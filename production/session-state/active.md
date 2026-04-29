@@ -1,7 +1,6 @@
 # Active Design Session
 
-- Task: Designing 玩家移动与交互 GDD
-- Current section: Visual/Audio Requirements
-- Completed sections: Overview; Player Fantasy; Detailed Design; Formulas; Edge Cases; Dependencies; Tuning Knobs
+- Task: 玩家移动与交互 GDD — APPROVED (re-review passed)
 - File: `design/gdd/player-movement-interaction.md`
-- Status: In Design
+- Status: Approved — 4/16 MVP systems designed
+- Next: Run `/design-system 资源、货物与容量` (System #5, next in design order)
