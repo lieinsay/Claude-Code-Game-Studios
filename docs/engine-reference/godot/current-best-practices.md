@@ -1,6 +1,6 @@
 # Godot — Current Best Practices
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-04-26 | Engine: Godot 4.6.2
 
 Practices that are **new or changed** since the model's training data (~4.3).
 This supplements (not replaces) the agent's built-in knowledge.
@@ -99,3 +99,10 @@ This supplements (not replaces) the agent's built-in knowledge.
 - **SDL3 gamepad driver**: Better cross-platform gamepad support
 - **Android**: Edge-to-edge display, camera feed access, 16KB page support (Android 15+)
 - **Linux**: Wayland subwindow support for multi-window capability
+
+## Web Export (4.6.2 project constraint)
+
+- Use GDScript for the Web-first build. Godot 4 C# projects currently cannot be exported to Web.
+- Target WebGL 2 through the Compatibility renderer for browser builds.
+- Treat browser behavior as part of design: audio needs user activation, background tabs pause processing, persistence depends on IndexedDB availability, and fullscreen/mouse capture must happen from user input.
+- Prefer single-threaded Web export unless the host can satisfy cross-origin isolation requirements for threaded export.

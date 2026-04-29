@@ -1,6 +1,6 @@
 # Godot UI — Quick Reference
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-04-26 | Engine: Godot 4.6.2
 
 ## What Changed Since ~4.3 (LLM Cutoff)
 
@@ -23,6 +23,12 @@ Last verified: 2026-02-12 | Engine: Godot 4.6
 - **`GraphEdit.connect_node`**: Added optional `keep_alive` parameter
 
 ## Current API Patterns
+
+### Project UI Policy
+
+The Web-first build uses keyboard/mouse as the primary and only launch input.
+Critical actions must be accessible by click and/or keyboard. Hover can be used
+for secondary tooltips, but not as the only way to reveal required controls.
 
 ### Theme and Style (4.6)
 ```gdscript

@@ -1,6 +1,6 @@
 # Godot Input — Quick Reference
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-04-26 | Engine: Godot 4.6.2
 
 ## What Changed Since ~4.3 (LLM Cutoff)
 
@@ -18,6 +18,12 @@ Last verified: 2026-02-12 | Engine: Godot 4.6
 - **InputEventShortcut**: Dedicated event type for menu shortcuts (optional)
 
 ## Current API Patterns
+
+### Project Input Policy
+
+The Web-first build of this project targets keyboard/mouse only. Gamepad and
+touch support are not part of launch scope. Do not make critical UI or gameplay
+paths depend on gamepad navigation, touch gestures, or hover-only interactions.
 
 ### Input Actions (unchanged)
 ```gdscript
