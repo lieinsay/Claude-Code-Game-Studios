@@ -1,8 +1,15 @@
 # Godot — Breaking Changes
 
-Last verified: 2026-02-12
+Last verified: 2026-04-26
 
 Changes between Godot versions, focused on post-LLM-cutoff changes (4.4+).
+
+## 4.6 → 4.6.2 (Apr 2026 — POST-CUTOFF, HIGH RISK)
+
+Godot 4.6.2 is a maintenance release on the 4.6 branch. The official release
+notes describe it as compatible with previous 4.6 releases and focused on
+stability, usability, and bug fixes. No project migration steps are currently
+recorded here beyond the 4.5 → 4.6 changes below.
 
 ## 4.5 → 4.6 (Jan 2026 — POST-CUTOFF, HIGH RISK)
 
