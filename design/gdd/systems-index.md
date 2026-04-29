@@ -74,7 +74,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 2 | 平台与会话壳 | Core | MVP | Approved | `design/gdd/platform-session-shell.md` | — |
 | 3 | 本地存档与世界状态持久化 | Persistence | MVP | Approved | `design/gdd/local-save-world-state-persistence.md` | 内容数据与状态注册表; 平台与会话壳 |
 | 4 | 玩家移动与交互 | Core | MVP | Approved | 2026-04-29 | 平台与会话壳 |
-| 5 | 资源、货物与容量 | Economy | MVP | Not Started | — | 内容数据与状态注册表; 本地存档与世界状态持久化 |
+| 5 | 资源、货物与容量 | Economy | MVP | Approved | `design/gdd/resources-goods-capacity.md` | 内容数据与状态注册表; 本地存档与世界状态持久化 |
 | 6 | 玩家知识与情报 | Progression | MVP | Not Started | — | 内容数据与状态注册表; 本地存档与世界状态持久化 |
 | 7 | 飞艇家园 Hub | Gameplay | MVP | Not Started | — | 玩家移动与交互; 本地存档与世界状态持久化; 内容数据与状态注册表 |
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | Not Started | — | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
@@ -355,9 +355,9 @@ The MVP version of each system must stay within these bounds:
 |---|---:|
 | Total systems identified | 18 |
 | Design docs started | 4 |
-| Design docs reviewed | 4 |
-| Design docs approved | 4 |
-| MVP systems designed | 4 / 16 |
+| Design docs reviewed | 5 |
+| Design docs approved | 5 |
+| MVP systems designed | 5 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
