@@ -555,7 +555,7 @@ Where `slot_capacity_check` = `used_slots + ceil(overflow_qty / max_stack) <= to
 |---------|-------------------|----------------------|------|
 | 内容数据与状态注册表 | ✅ 规则 1-3、Interactions | ✅ 下游依赖中列出本系统 | 已对齐 |
 | 本地存档与世界状态持久化 | ✅ 规则 19、Interactions、EC-06/07 | ✅ 快照包定义中引用 `progress.resources` | 已对齐 |
-| 玩家移动与交互 | ✅ 规则 19、Interactions | ✅ Interactions 中列出本系统为下游 | 已对齐 |
+| 玩家移动与交互 | ✅ 规则 19、Interactions | ⚠️ 隐式对齐——移动系统广播 `use_requested` 给领域系统，本系统消费存储/拾取/货舱交互；移动 GDD 不显式列出本系统（它不提供空间锚点） | 已对齐（隐式） |
 | 飞艇模块与船体状态 | ✅ 规则 12-13、Interactions | ⚠️ 尚未设计——需在模块系统 GDD 中回引 | 待对方 GDD 建立 |
 | 探索 / 搜撤场景 | ✅ 规则 18、Interactions | ⚠️ 尚未设计——需在探索 GDD 中回引 | 待对方 GDD 建立 |
 | 其他 5 个下游系统 | ✅ Interactions | ⚠️ 尚未设计 | 待对方 GDD 建立 |
