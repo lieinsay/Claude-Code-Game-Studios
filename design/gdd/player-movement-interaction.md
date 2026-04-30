@@ -106,6 +106,7 @@ Transitions:
 | `探索 / 搜撤场景` | walkable areas, extraction anchors, loot/search anchors, threat blockers | `use_requested`, blocked reasons, movement state | 探索系统拥有搜撤、奖励、撤离和危险后果 |
 | `空港 / 村镇状态与集市交易` | stall anchors, NPC / stall availability, market blockers | `use_requested` for stall or NPC focus | 市集系统拥有购买、货品、价格和库存变化 |
 | `世界修复与解锁` | repair node anchors and repair availability | `use_requested` for repair nodes | 修复系统拥有材料消耗、解锁和世界状态变化 |
+| `玩家知识与情报` | location boundary triggers from scene/domain systems | `player_arrived_at(location_id)` when player enters a location zone | 情报系统拥有知识状态变更；本系统只负责检测到达并发送事件 |
 | `UI / HUD / 航图界面` | modal / overlay blocking state, optional tooltip presentation policy | focus target, blocked reason, prompt hint, movement/focus state | UI 只显示焦点和原因，不判定可达性 |
 | `反馈、特效与音频语义` | none required for MVP | semantic events such as focus changed, use blocked, use requested, movement blocked | 反馈系统表现语义，不拥有规则 |
 | `内容数据与状态注册表` | stable interaction target IDs and content definitions through domain systems | none direct in MVP | 本系统不直接解析内容经济或修复规则 |
@@ -458,6 +459,7 @@ The `use_gate` formula is defined as:
 | `探索 / 搜撤场景` | 探索点移动、搜索点/撤离点/风险点焦点和 `Use` 入口 | 探索区域、可搜目标、撤离锚点、威胁阻断、领域处理结果 |
 | `空港 / 村镇状态与集市交易` | 摊位、NPC、公告点和市场入口的焦点与 `Use` 请求 | 摊位锚点、NPC 可用状态、市场忙碌/关闭原因、交易 UI 入口 |
 | `世界修复与解锁` | 修复节点的触达、焦点和 `Use` 请求 | 修复节点锚点、材料/情报可用性摘要、修复忙碌/锁定原因 |
+| `玩家知识与情报` | 地点到达事件 `player_arrived_at(location_id)` | 地点边界定义、location_id 的注册表解析 |
 | `UI / HUD / 航图界面` | 当前焦点、提示文案、阻断原因和输入阻断状态 | 模态 UI 是否阻断世界输入、提示展示策略 |
 | `反馈、特效与音频语义` | 移动阻断、焦点变化、Use 请求、Use 阻断等语义事件 | 只返回表现完成或忽略；不得改变规则结果 |
 

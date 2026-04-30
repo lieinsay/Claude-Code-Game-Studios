@@ -797,7 +797,7 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 - **本系统需要**：`player_arrived_at(location_id)` 事件——玩家到达某地点时调用。
 - **合约**：移动系统拥有到达判定；本系统消费事件，将对应地点的知识状态推进到 `verified`。
 - **合约检查**：若 `location_id` 不在注册表中，记录 warning 日志但不报错（可能是动态生成的地点）。
-- **注意——双向引用缺口**：当前版本的移动系统 GDD（`player-movement-interaction.md`）尚未包含 `player_arrived_at` 事件或对本系统的引用。此合约需要在移动系统 GDD 的下一次修订中补充，或在探索系统 GDD 中提供等效的到达事件。
+- **对端 GDD 中的反向引用**：移动系统 GDD 的 Interactions 表格和下游契约已包含 `player_arrived_at(location_id)` 事件及对本系统的引用（2026-04-30 修订）。
 
 ### 下游依赖（这些系统依赖本系统）
 
