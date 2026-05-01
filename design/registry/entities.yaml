@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: "2026-04-30"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -106,7 +106,34 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: room_existence
+    status: active
+    source: design/gdd/airship-hub.md
+    referenced_by:
+      - design/gdd/airship-hub.md
+      - design/gdd/airship-modules-hull-state.md
+    variables:
+      - room_base_exists
+      - room_requires_module
+      - module_installed
+    output_range: [false, true]
+    expression: "room_exists(room_id) = room_base_exists(room_id) OR (room_requires_module(room_id, module_id) AND module_installed(module_id))"
+    notes: "Determines whether a room physically exists on the airship. Cargo hold requires cargo/repair module to exist."
+    added: 2026-04-30
+    revised: ""
+  - name: departure_lock_timer
+    status: active
+    source: design/gdd/airship-hub.md
+    referenced_by:
+      - design/gdd/airship-hub.md
+    variables:
+      - base_lock_duration
+    output_range: [1.5, 3.0]
+    expression: "departure_lock_duration = clamp(base_lock_duration, 1.5, 3.0)"
+    notes: "Locks player movement during departure animation. Default 2.0s. Runtime clamp() provides last-line defense; startup validation rejects values outside 1.0-5.0 and falls back to 2.0s. Protects Pillar 1 intentional departure."
+    added: 2026-04-30
+    revised: ""
 
 # Example:
 #
@@ -139,7 +166,36 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: storage_base_volume
+    status: active
+    source: design/gdd/resources-goods-capacity.md
+    referenced_by:
+      - design/gdd/resources-goods-capacity.md
+      - design/gdd/airship-hub.md
+    value: 1000
+    unit: 容积
+    added: 2026-04-30
+    revised: 2026-04-30  # renamed from warehouse_base_volume per consistency-check
+  - name: base_lock_duration
+    status: active
+    source: design/gdd/airship-hub.md
+    referenced_by:
+      - design/gdd/airship-hub.md
+    value: 2.0
+    unit: 秒
+    added: 2026-04-30
+    revised: ""
+  - name: cargo_bay_base_volume
+    status: active
+    source: design/gdd/resources-goods-capacity.md
+    referenced_by:
+      - design/gdd/resources-goods-capacity.md
+      - design/gdd/airship-hub.md
+    value: 0
+    unit: 容积
+    added: 2026-04-30
+    revised: 2026-04-30  # source corrected to resources-goods-capacity (capacity rule owner)
 
 # Example:
 #

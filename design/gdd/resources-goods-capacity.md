@@ -161,7 +161,7 @@
 | 池 | 初始内容 | 说明 |
 |----|---------|------|
 | `on_person`（Pool 1 — 随身物品栏） | 空（0/5 槽） | 玩家在飞艇中开始，物品存放在仓库 |
-| `in_storage`（Pool 2 — 飞艇仓库） | `basic_supply` × 10（1 堆，basic，light），`repair_kit` × 2（1 堆，repair，light） | 启动补给：足够一次安全航线消耗 + 一次小型修复的材料参考量 |
+| `in_storage`（Pool 2 — 飞艇仓库） | `basic_supply` × 10（1 堆，basic，light），`repair_kit` × 4（1 堆，repair，light） | 启动补给：足够一次安全航线消耗 + 一次完整模块维修或多次船体小修的材料参考量 |
 | `loaded`（Pool 3 — 货舱） | 空（0/500 容积） | 货舱模块已在飞艇上预装，提供 500 容积。玩家开局时无待运输货物 |
 | `carried`（Pool 5 — 探索局内） | 空 | 从进入探索点开始生成 |
 | `deposited`（Pool 6） | 空 | 随修复提交累积 |
@@ -623,7 +623,7 @@ Where `slot_capacity_check` = `used_slots + ceil(overflow_qty / max_stack) <= to
 | 参数 | 默认值 | 安全范围 | 单位 | 影响的玩法感受 |
 |------|--------|---------|------|---------------|
 | `starting_basic_supply_qty` | 10 | 5–20 | 个 | 新游戏仓库中 basic 补给数量。太低→首轮航线消耗后玩家被迫立即寻找补给；太高→初期无资源压力 |
-| `starting_repair_kit_qty` | 2 | 1–5 | 个 | 新游戏仓库中 repair 材料数量。太低→首次修复机会被推迟；太高→修复决策失去取舍 |
+| `starting_repair_kit_qty` | 4 | 2–8 | 个 | 新游戏仓库中 repair 材料数量。太低→首次修复机会被推迟；太高→修复决策失去取舍 |
 | `cargo_module_preinstalled` | true | true / false | 布尔 | 货舱模块是否在 MVP 开局预装。false 仅在玩家选择"硬核"或"无模块开局"变体时使用 |
 
 核心原则：起始状态提供最低存活基准——足够触发首轮闭环（Hub → Route → Explore → Return → Repair）但不跳过探索需求。具体数值在首次平衡性游戏测试后校准。
