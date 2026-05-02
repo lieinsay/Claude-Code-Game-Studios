@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-02
+> **Last Updated**: 2026-05-03
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
@@ -73,7 +73,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 1 | 内容数据与状态注册表 | Core | MVP | Approved | `design/gdd/content-data-state-registry.md` | — |
 | 2 | 平台与会话壳 | Core | MVP | Approved | `design/gdd/platform-session-shell.md` | — |
 | 3 | 本地存档与世界状态持久化 | Persistence | MVP | Approved | `design/gdd/local-save-world-state-persistence.md` | 内容数据与状态注册表; 平台与会话壳 |
-| 4 | 玩家移动与交互 | Core | MVP | Approved | 2026-04-29 | 平台与会话壳 |
+| 4 | 玩家移动与交互 | Core | MVP | Approved | `design/gdd/player-movement-interaction.md` | 平台与会话壳 |
 | 5 | 资源、货物与容量 | Economy | MVP | Approved | `design/gdd/resources-goods-capacity.md` | 内容数据与状态注册表; 本地存档与世界状态持久化 |
 | 6 | 玩家知识与情报 | Progression | MVP | Approved | `design/gdd/player-knowledge-intel.md` | 内容数据与状态注册表; 本地存档与世界状态持久化 |
 | 7 | 飞艇家园 Hub | Gameplay | MVP | Approved | `design/gdd/airship-hub.md` | 玩家移动与交互; 本地存档与世界状态持久化; 内容数据与状态注册表 |
@@ -151,7 +151,9 @@ GDD: `design/gdd/navigation-route-risk.md` — CD-GDD-ALIGN (full): APPROVE WITH
 
 ### 11. 探索 / 搜撤场景
 
-One short exploration-point template for search, risk judgment, carrying choices, and extraction. The MVP template can use state variants but not a second dungeon rhythm.
+Exploration-point scene consuming `EncounterContext` from #10: 4-zone radial template (云观站废墟, 50×35 units), 4-phase session (ARRIVING→EXPLORING→EXTRACTING→DEPARTED), 6 search points with free-search rule (empty results don't consume attempts), 2 intel points, 2+ threat points (environmental handled by #11, guard delegated to #12), 1 extraction anchor (player-judged, no timer). Scout efficiency η_scout maps to 3-tier threat preview (none/presence/full). 3 state variants: unlooted → looted → danger-changed. 6 formulas (search_yield, threat_trigger, scout_preview_level, extraction_loss_settlement, state_variant_transition, intel_yield). Extraction loss via λ_success/λ_forced with Unique item protection (Pillar 4). Pool 5 preserves pre-exploration contents.
+
+GDD: `design/gdd/exploration-scavenge-scenario.md` — full-mode 8-agent adversarial review, NEEDS REVISION → Revision 1 applied (2026-05-03). 3 blockers resolved (compute_loss formula, C6/F-11-03 unification, Pool 5 initialization). 8/8 required + Visual/Audio + UI + Test Tools sections, 6 formulas, 21 edge cases, 13 tuning knobs, 26 ACs, 6 open questions.
 
 ### 12. 战斗与威胁处理
 
@@ -360,20 +362,21 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 12 |
-| Design docs reviewed | 11 |
-| Design docs approved | 12 |
-| MVP systems designed | 13 / 16 |
+| Design docs started | 15 |
+| Design docs reviewed | 15 |
+| Design docs approved | 14 |
+| MVP systems designed | 15 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
 
 ## Next Steps
 
-- [ ] Review and approve this systems enumeration.
-- [ ] Design MVP-tier systems first with `$design-system [system-name]`.
-- [ ] Start with `$design-system 内容数据与状态注册表`.
-- [ ] Run `$design-review` on each completed GDD.
-- [ ] Run `$review-all-gdds` after all MVP GDDs are authored.
-- [ ] Run `$gate-check technical-setup` when Systems Design artifacts are complete.
-- [ ] Prototype the highest-risk loop early: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.
+- [x] Review and approve this systems enumeration.
+- [x] Design MVP-tier systems #1-#15.
+- [x] Run `/design-review` on completed GDDs (#1-#15 reviewed).
+- [ ] Complete Revision 1 re-review for #11 探索/搜撤场景.
+- [ ] Design #16 UI/HUD/航图界面 (last MVP system).
+- [ ] Run `/review-all-gdds` for holistic cross-GDD consistency.
+- [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
+- [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.
