@@ -411,7 +411,7 @@ formulas:
       - λ_success
       - λ_forced
     output_range: "[0, total_carried_qty)"
-    expression: "Unique items (Q=1) skip loss; others: loss_qty = min(Q-1, max(1, ceil(Q × λ)))"
+    expression: "Unique items (Q=1) skip loss; others: loss_qty = min(Q-1, max(0, ceil(Q × λ)))"
     added: 2026-05-02
     revised: ""
 

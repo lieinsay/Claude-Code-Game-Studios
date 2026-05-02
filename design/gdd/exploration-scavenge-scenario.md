@@ -1,6 +1,6 @@
 # 探索 / 搜撤场景
 
-> **Status**: In Review (Revision 1 applied 2026-05-03 — 3 blockers resolved: B1 compute_loss formula λ≤0 guard + max(0,...), B2 C6/F-11-03 unified to formula logic, B3 Pool 5 initialization specified; zone gradient flattened; search point descriptions added; hull damage timing aligned with #12; capacity tradeoff default corrected; 2 ACs made deterministic; test tools appendix added)
+> **Status**: In Review (Revision 2 applied 2026-05-03 — 5 blockers resolved: B1 F-11-04 batch extract_carried_to_storage atomicity, B2 build_threat_context environmental guard, B3 F-11-01 empty pool guard, B4 registry compute_loss max(1→0) sync, B5 4 GM commands added; R1 knowledge-gated descriptions added — dual-variant description_enhanced gated on #6 has_relevant_intel())
 > **Author**: User + Claude Code
 > **Last Updated**: 2026-05-03
 > **Implements Pillar**: 规划先于冒险; 未知带来温和压力
@@ -74,21 +74,21 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 
 探索系统消费 System #10（航行与路线风险）在航程抵达时发出的 `EncounterContext`：
 
-- `voyage_result = "ARRIVED"`（安全抵达）→ 玩家从入口区正常进入，船体无额外损伤
-- `voyage_result = "FORCED_LANDING"`（迫降）→ 玩家从坠机点进入，船体已有损伤标记，部分区域可能因坠机影响而改变（如入口区被残骸封锁，需绕行）
+- `voyage_result = "arrived"`（安全抵达）→ 玩家从入口区正常进入，船体无额外损伤
+- `voyage_result = "forced_landing"`（迫降）→ 玩家从坠机点进入，船体已有损伤标记，部分区域可能因坠机影响而改变（如入口区被残骸封锁，需绕行）
 - `resolved_encounters[]` 中与探索点相关的遭遇（如航线中触发的侦察情报）在进入时预载——已揭示的风险标签在进入前就标注在探索点地图上
 - **Pool 5 初始状态**：进入探索点时，Pool 5（随身物品栏）保留玩家在飞艇准备阶段已装入的内容。玩家可携带 repair_kit、备品等进入探索，但这也意味着容量取舍会更早触发——准备越充分，越需要判断"带走什么"。进入探索后，Pool 5 的增减操作通过 System #5 接口进行。
 
 **C4. 探索中的移动与交互**
 
-- 玩家使用 System #3（玩家移动与交互）的 2D 俯视移动能力在探索点内移动
+- 玩家使用 System #4（玩家移动与交互）的 2D 俯视移动能力在探索点内移动
 - 交互焦点系统用于靠近搜索点、情报点、威胁点、撤离锚点时触发交互
 - 移动到相邻区域无加载——整个探索点（50×35 单位）为一个连续场景
 
 **C5. 搜索机制**
 
 - 每个搜索点可被搜索一次（每个会话中）。搜索触发一个检索动画（短暂停留），然后返回结果。
-- **搜索点描述**：每个搜索点在模板配置中携带一个 `description` 字段（一行文字，≤40 字），在玩家靠近搜索点时显示（如"一堆散落的电器零件，看起来像是通讯设备的残骸"）。描述随状态变体变化（unlooted / looted / danger-changed 各有不同文字）。这是"识荒人"幻想的机械支撑——搜索不是点击一个发光的节点，而是观察环境后判断"这里有什么可以带走"。
+- **搜索点描述**：每个搜索点在模板配置中携带 `description` 和 `description_enhanced` 两个字段（每行文字 ≤40 字）。默认显示 `description`（如"一堆散落的电器零件，看起来像是通讯设备的残骸"）。当 System #6 `has_relevant_intel(sp_id)` 返回 true 时——即玩家已获取与该搜索点主题相关的情报（如研读过灯塔继电器图纸）——改为显示 `description_enhanced`（如"一堆电器零件——其中一些铜线接头和你见过的灯塔继电器图纸吻合"）。描述随状态变体变化（unlooted / looted / danger-changed 各有不同文字对）。这是"识荒人"幻想的机械支撑——准备改变感知，情报让废墟变得可读。
 - **自由搜索**：搜索结果为空的搜索点不消耗搜索次数。玩家可以搜索探索点内的每一个搜索点，不会因为"翻到空的"而受到惩罚。这确保探索的温和压力——风险来自威胁，而非资源焦虑。
 - **容量约束**：搜索获得的资源/货物进入随身物品栏（Pool 5，5 格，由 System #5 管理）。当 Pool 5 已满（5/5），玩家必须做出取舍——丢弃现有物品腾出空间，或放弃新发现的物品。
 - 搜索点的内容由其配置和当前状态变体决定：
@@ -98,7 +98,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 
 **C6. 侦察与威胁预览**
 
-侦察模块效率 η_scout（来自 System #7）决定玩家在探索点内能提前看到多少威胁信息：
+侦察模块效率 η_scout（来自 System #8）决定玩家在探索点内能提前看到多少威胁信息：
 
 | η_scout | 效果 |
 |---------|------|
@@ -130,8 +130,8 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 撤离成功后自动结算：
 
 1. **资源/货物**：Pool 5（carried）中的物品通过 `extract_carried_to_storage()` 转入飞艇仓库（System #5）。按 F-11-04 撤离损耗结算——λ_success（成功撤离）或 λ_forced（被迫撤退）决定损耗率。Unique 物品（Q=1，max_stack=1）不可被损耗（Pillar 4 约束）。
-2. **情报**：探索中揭示的隐藏标签写入 System #9（玩家知识与情报）——航线知识永久推进。
-3. **船体后果**：守卫威胁接触造成的船体损伤/模块受损标记已在威胁处理时由 #12 即时应用到 #7；环境威胁损伤由 #11 在触发时即时应用到 #7。DEPARTED 阶段汇总展示本次探索的全部损伤（不做二次写入），确保玩家在探索中始终看到实时船体状态。
+2. **情报**：探索中揭示的隐藏标签写入 System #6（玩家知识与情报）——航线知识永久推进。
+3. **船体后果**：守卫威胁接触造成的船体损伤/模块受损标记已在威胁处理时由 #12 即时应用到 #8；环境威胁损伤由 #11 在触发时即时应用到 #8。DEPARTED 阶段汇总展示本次探索的全部损伤（不做二次写入），确保玩家在探索中始终看到实时船体状态。
 4. **探索点状态更新**：当前探索点根据本次探索结果更新状态变体——如果所有搜索点被搜刮 → looted；如果触发了环境威胁且未清除 → danger-changed。
 
 **C10. 探索点状态变体生命周期**
@@ -190,7 +190,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 | #8 飞艇模块与船体状态 | η_scout（侦察效率）, `can_depart()`（检查是否可以出发） | 船体损伤、模块受损标记（结算时写入） |
 | #5 资源/货物与容量 | Pool 5（carried，5 格）读写 | `extract_carried_to_storage()` 结算时调用 |
 | #4 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | — |
-| #6 玩家知识与情报 | — | 情报揭示（隐藏标签 → 已知标签） |
+| #6 玩家知识与情报 | `has_relevant_intel(sp_id)` — 搜索点描述增强门控 | 情报揭示（隐藏标签 → 已知标签） |
 
 **下游（依赖本系统的系统）**
 
@@ -219,6 +219,12 @@ search_yield(sp_id, zone, state):
 
     tier = weighted_random(quality_weights[state][zone])
     pool = loot_pool[sp_id][tier]
+
+    // 空池守卫：配置错误时回退为空结果，保护自由搜索保证（C5）
+    if len(pool) == 0:
+        return {items: [], is_empty: true, search_consumed: false,
+                message: "这里似乎还能找到些什么，但已经什么都没有了——或许下次再来？"}
+
     n = random_int(draw_count[tier].min, draw_count[tier].max)
     selected = sample_without_replacement(pool, min(n, len(pool)))
 
@@ -334,7 +340,17 @@ threat_trigger(threat_point, trigger_type, player_pos):
 
 ```
 build_threat_context(threat_point, trigger_type):
-    config = THREAT_CONFIG_TABLE[threat_point.threat_category]  // 来自 #1 Registry 的静态威胁配置（见 #12 C8 威胁配置表）
+    // 环境威胁由 #11 自行处理（施加 hull_damage 或封锁路径，见 C7）——不构建战斗上下文
+    if threat_point.threat_category == "environmental":
+        return {
+            threat_type:      "environmental",
+            threat_id:        threat_point.id,
+            position:         threat_point.position,
+            encounter_params: null  // 无战斗参数——#11 直接 apply_hull_damage 或 block_path
+        }
+
+    // 守卫威胁：从 #1 Registry 的静态威胁配置查询战斗参数（#12 C8 威胁配置表）
+    config = THREAT_CONFIG_TABLE[threat_point.threat_category]
 
     encounter_params = {
         threat_category:      threat_point.threat_category,
@@ -377,12 +393,12 @@ scout_preview_level(η_scout):
 
 | 变量 | 类型 | 值域 | 说明 |
 |------|------|------|------|
-| `η_scout` | float | {0, 0.48, 0.6, 0.76, 0.8, 0.95, 1.0} | 侦察模块有效效率，来自 System #7 |
+| `η_scout` | float | {0, 0.48, 0.6, 0.76, 0.8, 0.95, 1.0} | 侦察模块有效效率，来自 System #8 |
 | `PREVIEW_NONE` | — | — | 无预览：威胁点不可见，靠近时才触发 |
 | `PREVIEW_PRESENCE` | — | — | 存在预览：威胁点显示红色感叹号，不显示类型 |
 | `PREVIEW_FULL` | — | — | 完整预览：显示类型+名称（"守卫哨兵·东北角"） |
 
-**η_scout 来源速查**（from System #7）：
+**η_scout 来源速查**（from System #8）：
 
 | 模块状态 + 船体波段 | η_scout | 预览等级 |
 |---------------------|---------|---------|
@@ -405,10 +421,11 @@ DEPARTED 阶段，对 Pool 5 中每堆物品独立判定撤离损耗。本函数
 ```
 extraction_loss_settlement(carried_stacks, retreat_flagged):
     result = {transferred: [], lost: [], total_lost_qty: 0}
+    transfer_batch = []  // 组装批量转移清单，一次性提交至 #5
 
     for each stack in carried_stacks:
         if stack.is_unique and stack.max_stack == 1:
-            transfer_to_storage(stack.resource_id, stack.quantity)
+            transfer_batch.append({resource_id: stack.resource_id, quantity: stack.quantity})
             result.transferred.append({id: stack.resource_id, qty: stack.quantity, lost: 0})
             continue
 
@@ -416,12 +433,15 @@ extraction_loss_settlement(carried_stacks, retreat_flagged):
 
         loss_qty = compute_loss(stack.quantity, λ)
         retained_qty = stack.quantity - loss_qty
-        transfer_to_storage(stack.resource_id, retained_qty)
+        transfer_batch.append({resource_id: stack.resource_id, quantity: retained_qty})
 
         if loss_qty > 0:
             destroy(stack.resource_id, loss_qty)
             result.lost.append({id: stack.resource_id, qty: loss_qty})
             result.total_lost_qty += loss_qty
+
+    // 批量原子转移：全成功或全失败（#5 规则 14）
+    extract_carried_to_storage(transfer_batch)
 
     return result
 
@@ -549,10 +569,10 @@ intel_yield(intel_point_id):
 |---|--------|-------------|------|---------|
 | F-11-01 | 搜索产出投骰 | `search_yield` | 概率抽取 | 模板配置（loot_pool） |
 | F-11-02 | 威胁触发判定 | `threat_trigger` | 距离+概率 | System #12 |
-| F-11-03 | 侦察预览映射 | `scout_preview_level` | 分段阈值 | System #7 (η_scout) |
+| F-11-03 | 侦察预览映射 | `scout_preview_level` | 分段阈值 | System #8 (η_scout) |
 | F-11-04 | 撤离损耗结算 | `extraction_loss_settlement` | 比例损耗 | System #5 (Pool 5, EC-05) |
 | F-11-05 | 状态变体转换 | `exploration_state_variant_transition` | 分段状态机 | 模板配置 |
-| F-11-06 | 情报点产出 | `intel_yield` | 固定产出 | System #9 |
+| F-11-06 | 情报点产出 | `intel_yield` | 固定产出 | System #6 |
 
 ## Edge Cases
 
@@ -574,7 +594,7 @@ intel_yield(intel_point_id):
 - 触发：结算写入时浏览器存储配额满或其他写入错误
 - 处理：结算采用事务模式——内存中组装完整结算包，一次性写入。失败则自动重试（1s/2s/4s/8s，最多 4 次）。全部失败后显示"保存失败。你的探索收获暂时保留。请检查浏览器存储空间后点击重试。"按钮。结算包保留在内存中直到页面关闭。
 - 玩家感知：是。错误提示 + 手动重试按钮。
-- 依赖：#3, #5, #7, #9
+- 依赖：#3, #5, #8, #6
 
 ### E2. 容量边界
 
@@ -601,15 +621,15 @@ intel_yield(intel_point_id):
 
 **EC-11-07: EncounterContext 缺失或格式错误**
 - 触发：enter_exploration() 收到 null、缺失 route_id/destination_id/voyage_result
-- 处理：进入前校验。失败则构建 fallback context：`{route_id: "unknown", destination_id: "cloudwatch-ruins-fallback", voyage_result: "ARRIVED", resolved_encounters: []}`。正常进入探索，同时记录内部错误日志。
+- 处理：进入前校验。失败则构建 fallback context：`{route_id: "unknown", destination_id: "cloudwatch-ruins-fallback", voyage_result: "arrived", resolved_encounters: []}`。正常进入探索，同时记录内部错误日志。
 - 玩家感知：否（正常进入，fallback 不会导致不合理的迫降体验）。
 - 依赖：#10
 
 **EC-11-08: 探索中船体 hull 变为 0**
 - 触发：环境威胁触发后损伤导致 hull=0
-- 处理：探索系统不自行终止探索。HUD 显示"船体严重损毁"警告。撤离锚点仍然可用——玩家可带着 loot 撤离。hull==0 的全局后果（是否不可继续航行等）由 #7 负责。
+- 处理：探索系统不自行终止探索。HUD 显示"船体严重损毁"警告。撤离锚点仍然可用——玩家可带着 loot 撤离。hull==0 的全局后果（是否不可继续航行等）由 #8 负责。
 - 玩家感知：是。HUD 严重警告。
-- 依赖：#7
+- 依赖：#8
 
 **EC-11-09: Pool 5 状态不一致**
 - 触发：occupied_slots 计数与实际格位占用量不匹配（因持久化损坏等）
@@ -623,7 +643,7 @@ intel_yield(intel_point_id):
 - 触发：玩家踏入两个以上威胁点触发半径重叠区域
 - 处理：依次处理，不并行。优先级：(1) 环境威胁 > 守卫威胁，(2) 同类型中距离近者优先，(3) 同距离按 threat_id 字典序。每个结算完毕后处理下一个。环境威胁损伤可累积。
 - 玩家感知：是。依次经历每个威胁的触发序列。
-- 依赖：#12, #7
+- 依赖：#12, #8
 
 **EC-11-11: 威胁在撤离读条期间触发**
 - 触发：EXTRACTING 阶段中，守卫或环境威胁满足触发条件
@@ -720,10 +740,10 @@ intel_yield(intel_point_id):
 ### 双向依赖校验
 
 - **#5 ↔ #11**：#5 定义 Pool 5 和 `extract_carried_to_storage()`，#11 定义探索拾取和撤离结算消费这些接口。
-- **#7 ↔ #11**：#7 定义 η_scout 和船体损伤接口，#11 定义侦察预览消费 η_scout、探索威胁写入船体损伤。
+- **#8 ↔ #11**：#8 定义 η_scout 和船体损伤接口，#11 定义侦察预览消费 η_scout、探索威胁写入船体损伤。
 - **#10 → #11**：#10 定义 `EncounterContext` 在航程抵达时发出，#11 在 ARRIVING 阶段消费。#10 的 GDD 已列 #11 为下游。
 - **#11 → #12**：#12 定义威胁上下文和战斗结果接口（`combat_result` 包含 `outcome, hull_damage, module_damage, resources_consumed, knockback, retreat_flagged`），#11 定义守卫威胁触发时传递上下文、接收组合结果、存储 `retreat_flagged` 为会话状态，并将击退应用于玩家位置。#12 的 GDD 已列 #11 为上游。✅ 已对齐。
-- **#11 → #9**：#9 定义情报揭示接口，#11 定义探索中的情报产出。#9 的 GDD 需列 #11 为上游。
+- **#11 → #6**：#6 定义情报揭示接口，#11 定义探索中的情报产出。#6 的 GDD 需列 #11 为上游。
 
 ### 间接依赖
 
@@ -790,7 +810,7 @@ intel_yield(intel_point_id):
 |------|------|---------|
 | HUD — 随身物品栏 | Pool 5 的 5 格实时显示：物品图标 + 数量。满格（5/5）时边框高亮为橙色 | EXPLORING 阶段始终显示 |
 | HUD — 搜索点计数 | 可选显示"搜索点：3/6"，帮助玩家判断探索进度 | EXPLORING 阶段，可配置显示/隐藏 |
-| HUD — 船体状态 | 当前船体 HP 简条（来自 #7），颜色按波段变化（绿/黄/红） | 始终显示 |
+| HUD — 船体状态 | 当前船体 HP 简条（来自 #8），颜色按波段变化（绿/黄/红） | 始终显示 |
 | HUD — 威胁预览标记 | 根据 η_scout 在地图上覆盖标记（无/感叹号/完整标签） | EXPLORING 阶段，η_scout 在进入时快照 |
 | 搜索结果弹出 | 物品名称 + 图标 + 数量，从搜索点位置弹出，1-2 秒后自动消失或点击关闭 | 搜索产出非空时 |
 | 搜索空结果提示 | 淡色文字"空的……"浮出，1 秒后消失 | 搜索产出为空时 |
@@ -807,13 +827,13 @@ intel_yield(intel_point_id):
 
 | # | 验收条件 | 验证方法 |
 |---|---------|---------|
-| AC-11-01 | 进入探索点时，ARRIVING 阶段展示抵达描述文本（安全抵达 vs 迫降），按任意键后进入 EXPLORING 阶段，玩家角色出现在入口区或坠机点。 | 准备 `EncounterContext`（voyage_result=ARRIVED 和 FORCED_LANDING 各测一次）。进入探索点，观察 ARRIVING 文本与入场位置是否匹配 C3 规则。按任意键，确认阶段切换为 EXPLORING。引用 C2、C3。 |
+| AC-11-01 | 进入探索点时，ARRIVING 阶段展示抵达描述文本（安全抵达 vs 迫降），按任意键后进入 EXPLORING 阶段，玩家角色出现在入口区或坠机点。 | 准备 `EncounterContext`（voyage_result=arrived 和 forced_landing 各测一次）。进入探索点，观察 ARRIVING 文本与入场位置是否匹配 C3 规则。按任意键，确认阶段切换为 EXPLORING。引用 C2、C3。 |
 | AC-11-02 | 在 EXPLORING 阶段靠近搜索点并触发交互，播放搜索动画后返回结果。若结果为"空"，search_consumed=false；若结果为非空，search_consumed=true，物品进入 Pool 5。 | 准备 unlooted 探索点。(a) 使用 `gm_set_search_config <sp_id> empty_chance=1.0` 将任意搜索点设为必空。搜索该点 → 确认返回空结果且 search_consumed=false，该搜索点可再次交互。(b) 将该点 empty_chance 恢复为 0.0 → 确认返回非空、search_consumed=true、物品进入 Pool 5。(c) 在 A_core 区域用默认配置搜索 → 确认非空产出（empty_chance=0.00）。引用 C5、F-11-01。 |
 | AC-11-03 | 与情报点交互，每次会话仅可交互一次，固定产出 1 个 Q=1 Unique 情报物品（intel.*），不参与 F-11-01 投骰。 | 探索点内有 2 个情报点。依次交互，确认各产出 1 个 Unique 情报物品（检查物品 Q=1, max_stack=1）。再次尝试交互同一情报点 → 应提示"此处已调查过"。引用 C5、F-11-06。 |
 | AC-11-04 | 玩家移动到撤离锚点，执行"撤离"操作 → 进入 EXTRACTING 阶段，开始 2.5 秒读条。读条完成 → 进入 DEPARTED 阶段。 | 玩家携带任意物品到达撤离锚点，触发撤离，计时 2.5 秒。读条期间不可移动，读条完成后确认阶段切换为 DEPARTED。引用 C8。 |
 | AC-11-05 | DEPARTED 结算：Pool 5 中物品按 F-11-04 撤离损耗结算。Unique 物品（Q=1, max_stack=1）永不损耗、全量转入飞艇仓库。非 Unique 物品按 λ_success=0.08（成功撤离）或 λ_forced=0.25（被迫撤退）计算损耗，每堆至少保留 1。 | 准备 Pool 5 含 Unique 物品 ×1、非 Unique 物品 ×2（如 basic_supply ×20、repair_kit ×12）。正常撤离后检查仓库：Unique 全量保留；basic_supply 保留 16-19；repair_kit 保留 10-12。对比 F-11-04 演算示例。引用 C9、F-11-04。 |
-| AC-11-06 | DEPARTED 结算：探索中获取的情报物品写入 System #9，对应隐藏标签变为已知标签，航线知识永久推进。 | 在探索中获取情报物品后正常撤离，打开航图（System #9 管理），确认相关标签从 unknown/rumor 变为 revealed/verified。引用 C9。 |
-| AC-11-07 | DEPARTED 结算：探索中的威胁接触造成的船体损伤和模块受损标记结算至 System #7。 | 在探索中触发环境威胁（产生损伤），正常撤离后检查飞艇船体 HP → 应扣除对应损伤值。引用 C9。 |
+| AC-11-06 | DEPARTED 结算：探索中获取的情报物品写入 System #6，对应隐藏标签变为已知标签，航线知识永久推进。 | 在探索中获取情报物品后正常撤离，打开航图（System #6 管理），确认相关标签从 unknown/rumor 变为 revealed/verified。引用 C9。 |
+| AC-11-07 | DEPARTED 结算：探索中的威胁接触造成的船体损伤和模块受损标记结算至 System #8。 | 在探索中触发环境威胁（产生损伤），正常撤离后检查飞艇船体 HP → 应扣除对应损伤值。引用 C9。 |
 
 ### 状态机
 
@@ -875,6 +895,10 @@ intel_yield(intel_point_id):
 | `gm_dump_search_config` | — | 打印当前探索点所有搜索点的配置快照（含修饰符） | AC-11-22 |
 | `gm_fill_localstorage` | — | 将浏览器 localStorage 填充至配额限制（模拟写入失败） | AC-11-26 |
 | `gm_dump_exploration_state` | — | 打印持久化的探索点状态（当前变体、各搜索点枯竭状态、威胁活跃状态） | AC-11-21–23 |
+| `gm_set_voyage_result` | `<arrived\|forced_landing>` | 覆盖 EncounterContext 的 voyage_result，用于测试入场条件 | AC-11-01 |
+| `gm_set_carried` | `<resource_id> <quantity> [<resource_id2> <qty2> ...]` | 直接设置 Pool 5 内容（清空后填入），用于容量与结算 AC 的精确配置 | AC-11-05, AC-11-13, AC-11-14, AC-11-15 |
+| `gm_set_eta_scout` | `<value>` | 覆盖 η_scout 侦察效率值（0.0–1.0），独立于模块/船体状态 | AC-11-16, AC-11-17, AC-11-18 |
+| `gm_set_exploration_state_variant` | `<unlooted\|looted\|danger-changed>` | 直接设置探索点的持久化状态变体，用于状态转换 AC 的快速场景搭建 | AC-11-21, AC-11-22, AC-11-23 |
 
 ## Open Questions
 
@@ -888,4 +912,4 @@ intel_yield(intel_point_id):
 
 5. **空手而归的叙事反馈**：Pool 5 为空时撤离（EC-11-19），结算摘要显示"本次探索未带回任何物品。"是否应该有更丰富的叙事反馈（如日志条目）？MVP 中保持简洁。
 
-6. **情报点产出与 #9 的接口细节**：情报物品（intel.*）的具体字段结构（标签类型、关联航线 ID、揭示效果）需要在 #9 的 GDD 中明确定义。当前 #11 只定义了"固定产出 1 个 Q=1 Unique intel 物品"的行为。
+6. **情报点产出与 #9 的接口细节**：情报物品（intel.*）的具体字段结构（标签类型、关联航线 ID、揭示效果）需要在 #6 的 GDD 中明确定义。当前 #11 只定义了"固定产出 1 个 Q=1 Unique intel 物品"的行为。
