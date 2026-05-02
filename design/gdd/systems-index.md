@@ -82,7 +82,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 10 | 航行与路线风险 | Gameplay | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
 | 11 | 探索 / 搜撤场景 | Gameplay | MVP | Not Started | — | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Not Started | — | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
-| 13 | 世界修复与解锁 | Progression | MVP | Not Started | — | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
+| 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Not Started | — | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
 | 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | Not Started | — | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报 |
 | 16 | UI / HUD / 航图界面 | UI | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
@@ -356,10 +356,10 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 8 |
+| Design docs started | 9 |
 | Design docs reviewed | 7 |
-| Design docs approved | 6 |
-| MVP systems designed | 8 / 16 |
+| Design docs approved | 7 |
+| MVP systems designed | 9 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
