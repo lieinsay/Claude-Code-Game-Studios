@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-01
+> **Last Updated**: 2026-05-02
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
@@ -78,7 +78,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 6 | 玩家知识与情报 | Progression | MVP | Approved | `design/gdd/player-knowledge-intel.md` | 内容数据与状态注册表; 本地存档与世界状态持久化 |
 | 7 | 飞艇家园 Hub | Gameplay | MVP | In Review | `design/gdd/airship-hub.md` | 玩家移动与交互; 本地存档与世界状态持久化; 内容数据与状态注册表 |
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | In Review (Round 2 Revision Applied) | `design/gdd/airship-modules-hull-state.md` | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
-| 9 | 航图与航线规划 | Gameplay | MVP | Not Started | — | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报 |
+| 9 | 航图与航线规划 | Gameplay | MVP | Approved | `design/gdd/chart-route-planning.md` | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报; 飞艇家园 Hub |
 | 10 | 航行与路线风险 | Gameplay | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
 | 11 | 探索 / 搜撤场景 | Gameplay | MVP | Not Started | — | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Not Started | — | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
@@ -135,9 +135,11 @@ Two MVP modules plus simplified ship state: scout module, cargo/repair module, s
 
 ### 9. 航图与航线规划
 
-Map-style route planning: safe route, unknown/high-risk route, nodes, route selection, risk reading, route availability, and planning feedback.
+Pre-voyage map-style decision surface: consumes static route definitions from Content Registry (#1) and dynamic knowledge state from Player Knowledge & Intel (#6), renders routes with knowledge-gated visual encoding (rumored=dashed, identified=solid, verified=warm gold glow), evaluates route selectability via traversability and origin-location match, commits departure via two-step confirmation with ink-spread animation and irreversible lock. MVP: 2 routes, 1 starting port, fixed view, rumor toggle.
 
-Scope boundary: the route map displays and selects routes; it does not own discovery state.
+Scope boundary: chart displays, filters, and selects routes; it does not own discovery state or voyage execution. NPC ship trajectories and cargo delegation are excluded (belong to #14 in Phase 3+).
+
+GDD: `design/gdd/chart-route-planning.md` — 11 sections, CD reviewed PASS WITH NOTES (2026-05-02).
 
 ### 10. 航行与路线风险
 

@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: "2026-04-30"
+last_updated: "2026-05-02"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -48,7 +48,46 @@ last_updated: "2026-04-30"
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: location.glass-harbor
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+      - design/gdd/airship-hub.md
+    kind: location
+    location_type: port  # MVP starting port
+    services: []        # to be populated by #14
+    added: 2026-05-02
+    revised: ""
+
+  - name: route.sky-reef-arc-01
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    kind: route
+    origin_location_id: location.glass-harbor
+    destination_id: ""  # TBD by #10
+    distance_band: short
+    hazard_tags: [safe]
+    initial_knowledge: identified
+    added: 2026-05-02
+    revised: ""
+
+  - name: route.storm-cut-01
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    kind: route
+    origin_location_id: location.glass-harbor
+    destination_id: ""  # TBD by #10
+    distance_band: medium
+    hazard_tags: [storm, low-visibility]
+    initial_knowledge: rumored
+    added: 2026-05-02
+    revised: ""
 
 # Example (remove when first real entry is added):
 #
@@ -127,12 +166,93 @@ formulas:
     source: design/gdd/airship-hub.md
     referenced_by:
       - design/gdd/airship-hub.md
+      - design/gdd/chart-route-planning.md
     variables:
       - base_lock_duration
     output_range: [1.5, 3.0]
     expression: "departure_lock_duration = clamp(base_lock_duration, 1.5, 3.0)"
     notes: "Locks player movement during departure animation. Default 2.0s. Runtime clamp() provides last-line defense; startup validation rejects values outside 1.0-5.0 and falls back to 2.0s. Protects Pillar 1 intentional departure."
     added: 2026-04-30
+    revised: 2026-05-02  # referenced_by extended: chart-route-planning uses base_lock_duration for departure lock
+
+  - name: route_visibility
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    variables:
+      - knowledge_state
+      - hide_rumored
+    output_range: [false, true]
+    expression: "route_visibility(route_id, hide_rumored) = (knowledge_state != unknown) AND NOT (hide_rumored AND knowledge_state == rumored)"
+    notes: "Binary rendering decision. unknown routes are NEVER visible (hard boundary)."
+    added: 2026-05-02
+    revised: ""
+
+  - name: route_selectability
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    variables:
+      - route_id
+      - chart_state
+      - docked_location
+      - hide_rumored
+      - selected_route_id
+      - traversable
+      - origin_id
+    output_range: [hidden, browsable, selected, unavailable, locked]
+    expression: "Short-circuit eval: visibility → terminal state → traversability → origin match → selection match → fallback"
+    notes: "Per-route interactivity classification. Short-circuit order is load-bearing — hidden and locked must be checked before other branches."
+    added: 2026-05-02
+    revised: ""
+
+  - name: chart_state_transition
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    variables:
+      - current_state
+      - trigger
+      - trigger_payload
+    output_range: "[{new_state, allowed}] — allowed ∈ {true, false}"
+    expression: "Piecewise function over 5 states × 6 triggers. DEPARTURE_CONFIRMED is terminal and rejects all triggers."
+    notes: "Chart-level state machine. Enforces irreversible departure commitment and ERROR→LOADING→BROWSING gating."
+    added: 2026-05-02
+    revised: ""
+
+  - name: snapshot_package_validity
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+      - design/gdd/local-save-world-state-persistence.md
+    variables:
+      - domain_id
+      - fields
+      - current_time
+      - timestamp_tolerance
+      - route_registry
+    output_range: "[{valid: bool, violations: string[]}]"
+    expression: "Validate domain_id, required fields presence, departure_state value, timestamp finiteness, timestamp direction, route_id existence"
+    notes: "Cross-system contract with Save/Persistence (#3). Validates progress.routes snapshots before write. Extended by EC-9 and EC-10 to include route existence check and timestamp direction check."
+    added: 2026-05-02
+    revised: ""
+
+  - name: route_display_order
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    variables:
+      - knowledge_state
+      - distance_band
+    output_range: [101, 303]
+    expression: "display_order = rank_by_knowledge × 100 + rank_by_distance, where verified=1, identified=2, rumored=3 and short=1, medium=2, long=3"
+    notes: "Lower values sort first. Knowledge confidence tier (verified > identified > rumored) dominates via 100× multiplier. Within same tier, shorter distance sorts first."
+    added: 2026-05-02
     revised: ""
 
 # Example:
@@ -182,9 +302,20 @@ constants:
     source: design/gdd/airship-hub.md
     referenced_by:
       - design/gdd/airship-hub.md
+      - design/gdd/chart-route-planning.md
     value: 2.0
     unit: 秒
     added: 2026-04-30
+    revised: 2026-05-02  # chart-route-planning uses for departure lock in Formula 3
+
+  - name: base_timestamp_tolerance
+    status: active
+    source: design/gdd/chart-route-planning.md
+    referenced_by:
+      - design/gdd/chart-route-planning.md
+    value: 300
+    unit: 秒
+    added: 2026-05-02
     revised: ""
   - name: cargo_bay_base_volume
     status: active
