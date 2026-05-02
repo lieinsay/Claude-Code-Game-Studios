@@ -84,7 +84,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Not Started | — | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Not Started | — | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
-| 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | Not Started | — | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报 |
+| 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | In Review | `design/gdd/partner-relationships.md` | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报; 内容数据与状态注册表; 资源、货物与容量 |
 | 16 | UI / HUD / 航图界面 | UI | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
 | 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Not Started | — | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
 | 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Not Started | — | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
@@ -173,11 +173,13 @@ Creative constraint: each stall and good must answer a settlement need or local 
 
 ### 15. 伙伴功能与关系
 
-One scout partner function and one shallow relationship feedback beat. The scout reveals risk or resource information and gives the airship a human relationship anchor.
+MVP partner `partner.sky-cat` (航海猫) — last of the pre-Fragmentation airship crew cat lineage. Scout verb: sniff items brought back by the player, producing `reveal_rumor()` calls to #6 with confidence hard-capped at 66 (never authoritative). Relationship memory: one-time irreversible naming + nest accumulation in living quarters (4 items, irreversible). Cat always present on airship (R2), driven by 6-state runtime machine keyed to Hub states. No affection values, no gift menu, no event tree (R15).
 
-Scope boundary: no crew collection, party management, affection ladder, or event tree in MVP.
+CD constraints delivered: naming moment (memorable identity beat) + nest traces (persistent relationship memory). Pillars: P5 primary, P4/P3 auxiliary.
 
-Creative constraint: the scout partner must have one memorable identity beat and one persistent relationship memory so Pillar 5 is visible in MVP.
+Scope boundary: 1 scout partner only in MVP; no crew collection, party management, affection ladder, or event tree.
+
+GDD: `design/gdd/partner-relationships.md` — 8 required sections + self-check complete, CD reviewed APPROVE (2026-05-02). 5 cross-GDD revision flags (F.5) for #6, #7, #1, #16.
 
 ### 16. UI / HUD / 航图界面
 
@@ -356,10 +358,10 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 10 |
-| Design docs reviewed | 7 |
-| Design docs approved | 7 |
-| MVP systems designed | 10 / 16 |
+| Design docs started | 12 |
+| Design docs reviewed | 4 |
+| Design docs approved | 8 |
+| MVP systems designed | 12 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---

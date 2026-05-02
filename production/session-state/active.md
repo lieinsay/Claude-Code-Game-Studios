@@ -2,17 +2,23 @@
 
 <!-- STATUS -->
 Epic: Systems Design
-Feature: 探索与搜撤场景
-Task: Complete — All 11 sections written
+Feature: 伙伴功能与关系
+Task: Complete — Phase 5 Done
 <!-- /STATUS -->
 
-- Current: System #11 探索/搜撤场景 — **Complete**
-- File: `design/gdd/exploration-scavenge-scenario.md`
-- Status: **Ready for Review** (Sections A-H + Visual/Audio + UI + Open Questions)
-- Sections: 8/8 required + 3/3 optional = 11 total
+- Current: System #15 伙伴功能与关系 — In Review
+- File: `design/gdd/partner-relationships.md`
+- Status: ALL 8 REQUIRED SECTIONS COMPLETE + Self-Checked + CD Pillar Review (APPROVE) + Registry & Index Updated
+- Sections: 8/8 required written ✅ (A-H), 3 optional skipped (Visual/Audio, UI, Open Questions — user chose to defer)
+- D: 2 formal formulas (confidence_clamp, naming_prompt_eligibility) + 6 "no formula needed" + 4 external references
+- E: 33 edge cases in 6 groups
+- F: 4 hard deps + 4 soft deps + init order + save/load ownership + 5 cross-GDD revision flags
+- G: 8 tuning knobs (K1-K8) + 7 fixed invariants + tuning philosophy
+- H: 49 acceptance criteria (25 Unit + 17 Integration + 2 Manual Playtest)
+- CD Review: APPROVE — P5/P4/P3 alignment confirmed, all 5 CD constraints satisfied, 3 advisory tonal risks noted
+- Registry: partner.sky-cat entity, 2 formulas, 2 constants registered
+- Systems Index: #15 status → In Review, progress tracker 9/16 MVP designed
 
-- **Previous**: System #10 航行与路线风险 — Approved
-- **Next system in queue**: #12 战斗与威胁处理
-- **Systems Index**: 10/16 MVP designed
-
-- **Phase 5 done**: Registry updated (1 entity + 6 formulas + 4 constants), systems index updated
+- **Outstanding**: 5 cross-GDD revision flags (F.5) need addressing via `/consistency-check` — none block #15 approval
+- **Previous system**: #9 航图与航线规划 — Approved
+- **Skipped in queue**: #10 航行与路线风险
