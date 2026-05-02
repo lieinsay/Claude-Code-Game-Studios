@@ -1003,3 +1003,15 @@ Cross-system impacts: airship-hub.md (unchecked state visual spec), resources-go
 Prior verdict resolved: Yes (Systems Designer 2 blockers resolved; Economy Designer 4 blockers resolved; Round 2 full review 8 blockers resolved)
 
 GDD Status: CONDITIONAL APPROVAL — implementation-ready pending systems-index approval.
+
+---
+
+## Re-Review — 2026-05-02 — Verdict: APPROVED
+
+Scope signal: M
+Specialists: none (lean mode — single-session analysis)
+Blocking items: 0 | Recommended: 1
+
+Summary: Lean 重新审查，确认第 3 轮 CONDITIONAL APPROVAL 的所有 5 项阻断项均已正确修复：destroyed band η=0、swap_module 货舱门控、两阶段 swap 语义、swap AC、AC 类型标签。5 项建议修复项也已确认到位。依赖图已验证 — 全部 6 项声明依赖均存在。发现一项轻微编辑问题：详细规则中规则 20–21 编号重复（`apply_hull_damage` / `apply_module_damage` 与 `can_depart()` / 信号契约共用同一编号），不影响正确性。该 GDD 可实施，8/8 必填章节齐全，公式可跨边界值验证。
+
+Prior verdict resolved: Yes（第 3 轮 CONDITIONAL APPROVAL 的 5 项阻断项和 5 项建议项）

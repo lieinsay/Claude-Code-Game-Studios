@@ -55,9 +55,28 @@ entities:
     referenced_by:
       - design/gdd/chart-route-planning.md
       - design/gdd/airship-hub.md
+      - design/gdd/port-village-market.md
     kind: location
     location_type: port  # MVP starting port
-    services: []        # to be populated by #14
+    services: [stall.gh-lens-workshop, stall.gh-sail-shop, stall.gh-chart-studio, stall.gh-general]  # populated by #14
+    added: 2026-05-02
+    revised: ""
+
+  - name: threat.guard-sentinel
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+      - design/gdd/exploration-scavenge-scenario.md
+    kind: threat
+    threat_type: guard
+    full_damage_range: [12, 18]
+    module_damage_chance: 0.50
+    trigger_radius: [4, 6]
+    emergency_cost: "repair_kit ×1"
+    knockback_distance_tanked: 8.0
+    knockback_distance_retreat: 10.0
+    can_be_suppressed: true
     added: 2026-05-02
     revised: ""
 
@@ -147,7 +166,53 @@ entities:
 # Attribute fields: value_gold, weight, stackable, category, and any stat
 #   modifiers that another system (e.g., economy, crafting) might reference.
 
-items: []
+items:
+  - name: good.basic-supply-bundle
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+      - design/gdd/resources-goods-capacity.md
+    category: supply
+    base_price: 50
+    added: 2026-05-02
+    revised: ""
+  - name: good.repair-canvas
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+      - design/gdd/resources-goods-capacity.md
+    category: supply
+    base_price: 80
+    added: 2026-05-02
+    revised: ""
+  - name: good.route-notes
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+      - design/gdd/resources-goods-capacity.md
+      - design/gdd/player-knowledge-intel.md
+    category: intelligence
+    base_price: 120
+    added: 2026-05-02
+    revised: ""
+  - name: repair_kit
+    status: active
+    source: design/gdd/resources-goods-capacity.md
+    referenced_by:
+      - design/gdd/resources-goods-capacity.md
+      - design/gdd/airship-modules-hull-state.md
+      - design/gdd/combat-threat-handling.md
+      - design/gdd/world-repair-unlock.md
+    category: supply
+    supply_class: repair
+    stackable: true
+    base_price: null
+    notes: "Not purchasable at market; found only in exploration. Emergency consumption for threat suppression (#12), module repair and installation (#8), hull repair (#8), and lighthouse repair (#13). Starting quantity: 4."
+    added: 2026-05-02
+    revised: 2026-05-03
 
 # Example:
 #
@@ -309,6 +374,7 @@ formulas:
     source: design/gdd/exploration-scavenge-scenario.md
     referenced_by:
       - design/gdd/exploration-scavenge-scenario.md
+      - design/gdd/combat-threat-handling.md
     variables:
       - threat_point
       - trigger_type
@@ -337,6 +403,7 @@ formulas:
     source: design/gdd/exploration-scavenge-scenario.md
     referenced_by:
       - design/gdd/exploration-scavenge-scenario.md
+      - design/gdd/combat-threat-handling.md
     variables:
       - carried_stacks
       - voyage_result
@@ -370,6 +437,123 @@ formulas:
       - intel_point_id
     output_range: "1 Unique intel item"
     expression: "Fixed yield: 1 intel item (Q=1, max_stack=1) per intel point per session"
+    added: 2026-05-02
+    revised: ""
+  - name: purchase_total
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+      - design/gdd/resources-goods-capacity.md
+    variables:
+      - price
+      - quantity
+    output_range: [0, MAX_INT]
+    expression: "total_cost = price × quantity"
+    notes: "Validated by #5: total_cost ≤ player_currency and capacity check."
+    added: 2026-05-02
+    revised: ""
+  - name: stall_unlock
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+      - design/gdd/world-repair-unlock.md
+    variables:
+      - stall.repair_tags
+      - completed_repair_tags
+    output_range: "[closed, open_basic, open_expanded]"
+    expression: "stall_unlocks = { stall_id | stall.repair_tags ∩ completed_repair_tags ≠ ∅ }; first match → open_basic, second match → open_expanded"
+    notes: "Triggered by #13 repair_completed signal. No regression in MVP."
+    added: 2026-05-02
+    revised: ""
+  - name: settlement_activity
+    status: active
+    source: design/gdd/port-village-market.md
+    referenced_by:
+      - design/gdd/port-village-market.md
+    variables:
+      - active_stall_count
+      - total_stall_count
+      - expanded_count
+    output_range: "[dormant, recovering, active]"
+    expression: "active_stall_count = COUNT({ stall_id | stall.state ∈ {open_basic, open_expanded} }); =1 → dormant; 1< <total → recovering; =total AND expanded ≥1 → active"
+    notes: "Aggregate settlement state derived from stall states. Used for ambient audio/visual tier selection."
+    added: 2026-05-02
+    revised: ""
+
+  - name: resolve_threat
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - threat_context
+      - response_choice
+      - carried_inventory
+    output_range: "[{outcome: suppressed, tanked, retreated} × 3 discrete variants]"
+    expression: "Piecewise dispatch over 3 response choices: emergency_handling → suppressed (0 dmg, 1 repair_kit), tank → tanked (12-18 dmg, 50% module), retreat → retreated (0 dmg, retreat_flagged)"
+    notes: "Called by #11 when guard threat triggers. Returns combat_result to #11. Consumes repair_kit from #5, applies hull/module damage to #8."
+    added: 2026-05-02
+    revised: ""
+
+  - name: calc_hull_damage
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    variables:
+      - response_choice
+      - encounter_params.full_damage_min
+      - encounter_params.full_damage_max
+    output_range: "[0, 12, 18] — 0 or uniform_int(12, 18)"
+    expression: "0 if response_choice ≠ tank; uniform_int(full_damage_min, full_damage_max) if tank"
+    notes: "Guard: uniform_int(12, 18). Each integer equally likely (1/7)."
+    added: 2026-05-02
+    revised: ""
+
+  - name: calc_module_damage
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    variables:
+      - response_choice
+      - encounter_params.module_damage_chance
+      - eligible_modules
+    output_range: "[{module_damaged: bool, target_slot_id: slot_a | slot_b | null}]"
+    expression: "if tank AND random() < module_damage_chance AND count(eligible_modules) > 0: target = random_choice(eligible_modules); else: {false, null}"
+    notes: "Eligible modules exclude already-damaged slots (pre-selection filtering). Guard: module_damage_chance = 0.50."
+    added: 2026-05-02
+    revised: ""
+
+  - name: check_emergency_available
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    variables:
+      - carried_inventory
+      - repair_kit_id
+    output_range: "[false, true]"
+    expression: "carried_inventory.get(repair_kit_id, 0) >= 1"
+    notes: "Boolean gate for Emergency Handling button. False → button grayed with tooltip."
+    added: 2026-05-02
+    revised: ""
+
+  - name: calc_knockback
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    variables:
+      - response_choice
+      - encounter_params.knockback_distance_tanked
+      - encounter_params.knockback_distance_retreat
+    output_range: "[0, 8.0, 10.0]"
+    expression: "0 for emergency_handling; knockback_distance_tanked for tank (8.0); knockback_distance_retreat for retreat (10.0)"
+    notes: "Direction = threat.position → player.position. Knockback > trigger_radius ensures no immediate re-trigger."
     added: 2026-05-02
     revised: ""
 
@@ -483,6 +667,7 @@ constants:
     source: design/gdd/exploration-scavenge-scenario.md
     referenced_by:
       - design/gdd/exploration-scavenge-scenario.md
+      - design/gdd/combat-threat-handling.md
     value: 0.08
     unit: 比例
     added: 2026-05-02
@@ -493,6 +678,7 @@ constants:
     source: design/gdd/exploration-scavenge-scenario.md
     referenced_by:
       - design/gdd/exploration-scavenge-scenario.md
+      - design/gdd/combat-threat-handling.md
     value: 0.25
     unit: 比例
     added: 2026-05-02
@@ -513,6 +699,7 @@ constants:
     source: design/gdd/exploration-scavenge-scenario.md
     referenced_by:
       - design/gdd/exploration-scavenge-scenario.md
+      - design/gdd/combat-threat-handling.md
     value: 0.70
     unit: 概率
     added: 2026-05-02
@@ -537,6 +724,78 @@ constants:
       - design/gdd/airship-hub.md
     value: 4
     unit: 件
+    added: 2026-05-02
+    revised: ""
+
+  - name: guard_full_damage_min
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 12
+    unit: 船体伤害
+    added: 2026-05-02
+    revised: ""
+
+  - name: guard_full_damage_max
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 18
+    unit: 船体伤害
+    added: 2026-05-02
+    revised: ""
+
+  - name: guard_module_damage_chance
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 0.50
+    unit: 概率
+    added: 2026-05-02
+    revised: ""
+
+  - name: emergency_cost_repair_kit
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 1
+    unit: repair_kit
+    added: 2026-05-02
+    revised: ""
+
+  - name: knockback_distance_tanked
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 8.0
+    unit: 单位
+    added: 2026-05-02
+    revised: ""
+
+  - name: knockback_distance_retreat
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 10.0
+    unit: 单位
+    added: 2026-05-02
+    revised: ""
+
+  - name: hull_warning_threshold
+    status: active
+    source: design/gdd/combat-threat-handling.md
+    referenced_by:
+      - design/gdd/combat-threat-handling.md
+    value: 18
+    unit: hull integrity
+    added: 2026-05-02
+    revised: 2026-05-03  # changed from 5 to 18 (full_damage_max) — at hull=6, a 12-18 damage Tank hit can destroy the ship with zero warning
     added: 2026-05-02
     revised: ""
 

@@ -21,3 +21,25 @@ Blocking items: 3 (resolved) | Recommended: 7
 Summary: Second design review of the airship Hub GDD after Round 1 revisions. Creative-director rated fantasy text A-grade but identified 3 blocking issues threatening core pillars: (B1) Mode B autonomous flight had no cost contract undermining Pillar 1 (planning); (B2) R8 spawn point contradicted return flow narrative ("归港之锚" fantasy); (B3) warehouse shelves located in module-gated cargo hold made long-term storage physically inaccessible when module destroyed — contradicting resources GDD. All 3 resolved in same session: Mode B gains higher encounter risk + no route knowledge generation; return spawn changed to cabin door; warehouse moved to engineering bay. Registry formula (D6) also fixed. GDD ready for clean-session re-review.
 
 Prior verdict resolved: Yes — Round 1 blockers (R9 preparation gating, progress.airship naming, empty UI Requirements) all resolved in prior session.
+
+---
+
+## Review — 2026-05-01 (Round 3) — Verdict: APPROVED (CD-GDD-ALIGN)
+
+Scope signal: L
+Specialists: creative-director (CD-GDD-ALIGN gate check)
+Blocking items: 2 (resolved) | Recommended: 4 (resolved)
+Prior verdict resolved: Yes — Round 2 blockers (Mode B cost contract, spawn point contradiction, warehouse location) all resolved.
+
+Summary: Creative Director alignment review. Two final blockers fixed: B1 `room_exists` free variable and B2 `departure_locked` AC unreachability. Soft mechanical consequences (R9) adopted as Option A. CD rated fantasy text A-grade and recommended approval. All 4 recommended items also resolved in session.
+
+---
+
+## Re-review — 2026-05-02 — Verdict: APPROVED (lean re-review confirmed)
+
+Scope signal: L
+Specialists: none (lean mode — single-session analysis)
+Blocking items: 0 | Recommended: 3
+Prior verdict resolved: Yes — all R3 blockers and recommendations addressed.
+
+Summary: Lean re-review confirmed the CD's 2026-05-01 approval. GDD is among the strongest in the project — Player Fantasy section is A-grade, all 8 required sections present and thorough, 10 interactive stations fully specified, 4 state machines with clear transitions, full visual/audio/UI requirements with accessibility constraints and performance budgets. Three minor recommendations: (1) interaction table's slot state ownership direction contradicts the rules section (both agree #8 owns states, but summary table shows reversed data flow); (2) `unchecked` state missing from interaction table's state enumeration; (3) `uninformed_departure_penalty` is a forward reference to an undefined #10 knob — Hub should include a fallback default. No design changes needed.

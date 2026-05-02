@@ -1,6 +1,6 @@
 # 飞艇家园 Hub
 
-> **Status**: In Review（三轮复审修订完成 2026-05-01 — 阻断项 B1 `room_exists` 自由变量、B2 `departure_locked` AC 不可达已修复；采纳选项 A 软机械后果；4 项建议项已修复）
+> **Status**: Approved（三轮复审 + CD-GDD-ALIGN 通过 2026-05-01；lean re-review 确认 2026-05-02 — 2 项建议修正，无阻断项）
 > **Author**: User + Claude Code
 > **Last Updated**: 2026-05-01
 > **Creative Director Review (CD-GDD-ALIGN)**: APPROVED 2026-05-01 — 阻断项修复完成，软机械后果采纳，建议批准

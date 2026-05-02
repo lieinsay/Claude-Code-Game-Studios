@@ -81,6 +81,8 @@
 | `consume(pool, resource_id, quantity)` | 领域系统驱动的消耗（修复、制造、航线消耗）。 | 同 remove |
 | `discard(pool, resource_id, quantity)` | 从指定池移除指定数量并永久销毁。需二次确认（类似 `commit_deposit`）。有效目标池：Pool 1（`on_person`）、Pool 2（`in_storage`）、Pool 3（`loaded`）、Pool 5（`carried`）。触发入口由探索 UI 或物品栏 UI 提供。 | 同 remove |
 | `unpack_cargo(cargo_slot)` | 销毁指定货物物品，将其 `linked_resource_id` 的资源以货物声明数量加入飞艇仓库。 | 仓库剩余槽位不足以接收全部拆包资源 |
+| `consume_in_combat(resource_id, quantity)` | 战斗中消耗的专用入口。一个围绕 `consume(Pool 5, resource_id, quantity)` 的薄封装，从随身物品栏（Pool 5）消耗。此封装不添加额外的原子性保证——继承 `consume` 的完全成功/完全失败语义。发出 `resource_removed(Pool5, resource_id, quantity)` 信号。由战斗与威胁处理（#12）在威胁结算期间调用。 | 同 `consume(Pool5, ...)`：Pool 5 中该 ID 总持有量不足 |
+| `get_carried_contents_by_tag(material_tag)` | 查询 Pool 5 中所有 `material_tags` 与给定标签匹配的资源。返回 `Dictionary[resource_id → quantity]`。用于检查在出航前是否已准备好特定的消耗品（例如，#12 查询 `"repair-material"` 以确定 repair_kit 的可用性）。不进行修改。若没有匹配的资源，则返回一个空字典。由战斗与威胁处理（#12）在决策面板设置期间调用。 | 无（仅查询） |
 
 16. 集市交易由 `空港 / 村镇状态与集市交易` 通过组合 `remove` / `add` 原语实现。本系统不拥有交易规则、价格或库存刷新逻辑。
 
