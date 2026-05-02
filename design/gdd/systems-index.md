@@ -79,7 +79,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 7 | 飞艇家园 Hub | Gameplay | MVP | Approved | `design/gdd/airship-hub.md` | 玩家移动与交互; 本地存档与世界状态持久化; 内容数据与状态注册表 |
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | Approved | `design/gdd/airship-modules-hull-state.md` | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
 | 9 | 航图与航线规划 | Gameplay | MVP | Approved | `design/gdd/chart-route-planning.md` | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报; 飞艇家园 Hub |
-| 10 | 航行与路线风险 | Gameplay | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
+| 10 | 航行与路线风险 | Gameplay | MVP | Approved | `design/gdd/navigation-route-risk.md` | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
 | 11 | 探索 / 搜撤场景 | Gameplay | MVP | In Review | `design/gdd/exploration-scavenge-scenario.md` | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | In Review (Revision 2 — 2026-05-03) | `design/gdd/combat-threat-handling.md` | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
@@ -143,9 +143,11 @@ GDD: `design/gdd/chart-route-planning.md` — 11 sections, CD reviewed PASS WITH
 
 ### 10. 航行与路线风险
 
-Authored risk tags, route outcomes, encounter tables, safety/risk difference, return margin, and travel consequences.
+Voyage risk resolution engine: consumes `route_committed` events from #9, resolves authored hazard tags into concrete encounters via time-based progression, and outputs `EncounterContext` to downstream systems (#11, #17, #8, #6, #3). 5 formulas: voyage duration, encounter check timing, scout preview window, damage accumulation (max-not-sum), hidden tag reveal probability. Dynamic hull band transitions mid-voyage (Option B). Scout module as pure information layer — preview window only, no avoidance. Architecture reserves `VoyageContext` for NPC/delegated routes (Phase 3+). MVP: 2 routes (sky-reef-arc-01 safe/short/5 checks, storm-cut-01 risky/medium/10 checks) with authored encounter tables.
 
 Scope boundary: this system produces route outcomes or `EncounterContext`; it does not implement combat or exploration rules directly.
+
+GDD: `design/gdd/navigation-route-risk.md` — CD-GDD-ALIGN (full): APPROVE WITH NOTES. 1 blocker resolved (rule #7 scout preview alignment), 5 warnings accepted. 8/8 required + 3/3 optional sections, 95 ACs, 36 edge cases, 7 open questions.
 
 ### 11. 探索 / 搜撤场景
 
@@ -359,9 +361,9 @@ The MVP version of each system must stay within these bounds:
 |---|---:|
 | Total systems identified | 18 |
 | Design docs started | 12 |
-| Design docs reviewed | 9 |
-| Design docs approved | 9 |
-| MVP systems designed | 12 / 16 |
+| Design docs reviewed | 10 |
+| Design docs approved | 10 |
+| MVP systems designed | 13 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
