@@ -2,28 +2,22 @@
 
 <!-- STATUS -->
 Epic: Systems Design
-Feature: 飞艇模块与船体状态
-Task: Round 2 Re-Review Complete — CONDITIONAL APPROVAL (2 blockers + 4 recommendations)
+Feature: 航图与航线规划
+Task: Complete — GDD Approved + Design Review Passed
 <!-- /STATUS -->
 
-- Current: Re-review complete. 7 boundary tests executed. Findings written to review log.
-- File: `design/gdd/airship-modules-hull-state.md`
-- Review log: `design/gdd/reviews/airship-modules-hull-state-review-log.md` (Round 2 Systems Designer re-review appended)
-- Systems Index: 8/16 MVP designed, #8 "In Review (Round 2 Revision Applied)"
+- Current: System #9 航图与航线规划 — Design + Review Complete
+- File: `design/gdd/chart-route-planning.md`
+- Status: **Approved** (CD-GDD-ALIGN: PASS WITH NOTES; design-review: 1 blocker resolved)
+- Review Log: `design/gdd/reviews/chart-route-planning-review-log.md`
+- Sections: 11/11 + 22 Open Questions
+- Systems Index: 9/16 MVP designed
 
-- Round 2 Re-Review Results (Systems Designer, 2026-05-01):
-  - Verdict: CONDITIONAL APPROVAL
-  - BLOCKER-1 (SD-DESTROYED-ETA-NULL): η_hull_band undefined for destroyed band — needs definition (recommend η_hull_band=0)
-  - BLOCKER-2 (SD-CRITICAL-FLOOR-SILENT-NERF): D.1 floor() loss expanded by critical band; worst case 21.88% (was 16.67% in R1)
-  - MEDIUM: D.4 variable table missing 0.76 (cargo unchecked + critical)
-  - MEDIUM: swap_module per-material arithmetic needs explicit spec
-  - LOW: D.1 "installed" phrasing, D.4 missing critical examples
-  - PASSED: D.3 boundaries (no off-by-one), D.5 can_depart (all 8 combos correct), state machine (no damaged→unchecked reset), hull_scars cross-band (all scenarios consistent), swap_module non-negative
+- **Design review fixes applied**:
+  - CB-4: Rule #16 event ordering fixed (validate snapshot before emitting route_committed)
+  - R2: RETRY cooldown added to state machine
+  - R3: Missing transitions (BROWSING+FAIL→ERROR, BROWSING+RETRY→LOADING) added
+  - R6: Formula 4 strengthened (null guard, NaN current_time, epoch timestamp)
+  - QA findings recorded as OQ-18 ~ OQ-22
 
-- Verified Round 2 fixes still hold:
-  - B5 (cross-band scars 30→0 = +3) ✓
-  - B6 (η_final = η_visible × η_hull_band) ✓ but needs destroyed-band completion
-  - B4 (repair_kit = 5/kit) ✓ no degenerate values
-  - B3 (swap_module + 75% refund + ceil) ✓ non-negative
-
-- Next: Resolve 2 blockers (user decision), then implementation handoff
+- **Next system in queue**: #10 航行与路线风险 (Voyage & Route Risk)
