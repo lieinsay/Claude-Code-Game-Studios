@@ -2,23 +2,35 @@
 
 <!-- STATUS -->
 Epic: Systems Design
-Feature: 伙伴功能与关系
-Task: Complete — Phase 5 Done
+Feature: Design Reviews (lean mode)
+Task: Reviews complete for #7 and #14; user opening new session for re-reviews
 <!-- /STATUS -->
 
-- Current: System #15 伙伴功能与关系 — In Review
-- File: `design/gdd/partner-relationships.md`
-- Status: ALL 8 REQUIRED SECTIONS COMPLETE + Self-Checked + CD Pillar Review (APPROVE) + Registry & Index Updated
-- Sections: 8/8 required written ✅ (A-H), 3 optional skipped (Visual/Audio, UI, Open Questions — user chose to defer)
-- D: 2 formal formulas (confidence_clamp, naming_prompt_eligibility) + 6 "no formula needed" + 4 external references
-- E: 33 edge cases in 6 groups
-- F: 4 hard deps + 4 soft deps + init order + save/load ownership + 5 cross-GDD revision flags
-- G: 8 tuning knobs (K1-K8) + 7 fixed invariants + tuning philosophy
-- H: 49 acceptance criteria (25 Unit + 17 Integration + 2 Manual Playtest)
-- CD Review: APPROVE — P5/P4/P3 alignment confirmed, all 5 CD constraints satisfied, 3 advisory tonal risks noted
-- Registry: partner.sky-cat entity, 2 formulas, 2 constants registered
-- Systems Index: #15 status → In Review, progress tracker 9/16 MVP designed
+## Today's Reviews (2026-05-02)
 
-- **Outstanding**: 5 cross-GDD revision flags (F.5) need addressing via `/consistency-check` — none block #15 approval
-- **Previous system**: #9 航图与航线规划 — Approved
-- **Skipped in queue**: #10 航行与路线风险
+### #14 空港/村镇状态与集市交易 — Revision 2 Applied
+- File: `design/gdd/port-village-market.md`
+- Verdict: NEEDS REVISION → 2 blockers fixed (cross-reference #8→#10/#7, validate_purchase 2-param alignment)
+- 3 recommended items logged
+- Review log appended
+
+### #7 飞艇家园 Hub — APPROVED
+- File: `design/gdd/airship-hub.md`
+- Verdict: APPROVED (confirmed CD's 2026-05-01 approval)
+- 0 blockers, 3 recommendations (slot state ownership direction, unchecked state in interaction table, uninformed_departure_penalty forward ref)
+- System index updated, GDD header updated, review log appended
+
+## Current Pipeline State (from systems-index)
+
+| Status | Systems |
+|--------|---------|
+| Approved (8) | #1–#7, #9, #13, #15 |
+| In Review (4) | #8 modules (R2 revision applied), #11 exploration, #12 combat (revision applied), #14 market (R2 applied) |
+| Not Started (4) | #10 navigation-risk, #16 UI/HUD, #17 feedback-audio, #18 onboarding |
+
+## Next for New Session
+- Re-reviews pending: #8, #11, #12, #14
+- `/design-review design/gdd/airship-modules-hull-state.md --depth lean` (highest priority — R2 applied, longest in queue)
+- `/design-review design/gdd/exploration-scavenge-scenario.md --depth lean` (first review)
+- `/design-review design/gdd/combat-threat-handling.md --depth lean` (revision applied today)
+- `/review-all-gdds` recommended when all MVP GDDs complete (8/16 approved, 4 in review)

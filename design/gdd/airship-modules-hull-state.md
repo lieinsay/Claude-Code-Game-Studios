@@ -72,6 +72,11 @@
 18. 船体修复在 Hub 的 Station 10（船体维修点）执行，消耗资源材料。修复量 = 消耗资源的修复值总和。修复后补丁覆盖裂痕但留下视觉痕迹。若 `integrity >= 100`，修复操作被拒绝并提示"船体结构完好"——防止玩家浪费修复材料。
 19. 每次修复操作最小恢复 1 点 integrity，最大恢复至 100。单次修复量无上限。
 
+**中探索船体与模块损伤：**
+
+20. `apply_hull_damage(amount: int) → void`：由战斗与威胁处理（#12）在威胁结算期间（硬扛后）调用，以应用中探索船体损伤。扣除 `integrity -= amount`，若跨越波段边界则触发波段转换，并根据规则 15 和规则 17 增加 `hull_scars`。若 `amount` 将 integrity 推至 0 以下，则钳制为 0（destroyed 波段）。发出 `hull_integrity_changed` 信号，若波段变化则随后发出 `hull_band_changed`。前提条件：`amount > 0`。若 `amount <= 0`，则静默无操作返回。本操作由 #12 拥有并调用。
+21. `apply_module_damage(slot_id: StringName, damage_type: StringName) → void`：由战斗与威胁处理（#12）在威胁结算期间（硬扛后）调用，以将指定槽位的 `actual_state` 标记为 `damaged`。效率系数相应地设为 0.6（侦察兵）或 0.5（货物）。发出 `actual_state_changed`、`slot_state_changed`、`module_efficiency_changed` 和 `departure_readiness_changed` 信号（遵循规则 21 中定义的顺序）。`damage_type` 是一个传递字符串，用于识别损坏来源（MVP 中为 `"guard_impact"`）；#8 仅存储此值，其含义由 #17（反馈/特效/音频语义）消费。前提条件：`slot_id` 对应于一个已安装的、非空的槽位，且其 `actual_state` 当前未被标记为 `damaged`。若 `slot_id` 无效、为空或其 `actual_state` 已为 `damaged`，则此调用视为无操作（在已受损模块上返回无错误——不造成二次损坏）。当 #12 在调用 `apply_module_damage` 之前无法正确过滤出已受损槽位时，此调用作为防御性安全网。本操作由 #12 拥有并调用。
+
 **出航适航判定：**
 
 20. 出航条件 = `飞艇最大载重 > 0`（至少一个动力炉有出力）且 `船体完整性 > 0` 且 `当前总载重 ≤ 最大载重`。`can_depart()` 返回 `{can: bool, reasons: [StringName]}`——每个不满足的条件对应一条原因文本。Hub 的出航确认界面展示不满足的条件作为阻断原因。
@@ -178,7 +183,7 @@
 |------|----------|---------|
 | 航行与路线风险 (#10) | 侦察模块效率、船体完整性波段+惩罚、适航判定、动力炉载重上限 | 模块系统 → 航行系统 |
 | 探索搜撤 (#11) | 高风险撤离事件可能导致的额外船体损伤量 | 模块系统 → 探索系统 |
-| 战斗威胁 (#12) | 战斗命中可能触发的模块受损标记和船体损伤量 | 模块系统 → 战斗系统 |
+| 战斗威胁 (#12) | `apply_hull_damage(amount)`、`apply_module_damage(slot_id, damage_type)`、`get_installed_slots()` — 中探索威胁结算期间由 #12 调用 | 模块系统 → 战斗系统 |
 | UI HUD (#16) | 模块状态摘要、船体完整性显示、动力炉状态、载重/适航指示 | 模块系统 → UI |
 
 **数据流契约：**
