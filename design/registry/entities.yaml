@@ -105,6 +105,21 @@ entities:
     added: 2026-05-02
     revised: ""
 
+  - name: partner.sky-cat
+    status: active
+    source: design/gdd/partner-relationships.md
+    referenced_by:
+      - design/gdd/partner-relationships.md
+      - design/gdd/player-knowledge-intel.md
+      - design/gdd/airship-hub.md
+    kind: companion
+    role: scout  # MVP sole partner; provides scout verb "sniff identification"
+    species: 航海猫 (Sky Cat)
+    lore: 老飞艇船员猫族群的最后一只 (last of the pre-Fragmentation airship crew cat lineage)
+    mvp_confidence_max: 66  # hard cap; never reaches 权威 tier
+    added: 2026-05-02
+    revised: ""
+
 # Example (remove when first real entry is added):
 #
 # entities:
@@ -358,6 +373,38 @@ formulas:
     added: 2026-05-02
     revised: ""
 
+  - name: confidence_clamp
+    status: active
+    source: design/gdd/partner-relationships.md
+    referenced_by:
+      - design/gdd/partner-relationships.md
+      - design/gdd/player-knowledge-intel.md
+    variables:
+      - item.cat_sniff_signature.confidence
+      - MVP_CONFIDENCE_MAX
+    output_range: [0, 66]
+    expression: "confidence_final(item) = min(item.cat_sniff_signature.confidence, MVP_CONFIDENCE_MAX)"
+    notes: "Clamps partner sniff confidence to MVP hard cap (66). Protects P1 verification and P4 mild pressure. #6 receives clamped value via reveal_rumor(). Raw confidence from #1 content data may be 0-100; this formula is the gate."
+    added: 2026-05-02
+    revised: ""
+
+  - name: naming_prompt_eligibility
+    status: active
+    source: design/gdd/partner-relationships.md
+    referenced_by:
+      - design/gdd/partner-relationships.md
+    variables:
+      - naming_state
+      - sniff_success_occurred
+      - player_returned_to_hub
+      - naming_skip_count
+      - NAMING_SKIP_MAX
+    output_range: [false, true]
+    expression: "naming_eligible = (naming_state == pending) AND (sniff_success_occurred == true) AND (player_returned_to_hub == true) AND (naming_skip_count < NAMING_SKIP_MAX)"
+    notes: "4-way boolean conjunction determining whether naming UI opens on return-to-hub. Output consumed by #16 (UI). NAMING_SKIP_MAX = 3 in MVP."
+    added: 2026-05-02
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -468,6 +515,28 @@ constants:
       - design/gdd/exploration-scavenge-scenario.md
     value: 0.70
     unit: 概率
+    added: 2026-05-02
+    revised: ""
+
+  - name: MVP_CONFIDENCE_MAX
+    status: active
+    source: design/gdd/partner-relationships.md
+    referenced_by:
+      - design/gdd/partner-relationships.md
+      - design/gdd/player-knowledge-intel.md
+    value: 66
+    unit: 置信度 (0-100 scale)
+    added: 2026-05-02
+    revised: ""
+
+  - name: NEST_CAPACITY
+    status: active
+    source: design/gdd/partner-relationships.md
+    referenced_by:
+      - design/gdd/partner-relationships.md
+      - design/gdd/airship-hub.md
+    value: 4
+    unit: 件
     added: 2026-05-02
     revised: ""
 
