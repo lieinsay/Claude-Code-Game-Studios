@@ -1,8 +1,8 @@
 # 探索 / 搜撤场景
 
-> **Status**: In Design
+> **Status**: In Review (Revision 1 applied 2026-05-03 — 3 blockers resolved: B1 compute_loss formula λ≤0 guard + max(0,...), B2 C6/F-11-03 unified to formula logic, B3 Pool 5 initialization specified; zone gradient flattened; search point descriptions added; hull damage timing aligned with #12; capacity tradeoff default corrected; 2 ACs made deterministic; test tools appendix added)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-02
+> **Last Updated**: 2026-05-03
 > **Implements Pillar**: 规划先于冒险; 未知带来温和压力
 
 ## Overview
@@ -28,6 +28,8 @@
 锚定时刻不是在捡到稀有物品时——而是在走近一堆散落的零件、观察周围环境后，你意识到"这些零件正好是灯塔继电器需要的那些"。这个时刻，你不再是在"打怪掉装备"，你是在从遗忘中回收有用的东西。你知道你带回去的每一件东西都有一个具体的用途——修灯塔、补船体、换模块——不是卖金币，是让世界恢复运转。
 
 这种感受是克制的——不是"发财了！"的亢奋，而是"找到了，这就够了"的平静满足。像老航海日志里的一行："本日探索：回收继电器零件 × 4，发现一块旧海图残片。灯塔修复仍需铜线。"
+
+你在废墟中识别出灯塔继电器的零件——这是"识荒"。你把它带回飞艇，装进灯塔，看见航线重新亮起——那是"修补"。探索是修补的第一步：没有识别就没有修复。每一个搜索点旁边的简短描述——"一堆散落的电器零件，看起来像是通讯设备的残骸"——都在帮助你建立这种识别：这个地方曾经是做什么的，这些碎片曾经属于什么。
 
 ### 探图人：未知变成已知（第二层）
 
@@ -75,6 +77,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 - `voyage_result = "ARRIVED"`（安全抵达）→ 玩家从入口区正常进入，船体无额外损伤
 - `voyage_result = "FORCED_LANDING"`（迫降）→ 玩家从坠机点进入，船体已有损伤标记，部分区域可能因坠机影响而改变（如入口区被残骸封锁，需绕行）
 - `resolved_encounters[]` 中与探索点相关的遭遇（如航线中触发的侦察情报）在进入时预载——已揭示的风险标签在进入前就标注在探索点地图上
+- **Pool 5 初始状态**：进入探索点时，Pool 5（随身物品栏）保留玩家在飞艇准备阶段已装入的内容。玩家可携带 repair_kit、备品等进入探索，但这也意味着容量取舍会更早触发——准备越充分，越需要判断"带走什么"。进入探索后，Pool 5 的增减操作通过 System #5 接口进行。
 
 **C4. 探索中的移动与交互**
 
@@ -85,6 +88,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 **C5. 搜索机制**
 
 - 每个搜索点可被搜索一次（每个会话中）。搜索触发一个检索动画（短暂停留），然后返回结果。
+- **搜索点描述**：每个搜索点在模板配置中携带一个 `description` 字段（一行文字，≤40 字），在玩家靠近搜索点时显示（如"一堆散落的电器零件，看起来像是通讯设备的残骸"）。描述随状态变体变化（unlooted / looted / danger-changed 各有不同文字）。这是"识荒人"幻想的机械支撑——搜索不是点击一个发光的节点，而是观察环境后判断"这里有什么可以带走"。
 - **自由搜索**：搜索结果为空的搜索点不消耗搜索次数。玩家可以搜索探索点内的每一个搜索点，不会因为"翻到空的"而受到惩罚。这确保探索的温和压力——风险来自威胁，而非资源焦虑。
 - **容量约束**：搜索获得的资源/货物进入随身物品栏（Pool 5，5 格，由 System #5 管理）。当 Pool 5 已满（5/5），玩家必须做出取舍——丢弃现有物品腾出空间，或放弃新发现的物品。
 - 搜索点的内容由其配置和当前状态变体决定：
@@ -99,7 +103,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 | η_scout | 效果 |
 |---------|------|
 | 0 | 无预览——所有威胁点不可见，靠近时才触发 |
-| 0.6–0.95 | 存在预览——威胁点显示"此处有威胁"标记，但不显示具体类型 |
+| (0, 1.0) | 存在预览——威胁点显示"此处有威胁"标记，但不显示具体类型。注：任何 η_scout > 0 均进入此档，包括 0.48（Scout 受损+critical band） |
 | 1.0 | 完整预览——威胁点显示类型+位置（如"守卫哨兵，东北角"） |
 
 预览标记在进入探索点时一次性加载，探索过程中不会新增预览（η_scout 在进入时快照）。
@@ -125,9 +129,9 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 
 撤离成功后自动结算：
 
-1. **资源/货物**：Pool 5（carried）中的物品通过 `extract_carried_to_storage()` 转入飞艇仓库（System #5）。受 `extraction_loss_ratio` 影响——部分物品可能在撤离过程中损耗。Unique 物品（Q=1，max_stack=1）不可被损耗（Pillar 4 约束）。
+1. **资源/货物**：Pool 5（carried）中的物品通过 `extract_carried_to_storage()` 转入飞艇仓库（System #5）。按 F-11-04 撤离损耗结算——λ_success（成功撤离）或 λ_forced（被迫撤退）决定损耗率。Unique 物品（Q=1，max_stack=1）不可被损耗（Pillar 4 约束）。
 2. **情报**：探索中揭示的隐藏标签写入 System #9（玩家知识与情报）——航线知识永久推进。
-3. **船体后果**：探索中的威胁接触造成的船体损伤或模块受损标记在此时结算到 System #7（飞艇模块与船体状态）。
+3. **船体后果**：守卫威胁接触造成的船体损伤/模块受损标记已在威胁处理时由 #12 即时应用到 #7；环境威胁损伤由 #11 在触发时即时应用到 #7。DEPARTED 阶段汇总展示本次探索的全部损伤（不做二次写入），确保玩家在探索中始终看到实时船体状态。
 4. **探索点状态更新**：当前探索点根据本次探索结果更新状态变体——如果所有搜索点被搜刮 → looted；如果触发了环境威胁且未清除 → danger-changed。
 
 **C10. 探索点状态变体生命周期**
@@ -183,19 +187,19 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 | 系统 | 数据流入 | 数据流出 |
 |------|---------|---------|
 | #10 航行与路线风险 | `EncounterContext` {route_id, destination_id, voyage_result, resolved_encounters[]} | — |
-| #7 飞艇模块与船体状态 | η_scout（侦察效率）, `can_depart()`（检查是否可以出发） | 船体损伤、模块受损标记（结算时写入） |
+| #8 飞艇模块与船体状态 | η_scout（侦察效率）, `can_depart()`（检查是否可以出发） | 船体损伤、模块受损标记（结算时写入） |
 | #5 资源/货物与容量 | Pool 5（carried，5 格）读写 | `extract_carried_to_storage()` 结算时调用 |
-| #3 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | — |
-| #9 玩家知识与情报 | — | 情报揭示（隐藏标签 → 已知标签） |
+| #4 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | — |
+| #6 玩家知识与情报 | — | 情报揭示（隐藏标签 → 已知标签） |
 
 **下游（依赖本系统的系统）**
 
 | 系统 | 数据流入 | 数据流出 |
 |------|---------|---------|
-| #12 战斗与威胁处理 | 威胁上下文 {threat_type, threat_id, position, encounter_params} | 战斗结果 {outcome, hull_damage, module_damage, resources_dropped} |
+| #12 战斗与威胁处理 | 威胁上下文 {threat_type, threat_id, position, encounter_params} | 战斗结果 {outcome, hull_damage, module_damage, resources_consumed, knockback, retreat_flagged} |
 | #5 资源/货物与容量 | 探索拾取的资源/货物 | — |
-| #7 飞艇模块与船体状态 | 探索造成的船体损伤、模块受损标记 | — |
-| #9 玩家知识与情报 | 探索揭示的情报 | — |
+| #8 飞艇模块与船体状态 | 探索造成的船体损伤、模块受损标记 | — |
+| #6 玩家知识与情报 | 探索揭示的情报 | — |
 
 ## Formulas
 
@@ -238,10 +242,10 @@ search_yield(sp_id, zone, state):
 
 | 区域 | empty_chance | Poor 权重 | Common 权重 | Uncommon 权重 |
 |------|-------------|-----------|-------------|---------------|
-| A_core | 0.00 | 0.10 | 0.40 | 0.50 |
-| B_inner | 0.05 | 0.20 | 0.45 | 0.35 |
-| C_mid | 0.20 | 0.40 | 0.40 | 0.20 |
-| D_outer | 0.35 | 0.60 | 0.30 | 0.10 |
+| A_core | 0.00 | 0.20 | 0.45 | 0.35 |
+| B_inner | 0.05 | 0.25 | 0.45 | 0.30 |
+| C_mid | 0.20 | 0.35 | 0.40 | 0.25 |
+| D_outer | 0.35 | 0.50 | 0.30 | 0.20 |
 
 | tier | draw_count {min, max} |
 |------|----------------------|
@@ -263,7 +267,7 @@ search_yield(sp_id, zone, state):
 **演算示例**（unlooted，搜索 A_core 的 search_point.cloudwatch.core-01）：
 
 - `empty_chance[unlooted][A_core] = 0.00` → 非空
-- `weighted_random({Poor:0.10, Common:0.40, Uncommon:0.50})` → 抽中 Uncommon
+- `weighted_random({Poor:0.20, Common:0.45, Uncommon:0.35})` → 抽中 Uncommon
 - `loot_pool["search_point.cloudwatch.core-01"][Uncommon] = [("cloud_crystal", [2,4]), ("ancient_relay_part", [1,2])]`
 - `draw_count[Uncommon] = {1,2}`, `random_int(1,2)` → 2
 - 不放回抽取 2 个条目，数量随机：cloud_crystal ×3, ancient_relay_part ×1
@@ -300,9 +304,11 @@ threat_trigger(threat_point, trigger_type, player_pos):
 
 | 变量 | 类型 | 值域 | 说明 |
 |------|------|------|------|
-| `threat_point.is_active` | bool | {false, true} | 威胁是否仍活跃（清除后为 false） |
+| `threat_point.is_active` | bool | {false, true} | 威胁是否仍活跃（清除后为 false）。持续存在于本探索会话中，并跨 save/load 持久化（写入探索点快照）。 |
 | `threat_point.threat_category` | enum | {environmental, guard} | 环境威胁 vs 守卫威胁 |
 | `threat_point.trigger_radius` | float | [1.0, 8.0] | 触发半径（单位），环境 2-3，守卫 4-6 |
+| `threat_point.position` | Vector2 | — | 探索点内威胁的世界空间位置 |
+| `threat_point.facing` | Vector2 | 单位向量 | 威胁的朝向方向。用于击退方向回退（EC-12-06）。由探索点模板数据定义。 |
 | `trigger_type` | enum | {proximity, interaction} | 触发来源 |
 | `trigger_prob` | dict | [0.0, 1.0] | 靠近触发概率，按类别 |
 
@@ -321,6 +327,35 @@ threat_trigger(threat_point, trigger_type, player_pos):
 - 玩家靠近到 (16,19)，`distance = 3.61 ≤ 5.0`
 - `trigger_prob["guard"] = 0.70`, `random() = 0.52 < 0.70`
 - **结果**: triggered=true，传递 context 至 #12
+
+**`build_threat_context` 工厂函数：**
+
+`build_threat_context(threat_point, trigger_type)` 构建传递给 #12 的 `threat_context` 结构体。在 #11 的 F-11-02 判定触发后调用。
+
+```
+build_threat_context(threat_point, trigger_type):
+    config = THREAT_CONFIG_TABLE[threat_point.threat_category]  // 来自 #1 Registry 的静态威胁配置（见 #12 C8 威胁配置表）
+
+    encounter_params = {
+        threat_category:      threat_point.threat_category,
+        full_damage_min:      config.full_damage_range[0],
+        full_damage_max:      config.full_damage_range[1],
+        module_damage_chance: config.module_damage_chance,
+        emergency_cost:       config.emergency_cost,
+        knockback_distance_tanked:   config.knockback_distance_tanked,
+        knockback_distance_retreat:  config.knockback_distance_retreat,
+        can_be_suppressed:    config.can_be_suppressed
+    }
+
+    return {
+        threat_type:      threat_point.threat_category,
+        threat_id:        threat_point.id,
+        position:         threat_point.position,
+        encounter_params: encounter_params
+    }
+```
+
+`THREAT_CONFIG_TABLE` 由 #1（内容数据与状态注册表）提供。查询键为 `threat_category`。`trigger_radius` 不包含在 `encounter_params` 中——它保留在 #11 的 `threat_point` 中，用于计算重触发距离。
 
 ---
 
@@ -365,10 +400,10 @@ scout_preview_level(η_scout):
 
 ### F-11-04 撤离损耗结算 `extraction_loss_settlement`
 
-DEPARTED 阶段，对 Pool 5 中每堆物品独立判定撤离损耗。
+DEPARTED 阶段，对 Pool 5 中每堆物品独立判定撤离损耗。本函数接收来自 #12 的 `retreat_flagged` 和探索会话期间累积的任何战斗结果。
 
 ```
-extraction_loss_settlement(carried_stacks, voyage_result):
+extraction_loss_settlement(carried_stacks, retreat_flagged):
     result = {transferred: [], lost: [], total_lost_qty: 0}
 
     for each stack in carried_stacks:
@@ -377,7 +412,7 @@ extraction_loss_settlement(carried_stacks, voyage_result):
             result.transferred.append({id: stack.resource_id, qty: stack.quantity, lost: 0})
             continue
 
-        λ = (voyage_result == "SUCCESSFUL_EXTRACTION") ? λ_success : λ_forced
+        λ = retreat_flagged ? λ_forced : λ_success
 
         loss_qty = compute_loss(stack.quantity, λ)
         retained_qty = stack.quantity - loss_qty
@@ -394,7 +429,9 @@ extraction_loss_settlement(carried_stacks, voyage_result):
 compute_loss(Q, λ):
     if Q <= 1:
         return 0
-    return min(Q - 1, max(1, ceil(Q × λ)))
+    if λ <= 0:
+        return 0
+    return min(Q - 1, max(0, ceil(Q × λ)))
 ```
 
 **变量表**：
@@ -402,26 +439,28 @@ compute_loss(Q, λ):
 | 变量 | 类型 | 值域 | 说明 |
 |------|------|------|------|
 | `carried_stacks` | list | 0-5 堆 | Pool 5 撤离时快照 |
-| `voyage_result` | enum | {SUCCESSFUL_EXTRACTION, FORCED_RETREAT} | 撤离方式 |
+| `retreat_flagged` | bool | {false, true} | 若在当前探索会话期间，任何战斗结果设置了 `retreat_flagged = true`，则为 true。由探索系统在收到 #12 的 `combat_result` 时存储为会话级布尔值。当 `retreat_flagged = true` 时使 λ_forced 生效；当为 false 时使用 λ_success。 |
 | `λ_success` | float | [0.0, 0.10] | 成功撤离损耗率，MVP 默认 0.08 |
 | `λ_forced` | float | [0.10, 0.50] | 被迫撤退损耗率，MVP 默认 0.25 |
-| `compute_loss(Q, λ)` | int | [0, Q-1] | 单堆损耗量，保证至少保留 1 |
+| `compute_loss(Q, λ)` | int | [0, Q-1] | 单堆损耗量。λ≤0 时返回 0（无损）；λ>0 时最小可能为 0，保证每堆至少保留 1 |
 | `stack.is_unique` | bool | {false, true} | Q=1 且 max_stack=1 |
 
 **Pillar 4 硬约束**：Unique 物品（Q=1, max_stack=1）永不损耗，直接全量转移。
 
-**输出范围**：`total_lost_qty` ∈ [0, total_carried_qty)，严格小于总携带量（每堆至少保留 1）。
+**输出范围**：`total_lost_qty` ∈ [0, total_carried_qty)。λ_success ≤ 0 时 total_lost_qty = 0。每堆至少保留 1（Q ≤ 1 时无损，λ ≤ 0 时无损）。
 
 **演算示例**（SUCCESSFUL_EXTRACTION，λ_success=0.08）：
 
 | 物品 | 数量 | Unique? | compute_loss | 保留 | 损耗 |
 |------|------|---------|-------------|------|------|
-| basic_supply | 20 | no | min(19, max(1, ceil(20×0.08))) = 2 | 18 | 2 |
+| basic_supply | 20 | no | min(19, max(0, ceil(20×0.08))) = 2 | 18 | 2 |
 | cloud_crystal | 1 | no | Q≤1 → 0 | 1 | 0 |
+| cloud_crystal ×3 | 3 | no | min(2, max(0, ceil(3×0.08))) = max(0, 1) = 1 | 2 | 1 |
 | intel.ancient-log | 1 | **yes** | 跳过 | 1 | 0 |
-| repair_kit | 12 | no | min(11, max(1, ceil(12×0.08))) = 1 | 11 | 1 |
+| repair_kit | 12 | no | min(11, max(0, ceil(12×0.08))) = 1 | 11 | 1 |
 
-- **结果**: transferred 18+1+1+11=31, lost 3, total_lost_qty=3
+- **结果**: transferred 18+1+2+1+11=33, lost 4, total_lost_qty=4
+- 注：λ_success=0.0 时，compute_loss 对所有 Q 返回 0（无损）
 
 ---
 
@@ -541,7 +580,8 @@ intel_yield(intel_point_id):
 
 **EC-11-04: Pool 5 已满（5/5），搜索结果包含物品**
 - 触发：Pool 5 全部占用，搜索返回非空结果
-- 处理：弹出交互界面显示搜索结果，提示"随身物品栏已满（5/5）。请选择：丢弃现有物品腾出空间，或放弃这些物品。"选项：(a) 丢弃现有物品（永久丢失），(b) 放弃新物品（永久丢失），(c) 如果新物品与某格同 resource_id 且可堆叠 → 合并选项。关闭弹窗不做选择 = 放弃新物品。
+- 处理：弹出交互界面显示搜索结果，提示"随身物品栏已满（5/5）。请选择：丢弃现有物品腾出空间，或放弃这些物品。"选项：(a) 丢弃现有物品（永久丢失），(b) 放弃新物品（永久丢失），(c) 如果新物品与某格同 resource_id 且可堆叠 → 合并选项。关闭弹窗不做选择 = 保留现有物品，放弃新物品（保守默认行为，避免误触丢弃）。
+- 注：取舍界面打开时探索暂停，避免玩家在决策时被威胁触发打断。交互界面应展示选择前后的背包状态对比（丢弃 X → 空出 1 格，可装入 Y）。
 - 玩家感知：是。核心取舍体验。
 - 依赖：#5
 
@@ -663,9 +703,9 @@ intel_yield(intel_point_id):
 
 | 系统 | 依赖内容 | 关键接口 | 状态 |
 |------|---------|---------|------|
-| #3 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | 移动能力、焦点检测、交互触发 | Required |
+| #4 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | 移动能力、焦点检测、交互触发 | Required |
 | #5 资源/货物与容量 | Pool 5（carried，5 格）读写、`extract_carried_to_storage()`、`extraction_loss_ratio`、max_stack 判定 | `add_loot()`, `extract_carried_to_storage()`, `discard()` | Required |
-| #7 飞艇模块与船体状态 | η_scout 侦察效率值、`can_depart()`、船体损伤写入 | η_scout, `can_depart()`, `apply_hull_damage()` | Required |
+| #8 飞艇模块与船体状态 | η_scout 侦察效率值、`can_depart()`、船体损伤写入 | η_scout, `can_depart()`, `apply_hull_damage()` | Required |
 | #10 航行与路线风险 | `EncounterContext` {route_id, destination_id, voyage_result, resolved_encounters[]} | `EncounterContext` 消费 | Required |
 
 ### 下游依赖（依赖本系统）
@@ -673,16 +713,16 @@ intel_yield(intel_point_id):
 | 系统 | 依赖内容 | 关键接口 | 状态 |
 |------|---------|---------|------|
 | #5 资源/货物与容量 | 探索拾取的资源/货物通过 Pool 5 进入容量系统 | `add_loot()` 调用 | Required |
-| #7 飞艇模块与船体状态 | 探索中的威胁接触造成船体损伤或模块受损标记（结算时写入） | `apply_hull_damage()`, `apply_module_damage()` | Required |
-| #9 玩家知识与情报 | 探索揭示的隐藏标签 → 写入情报系统，航线知识永久推进 | `reveal_tag()`, `intel_writes` | Required |
-| #12 战斗与威胁处理 | 守卫威胁触发时传递威胁上下文，接收战斗结果 | `threat_context → #12`, `combat_result ← #12` | Required |
+| #8 飞艇模块与船体状态 | 探索中的威胁接触造成船体损伤或模块受损标记（结算时写入） | `apply_hull_damage()`, `apply_module_damage()` | Required |
+| #6 玩家知识与情报 | 探索揭示的隐藏标签 → 写入情报系统，航线知识永久推进 | `reveal_tag()`, `intel_writes` | Required |
+| #12 战斗与威胁处理 | 守卫威胁触发时传递威胁上下文，接收战斗结果。`combat_result.retreat_flagged`（当为 true 时）被存储为探索会话级布尔值 `session.retreat_flagged`，并传递给 F-11-04。多次 true 结果不叠加（布尔值）。 | `threat_context → #12`, `combat_result ← #12` | Required |
 
 ### 双向依赖校验
 
 - **#5 ↔ #11**：#5 定义 Pool 5 和 `extract_carried_to_storage()`，#11 定义探索拾取和撤离结算消费这些接口。
 - **#7 ↔ #11**：#7 定义 η_scout 和船体损伤接口，#11 定义侦察预览消费 η_scout、探索威胁写入船体损伤。
 - **#10 → #11**：#10 定义 `EncounterContext` 在航程抵达时发出，#11 在 ARRIVING 阶段消费。#10 的 GDD 已列 #11 为下游。
-- **#11 → #12**：#12 定义威胁上下文和战斗结果接口，#11 定义守卫威胁触发时传递上下文。#12 的 GDD 需列 #11 为上游。
+- **#11 → #12**：#12 定义威胁上下文和战斗结果接口（`combat_result` 包含 `outcome, hull_damage, module_damage, resources_consumed, knockback, retreat_flagged`），#11 定义守卫威胁触发时传递上下文、接收组合结果、存储 `retreat_flagged` 为会话状态，并将击退应用于玩家位置。#12 的 GDD 已列 #11 为上游。✅ 已对齐。
 - **#11 → #9**：#9 定义情报揭示接口，#11 定义探索中的情报产出。#9 的 GDD 需列 #11 为上游。
 
 ### 间接依赖
@@ -768,7 +808,7 @@ intel_yield(intel_point_id):
 | # | 验收条件 | 验证方法 |
 |---|---------|---------|
 | AC-11-01 | 进入探索点时，ARRIVING 阶段展示抵达描述文本（安全抵达 vs 迫降），按任意键后进入 EXPLORING 阶段，玩家角色出现在入口区或坠机点。 | 准备 `EncounterContext`（voyage_result=ARRIVED 和 FORCED_LANDING 各测一次）。进入探索点，观察 ARRIVING 文本与入场位置是否匹配 C3 规则。按任意键，确认阶段切换为 EXPLORING。引用 C2、C3。 |
-| AC-11-02 | 在 EXPLORING 阶段靠近搜索点并触发交互，播放搜索动画后返回结果。若结果为"空"，search_consumed=false；若结果为非空，search_consumed=true，物品进入 Pool 5。 | 准备 unlooted 探索点。在 D_outer 区域连续搜索 2 点 → 观察 empty_chance=0.35 时至少 1 个可能为空，验证空结果不消耗搜索次数。在 A_core 区域搜索 → 确认非空产出（empty_chance=0.00），物品进入 Pool 5。引用 C5、F-11-01。 |
+| AC-11-02 | 在 EXPLORING 阶段靠近搜索点并触发交互，播放搜索动画后返回结果。若结果为"空"，search_consumed=false；若结果为非空，search_consumed=true，物品进入 Pool 5。 | 准备 unlooted 探索点。(a) 使用 `gm_set_search_config <sp_id> empty_chance=1.0` 将任意搜索点设为必空。搜索该点 → 确认返回空结果且 search_consumed=false，该搜索点可再次交互。(b) 将该点 empty_chance 恢复为 0.0 → 确认返回非空、search_consumed=true、物品进入 Pool 5。(c) 在 A_core 区域用默认配置搜索 → 确认非空产出（empty_chance=0.00）。引用 C5、F-11-01。 |
 | AC-11-03 | 与情报点交互，每次会话仅可交互一次，固定产出 1 个 Q=1 Unique 情报物品（intel.*），不参与 F-11-01 投骰。 | 探索点内有 2 个情报点。依次交互，确认各产出 1 个 Unique 情报物品（检查物品 Q=1, max_stack=1）。再次尝试交互同一情报点 → 应提示"此处已调查过"。引用 C5、F-11-06。 |
 | AC-11-04 | 玩家移动到撤离锚点，执行"撤离"操作 → 进入 EXTRACTING 阶段，开始 2.5 秒读条。读条完成 → 进入 DEPARTED 阶段。 | 玩家携带任意物品到达撤离锚点，触发撤离，计时 2.5 秒。读条期间不可移动，读条完成后确认阶段切换为 DEPARTED。引用 C8。 |
 | AC-11-05 | DEPARTED 结算：Pool 5 中物品按 F-11-04 撤离损耗结算。Unique 物品（Q=1, max_stack=1）永不损耗、全量转入飞艇仓库。非 Unique 物品按 λ_success=0.08（成功撤离）或 λ_forced=0.25（被迫撤退）计算损耗，每堆至少保留 1。 | 准备 Pool 5 含 Unique 物品 ×1、非 Unique 物品 ×2（如 basic_supply ×20、repair_kit ×12）。正常撤离后检查仓库：Unique 全量保留；basic_supply 保留 16-19；repair_kit 保留 10-12。对比 F-11-04 演算示例。引用 C9、F-11-04。 |
@@ -781,7 +821,7 @@ intel_yield(intel_point_id):
 |---|---------|---------|
 | AC-11-08 | ARRIVING → EXPLORING 转换：按任意键触发转换。ARRIVING 中不可移动或交互。 | 进入探索点，按住方向键 → 无响应。按任意键 → 进入 EXPLORING。引用 C2。 |
 | AC-11-09 | EXPLORING → EXTRACTING → DEPARTED 主流程：在 EXPLORING 中触发撤离锚点 → EXTRACTING，读条完成 → DEPARTED。中间无其他阶段跳转。 | 完整走一遍 ARRIVING→EXPLORING（搜索 1-2 点）→ 撤离锚点 → EXTRACTING（读条完成）→ DEPARTED。确认阶段转换顺序严格匹配 C2 状态图。引用 C2、C8。 |
-| AC-11-10 | EXTRACTING 被打断 → 回落 EXPLORING：读条期间若被威胁攻击或环境伤害击中，读条进度重置为 0，阶段回到 EXPLORING，进入 threatened 子状态。威胁处理完毕后玩家仍在撤离锚点旁，可再次尝试撤离。 | 在 EXTRACTING 读条期间，使用 GM 命令触发一次威胁攻击。观察读条中断、进度归零、阶段显示 EXPLORING → threatened。威胁结算后检查玩家位置仍在撤离锚点旁。引用 C2、C8、EC-11-11。 |
+| AC-11-10 | EXTRACTING 被打断 → 回落 EXPLORING：读条期间若被威胁攻击或环境伤害击中，读条进度重置为 0，阶段回到 EXPLORING，进入 threatened 子状态。威胁处理完毕后玩家仍在撤离锚点旁，可再次尝试撤离。 | 在 EXTRACTING 读条期间，使用 `gm_threat_trigger <threat_point_id>` 强制触发附近一个活跃威胁。观察读条中断、进度归零、阶段显示 EXPLORING → threatened。威胁结算后检查玩家位置仍在撤离锚点旁。引用 C2、C8、EC-11-11。 |
 | AC-11-11 | EXPLORING 内子状态正确切换：idle（默认）↔ moving（移动中）→ searching（搜索动画中）→ idle；threatened（威胁触发中）→ idle（处理完毕）。 | 执行移动 → 观察子状态为 moving。触发搜索 → 子状态为 searching，动画完成后恢复 idle。触发环境威胁 → 子状态为 threatened，损伤施加后恢复 idle。引用 C2。 |
 
 ### 搜索与容量交互
@@ -801,7 +841,7 @@ intel_yield(intel_point_id):
 | AC-11-17 | 0 < η_scout < 1.0 → PREVIEW_PRESENCE：威胁点显示红色感叹号标记，但不显示具体类型和名称。 | 配置 η_scout=0.6（Scout 受损+intact band）进入探索点。观察所有已知威胁点位置显示红色感叹号，但不显示"守卫""塌方"等具体文字。引用 C6、F-11-03。 |
 | AC-11-18 | η_scout = 1.0 → PREVIEW_FULL：威胁点显示类型和名称（如"守卫哨兵·东北角"），预览标记在进入时一次性快照加载。 | 配置 η_scout=1.0（Scout 正常+intact band）进入探索点。观察所有已知威胁点显示完整标签，包含类型文本和方位描述。探索过程中清除一个守卫威胁后，预览标记不动态消失（快照不变）。引用 C6、F-11-03。 |
 | AC-11-19 | 环境威胁靠近必触发：玩家进入环境威胁的 trigger_radius（2-3 单位）→ trigger_prob=1.0，必定触发。系统自行施加船体损伤或封锁路径。 | 配置 η_scout 为任意值，在已知环境威胁点处逐步靠近。测量触发距离 = 2-3 单位时必定触发，检查船体 HP 扣减或路径封锁。重复 10 次确认触发率 100%。引用 C7、F-11-02。 |
-| AC-11-20 | 守卫威胁靠近 70% 概率触发 + 不可用时 inert：进入守卫威胁 trigger_radius（4-6 单位）→ 70% 概率触发，触发后传递 threat_context 至 #12。若 #12 不可用则守卫 inert（不触发、不造成伤害），threat_point.is_active 保持 true。 | 在守卫威胁周围反复测试 50 次靠近，统计触发次数（期望 35±6）。然后断开 #12 接口 → 靠近守卫威胁应完全不触发。引用 C7、F-11-02、EC-11-12。 |
+| AC-11-20 | 守卫威胁靠近 70% 概率触发 + 不可用时 inert：进入守卫威胁 trigger_radius（4-6 单位）→ 70% 概率触发，触发后传递 threat_context 至 #12。若 #12 不可用则守卫 inert（不触发、不造成伤害），threat_point.is_active 保持 true。 | (a) 使用 `gm_set_trigger_prob <threat_id> 1.0` 将守卫威胁触发概率设为 1.0。靠近 → 确认每次必定触发，传递 threat_context 至 #12。(b) 设为 0.0 → 靠近确认从不触发（proximity 方式不触发，但 interaction 方式仍触发）。(c) 使用 `gm_disable_system 12` 断开 #12 接口，设 trigger_prob=1.0 → 靠近确认守卫变为 inert（不触发、不造成伤害），threat_point.is_active 保持 true。(d) 恢复默认 prob=0.70 后，50 次靠近统计为调优验证（非 CI 门禁，不阻塞合并）。引用 C7、F-11-02、EC-11-12。 |
 
 ### 状态变体
 
@@ -818,6 +858,23 @@ intel_yield(intel_point_id):
 | AC-11-24 | EXPLORING 中标签页关闭后恢复：持久化快照在每次搜索/威胁结算后写入。关闭浏览器标签页，重新打开并恢复会话 → 玩家处于 EXPLORING 阶段，已搜索的搜索点保持已搜索，Pool 5 恢复至快照状态。显示"你在探索中中断了"提示。 | 在 EXPLORING 阶段搜索 3 个搜索点、获取 1 个情报、Pool 5 有 2 格物品。关闭标签页，重新打开游戏 → 确认恢复后：(a) 已搜索的 3 点不可再次搜索，(b) Pool 5 恢复 2 格物品，(c) 提示信息出现。最近一次快照后的进度丢失。引用 EC-11-01。 |
 | AC-11-25 | EXTRACTING 中标签页关闭：撤离读条是原子操作。在读条期间关闭标签页，重新打开 → 玩家处于 EXPLORING 阶段，位于撤离锚点旁，需重新触发撤离。 | 在撤离读条第 1.5 秒时关闭标签页。重新打开 → 确认阶段为 EXPLORING（不是 DEPARTED），位置在撤离锚点旁，Pool 5 保持撤离前状态。引用 EC-11-02。 |
 | AC-11-26 | DEPARTED 结算写入事务性：结算在内存中组装完整结算包，一次性写入。若写入失败，自动重试 1s/2s/4s/8s（最多 4 次）。全部失败后显示"保存失败"提示和手动重试按钮，结算包保留在内存中。 | 模拟 localStorage 写入失败（填满配额），触发 DEPARTED 结算。观察自动重试日志（4 次间隔递增）。全部失败后确认 UI 显示错误提示 + "重试"按钮。清理配额后重试成功 → 结算包正确写入。引用 EC-11-03。 |
+
+## Test Tools Requirements
+
+以下 GM 命令由本 GDD 的验收条件引用，需在实现时提供。命令由 #3（本地存档与世界状态持久化）或专用调试模块注册。
+
+| GM 命令 | 参数 | 用途 | 被 AC 使用 |
+|---------|------|------|-----------|
+| `gm_set_search_config` | `<sp_id> empty_chance=<v>` | 覆盖搜索点的 empty_chance（确定性测试） | AC-11-02, AC-11-12 |
+| `gm_threat_trigger` | `<threat_point_id>` | 强制触发指定威胁点（如同玩家已进入其触发半径）。可在 EXTRACTING 阶段调用 | AC-11-10 |
+| `gm_set_trigger_prob` | `<threat_id> <value>` | 覆盖威胁触发概率（0.0–1.0） | AC-11-20 |
+| `gm_disable_system` | `<system_id>` | 断开指定系统的接口，模拟系统不可用 | AC-11-20 |
+| `gm_show_threat_hitboxes` | — | 在调试模式下可视化所有威胁的触发半径、ID、类型 | AC-11-16–19 |
+| `gm_show_player_position` | — | HUD 显示玩家当前坐标（用于距离验证） | AC-11-19 |
+| `gm_show_substate` | — | HUD 显示当前探索状态机子状态 | AC-11-11 |
+| `gm_dump_search_config` | — | 打印当前探索点所有搜索点的配置快照（含修饰符） | AC-11-22 |
+| `gm_fill_localstorage` | — | 将浏览器 localStorage 填充至配额限制（模拟写入失败） | AC-11-26 |
+| `gm_dump_exploration_state` | — | 打印持久化的探索点状态（当前变体、各搜索点枯竭状态、威胁活跃状态） | AC-11-21–23 |
 
 ## Open Questions
 
