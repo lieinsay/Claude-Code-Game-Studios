@@ -80,7 +80,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | In Review (Round 2 Revision Applied) | `design/gdd/airship-modules-hull-state.md` | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
 | 9 | 航图与航线规划 | Gameplay | MVP | Approved | `design/gdd/chart-route-planning.md` | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报; 飞艇家园 Hub |
 | 10 | 航行与路线风险 | Gameplay | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
-| 11 | 探索 / 搜撤场景 | Gameplay | MVP | Not Started | — | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互 |
+| 11 | 探索 / 搜撤场景 | Gameplay | MVP | In Review | `design/gdd/exploration-scavenge-scenario.md` | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Not Started | — | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Not Started | — | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
@@ -356,10 +356,10 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 9 |
+| Design docs started | 10 |
 | Design docs reviewed | 7 |
 | Design docs approved | 7 |
-| MVP systems designed | 9 / 16 |
+| MVP systems designed | 10 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---

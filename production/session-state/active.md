@@ -2,22 +2,17 @@
 
 <!-- STATUS -->
 Epic: Systems Design
-Feature: 航图与航线规划
-Task: Complete — GDD Approved + Design Review Passed
+Feature: 探索与搜撤场景
+Task: Complete — All 11 sections written
 <!-- /STATUS -->
 
-- Current: System #9 航图与航线规划 — Design + Review Complete
-- File: `design/gdd/chart-route-planning.md`
-- Status: **Approved** (CD-GDD-ALIGN: PASS WITH NOTES; design-review: 1 blocker resolved)
-- Review Log: `design/gdd/reviews/chart-route-planning-review-log.md`
-- Sections: 11/11 + 22 Open Questions
-- Systems Index: 9/16 MVP designed
+- Current: System #11 探索/搜撤场景 — **Complete**
+- File: `design/gdd/exploration-scavenge-scenario.md`
+- Status: **Ready for Review** (Sections A-H + Visual/Audio + UI + Open Questions)
+- Sections: 8/8 required + 3/3 optional = 11 total
 
-- **Design review fixes applied**:
-  - CB-4: Rule #16 event ordering fixed (validate snapshot before emitting route_committed)
-  - R2: RETRY cooldown added to state machine
-  - R3: Missing transitions (BROWSING+FAIL→ERROR, BROWSING+RETRY→LOADING) added
-  - R6: Formula 4 strengthened (null guard, NaN current_time, epoch timestamp)
-  - QA findings recorded as OQ-18 ~ OQ-22
+- **Previous**: System #10 航行与路线风险 — Approved
+- **Next system in queue**: #12 战斗与威胁处理
+- **Systems Index**: 10/16 MVP designed
 
-- **Next system in queue**: #10 航行与路线风险 (Voyage & Route Risk)
+- **Phase 5 done**: Registry updated (1 entity + 6 formulas + 4 constants), systems index updated

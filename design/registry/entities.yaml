@@ -89,6 +89,22 @@ entities:
     added: 2026-05-02
     revised: ""
 
+  - name: exploration_point.cloudwatch-ruins
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    kind: exploration_point
+    template_name: 云观站废墟
+    zones: [A_core, B_inner, C_mid, D_outer]
+    search_points: 6
+    intel_points: 2
+    threat_points: 2+
+    extraction_anchor: 1
+    state_variants: [unlooted, looted, danger-changed]
+    added: 2026-05-02
+    revised: ""
+
 # Example (remove when first real entry is added):
 #
 # entities:
@@ -255,6 +271,93 @@ formulas:
     added: 2026-05-02
     revised: ""
 
+  - name: search_yield
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - sp_id
+      - zone
+      - state
+      - empty_chance
+      - quality_weights
+      - loot_pool
+      - draw_count
+    output_range: "[0, 5] items"
+    expression: "Three-step: empty check → tier roll (weighted random) → draw without replacement from loot_pool[sp_id][tier]"
+    added: 2026-05-02
+    revised: ""
+
+  - name: threat_trigger
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - threat_point
+      - trigger_type
+      - player_pos
+      - trigger_prob
+      - trigger_radius
+    output_range: "[false, true]"
+    expression: "interaction → always trigger; proximity → distance check + category probability (environmental=1.0, guard=0.70)"
+    added: 2026-05-02
+    revised: ""
+
+  - name: scout_preview_level
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - η_scout
+    output_range: "[PREVIEW_NONE, PREVIEW_PRESENCE, PREVIEW_FULL]"
+    expression: "η_scout <= 0 → NONE; η_scout >= 1.0 → FULL; else → PRESENCE"
+    added: 2026-05-02
+    revised: ""
+
+  - name: extraction_loss_settlement
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - carried_stacks
+      - voyage_result
+      - λ_success
+      - λ_forced
+    output_range: "[0, total_carried_qty)"
+    expression: "Unique items (Q=1) skip loss; others: loss_qty = min(Q-1, max(1, ceil(Q × λ)))"
+    added: 2026-05-02
+    revised: ""
+
+  - name: exploration_state_variant_transition
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - current_state
+      - all_searched
+      - env_threat_active
+    output_range: "[unlooted, looted, danger-changed]"
+    expression: "Piecewise: env_threat_active → danger-changed (priority); all_searched → looted; else unlooted (or unchanged)"
+    added: 2026-05-02
+    revised: ""
+
+  - name: intel_yield
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    variables:
+      - intel_point_id
+    output_range: "1 Unique intel item"
+    expression: "Fixed yield: 1 intel item (Q=1, max_stack=1) per intel point per session"
+    added: 2026-05-02
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -327,6 +430,46 @@ constants:
     unit: 容积
     added: 2026-04-30
     revised: 2026-04-30  # source corrected to resources-goods-capacity (capacity rule owner)
+
+  - name: extraction_loss_success_ratio
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    value: 0.08
+    unit: 比例
+    added: 2026-05-02
+    revised: ""
+
+  - name: extraction_loss_forced_ratio
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    value: 0.25
+    unit: 比例
+    added: 2026-05-02
+    revised: ""
+
+  - name: extraction_channel_duration
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    value: 2.5
+    unit: 秒
+    added: 2026-05-02
+    revised: ""
+
+  - name: trigger_prob_guard
+    status: active
+    source: design/gdd/exploration-scavenge-scenario.md
+    referenced_by:
+      - design/gdd/exploration-scavenge-scenario.md
+    value: 0.70
+    unit: 概率
+    added: 2026-05-02
+    revised: ""
 
 # Example:
 #
