@@ -208,6 +208,7 @@ items:
       - design/gdd/world-repair-unlock.md
     category: supply
     supply_class: repair
+    material_tags: [repair-material]
     stackable: true
     base_price: null
     notes: "Not purchasable at market; found only in exploration. Emergency consumption for threat suppression (#12), module repair and installation (#8), hull repair (#8), and lighthouse repair (#13). Starting quantity: 4."
