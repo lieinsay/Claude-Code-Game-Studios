@@ -2,35 +2,33 @@
 
 <!-- STATUS -->
 Epic: Systems Design
-Feature: Design Reviews (lean mode)
-Task: Reviews complete for #7 and #14; user opening new session for re-reviews
+Feature: Cross-GDD Holism Review (Phase 2+3 Fixes Applied)
+Task: All 5 BLOCKING/CRITICAL issues resolved — awaiting user review
 <!-- /STATUS -->
 
-## Today's Reviews (2026-05-02)
+## Current: /review-all-gdds Critical Fixes Complete
 
-### #14 空港/村镇状态与集市交易 — Revision 2 Applied
-- File: `design/gdd/port-village-market.md`
-- Verdict: NEEDS REVISION → 2 blockers fixed (cross-reference #8→#10/#7, validate_purchase 2-param alignment)
-- 3 recommended items logged
-- Review log appended
+- **Phase 2 Report**: `production/session-state/gdd-cross-review-2026-05-03.md`
+- **Phase 3 Report**: `production/session-state/phase3-game-design-holism-review.md`
+- **Status**: All 5 issues fixed across 3 GDDs + entities.yaml
 
-### #7 飞艇家园 Hub — APPROVED
-- File: `design/gdd/airship-hub.md`
-- Verdict: APPROVED (confirmed CD's 2026-05-01 approval)
-- 0 blockers, 3 recommendations (slot state ownership direction, unchecked state in interaction table, uninformed_departure_penalty forward ref)
-- System index updated, GDD header updated, review log appended
+### Resolution Summary
 
-## Current Pipeline State (from systems-index)
+| ID | Issue | Severity | Status | Fix |
+|----|-------|----------|--------|-----|
+| B1 | Cross-band warning threshold stale | BLOCKING | ✅ FIXED | Recalculated 37→33 (after C1 cascade) |
+| B2 | Currency acquisition unassigned | BLOCKING | ✅ Already resolved (entities.yaml + #14 deps) |
+| B3 | #6 stale references to #15 | BLOCKING | ✅ Already resolved (#6 already updated) |
+| C1 | Tank combat trap option | CRITICAL | ✅ FIXED | Damage 8-12, module 30%, threshold 33 |
+| C2 | repair_kit supply gap (5→4) | CRITICAL | ✅ FIXED | Lighthouse now needs 4 repair_kit (matches starting quantity) |
 
-| Status | Systems |
-|--------|---------|
-| Approved (8) | #1–#7, #9, #13, #15 |
-| In Review (4) | #8 modules (R2 revision applied), #11 exploration, #12 combat (revision applied), #14 market (R2 applied) |
-| Not Started (4) | #10 navigation-risk, #16 UI/HUD, #17 feedback-audio, #18 onboarding |
+### Files Modified
 
-## Next for New Session
-- Re-reviews pending: #8, #11, #12, #14
-- `/design-review design/gdd/airship-modules-hull-state.md --depth lean` (highest priority — R2 applied, longest in queue)
-- `/design-review design/gdd/exploration-scavenge-scenario.md --depth lean` (first review)
-- `/design-review design/gdd/combat-threat-handling.md --depth lean` (revision applied today)
-- `/review-all-gdds` recommended when all MVP GDDs complete (8/16 approved, 4 in review)
+- `design/gdd/combat-threat-handling.md` — C1 Tank rebalance (~20 edits)
+- `design/gdd/world-repair-unlock.md` — C2 repair_kit 5→4 (7 edits)
+- `design/registry/entities.yaml` — Synced constants + formula description
+
+### Next Steps
+
+- User reviews the changes (git diff)
+- If approved, proceed to Phase 4 (cross-system scenario walkthrough) or Phase 5 (final verdict)

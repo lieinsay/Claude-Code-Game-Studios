@@ -84,8 +84,8 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Approved | `design/gdd/combat-threat-handling.md` | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Approved | `design/gdd/port-village-market.md` | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
-| 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | Approved | `design/gdd/partner-relationships.md` | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报; 内容数据与状态注册表; 资源、货物与容量 |
-| 16 | UI / HUD / 航图界面 | UI | MVP | Not Started | — | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
+| 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | Approved | `design/gdd/partner-relationships.md` | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报; 内容数据与状态注册表; 资源、货物与容量; 本地存档与世界状态持久化 |
+| 16 | UI / HUD / 航图界面 | UI | MVP | Designed | `design/gdd/ui-hud-chart-interface.md` | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
 | 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Not Started | — | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
 | 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Not Started | — | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
 
@@ -187,7 +187,11 @@ GDD: `design/gdd/partner-relationships.md` — 8 required sections + self-check 
 
 ### 16. UI / HUD / 航图界面
 
-HUD, route map, preparation screens, cargo/extraction UI, market purchasing UI, repair feedback UI, and core state display.
+MVP 呈现层外壳，将 15 个领域系统的数据与状态转换为统一的画面体验。拥有 12 个屏幕（S1-S12）、模态栈（单模态 + 战斗覆盖）、输入路由（4 层优先级）、HUD 更新策略（信号驱动 + 脏标记批量更新）、12 个动画时序合约。视觉语言使用航路修复主义（UI 像可被阅读的航海图），统一 UI 语义色板（8 色）覆盖 #8/#12/#13 的色值冲突，统一玩家面向术语（船体完整性、随身物品栏、货舱、云海币）。完整屏幕流状态机覆盖 Hub→航图→探索→返回 闭环。WCAG AA 对比度合规，Web 后台冻结恢复兼容。
+
+Scope boundary: #16 拥有布局、模态管理、屏幕流、输入路由、动画时序和无障碍。#16 不发明新机制——领域系统拥有数据和状态机。
+
+GDD: `design/gdd/ui-hud-chart-interface.md` — 12 sections (8 required + Visual/Audio + UI Requirements + Open Questions), CD-GDD-ALIGN: APPROVED 2026-05-03 (3 non-blocking suggestions applied). 20 ACs, 13 edge cases, 18 tuning knobs, 6 open questions.
 
 ### 17. 反馈、特效与音频语义
 
@@ -362,10 +366,10 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 15 |
-| Design docs reviewed | 15 |
-| Design docs approved | 15 |
-| MVP systems designed | 15 / 16 |
+| Design docs started | 16 |
+| Design docs reviewed | 16 |
+| Design docs approved | 16 |
+| MVP systems designed | 16 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
 ---
@@ -376,7 +380,7 @@ The MVP version of each system must stay within these bounds:
 - [x] Design MVP-tier systems #1-#15.
 - [x] Run `/design-review` on completed GDDs (#1-#15 reviewed, all approved).
 - [x] Complete Revision 1 re-review for #11 探索/搜撤场景.
-- [ ] Design #16 UI/HUD/航图界面 (last MVP system).
+- [x] Design #16 UI/HUD/航图界面 (last MVP system) — COMPLETE 2026-05-03, CD APPROVED.
 - [ ] Run `/review-all-gdds` for holistic cross-GDD consistency.
 - [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
 - [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.

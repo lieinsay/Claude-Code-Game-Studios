@@ -121,7 +121,9 @@
     - 所有规律类知识：`undiscovered`。
     - 所有能力条目：`locked`。
 
-**Part 8: 知识伙伴身份锚点**
+**Part 8: 知识伙伴身份锚点** ⚠️ Post-MVP
+
+> **Scope note**: #15 R15.5 规定 MVP 唯一伙伴实体为 `partner.sky-cat`。以下三个伙伴身份锚点（老水手、灯塔看守后裔、制图师）及其关联的观测事件定义均为 Post-MVP 内容。MVP 中不实现这些伙伴，其观测事件（`partner_comment` 类型）在 MVP 中不可触发。
 
 本系统涉及的三个伙伴各有一个核心身份节拍——他们不是解锁条件的布尔变量，而是有记忆、有动机、与这个世界破碎历史有关系的人。完整的角色弧线和关系记忆由 System #15（伙伴功能与关系）拥有，但本系统在机械层面依赖以下身份锚点：
 
@@ -826,11 +828,11 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 - **合约**：修复系统拥有解锁的叙事语义；本系统只检查能力解锁条件是否满足。修复事件本身不直接解锁能力——它只是一条路径中的一个条件。
 - **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中双向标注。
 
-#### #10 `伙伴功能与关系` — 尚未设计
+#### #15 `伙伴功能与关系` — 已批准 GDD (2026-05-02)
 - **下游需要**：`query_pattern_state()`、`query_location_discovery()`——伙伴可能根据玩家已知信息改变对话或行为。
-- **上游提供**：`reveal_rumor(location_id, source_tag, rumor_hazards, confidence)`——伙伴侦察返回情报。
-- **合约**：伙伴系统拥有关系状态和侦察规则；本系统提供知识写入接口（`reveal_rumor`）和查询接口。
-- **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中双向标注。
+- **上游提供**：`reveal_rumor(location_id, source_tag, rumor_hazards, confidence)`——伙伴侦察返回情报（MVP 中 confidence 上限 66）；`report_observation_event(pattern_id, event_type)`——伙伴的 `partner_comment` 观测事件；`on_partner_joined(partner_id)`——伙伴加入队伍时通知本系统重评估能力解锁条件。
+- **合约**：伙伴系统拥有关系状态和侦察规则；本系统提供知识写入接口（`reveal_rumor`）和查询接口。MVP 仅 `partner.sky-cat` 一个伙伴实体（#15 R15.5），#6 Part 8 的三个伙伴身份锚点为 Post-MVP 内容。
+- **对端 GDD 中的反向引用**：#15 GDD 已双向标注本系统为下游（Interactions 表）。#15 的 Cross-GDD Revision Flags（Flags 1+2）已识别本节的过期引用。
 
 #### UI / HUD / 航图界面 — 尚未设计
 - **下游需要**：`query_pattern_state()`、`query_ability_state()`、`query_route_knowledge()`、`get_pattern_log()`（图鉴日志列表）、`get_ability_list()`（所有能力及其解锁状态）。
@@ -855,6 +857,7 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 |------|--------|------|---------|
 | `consume_intel(intel_id)` | 资源系统 | intel ID | 玩家消耗情报物品 |
 | `reveal_rumor(location_id, source_tag, hazard_tags, confidence)` | 伙伴系统 | 地点 ID + 来源 + 风险标签 + 置信度 | 伙伴侦察返回 |
+| `on_partner_joined(partner_id)` | 伙伴系统 | 伙伴 ID | 伙伴加入队伍时通知本系统重评估能力解锁条件 |
 | `player_arrived_at(location_id)` | 移动系统 | 地点 ID | 玩家到达某地点 |
 | `report_observation_event(pattern_id, event_id)` | 探索/航行/伙伴/交互系统 | 规律 ID + 事件 ID | gameplay 事件触发 |
 | `report_pattern_usage_success(pattern_id)` | 探索/航行系统 | 规律 ID | 玩家成功应用规律 |

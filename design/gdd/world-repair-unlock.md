@@ -1,8 +1,8 @@
 # 世界修复与解锁
 
-> **Status**: Re-Revised (re-review feedback applied — 4 BLOCKING + 2 RECOMMENDED fixed)
+> **Status**: Re-Revised (re-review feedback applied — 4 BLOCKING + 2 RECOMMENDED fixed; 2026-05-04 C2 fix: repair_kit requirement 5→4 — closes supply gap with starting quantity)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-02
+> **Last Updated**: 2026-05-04
 > **Implements Pillar**: 世界会回应照料; 规划先于冒险
 
 ## Overview
@@ -55,7 +55,7 @@ MVP 修复节点 `repair_node.starlight_dock`（与注册表 #1 `repair_node.sta
 | `node_id` | `repair_node.starlight_dock` | 唯一标识，与注册表 #1 对齐 |
 | `name` | 天礁灯塔 | 显示名称 |
 | `linked_location_id` | `location.glass-harbor-outskirts` | 郊外探索点，需从琉璃港短途飞行到达 |
-| `required_resources` | `[{resource.repair_kit, 5}, {resource.basic_supply, 4}]` | 修复所需材料（repair_kit 缺口 1，降低首轮闭环阻塞风险） |
+| `required_resources` | `[{resource.repair_kit, 4}, {resource.basic_supply, 4}]` | 修复所需材料（repair_kit 缺口 0，起始数量正好满足；若玩家将 repair_kit 用于战斗/维修则需从探索中补充） |
 | `unlocked_routes` | `[route.sky-reef-arc-01]` | 修复后天礁弧航线从不可通行变为可通行 |
 | `route_enhancement` | `hazard_reduction: 0.3` (比例) | 修复后航线 hazard 额外降低 30%（相对值） |
 | `pre_repair_route_state` | `traversable: false` | 修复前该航线不可通行 |
@@ -243,7 +243,7 @@ progress = Σ(min(deposited[rid] / required[rid], 1.0)) / max(|required_resource
 
 | # | 参数名 | 类型 | 安全范围 | MVP 值 | 说明 |
 |---|--------|------|---------|--------|------|
-| 1 | `repair_lighthouse_material_costs` | `Dict[id, qty]` | repair_kit: 2–8, basic_supply: 3–15 | `{repair_kit: 5, basic_supply: 4}` | 灯塔修复材料清单。repair_kit 起始 4 需 5（缺口 1），降低首轮闭环阻塞风险 |
+| 1 | `repair_lighthouse_material_costs` | `Dict[id, qty]` | repair_kit: 2–8, basic_supply: 3–15 | `{repair_kit: 4, basic_supply: 4}` | 灯塔修复材料清单。repair_kit 起始 4 正好满足（若玩家将 repair_kit 用于战斗/维修则需从探索中补充） |
 | 2 | `route_hazard_reduction` | `float`（比例） | 0.1–0.5 | `0.3` | 修复后航线 hazard 降低比例（相对值），配合航线从不可通行变为可通行 |
 | 3 | `repair_ceremony_duration_sec` | `float` | 3.0–8.0 | `5.0` | 最后一批材料提交后灯塔点亮仪式时长 |
 | 4 | `repair_cost_to_loot_ratio` | `float` | 1.5–3.0 | `2.0` | 修复总成本相对单次探索预期产出的比例，驱动探索→修复循环节奏 |
@@ -282,8 +282,8 @@ Creative Director 约束：MVP 必须承担"可见恢复"反馈的归属权（#1
 |------|------|---------|
 | 修复交互面板 | 节点名称、当前状态、材料清单（名称 + 图标 + 已提交/需求量 + 满足状态颜色——#FF3333 不足 / #33FF33 满足，禁用纯颜色区分需加图标辅助）、每种材料旁数量选择器（默认全部携带量）、解锁预览（情报不足时显示"未知效果"）、"确认提交"按钮（材料不足时灰态，`interactable = false`）、"取消"按钮 | 玩家在修复节点位置与锚点交互 |
 | 提交确认弹窗 | "确认提交以下材料？提交后材料不可取回。" + 提交材料明细 + "确认"/"取消" | 玩家点击"确认提交" |
-| 进度提示 | 顶部 toast："已提交 repair_kit ×3（还需 repair_kit ×2, basic_supply ×4）"，2-3 秒后消失 | 提交成功后 |
-| 航图进度标记 | 航图上灯塔节点旁显示修复进度（如"3/5 repair_kit"）作为持久化参考 | 首次提交后持续显示，修复完成后切换为"已修复" |
+| 进度提示 | 顶部 toast："已提交 repair_kit ×3（还需 repair_kit ×1, basic_supply ×4）"，2-3 秒后消失 | 提交成功后 |
+| 航图进度标记 | 航图上灯塔节点旁显示修复进度（如"2/4 repair_kit"）作为持久化参考 | 首次提交后持续显示，修复完成后切换为"已修复" |
 | 未揭示到访提示 | 破损灯塔显示微弱交互光标，状态描述："一座损坏的灯塔——你不知道它的来历，但看起来可以修复。" | 玩家首次到达 `unrevealed` 节点 |
 | 修复完成提示 | 全屏中央：灯塔名称 + "已修复" + 解锁内容摘要，3 秒后自动消失或点击关闭；解锁摘要事后可在航图/日志中回顾 | 最后一批材料提交后 |
 
@@ -298,8 +298,8 @@ Creative Director 约束：MVP 必须承担"可见恢复"反馈的归属权（#1
 | AC-3a | 材料不足时 `can_deposit` 返回 false，材料清单中不足行数量文字渲染为 #FF3333，已满足行渲染为 #33FF33，提交按钮 `interactable = false` | 携带不足材料前往 → 确认颜色状态和按钮灰态 |
 | AC-3b | 玩家到达修复节点但背包中无任何匹配 `required_resources` 的材料：修复面板仍可打开（可查看需求清单），所有材料行渲染为不足状态，提交按钮灰态 | 清空背包 → 前往灯塔 → 交互 → 确认面板可打开 + 全部行红色 + 按钮灰态 |
 | AC-3c | 数量选择器不允许输入 0 或负数 | 单元测试：尝试 offer `{repair_kit: 0}` → 确认 `empty_offer` violation |
-| AC-4a | 分批提交：提交 repair_kit×3 → `deposited` 计数器更新为 3，`repair_progress < 1.0`，灯塔保持 known 视觉但开始微弱闪烁；再次提交 repair_kit×2 + basic_supply×4 → 全部满足 → 灯塔切入 repaired 视觉 | 分两次提交 → 验证中间状态渐进反馈和最终状态 |
-| AC-4b | 单次提交（全部材料一次提交）：玩家携带 ≥5 repair_kit 且 ≥4 basic_supply → 打开面板 → 确认提交全部所需数量 → `deposited` 计数器直接满足需求，`repair_completion` 返回 true，仪式触发 | 携带足量材料一次提交 → 确认修复完成 + 视觉/下游通知全部触发 |
+| AC-4a | 分批提交：提交 repair_kit×3 → `deposited` 计数器更新为 3，`repair_progress < 1.0`，灯塔保持 known 视觉但开始微弱闪烁；再次提交 repair_kit×1 + basic_supply×4 → 全部满足 → 灯塔切入 repaired 视觉 | 分两次提交 → 验证中间状态渐进反馈和最终状态 |
+| AC-4b | 单次提交（全部材料一次提交）：玩家携带 ≥4 repair_kit 且 ≥4 basic_supply → 打开面板 → 确认提交全部所需数量 → `deposited` 计数器直接满足需求，`repair_completion` 返回 true，仪式触发 | 携带足量材料一次提交 → 确认修复完成 + 视觉/下游通知全部触发 |
 
 ### 状态机
 
@@ -307,7 +307,7 @@ Creative Director 约束：MVP 必须承担"可见恢复"反馈的归属权（#1
 |---|---------|---------|
 | AC-5 | 修复完成后再次前往灯塔，无修复交互入口，视觉保持 repaired 状态 | 修复后重访 → 确认不可再次修复 |
 | AC-6 | 对已修复节点直接调用 API 返回 `ERR_ALREADY_REPAIRED` | 单元测试覆盖 |
-| AC-7 | 提交超出需求数量的材料被 `deposit_validation` 拒绝 | 单元测试：携带 repair_kit×10（只需 5）→ 确认 excess_quantity violation |
+| AC-7 | 提交超出需求数量的材料被 `deposit_validation` 拒绝 | 单元测试：携带 repair_kit×10（只需 4）→ 确认 excess_quantity violation |
 | AC-8 | 提交无效材料类型被 `deposit_validation` 拒绝 | 单元测试：提交 `{invalid_material: 1}` → 确认 invalid_material violation |
 
 ### 下游通知

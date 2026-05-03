@@ -177,6 +177,7 @@ MVP 中不存在状态退化——修复是永久的。状态只向前推进。`
 | **#4 移动与交互** | ↓ 上游（依赖）| #14 通过 #4 的焦点系统注册每个已开启摊位：`register_focus_target(stall_id, world_pos, label)`。#4 分发 `use_requested(target_id)` → #14 打开摊位界面 | #4 拥有焦点/交互分发；#14 注册目标 |
 | **#3 持久化** | ↓ 上游（依赖）| #14 定义快照 schema：`{settlement_id, completed_node_ids: [node_id], stall_states: {stall_id: state}, npc_states: {npc_id: state}}`。#3 在存档/读档时保存/加载 | #3 拥有 I/O；#14 拥有 schema。`completed_node_ids` 为 F.2 公式在跨会话间追踪已完成的修复节点 |
 | **#10 航行与路线风险** | ↑ 下游（被依赖）| 摊位购买的补给品作为航线消耗（#10 通过 #5 的 `consume_for_route()` 从 Pool 2 `in_storage` 消耗补给品）。情报商品解锁航线知识条目 | #10 通过 #5 引用商品；#14 定义哪些商品存在 |
+| **#11 探索/搜撤场景** | ↓ 上游（依赖）| 探索中搜索点产出 `currency.cloud-coins`（云海币），通过 #5 的 `add_loot()` 进入玩家货币余额。这是 MVP 中货币的唯一获取途径。探索产出速率见 Tuning Knobs G.5 | #11 拥有搜刮产出规则和 loot_pool 配置；#14 消费货币（购买扣除） |
 | **叙事内容** | → 引用 | #14 读取 `npc_id` → 从 `design/narrative/glass-harbor.md` 获取名字、对话。`local_identity_tag` → 从同一文件获取风味文本 | 叙事文件拥有内容；#14 读取并显示 |
 
 ## Formulas
@@ -355,7 +356,7 @@ NPC 各自从 `absent` 转换为 `idle`。
 | **#13 世界修复与解锁** | `repair_completed(node_id)` 信号；#13 注册表中修复节点的 `linked_location_id` 和类型分类查询 | 摊位永远不升级；集市停留在初始状态 |
 | **#4 移动与交互** | `register_focus_target(target_id, world_pos, label)`；`use_requested(target_id)` 分发 | 玩家无法与摊位交互；集市不可达 |
 | **#3 持久化** | `progress.settlement-market` 快照的保存与加载 | 摊位状态在会话间丢失；每次进入游戏重置 |
-| **货币获取系统（待分配）** | 玩家获取货币的操作（探索奖励、物品出售或其他来源）| 无货币来源则购买功能无法验证；价格无锚点 |
+| **#11 探索/搜撤场景** | 货币来源：探索中搜索点产出 `currency.cloud-coins`（云海币），通过 #5 的 `add_loot()` 进入玩家货币余额（#5 追踪为 `player_currency`）。探索搜刮是 MVP 中货币的唯一获取途径。| 无货币来源则购买功能无法验证；价格以探索产出速率为锚点 |
 
 ### 下游依赖（依赖本系统）
 
@@ -412,6 +413,16 @@ NPC 各自从 `absent` 转换为 `idle`。
 | `local_identity_tag` | 每个商品的本地身份描述 | 任意非空字符串 | 玩家理解"这个地方为什么卖这个" |
 
 这些参数的值存放于 `design/narrative/`，本 GDD 定义结构和安全范围。
+
+### G.5 货币获取与起始资金
+
+| 参数 | MVP 值 | 安全范围 | 影响 |
+|---|---|---|---|
+| `currency_per_search_point_avg` | 25-40 云海币/搜索点 | 20-60 | 单个搜索点的平均货币产出。过低 → 初期无法购买基础物资包（50）；过高 → 购买无取舍 |
+| `currency_loot_tier` | Poor | Poor/Common | 货币在搜索产出品质档位中的位置。MVP 设为 Poor 档确保货币频繁小量产出，而非稀有大量 |
+| `starting_currency` | 50 | 0-100 | 新游戏起始货币。50 = 1 个基础物资包，确保玩家首次出航前可购买补给 |
+
+**联动约束**：单次探索（6 个搜索点）的期望货币产出应覆盖 1-2 个基础物资包（50-100）+ 留有余量供玩家在补给与情报之间取舍。具体数值需与 #11 的 `loot_pool` 配置协同调校。
 
 ## Visual/Audio Requirements
 

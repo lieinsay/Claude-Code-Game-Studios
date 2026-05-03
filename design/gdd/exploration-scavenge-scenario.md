@@ -197,9 +197,10 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 | 系统 | 数据流入 | 数据流出 |
 |------|---------|---------|
 | #12 战斗与威胁处理 | 威胁上下文 {threat_type, threat_id, position, encounter_params} | 战斗结果 {outcome, hull_damage, module_damage, resources_consumed, knockback, retreat_flagged} |
-| #5 资源/货物与容量 | 探索拾取的资源/货物 | — |
+| #5 资源/货物与容量 | 探索拾取的资源/货物（含 `currency.cloud-coins` 云海币，通过 `add_loot()` 进入玩家货币余额） | — |
 | #8 飞艇模块与船体状态 | 探索造成的船体损伤、模块受损标记 | — |
 | #6 玩家知识与情报 | 探索揭示的情报 | — |
+| #14 空港/村镇状态与集市交易 | 探索产出的货币（`currency.cloud-coins`）为集市购买提供资金来源——MVP 中货币的唯一获取途径 | — |
 
 ## Formulas
 

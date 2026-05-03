@@ -1,8 +1,8 @@
 # 战斗与威胁处理
 
-> **Status**: In Review (Revision 2 applied 2026-05-03 — 6 blockers addressed: repair_kit canonical ID registered, panel dismiss capability, AC-12-04b CI math corrected, EC-12-02 cross-band threshold fixed (30→42), Tank warning threshold raised (5→18), AC-12-10 label corrected [SEEDED]→[DETERMINISTIC]; keyboard mapping defined [E][T][R]; Threat Active indicator added)
+> **Status**: In Review (Revision 2 applied 2026-05-03; 2026-05-04 C1 fix: Tank rebalanced — damage 12-18→8-12, module chance 50%→30%, cross-band threshold recalculated 37→33, hull_warning_threshold 18→12)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-03
+> **Last Updated**: 2026-05-04
 > **Implements Pillar**: 未知带来温和压力
 
 ## Overview
@@ -31,7 +31,7 @@
 
 ### 每一次接触都是一堂课（隐含层）
 
-威胁接触后，无论你选择了什么，你知道了更多。你知道 B 区有这个类型的哨兵。你知道它的触发半径。你知道一次撞击大概打掉 12-15 点船体。下一次来，你的侦察模块可能已经升级了，你的船体可能已经修好了，你可能选择从西侧绕行——或者你这次就是来清掉它的。
+威胁接触后，无论你选择了什么，你知道了更多。你知道 B 区有这个类型的哨兵。你知道它的触发半径。你知道一次撞击大概打掉 8-12 点船体。下一次来，你的侦察模块可能已经升级了，你的船体可能已经修好了，你可能选择从西侧绕行——或者你这次就是来清掉它的。
 
 这不是"刷怪升级"——这是"我上次来过，我这次更懂了"。Pillar 4 的"失败应以教育性损失为主"在这里是最直接的兑现：即使你被迫撤退、损失了部分货物，你带回了一个关键情报——这个地方有什么、怎么应对、下次带什么。
 
@@ -63,7 +63,7 @@
 | # | 选项 | 可用条件 | 资源消耗 | 船体伤害 | 模块风险 | 威胁结果 | 附加效果 |
 |---|------|---------|---------|---------|---------|---------|---------|
 | A | **应急处理** | Pool 5 中 ≥1 repair_kit | 1 repair_kit | **0** | 无 | 清除（is_active=false，本会话永久安全） | — |
-| B | **硬扛** | 始终 | 无 | **12-18**（uniform 随机） | 50%: 随机 1 个已安装模块 → damaged | 活跃（保持 is_active=true） | 击退 8 单位（推出 trigger_radius） |
+| B | **硬扛** | 始终 | 无 | **8-12**（uniform 随机） | 30%: 随机 1 个已安装模块 → damaged | 活跃（保持 is_active=true） | 击退 8 单位（推出 trigger_radius） |
 | C | **撤退** | 始终 | 无 | **0** | 无 | 活跃（保持 is_active=true） | 击退 10 单位 + retreat_flagged=true |
 
 - **应急处理**不可用时灰显，tooltip："需要 repair_kit ×1（随身物品栏中无可用）"
@@ -130,8 +130,8 @@ MVP 仅定义一种威胁类型（`guard`）。威胁配置表预留字段以支
 | 字段 | MVP 值（guard） | 说明 |
 |------|----------------|------|
 | `threat_category` | `guard` | 威胁类别标识 |
-| `full_damage_range` | [12, 18] | 硬扛时的伤害范围 |
-| `module_damage_chance` | 0.50 | 模块受损概率 |
+| `full_damage_range` | [8, 12] | 硬扛时的伤害范围 |
+| `module_damage_chance` | 0.30 | 模块受损概率 |
 | `trigger_radius` | 4-6 | 触发半径（单位），由 #11 管理 |
 | `emergency_cost` | repair_kit ×1 | 应急处理消耗 |
 | `knockback_distance_tanked` | 8.0 | 硬扛击退距离 |
@@ -255,13 +255,13 @@ calc_hull_damage(response_choice, encounter_params) =
 | 变量 | 符号 | 类型 | 值域 | 说明 |
 |------|------|------|------|------|
 | `response_choice` | — | enum | {emergency_handling, tank, retreat} | 必须为 "tank" 才产生伤害 |
-| `encounter_params.full_damage_min` | — | int | 12（guard） | 均匀随机伤害下界 |
-| `encounter_params.full_damage_max` | — | int | 18（guard） | 均匀随机伤害上界 |
-| `result` | — | int | 0 或 [12, 18] | 通过 #8.apply_hull_damage() 应用的船体伤害 |
+| `encounter_params.full_damage_min` | — | int | 8（guard） | 均匀随机伤害下界 |
+| `encounter_params.full_damage_max` | — | int | 12（guard） | 均匀随机伤害上界 |
+| `result` | — | int | 0 或 [8, 12] | 通过 #8.apply_hull_damage() 应用的船体伤害 |
 
-**输出范围**：0（非硬扛）或 12-18 闭区间均匀随机整数（硬扛）。每个整数的概率均为 1/7。
+**输出范围**：0（非硬扛）或 8-12 闭区间均匀随机整数（硬扛）。每个整数的概率均为 1/5。
 
-**演算示例**：玩家硬扛守卫。`uniform_int(12, 18)` 掷出 15。结果：15 船体伤害。施加到 integrity=62 → 新值 47（进入 damaged 波段，触发跨波段伤痕增量）。5 次硬扛期望总伤害约 75（5×15），足以从 intact 推到 critical 边缘但不至于单次秒杀。
+**演算示例**：玩家硬扛守卫。`uniform_int(8, 12)` 掷出 10。结果：10 船体伤害。施加到 integrity=62 → 新值 52（仍在 intact 波段）。5 次硬扛期望总伤害约 50（5×10），刚好从 intact 推到 damaged 边界但不进入 critical。
 
 ---
 
@@ -283,7 +283,7 @@ calc_module_damage(response_choice, encounter_params, module_state) =
 | 变量 | 符号 | 类型 | 值域 | 说明 |
 |------|------|------|------|------|
 | `response_choice` | — | enum | {emergency_handling, tank, retreat} | 必须为 "tank" 才产生模块风险 |
-| `encounter_params.module_damage_chance` | — | float | 0.50（guard） | 概率阈值，来自威胁配置表 C8 |
+| `encounter_params.module_damage_chance` | — | float | 0.30（guard） | 概率阈值，来自威胁配置表 C8 |
 | `random_float(0, 1)` | — | float | [0.0, 1.0) | 均匀随机数 |
 | `eligible_modules` | — | list | 0-2 条目 | #8 槽位中已安装且 `actual_state ≠ damaged` 的槽位 ID 列表（EC-12-04 过滤：排除已受损槽位） |
 | `result.module_damaged` | — | bool | {false, true} | 是否有模块受损 |
@@ -291,7 +291,7 @@ calc_module_damage(response_choice, encounter_params, module_state) =
 
 **输出范围**：{module_damaged: false, target: null} 或 {module_damaged: true, target: slot_a 或 slot_b}。
 
-**演算示例**：玩家硬扛守卫。两模块已安装（scout 在 A，cargo 在 B）。`random()` = 0.37（< 0.50，判定通过）。`random_choice(["slot_a", "slot_b"])` 选中 "slot_a"。结果：`{module_damaged: true, target_slot_id: "slot_a"}`。#8 将侦察模块效率设为 0.6。
+**演算示例**：玩家硬扛守卫。两模块已安装（scout 在 A，cargo 在 B）。`random()` = 0.22（< 0.30，判定通过）。`random_choice(["slot_a", "slot_b"])` 选中 "slot_a"。结果：`{module_damaged: true, target_slot_id: "slot_a"}`。#8 将侦察模块效率设为 0.6。
 
 ---
 
@@ -357,8 +357,8 @@ calc_knockback(response_choice, encounter_params) =
 - **设计意图**：不阻止玩家带着已有收获撤离——你可以把自己逼到极限，但不会因一次错误判断而丢失已搜刮的一切。
 
 **EC-12-02: 硬扛伤害跨越波段边界**
-- **条件**：一次硬扛伤害使 integrity 跨越波段边界（如 42→30 跨越 damaged→critical）
-- **处理**：决策面板在显示船体状态时加入预估——若当前 hull ≤ 42（damaged 波段内，最小伤害 12 将 integrity 推入 ≤30 即 critical 波段）且玩家将光标悬停在"硬扛"上，面板显示警告文字"硬扛可能造成船体结构性恶化"。实际伤害结算由 #8 按跨波段规则执行（#8 EC-12 / AC-29），scars 增量按规定计算。
+- **条件**：一次硬扛伤害使 integrity 跨越波段边界（如 33→25 跨越 damaged→critical，33-8=25）
+- **处理**：决策面板在显示船体状态时加入预估——若当前 hull ≤ 33（damaged 波段内，最小伤害 8 将 integrity 推入 ≤25 即 critical 波段）且玩家将光标悬停在"硬扛"上，面板显示警告文字"硬扛可能造成船体结构性恶化"。实际伤害结算由 #8 按跨波段规则执行（#8 EC-12 / AC-29），scars 增量按规定计算。
 - **玩家感知**：是。决策面板的预测性警告。
 
 **EC-12-03: 全部模块槽位为空**
@@ -367,10 +367,10 @@ calc_knockback(response_choice, encounter_params) =
 - **玩家感知**：否。无模块时硬扛不显示模块风险提示。
 
 **EC-12-04: 模块损伤命中已受损槽位**
-- **条件**：硬扛触发模块损伤（P=0.50），但 `random_choice` 选中的槽位已处于 `damaged` 状态
+- **条件**：硬扛触发模块损伤（P=0.30），但 `random_choice` 选中的槽位已处于 `damaged` 状态
 - **处理**：F-12-03 的 `eligible_modules` 列表必须按 `actual_state`（非 `visible_state`）过滤——仅包含 `actual_state = installed` 的槽位（排除 `actual_state = damaged` 的槽位，无论其 `visible_state` 为何）。这保证了 `unchecked` 可见状态（对应 `actual_state = damaged`）的模块永远不会被选为目标——在 `unchecked` 状态下对 `apply_module_damage` 的调用会被 #8 拒绝或视为无操作（但正确的过滤可完全防止该调用发生）。若所有已安装模块的 `actual_state` 均为 `damaged`，则 `count(eligible_modules) = 0` → `module_damaged: false`。
 - **玩家感知**：否。已受损模块不会二次受损。
-- **设计意图**：防止 50% 概率变成"浪费的投骰"。过滤语义必须使用 `actual_state`（物理真实状态），而非 `visible_state`（玩家感知状态）。
+- **设计意图**：防止模块损伤投骰变成"浪费的投骰"——已受损的模块不应再次被选中。过滤语义必须使用 `actual_state`（物理真实状态），而非 `visible_state`（玩家感知状态）。
 
 **EC-12-05: 撤退后返回 + 应急处理同一威胁**
 - **条件**：玩家先选择"撤退"（retreat_flagged=true），走开后获得 repair_kit（如从探索点其他位置拾取），返回同一威胁点，选择"应急处理"清除威胁
@@ -384,7 +384,7 @@ calc_knockback(response_choice, encounter_params) =
 - **设计意图**：防御性编程——不应因边缘坐标情况导致击退失败或崩溃。
 
 **EC-12-07: 硬扛→hull=0 + 同时模块损伤**
-- **条件**：一次硬扛同时触发 hull=0 和模块损伤（P=0.50 命中）
+- **条件**：一次硬扛同时触发 hull=0 和模块损伤（P=0.30 命中）
 - **处理**：C4 结算序列保证先应用 hull_damage（步骤 5），后应用 module_damage（步骤 6）。此时模块在 destroyed 波段下被标记为 damaged——η_final = η_visible × 0 = 0（#8 D.2b）。模块状态正确转为 damaged，但有效效率为 0（因船体已崩溃）。修复船体后模块效率恢复至其 damaged 状态对应的效率值。
 - **设计意图**：结算顺序有意如此——船体损伤优先处理，模块损伤正确记录。
 
@@ -441,13 +441,13 @@ calc_knockback(response_choice, encounter_params) =
 
 | # | 参数名 | 类型 | 安全范围 | MVP 值 | 影响 |
 |---|--------|------|---------|--------|------|
-| 1 | `guard_full_damage_min` | int | 8–20 | **12** | 硬扛最小伤害。低于 8 → 硬扛代价太低，应急处理价值被稀释；高于 20 → 单次命中可能跨越两个波段 |
-| 2 | `guard_full_damage_max` | int | 15–35 | **18** | 硬扛最大伤害。与 min 的间距控制伤害波动：当前间距 6（约 1/3 均值），保留足够不确定性 |
-| 3 | `guard_module_damage_chance` | float | 0.30–0.70 | **0.50** | 硬扛时模块受损概率。高于 0.7 → 硬扛几乎必然损失模块，威慑过强；低于 0.3 → 模块风险形同虚设 |
+| 1 | `guard_full_damage_min` | int | 5–15 | **8** | 硬扛最小伤害。低于 5 → 硬扛代价太低，应急处理价值被稀释；高于 15 → 单次命中可能跨越两个波段 |
+| 2 | `guard_full_damage_max` | int | 10–20 | **12** | 硬扛最大伤害。与 min 的间距控制伤害波动：当前间距 4（约 1/3 均值），保留足够不确定性 |
+| 3 | `guard_module_damage_chance` | float | 0.15–0.45 | **0.30** | 硬扛时模块受损概率。高于 0.45 → 硬扛几乎必然损失模块，威慑过强；低于 0.15 → 模块风险形同虚设 |
 | 4 | `emergency_cost_repair_kit` | int | 1–2 | **1** | 应急处理消耗 repair_kit 数量。2 → 应急处理成本翻倍，可能使玩家宁愿硬扛 |
 | 5 | `knockback_distance_tanked` | float | 5.0–12.0 | **8.0** | 硬抗击退距离（单位）。必须 > guard trigger_radius 最大值（6.0），否则击退后仍在触发半径内。低于 6.0 → 重触发循环 |
 | 6 | `knockback_distance_retreat` | float | 8.0–15.0 | **10.0** | 撤退击退距离（单位）。大于硬抗击退以体现"撤退比硬扛走得更远"的差异化 |
-| 7 | `hull_warning_threshold` | int | 10–25 | **18** | 硬扛选项显示"⚠ 船体严重受损"警告的 hull 阈值。设为 full_damage_max（18）——低于此值时一次硬扛可能将船体推至 0。太高 → 警告频繁出现；太低 → 警告失去预警价值 |
+| 7 | `hull_warning_threshold` | int | 8–20 | **12** | 硬扛选项显示"⚠ 船体严重受损"警告的 hull 阈值。设为 full_damage_max（12）——低于此值时一次硬扛可能将船体推至 0。太高 → 警告频繁出现；太低 → 警告失去预警价值 |
 
 ### 间接调参（由其他系统拥有，影响本系统行为）
 
@@ -457,7 +457,7 @@ calc_knockback(response_choice, encounter_params) =
 | `trigger_radius[guard]` = 4-6 | #11 Tuning Knobs #5 | 守卫触发半径。必须小于 knockback_distance_tanked（8.0），否则击退后仍在触发半径内 |
 | `λ_forced` = 0.25 | #11 Tuning Knobs #7 | 撤退后撤离损耗率。影响"撤退"选项的机会成本 |
 | `extraction_loss_success_ratio` = 0.08 | #11 Tuning Knobs #6 | 正常撤离损耗率。与 λ_forced 的差值（0.17）定义"撤退的额外代价" |
-| `hull_band_*` 系列 | #8 Tuning Knobs #4-7 | 船体波段阈值和惩罚系数。影响硬扛伤害的实际游戏感受（damaged 波段航速 -10%，critical 波段 -25% + 模块效率 ×0.8） |
+| `hull_band_*` 系列 | #8 Tuning Knobs #4-7 | 船体波段阈值和惩罚系数。影响硬扛伤害的实际游戏感受（damaged 波段航速 -10%，critical 波段 -25% + 模块效率 ×0.8）——Tank 期望伤害 10，约 2 个 Tank 遭遇才会从 intact 进入 damaged |
 
 ## Visual/Audio Requirements
 
@@ -469,11 +469,11 @@ calc_knockback(response_choice, encounter_params) =
 |---|---------|--------|---------------|
 | V-01 | Threat triggers (enters trigger_radius) | Subtle border color shift to warm amber/copper at screen edges, like a navigation instrument status light illuminating. No red. | 0.6s ease-in-out, single play |
 | V-02 | Threat triggered, decision panel appears | Dark semi-transparent overlay (60% opacity, deep navy #1a1a2e rather than pure black), centered panel slides in | Slide-in 0.25s, ease-out |
-| V-03 | Persistent: hull status display | Segmented bar (0-100 width), color-coded by band: Green #4CAF50 (intact, 100-61) / Yellow #FFC107 (damaged, 60-31) / Orange #FF9800 (critical, 30-1) / Red #F44336 (destroyed, 0), with band label text + current integrity number. Band segments separated by subtle hatch pattern for colorblind distinction. | Bar width 65% of panel width, height 22px |
+| V-03 | Persistent: hull status display | Segmented bar (0-100 width), color-coded by band: Green #4CAF50 (intact, 100-76) / Yellow #FFC107 (damaged, 75-26) / Orange #FF9800 (critical, 25-1) / Red #F44336 (destroyed, 0), with band label text + current integrity number. Band segments separated by subtle hatch pattern for colorblind distinction. | Bar width 65% of panel width, height 22px |
 | V-04 | Persistent: response buttons | Three distinct buttons with clear visual hierarchy: Emergency Handling = Blue/Teal (safe, resource cost), Tank = Orange/Red (dangerous, free), Retreat = Gray/Neutral (safe, retreat cost). Shared cool-tone undertone on both safe options (Emergency + Retreat) to visually group "no hull damage" options. | Full width, min height 44px, keyboard shortcuts 1/2/3 |
-| V-05 | Button hover | Highlight border (2px, brighter than idle), Tank: always show damage range "12–18 船体伤害" as subtitle. When hull ≤ 42 (minimum 12 damage crosses into critical ≤30): additionally show cross-band preview "硬扛可能造成船体结构性恶化". | 150ms delay on hover |
+| V-05 | Button hover | Highlight border (2px, brighter than idle), Tank: always show damage range "8–12 船体伤害" as subtitle. When hull ≤ 33 (minimum 8 damage crosses into critical ≤25): additionally show cross-band preview "硬扛可能造成船体结构性恶化". | 150ms delay on hover |
 | V-06 | Button disabled | Desaturated, 50% opacity, lock icon | Emergency Handling disabled when repair_kit = 0 |
-| V-07 | Tank warning marker | Yellow warning triangle icon + text "⚠ 船体严重受损" beside Tank button label | Visible when hull ≤ 18 |
+| V-07 | Tank warning marker | Yellow warning triangle icon + text "⚠ 船体严重受损" beside Tank button label | Visible when hull ≤ 12 |
 | V-08 | Resolution feedback — suppressed | Threat marker smoothly fades out on minimap (opacity 1.0 → 0 over 0.5s). No screen flash. The satisfying moment is the marker disappearing. | Fade 0.5s, ease-out |
 | V-09 | Resolution feedback — tanked | Hull bar smoothly decrements to new value (animation, 0.3s). New hull number briefly pulses (scale 1.0 → 1.15 → 1.0, 0.4s) to register the change, then settles. No camera shake, no floating damage number, no screen flash. Player pushed back per V-11. | Bar animation 0.3s ease-out; number pulse 0.4s |
 | V-10 | Resolution feedback — retreated | Muted amber hue shift at screen edges (matching V-01 tone), player pushed back per V-11. A small text label fades in beside inventory summary: "撤离损耗增至 25%" (2s, then fades out). | Label fade-in 0.3s, display 2s, fade-out 0.5s |
@@ -510,7 +510,7 @@ calc_knockback(response_choice, encounter_params) =
 │  │ [E] 🔧 Emergency     [1x]  │    │  ← Blue/Teal (available)
 │  └─────────────────────────┘    │
 │  ┌─────────────────────────┐    │
-│  │ [T] ⚠ Tank       ⚠ Danger │    │  ← Orange/Red (always available, warning when hull ≤ 42)
+│  │ [T] ⚠ Tank       ⚠ Danger │    │  ← Orange/Red (always available, warning when hull ≤ 38)
 │  └─────────────────────────┘    │
 │  ┌─────────────────────────┐    │
 │  │ [R] ← Retreat    Loss 25% │    │  ← Gray (always available)
@@ -526,14 +526,14 @@ calc_knockback(response_choice, encounter_params) =
 |---|---------|------|
 | UI-01 | Panel size | Width 380px, height auto (min 320px), responsive scaling on smaller screens |
 | UI-02 | Panel position | Screen center (horizontal and vertical), z-index above all exploration UI |
-| UI-03 | Hull bar | Width 260px, height 22px, four segments (band boundaries: 100/60/30/0), 1px divider at each boundary |
+| UI-03 | Hull bar | Width 260px, height 22px, four segments (band boundaries: 100/76/26/0), 1px divider at each boundary |
 | UI-04 | Hull value | Right of bar, centered: "[Band Label] — [Current] / 100", font 14px |
 | UI-05 | Buttons | Full width 340px, min height 44px (accessibility tap target), 8px gap, 6px border radius |
 | UI-06 | Button labels | Left-aligned, font 16px, bold. Subtitle on right (cost/consequence preview), font 13px |
 | UI-07 | Keyboard shortcuts | Semantic key bindings: `[E]` Emergency Handling, `[T]` Tank, `[R]` Retreat. Keycap hint overlay on each button (e.g., `[E]`), positioned at button left edge, font 12px. Keys work regardless of panel open/closed state when threat is active |
 | UI-08 | Disabled button | Background desaturated to grayscale, text 60% opacity, 🔒 lock icon overlay on right |
 | UI-09 | Disabled button tooltip | Appears on 300ms hover, max width 250px, shows requirement text. Arrow pointing at button. z-index above panel |
-| UI-10 | Tank hover preview | Appears on 150ms hover. If hull ≤ 42: shows "硬扛可能造成船体结构性恶化". If hull ≤ 18: shows "⚠ 船体严重受损 — 硬扛可能导致船体崩溃" |
+| UI-10 | Tank hover preview | Appears on 150ms hover. If hull ≤ 33: shows "硬扛可能造成船体结构性恶化". If hull ≤ 12: shows "⚠ 船体严重受损 — 硬扛可能导致船体崩溃" |
 | UI-11 | Inventory summary row | Panel bottom, 8px separator line above buttons. Shows icon + count per carried item type, min 60px per item. repair_kit count ≥ 1 = green, 0 = gray |
 | UI-12 | Panel animation | Slide-in: from y+40px + opacity 0 to y=0 + opacity 1, 250ms, ease-out. Dismiss: reverse, 200ms |
 | UI-13 | Background overlay | Fullscreen, 60% black opacity, blocks click-through to exploration UI. Clicking overlay or pressing Esc dismisses panel (exploration stays paused). Panel can be reopened via persistent "Threat Active" indicator at screen top |
@@ -542,9 +542,9 @@ calc_knockback(response_choice, encounter_params) =
 
 | Hull State | Hull Bar Color | Tank Preview Text | Button Warning |
 |------------|---------------|-------------------|----------------|
-| intact (100-61) | Green #4CAF50 | None | None |
-| damaged (60-31) | Yellow #FFC107 | "硬扛可能造成船体结构性恶化" (when hull ≤ 42 — minimum 12 damage crosses into critical ≤30) | ⚠ when hull ≤ 18 |
-| critical (30-1) | Orange #FF9800 | "硬扛可能造成船体结构性恶化" | ⚠ when hull ≤ 18 |
+| intact (100-76) | Green #4CAF50 | None | None |
+| damaged (75-26) | Yellow #FFC107 | "硬扛可能造成船体结构性恶化" (when hull ≤ 33 — minimum 8 damage crosses into critical ≤25) | ⚠ when hull ≤ 12 |
+| critical (25-1) | Orange #FF9800 | "硬扛可能造成船体结构性恶化" | ⚠ when hull ≤ 12 |
 | destroyed (0) | Red #F44336 | N/A (cannot depart, but panel may still display during exploration) | ⚠ always |
 
 ## Open Questions
@@ -568,8 +568,8 @@ All ACs follow Given-When-Then format. ACs marked [DETERMINISTIC] produce identi
 - **When** Decision panel renders
 - **Then** Emergency Handling button grayed out, tooltip: "需要 repair_kit ×1（随身物品栏中无可用）"
 
-**AC-12-02c — Tank warning threshold at hull ≤ 18** [DETERMINISTIC]
-- **Given** Threat active, hull integrity = 17
+**AC-12-02c — Tank warning threshold at hull ≤ 12** [DETERMINISTIC]
+- **Given** Threat active, hull integrity = 11
 - **When** Decision panel renders
 - **Then** Tank button label shows "⚠ 船体严重受损" warning but remains clickable (not blocked)
 
@@ -586,7 +586,7 @@ All ACs follow Given-When-Then format. ACs marked [DETERMINISTIC] produce identi
 **AC-12-04b — Tank resolution produces tanked outcome** [RANGE]
 - **Given** Threat active, hull = 62, both modules installed (scout in slot_a, cargo in slot_b)
 - **When** Player selects Tank and system executes resolution sequence (tested across 1,000 independent calls with fresh RNG each time)
-- **Then** hull_damage ∈ [12, 18] for all calls (never outside range), minimum observed = 12, maximum observed = 18, mean ≈ 15.0 ± 0.16 (SE = 2.0/√1000 = 0.063, 99% CI ± 0.163); module_damage proportion with `module_damaged = true` ∈ [0.459, 0.541] (99% CI for 50% binomial at n=1,000; SE = √(0.5×0.5/1000) = 0.0158, z=2.576); resources_consumed = null; knockback = {direction: threat→player, distance: 8.0}; retreat_flagged = false; threat_point.is_active = true
+- **Then** hull_damage ∈ [8, 12] for all calls (never outside range), minimum observed = 8, maximum observed = 12, mean ≈ 10.0 ± 0.13 (SE = 1.41/√1000 = 0.045, 99% CI ± 0.115); module_damage proportion with `module_damaged = true` ∈ [0.263, 0.338] (99% CI for 30% binomial at n=1,000; SE = √(0.3×0.7/1000) = 0.0145, z=2.576); resources_consumed = null; knockback = {direction: threat→player, distance: 8.0}; retreat_flagged = false; threat_point.is_active = true
 
 **AC-12-04c — Retreat resolution produces retreated outcome** [DETERMINISTIC]
 - **Given** Threat active, hull = 62, both modules installed
@@ -630,13 +630,13 @@ All ACs follow Given-When-Then format. ACs marked [DETERMINISTIC] produce identi
 
 ### Formulas (F-12-01 through F-12-05)
 
-**AC-12-09 — F-12-02: Hull damage range is [12, 18]** [RANGE]
+**AC-12-09 — F-12-02: Hull damage range is [8, 12]** [RANGE]
 - **Given** `response_choice = "tank"`
 - **When** `calc_hull_damage("tank", guard_encounter_params)` called 1,000 times
-- **Then** Every result ∈ [12, 18] inclusive, minimum = 12, maximum = 18, mean ≈ 15.0 ± 0.5
+- **Then** Every result ∈ [8, 12] inclusive, minimum = 8, maximum = 12, mean ≈ 10.0 ± 0.5
 
 **AC-12-10 — F-12-03: Module damage excludes already-damaged slots** [DETERMINISTIC]
-- **Given** slot_a = damaged, slot_b = installed, `eligible_modules = ["slot_b"]`, module_damage_chance = 1.0 (force hit), RNG for slot selection seeded
+- **Given** slot_a = damaged, slot_b = installed, `eligible_modules = ["slot_b"]`, module_damage_chance = 1.0 (force hit for test), RNG for slot selection seeded
 - **When** `calc_module_damage("tank", encounter_params, module_state)` called with slot_a already in damaged state (excluded from eligible_modules)
 - **Then** target_slot_id selects slot_b (slot_a excluded from eligible pool), result = {module_damaged: true, target_slot_id: "slot_b"}
 
@@ -654,15 +654,15 @@ All ACs follow Given-When-Then format. ACs marked [DETERMINISTIC] produce identi
 ### Edge Cases (EC-12-01 through EC-12-10)
 
 **AC-12-13 — EC-12-01: Low hull tank → hull = 0, exploration continues** [SEEDED]
-- **Given** hull = 6, Tank selected, damage roll seeded to ≥ 6, retreat_flagged = false
+- **Given** hull = 7, Tank selected (min damage 8 > 7 hull → guaranteed destroy), retreat_flagged = false
 - **When** Resolution completes
 - **Then** integrity = 0 (destroyed band), combat_result returns outcome = "tanked", #11 does not terminate exploration, extraction anchor still available, #8 `can_depart()` returns {false, ["hull_destroyed"]}
 
 **AC-12-14 — EC-12-02: Cross-band damage warning display** [DETERMINISTIC]
-- **Given** hull = 42 (damaged band, edge: 12 damage = 30 which crosses into critical), threat active
+- **Given** hull = 33 (damaged band, edge: 8 damage = 25 which crosses into critical ≤25), threat active
 - **When** Player hovers cursor over Tank button
 - **Then** Panel displays warning: "硬扛可能造成船体结构性恶化"
-- **And** When hull = 43 (12 damage = 31, stays in damaged band), no warning displayed
+- **And** When hull = 34 (8 damage = 26, stays in damaged band), no warning displayed
 
 **AC-12-15 — EC-12-03: Tank with all slots empty** [DETERMINISTIC]
 - **Given** slot_a = empty, slot_b = empty, Tank selected, module_damage_chance = 1.0 (forced)
@@ -680,7 +680,7 @@ All ACs follow Given-When-Then format. ACs marked [DETERMINISTIC] produce identi
 - **Then** Direction falls back to threat facing (1, 0); knockback applied successfully (no crash, no null)
 
 **AC-12-18 — EC-12-07: Tank → hull = 0 with simultaneous module damage** [SEEDED]
-- **Given** hull = 10, both modules installed, Tank selected, damage roll seeded to 15 (yields hull = 0), module_damage_chance = 1.0 (force hit)
+- **Given** hull = 10, both modules installed, Tank selected, damage roll seeded to 10 (yields hull = 0), module_damage_chance = 1.0 (force hit for test)
 - **When** Resolution sequence executes
 - **Then** Step 5 executes before Step 6: hull_damage applied first (integrity → 0), then module_damage applied (target module actual_state → damaged, η_effective = 0 due to η_final = η_visible × 0 under destroyed band)
 

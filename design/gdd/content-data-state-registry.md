@@ -144,12 +144,13 @@ MVP 内容域如下：
 | `sort_order` | 确定性排序键 |
 | `owner_domain` | 内容归属领域 |
 | `references` | 静态 ID 引用，不包含运行时结果 |
+| `cat_sniff_signature` | (optional, on `resource` kind) 伙伴嗅探签名：`reveal_target` (location_id), `hazard_hint` (string), `confidence` (0-100), `pattern_id` (string)。#15 sky-cat 的 scout sniff 动词消费此字段。`reveal_target` 必须引用有效 `location_id`。 |
 
 类型专属最小字段：
 
 | Kind | Required Fields |
 |---|---|
-| `resource` | `unit`, `stack_rule`, `material_tags` |
+| `resource` | `unit`, `stack_rule`, `material_tags`, `cat_sniff_signature` (optional) |
 | `cargo` | `linked_resource_id`, `mass_class`, `handling_class` |
 | `module` | `slot_type`, `compatibility_tags`, `effect_tags` |
 | `home-space` | `space_kind`, `home_function_tags`, `access_tags` |
@@ -180,6 +181,15 @@ MVP 内容域如下：
 | `presentation_tier` | `hint`, `clue`, `warning`, `lore` | 情报展示层级，不表示玩家是否已知 |
 
 受控词表的值只能表达静态语义。它们不能表达库存数量、当前价格、修复完成、是否解锁、关系值、当前风险强度或 UI 可见性。
+
+### Content Validation Rules
+
+以下校验规则在内容导入时执行，违规条目标记为 `ERR_SCHEMA_INVALID`：
+
+| # | 规则 | 适用 kind | 错误码 |
+|---|---|---|---|
+| CV-01 | `cat_sniff_signature.reveal_target` 必须引用注册表中存在的有效 `location_id`（含 `kind: location`） | `resource` (含 `cat_sniff_signature` 的条目) | `ERR_SNIFF_TARGET_INVALID` |
+| CV-02 | `cat_sniff_signature.confidence` 必须在 0-100 范围内 | `resource` (含 `cat_sniff_signature` 的条目) | `ERR_SNIFF_CONFIDENCE_RANGE` |
 
 ### Stable Identity and Migration Rules
 
