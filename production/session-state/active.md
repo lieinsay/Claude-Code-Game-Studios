@@ -1,30 +1,52 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Systems Design
-Feature: /review-all-gdds Complete — Final Verdict: PASS WITH NOTES
-Task: Ready for /create-architecture
+Epic: Technical Setup
+Feature: /create-architecture Complete — Master Architecture Signed Off
+Task: Run /architecture-decision for Foundation ADRs (ADR-0001 through ADR-0006)
 <!-- /STATUS -->
 
-## Current: /review-all-gdds — All 4 Phases Complete
+## Current: /create-architecture — All 8 Phases Complete
 
-- **Final Report**: `production/session-state/phase5-final-verdict.md`
-- **Verdict**: **PASS WITH NOTES** — 0 blockers, 26 warnings documented
-- **Architecture Readiness**: ✅ All 8 gates passed
+- **Master Architecture**: `docs/architecture/architecture.md` — v1 signed off
+- **TD Sign-Off**: 2026-05-04 — APPROVED WITH CONCERNS (0 blockers)
+- **LP Feasibility**: 2026-05-04 — FEASIBLE WITH CONCERNS (8 concerns, 0 infeasible)
 
-### All Phases Summary
+### Phase Results
 
-| Phase | Blocker/Critical | Warning | Info |
-|-------|-----------------|---------|------|
-| P2 Consistency | 3 (resolved) | 11 | 9 |
-| P3 Holism | 2 (resolved) | 7 | 7 |
-| P4 Scenarios | 1 (fixed) | 8 | 4 |
-| **Total** | **6 resolved** | **26** | **20** |
+| Phase | Status | Key Output |
+|-------|--------|------------|
+| P0 Context | Complete | Knowledge Gap Inventory, 52 TR baseline |
+| P1 Layer Map | Complete | 5-layer architecture: Platform→Foundation→Core→Feature→Presentation |
+| P2 Ownership | Complete | 18 systems mapped with owns/exposes/consumes/engine APIs |
+| P3 Data Flow | Complete | Frame update, event/signal, save/load, init order paths |
+| P4 API Boundaries | Complete | 17 public API contracts in GDScript pseudocode |
+| P5 ADR Audit | Complete | 0 existing ADRs, 52 TR uncovered → 17 ADRs required |
+| P6 Missing ADRs | Complete | 6 blocking + 6 pre-build + 5 deferrable |
+| P7 Document | Complete | 5 architecture principles, 8 open questions |
+| P7b Sign-Off | Complete | TD + LP both CONCERNS, accepted by user |
+| P8 Handoff | Complete | Handoff delivered |
 
-### Key Artifacts
-- `design/gdd/gdd-cross-review-2026-05-03.md` — Phase 2 findings
-- `production/session-state/phase3-game-design-holism-review.md` — Phase 3 findings
-- `production/session-state/phase4-cross-system-scenario-walkthrough.md` — Phase 4 findings
-- `production/session-state/phase5-final-verdict.md` — Final verdict
+### LP-FEASIBILITY HIGH Concerns (to resolve in ADR authoring)
 
-### Next: /create-architecture
+| # | Concern | Resolve In |
+|---|---------|------------|
+| C1 | Dual-focus (4.6) + 4-layer input routing undefined | ADR-0012 |
+| C3 | ConfigFile→JSON for save data | ADR-0003 |
+| C10 | 5 critical cross-system types undefined | ADR-0010/0011/0012 |
+| C9 | InteractionHandler abstract method signatures | ADR-0004 |
+
+### Next: Create Foundation ADRs
+
+**Top 3 ADRs to run first:**
+1. `/architecture-decision Autoload/Scene 架构与启动顺序` → ADR-0001
+2. `/architecture-decision 基于 Signal 的跨系统通信协议` → ADR-0002
+3. `/architecture-decision 存档系统——快照包与 JSON 序列化` → ADR-0003
+
+When all 6 Foundation ADRs are written: run `/gate-check technical-setup`
+
+### Key Files
+
+- `docs/architecture/architecture.md` — Master architecture document (v1, signed off)
+- `docs/architecture/tr-registry.yaml` — To be populated with 52 TRs
+- `design/gdd/systems-index.md` — 18-system index (reference, not modified)
