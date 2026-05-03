@@ -79,10 +79,10 @@
    → #5.consume_in_combat("repair_kit", 1) from Pool 5
 3. 计算船体伤害（按选项）：
    → 应急处理: 0
-   → 硬扛: random_int(12, 18)
+   → 硬扛: random_int(8, 12)
    → 撤退: 0
 4. 判定模块损伤（仅硬扛）：
-   → if random() < 0.5 AND 存在已安装模块：
+   → if random() < 0.30 AND 存在已安装模块：
        target_slot = random_choice(已安装且非empty的槽位)
        module_damage = {slot_id: target_slot, damage_type: "guard_impact"}
 5. 应用船体伤害（如有）：
