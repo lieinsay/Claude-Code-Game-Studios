@@ -479,12 +479,12 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 | 依赖 #6 的知识查询 | ✅ #6 GDD 记录了 `query_route_knowledge` 被 #9、#10、#11 消费 |
 | 写入 #8 船体伤害 | ✅ #8 GDD 在受损来源中记录了 #10（航行伤害） |
 | 写入 #6 路线知识事件 | ✅ #6 GDD 记录了 #10 是规律观测事件的来源之一 |
-| 写入 #11 EncounterContext | ⚠️ #11 GDD 尚未编写——接口合约方向已在本系统定义，待 #11 设计时确认 |
+| 写入 #11 EncounterContext | ✅ #11 GDD 已编写并批准（2026-05-03）——EncounterContext 合约双向确认：#10 定义输出 schema，#11 在 Interactions 表中确认消费。字段名、类型、到达时序已对齐。 |
 | 写入 #17 反馈事件 | ⚠️ #17 GDD 尚未编写——事件 schema 已在本系统定义，待 #17 设计时确认 |
 
 ### 未满足的依赖
 
-- **#11 探索/搜撤场景**：GDD 尚未编写。本系统已定义 `EncounterContext` 输出合约，但 #11 如何消费此合约待其设计时确认。当前合约方向为提案性质。
+- **#11 探索/搜撤场景**：GDD 已编写并批准（2026-05-03）。#11 的 Interactions 表已确认消费 `EncounterContext`。#11 AC-11-01 要求有效的 EncounterContext 含 voyage_result 和 destination_id。双向合约已确认。
 - **#17 反馈/特效/音频语义**：GDD 尚未编写。本系统已定义事件 schema，但 #17 如何消费待其设计时确认。
 - **#14 空港/村镇/船队**：Phase 3+ 系统。本系统已预留统一的 `VoyageContext` 接口（与航行主体类型无关），但 #14 的具体委托航程逻辑待 Phase 3 设计。
 
@@ -838,7 +838,7 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 
 | ID | 问题 | 影响范围 | 优先级 |
 |----|------|---------|--------|
-| OQ-01 | 目的地具体是什么？MVP 两条航线的 `destination_id` 注册表中为 TBD——在哪个系统确定？ | 注册表 #1、探索 #11 | HIGH——阻塞 MVP 可玩性 |
+| OQ-01 | ~~目的地具体是什么？MVP 两条航线的 `destination_id` 注册表中为 TBD——在哪个系统确定？~~ **已解决 (2026-05-03)**：`route.sky-reef-arc-01` → `location.sky-reef-outpost`；`route.storm-cut-01` → `location.cloudwatch-ruins`。destination_id 已写入 `entities.yaml`。 | 注册表 #1、探索 #11 | ✅ CLOSED |
 | OQ-02 | 燃料/能量系统在哪个 GDD 中定义？当前航行距离可行性仅由 hull 波段限制，缺少能量维度的规划取舍 | 航程可行性判断、航图 UI #9 | MEDIUM——Phase 2 需解决 |
 | OQ-03 | NPC 航线与玩家委托货运的航程参数（船队规模、货物价值 vs 风险承受阈值）由谁定义？ | #14 空港/村镇、本系统的 VoyageContext 扩展 | LOW——Phase 3+ |
 | OQ-04 | `gentle_crosswind` 的 +5s 和 `turbulence_zone` 的 -15% 速度惩罚在 60s 短途航程中的感知强度是否合适？需要实际 playtest 验证 | Tuning Knobs 节奏参数 | MEDIUM——需 playtest |

@@ -1,6 +1,6 @@
 # 伙伴功能与关系
 
-> **Status**: In Review
+> **Status**: Approved (2026-05-02)
 > **Author**: User + Claude Code
 > **Last Updated**: 2026-05-02
 > **Implements Pillar**: 少量深关系胜过大量收集 (P5 主); 未知带来温和压力 (P4 辅); 飞艇是家，不只是载具 (P3 辅)
