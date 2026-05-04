@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: ""
+last_updated: "2026-05-04"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -43,7 +43,50 @@ last_updated: ""
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: session_lifecycle
+    status: active
+    owner_system: SessionShell (#2 platform-session-shell)
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    interface: "get_session_state() → int (read-only, 15 platform states)"
+    write_access: SessionShell-only
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: scene_tree_root
+    status: active
+    owner_system: SessionShell (#2 platform-session-shell)
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    interface: "SessionShell owns add_child/remove_child authority for active scene layer"
+    write_access: SessionShell-only
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: storage_capability
+    status: active
+    owner_system: Persistence (#3 local-save-world-state-persistence)
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    interface: "Determined by Persistence during Phase 2; SessionShell reads via persistence_ready(continue_state) signal payload"
+    write_access: Persistence-only
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: continue_availability
+    status: active
+    owner_system: Persistence (#3 local-save-world-state-persistence)
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    interface: "Authoritative determination via query_continue_state() → Enabled / PreservedLocked / Hidden; SessionShell reads only, never recalculates"
+    write_access: Persistence-only
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
 
 # Example:
 #
@@ -71,7 +114,83 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: boot_signal_chain
+    status: active
+    pattern: signal
+    producer: SessionShell
+    consumers:
+      - Registry
+      - Persistence
+      - Resources
+      - Intel
+      - Chart
+      - InteractionRegistry
+      - WorldRepair
+      - AirshipHub
+      - UIManager
+      - FeedbackManager
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    signal_signature: "9-phase sequential: boot_requested → platform_ready → registry_ready → persistence_ready → core_data_ready → core_ready → foundation_ready → hub_ready → ui_ready → session_ready; plus boot_fatal(reason, diagnostics) and boot_recoverable(reason, user_message, retry_count)"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: scene_switch_protocol
+    status: active
+    pattern: direct_call
+    producer: SessionShell
+    consumers:
+      - AirshipHub
+      - ExplorationScene
+      - Settlement
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    signal_signature: "Protocol: release_focus() → stop_tweens → cancel_awaits → disconnect_signals → remove_child → queue_free → instantiate → add_child → grab_focus()"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: overlay_priority
+    status: active
+    pattern: direct_call
+    producer: SessionShell
+    consumers:
+      - UIManager
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    signal_signature: "SessionShell overlays (FatalError, Pause, Loading) render above UIManager screen stack; when SessionShell overlay active, UIManager 4-layer input routing is suppressed"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: signal_communication_protocol
+    status: active
+    pattern: signal
+    producer: (all 9 Autoloads + 4 Scenes)
+    consumers:
+      - (all systems)
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    signal_signature: "34 cross-system signals cataloged. All follow {noun}_{verb_past} naming, typed params, fire-and-forget. Read queries use direct method calls; state changes use signals. Paired xxx_completed/xxx_failed for fallible operations."
+    referenced_by:
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: signal_naming_convention
+    status: active
+    pattern: signal
+    producer: (all systems)
+    consumers:
+      - (all systems)
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    signal_signature: "{noun}_{verb_past} — past tense for all cross-system signals (e.g., resource_deposited, route_committed). Matches Godot built-in style (pressed, timeout, finished)."
+    referenced_by:
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
 
 # Example:
 #
@@ -131,7 +250,72 @@ performance_budgets: []
 # Register an API decision when the choice is non-obvious and other ADRs might
 # make a different choice for the same purpose without knowing this was decided.
 
-api_decisions: []
+api_decisions:
+  - purpose: scene_management
+    status: active
+    api: "SceneTree.root.add_child() / remove_child() / queue_free()"
+    not: "change_scene_to_file() for Hub↔Exploration↔Settlement transitions"
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    reason: "add_child overlay preserves persistent layers (SessionShell, UIManager, AirshipHub) across scene transitions; change_scene_to_file replaces entire tree"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: boot_sequencing
+    status: active
+    api: "Godot signal chain (9-phase sequential signals from SessionShell)"
+    not: "Autoload _ready() synchronous init; call_deferred() passive deferral"
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    reason: "Signal chain is explicit, traceable, and testable; _ready() synchronous init creates hidden ordering dependencies; call_deferred() offers no phase gating"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: scene_cleanup
+    status: active
+    api: "Node.queue_free()"
+    not: "Node.free() (immediate, unsafe during signal emission); manual delete"
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    reason: "queue_free() is safe in Godot 4.6: signals auto-disconnect bidirectionally on free, Resources use ref-counting, no use-after-free when combined with signal payloads carrying only IDs (not object references)"
+    referenced_by:
+      - docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: signal_connect_syntax
+    status: active
+    api: "sender.signal_name.connect(receiver.method_name)"
+    not: "sender.connect(\"signal_name\", callable) — string-based connect (deprecated since 4.0)"
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    reason: "Signal.connect() is type-safe — the signal_name is a compiled symbol, not a runtime string. IDE can find references, rename, and validate connection existence."
+    referenced_by:
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: signal_emit_sync
+    status: active
+    api: "signal.emit() — synchronous fire-and-forget in current frame"
+    not: "signal.emit.call_deferred() — deferred emit breaks execution order"
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    reason: "Synchronous emit guarantees consumers execute in known order within the current frame. Essential for debugging signal chains and maintaining causal consistency."
+    referenced_by:
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: read_vs_signal_boundary
+    status: active
+    api: "Direct method call for read queries and action requests (returning Result); Signal for state-change notifications (fire-and-forget)"
+    not: "Signal for read queries (would require return value — signals cannot return); Direct method call for fan-out notifications (tight coupling)"
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    reason: "Read queries need return values → direct call. State-change notifications need fan-out to unknown consumers → signal. This distinction prevents both return-value-via-signal hacks and tight-coupling-via-direct-call fanout."
+    referenced_by:
+      - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
 
 # Example:
 #
@@ -157,7 +341,69 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: autoload_heavy_ready
+    status: active
+    description: "Autoload _ready() must not perform file I/O, scene instantiation, audio playback, or cross-autoload method calls. Only constant init, signal declarations, and null checks."
+    why: "Blocks first-frame render on Web; creates hidden init-order dependencies between Autoloads."
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+
+  - pattern: boot_sequencer_god_object
+    status: active
+    description: "The boot sequencer (SessionShell) must only emit signals in order — it must never call domain system init methods directly or access domain state internals."
+    why: "Direct calls bypass the signal contract and create a God Object that knows every system's internal initialization API."
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+
+  - pattern: runtime_dynamic_autoload
+    status: active
+    description: "Do not attempt to register or remove Autoloads at runtime in exported games. EditorPlugin.add_autoload_singleton() / remove_autoload_singleton() are editor-only APIs."
+    why: "Godot 4.x has no public runtime API for dynamic Autoload management. Use add_child/remove_child for runtime scene management instead."
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+
+  - pattern: missing_scene_exit_cleanup
+    status: active
+    description: "Before queue_free() on a scene, must explicitly stop() all running Tweens, cancel all active await coroutines, disconnect external signal connections, and call release_focus() on the root Control."
+    why: "Active Tweens/await coroutines referencing freed nodes cause crashes. Lingering focus claims conflict with Godot 4.6 dual-focus system."
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+
+  - pattern: cross_phase_direct_call
+    status: active
+    description: "A system must never call another system's methods before that system's init phase signal has fired. Systems in later phases must wait for the earlier phase's ready signal."
+    why: "Violates the boot phase dependency ordering. A Core system calling a Feature system during Phase 3 would read uninitialized state."
+    adr: docs/architecture/adr-0001-autoload-scene-boot-order.md
+    added: 2026-05-04
+
+  - pattern: dictionary_signal_payload
+    status: active
+    description: "Signal payloads must use typed parameters (signal foo(id: String, amount: int)), never Dictionary. All signal params must have explicit type annotations."
+    why: "Dictionary payloads lose compile-time type checking, cannot be refactored by IDE, and enable accidental mutable reference passing. Typed params enable IDE autocomplete, refactoring, and runtime type validation."
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+
+  - pattern: signal_emit_call_deferred
+    status: active
+    description: "Cross-system signals must use synchronous emit(), never emit.call_deferred(). call_deferred breaks execution order predictability and makes signal chains undebuggable."
+    why: "Synchronous emit guarantees all consumers execute in known order within the current frame. call_deferred defers to idle time, making it impossible to reason about causal ordering in signal chains."
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+
+  - pattern: signal_cascade_depth_gt_2
+    status: active
+    description: "Signal chains must not exceed 2 hops depth. A→B→C is allowed; A→B→C→D is forbidden. Use fan-out (A signals B, C, D directly) instead of deep chains."
+    why: "Deep signal chains become undebuggable — a broken link in the middle silently stops downstream effects. Fan-out keeps the dependency graph shallow and explicit."
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+
+  - pattern: untyped_signal_param
+    status: active
+    description: "All signal parameters must have explicit type annotations. signal foo(data) is forbidden; signal foo(node_id: String, amount: int) is required."
+    why: "Untyped params accept any Variant at emit time, bypassing type safety. GDScript compiler cannot validate untyped signal signatures, leaving type errors to surface only at runtime."
+    adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
 
 # Example:
 #

@@ -228,6 +228,7 @@ graph LR
     subgraph 核心架构["核心架构文档"]
         MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
         TR["tr-registry.yaml<br/>技术需求注册表"]
+        ADR["ADR-0001 / ADR-0002<br/>架构决策记录<br/>(2/17 complete)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -254,7 +255,9 @@ graph LR
 |------|------|
 | [architecture.md](architecture/architecture.md) | 主架构 — v1 签收 (TD+LP 双签收) |
 | [tr-registry.yaml](architecture/tr-registry.yaml) | 52 条技术需求注册表 |
-| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 |
+| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 |
+| [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构与启动顺序 |
+| [architecture/adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: 基于 Signal 的跨系统通信协议 |
 | [COLLABORATIVE-DESIGN-PRINCIPLE.md](COLLABORATIVE-DESIGN-PRINCIPLE.md) | 协作设计原则 |
 | [WORKFLOW-GUIDE.md](WORKFLOW-GUIDE.md) | 完整工作流指南 (1684 行) |
 | [examples/](examples/) | 11 个会话流程示例 |
@@ -551,14 +554,14 @@ graph TB
 
 根据 `/create-architecture` Phase 8 结论，以下文档待创建：
 
-- [ ] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/adr/`
-  - ADR-0001: Content Registry pattern
-  - ADR-0002: Save/Load architecture
-  - ADR-0003: Interaction system
-  - ADR-0004: Resource economy
-  - ADR-0005: Knowledge/Intel state machine
-  - ADR-0006: UI modal stack & input routing
-  - ... 等共 17 个
+- [ ] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/`
+  - [x] ADR-0001: Autoload/Scene 架构与启动顺序 ✅
+  - [x] ADR-0002: 基于 Signal 的跨系统通信协议 ✅
+  - [ ] ADR-0003: 存档系统 — 快照包与 JSON 序列化
+  - [ ] ADR-0004: 交互系统 — @abstract Handler + Registry
+  - [ ] ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit
+  - [ ] ADR-0006: Web 平台约束与引擎兼容性
+  - ... 等共 17 个 (2/17 complete)
 - [ ] **Control Manifest** — `docs/architecture/control-manifest.md`
 - [ ] **Epics** — 按系统分组的 Epic 文件
 - [ ] **技术偏好完整配置** — `.claude/docs/technical-preferences.md`
