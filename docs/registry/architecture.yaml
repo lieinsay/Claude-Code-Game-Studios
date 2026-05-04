@@ -88,6 +88,80 @@ state_ownership:
     added: 2026-05-04
     revised: ""
 
+  - state: snapshot_serializer_registry
+    status: active
+    owner_system: Persistence (#3 local-save-world-state-persistence)
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    interface: "register_domain_serializer(domain_id, serializer) / unregister_domain_serializer(domain_id) — 领域系统注册/注销其快照序列化器"
+    write_access: Persistence-only (registry management); domain systems call register/unregister
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: artifact_generation
+    status: active
+    owner_system: Persistence (#3 local-save-world-state-persistence)
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    interface: "query_continue_state() → current_generation (read-only int); 只能通过 promotion_success 递增"
+    write_access: Persistence-only (internal promotion logic)
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+  - state: world_interaction_focus
+    status: active
+    owner_system: InteractionRegistry (#3 interaction-registry)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    interface: "query_focus_state() → Dictionary (typed keys: world_focus_id, display_hint, focus_state, last_block_reason, candidate_count, is_input_open) — UIManager polls each frame"
+    write_access: InteractionRegistry-only
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: interaction_candidate_pool
+    status: active
+    owner_system: InteractionRegistry (#3 interaction-registry)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    interface: "register(target: Interactable) / unregister(target: Interactable) — Interactable nodes register/unregister in _ready()/exit_cleanup(); query_candidate_pool() → Array[Interactable] for debugging"
+    write_access: InteractionRegistry-only (pool management); Interactable nodes call register/unregister
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+  - state: resource_pools_1_3
+    status: active
+    owner_system: ResourcesManager (#5 resources-manager)
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    interface: "Pools 1 (on_person), 2 (in_storage), 3 (loaded) — accessed via add/remove/transfer/consume/discard operations. Read via get_storage_summary/get_cargo_bay_summary/get_carry_summary. All operations return ResourceResult."
+    write_access: ResourcesManager-only; domain systems call operations, never modify pools directly
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+
+  - state: resource_pool_capacity_bonuses
+    status: active
+    owner_system: ResourcesManager (#5 resources-manager)
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    interface: "set_carry_slot_bonus(bonus) / set_carry_volume_bonus(bonus) / set_storage_volume_bonus(bonus) / set_cargo_module_volume_bonus(bonus) — injected by partner/module/backpack systems"
+    write_access: ResourcesManager-only (bonus storage); domain systems call setters
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+  - state: web_lifecycle_state
+    status: active
+    owner_system: SessionShell (#2 platform-session-shell)
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    interface: "JavaScriptBridge callbacks: _on_visibility_changed(state) / _on_page_resume(persisted). SessionShell owns lifecycle state machine (boot → title → loading → playing → paused → error). Persistence receives pagehide emergency save trigger."
+    write_access: SessionShell-only (lifecycle transitions); Persistence reads pagehide events
+    referenced_by:
+      - docs/architecture/adr-0006-web-platform-constraints.md
+    added: 2026-05-04
+    revised: ""
+
 # Example:
 #
 # state_ownership:
@@ -189,6 +263,160 @@ interfaces:
     signal_signature: "{noun}_{verb_past} — past tense for all cross-system signals (e.g., resource_deposited, route_committed). Matches Godot built-in style (pressed, timeout, finished)."
     referenced_by:
       - docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: snapshot_package_contract
+    status: active
+    pattern: direct_call
+    producer: (domain systems — Resources, Intel, Chart, WorldRepair, AirshipHub, Settlement, Exploration, Partner, Settings)
+    consumers:
+      - Persistence (#3)
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    signal_signature: "register_domain_serializer(domain_id: String, serializer: Callable) — serializer returns SnapshotPackage (RefCounted). SnapshotPackage.to_canonical_json() → deterministic JSON string. Persistence validates but does not interpret payload."
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: save_staging_protocol
+    status: active
+    pattern: direct_call
+    producer: Persistence (#3)
+    consumers:
+      - SessionShell (consumes save_completed/load_completed/load_failed signals)
+      - UIManager (consumes save_completed/save_failed for toast/feedback)
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    signal_signature: "request_save(trigger: int) → SaveRequestResult; request_load(slot: int) → LoadRequestResult. Async completion: save_completed(slot: int) / save_failed(slot: int, reason: String) / load_completed(slot: int) / load_failed(slot: int, reason: String)"
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+  - contract: interaction_focus_changed_signal
+    status: active
+    pattern: signal
+    producer: InteractionRegistry (#3)
+    consumers:
+      - UIManager (updates focus indicator UI)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    signal_signature: "interaction_focus_changed(focused_id: StringName) — emits only when world focus changes; UIManager polls query_focus_state() for full state"
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: interaction_used_signal
+    status: active
+    pattern: signal
+    producer: InteractionRegistry (#3)
+    consumers:
+      - FeedbackManager (plays confirmation feedback)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    signal_signature: "interaction_used(target_id: StringName, interaction_type: StringName) — fire-and-forget feedback notification; domain dispatch via handle_use() method call"
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+    note: "Supersedes ADR-0002 definition of interaction_used — narrowed to feedback-only (consumer: FeedbackManager). Domain systems consume Use requests via handle_use() method call."
+
+  - contract: use_blocked_signal
+    status: active
+    pattern: signal
+    producer: InteractionRegistry (#3)
+    consumers:
+      - FeedbackManager (plays block feedback SFX/VFX)
+      - UIManager (shows block reason toast)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    signal_signature: "use_blocked(target_id: StringName, block_reason: StringName) — block_reason: input_closed / ui_modal_blocked / no_focus / target_disabled / blocked / too_far / target_busy"
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: use_dispatch_hybrid
+    status: active
+    pattern: signal
+    producer: InteractionRegistry (#3)
+    consumers:
+      - (domain Interactable subclasses — handle_use() method call)
+      - FeedbackManager (interaction_used signal)
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    signal_signature: "Hybrid: interaction_used signal (fire-and-forget feedback) + handle_use(player_id: StringName) → UseResult method call (request-response domain dispatch). Signal for feedback notification; method call for domain consequence."
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+  - contract: resource_operation_contract
+    status: active
+    pattern: direct_call
+    producer: ResourcesManager (#5)
+    consumers:
+      - AirshipHub (storage/cargo interactable delegates)
+      - ExplorationScene (add_loot, extract_carried)
+      - Settlement (execute_purchase, list_for_sale)
+      - WorldRepair (commit_deposit)
+      - Combat (consume_in_combat)
+      - Intel (consume_intel)
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    signal_signature: "All operations return ResourceResult enum (SUCCESS / ERR_TARGET_FULL / ERR_SOURCE_INSUFFICIENT / ERR_CAPACITY_ZERO / ERR_INVALID_QUANTITY / ERR_MISSING_REFERENCE / ERR_DEPRECATED_ID / ERR_STORAGE_FULL / ERR_CARRY_SLOTS_FULL / ERR_CARRY_STACK_FULL / ERR_CARGO_NOT_IN_BAY / ERR_BUSY / ERR_KIND_MISMATCH). Atomic: all-or-nothing."
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: resource_signal_contract
+    status: active
+    pattern: signal
+    producer: ResourcesManager (#5)
+    consumers:
+      - UIManager (pool_changed, resource_added, resource_removed, transfer_completed, cargo_unpacked, mass_changed)
+      - FeedbackManager (resource_added, resource_removed, cargo_unpacked, deposit_committed, deposit_failed)
+      - WorldRepair (deposit_committed, deposit_failed)
+      - AirshipModuleSystem (mass_changed)
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    signal_signature: "8 typed signals: pool_changed(pool_id: StringName) / resource_added(pool_id, resource_id: StringName, quantity: int) / resource_removed(pool_id, resource_id: StringName, quantity: int) / transfer_completed(from_pool, to_pool: StringName, resource_id: StringName, quantity: int) / cargo_unpacked(cargo_id, resource_id: StringName, quantity: int) / deposit_committed(repair_node_id: StringName) / deposit_failed(repair_node_id: StringName, reason: StringName) / mass_changed(new_mass: int). Emit-after-mutation. Re-entrancy guard: ERR_BUSY."
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+    note: "Supersedes ADR-0002 provisional resource signal entries — pool_changed type corrected from int to StringName; deposit_committed param renamed node_id→repair_node_id; deposit_failed added as paired signal."
+
+  - contract: resource_persistence_contract
+    status: active
+    pattern: direct_call
+    producer: ResourcesManager (#5)
+    consumers:
+      - Persistence (#3 — receives progress.resources snapshot)
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    signal_signature: "register_domain_serializer("resources", _serialize_resources) / _deserialize_resources(snapshot). Snapshot contains pools 1-3 (on_person, in_storage, loaded) + capacity bonuses. Canonical JSON encoding per ADR-0003."
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+  - contract: web_lifecycle_contract
+    status: active
+    pattern: direct_call
+    producer: Custom HTML Shell (JavaScriptBridge)
+    consumers:
+      - SessionShell (visibilitychange, pageshow events)
+      - Persistence (pagehide emergency save trigger)
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    signal_signature: "JavaScriptBridge → SessionShell._on_visibility_changed(state: String) / SessionShell._on_page_resume(persisted: bool); JavaScriptBridge → Persistence._emergency_save() on pagehide. Custom HTML shell required for lifecycle event capture."
+    referenced_by:
+      - docs/architecture/adr-0006-web-platform-constraints.md
+    added: 2026-05-04
+    revised: ""
+
+  - contract: web_audio_activation_contract
+    status: active
+    pattern: direct_call
+    producer: SessionShell (first user interaction detection)
+    consumers:
+      - FeedbackManager (resumes pending audio playback)
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    signal_signature: "SessionShell._on_first_user_interaction() → AudioServer.set_bus_mute(master, false). Title screen 'click to start' button triggers first interaction. No AudioStreamPlayer.autoplay."
+    referenced_by:
+      - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
     revised: ""
 
@@ -317,6 +545,69 @@ api_decisions:
     added: 2026-05-04
     revised: ""
 
+  - purpose: canonical_json_encoding
+    status: active
+    api: "JSON.stringify() / JSON.parse_string() with pre-sort canonicalization: recursive key bytewise-ascending sort, NFC normalization, IEEE 754 finite float only, -0.0→0.0, explicit null, empty payload as {}"
+    not: "store_var() / get_var() Variant blob; ResourceSaver / ResourceLoader for authority format; Dictionary dump without canonical sorting"
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    reason: "Deterministic encoding required for checksum verification and cross-session integrity. Variant blobs have undefined ordering and platform-dependent encoding — GDD explicitly forbids. JSON is human-readable for debugging and has stable cross-version parsing."
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: save_storage_backend
+    status: active
+    api: "Godot FileAccess + user:// path (maps to IndexedDB on Web export); custom HTML shell + JavaScriptBridge for lifecycle events (visibilitychange, pagehide, pageshow)"
+    not: "Pure IndexedDB via JavaScriptBridge for all storage (adds unnecessary cross-boundary complexity); Pure GDScript user:// without lifecycle JS bridge (lifecycle-blind — GDD forbids)"
+    adr: docs/architecture/adr-0003-save-system-snapshot-json.md
+    reason: "Godot 4.6 Web export maps user:// to IndexedDB, providing native FileAccess API. JS bridge is used only for lifecycle events that Godot engine cannot reliably capture (pagehide, visibilitychange). This avoids duplicating storage logic while ensuring Web lifecycle compliance."
+    referenced_by:
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+    added: 2026-05-04
+    revised: ""
+  - purpose: abstract_interactable_pattern
+    status: active
+    api: "@abstract decorator (Godot 4.5+) on Interactable.handle_use() — all interactable objects extend Interactable base class with @export fields (interaction_id, anchor_radius, priority, interaction_type)"
+    not: "Component pattern (InteractionComponent child node); String-based dispatch (interaction_type string matching to route to domain systems); Interface/duck-typing without @abstract enforcement"
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    reason: "@abstract enforces handle_use() implementation at scene load time (not runtime); class_name provides IDE refactoring support and type-safe registration. Component pattern adds indirection without benefit; String-based dispatch loses type safety and creates God Object risk in InteractionRegistry."
+    referenced_by:
+      - docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+    revised: ""
+  - purpose: dictionary_pool_storage
+    status: active
+    api: "Dictionary[StringName, Dictionary] for 6-pool resource storage — each pool: {stacks: Array[{resource_id: StringName, quantity: int}], capacity: Dictionary}"
+    not: "Godot Resource typed pools (ResourceStack extends Resource — .tres serialization conflicts with Canonical JSON); typed class per pool (adds boilerplate without benefit beyond Dictionary key conventions)"
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    reason: "Dictionary maps directly to JSON.stringify() for ADR-0003 snapshot persistence without conversion layer. StringName keys provide O(1) comparison. 100+ stacks at ~100 bytes each is memory negligible."
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+
+  - purpose: resource_result_enum
+    status: active
+    api: "ResourceResult enum (13 variants: SUCCESS + 12 ERR_* codes) — all resource operations return typed ResourceResult"
+    not: "bool returns (lose failure reason); null returns (ambiguous — null could mean empty pool); exception-based error handling (GDScript exceptions are runtime-only, no compile-time exhaustiveness)"
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    reason: "Typed enum enables exhaustive match statements, precise UI error messages per failure mode (e.g., '物品栏已满' vs '堆叠已达上限'), and testability of each error path independently."
+    referenced_by:
+      - docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+    revised: ""
+  - purpose: web_export_config
+    status: active
+    api: "GDScript only (no C#) + single-threaded export + Compatibility renderer (WebGL 2) + user:// → IndexedDB. Custom HTML shell for lifecycle events."
+    not: "C# scripts (cannot export to Web); GDExtension in Web export path; threaded export (requires COOP/COEP headers — unsupported by common static hosts); Vulkan/Forward+ renderer (not available on Web)"
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    reason: "GDScript is the only language that can export to Web in Godot 4. Single-threaded export deploys to any static host without COOP/COEP requirements. Compatibility renderer maps to WebGL 2 — the only GPU API available in browser. user:// → IndexedDB is Godot 4.6 Web export default."
+    referenced_by:
+      - docs/architecture/adr-0006-web-platform-constraints.md
+    added: 2026-05-04
+    revised: ""
+
 # Example:
 #
 # api_decisions:
@@ -403,6 +694,45 @@ forbidden_patterns:
     description: "All signal parameters must have explicit type annotations. signal foo(data) is forbidden; signal foo(node_id: String, amount: int) is required."
     why: "Untyped params accept any Variant at emit time, bypassing type safety. GDScript compiler cannot validate untyped signal signatures, leaving type errors to surface only at runtime."
     adr: docs/architecture/adr-0002-signal-communication-protocol.md
+    added: 2026-05-04
+  - pattern: string_based_interaction_dispatch
+    status: active
+    description: "InteractionRegistry must not route Use requests by matching interaction_type string to domain system handlers. Domain dispatch uses Interactable.handle_use() method call, not string-keyed handler lookup."
+    why: "String-based dispatch loses type safety (typo in interaction_type = runtime failure), requires InteractionRegistry to know every domain system API (God Object), and prevents IDE from finding all Use handlers. @abstract handle_use() keeps each Interactable subclass responsible for its own domain delegation."
+    adr: docs/architecture/adr-0004-interaction-handler-abstract.md
+    added: 2026-05-04
+  - pattern: cross_system_resource_state_write
+    status: active
+    description: "Domain systems must not modify resource pool contents directly. All resource mutations must go through ResourcesManager operations (add/remove/transfer/consume/discard)."
+    why: "ResourcesManager is the single authoritative source for all resource state. Direct writes bypass capacity checks, stack merge logic, signal emission, and atomicity guarantees. This would cause desynchronization between actual pool state and what UIManager displays."
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+
+  - pattern: resource_signal_callback_mutation
+    status: active
+    description: "Signal handlers (callbacks connected to resource_added, resource_removed, etc.) must not call ResourcesManager mutation methods (add/remove/transfer/consume/discard/commit_deposit). Re-entrant mutation returns ERR_BUSY."
+    why: "Signal callbacks execute synchronously within the emit() call stack. A mutation during a signal callback would modify pool state while the original operation is still finalizing, breaking atomicity and potentially causing infinite recursion. Use call_deferred() to schedule follow-up mutations."
+    adr: docs/architecture/adr-0005-resource-pool-system.md
+    added: 2026-05-04
+  - pattern: thread_api_usage
+    status: active
+    description: "Do not use Thread, Mutex, Semaphore, or WorkerThreadPool APIs anywhere in the project. All code must assume single-threaded execution on the browser main thread."
+    why: "Web export uses single-threaded mode (threaded export requires COOP/COEP headers unavailable on common static hosts). Thread APIs will cause runtime errors or silent failure in Web export. All game logic must complete within 16.6ms/frame on the main thread."
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    added: 2026-05-04
+
+  - pattern: csharp_for_web
+    status: active
+    description: "Do not use C# scripts for any code that must run in the Web export. All game logic must be GDScript. C# files (.cs) in the project are a Web export blocking error."
+    why: "Godot 4 C# projects cannot be exported to Web — this is a hard engine limitation. C# assemblies are not compiled to WebAssembly in the Godot Web export pipeline."
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
+    added: 2026-05-04
+
+  - pattern: gdextension_for_web
+    status: active
+    description: "GDExtension libraries (.gdextension, .dll, .so, .dylib) must not be listed as dependencies for the Web export path. Desktop development may use GDExtensions for editor tools only — these must be excluded from Web CI build steps."
+    why: "GDExtension native libraries cannot run in browser WebAssembly environment. Including them in Web export causes build failure."
+    adr: docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
 
 # Example:

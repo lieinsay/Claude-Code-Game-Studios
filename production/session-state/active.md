@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Technical Setup
-Feature: Foundation ADRs (2/6 complete)
-Task: ADR-0002 Complete → Next: ADR-0003 存档系统
+Feature: Foundation ADRs (6/6 complete)
+Task: ADR-0006 Complete — Foundation 层完成
 <!-- /STATUS -->
 
 ## Current: /create-architecture — All 8 Phases Complete

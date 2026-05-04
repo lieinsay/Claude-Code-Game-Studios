@@ -28,7 +28,7 @@
 3. 移动只改变玩家的位置、速度、朝向和移动状态；移动本身不得触发购买、采集、修复、安装模块、打开商店或推进世界状态。
 4. `Use` 是意图请求，不是结果。领域系统可以接受、拒绝、锁定、耗时处理或返回阻断原因；本系统不得自行执行领域后果。
 5. 每个可交互对象必须提供稳定 ID、交互锚点、交互半径、可用状态、优先级和阻断原因。显示名、节点路径或临时引用不得作为交互身份来源。
-6. 交互必须通过可达性检查：玩家在范围内、目标未被遮挡或阻断、目标当前可用、玩法输入门打开，才允许发出 `use_requested`。
+6. 交互必须通过可达性检查：玩家在范围内、目标未被遮挡或阻断、目标当前可用、玩法输入门打开，才允许发出 `interaction_used`。
 7. 同一时刻只有一个世界交互焦点。UI `Control` 焦点和世界交互焦点必须分离；壳层或 HUD overlay 可见时，世界交互焦点冻结或清空。
 8. 焦点选择优先级为：明确鼠标指向或点击目标、最近的可达目标、上一个仍有效焦点。多个目标同时可达时，用优先级、距离和稳定滞回决定唯一焦点。
 9. 焦点切换必须稳定，不得因鼠标轻微抖动、玩家站在两个锚点边缘或候选短暂进出范围而快速闪烁。
@@ -90,7 +90,7 @@ Transitions:
 - `Candidate -> Focused`: 候选通过优先级、距离、可达性和滞回稳定检查。
 - `Focused -> NoFocus`: 目标离开范围、被遮挡、禁用、销毁或输入门关闭。
 - `Focused -> UsePending`: 玩家按下 `Use` 且输入门打开。
-- `UsePending -> UseLocked`: `use_requested` 成功发给领域系统。
+- `UsePending -> UseLocked`: `interaction_used` 成功发给领域系统。
 - `UsePending -> Focused`: 请求被本系统可达性检查拒绝，并输出阻断原因。
 - `UsePending -> NoFocus`: 输入门关闭或焦点目标在帧间消失/禁用（绕过中间 Focused 状态，避免同帧双事件抖动）。
 - `UseLocked -> Focused / NoFocus`: 领域系统返回完成、拒绝、取消、超时或释放锁定。
@@ -102,10 +102,10 @@ Transitions:
 | System | This System Receives | This System Sends | Boundary |
 |---|---|---|---|
 | `平台与会话壳` | `input_gate_open` / `input_gate_reacquire` / `input_gate_closed`, overlay and resume gate state | none required | 壳层决定玩法输入是否可进来；本系统不判断浏览器生命周期 |
-| `飞艇家园 Hub` | walkable areas, room bounds, interaction anchors, station availability | `use_requested`, focus events, movement state | Hub 拥有舱室与站点后果；本系统只负责抵达和使用入口 |
-| `探索 / 搜撤场景` | walkable areas, extraction anchors, loot/search anchors, threat blockers | `use_requested`, blocked reasons, movement state | 探索系统拥有搜撤、奖励、撤离和危险后果 |
-| `空港 / 村镇状态与集市交易` | stall anchors, NPC / stall availability, market blockers | `use_requested` for stall or NPC focus | 市集系统拥有购买、货品、价格和库存变化 |
-| `世界修复与解锁` | repair node anchors and repair availability | `use_requested` for repair nodes | 修复系统拥有材料消耗、解锁和世界状态变化 |
+| `飞艇家园 Hub` | walkable areas, room bounds, interaction anchors, station availability | `interaction_used`, focus events, movement state | Hub 拥有舱室与站点后果；本系统只负责抵达和使用入口 |
+| `探索 / 搜撤场景` | walkable areas, extraction anchors, loot/search anchors, threat blockers | `interaction_used`, blocked reasons, movement state | 探索系统拥有搜撤、奖励、撤离和危险后果 |
+| `空港 / 村镇状态与集市交易` | stall anchors, NPC / stall availability, market blockers | `interaction_used` for stall or NPC focus | 市集系统拥有购买、货品、价格和库存变化 |
+| `世界修复与解锁` | repair node anchors and repair availability | `interaction_used` for repair nodes | 修复系统拥有材料消耗、解锁和世界状态变化 |
 | `玩家知识与情报` | location boundary triggers from scene/domain systems | `player_arrived_at(location_id)` when player enters a location zone | 情报系统拥有知识状态变更；本系统只负责检测到达并发送事件 |
 | `UI / HUD / 航图界面` | modal / overlay blocking state, optional tooltip presentation policy | focus target, blocked reason, prompt hint, movement/focus state | UI 只显示焦点和原因，不判定可达性 |
 | `反馈、特效与音频语义` | none required for MVP | semantic events such as focus changed, use blocked, use requested, movement blocked | 反馈系统表现语义，不拥有规则 |
@@ -388,15 +388,15 @@ The `use_gate` formula is defined as:
 
 1. **Signal（即发即忘，供反馈系统消费）：**
    ```
-   signal use_requested(target_id: StringName, target_display_hint: String)
+   signal interaction_used(target_id: StringName, interaction_type: StringName)
    ```
    用于 `反馈、特效与音频语义` 系统播放确认视觉/音频。不返回结果。
 
 2. **Method Call（请求-响应，供领域系统消费）：**
    ```
-   func request_use(target_id: StringName) -> UseResult
+   func handle_use(player_id: StringName) -> UseResult
    ```
-   调用领域系统的 `handle_use(target_id)` 方法。领域系统返回 `UseResult`（accepted / rejected / busy / timeout）。若为 accepted，进入 `UseLocked`；若为 rejected，输出 `block_reason`。
+   调用领域系统的 `handle_use(player_id)` 方法。领域系统返回 `UseResult`（accepted / rejected / busy / timeout）。若为 accepted，进入 `UseLocked`；若为 rejected，输出 `block_reason`。
 
 领域系统在接受锁定后负责通过回调或信号释放锁（`release_use_lock(target_id)`），本系统不自行判定领域后果。
 
@@ -405,9 +405,9 @@ The `use_gate` formula is defined as:
 - **If the shell is loading, background suspended, in an error state, showing an overlay, or reporting `InputReacquire`**: treat this system as `InputClosed`; discard movement and `Use` inputs immediately, with no queueing and no replay.
 - **If the first keyboard or mouse input arrives after browser focus / visibility recovery**: consume it only for shell reactivation; do not produce movement, focus confirmation, or `Use` until a later valid gameplay input edge.
 - **If the player is holding movement or `Use` during `InputReacquire`**: do not backfill any action when input opens; the player must release and press again.
-- **If a `Control` UI element has focus and the player presses `Use`**: route the input only to UI; do not emit `use_requested`, and keep or freeze the world focus.
+- **If a `Control` UI element has focus and the player presses `Use`**: route the input only to UI; do not emit `interaction_used`, and keep or freeze the world focus.
 - **If a HUD or shell modal is visible even though `Control` focus has not changed**: freeze world focus and block all `Use` attempts with `ui_modal_blocked`.
-- **If the player clicks empty world space**: keep the current world focus if it remains valid; otherwise stay in `NoFocus`; do not emit `use_requested`.
+- **If the player clicks empty world space**: keep the current world focus if it remains valid; otherwise stay in `NoFocus`; do not emit `interaction_used`.
 - **If small mouse jitter causes multiple targets to enter the candidate pool**: retain the current valid focus first; otherwise choose only the highest `focus_score` target.
 - **If two candidates have equal `focus_score` or tie at the focus threshold**: keep the current focus if valid; otherwise break the tie by higher author priority, then shorter distance, then stable ID order.
 - **If multiple interactable targets are valid and the mouse does not clearly point at one**: select exactly one world focus by `focus_score`; never highlight multiple world targets as active focus.
@@ -417,7 +417,7 @@ The `use_gate` formula is defined as:
 - **If a target is blocked by geometry, building pieces, scene boundaries, or another blocking entity**: remove it from interactable eligibility; return `Blocked(blocked)` for `use_gate`; if it was focused, clear focus or choose the next valid candidate.
 - **If the current focus is blocked, disabled, destroyed, or moved out of range on the same frame as `Use`**: fail `Use`, emit no domain consequence, and report the latest valid block reason.
 - **If `target_busy = true` while the target remains visible and reachable**: keep focus if appropriate, but block `Use` with `target_busy` and do not enter `UseLocked`.
-- **If `use_requested` has been emitted and the domain system accepts a lock**: enter `UseLocked`; optionally place movement in `Rooted`; reject repeated `Use` until the domain system releases the lock.
+- **If `interaction_used` has been emitted and the domain system accepts a lock**: enter `UseLocked`; optionally place movement in `Rooted`; reject repeated `Use` until the domain system releases the lock.
 - **If the domain system times out or fails to release a `UseLocked` interaction**: cancel the pending `Use`, release movement lock, and re-evaluate focus; do not automatically resubmit `Use`.
 - **If the player presses movement or repeatedly presses `Use` during `UseLocked`**: ignore those inputs; do not queue, repeat, or execute them after unlock.
 - **If a scene transition begins while the player is in `Focused`, `UsePending`, or `UseLocked`**: close input immediately, clear world focus, and cancel or let the old domain system safely finish the current `Use`; the new scene must not inherit old focus or replay old `Use`.
@@ -431,7 +431,7 @@ The `use_gate` formula is defined as:
 - **If the player presses Tab and wraps around the candidate list**: seamlessly return to the highest-scoring candidate without a gap or double-press requirement.
 - **If the player presses `Use` within `input_buffer_window` (default 0.10s) before the focus stabilizes or before `UseLocked` releases**: buffer the input and re-evaluate at the end of the window. If still valid, proceed with `Use`; if the window expires, discard silently.
 - **If the player presses `Use` during `UseLocked` on a different target than the locked one**: block with `target_busy` on the new target; do not queue.
-- **If a `movement_blocked` event and a `focus_changed` event occur on the same frame**: `focus_changed` takes priority per the event priority rule (`focus_changed` > `movement_blocked`); the `movement_blocked` event is suppressed for that frame.
+- **If a `movement_blocked` event and a `interaction_focus_changed` event occur on the same frame**: `interaction_focus_changed` takes priority per the event priority rule (`interaction_focus_changed` > `movement_blocked`); the `movement_blocked` event is suppressed for that frame.
 - **If the same target ID is reused after the original object was destroyed and re-created**: treat as a new target; do not carry over old focus state, sticky bonuses, or pending Use. Requires fresh reachability and availability checks.
 - **If `acquire_margin >= retain_margin` due to configuration error**: log a validation warning on startup; fall back to `acquire_margin = retain_margin * 0.5` to preserve hysteresis.
 
@@ -447,7 +447,7 @@ The `use_gate` formula is defined as:
 软依赖：
 
 - `UI / HUD / 航图界面`：显示当前焦点、可用提示、阻断原因和交互反馈；若 UI 尚未完整，本系统仍可通过调试提示或最小提示运行。
-- `反馈、特效与音频语义`：表现 `focus_changed`、`use_requested`、`use_blocked`、`movement_blocked` 等语义事件；MVP 可先用轻量视觉提示替代完整音画反馈。
+- `反馈、特效与音频语义`：表现 `interaction_focus_changed`、`interaction_used`、`use_blocked`、`movement_blocked` 等语义事件；MVP 可先用轻量视觉提示替代完整音画反馈。
 - `内容数据与状态注册表`：长期应提供稳定目标 ID 和交互类型定义；MVP 可以由场景作者临时配置，但不得使用显示名或节点路径作为最终交互身份。
 - `本地存档与世界状态持久化`：本系统不直接写档；若某些场景需要保存玩家位置或交互状态，应由场景或领域系统把可保存状态交给存档系统。
 
@@ -466,7 +466,7 @@ The `use_gate` formula is defined as:
 边界声明：
 
 - 本系统不拥有货币、库存、资源、修复、市场、模块安装、探索奖励、战斗、剧情或存档结果。
-- 本系统不打开领域 UI；它只发送 `use_requested`，由领域系统决定是否打开 UI。
+- 本系统不打开领域 UI；它只发送 `interaction_used`，由领域系统决定是否打开 UI。
 - 本系统不做自动寻路、不跨场景保持焦点、不跨房间远程交互。
 - 本系统不直接订阅浏览器 `visibilitychange`、`pagehide`、`focus` 等事件；这些都由 `平台与会话壳` 归一化后传入。
 - 下游系统可以拒绝 `Use`，但必须返回可解释的原因，不能让交互静默失败。
@@ -528,14 +528,14 @@ The `use_gate` formula is defined as:
 
 | Field | Type | Description |
 |---|---|---|
-| `event_type` | enum | `focus_changed` / `use_requested` / `use_blocked` / `movement_blocked` / `input_gate_changed` |
+| `event_type` | enum | `interaction_focus_changed` / `interaction_used` / `use_blocked` / `movement_blocked` / `input_gate_changed` |
 | `timestamp` | float | 事件发生时刻（秒，游戏时间） |
 | `source_system` | string | 固定为 `player_movement_interaction` |
 | `payload` | dict | 事件特定数据（见各事件定义） |
 
 ### Event Definitions
 
-#### focus_changed
+#### interaction_focus_changed
 
 触发时机：世界焦点从旧目标切换为新目标（包括清空为 NoFocus）。
 
@@ -544,7 +544,7 @@ The `use_gate` formula is defined as:
 | `previous_focus_id` | stable id / null | 旧焦点目标 ID，null 表示之前无焦点 |
 | `new_focus_id` | stable id / null | 新焦点目标 ID，null 表示清空 |
 | `transition_reason` | enum | `acquired` / `lost` / `switched` / `cleared` |
-| `target_display_hint` | string / null | 新焦点目标的简短显示提示文案 |
+| `interaction_type` | string / null | 新焦点目标的简短显示提示文案 |
 
 **最低视觉需求：**
 - 焦点获取 (`acquired` / `switched`)：目标上方或附近出现轻量高亮轮廓（2px, 半透明暖色），
@@ -558,14 +558,14 @@ The `use_gate` formula is defined as:
 - `lost` / `cleared`：无音频（避免频繁切换造成噪声）
 - `switched`：极短音（~40ms），与 `acquired` 同音色但半音高
 
-#### use_requested
+#### interaction_used
 
-触发时机：`use_gate = Allowed`，`use_requested` 成功发送给领域系统。
+触发时机：`use_gate = Allowed`，`interaction_used` 成功发送给领域系统。
 
 | Payload Key | Type | Description |
 |---|---|---|
 | `target_id` | stable id | 被使用的目标 ID |
-| `target_display_hint` | string | 目标简短显示名 |
+| `interaction_type` | string | 目标简短显示名 |
 
 **最低视觉需求：**
 - 目标上出现确认闪光（单帧白色闪白 + 0.2s 快速衰减至透明）
@@ -574,11 +574,11 @@ The `use_gate` formula is defined as:
 
 **最低音频需求：**
 - 短促确认音（~120ms），中性正向音色
-- 音高略低于 `focus_changed` 获取音，与 `use_blocked` 形成对比
+- 音高略低于 `interaction_focus_changed` 获取音，与 `use_blocked` 形成对比
 
 #### use_blocked
 
-触发时机：`use_gate = Blocked(reason)`，`use_requested` 未被发送。
+触发时机：`use_gate = Blocked(reason)`，`interaction_used` 未被发送。
 
 | Payload Key | Type | Description |
 |---|---|---|
@@ -598,7 +598,7 @@ The `use_gate` formula is defined as:
 - 统一轻阻断音（~60ms），低频闷音，音量低于环境音 8dB
 - 不同 `block_reason` 使用相同音色，由 UI 负责区分具体原因
 - `no_focus` / `input_closed` 不触发音频
-- 阻断音与 `use_requested` 确认音应有明显区别，形成"成功/失败"音频对
+- 阻断音与 `interaction_used` 确认音应有明显区别，形成"成功/失败"音频对
 
 #### movement_blocked
 
@@ -642,14 +642,14 @@ The `use_gate` formula is defined as:
 
 ### Cross-Cutting Rules
 
-1. **表现优先级**：`use_requested` > `use_blocked` > `focus_changed` > `movement_blocked`。
+1. **表现优先级**：`interaction_used` > `use_blocked` > `interaction_focus_changed` > `movement_blocked`。
    同一帧内同时触发多个事件时，只播放优先级最高的事件反馈。
 2. **音频预算**：移动/交互反馈总并发数不超过 3 个音源；超出时丢弃最早播放中的非循环音。
 3. **Web 约束**：所有音频必须在 `平台与会话壳` 的音频激活（用户手势）之后才能播放；
    激活前的语义事件保留但不播放历史音频。
 4. **色盲安全**：所有焦点和阻断视觉反馈必须同时包含非色相维度（轮廓样式、亮度变化、形状变化）；
    不得仅依赖红/绿/黄色区分状态。
-5. **表现可关闭**：玩家设置中可关闭交互辅助视觉高亮；关闭后仅保留 `use_requested` 闪白和
+5. **表现可关闭**：玩家设置中可关闭交互辅助视觉高亮；关闭后仅保留 `interaction_used` 闪白和
    `use_blocked` 红色微闪，移除焦点轮廓和持续高亮。
 
 ### MVP Scope Boundary
@@ -862,7 +862,7 @@ MVP 不做：
   `pointer_score = 1`，在得分中占最高权重。验证：玩家站在两个目标之间等距处，鼠标悬停的目标
   成为焦点。
 - [ ] **AC-FOCUS-008 — Click Empty Space**: 鼠标点击空世界空间且无目标可交互时，不发出
-  `use_requested`。验证：点击地面，无 `use_requested` 事件。
+  `interaction_used`。验证：点击地面，无 `interaction_used` 事件。
 - [ ] **AC-FOCUS-009 — Tie-Breaking**: 当两个候选目标的 `focus_score` 相等时，按作者优先级 >
   距离 > ID 字典序打破平局。验证：配置两个等属性等距离目标，焦点稳定选中 ID 靠前者。
 - [ ] **AC-FOCUS-010 — Boundary Distance (D == L)**: 当 `distance_to_anchor == reach_limit`
@@ -876,26 +876,26 @@ MVP 不做：
 ### Use Gate
 
 - [ ] **AC-USE-001 — Successful Use**: 当 `use_gate = Allowed` 且玩家按下 `Use` 键时，
-  `use_requested` 事件发送给领域系统，包含正确的 `target_id`。验证：站在目标范围内按 E，
+  `interaction_used` 事件发送给领域系统，包含正确的 `target_id`。验证：站在目标范围内按 E，
   检查事件日志包含正确的目标 ID。
 - [ ] **AC-USE-002 — Too Far Block**: 当 `distance_to_anchor > reach_limit` 时，按下 `Use` 返回
-  `Blocked(too_far)`，不发送 `use_requested`。验证：在刚好范围外按 E，收到 Toast "太远了"。
+  `Blocked(too_far)`，不发送 `interaction_used`。验证：在刚好范围外按 E，收到 Toast "太远了"。
 - [ ] **AC-USE-003 — Blocked By Geometry**: 当目标和玩家之间有阻挡体时，按下 `Use` 返回
   `Blocked(blocked)`。验证：在有墙隔开的目标前按 E，收到 Toast "过不去"。
 - [ ] **AC-USE-004 — Target Busy Block**: 当 `target_busy = true` 时，按下 `Use` 返回
   `Blocked(target_busy)`。验证：在忙碌目标前按 E，收到 Toast "稍等一下"。
 - [ ] **AC-USE-005 — No Focus Block**: 当无世界焦点时，按下 `Use` 返回 `Blocked(no_focus)`，
   不显示 Toast，但玩家角色上出现短暂微闪（~0.1s）表示输入已收到。验证：在空场景中按 E，
-  玩家角色微闪，无 Toast，无 `use_requested` 事件。
+  玩家角色微闪，无 Toast，无 `interaction_used` 事件。
 - [ ] **AC-USE-006 — UI Modal Block**: 当 UI 模态面板打开时，按下 `Use` 返回
-  `Blocked(ui_modal_blocked)`。验证：打开菜单后按 E，不发出 `use_requested`。
+  `Blocked(ui_modal_blocked)`。验证：打开菜单后按 E，不发出 `interaction_used`。
 - [ ] **AC-USE-007 — Use Lock Prevents Repeat**: 当 `world_focus_state` 为 `UseLocked` 时，
-  重复按 `Use` 不发出新的 `use_requested`。验证：在交互进行中连续按 E，事件日志只有一次
-  `use_requested`。
+  重复按 `Use` 不发出新的 `interaction_used`。验证：在交互进行中连续按 E，事件日志只有一次
+  `interaction_used`。
 - [ ] **AC-USE-008 — Use Lock Timeout**: 当领域系统在 `use_lock_timeout_seconds` 内未释放锁时，
   本系统自动取消 `UseLocked`，恢复焦点和移动。验证：模拟领域系统不释放锁，2 秒后玩家恢复控制。
 - [ ] **AC-USE-009 — Same-Frame Race Condition**: 当焦点目标在 `UsePending` 帧和 `Use` 执行帧
-  之间被禁用或销毁时，`use_gate` 返回 `Blocked(target_disabled)`，不发送 `use_requested`。
+  之间被禁用或销毁时，`use_gate` 返回 `Blocked(target_disabled)`，不发送 `interaction_used`。
   验证：脚本在玩家按 E 的同帧禁用目标，系统输出 `target_disabled` 而非崩溃。
 - [ ] **AC-USE-010 — Input Buffer**: 当玩家在 `input_buffer_window`（默认 0.10s）内提前按下
   `Use` 键（如在 `UseLocked` 释放前 2 帧按下），输入被缓冲并在窗口结束时重新评估。若仍有效则
@@ -912,7 +912,7 @@ MVP 不做：
 - [ ] **AC-BOUND-003 — No Save Direct Write**: 本系统不直接调用存档写入 API。验证：代码审查确认
   无 save/write/persist 调用。
 - [ ] **AC-BOUND-004 — Domain Consequences**: 所有 `Use` 的领域后果由领域系统执行，本系统只发送
-  `use_requested` 并等待结果。验证：对集市摊位按 E，购买逻辑不在本系统代码中。
+  `interaction_used` 并等待结果。验证：对集市摊位按 E，购买逻辑不在本系统代码中。
 - [ ] **AC-BOUND-005 — No Scene Transition Ownership**: 本系统不触发场景切换。验证：代码审查确认
   无场景加载/切换调用。
 - [ ] **AC-BOUND-006 — Focus Cleared on Scene Transition**: 场景过渡开始时，世界焦点立即清空，
@@ -922,10 +922,10 @@ MVP 不做：
 
 ### Visual/Audio Events
 
-- [ ] **AC-VFX-001 — Focus Changed Event**: 当焦点在目标之间切换时，发出 `focus_changed` 语义事件，
+- [ ] **AC-VFX-001 — Focus Changed Event**: 当焦点在目标之间切换时，发出 `interaction_focus_changed` 语义事件，
   包含正确的 `previous_focus_id` 和 `new_focus_id`。验证：在两个目标间移动，事件日志记录焦点
   变化序列。
-- [ ] **AC-VFX-002 — Use Requested Event**: 当 `use_requested` 成功发送时，发出 `use_requested`
+- [ ] **AC-VFX-002 — Use Requested Event**: 当 `interaction_used` 成功发送时，发出 `interaction_used`
   语义事件。验证：按 E 使用目标，事件日志包含正确的 `target_id`。
 - [ ] **AC-VFX-003 — Use Blocked Event**: 当 `use_gate = Blocked` 时，发出 `use_blocked` 语义事件，
   包含正确的 `block_reason`。验证：在范围外按 E，事件包含 `block_reason = too_far`。
@@ -934,7 +934,7 @@ MVP 不做：
 - [ ] **AC-VFX-005 — Input Gate Changed Event**: 当输入门状态变化时，发出 `input_gate_changed`
   语义事件。验证：暂停/恢复时事件日志记录门状态变化。
 - [ ] **AC-VFX-006 — Event Priority**: 同一帧内多个事件同时触发时，只发出优先级最高的事件。
-  验证：同时触发 `use_blocked` 和 `focus_changed` 的边界场景，日志只有 `use_blocked`。
+  验证：同时触发 `use_blocked` 和 `interaction_focus_changed` 的边界场景，日志只有 `use_blocked`。
 
 ### UI Data Contract
 
