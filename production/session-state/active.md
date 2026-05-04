@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Technical Setup
-Feature: /create-architecture Complete — Master Architecture Signed Off
-Task: Run /architecture-decision for Foundation ADRs (ADR-0001 through ADR-0006)
+Feature: Foundation ADRs (2/6 complete)
+Task: ADR-0002 Complete → Next: ADR-0003 存档系统
 <!-- /STATUS -->
 
 ## Current: /create-architecture — All 8 Phases Complete
