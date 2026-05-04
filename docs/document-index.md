@@ -1,9 +1,9 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-04
-> **项目阶段**: Technical Setup — 主架构已完成
+> **最后更新**: 2026-05-05
+> **项目阶段**: Technical Setup — Foundation ADRs 完成 (6/6)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first)
-> **文档总数**: ~320 个 .md 文件 + 9 个配置文件
+> **文档总数**: ~324 个 .md 文件 + 9 个配置文件
 
 ---
 
@@ -228,7 +228,7 @@ graph LR
     subgraph 核心架构["核心架构文档"]
         MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
         TR["tr-registry.yaml<br/>技术需求注册表"]
-        ADR["ADR-0001 / ADR-0002<br/>架构决策记录<br/>(2/17 complete)"]
+        ADR["ADR-0001~0006<br/>架构决策记录<br/>(6/17 complete)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -258,6 +258,10 @@ graph LR
 | [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 |
 | [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构与启动顺序 |
 | [architecture/adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: 基于 Signal 的跨系统通信协议 |
+| [architecture/adr-0003-save-system-snapshot-json.md](architecture/adr-0003-save-system-snapshot-json.md) | ADR-0003: 存档系统 — 快照包与 JSON 序列化 |
+| [architecture/adr-0004-interaction-handler-abstract.md](architecture/adr-0004-interaction-handler-abstract.md) | ADR-0004: 交互系统 — @abstract Handler + Registry |
+| [architecture/adr-0005-resource-pool-system.md](architecture/adr-0005-resource-pool-system.md) | ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit |
+| [architecture/adr-0006-web-platform-constraints.md](architecture/adr-0006-web-platform-constraints.md) | ADR-0006: Web 平台约束与引擎兼容性 |
 | [COLLABORATIVE-DESIGN-PRINCIPLE.md](COLLABORATIVE-DESIGN-PRINCIPLE.md) | 协作设计原则 |
 | [WORKFLOW-GUIDE.md](WORKFLOW-GUIDE.md) | 完整工作流指南 (1684 行) |
 | [examples/](examples/) | 11 个会话流程示例 |
@@ -557,11 +561,11 @@ graph TB
 - [ ] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/`
   - [x] ADR-0001: Autoload/Scene 架构与启动顺序 ✅
   - [x] ADR-0002: 基于 Signal 的跨系统通信协议 ✅
-  - [ ] ADR-0003: 存档系统 — 快照包与 JSON 序列化
-  - [ ] ADR-0004: 交互系统 — @abstract Handler + Registry
-  - [ ] ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit
-  - [ ] ADR-0006: Web 平台约束与引擎兼容性
-  - ... 等共 17 个 (2/17 complete)
+  - [x] ADR-0003: 存档系统 — 快照包与 JSON 序列化 ✅
+  - [x] ADR-0004: 交互系统 — @abstract Handler + Registry ✅
+  - [x] ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit ✅
+  - [x] ADR-0006: Web 平台约束与引擎兼容性 ✅
+  - ... 等共 17 个 (6/17 complete)
 - [ ] **Control Manifest** — `docs/architecture/control-manifest.md`
 - [ ] **Epics** — 按系统分组的 Epic 文件
 - [ ] **技术偏好完整配置** — `.claude/docs/technical-preferences.md`
