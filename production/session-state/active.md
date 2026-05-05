@@ -1,42 +1,45 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Technical Setup
-Feature: Gate Check — Technical Setup → Pre-Production
-Task: 4 阻塞项已清除 — ADR Accepted / TR Registry / Engine Config / Tech Prefs
+Epic: Pre-Production
+Feature: P3 原型 + Epic/Story 框架
+Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
 <!-- /STATUS -->
 
-## Current: /gate-check technical-setup — CONCERNS (4 blockers resolved)
+## Current: Pre-Production — 2026-05-05
 
-- **Gate Verdict**: CONCERNS — 0 hard blockers, all 4 directors returned CONCERNS
-- **Resolved Blockers** (2026-05-05):
-  1. ADR Acceptance: 11/12 Proposed → 12/12 Accepted
-  2. TR Registry: 0 entries → 52 TRs populated
-  3. Engine Config: [CHOOSE] → Godot 4.6.2 + GDScript in CLAUDE.md
-  4. Tech Preferences: [TO BE CONFIGURED] → fully populated (naming, budgets, forbidden patterns, specialists)
+### P2 已完成
 
-### Director Panel Summary
+- [x] `/architecture-review` — CONCERNS (65.4% TR coverage, Combat #12 gap)
+- [x] `/ux-design` — Hub, Chart, Exploration 三份完整 UX Spec
+- [x] `/gate-check technical-setup` — CONCERNS (11/13 artifacts, 9/9 quality, 4/4 directors CONCERNS)
 
-| Director | Verdict |
-|----------|---------|
-| Creative Director | CONCERNS (4) |
-| Technical Director | CONCERNS (7) |
-| Producer | CONCERNS (8) |
-| Art Director | CONCERNS (4) |
+### Pre-Production 入口状态
 
-### Key Files Modified
+- **Stage**: Pre-Production (已写入 `production/stage.txt`)
+- **ADRs**: 12 Accepted (0001-0012), 6 deferred (0013-0017, 0018 needed)
+- **UX Specs**: 3 complete (Hub, Chart, Exploration)
+- **Tests**: 1 example (GdUnit4 framework ready, CI wired)
+- **Art Bible**: 9 chapters complete
 
-- `CLAUDE.md` — Engine formalized: Godot 4.6.2 + GDScript
-- `.claude/docs/technical-preferences.md` — Fully populated (was all [TO BE CONFIGURED])
-- `docs/architecture/adr-0001~0012` — All 12 Accepted (9 changed from Proposed)
-- `docs/architecture/tr-registry.yaml` — 52 TR entries transcribed from architecture.md
-- `docs/document-index.md` — Updated with gate check results, artifact matrix, stats
+### 门禁留下的 Concerns（按优先级）
 
-### Pre-Production Next Steps
+| # | Concern | 严重度 | 建议动作 |
+|---|---------|--------|---------|
+| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | 创建 ADR-0018（任何战斗代码之前） |
+| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 从 3 份 UX Spec 中提取模式 |
+| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 创建独立文件 |
+| 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统进入 Production 前完成 |
+| 5 | Dual-focus + Web 生命周期未测试 | 🟡 MEDIUM | Sprint 1 Spike 任务 |
+| 6 | 仅 1 个示例测试 | 🟡 LOW | 随 Foundation/Core 实现同步编写 |
+| 7 | 无视觉参考/Mood Board | 🟡 LOW | 概念美术开始前整理 |
+| 8 | UX Specs 未交叉引用 Art Bible | 🟡 LOW | 早期 Pre-Production 轻量对齐 |
 
-- [ ] P1: `/test-setup` (gdUnit4)
-- [ ] P1: `/create-control-manifest`
-- [ ] P1: Create `design/accessibility-requirements.md`
-- [ ] P2: `/architecture-review`
-- [ ] P2: `/ux-design` for core screens (Hub, Chart, Exploration)
-- [ ] P2: CI/CD workflow (`.github/workflows/tests.yml`)
+### 关键文件
+
+- `docs/architecture/architecture-review-2026-05-05.md`
+- `docs/architecture/control-manifest.md`
+- `design/ux/hub.md`
+- `design/ux/chart.md`
+- `design/ux/exploration.md`
+- `production/stage.txt` → Pre-Production
