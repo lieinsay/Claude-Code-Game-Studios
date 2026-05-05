@@ -550,8 +550,8 @@ UX SPECS             --      --      --     --      --      --      --     █�
 | # | Concern | 严重度 | 状态 |
 |---|---------|--------|------|
 | 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | ✅ ADR-0018 已创建 (2026-05-05) |
-| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 待从 3 份 UX Spec 提取 |
-| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 待创建 |
+| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | ✅ 已创建 — 10 个交互模式 |
+| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | ✅ 已创建 — 54 TR 全覆盖矩阵 |
 | 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统 Production 前完成 |
 | 5 | Dual-focus + Web 生命周期未测试 | 🟡 MEDIUM | Sprint 1 Spike |
 | 6 | 仅 1 个示例测试 | 🟡 LOW | 随实现同步编写 |
@@ -806,8 +806,8 @@ graph TB
 
 - [x] **ADR-0018** (Combat/Threat System) — ✅ 已创建 (2026-05-05)
 - [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 对应系统进入 Production 前完成
-- [ ] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md` (Concern #3)
-- [ ] **Interaction Patterns Library** — `design/ux/interaction-patterns.md` (Concern #2)
+- [x] **Interaction Patterns Library** — `design/ux/interaction-patterns.md` ✅ 已创建 (10 个模式)
+- [x] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md` ✅ 已创建 (54 TR 全覆盖矩阵)
 - [ ] **Epics** — `production/epics/` — Foundation + Core 层 Epic
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
 - [ ] **P3 原型** — Core Loop 可玩原型 + Vertical Slice 范围定义
