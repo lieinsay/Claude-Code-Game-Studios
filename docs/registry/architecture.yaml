@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-05-04"
+last_updated: "2026-05-05"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -160,6 +160,126 @@ state_ownership:
     referenced_by:
       - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+    revised: ""
+  - state: player_knowledge_state
+    status: active
+    owner_system: IntelManager (#6 player-knowledge-intel)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    interface: "query_knowledge_state(location_id: StringName) → Dictionary; knowledge_advanced(location_id, previous_state: int, new_state: int) signal on state change"
+    write_access: IntelManager-only (consume_intel, reveal_rumor, player_arrived_at); all other systems read-only
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: player_pattern_state
+    status: active
+    owner_system: IntelManager (#6 player-knowledge-intel)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    interface: "query_pattern_state(pattern_id: StringName) → Dictionary {state: int, observation_score: int, is_confirmed_plus: bool, triggered_events: Array}; pattern_state_changed(pattern_id, previous_state: int, new_state: int) signal"
+    write_access: IntelManager-only (report_observation_event, report_pattern_usage_success); all other systems read-only
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: player_ability_state
+    status: active
+    owner_system: IntelManager (#6 player-knowledge-intel)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    interface: "query_ability_state(ability_id: StringName) → int (ABILITY_LOCKED=0 / ABILITY_UNLOCKED=1); ability_unlocked(ability_id, unlock_path: StringName) signal on unlock"
+    write_access: IntelManager-only (check_unlock_conditions internal); all other systems read-only
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: consumed_intel_ids
+    status: active
+    owner_system: IntelManager (#6 player-knowledge-intel)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    interface: "is_intel_consumed(intel_id: StringName) → bool — ResourcesManager checks before allowing consume UI"
+    write_access: IntelManager-only (consume_intel appends); ResourcesManager reads via is_intel_consumed()
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: rumor_sources_confidence
+    status: active
+    owner_system: IntelManager (#6 player-knowledge-intel)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    interface: "reveal_rumor(location_id, source_tag, hazard_tags: Array, confidence: int) → void; rumor_confidence_changed(source_tag, location_id, old_confidence: int, new_confidence: int) signal on verification adjustment"
+    write_access: IntelManager-only; Partner system writes via reveal_rumor(); verification adjustment internal
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: airship_module_slots
+    status: active
+    owner_system: AirshipModuleSystem (#8 airship-module-hull-system)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    interface: "get_slot_state(slot_id: StringName) → Dictionary {visible_state, actual_state, module_type, efficiency}; slot_state_changed(slot_id, old_state: StringName, new_state: StringName) signal on visible_state change"
+    write_access: AirshipModuleSystem-only (install/uninstall/swap/inspect/repair); Combat writes via apply_module_damage(); Navigation writes via on_voyage_return()
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: airship_hull_integrity
+    status: active
+    owner_system: AirshipModuleSystem (#8 airship-module-hull-system)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    interface: "get_hull_state() → Dictionary {integrity: int, scars: int, band: StringName}; hull_integrity_changed(old_value: int, new_value: int) signal; hull_band_changed(old_band: StringName, new_band: StringName) signal"
+    write_access: AirshipModuleSystem-only (apply_hull_damage, repair_hull, on_voyage_return); Combat writes via apply_hull_damage()
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: airship_hull_scars
+    status: active
+    owner_system: AirshipModuleSystem (#8 airship-module-hull-system)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    interface: "get_hull_state() → Dictionary (scars field: int, ≥0, no ceiling); incremented internally by apply_hull_damage() cross-band algorithm; no external write access"
+    write_access: AirshipModuleSystem-only (internal counter — incremented during apply_hull_damage)
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: encounter_context
+    status: active
+    owner_system: Navigation (#10 navigation-route-risk)
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    interface: "voyage_completed(encounter_context: Dictionary) signal — EncounterContext {route_id, destination_id, voyage_result, resolved_encounters[], accumulated_damage, revealed_hidden_tags[], hull_band_arrival, forced_landing_position, damaged_slots[]}. Produced by Navigation at voyage end; consumed by Exploration (#11) for scene generation, Persistence (#3) for progress.voyage snapshot."
+    write_access: Navigation-only (producer — _build_encounter_context()); Exploration and Persistence read-only; Combat reads via Exploration-derived ThreatContext
+    referenced_by:
+      - docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: repair_nodes
+    status: active
+    owner_system: WorldRepair (#13 world-repair-unlock)
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    interface: "get_repair_state(node_id: StringName) → int / get_repair_progress(node_id: StringName) → float / get_deposited(node_id: StringName) → Dictionary — read-only queries. Mutations via on_player_arrived_at_repair_node() and submit_deposit()."
+    write_access: WorldRepair-only (submit_deposit, on_player_arrived_at_repair_node); ResourcesManager (#5) writes via deposit_committed signal consumed internally; IntelManager (#6) reads repair state for ability unlock evaluation
+    referenced_by:
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - state: chart_routing_state
+    status: active
+    owner_system: Chart (#9 chart-route-planning)
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    interface: "get_chart_state() → StringName / get_visible_routes() → Array / get_selected_route() → StringName / get_filter_state() → Dictionary — read-only queries for UIManager (#16). Mutations via open_chart() and internal state machine transitions."
+    write_access: Chart-only (open_chart, chart_state_transition, _commit_departure, _reevaluate_all_routes); UIManager (#16) reads via 4 query methods; Persistence (#3) reads last_committed_route_id via progress.routes snapshot; Navigation (#10) consumes route_committed signal
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
     revised: ""
 
 # Example:
@@ -419,10 +539,275 @@ interfaces:
       - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
     revised: ""
+  - contract: intel_consume_contract
+    status: active
+    pattern: direct_call
+    producer: IntelManager (#6)
+    consumers:
+      - ResourcesManager (calls consume_intel when player uses intel item)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    signal_signature: "consume_intel(intel_id: StringName) → Dictionary (IntelConsumeResult). ResourcesManager owns item consumption UI and inventory; IntelManager owns knowledge/ability state change logic. Completion notified via intel_consumed(intel_id: StringName) / intel_consume_failed(intel_id: StringName, reason: StringName) signals."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: observation_event_contract
+    status: active
+    pattern: direct_call
+    producer: IntelManager (#6)
+    consumers:
+      - ExplorationSystem (report_observation_event, report_pattern_usage_success)
+      - NavigationSystem (report_observation_event, report_navigation_event)
+      - PartnerSystem (report_observation_event for partner_comment events)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    signal_signature: "report_observation_event(pattern_id: StringName, event_id: StringName) → void; report_pattern_usage_success(pattern_id: StringName) → void; report_navigation_event(event_type: StringName, payload: Dictionary) → void. Events trigger observation_score accumulation, pattern state machine transitions, and ability unlock re-evaluation."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: rumor_intake_contract
+    status: active
+    pattern: direct_call
+    producer: IntelManager (#6)
+    consumers:
+      - PartnerSystem (reveal_rumor, on_partner_joined, on_partner_left)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    signal_signature: "reveal_rumor(location_id: StringName, source_tag: StringName, hazard_tags: Array, confidence: int) → void; on_partner_joined(partner_id: StringName) → void; on_partner_left(partner_id: StringName) → void. Rumor intake triggers knowledge state transitions and rumor conflict resolution; partner join/leave updates active_crew for ability unlock condition checks."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: knowledge_query_contract
+    status: active
+    pattern: direct_call
+    producer: IntelManager (#6)
+    consumers:
+      - Chart (query_route_knowledge, query_route_accessibility)
+      - NavigationSystem (query_pattern_state)
+      - ExplorationSystem (query_location_discovery)
+      - WorldRepair (query_ability_state)
+      - UIManager (get_pattern_log, get_ability_list, query_knowledge_state)
+      - PartnerSystem (query_knowledge_state, query_pattern_state)
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    signal_signature: "7 read-only query methods returning Dictionary or int. All queries are O(1) Dictionary lookups. Downstream systems must not cache query results — always re-query IntelManager for current state."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: module_operation_contract
+    status: active
+    pattern: direct_call
+    producer: AirshipModuleSystem (#8)
+    consumers:
+      - AirshipHub (install_module, uninstall_module, swap_module, inspect_module, repair_module)
+      - ResourcesManager (consume_for_module — called within module operations)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    signal_signature: "install_module(slot_id: StringName, module_type: StringName) → int / uninstall_module(slot_id: StringName) → Dictionary / swap_module(slot_id: StringName, new_module_type: StringName) → int / inspect_module(slot_id: StringName) → int / repair_module(slot_id: StringName) → int. All return ResourceResult or Dictionary. swap_module is two-phase atomic (validate all preconditions → execute)."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: hull_damage_contract
+    status: active
+    pattern: direct_call
+    producer: AirshipModuleSystem (#8)
+    consumers:
+      - Combat (#12 — apply_hull_damage, apply_module_damage)
+      - AirshipHub (#7 — repair_hull via Station 10)
+      - Navigation (#10 — on_voyage_return)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    signal_signature: "apply_hull_damage(amount: int) → void / apply_module_damage(slot_id: StringName, damage_type: StringName) → void / repair_hull(materials: Array[StringName]) → Dictionary / on_voyage_return(damage_amount: int, damaged_slots: Array[StringName]) → void. apply_hull_damage triggers cross-band hull_scars algorithm; apply_module_damage is idempotent (no-op if already damaged)."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: departure_readiness_contract
+    status: active
+    pattern: direct_call
+    producer: AirshipModuleSystem (#8)
+    consumers:
+      - Navigation (#10 — can_depart, get_max_load, get_effective_cargo_volume)
+      - Exploration (#11 — hull band penalties for risk events)
+      - AirshipHub (#7 — departure confirmation UI reads can_depart)
+      - UIManager (#16 — displays departure readiness)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    signal_signature: "can_depart() → Dictionary {can: bool, reasons: Array[StringName]} — tri-dimension check: furnace alive + hull > 0 + load ≤ M_max. get_max_load() → int — floor(Σ furnace_rating × η_final). get_effective_cargo_volume() → int."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: airship_module_signal_contract
+    status: active
+    pattern: signal
+    producer: AirshipModuleSystem (#8)
+    consumers:
+      - AirshipHub (slot_state_changed, actual_state_changed — updates visual state)
+      - ResourcesManager (module_efficiency_changed — updates cargo_bay_effective_volume)
+      - UIManager (module_efficiency_changed, departure_readiness_changed, hull_integrity_changed, hull_band_changed)
+      - Navigation (departure_readiness_changed)
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    signal_signature: "6 typed signals: slot_state_changed(slot_id: StringName, old_state: StringName, new_state: StringName) / actual_state_changed(slot_id: StringName, old_state: StringName, new_state: StringName) / hull_integrity_changed(old_value: int, new_value: int) / hull_band_changed(old_band: StringName, new_band: StringName) / module_efficiency_changed(slot_id: StringName, old_eff: float, new_eff: float) / departure_readiness_changed(can_depart: bool, reasons: Array[StringName]). Emit order: actual_state → slot_state → module_efficiency → departure_readiness. Emit-after-mutation. departure_readiness_changed only fires on actual change."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: voyage_completed_contract
+    status: active
+    pattern: signal
+    producer: Navigation (#10)
+    consumers:
+      - Exploration (#11 — _on_voyage_completed, ARRIVING phase entry)
+      - Persistence (#3 — progress.voyage snapshot capture)
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    signal_signature: "voyage_completed(encounter_context: Dictionary) — sync emit at voyage end state (ARRIVED/RETREATED/FORCED_LANDING). Emitted after #8 hull damage write and #6 knowledge update, before #17 feedback events and #3 persistence. Single consumer signal — all downstream state carried in the Dictionary payload."
+    referenced_by:
+      - docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: encounter_context_validation_contract
+    status: active
+    pattern: direct_call
+    producer: Exploration (#11)
+    consumers:
+      - (internal — Exploration validates on receipt before scene generation)
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    signal_signature: "_validate_encounter_context(ctx: Dictionary) → Dictionary. Validates: ctx non-null + Dictionary type, route_id non-empty, destination_id non-empty, voyage_result in valid enum set, resolved_encounters is Array. Returns ctx if valid, fallback context if invalid. Fallback: {route_id: unknown, destination_id: cloudwatch-ruins-fallback, voyage_result: arrived, resolved_encounters: [], accumulated_damage: 0, ...}. Internal error logged on fallback trigger."
+    referenced_by:
+      - docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: repair_deposit_contract
+    status: active
+    pattern: direct_call
+    producer: WorldRepair (#13)
+    consumers:
+      - Exploration (#11 — on_player_arrived_at_repair_node)
+      - AirshipHub (#7 — repair interaction panel calls submit_deposit)
+      - ResourcesManager (#5 — called internally via commit_deposit)
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    signal_signature: "validate_deposit(node_id: StringName, offer: Dictionary) → Dictionary {valid: bool, violations: Array[StringName]} / submit_deposit(node_id: StringName, offer: Dictionary) → Dictionary {result: int, deposited: Dictionary, progress: float, completed: bool}. submit_deposit orchestrates validate → ResourcesManager.commit_deposit → counter update → repair_completion check → signal fan-out."
+    referenced_by:
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: repair_completed_fanout_contract
+    status: active
+    pattern: signal
+    producer: WorldRepair (#13)
+    consumers:
+      - IntelManager (#6 — on_repair_completed → ability unlock re-evaluation)
+      - Chart (#9 — on_route_enhanced → route unlock + hazard reduction)
+      - Settlement (#14 — NPC activity/dialogue changes)
+      - Persistence (#3 — progress.world-repair snapshot checkpoint)
+      - FeedbackManager (#17 — visual_state_changed → beacon relight animation)
+      - UIManager (#16 — repair progress toast + completion summary)
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    signal_signature: "repair_completed(node_id: StringName) — single signal fan-out to 6 downstream systems (ADR-0002 fan-out pattern). repair_progress_changed(node_id: StringName, progress: float, deposited: Dictionary) — per-deposit progress update. visual_state_changed(node_id: StringName, visual_state: StringName) — beacon visual anchor switch. Emit order: progress_changed → repair_completed → visual_state_changed."
+    referenced_by:
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: ui_screen_management_contract
+    status: active
+    pattern: direct_call
+    producer: UIManager (#16)
+    consumers:
+      - AirshipHub (#7 — open screen during departure flow)
+      - Exploration (#11 — open S6a/S6b/S6c during exploration phases)
+      - Combat (#12 — trigger S7 threat panel)
+      - WorldRepair (#13 — open S8 repair panel)
+      - Settlement (#14 — open S9 market panel)
+      - Partner (#15 — trigger S10 naming modal)
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    signal_signature: "open_screen(screen_id: StringName, data: Dictionary) → int (ScreenResult) / close_screen(screen_id: StringName) → void / open_modal(panel_id: StringName, data: Dictionary) → int (ModalResult) / close_modal() → void / open_non_modal(panel_id: StringName, data: Dictionary) → void / close_non_modal(panel_id: StringName) → void. Single-slot modal stack — second modal request follows queue strategy (S7 override / S10 queue / others discard)."
+    referenced_by:
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: ui_input_routing_contract
+    status: active
+    pattern: direct_call
+    producer: UIManager (#16)
+    consumers:
+      - InteractionRegistry (#4 — checks is_input_blocked_for_movement before dispatching WASD/E)
+      - (all domain systems — global keys Esc/M/Tab/Enter/WASD/E dispatched by UIManager._unhandled_input)
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    signal_signature: "get_active_input_layer() → int (0=Modal, 1=SemiModal, 2=NonModal, 3=HUD, 4=World) / is_input_blocked_for_movement() → bool (true when Layer 0-2 active). 4-layer Control hierarchy: Layer 0 mouse_filter=STOP → Layer 1 mouse_filter=STOP → Layer 2 mouse_filter=PASS → Layer 3 mouse_filter=IGNORE → Layer 4 World interaction."
+    referenced_by:
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: ui_semantic_event_contract
+    status: active
+    pattern: signal
+    producer: UIManager (#16)
+    consumers:
+      - FeedbackManager (#17 — ui_route_selected, ui_departure_confirmed, ui_threat_response_chosen, ui_repair_submitted, ui_purchase_confirmed, ui_item_transferred, ui_naming_confirmed, ui_settlement_closed, ui_panel_opened, ui_panel_closed)
+      - Onboarding (#18 — ui_panel_opened, ui_panel_closed for guidance highlight overlay)
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    signal_signature: "10 typed signals: ui_route_selected(route_id: StringName, route_name: String) / ui_departure_confirmed(route_id: StringName, departure_mode: StringName) / ui_threat_response_chosen(threat_id: StringName, response: StringName) / ui_repair_submitted(node_id: StringName, materials: Dictionary) / ui_purchase_confirmed(stall_id: StringName, good_id: StringName, quantity: int, total_cost: int) / ui_item_transferred(item_id: StringName, from_pool: StringName, to_pool: StringName, qty: int) / ui_naming_confirmed(partner_id: StringName, chosen_name: String) / ui_settlement_closed(voyage_id: StringName, items_brought: Array, intel_gained: Array) / ui_panel_opened(panel_id: StringName) / ui_panel_closed(panel_id: StringName). All sync emit, typed params per ADR-0002."
+    referenced_by:
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: route_committed_contract
+    status: active
+    pattern: signal
+    producer: Chart (#9)
+    consumers:
+      - Navigation (#10 — _on_route_committed, builds EncounterContext per ADR-0010)
+      - UIManager (#16 — departure lock visual feedback, ink spread animation trigger)
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    signal_signature: "route_committed(route_id: StringName, destination_id: StringName, hazard_tags: Array[StringName]) — 单次发射保证 (terminal state guard), sync emit, 3 typed params per ADR-0002. 发射后 Chart 进入终端 DEPARTURE_CONFIRMED 状态并开始出航锁定."
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: chart_data_query_contract
+    status: active
+    pattern: direct_call
+    producer: Chart (#9)
+    consumers:
+      - UIManager (#16 — get_chart_state, get_visible_routes, get_selected_route, get_filter_state)
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    signal_signature: "4 read-only query methods returning data only (no visual properties): get_chart_state() → StringName / get_visible_routes() → Array[StringName] / get_selected_route() → StringName / get_filter_state() → Dictionary {hide_rumored: bool}. UIManager owns all visual rendering, control positioning, input handling, and animation."
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - contract: route_enhanced_contract
+    status: active
+    pattern: signal
+    producer: Chart (#9)
+    consumers:
+      - UIManager (#16 — route visual update after repair completion)
+      - FeedbackManager (#17 — route unlock/hazard reduction feedback)
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    signal_signature: "route_enhanced(route_id: StringName, enhancement_id: StringName) — emitted when WorldRepair.repair_completed triggers route re-evaluation resulting in newly available or hazard-reduced routes. enhancement_id is the repair node_id that caused the enhancement."
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
 
 # Example:
-#
-# interfaces:
 #   - contract: damage_delivery
 #     status: active
 #     pattern: signal          # how the producer notifies consumers
@@ -607,10 +992,128 @@ api_decisions:
       - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
     revised: ""
+  - purpose: dictionary_knowledge_storage
+    status: active
+    api: "Dictionary[StringName, int/Dictionary/Array] for all knowledge/pattern/ability runtime state — knowledge_state, pattern_state, ability_state, consumed_intel_ids, rumor_sources"
+    not: "Godot Resource typed entries (conflicts with ADR-0003 Canonical JSON serialization); SQLite/local database (over-engineered for < 50KB state); typed class per knowledge entry (adds boilerplate without benefit)"
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    reason: "Dictionary maps directly to JSON.stringify() for ADR-0003 snapshot persistence without conversion layer. Consistent with ADR-0005 resource pool Dictionary storage. StringName keys provide O(1) comparison. Total state < 50KB — memory negligible."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: ability_unlock_data_driven
+    status: active
+    api: "Data-driven ability unlock path definitions (Dictionary of condition types: pattern_state, intel_consumed, observation_event_count, observation_event_type_count, partner_in_crew, repair_completed, location_visit_count, fog_traversal_count). Each ability has 2-4 paths; OR across paths, AND within path."
+    not: "Hardcoded if-else chains per ability (adding a new path requires code change); ScriptableObject/Resource-based unlock graphs (conflicts with ADR-0003 Canonical JSON); Event-driven unlock without centralized condition check (race conditions)"
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    reason: "Data-driven definitions allow adding new abilities and paths by updating configuration data only — no algorithm code changes. Condition evaluators are reusable across abilities. Centralized check_unlock_conditions() ensures atomic evaluation within a single frame."
+    referenced_by:
+      - docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: swap_module_atomicity
+    status: active
+    api: "Two-phase atomic swap_module: Phase 1 validates all preconditions (slot non-empty, not same type, cargo_bay empty if cargo→non-cargo, net cost affordable) → any failure returns error with zero state change. Phase 2 executes in fixed order (uninstall old → refund → install new → charge net cost)."
+    not: "Optimistic install-then-rollback (creates visible intermediate states); Separate uninstall+install exposed as two user actions (adds unnecessary intermediate empty state and doubles material UI confirmations)"
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    reason: "Two-phase atomicity guarantees no 'uninstalled but can't install' state. Single-threaded execution (ADR-0006) guarantees Phase 1→2 without external interference. Net cost per resource type prevents cross-type refund abuse."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: dual_field_module_efficiency
+    status: active
+    api: "Dual-field actual_state / visible_state per module slot. Efficiency chain: η_visible = EFFICIENCY_TABLE[module_type][visible_state]; η_final = η_visible × HULL_EFFICIENCY_BAND[hull_band]. visible_state drives UI display and player decision-making; actual_state is the ground truth written by Combat/Navigation."
+    not: "Single state field per slot (cannot represent 'unchecked' uncertainty); efficiency computed from actual_state alone (players cannot see actual damage — breaks the inspection gameplay loop)"
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    reason: "Dual-field enables the 'return to port → uncertain module state → inspect or blind-repair' gameplay loop. visible_state-based efficiency means players make decisions with imperfect information. actual_state is the authoritative source for damage but is hidden from players until inspection."
+    referenced_by:
+      - docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: encounter_context_dictionary_transfer
+    status: active
+    api: "Dictionary[StringName, Variant] for cross-system EncounterContext transfer — Navigation (#10) builds Dictionary, emits via voyage_completed signal, Exploration (#11) validates and consumes. Full EncounterContext included in progress.voyage snapshot for ADR-0003 persistence."
+    not: "Godot Resource subclass (class_name EncounterContext extends Resource — .tres serialization conflicts with ADR-0003 Canonical JSON); Multiple fine-grained signals per encounter (adds aggregation complexity in Exploration, violates ADR-0002 max cascade depth); Exploration pulling from Navigation (introduces lifecycle coupling — Navigation must remain active after voyage end)"
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    reason: "Dictionary maps directly to JSON.stringify() for ADR-0003 snapshot persistence without conversion layer. Consistent with ADR-0005/0007/0009 Dictionary storage pattern. Signal push model allows Navigation to fully close after voyage_completed emission — no lifecycle coupling."
+    referenced_by:
+      - docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: batch_deposit_atomicity
+    status: active
+    api: "Two-phase submit_deposit: Phase 1 validates (validate_deposit checks 5 violation types) → Phase 2 executes (ResourcesManager.commit_deposit → deposited counter update → repair_progress recalculation → repair_completion check → signal fan-out). All-or-nothing: validation failure returns violations without state change."
+    not: "Direct pool writes bypassing commit_deposit (breaks Pool 6 audit trail); optimistic deposit-then-validate (creates visible deposit-then-reversal confusing to player); single-phase deposit without validation separation (mixes validation errors with commit failures)"
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    reason: "Two-phase atomicity guarantees no 'materials consumed but repair not counted' state. Single-threaded execution (ADR-0006) guarantees Phase 1→2 without external interference. Consistent with ADR-0009 swap_module two-phase atomic pattern."
+    referenced_by:
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: irreversible_repair_state_machine
+    status: active
+    api: "3-state irreversible state machine: UNREVEALED(0) → KNOWN(1) → REPAIRED(2). known→repaired is one-way (irreversible). All reverse transitions rejected by state machine. REPAIRED state returns ERR_ALREADY_REPAIRED on submit_deposit."
+    not: "Reversible repair (undo/refund — violates Pool 6 finality and Pillar 2 'world remembers care'); 2-state skip-known model (loses 'discovery' moment and gradual progress feedback); multi-branch repair tree per node (adds complexity without MVP benefit)"
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    reason: "Irreversible known→repaired transition supports Pillar 2 (世界会回应照料 — player care leaves permanent trace). Physical arrival always advances unrevealed→known — knowledge gating only affects UI hint precision, never blocks interaction."
+    referenced_by:
+      - docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: godot4_6_dual_focus_sync
+    status: active
+    api: "Explicit mouse-click → grab_focus() synchronization for all interactable Controls. Separate Theme StyleBoxes: focus (keyboard) = #4FB7B2 1.5px solid border; hover (mouse) = bg +10% brightness, no border. Readonly elements: focus_mode = Control.FOCUS_NONE."
+    not: "Relying on Godot default dual-focus behavior without explicit sync (causes 'two focus indicators visible simultaneously'); using grab_focus() alone without mouse press sync (mouse click leaves keyboard focus on previous control); single style for both focus and hover (visually confusing in 4.6 dual-focus system)"
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    reason: "Godot 4.6 dual-focus separates mouse/touch focus from keyboard/gamepad focus. Without explicit sync, clicking a button with mouse then pressing Tab navigates from the old keyboard focus position — not the clicked position. FocusSync base classes encapsulate this per ADR-0012 Risk mitigation."
+    referenced_by:
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: create_tween_animation_policy
+    status: active
+    api: "All UI animation via create_tween() (SceneTreeTween) — 0.15s–3.0s with Tween.EASE_OUT/EASE_IN presets. Ink spread animation via ShaderMaterial + uniform progress (GPU-side). Fullscreen parchment via NinePatchRect 9-slice. No manual _process() interpolation."
+    not: "Canvas draw_*() for ink spread (CPU-bound per-frame redraw — prohibited for WebGL 2 Compatibility renderer); manual _process() delta interpolation (brittle under Web tab freeze — delta spikes cause animation jumps); full 2048x2048 textures for parchment backgrounds (memory waste — use NinePatchRect 9-slice)"
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    reason: "create_tween() is the Godot 4.6 idiomatic animation API — it handles frame delta, pause, and Web tab freeze recovery correctly. GPU ShaderMaterial ink spread avoids CPU-side Canvas draw calls. NinePatchRect reduces parchment texture memory from ~16MB (2048² RGBA8) to ~256KB (256² source)."
+    referenced_by:
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: chart_terminal_state_guard
+    status: active
+    api: "DEPARTURE_CONFIRMED 终端状态守卫 — chart_state_transition() 在任何 trigger 下对 DEPARTURE_CONFIRMED 状态返回 {allowed: false}。route_committed 单次发射保证由状态机本身提供，不依赖外部去重逻辑。"
+    not: "外部去重逻辑 (boolean flag / debounce timer) — 与状态机分离的去重可能不同步；可逆出航确认 (允许 DEPARTURE_CONFIRMED → BROWSING) — 违反 GDD #9 不可逆约束和 Pillar 1 规划重量"
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    reason: "状态机层面的终端守卫是单次发射保证的最可靠实现——在状态的唯一入口处拦截，而非在信号发射处事后去重。同一帧内两次 CONFIRM 触发：第一个成功转换 → DEPARTURE_CONFIRMED，第二个命中终端守卫 → allowed: false。"
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
+    revised: ""
+
+  - purpose: route_selectability_short_circuit
+    status: active
+    api: "短路求值顺序: hidden → locked → unavailable (traversable) → unavailable (origin) → selected → browsable。hidden 在第一分支返回，避免对不可见航线进行跨系统查询（IntelManager.query_route_accessibility, Registry.get_route_origin, AirshipHub.get_current_docked_location）。"
+    not: "全量查询模式 (对每条航线执行所有 6 层判断) — 浪费跨系统查询；并行查询所有航线的 traversable 状态 — 无实际收益（MVP 仅 2 条航线）且破坏短路逻辑"
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    reason: "短路求值在 hidden 分支即返回，节省对不可见航线的 3 次跨系统查询。遵循 ADR-0007 的 '下游不得缓存查询结果' 规则——短路不是缓存，是条件判断排序优化。"
+    referenced_by:
+      - docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
+    revised: ""
 
 # Example:
-#
-# api_decisions:
 #   - purpose: physics_raycast
 #     status: active
 #     api: PhysicsServer3D.space_get_direct_state()
@@ -734,6 +1237,89 @@ forbidden_patterns:
     why: "GDExtension native libraries cannot run in browser WebAssembly environment. Including them in Web export causes build failure."
     adr: docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+  - pattern: direct_knowledge_state_write
+    status: active
+    description: "Domain systems must not write to knowledge_state, pattern_state, ability_state, consumed_intel_ids, or rumor_sources directly. All knowledge/ability state mutations must go through IntelManager methods (consume_intel, reveal_rumor, player_arrived_at, report_observation_event, etc.)."
+    why: "IntelManager is the single authoritative source for all player knowledge and ability state. Direct writes bypass state machine validation, observation score accumulation, rumor conflict resolution, ability unlock re-evaluation, and signal emission. This would cause UI desynchronization and broken game progression."
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+
+  - pattern: downstream_knowledge_cache
+    status: active
+    description: "Downstream systems (Chart, Navigation, Exploration, UI) must not cache knowledge/ability query results. Every read must re-query IntelManager for current state."
+    why: "Knowledge state can change within a single frame (e.g., consume_intel triggers multiple state transitions). Cached values become stale immediately and cause visual inconsistencies — a route shown as 'identified' in Chart while IntelManager has it as 'verified' after a player_arrived_at event."
+    adr: docs/architecture/adr-0007-intel-knowledge-ability-system.md
+    added: 2026-05-05
+
+  - pattern: direct_module_state_write
+    status: active
+    description: "Domain systems must not write to module_slots, hull_integrity, or hull_scars directly. All module/hull state mutations must go through AirshipModuleSystem methods (install_module, uninstall_module, swap_module, apply_hull_damage, apply_module_damage, repair_hull, repair_module, on_voyage_return)."
+    why: "AirshipModuleSystem is the single authoritative source for all module and hull state. Direct writes bypass the dual-field state machine, efficiency recalculation, signal emission (6 typed signals), departure readiness re-evaluation, and atomicity guarantees. This would cause Hub visual desynchronization, incorrect can_depart() results, and broken trapped cargo detection."
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+
+  - pattern: cached_departure_state
+    status: active
+    description: "Downstream systems (Navigation, Hub, UI) must not cache can_depart() results or derived values (M_max, hull_band). Every departure gate check must re-query AirshipModuleSystem for current state."
+    why: "Module and hull state can change within a single frame (e.g., swap_module changes furnace configuration, apply_hull_damage changes hull band). Cached departure state becomes stale immediately and could allow departure when the ship is actually grounded — a critical gameplay integrity bug. AirshipModuleSystem internally caches for signal noise reduction only; external consumers must always re-query."
+    adr: docs/architecture/adr-0009-airship-module-hull-system.md
+    added: 2026-05-05
+
+  - pattern: encounter_context_mutation_in_consumer
+    status: active
+    description: "Consumers of EncounterContext (Exploration #11, Persistence #3, Combat #12 via ThreatContext) must not modify the received Dictionary. EncounterContext is immutable after voyage_completed emission — the Navigation's _build_encounter_context() with .duplicate(true) is the only mutation point."
+    why: "EncounterContext represents historical voyage record — modifying it after the fact corrupts the audit trail. Multiple consumers (Exploration + Persistence in the same frame) would see inconsistent data if one mutates. Persistence must capture exactly what Navigation produced."
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+
+  - pattern: direct_encounter_context_construction
+    status: active
+    description: "Only Navigation (#10) may construct EncounterContext. Exploration (#11) may only construct fallback context via _build_fallback_context() when validation fails. Combat (#12) must consume ThreatContext derived by Exploration, never raw EncounterContext directly."
+    why: "Navigation is the sole authority on voyage outcomes — allowing other systems to construct EncounterContext would bypass the voyage state machine and create conflicting voyage records. Fallback context is explicitly labeled as fallback (route_id='unknown') and logged for debugging."
+    adr: docs/architecture/adr-0010-encounter-context-type.md
+    added: 2026-05-05
+
+  - pattern: direct_repair_state_write
+    status: active
+    description: "Domain systems must not write to repair_nodes, repair_state, deposited counters, or repair_progress directly. All repair state mutations must go through WorldRepair methods (on_player_arrived_at_repair_node, submit_deposit)."
+    why: "WorldRepair is the single authoritative source for all repair node state. Direct writes bypass the 3-state machine validation, deposit_validation guards, repair_completion trigger, signal fan-out (6 downstream systems), and irreversibility guarantees. This would cause desynchronization between actual repair state and what Chart/Intel/UI display."
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+
+  - pattern: repair_bypass_irreversibility
+    status: active
+    description: "Must not attempt to reverse repair state: known→unrevealed, repaired→known, and repaired→unrevealed are all rejected by the state machine. Repaired nodes must reject submit_deposit with ERR_ALREADY_REPAIRED. The deposited counter must never decrement."
+    why: "Repair is irreversible by design — materials enter Pool 6 (final state) via commit_deposit. Reversing repair would require 'un-committing' from Pool 6, which violates ADR-0005's ResourceManager atomicity and Pool 6 finality. Pillar 2 (世界会回应照料) requires that player care leaves permanent, visible traces in the world."
+    adr: docs/architecture/adr-0011-world-repair-state-machine.md
+    added: 2026-05-05
+
+  - pattern: ui_process_polling
+    status: active
+    description: "HUD elements must not use _process() polling to read domain state. All HUD updates must be signal-driven: domain signal → dirty flag → _process batch update. Idle frames must have zero _process overhead."
+    why: "Polling domain state in _process() wastes CPU on idle frames, violates ADR-0002 read-vs-signal boundary, and creates frame ordering non-determinism. Signal-driven dirty flag batching ensures HUD renders exactly when data changes and is Web tab-freeze safe (signals accumulate during freeze, batch applied on resume)."
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+
+  - pattern: ui_direct_canvas_draw
+    status: active
+    description: "Must not use Canvas draw_*() methods (draw_rect, draw_circle, draw_line, draw_texture) for UI animations, particularly the ink spread animation. Use ShaderMaterial + uniform progress on GPU side, or create_tween() for property interpolation."
+    why: "Canvas draw_*() executes on CPU per-frame and triggers full CanvasItem redraw. Under WebGL 2 Compatibility renderer, CPU-side drawing is significantly slower than GPU ShaderMaterial. Ink spread via draw_*() would consume ~2-5ms/frame on Web — exceeding the animation budget. ShaderMaterial performs the same visual at <0.1ms GPU-side."
+    adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-05
+
+  - pattern: direct_chart_state_write
+    status: active
+    description: "Domain systems must not write to Chart internal state (_chart_state, _route_states, _visible_routes, _selected_route_id, _hide_rumored, _last_committed_route_id) directly. All chart state mutations must go through Chart methods (open_chart, chart_state_transition, _commit_departure, _reevaluate_all_routes)."
+    why: "Chart is the single authoritative source for all route selection and departure state. Direct writes bypass the 5-state machine validation, terminal state guard, route_committed single-emit guarantee, and signal emission (route_committed, route_selection_failed, route_enhanced). This would cause Navigation to receive duplicate departure events and UIManager to display inconsistent route states."
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
+
+  - pattern: cached_intel_route_query
+    status: active
+    description: "Chart must not cache query_route_knowledge() or query_route_accessibility() results. Every route_selectability() evaluation must re-query IntelManager for current traversable and knowledge state. Chart's internal _route_states and _visible_routes are derived state — not caches of IntelManager results."
+    why: "Knowledge state can change within a single frame (consume_intel triggers knowledge_advanced signal). Cached traversable values become stale immediately and could show a route as BROWSABLE when it's actually UNAVAILABLE — or vice versa. This extends ADR-0007's downstream_knowledge_cache forbidden pattern to Chart specifically."
+    adr: docs/architecture/adr-0008-chart-route-state-machine.md
+    added: 2026-05-05
 
 # Example:
 #
