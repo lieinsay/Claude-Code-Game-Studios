@@ -3,7 +3,7 @@
 > **最后更新**: 2026-05-05
 > **项目阶段**: Pre-Production — P2 完成 (架构审计 + UX Spec ×3 + 门禁通过)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
-> **ADR**: 13 Accepted (0001-0012 + 0018) · TR Registry: 52 条已注册 · Control Manifest: Active
+> **ADR**: 13 Accepted (0001-0012 + 0018) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **文档总数**: ~345 个 .md 文件 + 10 个配置/数据文件
 
 ---
@@ -87,7 +87,7 @@ graph TB
 
 | 文件 | 说明 |
 |------|------|
-| [docs/architecture/architecture.md](architecture/architecture.md) | 主架构 — 52 TR / 5 层 / 18 系统 (TD+LP 双签收) |
+| [docs/architecture/architecture.md](architecture/architecture.md) | 主架构 — 54 TR / 5 层 / 18 系统 (TD+LP 双签收) |
 | [docs/architecture/tr-registry.yaml](architecture/tr-registry.yaml) | 技术需求注册表 |
 | [docs/engine-reference/godot/VERSION.md](engine-reference/godot/VERSION.md) | Godot 4.6.2 版本锁定 |
 
@@ -247,7 +247,7 @@ graph TB
 ## 三、架构决策记录 (ADR) 全景
 
 > **状态**: 12/12 ADRs 全部 **Accepted** ✅ (2026-05-05)
-> **TR Registry**: 52 条技术需求已录入 `docs/architecture/tr-registry.yaml`
+> **TR Registry**: 54 条技术需求已录入 `docs/architecture/tr-registry.yaml`
 > **门禁检查**: Technical Setup → Pre-Production — CONCERNS (4/4 directors, 0 NOT READY) → 已进入 Pre-Production
 
 ### ADR 信号流与状态机架构
@@ -272,6 +272,7 @@ graph TB
 
     subgraph Feature_Presentation["⚔️ Feature + 🖥️ Presentation ADRs"]
         ADR11["ADR-0011<br/>WorldRepair<br/>3-state 不可逆状态机"]
+        ADR18["ADR-0018<br/>CombatManager<br/>4-state + combat_result"]
         ADR12["ADR-0012<br/>UIManager<br/>屏幕状态机 + 4层输入路由"]
     end
 
@@ -283,10 +284,13 @@ graph TB
     ADR2 -->|"signal 协议"| ADR8
     ADR2 -->|"signal 协议"| ADR9
     ADR2 -->|"signal 协议"| ADR10
+    ADR2 -->|"signal 协议"| ADR18
     ADR3 -->|"progress.intel snapshot"| ADR7
     ADR3 -->|"progress.routes snapshot"| ADR8
     ADR3 -->|"progress.modules snapshot"| ADR9
+    ADR3 -.->|"threat 状态 via Exploration"| ADR18
     ADR5 -.->|"consume_intel 入口"| ADR7
+    ADR5 -->|"consume_in_combat"| ADR18
     ADR6 -.->|"Web 约束"| ADR7
     ADR6 -.->|"Web 约束"| ADR8
 
@@ -301,10 +305,13 @@ graph TB
     ADR8 -.->|"route_enhanced"| ADR11
     ADR8 -.->|"UI 数据接口"| ADR12
     ADR9 -.->|"can_depart"| ADR12
+    ADR9 -->|"apply_hull_damage"| ADR18
+    ADR10 -.->|"EncounterContext"| ADR18
 
     %% Feature internal
     ADR11 -.->|"repair_completed fan-out"| ADR8
     ADR10 -.->|"EncounterContext"| ADR11
+    ADR18 -.->|"threat_resolved"| ADR12
 ```
 
 ### ADR 状态机一览
@@ -315,6 +322,7 @@ stateDiagram-v2
 
     state "Chart #9" as CH
     state "WorldRepair #13" as WR
+    state "CombatManager #12" as CBT
     state "IntelManager #6" as INTEL
     state "UIManager #16" as UI
 
@@ -332,6 +340,14 @@ stateDiagram-v2
         UNREVEALED --> KNOWN: player_arrived
         KNOWN --> REPAIRED: submit_deposit ▶
         note right of REPAIRED: 终端 (irreversible)
+    }
+
+    state CBT {
+        IDLE --> AWAITING_RESPONSE: threat_context
+        AWAITING_RESPONSE --> PROCESSING: select_response
+        PROCESSING --> RESOLVED: settlement_done
+        RESOLVED --> IDLE: return_control
+        note right of AWAITING_RESPONSE: 决策呼吸 (no timer)
     }
 
     state INTEL {
@@ -355,11 +371,12 @@ stateDiagram-v2
 ```mermaid
 graph LR
     subgraph 核心架构["核心架构文档"]
-        MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
+        MA["architecture.md<br/>主架构 v1<br/>54 TR / 5 层 / 18 系统"]
         TR2["tr-registry.yaml<br/>技术需求注册表"]
-        ADR["ADR-0001~0012<br/>架构决策记录<br/>(12/12 Accepted ✅)"]
-        ARREV["architecture-review-2026-05-05.md<br/>架构审计报告<br/>(65.4% TR 覆盖)"]
+        ADR["ADR-0001~0018<br/>架构决策记录<br/>(13 Accepted ✅)"]
+        ARREV["architecture-review-2026-05-05.md<br/>架构审计报告<br/>(79.6% TR 覆盖)"]
         CM2["control-manifest.md<br/>Control Manifest<br/>(4 层 + Global 规则)"]
+        TRACE["architecture-traceability.md<br/>可追溯性索引<br/>(54 TR 全覆盖矩阵)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -378,16 +395,136 @@ graph LR
     MA -.-> GODOT
     CP --> WG
     WG --> EX
+    TRACE -.-> MA
+```
+
+### ADR 层级依赖关系图
+
+```mermaid
+graph TB
+    subgraph Foundation["📦 Foundation (6 ADRs)"]
+        direction LR
+        F1["ADR-0001<br/>Autoload/Scene"]
+        F2["ADR-0002<br/>Signal 协议"]
+        F3["ADR-0003<br/>存档系统"]
+        F4["ADR-0004<br/>交互系统"]
+        F5["ADR-0005<br/>资源池"]
+        F6["ADR-0006<br/>Web 约束"]
+    end
+
+    subgraph Core["🔧 Core (5 ADRs + 1 cross)"]
+        direction LR
+        C1["ADR-0007<br/>IntelManager"]
+        C2["ADR-0008<br/>Chart"]
+        C3["ADR-0009<br/>Module/Hull"]
+        C4["ADR-0010<br/>EncounterContext<br/>(cross: #10 Nav)"]
+    end
+
+    subgraph Feature["⚔️ Feature (3 ADRs)"]
+        direction LR
+        FT1["ADR-0011<br/>WorldRepair #13"]
+        FT2["ADR-0018<br/>Combat #12"]
+    end
+
+    subgraph Presentation["🖥️ Presentation (1 ADR)"]
+        P1["ADR-0012<br/>UIManager #16"]
+    end
+
+    subgraph Deferred["⏳ Deferred (5 ADRs)"]
+        direction LR
+        D1["ADR-0013<br/>Exploration #11"]
+        D2["ADR-0014<br/>Settlement #14"]
+        D3["ADR-0015<br/>Partner #15"]
+        D4["ADR-0016<br/>Feedback #17"]
+        D5["ADR-0017<br/>Onboarding #18"]
+    end
+
+    Foundation --> Core
+    Core --> Feature
+    Feature --> Presentation
+    Feature -.-> Deferred
+    Presentation -.-> Deferred
+
+    F2 -..-> Core
+    F2 -..-> Feature
+    F2 -..-> Presentation
+    F5 --> FT1
+    F5 --> FT2
+    F3 --> C1
+    F3 --> C2
+    F3 --> C3
+    C1 --> C2
+    C2 --> C4
+    C3 --> FT2
+    C4 --> FT2
+    FT1 --> C1
+    FT1 --> C2
+    FT2 -.-> P1
+```
+
+### 交互模式库全景
+
+```mermaid
+graph TB
+    subgraph Screens["🖥️ 屏幕"]
+        HUB["Hub<br/>飞艇家园"]
+        CHART["Chart<br/>航图规划"]
+        EXPLORE["Exploration<br/>探索搜撤"]
+    end
+
+    subgraph Patterns["🔄 可复用交互模式 (10)"]
+        P1["#1 靠近+E<br/>Approach+Interact"]
+        P2["#2 双重移动<br/>WASD+Click-to-Move"]
+        P3["#3 覆盖层面板<br/>Tab Overlay"]
+        P4["#4 通用暂停<br/>Esc Pause"]
+        P5["#5 确认门<br/>Confirmation Gate"]
+        P6["#6 决策呼吸<br/>Decision Breath"]
+        P7["#7 状态驱动显隐<br/>State-Driven Visibility"]
+        P8["#8 屏幕过渡<br/>Screen Transition"]
+        P9["#9 HUD 常驻<br/>HUD Persistence"]
+        P10["#10 键盘优先<br/>Keyboard-First"]
+    end
+
+    subgraph Principles["📐 设计原则"]
+        WCAG["WCAG AA 对比度"]
+        NO_COLOR["非颜色双重编码"]
+        FULL_KB["完整键盘可达性"]
+    end
+
+    HUB --> P1
+    HUB --> P2
+    HUB --> P3
+    HUB --> P4
+    HUB --> P5
+    HUB --> P7
+    HUB --> P8
+    HUB --> P10
+    CHART --> P5
+    CHART --> P7
+    CHART --> P8
+    CHART --> P10
+    EXPLORE --> P1
+    EXPLORE --> P2
+    EXPLORE --> P3
+    EXPLORE --> P4
+    EXPLORE --> P5
+    EXPLORE --> P6
+    EXPLORE --> P7
+    EXPLORE --> P8
+    EXPLORE --> P9
+    EXPLORE --> P10
+
+    Patterns --> Principles
 ```
 
 ### 架构文档清单
 
-> **全部 12 ADR 已于 2026-05-05 Accepted。** TR Registry 已填充 52 条记录。
+> **全部 13 ADR 已于 2026-05-05 Accepted。** TR Registry 已填充 54 条记录。
 
 | 文件 | 说明 |
 |------|------|
 | [architecture.md](architecture/architecture.md) | 主架构 — v1 签收 (TD+LP 双签收) |
-| [tr-registry.yaml](architecture/tr-registry.yaml) | 52 条技术需求注册表 ✅ (2026-05-05 填充) |
+| [tr-registry.yaml](architecture/tr-registry.yaml) | 54 条技术需求注册表 ✅ (2026-05-05 填充) |
 | [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 (12 ADR 注册) |
 | | **Foundation ADRs (6) — 全部 Accepted ✅** |
 | [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构 — 9 Autoload + 9-Phase 启动链 |
@@ -479,7 +616,7 @@ graph LR
 | 2026-05-04 | `/create-architecture` — 主架构 | TD+LP 双签收 | [architecture.md](architecture/architecture.md) |
 | 2026-05-05 | `/gate-check technical-setup` — Technical Setup→Pre-Production | CONCERNS — 4 阻塞项已清除 | 本文档第三节 |
 | 2026-05-05 | ADR 批量 Acceptance — 12/12 Accepted | 通过 | 全部 12 ADR Status→Accepted |
-| 2026-05-05 | TR Registry 填充 — 52 TR 条目 | 通过 | [tr-registry.yaml](architecture/tr-registry.yaml) |
+| 2026-05-05 | TR Registry 填充 — 54 TR 条目 | 通过 | [tr-registry.yaml](architecture/tr-registry.yaml) |
 | 2026-05-05 | 技术偏好配置 — naming/budget/forbidden/specialists | 通过 | [technical-preferences.md](../.claude/docs/technical-preferences.md) |
 | 2026-05-05 | `/architecture-review` — 架构完整性审计 | CONCERNS (65.4% TR coverage, Combat #12 gap) | [architecture-review-2026-05-05](architecture/architecture-review-2026-05-05.md) |
 | 2026-05-05 | `/ux-design` — Hub, Chart, Exploration 三份 UX Spec | 通过 | [Hub](../design/ux/hub.md), [Chart](../design/ux/chart.md), [Exploration](../design/ux/exploration.md) |
@@ -512,7 +649,7 @@ graph LR
 │  │                      RESOLVED BLOCKERS (2026-05-05)                    │   │
 │  │                                                                        │   │
 │  │  ✅ ADR Acceptance:   11/12 Proposed → 12/12 Accepted                  │   │
-│  │  ✅ TR Registry:      0 entries → 52 TRs populated                     │   │
+│  │  ✅ TR Registry:      0 entries → 54 TRs populated                     │   │
 │  │  ✅ Engine Config:    [CHOOSE] → Godot 4.6.2 + GDScript                │   │
 │  │  ✅ Tech Preferences: [TO BE CONFIGURED] → fully populated             │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
@@ -775,7 +912,7 @@ graph TB
   src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
 
   📊 总计: ~345 个 Markdown 文档 + 10 个配置/数据文件
-  🏗️ ADR: 12/12 Accepted | TR: 52 条注册 | Control Manifest: Active
+  🏗️ ADR: 13/13 Accepted | TR: 54 条注册 | Control Manifest: Active
   ✅ Pre-Production P2 完成 — 门禁通过，进入 Pre-Production 阶段
 ```
 
@@ -788,7 +925,7 @@ graph TB
 ### 已在 Technical Setup 完成 ✅
 
 - [x] **12 个 Foundation + Core ADR** — `docs/architecture/adr-0001~0012` — 全部 Accepted
-- [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 52 条全部录入
+- [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 54 条全部录入
 - [x] **引擎正式配置** — `CLAUDE.md` — Godot 4.6.2 + GDScript
 - [x] **技术偏好完整配置** — `.claude/docs/technical-preferences.md` — 命名规范/性能预算/禁止模式/专家路由
 - [x] **门禁检查** — Technical Setup → Pre-Production — CONCERNS 已记录
