@@ -29,8 +29,8 @@ Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
 | # | Concern | 严重度 | 建议动作 |
 |---|---------|--------|---------|
 | 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | ✅ ADR-0018 已创建 (2026-05-05) |
-| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 从 3 份 UX Spec 中提取模式 |
-| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 创建独立文件 |
+| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | ✅ 已创建 — 10 个交互模式提取完成 |
+| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | ✅ 已创建 — 54 TR 全覆盖矩阵 |
 | 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统进入 Production 前完成 |
 | 5 | Dual-focus + Web 生命周期未测试 | 🟡 MEDIUM | Sprint 1 Spike 任务 |
 | 6 | 仅 1 个示例测试 | 🟡 LOW | 随 Foundation/Core 实现同步编写 |
