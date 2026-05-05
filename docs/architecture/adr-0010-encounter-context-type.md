@@ -1,7 +1,7 @@
 # ADR-0010: EncounterContext 跨系统类型契约 — Navigation→Exploration/Combat 数据桥
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-05

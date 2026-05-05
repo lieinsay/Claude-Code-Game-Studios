@@ -1,7 +1,7 @@
 # ADR-0006: Web 平台约束 — 浏览器作为一等目标平台的完整约束集
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04

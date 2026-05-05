@@ -1,7 +1,7 @@
 # ADR-0004: InteractionHandler @abstract 基类与 Use 入口分发
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04

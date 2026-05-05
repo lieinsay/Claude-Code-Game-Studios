@@ -1,7 +1,7 @@
 # ADR-0007: 知识状态与能力解锁架构 — IntelManager Autoload #6
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-05

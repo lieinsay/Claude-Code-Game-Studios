@@ -25,32 +25,439 @@
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
 version: 1
-last_updated: ""
+last_updated: "2026-05-05"
 
-requirements: []
+requirements:
+  # === System #1 — content-data-state-registry ===
+  - id: TR-registry-001
+    system: content-data-state-registry
+    gdd: design/gdd/content-data-state-registry.md
+    requirement: "Static content definitions with stable IDs across 12 content kinds"
+    created: 2026-05-05
+    revised: ""
+    status: active
 
-# --- EXAMPLE ENTRIES (remove when first real entries are added) ---
-#
-# - id: TR-combat-001
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Player takes damage from enemies based on attack power minus defence"
-#   created: 2026-03-10
-#   revised: ""
-#   status: active
-#
-# - id: TR-combat-002
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Combo window timing is 0.4 seconds between hits"
-#   created: 2026-03-10
-#   revised: "2026-04-01"
-#   status: active
-#
-# - id: TR-combat-003
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Old damage formula using raw stats"
-#   created: 2026-03-10
-#   revised: ""
-#   status: superseded-by: TR-combat-001
+  - id: TR-registry-002
+    system: content-data-state-registry
+    gdd: design/gdd/content-data-state-registry.md
+    requirement: "query_entity(id) returns typed entity; validate_all() produces diagnostics"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-registry-003
+    system: content-data-state-registry
+    gdd: design/gdd/content-data-state-registry.md
+    requirement: "Registry must not own mutable runtime state"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #2 — platform-session-shell ===
+  - id: TR-platform-001
+    system: platform-session-shell
+    gdd: design/gdd/platform-session-shell.md
+    requirement: "Web-first application shell: loading → start/continue → gameplay"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-platform-002
+    system: platform-session-shell
+    gdd: design/gdd/platform-session-shell.md
+    requirement: "Audio activation via user gesture; tab focus recovery with delta-based resume"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-platform-003
+    system: platform-session-shell
+    gdd: design/gdd/platform-session-shell.md
+    requirement: "15 platform states: boot → title → loading → playing → paused → error"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #3 — local-save-world-state-persistence ===
+  - id: TR-persistence-001
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Staging → Verify → Promotion save workflow"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-persistence-002
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "8 snapshot packages: progress.*, state.*, settings.*"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-persistence-003
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Version migration: save_version field + migration path registry"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #4 — player-movement-interaction ===
+  - id: TR-movement-001
+    system: player-movement-interaction
+    gdd: design/gdd/player-movement-interaction.md
+    requirement: "CharacterBody2D movement with InteractionRegistry autoload"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-movement-002
+    system: player-movement-interaction
+    gdd: design/gdd/player-movement-interaction.md
+    requirement: "@abstract InteractionHandler base class for all interactable objects"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-movement-003
+    system: player-movement-interaction
+    gdd: design/gdd/player-movement-interaction.md
+    requirement: "Interaction focus: nearest-reachable with priority tie-breaking"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #5 — resources-goods-capacity ===
+  - id: TR-resources-001
+    system: resources-goods-capacity
+    gdd: design/gdd/resources-goods-capacity.md
+    requirement: "6 resource pools with defined stack rules and capacity types"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-resources-002
+    system: resources-goods-capacity
+    gdd: design/gdd/resources-goods-capacity.md
+    requirement: "commit_deposit(node_id, resources) — atomic, irreversible, Pool 6 terminal"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-resources-003
+    system: resources-goods-capacity
+    gdd: design/gdd/resources-goods-capacity.md
+    requirement: "3 capacity types: discrete slots, numeric stacks, weight-based"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #6 — player-knowledge-intel ===
+  - id: TR-intel-001
+    system: player-knowledge-intel
+    gdd: design/gdd/player-knowledge-intel.md
+    requirement: "3 knowledge states per entity: unrevealed → rumored → identified → verified"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-intel-002
+    system: player-knowledge-intel
+    gdd: design/gdd/player-knowledge-intel.md
+    requirement: "IntelConsumeResult algorithm: confidence decay + hidden tag reveal"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-intel-003
+    system: player-knowledge-intel
+    gdd: design/gdd/player-knowledge-intel.md
+    requirement: "3 ability unlock paths: Path A (intel-driven), Path B (repair-driven), Path C (composite)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #7 — airship-hub ===
+  - id: TR-hub-001
+    system: airship-hub
+    gdd: design/gdd/airship-hub.md
+    requirement: "Walkable side-view airship interior with 10 MVP stations"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-hub-002
+    system: airship-hub
+    gdd: design/gdd/airship-hub.md
+    requirement: "2 departure modes: chart departure, direct departure"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-hub-003
+    system: airship-hub
+    gdd: design/gdd/airship-hub.md
+    requirement: "Room gating: stations unlock via module installation"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #8 — airship-modules-hull-state ===
+  - id: TR-modules-001
+    system: airship-modules-hull-state
+    gdd: design/gdd/airship-modules-hull-state.md
+    requirement: "2 module slots: scout module, cargo/repair module"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-modules-002
+    system: airship-modules-hull-state
+    gdd: design/gdd/airship-modules-hull-state.md
+    requirement: "Dual-field model: functional field + cosmetic field per module"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-modules-003
+    system: airship-modules-hull-state
+    gdd: design/gdd/airship-modules-hull-state.md
+    requirement: "4 hull bands with efficiency coefficients; damage = max(per-band) not sum"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #9 — chart-route-planning ===
+  - id: TR-chart-001
+    system: chart-route-planning
+    gdd: design/gdd/chart-route-planning.md
+    requirement: "2 MVP routes with authored hazard tags; traversable + selectable states"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-chart-002
+    system: chart-route-planning
+    gdd: design/gdd/chart-route-planning.md
+    requirement: "Route rendering: rumored=dashed, identified=solid, verified=warm gold glow"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-chart-003
+    system: chart-route-planning
+    gdd: design/gdd/chart-route-planning.md
+    requirement: "Two-step departure confirmation with ink-spread animation and irreversible lock"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #10 — navigation-route-risk ===
+  - id: TR-navigation-001
+    system: navigation-route-risk
+    gdd: design/gdd/navigation-route-risk.md
+    requirement: "Voyage risk resolution: authored tags → EncounterContext via time-based progression"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-navigation-002
+    system: navigation-route-risk
+    gdd: design/gdd/navigation-route-risk.md
+    requirement: "5 formulas: voyage duration, encounter check timing, scout preview, damage, hidden tag reveal"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-navigation-003
+    system: navigation-route-risk
+    gdd: design/gdd/navigation-route-risk.md
+    requirement: "Dynamic hull band transitions mid-voyage (Option B)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #11 — exploration-scavenge-scenario ===
+  - id: TR-exploration-001
+    system: exploration-scavenge-scenario
+    gdd: design/gdd/exploration-scavenge-scenario.md
+    requirement: "4-zone radial template: 50×35 units, 4-phase session"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-exploration-002
+    system: exploration-scavenge-scenario
+    gdd: design/gdd/exploration-scavenge-scenario.md
+    requirement: "6 search points with free-search rule; 2 intel points; 2+ threat points"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-exploration-003
+    system: exploration-scavenge-scenario
+    gdd: design/gdd/exploration-scavenge-scenario.md
+    requirement: "Extraction: player-judged (no timer), λ_success/λ_forced with Unique item protection"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #12 — combat-threat-handling ===
+  - id: TR-combat-001
+    system: combat-threat-handling
+    gdd: design/gdd/combat-threat-handling.md
+    requirement: "1 threat type with 3 response options (fight, evade, retreat)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-combat-002
+    system: combat-threat-handling
+    gdd: design/gdd/combat-threat-handling.md
+    requirement: "Decision breath: player chooses response without real-time pressure"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-combat-003
+    system: combat-threat-handling
+    gdd: design/gdd/combat-threat-handling.md
+    requirement: "3 outcomes: damaged, knocked back, retreat"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #13 — world-repair-unlock ===
+  - id: TR-repair-001
+    system: world-repair-unlock
+    gdd: design/gdd/world-repair-unlock.md
+    requirement: "1 repair node: starlight_dock, 3-state machine (unrevealed → known → repaired)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-repair-002
+    system: world-repair-unlock
+    gdd: design/gdd/world-repair-unlock.md
+    requirement: "Batch deposit with deposit_validation guarding excess/invalid materials"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-repair-003
+    system: world-repair-unlock
+    gdd: design/gdd/world-repair-unlock.md
+    requirement: "Repair completion triggers: route unlock + hazard reduction + ability unlock + world feedback"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #14 — port-village-market ===
+  - id: TR-settlement-001
+    system: port-village-market
+    gdd: design/gdd/port-village-market.md
+    requirement: "1 starting settlement with walk-up stall purchasing"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-settlement-002
+    system: port-village-market
+    gdd: design/gdd/port-village-market.md
+    requirement: "Repair-flag-driven stock changes; no price simulation in MVP"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-settlement-003
+    system: port-village-market
+    gdd: design/gdd/port-village-market.md
+    requirement: "NPC activity and dialogue respond to repair_completed signal"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #15 — partner-relationships ===
+  - id: TR-partner-001
+    system: partner-relationships
+    gdd: design/gdd/partner-relationships.md
+    requirement: "1 scout partner (sky-cat) with sniff verb → reveal_rumor()"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-partner-002
+    system: partner-relationships
+    gdd: design/gdd/partner-relationships.md
+    requirement: "One-time irreversible naming + nest accumulation (4 items, irreversible)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-partner-003
+    system: partner-relationships
+    gdd: design/gdd/partner-relationships.md
+    requirement: "6-state runtime machine keyed to Hub states; always present on airship"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #16 — ui-hud-chart-interface ===
+  - id: TR-ui-001
+    system: ui-hud-chart-interface
+    gdd: design/gdd/ui-hud-chart-interface.md
+    requirement: "12 screens with modal stack (single modal + combat overlay)"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-ui-002
+    system: ui-hud-chart-interface
+    gdd: design/gdd/ui-hud-chart-interface.md
+    requirement: "4-layer input routing priority; signal-driven HUD with dirty-flag batch updates"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-ui-003
+    system: ui-hud-chart-interface
+    gdd: design/gdd/ui-hud-chart-interface.md
+    requirement: "Screen state machine: Hub → Chart → Exploration → Return closed loop"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-ui-004
+    system: ui-hud-chart-interface
+    gdd: design/gdd/ui-hud-chart-interface.md
+    requirement: "WCAG AA contrast compliance; browser tab freeze recovery"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #17 — feedback-fx-audio ===
+  - id: TR-feedback-001
+    system: feedback-fx-audio
+    gdd: design/gdd/feedback-fx-audio.md
+    requirement: "Semantic feedback events: route_selected, repair_completed, threat_triggered, etc."
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-feedback-002
+    system: feedback-fx-audio
+    gdd: design/gdd/feedback-fx-audio.md
+    requirement: "Minimum visible-repair feedback owned by #13; home-safety feedback by #7; clarity by #16"
+    created: 2026-05-05
+    revised: ""
+    status: active
+
+  # === System #18 — onboarding-first-loop ===
+  - id: TR-onboarding-001
+    system: onboarding-first-loop
+    gdd: design/gdd/onboarding-first-loop.md
+    requirement: "First-loop guidance: Hub → Chart → Explore → Return → Repair"
+    created: 2026-05-05
+    revised: ""
+    status: active

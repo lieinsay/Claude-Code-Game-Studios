@@ -1,7 +1,7 @@
 # ADR-0009: 飞艇模块与船体伤害模型 — AirshipModuleSystem Autoload #8
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-05

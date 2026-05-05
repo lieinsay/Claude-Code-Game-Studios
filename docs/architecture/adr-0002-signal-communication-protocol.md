@@ -1,7 +1,7 @@
 # ADR-0002: 基于 Signal 的跨系统通信协议
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04

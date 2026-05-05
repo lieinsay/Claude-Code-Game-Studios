@@ -1,7 +1,7 @@
 # ADR-0001: Autoload/Scene 架构与启动顺序
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04
