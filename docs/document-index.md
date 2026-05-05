@@ -1,9 +1,9 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-05
-> **项目阶段**: Technical Setup — Foundation ADRs 完成 (6/6)
+> **项目阶段**: Technical Setup — Foundation + Core ADRs 完成 (12/12)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first)
-> **文档总数**: ~324 个 .md 文件 + 9 个配置文件
+> **文档总数**: ~330 个 .md 文件 + 9 个配置文件
 
 ---
 
@@ -144,17 +144,29 @@ graph TB
     %% Core 依赖
     CHART --> INTEL
     CHART --> HUB
+    CHART --> REG
     MODULE --> HUB
     MODULE --> RES
-    RES --> SAVE
+
+    %% Core→Core 依赖
+    CHART -.->|route_committed| NAV
+    CHART -.->|route_enhanced| REPAIR
+    INTEL -.->|knowledge_advanced| CHART
+    INTEL -.->|ability_unlocked| CHART
+    RES -.->|deposit_committed| REPAIR
+    MODULE -.->|departure_readiness_changed| NAV
 
     %% Feature 依赖
     NAV --> CHART
     NAV --> MODULE
+    NAV -.->|voyage_completed(EncounterContext)| EXPLORE
     EXPLORE --> NAV
     COMBAT --> EXPLORE
+    COMBAT --> MODULE
     REPAIR --> RES
-    REPAIR --> INTEL
+    REPAIR -.->|repair_completed| INTEL
+    REPAIR -.->|repair_completed| CHART
+    REPAIR -.->|repair_completed| SETTLE
     SETTLE --> REPAIR
     PARTNER --> HUB
     PARTNER --> INTEL
@@ -167,8 +179,12 @@ graph TB
     UI --> CHART
     UI --> HUB
     UI --> EXPLORE
+    UI -.->|10 semantic events| VFX
     VFX --> REPAIR
     VFX --> COMBAT
+    SAVE -.->|progress.routes snapshot| CHART
+    SAVE -.->|progress.intel snapshot| INTEL
+    SAVE -.->|progress.world-repair snapshot| REPAIR
 
     Platform --> Foundation
     Foundation --> Core
@@ -221,14 +237,116 @@ graph TB
 
 ---
 
-## 三、架构文档结构
+## 三、架构决策记录 (ADR) 全景
+
+### ADR 信号流与状态机架构
+
+```mermaid
+graph TB
+    subgraph Foundation["📦 Foundation ADRs"]
+        ADR1["ADR-0001<br/>Autoload/Scene 架构<br/>9 Autoload + 启动顺序"]
+        ADR2["ADR-0002<br/>Signal 通信协议<br/>{noun}_{verb_past} + typed params"]
+        ADR3["ADR-0003<br/>存档系统<br/>SnapshotPackage + JSON"]
+        ADR4["ADR-0004<br/>交互系统<br/>@abstract Interactable"]
+        ADR5["ADR-0005<br/>资源池架构<br/>6 Pools + 13 Result 枚举"]
+        ADR6["ADR-0006<br/>Web 平台约束<br/>GDScript + WebGL 2 + 单线程"]
+    end
+
+    subgraph Core["🔧 Core ADRs"]
+        ADR7["ADR-0007<br/>IntelManager<br/>知识/能力 Dictionary 状态"]
+        ADR8["ADR-0008<br/>Chart 状态机<br/>5-state + route_committed"]
+        ADR9["ADR-0009<br/>Module/Hull System<br/>双字段 + 出航就绪"]
+        ADR10["ADR-0010<br/>EncounterContext<br/>Navigation→Exploration 数据桥"]
+    end
+
+    subgraph Feature_Presentation["⚔️ Feature + 🖥️ Presentation ADRs"]
+        ADR11["ADR-0011<br/>WorldRepair<br/>3-state 不可逆状态机"]
+        ADR12["ADR-0012<br/>UIManager<br/>屏幕状态机 + 4层输入路由"]
+    end
+
+    %% Foundation→Core
+    ADR1 -->|"Autoload #6"| ADR7
+    ADR1 -->|"Autoload #9 Phase 3b"| ADR8
+    ADR1 -->|"Autoload #7 Phase 4"| ADR9
+    ADR2 -->|"signal 协议"| ADR7
+    ADR2 -->|"signal 协议"| ADR8
+    ADR2 -->|"signal 协议"| ADR9
+    ADR2 -->|"signal 协议"| ADR10
+    ADR3 -->|"progress.intel snapshot"| ADR7
+    ADR3 -->|"progress.routes snapshot"| ADR8
+    ADR3 -->|"progress.modules snapshot"| ADR9
+    ADR5 -.->|"consume_intel 入口"| ADR7
+    ADR6 -.->|"Web 约束"| ADR7
+    ADR6 -.->|"Web 约束"| ADR8
+
+    %% Core→Core
+    ADR7 -->|"query_route_knowledge"| ADR8
+    ADR7 -->|"query_ability_state"| ADR9
+    ADR8 -->|"route_committed"| ADR10
+
+    %% Core→Feature
+    ADR7 -.->|"knowledge 查询"| ADR11
+    ADR5 -.->|"commit_deposit"| ADR11
+    ADR8 -.->|"route_enhanced"| ADR11
+    ADR8 -.->|"UI 数据接口"| ADR12
+    ADR9 -.->|"can_depart"| ADR12
+
+    %% Feature internal
+    ADR11 -.->|"repair_completed fan-out"| ADR8
+    ADR10 -.->|"EncounterContext"| ADR11
+```
+
+### ADR 状态机一览
+
+```mermaid
+stateDiagram-v2
+    direction LR
+
+    state "Chart #9" as CH
+    state "WorldRepair #13" as WR
+    state "IntelManager #6" as INTEL
+    state "UIManager #16" as UI
+
+    state CH {
+        LOADING --> BROWSING: COMPLETE
+        LOADING --> ERROR: FAIL
+        BROWSING --> ROUTE_SELECTED: SELECT
+        ROUTE_SELECTED --> BROWSING: DESELECT
+        ROUTE_SELECTED --> DEPARTURE_CONFIRMED: CONFIRM ▶
+        ERROR --> LOADING: RETRY
+        note right of DEPARTURE_CONFIRMED: 终端 (irreversible)
+    }
+
+    state WR {
+        UNREVEALED --> KNOWN: player_arrived
+        KNOWN --> REPAIRED: submit_deposit ▶
+        note right of REPAIRED: 终端 (irreversible)
+    }
+
+    state INTEL {
+        [*] --> knowledge_UNKNOWN
+        knowledge_UNKNOWN --> knowledge_RUMORED: consume_intel
+        knowledge_RUMORED --> knowledge_IDENTIFIED: observation
+        knowledge_IDENTIFIED --> knowledge_VERIFIED: player_arrived
+    }
+
+    state UI {
+        HUB --> CHART: open_chart
+        CHART --> HUB: close_chart
+        HUB --> EXPLORATION: voyage_start
+        EXPLORATION --> SETTLEMENT: arrive
+        SETTLEMENT --> HUB: return
+    }
+```
+
+### 架构文档结构
 
 ```mermaid
 graph LR
     subgraph 核心架构["核心架构文档"]
         MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
-        TR["tr-registry.yaml<br/>技术需求注册表"]
-        ADR["ADR-0001~0006<br/>架构决策记录<br/>(6/17 complete)"]
+        TR2["tr-registry.yaml<br/>技术需求注册表"]
+        ADR["ADR-0001~0012<br/>架构决策记录<br/>(12/17 complete)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -243,7 +361,7 @@ graph LR
         EX["examples/<br/>11 个会话示例"]
     end
 
-    MA --> TR
+    MA --> TR2
     MA -.-> GODOT
     CP --> WG
     WG --> EX
@@ -255,13 +373,21 @@ graph LR
 |------|------|
 | [architecture.md](architecture/architecture.md) | 主架构 — v1 签收 (TD+LP 双签收) |
 | [tr-registry.yaml](architecture/tr-registry.yaml) | 52 条技术需求注册表 |
-| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 |
-| [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构与启动顺序 |
-| [architecture/adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: 基于 Signal 的跨系统通信协议 |
-| [architecture/adr-0003-save-system-snapshot-json.md](architecture/adr-0003-save-system-snapshot-json.md) | ADR-0003: 存档系统 — 快照包与 JSON 序列化 |
-| [architecture/adr-0004-interaction-handler-abstract.md](architecture/adr-0004-interaction-handler-abstract.md) | ADR-0004: 交互系统 — @abstract Handler + Registry |
-| [architecture/adr-0005-resource-pool-system.md](architecture/adr-0005-resource-pool-system.md) | ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit |
-| [architecture/adr-0006-web-platform-constraints.md](architecture/adr-0006-web-platform-constraints.md) | ADR-0006: Web 平台约束与引擎兼容性 |
+| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 (12 ADR 注册) |
+| | **Foundation ADRs (6)** |
+| [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构 — 9 Autoload + 9-Phase 启动链 |
+| [architecture/adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: Signal 通信协议 — typed params + sync emit + max depth 2 |
+| [architecture/adr-0003-save-system-snapshot-json.md](architecture/adr-0003-save-system-snapshot-json.md) | ADR-0003: 存档系统 — SnapshotPackage + Canonical JSON |
+| [architecture/adr-0004-interaction-handler-abstract.md](architecture/adr-0004-interaction-handler-abstract.md) | ADR-0004: 交互系统 — @abstract Interactable + Registry |
+| [architecture/adr-0005-resource-pool-system.md](architecture/adr-0005-resource-pool-system.md) | ADR-0005: 资源池 — 6 Pools + 13 ResourceResult 枚举 |
+| [architecture/adr-0006-web-platform-constraints.md](architecture/adr-0006-web-platform-constraints.md) | ADR-0006: Web 平台约束 — WebGL 2 + 单线程 + 无 C# |
+| | **Core ADRs (6)** |
+| [architecture/adr-0007-intel-knowledge-ability-system.md](architecture/adr-0007-intel-knowledge-ability-system.md) | ADR-0007: IntelManager — 知识/能力 Dictionary 状态 + 多路径解锁 |
+| [architecture/adr-0008-chart-route-state-machine.md](architecture/adr-0008-chart-route-state-machine.md) | ADR-0008: Chart 状态机 — 5-state + route_committed 不可逆承诺 |
+| [architecture/adr-0009-airship-module-hull-system.md](architecture/adr-0009-airship-module-hull-system.md) | ADR-0009: Module/Hull System — 双字段 + 出航就绪三维检查 |
+| [architecture/adr-0010-encounter-context-type.md](architecture/adr-0010-encounter-context-type.md) | ADR-0010: EncounterContext — Navigation→Exploration 数据桥 |
+| [architecture/adr-0011-world-repair-state-machine.md](architecture/adr-0011-world-repair-state-machine.md) | ADR-0011: WorldRepair — 3-state 不可逆 + 批量提交 + 6 下游 fan-out |
+| [architecture/adr-0012-ui-input-routing-dual-focus.md](architecture/adr-0012-ui-input-routing-dual-focus.md) | ADR-0012: UIManager — 屏幕状态机 + 模态栈 + 4 层输入路由 |
 | [COLLABORATIVE-DESIGN-PRINCIPLE.md](COLLABORATIVE-DESIGN-PRINCIPLE.md) | 协作设计原则 |
 | [WORKFLOW-GUIDE.md](WORKFLOW-GUIDE.md) | 完整工作流指南 (1684 行) |
 | [examples/](examples/) | 11 个会话流程示例 |
@@ -549,7 +675,7 @@ graph TB
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
 
-  📊 总计: ~320 个 Markdown 文档 + 9 个配置/数据文件
+  📊 总计: ~330 个 Markdown 文档 + 9 个配置/数据文件 (12 ADR 已写入)
 ```
 
 ---
@@ -558,14 +684,20 @@ graph TB
 
 根据 `/create-architecture` Phase 8 结论，以下文档待创建：
 
-- [ ] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/`
+- [x] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/` (12/17 complete)
   - [x] ADR-0001: Autoload/Scene 架构与启动顺序 ✅
   - [x] ADR-0002: 基于 Signal 的跨系统通信协议 ✅
   - [x] ADR-0003: 存档系统 — 快照包与 JSON 序列化 ✅
   - [x] ADR-0004: 交互系统 — @abstract Handler + Registry ✅
   - [x] ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit ✅
   - [x] ADR-0006: Web 平台约束与引擎兼容性 ✅
-  - ... 等共 17 个 (6/17 complete)
+  - [x] ADR-0007: IntelManager 知识状态与能力解锁架构 ✅
+  - [x] ADR-0008: Chart 航图路线状态机与出航承诺 ✅
+  - [x] ADR-0009: AirshipModuleSystem 飞艇模块与船体伤害模型 ✅
+  - [x] ADR-0010: EncounterContext 跨系统类型契约 ✅
+  - [x] ADR-0011: WorldRepair 修复状态机与分批提交 ✅
+  - [x] ADR-0012: UIManager 屏幕状态机/模态栈/输入路由 ✅
+  - [ ] ADR-0013~0017: AirshipHub, Exploration, Combat, Settlement, Partner (Feature 层)
 - [ ] **Control Manifest** — `docs/architecture/control-manifest.md`
 - [ ] **Epics** — 按系统分组的 Epic 文件
 - [ ] **技术偏好完整配置** — `.claude/docs/technical-preferences.md`

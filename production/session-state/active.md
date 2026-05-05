@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Technical Setup
-Feature: Foundation ADRs (6/6 complete)
-Task: ADR-0006 Complete — Foundation 层完成
+Feature: Core ADRs (6/6 — ADR-0008 complete)
+Task: ADR-0008 Complete — Chart 航图路线状态机与出航承诺
 <!-- /STATUS -->
 
 ## Current: /create-architecture — All 8 Phases Complete
@@ -31,22 +31,29 @@ Task: ADR-0006 Complete — Foundation 层完成
 
 | # | Concern | Resolve In |
 |---|---------|------------|
-| C1 | Dual-focus (4.6) + 4-layer input routing undefined | ADR-0012 |
+| C1 | Dual-focus (4.6) + 4-layer input routing undefined | ADR-0012 ✓ RESOLVED |
 | C3 | ConfigFile→JSON for save data | ADR-0003 |
-| C10 | 5 critical cross-system types undefined | ADR-0010/0011/0012 |
+| C10 | 5 critical cross-system types undefined | ADR-0010/0011/0012 — ALL RESOLVED (EncounterContext, WorldRepair, UIManager input routing + modal stack) |
 | C9 | InteractionHandler abstract method signatures | ADR-0004 |
 
-### Next: Create Foundation ADRs
+### Core ADRs Written
 
-**Top 3 ADRs to run first:**
-1. `/architecture-decision Autoload/Scene 架构与启动顺序` → ADR-0001
-2. `/architecture-decision 基于 Signal 的跨系统通信协议` → ADR-0002
-3. `/architecture-decision 存档系统——快照包与 JSON 序列化` → ADR-0003
+1. ADR-0007 — IntelManager 知识状态与能力解锁架构
+2. ADR-0008 — Chart 航图路线状态机与出航承诺 ✓ NEW
+3. ADR-0009 — AirshipModuleSystem 飞艇模块与船体伤害模型
+4. ADR-0010 — EncounterContext 跨系统类型契约 (Navigation→Exploration/Combat 数据桥)
+5. ADR-0011 — WorldRepair 修复状态机与分批提交
+6. ADR-0012 — UIManager 屏幕状态机、模态栈与输入路由
 
-When all 6 Foundation ADRs are written: run `/gate-check technical-setup`
+### Core ADRs — ALL COMPLETE ✓
+
+All 6 Core ADRs written and registered. Ready for `/gate-check technical-setup`.
+
+When all Foundation + Core ADRs are written: run `/gate-check technical-setup`
 
 ### Key Files
 
 - `docs/architecture/architecture.md` — Master architecture document (v1, signed off)
 - `docs/architecture/tr-registry.yaml` — To be populated with 52 TRs
+- `docs/registry/architecture.yaml` — Updated with ADR-0007/0009/0010/0011/0012 stances
 - `design/gdd/systems-index.md` — 18-system index (reference, not modified)
