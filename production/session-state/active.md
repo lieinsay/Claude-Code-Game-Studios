@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型 + Epic/Story 框架
-Task: Concerns #1-#3 清除 → P3 原型 + Epic/Story 框架
+Task: Epics 已完成 → Stories 或 P3 原型
 <!-- /STATUS -->
 
 ## Current: Pre-Production — 2026-05-05
@@ -21,6 +21,7 @@ Task: Concerns #1-#3 清除 → P3 原型 + Epic/Story 框架
 - [x] ADR-0018 — Combat/Threat Resolution System (Concern #1 清除)
 - [x] `design/ux/interaction-patterns.md` — 10 个交互模式 (Concern #2 清除)
 - [x] `docs/architecture/architecture-traceability.md` — 54 TR 全覆盖矩阵 (Concern #3 清除)
+- [x] `production/epics/` — 10 个 Epic 文件 (5 Foundation + 5 Core) + index.md + 完整 Coverage 表 (18 系统)
 
 ### Pre-Production 入口状态
 
@@ -50,4 +51,14 @@ Task: Concerns #1-#3 清除 → P3 原型 + Epic/Story 框架
 - `design/ux/hub.md`
 - `design/ux/chart.md`
 - `design/ux/exploration.md`
-- `production/stage.txt` → Pre-Production
+- `production/epics/index.md` — 18-system complete coverage table (Foundation 5 Ready + Core 5 Ready + Feature 3 + Presentation 1 + 5 Blocked)
+- `production/epics/content-registry/EPIC.md`
+- `production/epics/platform-session-shell/EPIC.md`
+- `production/epics/local-save-persistence/EPIC.md`
+- `production/epics/player-movement-interaction/EPIC.md`
+- `production/epics/resources-goods-capacity/EPIC.md`
+- `production/epics/intel-knowledge/EPIC.md`
+- `production/epics/airship-hub/EPIC.md`
+- `production/epics/modules-hull-state/EPIC.md`
+- `production/epics/chart-route-planning/EPIC.md`
+- `production/epics/navigation-route-risk/EPIC.md`
