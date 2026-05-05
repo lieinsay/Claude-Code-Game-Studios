@@ -4,7 +4,20 @@
 > **GDD**: design/gdd/content-data-state-registry.md
 > **Architecture Module**: Autoload #1 — Registry
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories content-registry`
+> **Stories**: 8 created
+
+## Stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | [ID Registry Core + Query Engine](story-001-id-registry-core-query.md) | Logic | Ready | ADR-0001 |
+| 002 | [Schema Validation](story-002-schema-validation.md) | Logic | Ready | ADR-0001 |
+| 003 | [Content Lifecycle](story-003-content-lifecycle.md) | Logic | Ready | ADR-0001 |
+| 004 | [Reference Integrity](story-004-reference-integrity.md) | Logic | Ready | ADR-0001 |
+| 005 | [Domain Loading & Decision UI Gating](story-005-domain-loading-decision-gating.md) | Integration | Ready | ADR-0001, ADR-0002 |
+| 006 | [Diagnostic System](story-006-diagnostic-system.md) | Logic | Ready | ADR-0001 |
+| 007 | [Diagnostic UI — Dev Tools](story-007-diagnostic-ui.md) | UI | Ready | ADR-0001, ADR-0012 |
+| 008 | [Player-Facing Boundary](story-008-player-facing-boundary.md) | Integration | Ready | ADR-0001, ADR-0002 |
 
 ## Overview
 
