@@ -1,0 +1,53 @@
+# Epics Index
+
+> **Last Updated**: 2026-05-05
+> **Engine**: Godot 4.6.2
+> **ADR Coverage**: 13 Accepted + 5 Deferred
+
+## Foundation Layer
+
+| Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
+|------|----------|-----|----------------|-----|---------|--------|
+| [content-registry](content-registry/EPIC.md) | #1 | content-data-state-registry.md | ADR-0001, ADR-0002 | 3 | Not yet created | Ready |
+| [platform-session-shell](platform-session-shell/EPIC.md) | #2 | platform-session-shell.md | ADR-0001, ADR-0006 | 3 | Not yet created | Ready |
+| [local-save-persistence](local-save-persistence/EPIC.md) | #3 | local-save-world-state-persistence.md | ADR-0003 | 3 | Not yet created | Ready |
+| [player-movement-interaction](player-movement-interaction/EPIC.md) | #4 | player-movement-interaction.md | ADR-0004 | 3 | Not yet created | Ready |
+| [resources-goods-capacity](resources-goods-capacity/EPIC.md) | #5 | resources-goods-capacity.md | ADR-0005 | 3 | Not yet created | Ready |
+
+## Core Layer
+
+| Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
+|------|----------|-----|----------------|-----|---------|--------|
+| [intel-knowledge](intel-knowledge/EPIC.md) | #6 | player-knowledge-intel.md | ADR-0007 | 3 | Not yet created | Ready |
+| [airship-hub](airship-hub/EPIC.md) | #7 | airship-hub.md | ADR-0001, ADR-0002, ADR-0003, ADR-0004 | 3 | Not yet created | Ready |
+| [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | Not yet created | Ready |
+| [chart-route-planning](chart-route-planning/EPIC.md) | #9 | chart-route-planning.md | ADR-0008 | 3 | Not yet created | Ready |
+| [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | Not yet created | Ready |
+
+## Feature Layer
+
+| Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
+|------|----------|-----|----------------|-----|---------|--------|
+| exploration-scavenge | #11 | exploration-scavenge-scenario.md | (ADR-0013 deferred) | 3 | — | Blocked — ADR-0013 |
+| combat-threat | #12 | combat-threat-handling.md | ADR-0018 | 3 | — | Pending |
+| world-repair | #13 | world-repair-unlock.md | ADR-0011 | 3 | — | Pending |
+| settlement-market | #14 | port-village-market.md | (ADR-0014 deferred) | 3 | — | Blocked — ADR-0014 |
+| partner-relationships | #15 | partner-relationships.md | (ADR-0015 deferred) | 3 | — | Blocked — ADR-0015 |
+
+## Presentation Layer
+
+| Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
+|------|----------|-----|----------------|-----|---------|--------|
+| ui-hud-interface | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | — | Pending |
+| feedback-fx-audio | #17 | feedback-fx-audio.md | (ADR-0016 deferred) | 2 | — | Blocked — ADR-0016 |
+| onboarding-first-loop | #18 | onboarding-first-loop.md | (ADR-0017 deferred) | 1 | — | Blocked — ADR-0017 |
+
+## Deferred ADR Status
+
+| ADR | System | Priority | Recommended Trigger |
+|-----|--------|----------|---------------------|
+| ADR-0013 | #11 Exploration | HIGH | Before any Exploration code |
+| ADR-0014 | #14 Settlement | MEDIUM | Before Settlement implementation |
+| ADR-0015 | #15 Partner | MEDIUM | Before Partner implementation |
+| ADR-0016 | #17 Feedback | MEDIUM | Before VFX/Audio implementation |
+| ADR-0017 | #18 Onboarding | LOW | Vertical Slice phase |
