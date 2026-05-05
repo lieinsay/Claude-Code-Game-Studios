@@ -3,7 +3,7 @@
 > **最后更新**: 2026-05-05
 > **项目阶段**: Pre-Production — P2 完成 (架构审计 + UX Spec ×3 + 门禁通过)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
-> **ADR**: 12/12 Accepted · TR Registry: 52 条已注册 · Control Manifest: Active
+> **ADR**: 13 Accepted (0001-0012 + 0018) · TR Registry: 52 条已注册 · Control Manifest: Active
 > **文档总数**: ~345 个 .md 文件 + 10 个配置/数据文件
 
 ---
@@ -403,6 +403,7 @@ graph LR
 | [architecture/adr-0010-encounter-context-type.md](architecture/adr-0010-encounter-context-type.md) | ADR-0010: EncounterContext — Navigation→Exploration 数据桥 |
 | [architecture/adr-0011-world-repair-state-machine.md](architecture/adr-0011-world-repair-state-machine.md) | ADR-0011: WorldRepair — 3-state 不可逆 + 批量提交 + 6 下游 fan-out |
 | [architecture/adr-0012-ui-input-routing-dual-focus.md](architecture/adr-0012-ui-input-routing-dual-focus.md) | ADR-0012: UIManager — 屏幕状态机 + 模态栈 + 4 层输入路由 |
+| [architecture/adr-0018-combat-threat-resolution.md](architecture/adr-0018-combat-threat-resolution.md) | ADR-0018: Combat/Threat — 4 态状态机 + resolve_threat + combat_result 契约 |
 | [COLLABORATIVE-DESIGN-PRINCIPLE.md](COLLABORATIVE-DESIGN-PRINCIPLE.md) | 协作设计原则 |
 | [WORKFLOW-GUIDE.md](WORKFLOW-GUIDE.md) | 完整工作流指南 (1684 行) |
 | [examples/](examples/) | 11 个会话流程示例 |
@@ -548,7 +549,7 @@ UX SPECS             --      --      --     --      --      --      --     █�
 
 | # | Concern | 严重度 | 状态 |
 |---|---------|--------|------|
-| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | 待创建 ADR-0018 |
+| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | ✅ ADR-0018 已创建 (2026-05-05) |
 | 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 待从 3 份 UX Spec 提取 |
 | 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 待创建 |
 | 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统 Production 前完成 |
@@ -803,7 +804,7 @@ graph TB
 
 ### Pre-Production 剩余待创建
 
-- [ ] **ADR-0018** (Combat/Threat System) — 🔴 HIGH PRIORITY — 任何战斗代码之前 (门禁 Concern #1)
+- [x] **ADR-0018** (Combat/Threat System) — ✅ 已创建 (2026-05-05)
 - [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 对应系统进入 Production 前完成
 - [ ] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md` (Concern #3)
 - [ ] **Interaction Patterns Library** — `design/ux/interaction-patterns.md` (Concern #2)

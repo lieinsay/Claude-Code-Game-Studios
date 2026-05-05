@@ -13,6 +13,8 @@ Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
 - [x] `/architecture-review` — CONCERNS (65.4% TR coverage, Combat #12 gap)
 - [x] `/ux-design` — Hub, Chart, Exploration 三份完整 UX Spec
 - [x] `/gate-check technical-setup` — CONCERNS (11/13 artifacts, 9/9 quality, 4/4 directors CONCERNS)
+- [x] `git push` fa0a21b — P2 交付物推送完成
+- [x] `docs/document-index.md` 更新 — 图表 + 就绪矩阵 + 待创建列表 + Concerns 跟踪表
 
 ### Pre-Production 入口状态
 
@@ -26,7 +28,7 @@ Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
 
 | # | Concern | 严重度 | 建议动作 |
 |---|---------|--------|---------|
-| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | 创建 ADR-0018（任何战斗代码之前） |
+| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | ✅ ADR-0018 已创建 (2026-05-05) |
 | 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 从 3 份 UX Spec 中提取模式 |
 | 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 创建独立文件 |
 | 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统进入 Production 前完成 |
