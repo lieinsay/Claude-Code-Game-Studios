@@ -1,10 +1,10 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-05
-> **项目阶段**: Technical Setup → Pre-Production 门禁检查完成 (CONCERNS→4 阻塞项已清)
+> **项目阶段**: Pre-Production — P2 完成 (架构审计 + UX Spec ×3 + 门禁通过)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
-> **ADR**: 12/12 Accepted · TR Registry: 52 条已注册 · 技术偏好: 完整配置
-> **文档总数**: ~332 个 .md 文件 + 10 个配置/数据文件
+> **ADR**: 12/12 Accepted · TR Registry: 52 条已注册 · Control Manifest: Active
+> **文档总数**: ~345 个 .md 文件 + 10 个配置/数据文件
 
 ---
 
@@ -25,12 +25,15 @@ graph TB
         GDD["18 个 GDD 文档<br/>游戏设计文档"]
         REVIEWS["13 个 Review Logs<br/>设计审查记录"]
         ART["art-bible.md<br/>艺术圣经"]
+        UX["ux/ (3)<br/>Hub·Chart·Exploration UX Spec"]
         REGISTRY["entities.yaml<br/>实体注册表"]
     end
 
     subgraph 架构["🏗️ 架构层 docs/"]
         ARCH["architecture.md<br/>主架构文档"]
         TR["tr-registry.yaml<br/>技术需求注册表"]
+        ADRREV["architecture-review-2026-05-05.md<br/>架构审计报告"]
+        CM["control-manifest.md<br/>程序员规则清单"]
         COLLAB["COLLABORATIVE-DESIGN-PRINCIPLE.md<br/>协作设计原则"]
         ENGINE["engine-reference/<br/>引擎参考文档"]
     end
@@ -75,6 +78,9 @@ graph TB
 | [design/gdd/game-concept.md](../design/gdd/game-concept.md) | 游戏概念 — 核心幻想、MDA 分析 |
 | [design/gdd/systems-index.md](../design/gdd/systems-index.md) | 系统索引 — 18 个系统的边界与约束 |
 | [design/art/art-bible.md](../design/art/art-bible.md) | 艺术圣经 (2111 行) |
+| [design/ux/hub.md](../design/ux/hub.md) | Hub UX Spec — 飞艇家园 (10 站点/4 房间/8 状态变体) |
+| [design/ux/chart.md](../design/ux/chart.md) | Chart UX Spec — 航图航线规划 (5 状态/墨水扩散出航序列) |
+| [design/ux/exploration.md](../design/ux/exploration.md) | Exploration UX Spec — 探索搜撤场景 (4 阶段/11 动画) |
 | [design/registry/entities.yaml](../design/registry/entities.yaml) | 实体注册表 |
 
 ### 架构层快速入口
@@ -242,7 +248,7 @@ graph TB
 
 > **状态**: 12/12 ADRs 全部 **Accepted** ✅ (2026-05-05)
 > **TR Registry**: 52 条技术需求已录入 `docs/architecture/tr-registry.yaml`
-> **门禁检查**: Technical Setup → Pre-Production — CONCERNS (4 阻塞项已清除)
+> **门禁检查**: Technical Setup → Pre-Production — CONCERNS (4/4 directors, 0 NOT READY) → 已进入 Pre-Production
 
 ### ADR 信号流与状态机架构
 
@@ -352,6 +358,8 @@ graph LR
         MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
         TR2["tr-registry.yaml<br/>技术需求注册表"]
         ADR["ADR-0001~0012<br/>架构决策记录<br/>(12/12 Accepted ✅)"]
+        ARREV["architecture-review-2026-05-05.md<br/>架构审计报告<br/>(65.4% TR 覆盖)"]
+        CM2["control-manifest.md<br/>Control Manifest<br/>(4 层 + Global 规则)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -398,6 +406,9 @@ graph LR
 | [COLLABORATIVE-DESIGN-PRINCIPLE.md](COLLABORATIVE-DESIGN-PRINCIPLE.md) | 协作设计原则 |
 | [WORKFLOW-GUIDE.md](WORKFLOW-GUIDE.md) | 完整工作流指南 (1684 行) |
 | [examples/](examples/) | 11 个会话流程示例 |
+| [architecture/architecture-review-2026-05-05.md](architecture/architecture-review-2026-05-05.md) | 架构审计报告 — 65.4% TR 覆盖 (34/52), 0 冲突, 0 废弃 API |
+| [architecture/control-manifest.md](architecture/control-manifest.md) | Control Manifest — 程序员规则清单 (4 层 + Global) |
+| [design/accessibility-requirements.md](../design/accessibility-requirements.md) | 无障碍需求 — Accessibility Tier 承诺 |
 
 ### 引擎参考文档 (当前使用: Godot)
 
@@ -469,6 +480,11 @@ graph LR
 | 2026-05-05 | ADR 批量 Acceptance — 12/12 Accepted | 通过 | 全部 12 ADR Status→Accepted |
 | 2026-05-05 | TR Registry 填充 — 52 TR 条目 | 通过 | [tr-registry.yaml](architecture/tr-registry.yaml) |
 | 2026-05-05 | 技术偏好配置 — naming/budget/forbidden/specialists | 通过 | [technical-preferences.md](../.claude/docs/technical-preferences.md) |
+| 2026-05-05 | `/architecture-review` — 架构完整性审计 | CONCERNS (65.4% TR coverage, Combat #12 gap) | [architecture-review-2026-05-05](architecture/architecture-review-2026-05-05.md) |
+| 2026-05-05 | `/ux-design` — Hub, Chart, Exploration 三份 UX Spec | 通过 | [Hub](../design/ux/hub.md), [Chart](../design/ux/chart.md), [Exploration](../design/ux/exploration.md) |
+| 2026-05-05 | `/test-setup` + CI/CD — 测试框架 + GitHub Actions | 通过 | [tests/unit/](../tests/unit/), [.github/workflows/](../.github/workflows/) |
+| 2026-05-05 | `/create-control-manifest` — 程序员规则清单 | 通过 | [control-manifest.md](architecture/control-manifest.md) |
+| 2026-05-05 | `/gate-check technical-setup` — 最终门禁 | CONCERNS (4/4 directors CONCERNS, 0 NOT READY) | [active.md](../production/session-state/active.md) |
 
 ---
 
@@ -477,7 +493,7 @@ graph LR
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                    TECHNICAL SETUP → PRE-PRODUCTION                           │
-│                          Gate Check: CONCERNS                                 │
+│                   Gate Check: CONCERNS → PASS (Pre-Production)                │
 │                                                                              │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                      DIRECTOR PANEL                                    │   │
@@ -503,9 +519,9 @@ graph LR
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                   PRE-PRODUCTION KICK-OFF ITEMS                         │   │
 │  │                                                                        │   │
-│  │  P1: /test-setup (gdUnit4)     P2: /architecture-review               │   │
-│  │  P1: accessibility-requirements.md    P2: /ux-design (Hub, Chart)      │   │
-│  │  P1: /create-control-manifest         P2: CI/CD workflow               │   │
+│  │  ✅ P1: /test-setup (gdUnit4)     ✅ P2: /architecture-review            │   │
+│  │  ✅ P1: accessibility-requirements    ✅ P2: /ux-design (Hub,Chart,Exp) │   │
+│  │  ✅ P1: /create-control-manifest      ✅ P2: CI/CD workflow              │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -514,19 +530,32 @@ graph LR
 
 ```
                      ADP     GDD     ADR     TR     TECH    ART     TEST    UX
-                     ██      ██      ██     ██     ██      ██      ░░     ░░
-ARCHITECTURE.md      ██      ██      ██     ██     ██      ██      ░░     ░░
+                     ██      ██      ██     ██     ██      ██      ██     ██
+ARCHITECTURE.md      ██      ██      ██     ██     ██      ██      ██     ██
 CLAUDE.md            ██      --      --     --      ██      --      --     --
 ADR (x12)            ██      ██      ██     ██     ██      ░░      --     --
 TR REGISTRY          ██      ██      ██     ██     ██      --      --     --
 TECH PREFS           ██      --      ██     --      ██      --      --     --
 ART BIBLE            --      ██      --     --      --      ██      --     --
 ENGINE REFS          --      --      --     --      ██      --      --     --
-TEST FRAMEWORK       --      --      --     --      --      --      ░░     --
-UX SPECS             --      --      --     --      --      --      --     ░░
+TEST FRAMEWORK       --      --      --     --      --      --      ██     --
+UX SPECS             --      --      --     --      --      --      --     ██
 
                      ██ = Complete    ░░ = Missing    -- = Not applicable
 ```
+
+### 门禁留下的 Concerns（Pre-Production 期间跟踪）
+
+| # | Concern | 严重度 | 状态 |
+|---|---------|--------|------|
+| 1 | Combat #12 零 ADR 覆盖 | 🔴 HIGH | 待创建 ADR-0018 |
+| 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | 待从 3 份 UX Spec 提取 |
+| 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | 待创建 |
+| 4 | 6 个延期 ADR 无时间表 | 🟡 MEDIUM | 对应系统 Production 前完成 |
+| 5 | Dual-focus + Web 生命周期未测试 | 🟡 MEDIUM | Sprint 1 Spike |
+| 6 | 仅 1 个示例测试 | 🟡 LOW | 随实现同步编写 |
+| 7 | 无视觉参考/Mood Board | 🟡 LOW | 概念美术开始前整理 |
+| 8 | UX Specs 未交叉引用 Art Bible | 🟡 LOW | 早期 Pre-Production 轻量对齐 |
 
 ---
 
@@ -744,18 +773,18 @@ graph TB
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
 
-  📊 总计: ~332 个 Markdown 文档 + 10 个配置/数据文件
-  🏗️ ADR: 12/12 Accepted | TR: 52 条注册 | 技术偏好: 完整配置
-  ✅ Technical Setup 阶段完成 — 就绪进入 Pre-Production
+  📊 总计: ~345 个 Markdown 文档 + 10 个配置/数据文件
+  🏗️ ADR: 12/12 Accepted | TR: 52 条注册 | Control Manifest: Active
+  ✅ Pre-Production P2 完成 — 门禁通过，进入 Pre-Production 阶段
 ```
 
 ---
 
 ## 九、待创建文档
 
-> 更新于 2026-05-05 — Technical Setup 阶段末尾。
+> 更新于 2026-05-05 — Pre-Production P2 完成。
 
-### 已在本阶段完成 ✅
+### 已在 Technical Setup 完成 ✅
 
 - [x] **12 个 Foundation + Core ADR** — `docs/architecture/adr-0001~0012` — 全部 Accepted
 - [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 52 条全部录入
@@ -763,18 +792,24 @@ graph TB
 - [x] **技术偏好完整配置** — `.claude/docs/technical-preferences.md` — 命名规范/性能预算/禁止模式/专家路由
 - [x] **门禁检查** — Technical Setup → Pre-Production — CONCERNS 已记录
 
-### Pre-Production 阶段待创建
+### 已在 Pre-Production P1-P2 完成 ✅
 
-- [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 在对应系统实现前创建
-- [ ] **Control Manifest** — `docs/architecture/control-manifest.md`
-- [ ] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md`
-- [ ] **Architecture Review Report** — 在 ADR 全部完成后运行 `/architecture-review`
-- [ ] **Accessibility Requirements** — `design/accessibility-requirements.md`
-- [ ] **UX Specs** — `design/ux/` — 核心屏幕 (Hub, Chart, Exploration)
-- [ ] **Test Framework** — `tests/unit/` + `tests/integration/` — 运行 `/test-setup`
-- [ ] **CI/CD Workflow** — `.github/workflows/tests.yml`
-- [ ] **Epics** — `production/epics/` — 按系统分组
+- [x] **Control Manifest** — `docs/architecture/control-manifest.md` (P1)
+- [x] **Architecture Review Report** — `docs/architecture/architecture-review-2026-05-05.md` (P2)
+- [x] **Accessibility Requirements** — `design/accessibility-requirements.md` (P1)
+- [x] **UX Specs (×3)** — `design/ux/hub.md`, `chart.md`, `exploration.md` (P2)
+- [x] **Test Framework** — `tests/unit/` + `tests/integration/` (P1)
+- [x] **CI/CD Workflow** — `.github/workflows/tests.yml` (P1)
+
+### Pre-Production 剩余待创建
+
+- [ ] **ADR-0018** (Combat/Threat System) — 🔴 HIGH PRIORITY — 任何战斗代码之前 (门禁 Concern #1)
+- [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 对应系统进入 Production 前完成
+- [ ] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md` (Concern #3)
+- [ ] **Interaction Patterns Library** — `design/ux/interaction-patterns.md` (Concern #2)
+- [ ] **Epics** — `production/epics/` — Foundation + Core 层 Epic
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
+- [ ] **P3 原型** — Core Loop 可玩原型 + Vertical Slice 范围定义
 
 ---
 
