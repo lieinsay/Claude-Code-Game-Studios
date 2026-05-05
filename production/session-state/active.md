@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型 + Epic/Story 框架
-Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
+Task: Concerns #1-#3 清除 → P3 原型 + Epic/Story 框架
 <!-- /STATUS -->
 
 ## Current: Pre-Production — 2026-05-05
@@ -16,10 +16,16 @@ Task: /gate-check technical-setup PASS (CONCERNS) → 进入 Pre-Production
 - [x] `git push` fa0a21b — P2 交付物推送完成
 - [x] `docs/document-index.md` 更新 — 图表 + 就绪矩阵 + 待创建列表 + Concerns 跟踪表
 
+### P3 进行中
+
+- [x] ADR-0018 — Combat/Threat Resolution System (Concern #1 清除)
+- [x] `design/ux/interaction-patterns.md` — 10 个交互模式 (Concern #2 清除)
+- [x] `docs/architecture/architecture-traceability.md` — 54 TR 全覆盖矩阵 (Concern #3 清除)
+
 ### Pre-Production 入口状态
 
 - **Stage**: Pre-Production (已写入 `production/stage.txt`)
-- **ADRs**: 12 Accepted (0001-0012), 6 deferred (0013-0017, 0018 needed)
+- **ADRs**: 13 Accepted (0001-0012 + 0018), 5 deferred (0013-0017)
 - **UX Specs**: 3 complete (Hub, Chart, Exploration)
 - **Tests**: 1 example (GdUnit4 framework ready, CI wired)
 - **Art Bible**: 9 chapters complete
