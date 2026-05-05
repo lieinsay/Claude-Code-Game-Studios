@@ -1,9 +1,10 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-05
-> **项目阶段**: Technical Setup — Foundation + Core ADRs 完成 (12/12)
-> **引擎**: Godot 4.6.2 + GDScript (Web-first)
-> **文档总数**: ~330 个 .md 文件 + 9 个配置文件
+> **项目阶段**: Technical Setup → Pre-Production 门禁检查完成 (CONCERNS→4 阻塞项已清)
+> **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
+> **ADR**: 12/12 Accepted · TR Registry: 52 条已注册 · 技术偏好: 完整配置
+> **文档总数**: ~332 个 .md 文件 + 10 个配置/数据文件
 
 ---
 
@@ -239,6 +240,10 @@ graph TB
 
 ## 三、架构决策记录 (ADR) 全景
 
+> **状态**: 12/12 ADRs 全部 **Accepted** ✅ (2026-05-05)
+> **TR Registry**: 52 条技术需求已录入 `docs/architecture/tr-registry.yaml`
+> **门禁检查**: Technical Setup → Pre-Production — CONCERNS (4 阻塞项已清除)
+
 ### ADR 信号流与状态机架构
 
 ```mermaid
@@ -346,7 +351,7 @@ graph LR
     subgraph 核心架构["核心架构文档"]
         MA["architecture.md<br/>主架构 v1<br/>52 TR / 5 层 / 18 系统"]
         TR2["tr-registry.yaml<br/>技术需求注册表"]
-        ADR["ADR-0001~0012<br/>架构决策记录<br/>(12/17 complete)"]
+        ADR["ADR-0001~0012<br/>架构决策记录<br/>(12/12 Accepted ✅)"]
     end
 
     subgraph 引擎参考["引擎参考 (3 引擎并行)"]
@@ -369,19 +374,21 @@ graph LR
 
 ### 架构文档清单
 
+> **全部 12 ADR 已于 2026-05-05 Accepted。** TR Registry 已填充 52 条记录。
+
 | 文件 | 说明 |
 |------|------|
 | [architecture.md](architecture/architecture.md) | 主架构 — v1 签收 (TD+LP 双签收) |
-| [tr-registry.yaml](architecture/tr-registry.yaml) | 52 条技术需求注册表 |
+| [tr-registry.yaml](architecture/tr-registry.yaml) | 52 条技术需求注册表 ✅ (2026-05-05 填充) |
 | [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 (12 ADR 注册) |
-| | **Foundation ADRs (6)** |
+| | **Foundation ADRs (6) — 全部 Accepted ✅** |
 | [architecture/adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构 — 9 Autoload + 9-Phase 启动链 |
 | [architecture/adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: Signal 通信协议 — typed params + sync emit + max depth 2 |
 | [architecture/adr-0003-save-system-snapshot-json.md](architecture/adr-0003-save-system-snapshot-json.md) | ADR-0003: 存档系统 — SnapshotPackage + Canonical JSON |
 | [architecture/adr-0004-interaction-handler-abstract.md](architecture/adr-0004-interaction-handler-abstract.md) | ADR-0004: 交互系统 — @abstract Interactable + Registry |
 | [architecture/adr-0005-resource-pool-system.md](architecture/adr-0005-resource-pool-system.md) | ADR-0005: 资源池 — 6 Pools + 13 ResourceResult 枚举 |
 | [architecture/adr-0006-web-platform-constraints.md](architecture/adr-0006-web-platform-constraints.md) | ADR-0006: Web 平台约束 — WebGL 2 + 单线程 + 无 C# |
-| | **Core ADRs (6)** |
+| | **Core ADRs (6) — 全部 Accepted ✅** |
 | [architecture/adr-0007-intel-knowledge-ability-system.md](architecture/adr-0007-intel-knowledge-ability-system.md) | ADR-0007: IntelManager — 知识/能力 Dictionary 状态 + 多路径解锁 |
 | [architecture/adr-0008-chart-route-state-machine.md](architecture/adr-0008-chart-route-state-machine.md) | ADR-0008: Chart 状态机 — 5-state + route_committed 不可逆承诺 |
 | [architecture/adr-0009-airship-module-hull-system.md](architecture/adr-0009-airship-module-hull-system.md) | ADR-0009: Module/Hull System — 双字段 + 出航就绪三维检查 |
@@ -458,6 +465,68 @@ graph LR
 | 2026-05-04 | `/review-all-gdds` Phase 4 — 跨系统场景走查 | 通过 | [phase4-report](../production/session-state/phase4-cross-system-scenario-walkthrough.md) |
 | 2026-05-04 | `/review-all-gdds` Phase 5 — 最终裁决 | PASS WITH NOTES | [phase5-report](../production/session-state/phase5-final-verdict.md) |
 | 2026-05-04 | `/create-architecture` — 主架构 | TD+LP 双签收 | [architecture.md](architecture/architecture.md) |
+| 2026-05-05 | `/gate-check technical-setup` — Technical Setup→Pre-Production | CONCERNS — 4 阻塞项已清除 | 本文档第三节 |
+| 2026-05-05 | ADR 批量 Acceptance — 12/12 Accepted | 通过 | 全部 12 ADR Status→Accepted |
+| 2026-05-05 | TR Registry 填充 — 52 TR 条目 | 通过 | [tr-registry.yaml](architecture/tr-registry.yaml) |
+| 2026-05-05 | 技术偏好配置 — naming/budget/forbidden/specialists | 通过 | [technical-preferences.md](../.claude/docs/technical-preferences.md) |
+
+---
+
+### 架构就绪状态 — Gate Check 全景
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    TECHNICAL SETUP → PRE-PRODUCTION                           │
+│                          Gate Check: CONCERNS                                 │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      DIRECTOR PANEL                                    │   │
+│  │  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐       │   │
+│  │  │ Creative Director│ │Technical Director│ │    Producer      │       │   │
+│  │  │   CONCERNS (4)   │ │  CONCERNS (7)    │ │  CONCERNS (8)    │       │   │
+│  │  └──────────────────┘ └──────────────────┘ └──────────────────┘       │   │
+│  │  ┌──────────────────┐                                                 │   │
+│  │  │  Art Director    │  NO "NOT READY" — 0 hard blockers                │   │
+│  │  │  CONCERNS (4)    │                                                 │   │
+│  │  └──────────────────┘                                                 │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      RESOLVED BLOCKERS (2026-05-05)                    │   │
+│  │                                                                        │   │
+│  │  ✅ ADR Acceptance:   11/12 Proposed → 12/12 Accepted                  │   │
+│  │  ✅ TR Registry:      0 entries → 52 TRs populated                     │   │
+│  │  ✅ Engine Config:    [CHOOSE] → Godot 4.6.2 + GDScript                │   │
+│  │  ✅ Tech Preferences: [TO BE CONFIGURED] → fully populated             │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                   PRE-PRODUCTION KICK-OFF ITEMS                         │   │
+│  │                                                                        │   │
+│  │  P1: /test-setup (gdUnit4)     P2: /architecture-review               │   │
+│  │  P1: accessibility-requirements.md    P2: /ux-design (Hub, Chart)      │   │
+│  │  P1: /create-control-manifest         P2: CI/CD workflow               │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 制品就绪矩阵
+
+```
+                     ADP     GDD     ADR     TR     TECH    ART     TEST    UX
+                     ██      ██      ██     ██     ██      ██      ░░     ░░
+ARCHITECTURE.md      ██      ██      ██     ██     ██      ██      ░░     ░░
+CLAUDE.md            ██      --      --     --      ██      --      --     --
+ADR (x12)            ██      ██      ██     ██     ██      ░░      --     --
+TR REGISTRY          ██      ██      ██     ██     ██      --      --     --
+TECH PREFS           ██      --      ██     --      ██      --      --     --
+ART BIBLE            --      ██      --     --      --      ██      --     --
+ENGINE REFS          --      --      --     --      ██      --      --     --
+TEST FRAMEWORK       --      --      --     --      --      --      ░░     --
+UX SPECS             --      --      --     --      --      --      --     ░░
+
+                     ██ = Complete    ░░ = Missing    -- = Not applicable
+```
 
 ---
 
@@ -621,7 +690,7 @@ graph LR
 | [.claude/docs/agent-coordination-map.md](../.claude/docs/agent-coordination-map.md) | Agent 协调委托关系图 |
 | [.claude/docs/coordination-rules.md](../.claude/docs/coordination-rules.md) | Agent 协调规则 |
 | [.claude/docs/directory-structure.md](../.claude/docs/directory-structure.md) | 目录结构 |
-| [.claude/docs/technical-preferences.md](../.claude/docs/technical-preferences.md) | 技术偏好 (待配置) |
+| [.claude/docs/technical-preferences.md](../.claude/docs/technical-preferences.md) | 技术偏好 ✅ (2026-05-05 完整配置) |
 | [.claude/docs/coding-standards.md](../.claude/docs/coding-standards.md) | 编码标准 |
 | [.claude/docs/context-management.md](../.claude/docs/context-management.md) | 上下文管理策略 |
 | [.claude/docs/review-workflow.md](../.claude/docs/review-workflow.md) | 审查工作流 |
@@ -675,32 +744,36 @@ graph TB
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
 
-  📊 总计: ~330 个 Markdown 文档 + 9 个配置/数据文件 (12 ADR 已写入)
+  📊 总计: ~332 个 Markdown 文档 + 10 个配置/数据文件
+  🏗️ ADR: 12/12 Accepted | TR: 52 条注册 | 技术偏好: 完整配置
+  ✅ Technical Setup 阶段完成 — 就绪进入 Pre-Production
 ```
 
 ---
 
 ## 九、待创建文档
 
-根据 `/create-architecture` Phase 8 结论，以下文档待创建：
+> 更新于 2026-05-05 — Technical Setup 阶段末尾。
 
-- [x] **17 个 ADR** (Architecture Decision Records) — `docs/architecture/` (12/17 complete)
-  - [x] ADR-0001: Autoload/Scene 架构与启动顺序 ✅
-  - [x] ADR-0002: 基于 Signal 的跨系统通信协议 ✅
-  - [x] ADR-0003: 存档系统 — 快照包与 JSON 序列化 ✅
-  - [x] ADR-0004: 交互系统 — @abstract Handler + Registry ✅
-  - [x] ADR-0005: 资源池架构 — 6 Pools / Capacity Types / Terminal Deposit ✅
-  - [x] ADR-0006: Web 平台约束与引擎兼容性 ✅
-  - [x] ADR-0007: IntelManager 知识状态与能力解锁架构 ✅
-  - [x] ADR-0008: Chart 航图路线状态机与出航承诺 ✅
-  - [x] ADR-0009: AirshipModuleSystem 飞艇模块与船体伤害模型 ✅
-  - [x] ADR-0010: EncounterContext 跨系统类型契约 ✅
-  - [x] ADR-0011: WorldRepair 修复状态机与分批提交 ✅
-  - [x] ADR-0012: UIManager 屏幕状态机/模态栈/输入路由 ✅
-  - [ ] ADR-0013~0017: AirshipHub, Exploration, Combat, Settlement, Partner (Feature 层)
+### 已在本阶段完成 ✅
+
+- [x] **12 个 Foundation + Core ADR** — `docs/architecture/adr-0001~0012` — 全部 Accepted
+- [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 52 条全部录入
+- [x] **引擎正式配置** — `CLAUDE.md` — Godot 4.6.2 + GDScript
+- [x] **技术偏好完整配置** — `.claude/docs/technical-preferences.md` — 命名规范/性能预算/禁止模式/专家路由
+- [x] **门禁检查** — Technical Setup → Pre-Production — CONCERNS 已记录
+
+### Pre-Production 阶段待创建
+
+- [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 在对应系统实现前创建
 - [ ] **Control Manifest** — `docs/architecture/control-manifest.md`
-- [ ] **Epics** — 按系统分组的 Epic 文件
-- [ ] **技术偏好完整配置** — `.claude/docs/technical-preferences.md`
+- [ ] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md`
+- [ ] **Architecture Review Report** — 在 ADR 全部完成后运行 `/architecture-review`
+- [ ] **Accessibility Requirements** — `design/accessibility-requirements.md`
+- [ ] **UX Specs** — `design/ux/` — 核心屏幕 (Hub, Chart, Exploration)
+- [ ] **Test Framework** — `tests/unit/` + `tests/integration/` — 运行 `/test-setup`
+- [ ] **CI/CD Workflow** — `.github/workflows/tests.yml`
+- [ ] **Epics** — `production/epics/` — 按系统分组
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
 
 ---

@@ -1,7 +1,7 @@
 # ADR-0003: 存档系统 — 快照包与 JSON 序列化
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04

@@ -1,7 +1,7 @@
 # ADR-0005: 资源池系统 — Autoload ResourcesManager + 六池 Dictionary 架构
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-05-04
