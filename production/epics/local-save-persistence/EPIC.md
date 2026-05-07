@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/local-save-world-state-persistence.md
 > **Architecture Module**: Autoload #3 — Persistence
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories local-save-persistence`
+> **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
 
@@ -37,6 +37,19 @@ This epic is complete when:
 - Snapshot 2MB budget respected; encode+hash p95 <50ms
 - Atomic promotion: power loss / tab close during save never corrupts existing save
 
+## Stories
+
+| # | Title | Type | TR | ADR | Status |
+|---|-------|------|----|-----|--------|
+| 001 | [Staging → Verify → Promotion Pipeline](story-001-save-pipeline.md) | Logic | TR-persistence-001 | ADR-0003 | Ready |
+| 002 | [Snapshot Package Contract](story-002-snapshot-package-contract.md) | Logic | TR-persistence-002 | ADR-0003 | Ready |
+| 003 | [Storage Capability Detection](story-003-storage-capability-detection.md) | Logic | TR-persistence-003 | ADR-0003, ADR-0006 | Ready |
+| 004 | [Continue Availability & Restore Readiness](story-004-continue-availability-restore-readiness.md) | Integration | TR-persistence-004 | ADR-0003 | Ready |
+| 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Ready |
+| 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Ready |
+| 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Ready |
+| 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Ready |
+
 ## Next Step
 
-Run `/create-stories local-save-persistence` to break this epic into implementable stories.
+All 8 stories are written and ready for implementation. Start with Story 001 (pipeline core) as it unblocks all other stories.
