@@ -1,10 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-05
-> **项目阶段**: Pre-Production — P2 完成 (架构审计 + UX Spec ×3 + 门禁通过)
+> **最后更新**: 2026-05-07
+> **项目阶段**: Pre-Production — P3 进行中 (Foundation 层 5/5 Epic Story 分解完成)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
 > **ADR**: 13 Accepted (0001-0012 + 0018) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **文档总数**: ~345 个 .md 文件 + 10 个配置/数据文件
+> **Epic/Story**: Foundation 层 5/5 Epic 完成 (39 Stories: 22 Logic + 14 Integration + 2 UI)
+> **文档总数**: ~355 个 .md 文件 + 10 个配置/数据文件
 
 ---
 
@@ -40,6 +41,7 @@ graph TB
 
     subgraph 生产["📋 生产层 production/"]
         ACTIVE["session-state/active.md<br/>当前会话状态"]
+        EPICS["epics/<br/>5 Foundation Epic + 5 Core Epic<br/>39 Stories 已分解"]
         LOGS["session-logs/<br/>会话日志"]
         PHASES["Phase 2-5 审查报告"]
     end
@@ -96,6 +98,12 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — Foundation 5/5 完成 (39 Stories) |
+| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories) |
+| [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
+| [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8 Stories) |
+| [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
+| [production/epics/resources-goods-capacity/EPIC.md](../production/epics/resources-goods-capacity/EPIC.md) | Epic #5: 资源货物容量 (9 Stories) |
 | [production/session-logs/session-log.md](../production/session-logs/session-log.md) | 会话日志 |
 
 ---
@@ -122,7 +130,6 @@ graph TB
     end
 
     subgraph Core["🔧 Core 层"]
-        RES["#5 资源/货物/容量"]
         INTEL["#6 玩家知识与情报"]
         HUB["#7 飞艇家园 Hub"]
         MODULE["#8 飞艇模块/船体"]
@@ -134,6 +141,7 @@ graph TB
         PLATFORM["#2 平台与会话壳"]
         SAVE["#3 本地存档/持久化"]
         MOVE["#4 玩家移动与交互"]
+        RES["#5 资源/货物/容量"]
     end
 
     subgraph Platform["🖧 Platform 层"]
@@ -207,7 +215,7 @@ graph TB
 | 2 | 平台与会话壳 | [platform-session-shell.md](../design/gdd/platform-session-shell.md) | Foundation | ✅ 已审查 |
 | 3 | 本地存档与世界状态持久化 | [local-save-world-state-persistence.md](../design/gdd/local-save-world-state-persistence.md) | Foundation | ✅ 已审查 |
 | 4 | 玩家移动与交互 | [player-movement-interaction.md](../design/gdd/player-movement-interaction.md) | Foundation | ✅ 已审查 |
-| 5 | 资源、货物与容量 | [resources-goods-capacity.md](../design/gdd/resources-goods-capacity.md) | Core | ✅ 已审查 |
+| 5 | 资源、货物与容量 | [resources-goods-capacity.md](../design/gdd/resources-goods-capacity.md) | Foundation | ✅ 已审查 |
 | 6 | 玩家知识与情报 | [player-knowledge-intel.md](../design/gdd/player-knowledge-intel.md) | Core | ✅ 已审查 |
 | 7 | 飞艇家园 Hub | [airship-hub.md](../design/gdd/airship-hub.md) | Core | ✅ 已审查 |
 | 8 | 飞艇模块与船体状态 | [airship-modules-hull-state.md](../design/gdd/airship-modules-hull-state.md) | Core | ✅ 已审查 |
@@ -567,7 +575,72 @@ graph TB
 
 ---
 
-## 四、审查与质量门禁流程
+## 四、Epic/Story 生产框架
+
+> **Foundation 层 5/5 Epic 完成** — 2026-05-07
+> **39 个 Story**: 22 Logic + 14 Integration + 2 UI
+
+### 层级分解状态
+
+```
+Foundation (5 Epic / 39 Stories)        Core (5 Epic / 待分解)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━        ━━━━━━━━━━━━━━━━━━━━━━━━━━
+#1 content-registry          8        #6  intel-knowledge
+#2 platform-session-shell    7        #7  airship-hub
+#3 local-save-persistence    8        #8  modules-hull-state
+#4 player-movement-interaction  7     #9  chart-route-planning
+#5 resources-goods-capacity  9        #10 navigation-route-risk
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total: 39 Stories
+(22 Logic + 14 Integration + 2 UI)
+```
+
+### Foundation 层 5 个 Epic 详解
+
+| Epic | System # | Stories | 职责概括 | Autoload |
+|------|----------|---------|---------|----------|
+| [content-registry](../production/epics/content-registry/EPIC.md) | #1 | 8 | 内容数据与状态注册表——所有 gameplay 值的唯一权威源，定义资源/货物/mass_class/supply_class Schema | Registry (#1) |
+| [platform-session-shell](../production/epics/platform-session-shell/EPIC.md) | #2 | 7 | 平台与会话壳——Web 生命周期归一化、AudioContext 激活门、BFCache 恢复、Input Gate | SessionShell (#2) |
+| [local-save-persistence](../production/epics/local-save-persistence/EPIC.md) | #3 | 8 | 本地存档与持久化——SnapshotPackage + Canonical JSON + SHA-256 + 版本迁移 | Persistence (#3) |
+| [player-movement-interaction](../production/epics/player-movement-interaction/EPIC.md) | #4 | 7 | 玩家移动与交互——WASD+Click-to-Move、焦点仲裁、Use Gate、@abstract Interactable | InteractionRegistry (#4) |
+| [resources-goods-capacity](../production/epics/resources-goods-capacity/EPIC.md) | #5 | 9 | 资源/货物/容量——6 池架构、双容量制、7 种原子操作、重量追踪、信号契约 | ResourcesManager (#5) |
+
+### Story 层级依赖关系
+
+```
+                    ┌─────────────────────────────────┐
+                    │         Core Layer (#6-#10)       │
+                    │    (依赖所有 Foundation Story)     │
+                    └─────────────────────────────────┘
+                                    ▲
+        ┌───────────┬───────────────┼───────────────┬───────────┐
+        │           │               │               │           │
+   ┌────────┐ ┌────────┐    ┌────────────┐   ┌────────┐ ┌────────┐
+   │  #1    │ │  #2    │    │     #3     │   │  #4    │ │  #5    │
+   │Registry│ │Session │    │ Persistence│   │Movement│ │Resources│
+   │  8 st. │ │Shell   │    │   8 st.    │   │  7 st. │ │  9 st.  │
+   └───┬────┘ └───┬────┘    └─────┬──────┘   └───┬────┘ └───┬────┘
+       │          │               │               │          │
+       ▼          ▼               ▼               ▼          ▼
+   All Epics   #4 Input       #5 Snapshot      #5 Use       #3 Save
+   need IDs    Gate needs     needs JSON       (Storage/    (resources
+   from Reg    Shell signals  from #3          Pickup/      snapshot)
+                                          Cargo)
+```
+
+### Story 类型与质量门
+
+| Story Type | Required Evidence | Gate Level | 来源 Epic 示例 |
+|------------|------------------|------------|-------------|
+| **Logic** | 自动化单元测试 (tests/unit/) | BLOCKING | stack_merge, capacity, atomic ops |
+| **Integration** | 集成测试或 playtest 文档 | BLOCKING | signal contract, persistence, specialized ops |
+| **UI** | Manual walkthrough doc | ADVISORY | item grid sorting, cargo UI |
+| **Visual/Feel** | Screenshot + lead sign-off | ADVISORY | capacity bar animation |
+| **Config/Data** | Smoke check pass | ADVISORY | supply_class defaults |
+
+---
+
+## 五、审查与质量门禁流程
 
 ```mermaid
 graph LR
@@ -697,7 +770,7 @@ UX SPECS             --      --      --     --      --      --      --     █�
 
 ---
 
-## 五、Studio 基础设施
+## 六、Studio 基础设施
 
 ### Agent 体系 (49 个)
 
@@ -828,7 +901,7 @@ graph LR
 
 ---
 
-## 六、规范与模板
+## 七、规范与模板
 
 ### 路径规则 (11 个)
 
@@ -871,7 +944,7 @@ graph LR
 
 ---
 
-## 七、文档阅读路线图
+## 八、文档阅读路线图
 
 ### 新成员入门路径
 
@@ -898,27 +971,28 @@ graph TB
 
 ---
 
-## 八、统计概览
+## 九、统计概览
 
 ```
 文档分布 (按目录)
 
   design/          ████████████████░░░░  35 文件  (GDD + 审查 + 艺术)
   docs/            ████████████████████████████████  63 文件  (架构 + 引擎参考 + 示例)
-  production/      ████░░░░░░░░░░░░░░░   7 文件  (会话状态 + 日志)
+  production/      ██████████░░░░░░░░░░  50+ 文件  (Epics/Stories + 会话状态 + 日志)
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   CCGS Framework/  ██████████████████████████████████████  85 文件  (测试框架)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
 
-  📊 总计: ~345 个 Markdown 文档 + 10 个配置/数据文件
+  📊 总计: ~355 个 Markdown 文档 + 10 个配置/数据文件
   🏗️ ADR: 13/13 Accepted | TR: 54 条注册 | Control Manifest: Active
-  ✅ Pre-Production P2 完成 — 门禁通过，进入 Pre-Production 阶段
+  📋 Epic/Story: Foundation 层 5/5 Epic 完成 (39 Stories) | Core 层 5/5 Epic 就绪 (待分解)
+  ✅ Pre-Production P3 进行中 — Foundation 层 Epic/Story 框架完成，Core 层待分解
 ```
 
 ---
 
-## 九、待创建文档
+## 十、待创建文档
 
 > 更新于 2026-05-05 — Pre-Production P2 完成。
 
@@ -939,13 +1013,14 @@ graph TB
 - [x] **Test Framework** — `tests/unit/` + `tests/integration/` (P1)
 - [x] **CI/CD Workflow** — `.github/workflows/tests.yml` (P1)
 
-### Pre-Production 剩余待创建
+### Pre-Production 进行中
 
 - [x] **ADR-0018** (Combat/Threat System) — ✅ 已创建 (2026-05-05)
-- [ ] **ADR-0013~0017** (Feature 层): AirshipHub, Exploration, Combat, Settlement, Partner — 对应系统进入 Production 前完成
 - [x] **Interaction Patterns Library** — `design/ux/interaction-patterns.md` ✅ 已创建 (10 个模式)
 - [x] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md` ✅ 已创建 (54 TR 全覆盖矩阵)
-- [ ] **Epics** — `production/epics/` — Foundation + Core 层 Epic
+- [x] **Foundation 层 Epics + Stories** — `production/epics/` — 5/5 Epic 完成 (39 Stories: 22 Logic + 14 Integration + 2 UI)
+- [ ] **Core 层 Story 分解** — `production/epics/` — 5 个 Epic (#6-#10) 待分解
+- [ ] **ADR-0013~0017** (Feature 层): Exploration, Settlement, Partner, Feedback, Onboarding — 对应系统进入 Production 前完成
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
 - [ ] **P3 原型** — Core Loop 可玩原型 + Vertical Slice 范围定义
 
