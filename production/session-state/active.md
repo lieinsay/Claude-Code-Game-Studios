@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型 + Epic/Story 框架
-Task: local-save-persistence Stories 已完成 → 继续 player-movement-interaction 或 P3 原型
+Task: player-movement-interaction Stories 已完成 → 继续 resources-goods-capacity 或 P3 原型
 <!-- /STATUS -->
 
 ## Current: Pre-Production — 2026-05-05
@@ -25,6 +25,7 @@ Task: local-save-persistence Stories 已完成 → 继续 player-movement-intera
 - [x] `production/epics/content-registry/` — 8 个 Story (001-008): 6 Logic + 1 Integration + 1 UI
 - [x] `production/epics/platform-session-shell/` — 7 个 Story (001-007): 2 Logic + 3 Integration + 1 UI
 - [x] `production/epics/local-save-persistence/` — 8 个 Story (001-008): 5 Logic + 3 Integration
+- [x] `production/epics/player-movement-interaction/` — 7 个 Story (001-007): 3 Logic + 4 Integration
 
 ### Pre-Production 入口状态
 
