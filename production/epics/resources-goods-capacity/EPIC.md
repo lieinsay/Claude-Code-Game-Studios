@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/resources-goods-capacity.md
 > **Architecture Module**: Autoload #5 — ResourcesManager
 > **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories resources-goods-capacity`
+> **Stories**: 9 (001-009) — Ready for implementation
 
 ## Overview
 
@@ -38,6 +38,20 @@ This epic is complete when:
 - Capacity overflow prevented at transfer boundaries
 - HUD Pool 5 bar updates via ResourcesManager signal (dirty-flag batch update per ADR-0012)
 
+## Stories
+
+| # | Title | Type | TR | ADR | Status |
+|---|-------|------|----|-----|--------|
+| 001 | [Resource Identity & Stack Merge](story-001-resource-identity-stack-merge.md) | Logic | TR-resources-001 | ADR-0005 | Ready |
+| 002 | [Dual Capacity System](story-002-dual-capacity-system.md) | Logic | TR-resources-002 | ADR-0005 | Ready |
+| 003 | [Cargo Model & Unpack](story-003-cargo-model-unpack.md) | Logic | TR-resources-003 | ADR-0005 | Ready |
+| 004 | [Weight & Mass Tracking](story-004-weight-mass-tracking.md) | Logic | TR-resources-004 | ADR-0005 | Ready |
+| 005 | [Core Atomic Operations](story-005-core-atomic-operations.md) | Logic | TR-resources-005 | ADR-0005 | Ready |
+| 006 | [State Machine & Pool Transitions](story-006-state-machine-pool-transitions.md) | Logic | TR-resources-006 | ADR-0005 | Ready |
+| 007 | [Specialized Operations](story-007-specialized-operations.md) | Integration | TR-resources-007 | ADR-0004, ADR-0005 | Ready |
+| 008 | [Signal Contract & Reentry Guard](story-008-signal-contract-reentry-guard.md) | Integration | TR-resources-008 | ADR-0002, ADR-0005 | Ready |
+| 009 | [Persistence & External Integration](story-009-persistence-external-integration.md) | Integration | TR-resources-009 | ADR-0001, ADR-0003, ADR-0005 | Ready |
+
 ## Next Step
 
-Run `/create-stories resources-goods-capacity` to break this epic into implementable stories.
+All 9 stories are written and ready for implementation. Start with Story 001 (Resource Identity & Stack Merge) and Story 002 (Dual Capacity System) as they unblock all other stories.

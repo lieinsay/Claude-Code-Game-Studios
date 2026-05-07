@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型 + Epic/Story 框架
-Task: player-movement-interaction Stories 已完成 → 继续 resources-goods-capacity 或 P3 原型
+Task: resources-goods-capacity Stories 已完成 (9 stories: 6 Logic + 3 Integration) → Foundation 层 5/5 Epic 完成
 <!-- /STATUS -->
 
 ## Current: Pre-Production — 2026-05-05
@@ -26,6 +26,20 @@ Task: player-movement-interaction Stories 已完成 → 继续 resources-goods-c
 - [x] `production/epics/platform-session-shell/` — 7 个 Story (001-007): 2 Logic + 3 Integration + 1 UI
 - [x] `production/epics/local-save-persistence/` — 8 个 Story (001-008): 5 Logic + 3 Integration
 - [x] `production/epics/player-movement-interaction/` — 7 个 Story (001-007): 3 Logic + 4 Integration
+- [x] `production/epics/resources-goods-capacity/` — 9 个 Story (001-009): 6 Logic + 3 Integration
+
+### Foundation Layer 完成
+
+**5/5 Foundation Epics — 全部 Story 分解完成 (30+9=39 stories total)**
+
+| Epic | # | Stories | Types |
+|------|---|---------|-------|
+| content-registry | #1 | 8 | 6 Logic + 1 Integration + 1 UI |
+| platform-session-shell | #2 | 7 | 2 Logic + 3 Integration + 1 UI |
+| local-save-persistence | #3 | 8 | 5 Logic + 3 Integration |
+| player-movement-interaction | #4 | 7 | 3 Logic + 4 Integration |
+| resources-goods-capacity | #5 | 9 | 6 Logic + 3 Integration |
+| **Total** | | **39** | **22 Logic + 14 Integration + 2 UI** |
 
 ### Pre-Production 入口状态
 
