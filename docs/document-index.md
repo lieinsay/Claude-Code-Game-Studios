@@ -174,7 +174,7 @@ graph TB
     %% Feature 依赖
     NAV --> CHART
     NAV --> MODULE
-    NAV -.->|voyage_completed(EncounterContext)| EXPLORE
+    NAV -.->|"voyage_completed(EncounterContext)"| EXPLORE
     EXPLORE --> NAV
     COMBAT --> EXPLORE
     COMBAT --> MODULE
