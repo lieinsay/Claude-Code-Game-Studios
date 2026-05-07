@@ -3,10 +3,10 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型 + Epic/Story 框架
-Task: resources-goods-capacity Stories 已完成 (9 stories: 6 Logic + 3 Integration) → Foundation 层 5/5 Epic 完成
+Task: world-repair Stories 已完成 (6 stories: 3 Logic + 3 Integration) → Feature Layer 2/3 unblocked, 下一目标: exploration/scavenge/settlement/partner 均 Blocked
 <!-- /STATUS -->
 
-## Current: Pre-Production — 2026-05-05
+## Current: Pre-Production — 2026-05-07
 
 ### P2 已完成
 
@@ -27,6 +27,13 @@ Task: resources-goods-capacity Stories 已完成 (9 stories: 6 Logic + 3 Integra
 - [x] `production/epics/local-save-persistence/` — 8 个 Story (001-008): 5 Logic + 3 Integration
 - [x] `production/epics/player-movement-interaction/` — 7 个 Story (001-007): 3 Logic + 4 Integration
 - [x] `production/epics/resources-goods-capacity/` — 9 个 Story (001-009): 6 Logic + 3 Integration
+- [x] `production/epics/intel-knowledge/` — 8 个 Story (001-008): 6 Logic + 2 Integration
+- [x] `production/epics/airship-hub/` — 8 个 Story (001-008): 6 Logic + 2 Integration
+- [x] `production/epics/modules-hull-state/` — 8 个 Story (001-008): 4 Logic + 4 Integration
+- [x] `production/epics/chart-route-planning/` — 8 个 Story (001-008): 4 Logic + 4 Integration
+- [x] `production/epics/navigation-route-risk/` — 8 个 Story (001-008): 5 Logic + 3 Integration
+- [x] `production/epics/combat-threat/` — 6 个 Story (001-006): 3 Logic + 3 Integration
+- [x] `production/epics/world-repair/` — 6 个 Story (001-006): 3 Logic + 3 Integration
 
 ### Foundation Layer 完成
 
@@ -40,6 +47,31 @@ Task: resources-goods-capacity Stories 已完成 (9 stories: 6 Logic + 3 Integra
 | player-movement-interaction | #4 | 7 | 3 Logic + 4 Integration |
 | resources-goods-capacity | #5 | 9 | 6 Logic + 3 Integration |
 | **Total** | | **39** | **22 Logic + 14 Integration + 2 UI** |
+
+### Core Layer 完成
+
+**5/5 Core Epics — 全部 Story 分解完成 (40 stories)**
+
+| Epic | # | Stories | Types |
+|------|---|---------|-------|
+| intel-knowledge | #6 | 8 | 6 Logic + 2 Integration |
+| airship-hub | #7 | 8 | 6 Logic + 2 Integration |
+| modules-hull-state | #8 | 8 | 4 Logic + 4 Integration |
+| chart-route-planning | #9 | 8 | 4 Logic + 4 Integration |
+| navigation-route-risk | #10 | 8 | 5 Logic + 3 Integration |
+| **Total** | | **40** | **25 Logic + 15 Integration** |
+
+### Feature Layer 进行中
+
+**2/5 Feature Epics — combat-threat + world-repair 完成 (12 stories, 其他 3 个 Blocked)**
+
+| Epic | # | Stories | Types |
+|------|---|---------|-------|
+| combat-threat | #12 | 6 | 3 Logic + 3 Integration |
+| world-repair | #13 | 6 | 3 Logic + 3 Integration |
+| exploration-scavenge | #11 | — | Blocked — ADR-0013 deferred |
+| settlement-market | #14 | — | Blocked — ADR-0014 deferred |
+| partner-relationships | #15 | — | Blocked — ADR-0015 deferred |
 
 ### Pre-Production 入口状态
 
@@ -76,7 +108,16 @@ Task: resources-goods-capacity Stories 已完成 (9 stories: 6 Logic + 3 Integra
 - `production/epics/player-movement-interaction/EPIC.md`
 - `production/epics/resources-goods-capacity/EPIC.md`
 - `production/epics/intel-knowledge/EPIC.md`
+- `production/epics/intel-knowledge/story-001-pattern-knowledge-state-machine.md` through `story-008-persistence-mvp-bootstrap.md`
+- `production/epics/airship-hub/story-001-hub-scene-state-machine.md` through `story-008-scene-persistence-transition.md`
+- `production/epics/modules-hull-state/story-001-slot-state-machine-dual-field.md` through `story-008-scout-acquisition-combat-damage.md`
 - `production/epics/airship-hub/EPIC.md`
 - `production/epics/modules-hull-state/EPIC.md`
 - `production/epics/chart-route-planning/EPIC.md`
+- `production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md` through `story-008-edge-cases-error-recovery-keyboard.md`
 - `production/epics/navigation-route-risk/EPIC.md`
+- `production/epics/navigation-route-risk/story-001-voyage-state-machine-preflight.md` through `story-008-edge-cases-defensive-error-handling.md`
+- `production/epics/combat-threat/EPIC.md`
+- `production/epics/combat-threat/story-001-combat-state-machine-threat-queue.md` through `story-006-edge-cases-defensive-handling.md`
+- `production/epics/world-repair/EPIC.md`
+- `production/epics/world-repair/story-001-repair-state-machine-node-lifecycle.md` through `story-006-edge-cases-visual-audio-defensive.md`

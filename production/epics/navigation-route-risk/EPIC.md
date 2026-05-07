@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/navigation-route-risk.md
 > **Architecture Module**: Autoload #10 — NavigationManager
-> **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories navigation-route-risk`
+> **Status**: In Progress
+> **Stories**: 8 (001-008)
 
 ## Overview
 
@@ -37,6 +37,21 @@ This epic is complete when:
 - EncounterContext contract is correctly consumed by Exploration (#11) and Combat (#12)
 - Navigation snapshot persists/restores via Persistence (progress.exploration)
 
+## Stories
+
+| # | Story | Type | TRs | ADR |
+|---|-------|------|-----|-----|
+| 001 | [Voyage State Machine & Preflight Checks](story-001-voyage-state-machine-preflight.md) | Logic | TR-navigation-001 | ADR-0010 |
+| 002 | [Voyage Duration & Encounter Check Timing](story-002-voyage-duration-check-timing.md) | Logic | TR-navigation-002 | ADR-0010 |
+| 003 | [Scout Preview Window & Hidden Tag Reveal](story-003-scout-preview-hidden-tag-reveal.md) | Logic | TR-navigation-002 | ADR-0010 |
+| 004 | [Damage Accumulation & Dynamic Hull Band Transitions](story-004-damage-hull-band-transitions.md) | Logic | TR-navigation-002, TR-navigation-003 | ADR-0010 |
+| 005 | [Encounter Resolution & EncounterEntry Dispatch](story-005-encounter-resolution-entry-dispatch.md) | Logic | TR-navigation-001, TR-navigation-002 | ADR-0010 |
+| 006 | [EncounterContext Production & voyage_completed Signal](story-006-encounter-context-production-signal.md) | Integration | TR-navigation-001 | ADR-0010 |
+| 007 | [Voyage Snapshot Persistence](story-007-voyage-snapshot-persistence.md) | Integration | TR-navigation-001, TR-navigation-002 | ADR-0010, ADR-0003 |
+| 008 | [Edge Cases & Defensive Error Handling](story-008-edge-cases-defensive-error-handling.md) | Integration | TR-navigation-001, TR-navigation-002, TR-navigation-003 | ADR-0010, ADR-0002, ADR-0006 |
+
+**Summary**: 5 Logic + 3 Integration stories
+
 ## Next Step
 
-Run `/create-stories navigation-route-risk` to break this epic into implementable stories.
+All stories created. Core Layer 5/5 complete. Ready for Feature Layer epic decomposition.

@@ -18,19 +18,19 @@
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| [intel-knowledge](intel-knowledge/EPIC.md) | #6 | player-knowledge-intel.md | ADR-0007 | 3 | Not yet created | Ready |
-| [airship-hub](airship-hub/EPIC.md) | #7 | airship-hub.md | ADR-0001, ADR-0002, ADR-0003, ADR-0004 | 3 | Not yet created | Ready |
-| [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | Not yet created | Ready |
-| [chart-route-planning](chart-route-planning/EPIC.md) | #9 | chart-route-planning.md | ADR-0008 | 3 | Not yet created | Ready |
-| [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | Not yet created | Ready |
+| [intel-knowledge](intel-knowledge/EPIC.md) | #6 | player-knowledge-intel.md | ADR-0007 | 3 | 8 (001-008) | In Progress |
+| [airship-hub](airship-hub/EPIC.md) | #7 | airship-hub.md | ADR-0001, ADR-0002, ADR-0003, ADR-0004 | 3 | 8 (001-008) | In Progress |
+| [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | 8 (001-008) | In Progress |
+| [chart-route-planning](chart-route-planning/EPIC.md) | #9 | chart-route-planning.md | ADR-0008 | 3 | 8 (001-008) | In Progress |
+| [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | 8 (001-008) | In Progress |
 
 ## Feature Layer
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
 | exploration-scavenge | #11 | exploration-scavenge-scenario.md | (ADR-0013 deferred) | 3 | — | Blocked — ADR-0013 |
-| combat-threat | #12 | combat-threat-handling.md | ADR-0018 | 3 | — | Pending |
-| world-repair | #13 | world-repair-unlock.md | ADR-0011 | 3 | — | Pending |
+| combat-threat | #12 | combat-threat-handling.md | ADR-0018 | 3 | 6 (001-006) | In Progress |
+| world-repair | #13 | world-repair-unlock.md | ADR-0011 | 3 | 6 (001-006) | In Progress |
 | settlement-market | #14 | port-village-market.md | (ADR-0014 deferred) | 3 | — | Blocked — ADR-0014 |
 | partner-relationships | #15 | partner-relationships.md | (ADR-0015 deferred) | 3 | — | Blocked — ADR-0015 |
 

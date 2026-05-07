@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/airship-hub.md
 > **Architecture Module**: Autoload #7 — HubManager
-> **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories airship-hub`
+> **Status**: In Progress
+> **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
 
@@ -41,6 +41,21 @@ This epic is complete when:
 - Hub arrival animation varies correctly by departure type
 - Hub snapshot persists/restores via `progress.hub`
 
+## Stories
+
+| # | Story | Type | TRs | ADRs |
+|---|-------|------|-----|------|
+| 001 | [Hub Scene Foundation & Docking State Machine](story-001-hub-scene-state-machine.md) | Logic | TR-hub-001 | ADR-0001, ADR-0004 |
+| 002 | [Station Registration & Interaction Routing](story-002-station-registration-interaction.md) | Logic | TR-hub-001 | ADR-0001, ADR-0004 |
+| 003 | [Room Gating & Module Slot Display](story-003-room-gating-module-slots.md) | Logic | TR-hub-003 | ADR-0009, ADR-0001 |
+| 004 | [Departure Modes & Confirmation Gate](story-004-departure-modes-confirmation-gate.md) | Logic | TR-hub-002 | ADR-0001, ADR-0002 |
+| 005 | [Arrival Flow & State Continuity](story-005-arrival-flow-state-continuity.md) | Logic | TR-hub-001 | ADR-0001, ADR-0002 |
+| 006 | [Life Trace Anchors](story-006-life-trace-anchors.md) | Logic | TR-hub-001 | ADR-0001, ADR-0003 |
+| 007 | [Signal Contract & HUD Integration](story-007-signal-contract-hud-integration.md) | Integration | TR-hub-001 | ADR-0002, ADR-0001, ADR-0012 |
+| 008 | [Scene Persistence & Transition Lifecycle](story-008-scene-persistence-transition.md) | Integration | TR-hub-001 | ADR-0001, ADR-0003, ADR-0006 |
+
+**Summary**: 6 Logic + 2 Integration stories
+
 ## Next Step
 
-Run `/create-stories airship-hub` to break this epic into implementable stories.
+Run `/story-readiness airship-hub` to validate all stories, then begin implementation with Story 001.

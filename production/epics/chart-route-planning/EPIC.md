@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/chart-route-planning.md
 > **Architecture Module**: Autoload #9 — ChartManager
-> **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories chart-route-planning`
+> **Status**: In Progress
+> **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
 
@@ -38,6 +38,21 @@ This epic is complete when:
 - Route visibility updates correctly on intel state change or world repair completion
 - Chart snapshot persists/restores via Persistence (progress.exploration)
 
+## Stories
+
+| # | Story | Type | TRs | ADRs |
+|---|-------|------|-----|------|
+| 001 | [Chart State Machine & Content Domain Gate](story-001-chart-state-machine-content-gate.md) | Logic | TR-chart-001, TR-chart-003 | ADR-0008 |
+| 002 | [Route Visibility & Selectability Formulas](story-002-visibility-selectability-formulas.md) | Logic | TR-chart-001, TR-chart-002 | ADR-0008 |
+| 003 | [Two-Step Departure Confirmation & route_committed Signal](story-003-departure-confirmation-signal.md) | Logic | TR-chart-003 | ADR-0008 |
+| 004 | [Route Display Ordering & Filtering](story-004-display-ordering-filtering.md) | Logic | TR-chart-001 | ADR-0008 |
+| 005 | [Snapshot Validation & Persistence](story-005-snapshot-validation-persistence.md) | Integration | TR-chart-001, TR-chart-003 | ADR-0008, ADR-0003 |
+| 006 | [UIManager Query Interface & Signal Contract](story-006-uimanager-query-interface-signal-contract.md) | Integration | TR-chart-002 | ADR-0008, ADR-0002 |
+| 007 | [External State Change Response](story-007-external-state-change-response.md) | Integration | TR-chart-001 | ADR-0008, ADR-0007, ADR-0011 |
+| 008 | [Edge Cases, Error Recovery & Keyboard Navigation](story-008-edge-cases-error-recovery-keyboard.md) | Integration | TR-chart-001, TR-chart-003 | ADR-0008 |
+
+**Summary**: 4 Logic + 4 Integration stories
+
 ## Next Step
 
-Run `/create-stories chart-route-planning` to break this epic into implementable stories.
+Run `/story-readiness chart-route-planning` to validate all stories, then begin implementation with Story 001.

@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/player-knowledge-intel.md
 > **Architecture Module**: Autoload #6 — IntelManager
-> **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories intel-knowledge`
+> **Status**: In Progress
+> **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
 
@@ -36,6 +36,19 @@ This epic is complete when:
 - 3 ability unlock paths all resolve correctly with mock inputs
 - Intel snapshot persists/restores correctly via Persistence (ADR-0003)
 
+## Stories
+
+| # | Title | Type | TR | ADR | Status |
+|---|-------|------|----|-----|--------|
+| 001 | [Pattern Knowledge Observation & State Machine](story-001-pattern-knowledge-state-machine.md) | Logic | TR-intel-001 | ADR-0007 | Ready |
+| 002 | [Location Knowledge State Machine & Rumor System](story-002-location-knowledge-rumor-system.md) | Logic | TR-intel-001 | ADR-0007 | Ready |
+| 003 | [Ability Multi-Path Unlock System](story-003-ability-multi-path-unlock.md) | Logic | TR-intel-003 | ADR-0007 | Ready |
+| 004 | [IntelConsumeResult Algorithm](story-004-intel-consume-algorithm.md) | Logic | TR-intel-002 | ADR-0007 | Ready |
+| 005 | [Upstream Event Receivers](story-005-upstream-event-receivers.md) | Logic | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0007 | Ready |
+| 006 | [Downstream Query Interface](story-006-downstream-query-interface.md) | Logic | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0007 | Ready |
+| 007 | [Signal Contract & Non-Degradation Guards](story-007-signal-contract-non-degradation.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0002, ADR-0007 | Ready |
+| 008 | [Persistence & MVP Bootstrap](story-008-persistence-mvp-bootstrap.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0001, ADR-0003, ADR-0007 | Ready |
+
 ## Next Step
 
-Run `/create-stories intel-knowledge` to break this epic into implementable stories.
+All 8 stories are written and ready for implementation. Start with Story 001 (Pattern Knowledge State Machine) and Story 002 (Location Knowledge & Rumor) as they unblock all other stories.
