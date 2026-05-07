@@ -11,7 +11,7 @@
 | [content-registry](content-registry/EPIC.md) | #1 | content-data-state-registry.md | ADR-0001, ADR-0002 | 3 | 8 (001-008) | In Progress |
 | [platform-session-shell](platform-session-shell/EPIC.md) | #2 | platform-session-shell.md | ADR-0001, ADR-0006 | 3 | 7 (001-007) | In Progress |
 | [local-save-persistence](local-save-persistence/EPIC.md) | #3 | local-save-world-state-persistence.md | ADR-0003, ADR-0006 | 3 | 8 (001-008) | In Progress |
-| [player-movement-interaction](player-movement-interaction/EPIC.md) | #4 | player-movement-interaction.md | ADR-0004 | 3 | Not yet created | Ready |
+| [player-movement-interaction](player-movement-interaction/EPIC.md) | #4 | player-movement-interaction.md | ADR-0004 | 3 | 7 (001-007) | In Progress |
 | [resources-goods-capacity](resources-goods-capacity/EPIC.md) | #5 | resources-goods-capacity.md | ADR-0005 | 3 | Not yet created | Ready |
 
 ## Core Layer
