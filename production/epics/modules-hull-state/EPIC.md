@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/airship-modules-hull-state.md
 > **Architecture Module**: Autoload #8 — ModuleHullManager
-> **Status**: Ready
-> **Stories**: Not yet created — run `/create-stories modules-hull-state`
+> **Status**: In Progress
+> **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
 
@@ -38,6 +38,21 @@ This epic is complete when:
 - Module snapshot persists/restores via Persistence (ADR-0003)
 - apply_hull_damage and apply_module_damage interfaces work for Combat system (ADR-0018)
 
+## Stories
+
+| # | Story | Type | TRs | ADRs |
+|---|-------|------|-----|------|
+| 001 | [Module Slot State Machine & Dual-Field Model](story-001-slot-state-machine-dual-field.md) | Logic | TR-modules-001, TR-modules-002 | ADR-0009 |
+| 002 | [Module Swap Two-Phase Operation](story-002-module-swap-two-phase.md) | Logic | TR-modules-001 | ADR-0009 |
+| 003 | [Hull Integrity, Bands & Scars](story-003-hull-integrity-bands-scars.md) | Logic | TR-modules-003 | ADR-0009 |
+| 004 | [Furnace Capacity & Departure Readiness](story-004-furnace-capacity-departure-readiness.md) | Logic | TR-modules-001, TR-modules-003 | ADR-0009 |
+| 005 | [Cargo Bay Effective Volume & Trapped Goods](story-005-cargo-volume-trapped-goods.md) | Integration | TR-modules-001 | ADR-0009 |
+| 006 | [Module Signal Contract](story-006-module-signal-contract.md) | Integration | TR-modules-001, TR-modules-002 | ADR-0009, ADR-0002 |
+| 007 | [Module Snapshot Persistence](story-007-module-snapshot-persistence.md) | Integration | TR-modules-001, TR-modules-003 | ADR-0009, ADR-0003 |
+| 008 | [Scout Module Acquisition & Combat Damage Interfaces](story-008-scout-acquisition-combat-damage.md) | Integration | TR-modules-001 | ADR-0009, ADR-0018 |
+
+**Summary**: 4 Logic + 4 Integration stories
+
 ## Next Step
 
-Run `/create-stories modules-hull-state` to break this epic into implementable stories.
+Run `/story-readiness modules-hull-state` to validate all stories, then begin implementation with Story 001.
