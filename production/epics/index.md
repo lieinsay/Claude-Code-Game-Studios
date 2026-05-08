@@ -1,8 +1,8 @@
 # Epics Index
 
-> **Last Updated**: 2026-05-05
+> **Last Updated**: 2026-05-08
 > **Engine**: Godot 4.6.2
-> **ADR Coverage**: 13 Accepted + 5 Deferred
+> **ADR Coverage**: 16 Accepted + 2 Deferred
 
 ## Foundation Layer
 
@@ -28,17 +28,17 @@
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| exploration-scavenge | #11 | exploration-scavenge-scenario.md | (ADR-0013 deferred) | 3 | — | Blocked — ADR-0013 |
+| exploration-scavenge | #11 | exploration-scavenge-scenario.md | ADR-0013 | 3 | 6 (001-006) | In Progress |
 | combat-threat | #12 | combat-threat-handling.md | ADR-0018 | 3 | 6 (001-006) | In Progress |
 | world-repair | #13 | world-repair-unlock.md | ADR-0011 | 3 | 6 (001-006) | In Progress |
-| settlement-market | #14 | port-village-market.md | (ADR-0014 deferred) | 3 | — | Blocked — ADR-0014 |
-| partner-relationships | #15 | partner-relationships.md | (ADR-0015 deferred) | 3 | — | Blocked — ADR-0015 |
+| [settlement-market](settlement-market/EPIC.md) | #14 | port-village-market.md | ADR-0014 | 3 | 6 (001-006) | In Progress |
+| [partner-relationships](partner-relationships/EPIC.md) | #15 | partner-relationships.md | ADR-0015 | 3 | 6 (001-006) | In Progress |
 
 ## Presentation Layer
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| ui-hud-interface | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | — | Pending |
+| [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | In Progress |
 | feedback-fx-audio | #17 | feedback-fx-audio.md | (ADR-0016 deferred) | 2 | — | Blocked — ADR-0016 |
 | onboarding-first-loop | #18 | onboarding-first-loop.md | (ADR-0017 deferred) | 1 | — | Blocked — ADR-0017 |
 
@@ -46,8 +46,5 @@
 
 | ADR | System | Priority | Recommended Trigger |
 |-----|--------|----------|---------------------|
-| ADR-0013 | #11 Exploration | HIGH | Before any Exploration code |
-| ADR-0014 | #14 Settlement | MEDIUM | Before Settlement implementation |
-| ADR-0015 | #15 Partner | MEDIUM | Before Partner implementation |
 | ADR-0016 | #17 Feedback | MEDIUM | Before VFX/Audio implementation |
 | ADR-0017 | #18 Onboarding | LOW | Vertical Slice phase |

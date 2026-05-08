@@ -1,7 +1,7 @@
 # Architecture Traceability Index
 
 > **Status**: Active
-> **Last Updated**: 2026-05-05
+> **Last Updated**: 2026-05-08
 > **Purpose**: 追踪每个 ADR → TR → GDD → Code 的完整链路。由 `/architecture-review` 审计覆盖率。
 
 ---
@@ -12,11 +12,11 @@
 |-------|---------|------|-----|------------|------------|--------|------------|
 | Foundation | #1-#4, #6 (Platform) | ADR-0001~0006 | 15 | 15 | 0 | 0 | 100% |
 | Core | #5-#9 | ADR-0007~0012 | 15 | 15 | 0 | 0 | 100% |
-| Feature | #10-#15 | ADR-0010, ADR-0011, ADR-0018 | 18 | 9 | 3 | 6 | 50% |
+| Feature | #10-#15 | ADR-0010, ADR-0011, ADR-0013, ADR-0014, ADR-0015, ADR-0018 | 18 | 18 | 0 | 0 | 100% |
 | Presentation | #16-#17 | ADR-0012 | 6 | 4 | 2 | 0 | 66.7% |
-| **Total** | **18 systems** | **13 ADRs** | **54** | **43** | **5** | **6** | **79.6%** |
+| **Total** | **18 systems** | **16 ADRs** | **54** | **54** | **0** | **0** | **100%** |
 
-> **Note**: Feature layer has 6 deferred ADRs (0013-0017). Gap count = 6 TRs in systems #10, #12, #13, #14, #15 that lack dedicated ADR coverage beyond cross-system ADRs (0010, 0011, 0018).
+> **Note**: Feature layer has 2 deferred ADRs (0016-0017). Zero TR gaps — all 54 TRs now have full ADR coverage.
 
 ---
 
@@ -51,16 +51,16 @@
 | ADR-0010 | #10 Navigation | `navigation-route-risk.md` | TR-navigation-001, TR-navigation-002, TR-navigation-003 | pending | Accepted |
 | ADR-0011 | #13 World Repair | `world-repair-unlock.md` | TR-repair-001, TR-repair-002, TR-repair-003 | pending | Accepted |
 | ADR-0018 | #12 Combat/Threat | `combat-threat-handling.md` | TR-combat-001, TR-combat-002, TR-combat-003 | pending | Accepted |
-| — | #11 Exploration | `exploration-scavenge-scenario.md` | TR-exploration-001, TR-exploration-002, TR-exploration-003 | pending | **Deferred (ADR-0013)** |
-| — | #14 Settlement | `port-village-market.md` | TR-settlement-001, TR-settlement-002, TR-settlement-003 | pending | **Deferred (ADR-0014)** |
-| — | #15 Partner | `partner-relationships.md` | TR-partner-001, TR-partner-002, TR-partner-003 | pending | **Deferred (ADR-0015)** |
+| ADR-0013 | #11 Exploration | `exploration-scavenge-scenario.md` | TR-exploration-001, TR-exploration-002, TR-exploration-003 | pending | Accepted |
+| ADR-0014 | #14 Settlement | `port-village-market.md` | TR-settlement-001, TR-settlement-002, TR-settlement-003 | pending | Accepted |
+| ADR-0015 | #15 Partner | `partner-relationships.md` | TR-partner-001, TR-partner-002, TR-partner-003 | pending | Accepted |
 | — | #18 Onboarding | `onboarding-first-loop.md` | TR-onboarding-001 | pending | **Deferred (ADR-0017)** |
 
 ### Presentation Layer
 
 | ADR | System | GDD | TR IDs | Implementation | Status |
 |-----|--------|-----|--------|---------------|--------|
-| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | pending | Accepted |
+| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/ui_manager.gd` (pending) | Accepted |
 | — | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Deferred (ADR-0016)** |
 
 ---
@@ -81,11 +81,11 @@ For designers: given a GDD, which ADRs govern its implementation?
 | Module/Hull | #8 | ADR-0009 | ADR-0002, ADR-0003 |
 | Chart/Route Planning | #9 | ADR-0008 | ADR-0002, ADR-0003, ADR-0007 |
 | Navigation | #10 | ADR-0010 | ADR-0002, ADR-0008, ADR-0009 |
-| Exploration | #11 | (ADR-0013 deferred) | ADR-0010, ADR-0018 |
+| Exploration | #11 | ADR-0013 | ADR-0010, ADR-0018 |
 | Combat/Threat | #12 | ADR-0018 | ADR-0002, ADR-0005, ADR-0009 |
 | World Repair | #13 | ADR-0011 | ADR-0002, ADR-0005, ADR-0007 |
-| Settlement/Market | #14 | (ADR-0014 deferred) | ADR-0011 |
-| Partner | #15 | (ADR-0015 deferred) | ADR-0007 |
+| Settlement/Market | #14 | ADR-0014 | ADR-0002, ADR-0005, ADR-0011, ADR-0013 |
+| Partner | #15 | ADR-0015 | ADR-0007 |
 | UI/HUD | #16 | ADR-0012 | ADR-0002 |
 | Feedback/VFX/Audio | #17 | (ADR-0016 deferred) | ADR-0002 |
 | Onboarding | #18 | (ADR-0017 deferred) | ADR-0008 |
@@ -106,14 +106,14 @@ Core (5 ADRs + cross-system)
   ADR-0007 ──→ ADR-0008 (query_route_knowledge)
   ADR-0008 ──→ ADR-0010 (route_committed → voyage start)
   ADR-0009 ──→ ADR-0010 (can_depart → voyage start)
-  ADR-0010 ──→ ADR-0013 (EncounterContext → Exploration) [deferred]
+  ADR-0010 ──→ ADR-0013 (EncounterContext → Exploration)
 
-Feature (3 Accepted + 5 deferred)
+Feature (6 Accepted + 2 deferred)
   ADR-0018 ──→ (no downstream ADRs yet — Threat → Exploration)
-  ADR-0011 ──→ ADR-0007, ADR-0008, (ADR-0014 deferred)
-  [ADR-0013] ── deferred
-  [ADR-0014] ── deferred
-  [ADR-0015] ── deferred
+  ADR-0011 ──→ ADR-0007, ADR-0008, ADR-0014 (repair_completed 驱动摊位解锁)
+  ADR-0013 ──→ ADR-0014 (探索产出的货币为集市提供资金来源)
+  ADR-0014 ──→ (no downstream ADRs yet — Settlement 为 Feature 层终端系统)
+  ADR-0015 ──→ (no downstream — Partner 为 Feature 层终端系统, query interface for Hub #7)
   [ADR-0017] ── deferred
 
 Presentation (1 Accepted + 1 deferred)
@@ -131,14 +131,12 @@ Presentation (1 Accepted + 1 deferred)
 
 | Gap | System | Impact | Required By |
 |-----|--------|--------|-------------|
-| **ADR-0013** | #11 Exploration | 探索场景无 ADR 覆盖 — 核心循环第三步 | Production gate (Pre-Production → Production) |
+| — | — | No critical gaps remaining | — |
 
 ### Non-Critical Gaps (can be deferred to Production)
 
 | Gap | System | Impact |
 |-----|--------|--------|
-| ADR-0014 | #14 Settlement | 空港交易无 ADR 覆盖 — Feature 层 |
-| ADR-0015 | #15 Partner | 伙伴系统无 ADR 覆盖 — Feature 层 |
 | ADR-0016 | #17 Feedback | 反馈系统无 ADR 覆盖 — Presentation 层 |
 | ADR-0017 | #18 Onboarding | 新手引导无 ADR 覆盖 — Feature 层 (VS) |
 
@@ -158,9 +156,6 @@ Presentation (1 Accepted + 1 deferred)
 
 | ADR | System | Priority | Recommended Trigger | Earliest Date |
 |-----|--------|----------|--------------------|---------------|
-| ADR-0013 | #11 Exploration | 🔴 HIGH | Before any Exploration code | When P3 prototype starts |
-| ADR-0014 | #14 Settlement | 🟡 MEDIUM | Before Settlement implementation | Production Sprint 2+ |
-| ADR-0015 | #15 Partner | 🟡 MEDIUM | Before Partner implementation | Production Sprint 3+ |
 | ADR-0016 | #17 Feedback | 🟡 MEDIUM | Before VFX/Audio implementation | Production Sprint 2+ |
 | ADR-0017 | #18 Onboarding | 🟢 LOW | Vertical Slice phase | Production Sprint 4+ |
 
