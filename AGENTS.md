@@ -8,12 +8,13 @@ back to the same canonical source.
 ## Read Order
 
 1. Read this `AGENTS.md` for Codex-specific rules.
-2. Read `.agentlens/INDEX.md` for repository navigation.
-3. Read `CLAUDE.md` for the canonical project contract.
-4. Read any deeper `CLAUDE.md` before editing files under that directory.
-5. For workflows, read `.agents/skills/<skill>/SKILL.md`, then the linked
+2. Read `.codex/README.md` for the Codex project home and branch map.
+3. Read `.agentlens/INDEX.md` for repository navigation.
+4. Read `CLAUDE.md` for the canonical project contract.
+5. Read any deeper `CLAUDE.md` before editing files under that directory.
+6. For workflows, read `.agents/skills/<skill>/SKILL.md`, then the linked
    canonical `.claude/skills/<skill>/SKILL.md`.
-6. For studio roles, use `.agents/skills/ccgs-agent-router/SKILL.md`, then read
+7. For studio roles, use `.agents/skills/ccgs-agent-router/SKILL.md`, then read
    the matching `.claude/agents/*.md` role file.
 
 ## Canonical Source
@@ -25,6 +26,7 @@ back to the same canonical source.
 - `.agents/skills/*/SKILL.md` files are Codex adapters. Do not hand-edit
   generated skill adapters; update the canonical `.claude` file or the sync
   script, then regenerate.
+- `.codex/` is the Codex-native project home generated from `.claude/`.
 
 ## Codex Translation Rules
 
@@ -48,15 +50,18 @@ back to the same canonical source.
 - Do not duplicate workflow logic into `.agents/`; adapters should route back
   to `.claude/`.
 - If a change should affect both Claude and Codex, edit the canonical `.claude`
-  source first, then run `python tools/sync_codex_adapters.py`.
+  source first, then run both sync scripts.
 - If a change is Codex-only, keep it in `AGENTS.md`, `.agentlens/`, `.agents/`,
-  or `tools/sync_codex_adapters.py`.
+  `.codex/`, `tools/sync_codex_from_claude.py`, or
+  `tools/sync_codex_adapters.py`.
 - Do not commit generated local state, session logs, engine caches, build
   output, secrets, or machine-local settings.
 
 ## Maintenance Commands
 
 ```bash
+python tools/sync_codex_from_claude.py
+python tools/sync_codex_from_claude.py --check
 python tools/sync_codex_adapters.py
 python tools/sync_codex_adapters.py --check
 git diff --check

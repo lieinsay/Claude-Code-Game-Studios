@@ -16,12 +16,16 @@ Codex without maintaining a second copy of the workflows.
 
 - Workflow text: `.claude/skills/*/SKILL.md`
 - Studio roles: `.claude/agents/*.md`
+- Codex native surface generation: `tools/sync_codex_from_claude.py`
 - Codex adapter generation: `tools/sync_codex_adapters.py`
+- Codex project metadata: `.codex/README.md` and `.codex/project.toml`
 - Codex-only routing notes: `AGENTS.md`, `.agentlens/INDEX.md`, or this file
 
 ## Resync
 
 ```bash
+python tools/sync_codex_from_claude.py
+python tools/sync_codex_from_claude.py --check
 python tools/sync_codex_adapters.py
 python tools/sync_codex_adapters.py --check
 ```

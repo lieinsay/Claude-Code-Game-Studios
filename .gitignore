@@ -14,6 +14,9 @@ Desktop.ini
 CLAUDE.local.md
 production/session-logs/
 
+# === Codex / OMX Local ===
+.omx/
+
 # === Internal Planning (not for public) ===
 
 expansions/
@@ -133,6 +136,7 @@ ehthumbs.db
 ehthumbs_vista.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+bash.exe.stackdump
 *.cab
 *.msi
 *.msix

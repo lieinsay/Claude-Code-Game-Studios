@@ -1,0 +1,41 @@
+name = "Claude Code Game Studios"
+compatibility = "claude-and-codex"
+baseline_commit = "9ccc5440af4b6e9cfa0014c993cf37c6a81f4222"
+updated = "2026-05-09"
+
+[entrypoints]
+codex_contract = "AGENTS.md"
+codex_home = ".codex/README.md"
+agent_prompts = ".codex/agents"
+skill_workflows = ".codex/skills"
+docs = ".codex/docs"
+rules = ".codex/rules"
+hooks = ".codex/hooks"
+adapter_layer = ".agents"
+claude_contract = "CLAUDE.md"
+sync_codex = "tools/sync_codex_from_claude.py"
+sync_agents = "tools/sync_codex_adapters.py"
+
+[canonical_sources]
+root = ".claude"
+workflows = ".claude/skills/*/SKILL.md"
+roles = ".claude/agents/*.md"
+docs = ".claude/docs/*"
+rules = ".claude/rules/*"
+hooks = ".claude/hooks/*"
+
+[branches]
+main = "clean Claude+Codex compatibility baseline"
+develop = "long-lived active project development branch"
+"codex/dual-agent-base" = "named compatibility baseline reference"
+"codex/clean-9ccc544" = "untouched clean-start anchor"
+
+[maintenance]
+sync_codex = "python tools/sync_codex_from_claude.py"
+check_codex = "python tools/sync_codex_from_claude.py --check"
+sync_adapters = "python tools/sync_codex_adapters.py"
+check_adapters = "python tools/sync_codex_adapters.py --check"
+diff_check = "git diff --check"
+
+[local_state]
+do_not_commit = [".omx/", "production/session-logs/", ".claude/settings.local.json", "CLAUDE.local.md"]
