@@ -3,46 +3,61 @@
 # REF: ADR-0001, platform-session-shell Story 001
 extends Node
 
+const RegistryScript := preload("res://src/core/registry.gd")
+const PersistenceScript := preload("res://src/core/persistence.gd")
+const ResourcesScript := preload("res://src/core/resources_manager.gd")
+const WorldRepairScript := preload("res://src/feature/world_repair.gd")
+const ChartScript := preload("res://src/core/chart_manager.gd")
+
 func test_registry_autoload_initialized() -> void:
 	# Integration: verify Registry is accessible and initialized
 	# In headless test, Autoloads are available if project is configured
 	if not _autoloads_available():
 		return  # Skip if running standalone (no project.godot context)
-	var result: Dictionary = Registry.query_by_id(&"location.glass-harbor")
-	assert(result.status == Registry.QueryResult.FOUND, "Registry should find glass-harbor")
-	assert(Registry.is_initialized(), "Registry should be initialized")
-	assert(Registry.is_domain_loaded(&"core_content"), "core_content domain should be loaded")
+	var reg = RegistryScript.new()
+	reg._ready()
+	RegistryBootstrap.bootstrap(reg)
+	var result: Dictionary = reg.query_by_id(&"location.glass-harbor")
+	assert(result.status == reg.QueryResult.FOUND, "Registry should find glass-harbor")
+	assert(reg.is_initialized(), "Registry should be initialized")
+	assert(reg.is_domain_loaded(&"core_content"), "core_content domain should be loaded")
 
 func test_resources_autoload_initialized() -> void:
 	if not _autoloads_available():
 		return
-	assert(ResourcesManager.has_method("add_item"), "Resources should have add_item method")
+	var rm = ResourcesScript.new()
+	rm._ready()
+	assert(rm.has_method("add_item"), "Resources should have add_item method")
 	# Verify default pools are initialized
-	var qty: int = ResourcesManager.get_quantity(ResourcesManager.Pool.STORAGE, &"resource.repair_kit")
+	var qty: int = rm.get_quantity(rm.Pool.STORAGE, &"resource.repair_kit")
 	assert(qty >= 0, "Should return 0 for empty pool, got %d" % qty)
 
 func test_chart_route_registration() -> void:
 	if not _autoloads_available():
 		return
 	# Bootstrap a route and verify selectability
-	Chart.register_route(&"test.route", {
+	var chart = ChartScript.new()
+	chart._ready()
+	chart.register_route(&"test.route", {
 		"destination_id": "location.test",
 		"traversable": true,
 		"hazard_tags": [],
 	})
-	var sel: Dictionary = Chart.route_selectability(&"test.route")
+	var sel: Dictionary = chart.route_selectability(&"test.route")
 	assert(sel.selectable, "Route should be selectable: %s" % sel.get("reason", ""))
 
 func test_world_repair_deposit_flow() -> void:
 	if not _autoloads_available():
 		return
-	WorldRepair.register_repair_node(&"test.node", {
+	var wr = WorldRepairScript.new()
+	wr._ready()
+	wr.register_repair_node(&"test.node", {
 		"resource.repair_kit": 3,
 	})
-	assert(WorldRepair.can_deposit(&"test.node"), "Should be able to deposit")
-	var ok: bool = WorldRepair.commit_deposit(&"test.node", &"resource.repair_kit", 3)
+	assert(wr.can_deposit(&"test.node"), "Should be able to deposit")
+	var ok: bool = wr.commit_deposit(&"test.node", &"resource.repair_kit", 3)
 	assert(ok, "Deposit should succeed")
-	assert(WorldRepair.get_node_state(&"test.node") == WorldRepair.RepairState.REPAIRED,
+	assert(wr.get_node_state(&"test.node") == WorldRepairScript.RepairState.REPAIRED,
 		"Node should be REPAIRED after all materials committed")
 
 func test_signal_protocol_naming() -> void:

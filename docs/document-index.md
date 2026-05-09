@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-09
-> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 26 Tests + SessionShell Boot Chain)
+> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 49 Verification Checks + 26 Unit Tests + SessionShell Boot Chain)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置, project.godot 已初始化)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
@@ -758,6 +758,9 @@ graph TB
 | | `tests/unit/test_resources_merge.gd` | 67 | — | 7 测试用例 |
 | | `tests/unit/test_persistence_roundtrip.gd` | 93 | — | 8 测试用例 |
 | | `tests/integration/test_boot_chain.gd` | 66 | — | 5 测试用例 |
+| | `tests/integration/test_save_roundtrip.gd` | ~200 | — | 场景 B — 存档往返集成测试 (7 用例) |
+| | `tests/integration/test_signal_fanout.gd` | ~200 | — | 场景 C — 信号扇出集成测试 (6 用例) |
+| | `tests/p3_verification.gd` | ~300 | — | P3 自包含验证脚本 (49 checks, SceneTree runner) |
 | **Proto** | `prototypes/p3-architecture/README.md` | ~80 | — | 验证清单 + 运行说明 |
 
 ### 架构关键决策

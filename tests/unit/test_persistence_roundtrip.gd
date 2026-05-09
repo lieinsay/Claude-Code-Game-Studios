@@ -3,6 +3,8 @@
 # REF: local-save-persistence Story 001 AC-1, AC-2, AC-4
 extends Node
 
+const PersistenceScript := preload("res://src/core/persistence.gd")
+
 func test_canonical_json_sorts_keys() -> void:
 	var p := _make_persistence()
 	var input := {"b": 2, "a": 1, "c": {"z": 9, "x": 7}}
@@ -83,8 +85,8 @@ func test_snapshot_roundtrip_serialization() -> void:
 
 ## Helper
 
-func _make_persistence() -> Persistence:
-	var p := Persistence.new()
+func _make_persistence():
+	var p = PersistenceScript.new()
 	p._ready()
 	return p
 

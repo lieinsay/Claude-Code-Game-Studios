@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: P3 原型
-Task: 文档索引已更新 → 提交并推送所有变更
+Task: ✅ P3 全场景验证 PASS — 场景 A (122.35ms) + 场景 B 存档往返 + 场景 C 信号扇出 (49/49 checks)
 <!-- /STATUS -->
 
 ## Current: Pre-Production — 2026-05-09
@@ -230,10 +230,22 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - [x] `tests/integration/test_boot_chain.gd` — 引导链 + 信号协议测试（5 例）
 - [x] `prototypes/p3-architecture/README.md` — 原型说明文件
 
-**待验证**（需在 Godot 编辑器中手动运行）:
-- 场景 A：启动后终端输出 "Architecture boot: PASS"
-- 场景 B：存档往返 — 模拟状态 → save → load → 状态一致
-- 场景 C：信号协议 — repair_completed 扇出到 4 消费者
+**已验证 ✅** (2026-05-09 — Godot 4.6.2, RTX 4080, Compatibility Renderer):
+- [x] **场景 A**：启动后终端输出 "Architecture boot: PASS" — **122.35 ms** (预算 <2s ✅)
+  - Phase 0→7 全部完成，9 个 Autoload 按序加载
+  - 修复: 移除 6 个 Autoload 脚本的 `class_name` (与 Autoload 名称冲突)
+
+**待验证**:
+- [x] 场景 B：存档往返 — ✅ PASS (16/16 checks) — 完整 save→load 往返 + 多域 + 空加载
+- [x] 场景 C：信号协议 — ✅ PASS (33/33 checks) — repair_completed 4 消费者扇出 + 状态机 + 类型检查
+- [x] Bug Fix: persistence.gd checksum_mismatch — `_checksum` 字段在验证前加入 manifest 导致重编码校验和不一致
+- [x] Bug Fix: Godot 4.6 --script 模式下 lambda 不能作为 signal callback（必须用命名方法）
+- [x] 验证脚本: `tests/p3_verification.gd` — 自包含 SceneTree runner，49 项检查
+
+**P3 全场景验证完成** ✅ — 场景 A (启动引导 122ms) + 场景 B (存档往返) + 场景 C (信号扇出)
+- 源代码修改: `src/core/persistence.gd` (checksum fix)
+- 测试文件: `tests/p3_verification.gd` (新增), `tests/integration/test_save_roundtrip.gd` (新增), `tests/integration/test_signal_fanout.gd` (新增)
+- 修复编译错误: 6 个测试文件的 class_name/类型引用问题 (Autoload 脚本无 class_name)
 
 ### Document Index 更新 — 2026-05-09
 
