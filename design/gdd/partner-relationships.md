@@ -5,7 +5,7 @@
 > **Last Updated**: 2026-05-02
 > **Implements Pillar**: 少量深关系胜过大量收集 (P5 主); 未知带来温和压力 (P4 辅); 飞艇是家，不只是载具 (P3 辅)
 > **MVP Partner**: `partner.sky-cat` — 航海猫，老飞艇船员猫族群的最后一只
-> **Cross-GDD Impact**: 修订 #6 玩家知识与情报 Part 8（三个人类伙伴退到 Post-MVP，待 `/consistency-check` 同步）
+> **Cross-GDD Impact**: #6 Part 8 已按 R15.5 同步（三个人类伙伴退到 Post-MVP）— verified 2026-05-08
 
 ## Overview
 

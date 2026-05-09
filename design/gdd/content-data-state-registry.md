@@ -122,7 +122,7 @@ MVP 内容域如下：
   - `home-anchor.chart-table`
   - `route.sky-reef-arc-01`
   - `location.glass-harbor`
-  - `repair-node.starlight-dock`
+  - `repair_node.starlight_dock`
   - `stall-good.fresh-rations`
   - `companion.tide-scout`
   - `threat.mist-raider`
@@ -155,7 +155,7 @@ MVP 内容域如下：
 | `module` | `slot_type`, `compatibility_tags`, `effect_tags` |
 | `home-space` | `space_kind`, `home_function_tags`, `access_tags` |
 | `home-anchor` | `home_space_id`, `anchor_kind`, `interaction_tags`, `home_feedback_tags` |
-| `route` | `origin_location_id`, `destination_location_id`, `distance_band`, `hazard_tags` |
+| `route` | `origin_location_id`, `destination_id`, `distance_band`, `hazard_tags` |
 | `location` | `region_tag`, `location_kind`, `service_tags`, `local_identity_tags`, `settlement_need_tags` |
 | `repair-node` | `location_id`, `node_kind`, `restoration_theme`, `settlement_need_tags`, `repair_visible_state_tags` |
 | `stall-good` | `commodity_tags`, `vendor_tags`, `supply_class`, `local_identity_tags`, `settlement_need_tags`, `repair_visible_state_tags` |
@@ -297,11 +297,11 @@ description_key: content.route.sky_reef_arc_01.desc
 schema_version: 1
 tags: [starter-route]
 sort_order: 60
-references: [location.glass-harbor, location.starlight-dock]
+references: [location.glass-harbor, location.sky-reef-outpost]
 origin_location_id: location.glass-harbor
-destination_location_id: location.starlight-dock
+destination_id: location.sky-reef-outpost
 distance_band: short
-hazard_tags: [mist, low-visibility]
+hazard_tags: [safe]  # post-repair: originally [mist, low-visibility], reduced 30% by #13 repair_node.starlight_dock
 ```
 
 ```yaml
@@ -323,25 +323,25 @@ settlement_need_tags: [navigation-aid, trade-link]
 ```
 
 ```yaml
-id: location.starlight-dock
+id: location.glass-harbor
 kind: location
 owner_domain: world
 status: Active
-name_key: content.location.starlight_dock.name
-description_key: content.location.starlight_dock.desc
+name_key: content.location.glass_harbor.name
+description_key: content.location.glass_harbor.desc
 schema_version: 1
-tags: [dock]
-sort_order: 75
+tags: [starting-port]
+sort_order: 70
 references: []
 region_tag: starter-sea
-location_kind: dock
-service_tags: [repair]
-local_identity_tags: [old-lighthouse]
-settlement_need_tags: [safety, navigation-aid]
+location_kind: port
+service_tags: [market, repair, chart, general]
+local_identity_tags: [glass-buoys]
+settlement_need_tags: [navigation-aid, trade-link]
 ```
 
 ```yaml
-id: repair-node.starlight-dock
+id: repair_node.starlight_dock
 kind: repair-node
 owner_domain: world
 status: Active
@@ -350,8 +350,8 @@ description_key: content.repair_node.starlight_dock.desc
 schema_version: 1
 tags: [repair]
 sort_order: 80
-references: [location.starlight-dock]
-location_id: location.starlight-dock
+references: [location.glass-harbor]
+location_id: location.glass-harbor
 node_kind: beacon
 restoration_theme: lighthouse
 settlement_need_tags: [navigation-aid, safety]
@@ -699,7 +699,7 @@ total_warnings:
 
 | severity | error_code | content_id | kind | field_path | blocking_scope | suggested_action |
 |---|---|---|---|---|---|---|
-| error | ERR_MISSING_REFERENCE | route.sky-reef-arc-01 | route | destination_location_id | item | Add or load referenced location. |
+| error | ERR_MISSING_REFERENCE | route.sky-reef-arc-01 | route | destination_id | item | Add or load referenced location. |
 ```
 
 批量复制必须使用当前错误列表的排序与筛选结果；每行只放最短可行动信息，完整引用链仍通过单条错误复制格式提供。若同一内容项有 `related_errors`，摘要行使用主错误，单条详情必须列出 `related_errors`。

@@ -42,8 +42,8 @@ dist/
 .godot/
 *.translation
 export_presets.cfg
-# Uncomment if using Godot:
-# *.import
+# Godot import files (auto-generated)
+*.import
 
 # === Engine: Unity ===
 [Ll]ibrary/
@@ -143,3 +143,4 @@ bash.exe.stackdump
 *.msm
 *.msp
 *.lnk
+bash.exe.stackdump

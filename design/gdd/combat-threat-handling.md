@@ -68,7 +68,7 @@
 
 - **应急处理**不可用时灰显，tooltip："需要 repair_kit ×1（随身物品栏中无可用）"
 - 如果 Pool 5 中有 repair_kit 但不在 carried 池（在仓库），同样不可用——准备必须在出航前完成
-- **硬扛**在 hull ≤ 18 时，选项标签附加警告标记"⚠ 船体严重受损"但不阻止选择
+- **硬扛**在 hull ≤ 12 时，选项标签附加警告标记"⚠ 船体严重受损"但不阻止选择
 - **撤退**始终可用——这是安全阀
 
 **C4. 结算序列（严格顺序）**
@@ -351,7 +351,7 @@ calc_knockback(response_choice, encounter_params) =
 ## Edge Cases
 
 **EC-12-01: 低船体 + 无 repair_kit + 硬扛 → hull=0**
-- **条件**：hull ≤ 18，玩家选择硬扛，damage roll ≥ 当前 integrity
+- **条件**：hull ≤ 12，玩家选择硬扛，damage roll ≥ 当前 integrity
 - **处理**：integrity = max(0, integrity - damage) = 0（destroyed 波段）。船体不可再出航（#8 `can_depart()` 返回 `{false, ["hull_destroyed"]}`）。探索本身不终止——玩家仍可撤离、携带已搜刮物品离开探索点。hull=0 的后果由 #8 在返航后执行。#8 EC-11-08 已规定探索系统不自行终止探索。
 - **玩家感知**：是。HUD 显示"船体严重损毁"警告（#8 EC-11-08），但撤离锚点仍可用。
 - **设计意图**：不阻止玩家带着已有收获撤离——你可以把自己逼到极限，但不会因一次错误判断而丢失已搜刮的一切。
@@ -510,7 +510,7 @@ calc_knockback(response_choice, encounter_params) =
 │  │ [E] 🔧 Emergency     [1x]  │    │  ← Blue/Teal (available)
 │  └─────────────────────────┘    │
 │  ┌─────────────────────────┐    │
-│  │ [T] ⚠ Tank       ⚠ Danger │    │  ← Orange/Red (always available, warning when hull ≤ 38)
+│  │ [T] ⚠ Tank       ⚠ Danger │    │  ← Orange/Red (always available, warning when hull ≤ 33 or hull ≤ 12 severe)
 │  └─────────────────────────┘    │
 │  ┌─────────────────────────┐    │
 │  │ [R] ← Retreat    Loss 25% │    │  ← Gray (always available)

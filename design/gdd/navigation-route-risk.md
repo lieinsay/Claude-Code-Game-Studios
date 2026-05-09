@@ -455,8 +455,10 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 | 系统 | 依赖内容 | 接口 | 临界性 |
 |------|---------|------|--------|
 | #9 航图与航线规划 | `route_committed(route_id, destination_id, hazard_tags)` 事件 —— 航程启动的唯一入口 | 信号 | 阻断——无此事件系统不运行 |
+| #7 飞艇家园 Hub | `helm_activated(hub_state_pack)` 事件 —— Mode B 自主飞行入口 | 信号 | 非阻断——仅 Mode B 航程需要；Mode A 由 #9 `route_committed` 触发 |
 | #1 内容数据与状态注册表 | 航线静态数据：`distance_band`、所有 `hazard_tags`、`origin_id`、`destination_id` | `list_by_kind("route")` 查询 | 阻断——无静态数据无法构建 VoyageContext |
 | #8 飞艇模块与船体状态 | `η_scout`、`hull_band`、`hull_integrity`、`can_depart()`、`M_max`、`M_loaded` | 查询接口（出航时 + 每次遭遇检查前） | 阻断——can_depart 返回 false 则出航中止 |
+| #5 资源、货物与容量 | `get_carried_supply()` —— 查询随身补给品数量，用于消耗结算 | 查询接口（出航时 + 抵达时） | 阻断——补给品不足则出航中止 |
 | #6 玩家知识与情报 | `query_route_knowledge(route_id)` → 知识状态 + 可见/隐藏标签映射 + 来源标注 | 查询接口（出航时 + 每次遭遇检查） | 阻断——查询失败则出航中止 |
 
 ### 下游依赖（以下系统消费本系统的输出）
@@ -475,6 +477,7 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 | 本系统声明的依赖 | 对应系统的 GDD 是否记录了反向依赖 |
 |----------------|------------------------------|
 | 依赖 #9 的 `route_committed` | ✅ #9 GDD 记录了下游 `route_committed → #10` |
+| 依赖 #7 的 `helm_activated` | ✅ #7 GDD Interactions 表委托 Mode B 至 #10；本系统已添加 #7 为上游依赖（2026-05-08） |
 | 依赖 #8 的模块/船体查询 | ✅ #8 GDD 记录了 `can_depart()` 的消费方为 #9 和 #10 |
 | 依赖 #6 的知识查询 | ✅ #6 GDD 记录了 `query_route_knowledge` 被 #9、#10、#11 消费 |
 | 写入 #8 船体伤害 | ✅ #8 GDD 在受损来源中记录了 #10（航行伤害） |
@@ -484,6 +487,8 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 
 ### 未满足的依赖
 
+- **#7 飞艇家园 Hub**：双向依赖已确认（2026-05-08）。#7 Interactions 表委托 Mode B 至 #10，本系统已添加 `helm_activated(hub_state_pack)` 作为上游信号。Mode B 风险倍率（×2.0）将在 Vertical Slice 中细化。
+- **#5 资源、货物与容量**：双向依赖已确认（2026-05-08）。本系统出航时查询 `get_carried_supply()` 并消耗补给品；补给品消耗量见 Tuning Knobs > 补给品消耗。
 - **#11 探索/搜撤场景**：GDD 已编写并批准（2026-05-03）。#11 的 Interactions 表已确认消费 `EncounterContext`。#11 AC-11-01 要求有效的 EncounterContext 含 voyage_result 和 destination_id。双向合约已确认。
 - **#17 反馈/特效/音频语义**：GDD 尚未编写。本系统已定义事件 schema，但 #17 如何消费待其设计时确认。
 - **#14 空港/村镇/船队**：Phase 3+ 系统。本系统已预留统一的 `VoyageContext` 接口（与航行主体类型无关），但 #14 的具体委托航程逻辑待 Phase 3 设计。
@@ -529,6 +534,15 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 | `T_distance[ short ]` | 60s | 40–90s | 短途航行的基准时长。MVP 中用于 `sky-reef-arc-01` |
 | `T_distance[ medium ]` | 120s | 90–180s | 中途航行的基准时长。MVP 中用于 `storm-cut-01` |
 | `T_distance[ long ]` | 180s | 150–300s | 长途航行的基准时长。MVP 中不使用，Phase 2+ 预留 |
+
+### 补给品消耗
+
+| 参数 | 默认值 | 安全范围 | 影响 |
+|------|--------|---------|------|
+| `supply_consumption[short]` | 2 | 1–3 | 短途航行消耗 basic_supply 数量（等价于 100 云海币）。repair-canvas 可作为 basic_supply 替代品按 1:1 换算。MVP 中用于 `sky-reef-arc-01` |
+| `supply_consumption[medium]` | 4 | 3–6 | 中途航行消耗量（等价于 200 云海币）。MVP 中用于 `storm-cut-01` |
+| `supply_consumption[long]` | 8 | 6–12 | 长途航行消耗量。MVP 中不使用，Phase 2+ 预留 |
+| `supply_cost_ratio_max` | 0.30 | 0.20–0.40 | 补给品成本占航线预期收益的上限比例。短途示例：2 basic_supply (100¢) ÷ 探索预期收益 (150-240¢) ≈ 0.42-0.67 — 超过上限，需通过探索收益平衡或降低消耗。见 #14 联动约束 |
 
 ### 遭遇表调优参数
 

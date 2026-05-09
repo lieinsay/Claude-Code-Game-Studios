@@ -2,11 +2,11 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: P3 原型 + Epic/Story 框架
-Task: UI/HUD #16 Epic + 6 stories 已完成 → Presentation Layer 1/3 unblocked, 下一目标: ADR-0016/0017 (Feedback/Onboarding, 无 GDD, Vertical Slice)
+Feature: P3 原型
+Task: 文档索引已更新 → 提交并推送所有变更
 <!-- /STATUS -->
 
-## Current: Pre-Production — 2026-05-08
+## Current: Pre-Production — 2026-05-09
 
 ### P2 已完成
 
@@ -154,3 +154,97 @@ Task: UI/HUD #16 Epic + 6 stories 已完成 → Presentation Layer 1/3 unblocked
 - `production/epics/world-repair/story-001-repair-state-machine-node-lifecycle.md` through `story-006-edge-cases-visual-audio-defensive.md`
 - `production/epics/exploration-scavenge/EPIC.md`
 - `production/epics/exploration-scavenge/story-001-state-machine-phase-transitions.md` through `story-006-persistence-session-recovery-edge-cases.md`
+
+### /review-all-gdds 2026-05-08 — Result: FAIL
+- 16 GDDs reviewed, 14 blockers, 25 warnings
+- 10 GDDs marked Needs Revision in systems-index
+- Report: `design/gdd/gdd-cross-review-2026-05-08.md`
+
+---
+
+### /review-all-gdds 2026-05-08 — Blocker Resolution Complete
+
+All 14 blockers across 10 GDDs resolved in 3 rounds:
+
+**Round 1 — Quick Fixes (C1 stale values + entity registry sync):**
+- `entities.yaml`: calc_hull_damage sync (8-12 range, 0.30 module chance), added `location.glass-harbor-outskirts`
+- `combat-threat-handling.md`: hull threshold 18→12 (×2 locations)
+
+**Round 2 — Simple Fixes (status markers, ID renames, field consistency):**
+- `player-knowledge-intel.md`: 7 fixes (dep status markers, repair_node ID, stale references)
+- `resources-goods-capacity.md`: dependency table updated, risk assessment corrected
+- `content-data-state-registry.md`: starlight-dock→glass-harbor/sky-reef-outpost, repair-node IDs, destination_id field
+- `partner-relationships.md`: Cross-GDD Impact header cleared
+
+**Round 3 — Design-Heavy Fixes (user-approved decisions):**
+- `exploration-scavenge-scenario.md`: repair_kit_drop_rate = 0.25 (range 0.15-0.35)
+- `navigation-route-risk.md`: supply consumption (Short=2, Medium=4, Long=8), Mode B signal interface (helm_activated), #7/#5 added as upstream deps
+- `entities.yaml`: location.glass-harbor-outskirts created (separate from glass-harbor)
+
+**Result:** 16/16 GDDs Approved. 10 Needs Revision → 0. Systems-index progress tracker synced.
+
+**Modified files (10 GDDs + registry + systems-index + session state):**
+- `design/gdd/combat-threat-handling.md`
+- `design/gdd/content-data-state-registry.md`
+- `design/gdd/exploration-scavenge-scenario.md`
+- `design/gdd/navigation-route-risk.md`
+- `design/gdd/partner-relationships.md`
+- `design/gdd/player-knowledge-intel.md`
+- `design/gdd/resources-goods-capacity.md`
+- `design/gdd/systems-index.md`
+- `design/registry/entities.yaml`
+- `production/session-state/active.md`
+
+**Recommended next step:** Re-run `/review-all-gdds` to verify all blockers cleared → PASS.
+
+### Session Extract — /review-all-gdds Rerun 2026-05-08
+- Verdict: PASS
+- GDDs reviewed: 16
+- Flagged for revision: None
+- Blocking issues: None (all 14 previous blockers verified resolved)
+- New warnings: 7 (W-RERUN-01~04 + W-SCEN-R01~R03), all LOW severity
+- Previous warnings resolved: 17/25
+- Persistent design-choice warnings: 8
+- Report: design/gdd/gdd-cross-review-2026-05-08-rerun.md
+
+### P3 架构验证原型 — 2026-05-09
+
+- [x] `project.godot` — Godot 4.6.2 项目初始化（Compatibility 渲染器、WebGL 2、9 Autoload、输入映射）
+- [x] `src/core/registry.gd` — Registry Autoload (#1) 静态内容目录 + 查询引擎（5 种查询结果区分）
+- [x] `src/core/registry_bootstrap.gd` — 引导数据：4 地点、2 航线、6 资源、1 修复节点、1 威胁、1 伙伴
+- [x] `src/core/persistence.gd` — Persistence Autoload (#2) 完整 staging→verify→promotion 管道 + Canonical JSON 编码器 + SHA-256
+- [x] `src/core/snapshot_package.gd` — SnapshotPackage RefCounted 数据类（to_dict/from_dict 往返）
+- [x] `src/core/interaction_registry.gd` — InteractionRegistry Autoload (#3) 可交互对象注册中心 + 5 状态焦点机
+- [x] `src/core/interactable.gd` — Interactable @abstract 基类（所有可交互对象的父类）
+- [x] `src/core/resources_manager.gd` — Resources Autoload (#4) 6 资源池 + "fill fullest first" stack merge
+- [x] `src/core/intel_manager.gd` — Intel Autoload (#5) 知识状态机 + reveal_rumor/report_observation_event
+- [x] `src/core/chart_manager.gd` — Chart Autoload (#6) 航线状态机 + route_selectability + departure 确认
+- [x] `src/feature/world_repair.gd` — WorldRepair Autoload (#7) 修复状态机 + commit_deposit + repair_completed 信号
+- [x] `src/presentation/ui_manager.gd` — UIManager Autoload (#8) 12 屏幕 FSM + 单槽模态栈 + 4 层输入路由
+- [x] `src/presentation/feedback_manager.gd` — FeedbackManager Autoload (#9) 语义事件中心 (VS stub)
+- [x] `src/session_shell.gd` — SessionShell 主场景（Phase 0→7 引导链 + Web 生命周期钩子）
+- [x] `src/session_shell.tscn` — 主场景文件
+- [x] `tests/unit/test_registry_query.gd` — Registry 查询引擎测试（6 例）
+- [x] `tests/unit/test_resources_merge.gd` — Resources stack merge 算法测试（7 例）
+- [x] `tests/unit/test_persistence_roundtrip.gd` — Persistence 往返 + Canonical JSON 测试（8 例）
+- [x] `tests/integration/test_boot_chain.gd` — 引导链 + 信号协议测试（5 例）
+- [x] `prototypes/p3-architecture/README.md` — 原型说明文件
+
+**待验证**（需在 Godot 编辑器中手动运行）:
+- 场景 A：启动后终端输出 "Architecture boot: PASS"
+- 场景 B：存档往返 — 模拟状态 → save → load → 状态一致
+- 场景 C：信号协议 — repair_completed 扇出到 4 消费者
+
+### Document Index 更新 — 2026-05-09
+
+- [x] `docs/document-index.md` — 新增 §五 P3 架构原型章节
+  - 9 Autoload 依赖层次图 (Mermaid graph TB)
+  - SessionShell Phase 0→7 引导链 (Mermaid sequenceDiagram)
+  - Persistence staging→verify→promotion 管道 (Mermaid graph LR)
+  - 测试架构图 (Mermaid graph TB)
+  - 源代码文件清单 (15 .gd + 1 .tscn + 4 tests + project.godot)
+  - 架构关键决策表
+- [x] 文档全景图新增 `src/` 源代码层
+- [x] 统计数据更新 (src/ 16 文件, tests/ 4 文件, prototypes/ 1 文件)
+- [x] §十一待完成列表 — P3 原型标记 ✅
+- [x] 全部 7 个节号重新编排 (原 §五→§六, §六→§七, ... §十→§十一)

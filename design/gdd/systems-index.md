@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-03
+> **Last Updated**: 2026-05-08
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
@@ -79,7 +79,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 7 | 飞艇家园 Hub | Gameplay | MVP | Approved | `design/gdd/airship-hub.md` | 玩家移动与交互; 本地存档与世界状态持久化; 内容数据与状态注册表 |
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | Approved | `design/gdd/airship-modules-hull-state.md` | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
 | 9 | 航图与航线规划 | Gameplay | MVP | Approved | `design/gdd/chart-route-planning.md` | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报; 飞艇家园 Hub |
-| 10 | 航行与路线风险 | Gameplay | MVP | Approved | `design/gdd/navigation-route-risk.md` | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报 |
+| 10 | 航行与路线风险 | Gameplay | MVP | Approved | `design/gdd/navigation-route-risk.md` | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报; 飞艇家园 Hub; 资源、货物与容量 |
 | 11 | 探索 / 搜撤场景 | Gameplay | MVP | Approved | `design/gdd/exploration-scavenge-scenario.md` | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互; 玩家知识与情报 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Approved | `design/gdd/combat-threat-handling.md` | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
@@ -369,6 +369,7 @@ The MVP version of each system must stay within these bounds:
 | Design docs started | 16 |
 | Design docs reviewed | 16 |
 | Design docs approved | 16 |
+| Design docs needing revision | 0 |
 | MVP systems designed | 16 / 16 |
 | Vertical Slice systems designed | 0 / 2 |
 
@@ -381,6 +382,7 @@ The MVP version of each system must stay within these bounds:
 - [x] Run `/design-review` on completed GDDs (#1-#15 reviewed, all approved).
 - [x] Complete Revision 1 re-review for #11 探索/搜撤场景.
 - [x] Design #16 UI/HUD/航图界面 (last MVP system) — COMPLETE 2026-05-03, CD APPROVED.
-- [ ] Run `/review-all-gdds` for holistic cross-GDD consistency.
+- [x] Run `/review-all-gdds` for holistic cross-GDD consistency — 2026-05-08, 14 blockers resolved, 25 warnings noted.
+- [x] Run `/review-all-gdds` re-check — 2026-05-08, **PASS** (0 blockers, 15 warnings, 17/25 resolved).
 - [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
 - [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.

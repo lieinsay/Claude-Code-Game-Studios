@@ -534,7 +534,7 @@ Where `slot_capacity_check` = `used_slots + ceil(overflow_qty / max_stack) <= to
 
 | 风险 | 等级 | 说明 | 缓解 |
 |------|------|------|------|
-| 所有下游系统未设计 | 🔴 高 | 6 个下游系统需要本系统接口，但它们的设计尚未开始，接口期望可能与实际暴露不匹配 | 本 GDD 的 Interactions 表格和各操作接口已明确定义契约；下游系统设计时必须遵循这些接口签名。若下游系统需要额外接口，本系统 GDD 需修订 |
+| 下游系统接口已在各系统 GDD 中完成双向对齐 | 🟢 低 | 所有 7 个下游系统 (#8, #11-#16) 均已设计并完成双向依赖标注 | 本 GDD 的 Interactions 表格和各操作接口已明确定义契约；下游系统设计时必须遵循这些接口签名 |
 | 注册表资源域完整性 | 🟡 中 | 注册表的资源域条目（material_tags、supply_class 等）必须在本系统实现前完成填充，否则运行时查询无数据 | 注册表 GDD 要求在资源系统实现前完成资源域 Schema |
 | 模块系统接口未锁定 | 🟡 中 | `飞艇模块与船体状态` 是重量适航的判定方，但其设计尚未开始。本系统假设模块系统接收 `get_total_loaded_mass()` 并自行决定超重后果 | 已在规则 12-13 中明确边界；模块系统设计时必须以本 GDD 的边界为输入 |
 
@@ -558,9 +558,13 @@ Where `slot_capacity_check` = `used_slots + ceil(overflow_qty / max_stack) <= to
 | 内容数据与状态注册表 | ✅ 规则 1-3、Interactions | ✅ 下游依赖中列出本系统 | 已对齐 |
 | 本地存档与世界状态持久化 | ✅ 规则 19、Interactions、EC-06/07 | ✅ 快照包定义中引用 `progress.resources` | 已对齐 |
 | 玩家移动与交互 | ✅ 规则 19、Interactions | ⚠️ 隐式对齐——移动系统广播 `use_requested` 给领域系统，本系统消费存储/拾取/货舱交互；移动 GDD 不显式列出本系统（它不提供空间锚点） | 已对齐（隐式） |
-| 飞艇模块与船体状态 | ✅ 规则 12-13、Interactions | ⚠️ 尚未设计——需在模块系统 GDD 中回引 | 待对方 GDD 建立 |
-| 探索 / 搜撤场景 | ✅ 规则 18、Interactions | ⚠️ 尚未设计——需在探索 GDD 中回引 | 待对方 GDD 建立 |
-| 其他 5 个下游系统 | ✅ Interactions | ⚠️ 尚未设计 | 待对方 GDD 建立 |
+| 飞艇模块与船体状态 | ✅ 规则 12-13、Interactions | ✅ #8 Dependencies 已双向标注本系统 | 已对齐 |
+| 探索 / 搜撤场景 | ✅ 规则 18、Interactions | ✅ #11 Dependencies 已双向标注本系统 | 已对齐 |
+| 战斗与威胁处理 | ✅ Interactions (consume_in_combat) | ✅ #12 Dependencies 已双向标注本系统 | 已对齐 |
+| 世界修复与解锁 | ✅ Interactions (commit_deposit) | ✅ #13 Dependencies 已双向标注本系统 | 已对齐 |
+| 空港/村镇状态与集市交易 | ✅ Interactions (purchase) | ✅ #14 Dependencies 已双向标注本系统 | 已对齐 |
+| 伙伴功能与关系 | ✅ Interactions (capacity query) | ✅ #15 Dependencies 已双向标注本系统 | 已对齐 |
+| UI/HUD/航图界面 | ✅ Interactions | ✅ #16 Dependencies 已双向标注本系统 | 已对齐 |
 
 ## Tuning Knobs
 
