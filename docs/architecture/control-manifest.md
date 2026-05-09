@@ -1,9 +1,9 @@
 # Control Manifest
 
-> **Engine**: Godot 4.6.2 + GDScript
-> **Last Updated**: 2026-05-05
-> **Manifest Version**: 2026-05-05
-> **ADRs Covered**: ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012
+> **Engine**: Godot 4.6.2 .NET + C#
+> **Last Updated**: 2026-05-09
+> **Manifest Version**: 2026-05-09
+> **ADRs Covered**: ADR-0001, ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0011, ADR-0012, ADR-0019
 > **Status**: Active — regenerate with `/create-control-manifest update` when ADRs change
 
 This manifest is a programmer's quick-reference extracted from all Accepted ADRs,
@@ -19,23 +19,23 @@ rule, see the referenced ADR.
 ### Required Patterns
 
 - **Autoload `_ready()` must only do constant init, signal declarations, and null checks** — no file I/O, scene instantiation, audio playback, coroutine launch, or cross-Autoload method calls. Source: ADR-0001
-- **All cross-system communication uses Godot typed signals with explicit type annotations** — `signal name(param: Type, ...)` syntax. Source: ADR-0002
+- **All cross-system communication uses Godot typed signals/events with explicit parameter types** — use C# `[Signal]` delegate patterns for new code. Source: ADR-0002, ADR-0019
 - **Signal naming must follow `{noun}_{verb_past}` convention** — e.g., `deposit_committed`, `route_committed`. Failure pairs use `_failed` suffix. Source: ADR-0002
 - **All cross-system signal connections established during boot phases (Phase 3-7)** — never during `_process()` or `_physics_process()`. Source: ADR-0001, ADR-0002
 - **Read queries use direct method calls; state mutations use signals** — query = return value needed; notify = fire-and-forget. Source: ADR-0002
 - **All signal emit uses synchronous `.emit()`** — no `.emit.call_deferred()` for cross-system signals. Source: ADR-0002
-- **Signal connections use `sender.signal_name.connect(receiver.method)` syntax** — no string-based `connect("name", ...)`. Source: ADR-0002
+- **Signal connections use typed C# event/signal patterns** — no string-based `connect("name", ...)`. Source: ADR-0002, ADR-0019
 - **Save/load uses Canonical JSON with sorted keys, NFC normalization, finite IEEE 754 floats only** — no `store_var()`/`get_var()` Variant blobs as authoritative format. Source: ADR-0003
 - **Save workflow must follow Staging → Verify → Promotion** — staging write → readback + checksum verify → atomic rename promotion. Old Safe preserved on any failure. Source: ADR-0003
 - **Domain systems export state via `SnapshotPackage` with typed fields** — Persistence orchestrates but never interprets domain payload. Source: ADR-0003
 - **`settings` and `progress` artifacts must be independent** — each with own manifest, generation, checksum, and backup. One corrupt artifact must not block the other. Source: ADR-0003
-- **All interactable objects must extend `Interactable` @abstract base class and implement `handle_use()`** — returning `UseResult` enum (ACCEPTED / REJECTED / BUSY). Source: ADR-0004
+- **All interactable objects must inherit the C# `Interactable` base class and implement `HandleUse()`** — returning `UseResult` enum (ACCEPTED / REJECTED / BUSY). Source: ADR-0004, ADR-0019
 - **InteractionRegistry manages focus state machine + candidate pool + Use Gate + dispatch** — scene interactables register/unregister themselves; Registry owns the 5-state focus machine. Source: ADR-0004
 - **Use dispatch is dual-channel**: `interaction_used` signal (fire-and-forget feedback) + `handle_use()` method call (request-response for domain logic). Source: ADR-0004
-- **Web-first: all code must work with single-threaded Godot Web export** — no `Thread`, `Mutex`, `Semaphore`, `WorkerThreadPool` usage in export path. Source: ADR-0006
-- **Compatibility renderer / WebGL 2 only** — no `Compositor` post-processing, no `FogVolume`, no Vulkan features. Source: ADR-0006
-- **GDScript only for Web export path** — no C# (.cs files), no GDExtension (.gdextension) in Web build. Source: ADR-0006
-- **Browser lifecycle events must be handled**: `visibilitychange` → pause/resume; `pagehide` → best-effort emergency save (≤20ms budget); `pageshow` → capability re-probe. Source: ADR-0003, ADR-0006
+- **Desktop-first: all new game code is C# unless an ADR grants an exception** — GDScript remains temporary prototype/migration evidence only. Source: ADR-0019
+- **Desktop lifecycle events must be handled by SessionShell** — focus loss, pause, quit, error, and save boundaries replace browser lifecycle callbacks. Source: ADR-0019
+- **Godot .NET project files are source artifacts** — `.csproj` and `.sln` must be tracked once generated. Source: ADR-0019
+- **Web export is not an MVP target** — do not add new requirements that depend on WebGL 2, IndexedDB, AudioContext, or JavaScriptBridge. Source: ADR-0019
 
 ### Forbidden Approaches
 
@@ -48,18 +48,17 @@ rule, see the referenced ADR.
 - **Never use `store_var()`/`get_var()` as authoritative save format** — Variant blob encoding is non-deterministic. Source: ADR-0003
 - **Never include `Node`, `Resource`, `Object`, `Callable`, or `RID` references in snapshot payload** — use String stable IDs. Source: ADR-0003
 - **Never bypass `Interactable` base class** — all interactable objects must inherit from it. Source: ADR-0004
-- **Never use `OS.delay_usec()` in Web export** — blocks the browser main thread, freezing the entire tab. Source: ADR-0006
-- **Never use `AudioStreamPlayer.autoplay`** — AudioContext requires user gesture; all audio must go through FeedbackManager explicit triggers. Source: ADR-0006
-- **Never depend on `beforeunload` for save** — unreliable; use `pagehide` for best-effort emergency save. Source: ADR-0003, ADR-0006
+- **Never introduce browser-only lifecycle requirements for MVP desktop** — no `pagehide`, `visibilitychange`, `beforeunload`, or JavaScriptBridge lifecycle dependency. Source: ADR-0019
+- **Never treat C# files as Web export blockers in active MVP work** — Web export is superseded by desktop C# targeting. Source: ADR-0019
 
 ### Performance Guardrails
 
 - **Autoload `_ready()` total**: <100ms across all 9 Autoloads — source: ADR-0001
-- **Web boot time**: <2s from `boot_requested` to `session_ready` (warm cache); <5s hard cap — source: ADR-0001, ADR-0006
+- **Desktop boot time**: <2s from `boot_requested` to `session_ready` (warm local build); <5s hard cap — source: ADR-0001, ADR-0019
 - **Save encode + SHA-256**: p95 <50ms for 2MB snapshot; max 100ms — source: ADR-0003
 - **Signal emit**: single emit <0.01ms (consumer count ≤5); 200 connections at boot <1ms — source: ADR-0002
 - **Scene transition**: <500ms (exit cleanup + instantiate + `_ready()`) — source: ADR-0001
-- **Web `.pck` + `.wasm`**: <50MB initial load — source: ADR-0006
+- **MVP desktop memory soft ceiling**: <=512MB peak — source: ADR-0019
 
 ---
 
@@ -157,9 +156,10 @@ rule, see the referenced ADR.
 | Element | Convention | Example |
 |---------|-----------|---------|
 | Classes | PascalCase | `InteractionRegistry`, `SnapshotPackage` |
-| Variables | snake_case | `route_id`, `hull_band_integrity` |
-| Signals/Events | `{noun}_{verb_past}` | `deposit_committed`, `route_committed` |
-| Files | snake_case | `interaction_registry.gd`, `snapshot_package.gd` |
+| Private fields | `_camelCase` | `_routeId`, `_hullBandIntegrity` |
+| Locals/parameters | camelCase | `routeId`, `hullBandIntegrity` |
+| Signals/Events | PascalCase C# delegates; stable data IDs may remain snake_case | `DepositCommitted`, `RouteCommitted` |
+| Files | PascalCase matching C# class names | `InteractionRegistry.cs`, `SnapshotPackage.cs` |
 | Scenes/Prefabs | PascalCase | `AirshipHub.tscn`, `ExplorationScene.tscn` |
 | Constants | UPPER_SNAKE_CASE | `DOMAIN_READY`, `KNOWLEDGE_UNREVEALED` |
 | Autoload names | PascalCase matching class name | `Registry`, `Persistence`, `Intel` |
@@ -170,43 +170,43 @@ rule, see the referenced ADR.
 |--------|-------|
 | Framerate | 60fps (16.67ms frame) |
 | Frame budget | 16ms (~12ms after engine overhead) |
-| Draw calls | ≤200 (WebGL 2 Compatibility renderer) |
-| Memory ceiling | 200MB total; Autoload pool ≤10MB; AirshipHub ≤30MB; Peak ≤100MB |
-| Web boot time | <2s `boot_requested` → `session_ready` |
+| Draw calls | ≤400 MVP desktop 2D soft budget |
+| Memory ceiling | 512MB total; Autoload pool ≤20MB; AirshipHub ≤60MB; Peak ≤200MB |
+| Desktop boot time | <2s `boot_requested` → `session_ready` |
 
 ### Approved Libraries / Addons
 
-- gdUnit4 — approved for automated testing
-- GDScript built-in only — no external addons for MVP runtime
+- Godot .NET runtime + .NET SDK — required for C# implementation
+- gdUnit4 — temporary legacy regression support during migration
+- No new third-party runtime dependencies for MVP without ADR/user request
 
 ### Forbidden Patterns (All Layers)
 
 - `dictionary_signal_payload` — signal payload must be typed parameters, not Dictionary. Source: ADR-0002
 - `untyped_signal_param` — all signal parameters must have explicit type annotations. Source: ADR-0002
-- `string_signal_connect` — use `sender.signal_name.connect(receiver.method)` not `connect("name", ...)`. Source: ADR-0002
-- `deferred_emit` — use synchronous `.emit()` not `.emit.call_deferred()` for cross-system signals. Source: ADR-0002
+- `string_signal_connect` — use typed C# event/signal patterns, not `connect("name", ...)`. Source: ADR-0002, ADR-0019
+- `deferred_emit` — do not defer cross-system events unless an ADR explicitly requires next-frame ordering. Source: ADR-0002
 - `process_connect` — no dynamic connect/disconnect in `_process()`/`_physics_process()`. Source: ADR-0002
 - `store_var_save` — no `store_var()`/`get_var()` Variant blob for authoritative save data. Source: ADR-0003
 - `hardcoded_value` — all gameplay values must come from Registry (data-driven). Source: ADR-0001, ADR-0005
 - `direct_cross_autoload_in_ready` — no calling other Autoload methods in `_ready()`. Source: ADR-0001
-- `bare_dictionary_payload` — no Node/Resource/Object/Callable references in signal payload. Source: ADR-0002
+- `bare_object_payload` — no Node/Resource/Object/Callable references in signal or persistence payload. Source: ADR-0002, ADR-0019
 - `signal_cascade_depth_3plus` — max signal cascade depth = 2 (A→B→C allowed; A→B→C→D forbidden). Source: ADR-0002
 
 ### Forbidden APIs (Godot 4.6.2)
 
 These APIs are deprecated or unverified for Godot 4.6.2:
 
-- `Thread`, `Mutex`, `Semaphore`, `WorkerThreadPool` — unavailable in single-threaded Web export. Source: ADR-0006
-- `OS.delay_usec()` — blocks browser main thread; freezes entire tab. Source: ADR-0006
+- Browser lifecycle APIs (`pagehide`, `visibilitychange`, JavaScriptBridge lifecycle callbacks) — superseded for active MVP work. Source: ADR-0019
 - `store_var()` / `get_var()` — non-deterministic Variant blob encoding; forbidden for save data. Source: ADR-0003
 - `ResourceSaver` / `ResourceLoader` for save data — `.tres`/`.res` format is not canonical; violates ADR-0003 deterministic encoding requirement. Source: ADR-0003
 
 ### Cross-Cutting Constraints
 
 - **Signal cascade depth ≤2**: A→B→C allowed; A→B→C→D forbidden. Replace deep chains with direct fan-out from the original emitter. Source: ADR-0002
-- **Signal parameters ≤6**: GDScript hard limit on signal parameter count. Source: ADR-0002
+- **Signal parameters should stay small and typed**: if a signal needs many fields, define an explicit package type or ADR-approved context object. Source: ADR-0002, ADR-0019
 - **All state mutations emit signals after the mutation completes** — consumers must read complete state, not in-progress state. Source: ADR-0002, ADR-0005
 - **All persistent state goes through ADR-0003 SnapshotPackage + Canonical JSON** — no bypassing the Persistence Autoload for direct file I/O. Source: ADR-0003
 - **All static content definitions come from Registry (#1)** — no hardcoded resource costs, repair requirements, intel definitions, or route data in gameplay code. Source: ADR-0001, ADR-0005, ADR-0011
-- **Web-first: every system must function under single-threaded, WebGL 2, IndexedDB-only constraints** — desktop native build may relax some constraints during development, but CI must test Web export. Source: ADR-0006
+- **Desktop C# first: every new system must build under Godot .NET/C# desktop constraints** — CI/local verification must include `dotnet build` once project files exist. Source: ADR-0019
 - **No field in `_ready()` beyond constant init + signal declarations + null checks** — real initialization deferred to phase signal handlers. Source: ADR-0001

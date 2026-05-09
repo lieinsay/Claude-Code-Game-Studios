@@ -1,8 +1,8 @@
 # Epics Index
 
-> **Last Updated**: 2026-05-08
-> **Engine**: Godot 4.6.2
-> **ADR Coverage**: 16 Accepted + 2 Deferred
+> **Last Updated**: 2026-05-09
+> **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
+> **ADR Coverage**: 17 Accepted + 2 Deferred (ADR-0019 platform pivot active)
 
 ## Foundation Layer
 
@@ -48,3 +48,4 @@
 |-----|--------|----------|---------------------|
 | ADR-0016 | #17 Feedback | MEDIUM | Before VFX/Audio implementation |
 | ADR-0017 | #18 Onboarding | LOW | Vertical Slice phase |
+| ADR-0019 | Platform/C# Pivot | ACTIVE | Governs all new implementation stories |

@@ -3,8 +3,8 @@
 ## Document Status
 - **Version**: 1 (signed off)
 - **Last Updated**: 2026-05-04
-- **Engine**: Godot 4.6.2 + GDScript
-- **Target Platform**: Web-first (desktop browsers, WebGL 2, Compatibility renderer)
+- **Engine**: Godot 4.6.2 .NET + C#
+- **Target Platform**: Desktop-first (Windows primary, Linux secondary)
 - **GDDs Covered**: #1–#18 (16 MVP + 2 Vertical Slice)
 - **ADRs Referenced**: (none yet — 17 required)
 - **Technical Director Sign-Off**: 2026-05-04 — APPROVED WITH CONCERNS (0 blockers, 4 HIGH concerns for ADR authoring)
@@ -19,9 +19,9 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | Domain | Risk | Key Changes | Affected Systems |
 |--------|------|-------------|-----------------|
 | UI / Control | 🔴 HIGH | Dual-focus system (4.6), FoldableContainer (4.5) | #16 UI/HUD |
-| GDScript | ⚠️ MEDIUM | `@abstract` decorator (4.5), variadic args (4.5) | #4 Movement/Interaction |
+| C# / .NET | 🔴 HIGH | Godot .NET project workflow, signal delegate patterns, C# string extraction (4.6) | All implementation systems |
 | Navigation | ⚠️ MEDIUM | Dedicated 2D nav server `NavigationServer2D` (4.5) | #4 Movement/Interaction |
-| Rendering | ⚠️ MEDIUM | WebGL 2 constraints, Compatibility renderer, glow rework (4.6), D3D12 default (4.6 — irrelevant for Web) | #17 Feedback/VFX |
+| Rendering | ⚠️ MEDIUM | Desktop D3D12 default on Windows, glow rework (4.6), Forward+/Compatibility choice | #16 UI/HUD, #17 Feedback/VFX |
 | Physics 2D | ✅ LOW | Unchanged since 4.3 | #4, #10, #11, #12 |
 | Audio | ✅ LOW | No breaking changes | #17 |
 | Animation | ✅ LOW | No breaking changes | #16, #17 |
@@ -40,14 +40,14 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | TR-registry-001 | content-data-state-registry | #1 | Static content definitions with stable IDs across 12 content kinds | Data |
 | TR-registry-002 | content-data-state-registry | #1 | `query_entity(id)` returns typed entity; `validate_all()` produces diagnostics | Data |
 | TR-registry-003 | content-data-state-registry | #1 | Registry must not own mutable runtime state | Architecture |
-| TR-platform-001 | platform-session-shell | #2 | Web-first application shell: loading → start/continue → gameplay | Platform |
-| TR-platform-002 | platform-session-shell | #2 | Audio activation via user gesture; tab focus recovery with delta-based resume | Platform |
+| TR-platform-001 | platform-session-shell | #2 | Desktop application shell: loading → start/continue → gameplay | Platform |
+| TR-platform-002 | platform-session-shell | #2 | Desktop focus/pause/quit handling with deterministic save boundaries | Platform |
 | TR-platform-003 | platform-session-shell | #2 | 15 platform states: boot → title → loading → playing → paused → error | Platform |
 | TR-persistence-001 | local-save-world-state-persistence | #3 | Staging → Verify → Promotion save workflow | Save/Load |
 | TR-persistence-002 | local-save-world-state-persistence | #3 | 8 snapshot packages: progress.*, state.*, settings.* | Save/Load |
 | TR-persistence-003 | local-save-world-state-persistence | #3 | Version migration: save_version field + migration path registry | Save/Load |
 | TR-movement-001 | player-movement-interaction | #4 | CharacterBody2D movement with InteractionRegistry autoload | Core |
-| TR-movement-002 | player-movement-interaction | #4 | @abstract InteractionHandler base class for all interactable objects | Core |
+| TR-movement-002 | player-movement-interaction | #4 | C# abstract InteractionHandler base class for all interactable objects | Core |
 | TR-movement-003 | player-movement-interaction | #4 | Interaction focus: nearest-reachable with priority tie-breaking | Core |
 | TR-resources-001 | resources-goods-capacity | #5 | 6 resource pools with defined stack rules and capacity types | Economy |
 | TR-resources-002 | resources-goods-capacity | #5 | `commit_deposit(node_id, resources)` — atomic, irreversible, Pool 6 terminal | Economy |
@@ -85,7 +85,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | TR-ui-001 | ui-hud-chart-interface | #16 | 12 screens with modal stack (single modal + combat overlay) | UI |
 | TR-ui-002 | ui-hud-chart-interface | #16 | 4-layer input routing priority; signal-driven HUD with dirty-flag batch updates | UI |
 | TR-ui-003 | ui-hud-chart-interface | #16 | Screen state machine: Hub → Chart → Exploration → Return closed loop | UI |
-| TR-ui-004 | ui-hud-chart-interface | #16 | WCAG AA contrast compliance; browser tab freeze recovery | UI/Accessibility |
+| TR-ui-004 | ui-hud-chart-interface | #16 | WCAG AA contrast compliance; desktop focus recovery | UI/Accessibility |
 | TR-feedback-001 | feedback-fx-audio | #17 | Semantic feedback events: route_selected, repair_completed, threat_triggered, etc. | Audio/VFX |
 | TR-feedback-002 | feedback-fx-audio | #17 | Minimum visible-repair feedback owned by #13; home-safety feedback by #7; clarity by #16 | Audio/VFX |
 | TR-onboarding-001 | onboarding-first-loop | #18 | First-loop guidance: Hub → Chart → Explore → Return → Repair | Meta |
@@ -115,7 +115,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 │  #3 本地存档与世界状态持久化  #4 玩家移动与交互                    │
 ├──────────────────────────────────────────────────────────────────┤
 │  PLATFORM                                                        │
-│  Godot 4.6.2  |  GDScript  |  Web Export  |  WebGL 2  |  IndexedDB │
+│  Godot 4.6.2  |  C#/.NET  |  Desktop Export  |  user:// JSON      │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -126,7 +126,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | 1 | 内容数据与状态注册表 | Foundation | — | Static content contracts — all systems depend on stable IDs |
 | 2 | 平台与会话壳 | Foundation | — | Web lifecycle, session management — engine integration boundary |
 | 3 | 本地存档与世界状态持久化 | Foundation | — | Serialization/deserialization infrastructure |
-| 4 | 玩家移动与交互 | Foundation | ⚠️ MEDIUM | Interaction framework: `@abstract` (4.5), NavigationServer2D (4.5) |
+| 4 | 玩家移动与交互 | Foundation | ⚠️ MEDIUM | Interaction framework: C# abstract handler base, NavigationServer2D (4.5) |
 | 5 | 资源、货物与容量 | Core | — | Shared economy state consumed by all Features |
 | 6 | 玩家知识与情报 | Core | — | Shared knowledge state — truth source for chart, repair, exploration |
 | 7 | 飞艇家园 Hub | Core | — | Shared spatial context — stations, rooms, preparation |
@@ -146,7 +146,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 
 | System | Risk | Domain | Concern | Mitigation |
 |--------|------|--------|---------|------------|
-| #4 Movement | ⚠️ MEDIUM | GDScript | `@abstract` decorator (4.5) | Verify `InteractionHandler` base class pattern against `docs/engine-reference/godot/current-best-practices.md` |
+| #4 Movement | ⚠️ MEDIUM | C# / Godot .NET | Abstract `InteractionHandler` base class pattern | Verify C# base class and typed signal pattern against `docs/engine-reference/godot/current-best-practices.md` and ADR-0019 |
 | #4 Movement | ⚠️ MEDIUM | Navigation | `NavigationServer2D` (4.5) | Verify 2D nav server API against `docs/engine-reference/godot/modules/navigation.md` |
 | #16 UI/HUD | 🔴 HIGH | UI/Control | Dual-focus system (4.6) | Verify modal stack + input routing against `docs/engine-reference/godot/modules/ui.md`; `Control.focus_mode` new behavior |
 
@@ -159,9 +159,9 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | System | Owns | Exposes | Consumes | Engine APIs |
 |--------|------|---------|----------|-------------|
 | **#1 Registry** | Static entity definitions, ID schemas, 12 content kinds, validation diagnostics | `query_entity(id) → Entity`, `validate_all() → [Diagnostic]` | — (foundational) | `Resource`, `FileAccess` |
-| **#2 Platform Shell** | Session lifecycle (15 states), loading screen, audio activation, tab focus state | `get_session_state()`, `request_audio_activation()`, session state change signals | #3 (save for continue) | `SceneTree`, `DisplayServer`, `JavaScriptBridge` |
+| **#2 Platform Shell** | Session lifecycle (15 states), loading screen, audio state, desktop focus/pause/quit state | `GetSessionState()`, `RequestAudioActivation()`, typed session state change signals | #3 (save for continue) | `SceneTree`, `DisplayServer`, Godot .NET lifecycle bindings |
 | **#3 Persistence** | Serialization format, save slots, migration registry, Staging→Verify→Promotion workflow | `save(slot, packages)`, `load(slot) → SnapshotData`, `migrate(data, from, to)` | #1 (schema validation), #2 (session lifecycle) | `FileAccess` (4.4+), `ConfigFile` |
-| **#4 Movement/Interaction** | Player position, movement state, InteractionRegistry, interaction focus, reachability checks | `register_interactable(node, handler)`, `get_focus()`, `use_focused()`, interaction signals | #2 (input entry) | `CharacterBody2D`, ⚠️ `NavigationServer2D` (4.5), ⚠️ `@abstract` (4.5), `Input` |
+| **#4 Movement/Interaction** | Player position, movement state, InteractionRegistry, interaction focus, reachability checks | `RegisterInteractable(node, handler)`, `GetFocus()`, `UseFocused()`, typed interaction signals | #2 (input entry) | `CharacterBody2D`, ⚠️ `NavigationServer2D` (4.5), C# abstract base class, `Input` |
 
 ### CORE LAYER
 
@@ -189,14 +189,14 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | System | Owns | Exposes | Consumes | Engine APIs |
 |--------|------|---------|----------|-------------|
 | **#16 UI/HUD** | 12 screens, modal stack, 4-layer input routing, HUD dirty-flag system, animation timing contracts, screen state machine | `push_screen(id)`, `push_modal(id)`, `update_hud(data)`, screen transition signals | #9 (chart data), #8 (module data), #5 (resource data), #11 (exploration data), #13 (repair data), #14 (settlement data) | `Control` hierarchy, 🔴 `dual-focus` (4.6), `AnimationPlayer`, `Theme`, `StyleBox` |
-| **#17 Feedback (VS)** | Semantic event subscriptions, VFX triggers, audio cue triggers | `emit_feedback(event_id, ctx)`, `register_feedback_handler(event_id, handler)` | #10, #11, #12, #13, #16 (semantic events) | `AudioStreamPlayer2D`, `CPUParticles2D` (WebGL 2 compat), `Tween` |
+| **#17 Feedback (VS)** | Semantic event subscriptions, VFX triggers, audio cue triggers | `emit_feedback(event_id, ctx)`, `register_feedback_handler(event_id, handler)` | #10, #11, #12, #13, #16 (semantic events) | `AudioStreamPlayer2D`, `CPUParticles2D`, `Tween` |
 | **#18 Onboarding (VS)** | First-loop sequence state, guidance triggers, step progression | `start_first_loop()`, `advance_step(id)` | #7, #9, #11, #13, #14, #16 (cross-system orchestration) | `Control` overlay, `AnimationPlayer` |
 
 ### Engine API Risk Flags (Verified)
 
 | Flag | System | API | Version | Risk | Verified Against |
 |------|--------|-----|---------|------|------------------|
-| ⚠️ | #4 | `@abstract` decorator | 4.5 | MEDIUM | `docs/engine-reference/godot/current-best-practices.md` |
+| 🔴 | All code | Godot C#/.NET project workflow and `[Signal]` delegate patterns | 4.6 | HIGH | `docs/architecture/adr-0019-desktop-csharp-platform-pivot.md` |
 | ⚠️ | #4 | `NavigationServer2D` | 4.5 | MEDIUM | `docs/engine-reference/godot/modules/navigation.md` |
 | 🔴 | #16 | Dual-focus system / `Control.focus_mode` | 4.6 | HIGH | `docs/engine-reference/godot/modules/ui.md` |
 | ⚠️ | #1, #3 | `FileAccess` return types | 4.4 | LOW | `docs/engine-reference/godot/deprecated-apis.md` |
@@ -238,7 +238,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
       │              │              │              │
 ══════════════════════════════════════════════════════════════════════
                        PLATFORM
- Godot 4.6.2  │  GDScript  │  Web Export  │  WebGL 2  │  IndexedDB
+ Godot 4.6.2  │  C#/.NET  │  Desktop Export  │  user:// JSON
 ══════════════════════════════════════════════════════════════════════
 ```
 
@@ -264,7 +264,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 Input (Keyboard/Mouse)
   │
   ▼
-#2 Platform Shell ─── captures raw input, applies tab-focus guard
+#2 Platform Shell ─── captures raw input, applies desktop focus/pause guard
   │
   ▼
 #4 Movement ─── CharacterBody2D._physics_process(delta)
@@ -277,7 +277,7 @@ Core Systems ─── Domain systems react to interaction signals
 Scene Tree ─── Godot renders node hierarchy (CanvasItem tree)
   │            #16 HUD: dirty-flag check → update only changed Controls
   ▼
-DisplayServer ─── WebGL 2 framebuffer → browser compositor
+DisplayServer ─── desktop renderer → OS window compositor
 ```
 
 Frame budget: 60fps target (16.67ms). This is a non-real-time game — most frames are idle 2D rendering. Heavy operations (save, route calculation) fire on discrete events, not per-frame.
@@ -330,10 +330,10 @@ SAVE:
   ↓
   #3: serialize → write staging file → verify checksum → promote to slot
   ↓
-  IndexedDB (browser)
+  user:// local save files
 
 LOAD:
-  IndexedDB → #3: read slot → verify checksum → deserialize
+  user:// local files → #3: read slot → verify checksum → deserialize
   ↓
   #3: distribute snapshots to domain systems → each restores its own state
   ↓
@@ -349,7 +349,7 @@ Key contract: each domain system independently manages its own serialization/des
 ```
 Boot Phase (sequential):
   1. Godot Main Loop start
-  2. #2 Platform Shell — session lifecycle, audio activation guard
+  2. #2 Platform Shell — session lifecycle, desktop focus/pause guard
   3. #1 Registry — load & validate static content (fail-fast on schema errors)
 
 Restore Phase:
@@ -382,11 +382,11 @@ Entry Phase:
 
 ## API Boundaries
 
-> 以下定义层间关键 API 契约，使用 GDScript 伪代码。仅列公共入口点。
+> 以下定义层间关键 API 契约的概念形状。旧 GDScript 风格签名仅作为历史 IDL 草案帮助阅读，不是当前实现语法；新实现必须按 ADR-0019 / Control Manifest 使用 Godot .NET / C#、PascalCase 方法、typed C# signals/events 和 DTO 边界。
 
 ### FOUNDATION → ALL
 
-```gdscript
+```text
 # === #1 Registry (Autoload: Registry) ===
 # 不变量: 所有 ID 为稳定字符串；实体加载后不可变
 # 保证: query_entity 返回类型化 Entity 或 null（绝不返回部分/损坏数据）
@@ -410,11 +410,11 @@ func list_slots() -> Array[SaveSlotInfo]
 
 ### FOUNDATION → CORE / FEATURE
 
-```gdscript
+```text
 # === #4 Movement/Interaction (Autoload: InteractionRegistry) ===
 # 不变量: focus 始终为最近可达的可交互对象；无可交互对象时为 null
 # 保证: use_focused() 分发到正确的领域处理器
-# ⚠️ 引擎风险: @abstract 装饰器 (4.5) —— 验证基类模式
+# ⚠️ 引擎风险: C# abstract base class + Godot node binding —— 验证基类模式
 
 signal interaction_focus_changed(focused: Interactable)
 signal interaction_used(focused: Interactable)
@@ -427,7 +427,7 @@ func use_focused() -> void
 
 ### CORE APIs
 
-```gdscript
+```text
 # === #5 Resources (Autoload: Resources) ===
 # 不变量: Pool 6 为终态——一旦提交，资源永久锁定
 # 保证: commit_deposit 原子操作——全部成功或全部回滚
@@ -454,7 +454,7 @@ func on_repair_completed(node_id: String) -> void
 func reveal_rumor(entity_id: String, confidence: int) -> void
 ```
 
-```gdscript
+```text
 # === #7 Hub (Scene: AirshipHub) ===
 # 不变量: 出发模式在 commit_departure 开始后锁定
 # 保证: 站台状态在任何站台交互前准确反映当前状态
@@ -493,7 +493,7 @@ func on_route_enhanced(route_id: String, enhancement: Dictionary) -> void
 
 ### FEATURE APIs
 
-```gdscript
+```text
 # === #10 Navigation (Scene: VoyageManager) ===
 # 不变量: EncounterContext 一旦产出即不可变
 # 保证: 航行以到达或强制中止结束
@@ -519,7 +519,7 @@ func search(point_id: String) -> SearchResult
 func extract(anchor_id: String) -> ExtractionResult
 ```
 
-```gdscript
+```text
 # === #12 Combat (Scene child of Exploration: ThreatResolver) ===
 # 不变量: 玩家始终有 ≥1 个响应选项可用
 # 保证: threat_result 在一个决策周期内产出（非阻塞）
@@ -541,7 +541,7 @@ func deposit_materials(node_id: String, offer: Dictionary) -> DepositResult
 func get_repair_progress(node_id: String) -> float
 ```
 
-```gdscript
+```text
 # === #14 Settlement (Scene: Settlement) ===
 # 不变量: stall 货品为固定或 repair-flag 驱动——无价格模拟
 # 保证: purchase 在扣款前验证可支付性
@@ -567,7 +567,7 @@ func name_partner(name: String) -> Result
 
 ### PRESENTATION APIs
 
-```gdscript
+```text
 # === #16 UI (Autoload: UIManager) ===
 # 不变量: 最多一个模态活跃；战斗覆盖层优先级最高
 # 保证: 屏幕转场遵守动画时序合约
@@ -595,7 +595,7 @@ func register_feedback_handler(event_id: String, handler: Callable) -> void
 
 | API 边界 | 引擎类型 | 版本 | 状态 |
 |----------|---------|------|------|
-| #4 `InteractionHandler` | `@abstract` class | 4.5 | ⚠️ 验证: 基类方法上的 `@abstract` 装饰器语法 |
+| #4 `InteractionHandler` | C# abstract base class | 4.6.2 .NET | ⚠️ 验证: C# 基类、virtual/abstract 方法和 Godot 节点绑定模式 |
 | #4 `NavigationServer2D` | Singleton | 4.5 | ⚠️ 验证: 专用 2D nav server；旧 `Navigation2DServer` 已移除 |
 | #4 `CharacterBody2D` | Node class | stable | ✅ 自 4.0 起未变 |
 | #1/#3 `FileAccess` | Singleton | 4.4+ | ⚠️ 部分方法返回类型从 `Error` 变为 `bool` |
@@ -628,14 +628,14 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 | TR-registry-001 | Static content definitions with stable IDs | — | ❌ GAP |
 | TR-registry-002 | `query_entity` + `validate_all` | — | ❌ GAP |
 | TR-registry-003 | Registry must not own mutable runtime state | — | ❌ GAP |
-| TR-platform-001 | Web-first application shell | — | ❌ GAP |
-| TR-platform-002 | Audio activation + tab focus recovery | — | ❌ GAP |
+| TR-platform-001 | Desktop application shell | ADR-0019 | ✅ COVERED |
+| TR-platform-002 | Desktop focus/pause/quit handling | ADR-0019 | ✅ COVERED |
 | TR-platform-003 | 15 platform states | — | ❌ GAP |
 | TR-persistence-001 | Staging→Verify→Promotion | — | ❌ GAP |
 | TR-persistence-002 | 8 snapshot packages | — | ❌ GAP |
 | TR-persistence-003 | Version migration | — | ❌ GAP |
 | TR-movement-001 | CharacterBody2D + InteractionRegistry | — | ❌ GAP |
-| TR-movement-002 | @abstract InteractionHandler | — | ❌ GAP |
+| TR-movement-002 | C# abstract InteractionHandler | — | ❌ GAP |
 | TR-movement-003 | Interaction focus: nearest-reachable | — | ❌ GAP |
 | TR-resources-001 | 6 pools, stack rules, capacity types | — | ❌ GAP |
 | TR-resources-002 | `commit_deposit` atomic + irreversible | — | ❌ GAP |
@@ -673,7 +673,7 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 | TR-ui-001 | 12 screens + modal stack | — | ❌ GAP |
 | TR-ui-002 | 4-layer input routing + dirty-flag HUD | — | ❌ GAP |
 | TR-ui-003 | Screen state machine closed loop | — | ❌ GAP |
-| TR-ui-004 | WCAG AA + browser tab freeze | — | ❌ GAP |
+| TR-ui-004 | WCAG AA + desktop focus recovery | ADR-0019 | ✅ COVERED |
 | TR-feedback-001 | Semantic feedback events | — | ❌ GAP |
 | TR-feedback-002 | MVP feedback ownership assignment | — | ❌ GAP |
 | TR-onboarding-001 | First-loop guidance | — | ❌ GAP |
@@ -687,9 +687,10 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 | ADR-0001 | Autoload/Scene Architecture & Boot Order | TR-platform-*, TR-persistence-*, TR-registry-* | Which systems are Autoloads (Registry, Persistence, Resources, Intel, Chart, InteractionRegistry, WorldRepair, UIManager, FeedbackManager) vs Scenes (Hub, Settlement, Exploration, VoyageManager); boot sequence from Phase 3 |
 | ADR-0002 | Signal-based Cross-System Communication Protocol | TR-movement-*, TR-resources-*, TR-intel-*, TR-repair-* | All cross-layer communication uses Godot signals; fire-and-forget; payloads carry only IDs and context data; no direct method calls across layers |
 | ADR-0003 | Save/Load — Snapshot Package System | TR-persistence-* | Staging→Verify→Promotion workflow; 8 snapshot packages; each domain system owns its serialization; Persistence only orchestrates, migrates, verifies |
-| ADR-0004 | Interaction System — @abstract Handler + Registry | TR-movement-* | @abstract InteractionHandler base class; InteractionRegistry autoload; nearest-reachable focus; Use entry dispatches to domain handlers |
+| ADR-0004 | Interaction System — C# Handler Base + Registry | TR-movement-* | C# `InteractionHandler` base class; InteractionRegistry autoload; nearest-reachable focus; Use entry dispatches to domain handlers |
 | ADR-0005 | Resource Pool Architecture — 6 Pools, Capacity Types, Terminal Deposit | TR-resources-* | 6 pools with defined stack rules; 3 capacity types; `commit_deposit` atomic + irreversible to Pool 6 |
-| ADR-0006 | Web Platform Constraints & Engine Compatibility | TR-platform-*, TR-ui-004 | Godot 4.6.2 Web export: GDScript only, Compatibility renderer, single-threaded, IndexedDB persistence, AudioContext user gesture, tab-freeze delta recovery, dual-focus system (4.6) verification |
+| ADR-0006 | Web Platform Constraints & Engine Compatibility | Historical / superseded by ADR-0019 | Retained for rationale only; Web export no longer governs MVP implementation |
+| ADR-0019 | Desktop C# Platform Pivot | TR-platform-*, TR-ui-004 | Godot 4.6.2 .NET/C# desktop-first implementation; Web/GDScript constraints superseded for active MVP work |
 
 ### Should Have Before System Build (Core & Feature — 6 ADRs)
 
@@ -724,7 +725,7 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 
 3. **Data-Driven, Never Hardcoded** — All gameplay values (material costs, hazard rates, route definitions, repair thresholds) live in #1 Registry as static content. Systems read config at runtime via `query_entity()`. No magic numbers in code. Tuning does not require recompilation.
 
-4. **Web-First Constraints Are Design Constraints** — Every system must account for: single-threaded execution (no `Thread` assumptions), IndexedDB persistence (no filesystem access), AudioContext user-gesture requirement, browser tab freeze/resume with delta-based recovery, WebGL 2 Compatibility renderer limits. No system may assume desktop-native features.
+4. **Desktop C# Is The Active Platform Contract** — Every new implementation story assumes Godot 4.6.2 .NET/C# and desktop lifecycle boundaries. Browser-only constraints from ADR-0006 are historical unless a future ADR reintroduces Web as a separate target.
 
 5. **Thin MVP, Depth Later** — Each system starts at its MVP thin-slice boundary (defined in systems-index.md). Systems are built to work correctly at minimum scope first; depth is added inside existing systems, not by adding new top-level systems. The thin-slice rules (1 Hub, 2 routes, 1 exploration point, 1 threat, 1 repair node, 1 partner, fixed market) are hard constraints for MVP.
 
@@ -732,13 +733,13 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 
 ## Open Questions
 
-1. **Autoload count vs Web boot time** — 9 proposed Autoloads (Registry, Persistence, InteractionRegistry, Resources, Intel, Chart, WorldRepair, UIManager, FeedbackManager) may impact initial load on Web. Profile after implementation; consider lazy-init for Feature-layer Autoloads.
+1. **Autoload count vs desktop boot time** — 9 proposed Autoloads (Registry, Persistence, InteractionRegistry, Resources, Intel, Chart, WorldRepair, UIManager, FeedbackManager) may impact initial load. Profile after C# migration; consider lazy-init for Feature-layer Autoloads only if measured.
 
 2. **Dual-focus system (Godot 4.6) with 4-layer input routing** — The interaction between Godot 4.6's new dual-focus system and #16's custom 4-layer input routing priority needs runtime verification. Risk: conflicting focus claims between Godot's built-in focus and the modal stack's input capture.
 
-3. **IndexedDB storage limits** — Browser-dependent (typically 50MB–2GB per origin). Save file size needs profiling once all 8 snapshot packages are populated. If approaching limits, consider compression or selective snapshot packages.
+3. **Desktop save size and atomic promotion** — Save file size needs profiling once all 8 snapshot packages are populated. If save latency exceeds budget, consider compression or selective snapshot packages after measurement.
 
-4. **AudioContext activation across browsers** — User gesture requirements vary (Chrome: any click, Firefox: explicit interaction, Safari: stricter). The audio activation flow in #2 needs cross-browser testing.
+4. **Desktop audio startup** — Audio no longer depends on browser user activation, but the first desktop build must still validate volume defaults, mute/pause behavior, and focus-loss pause policy.
 
 5. **NavigationServer2D API compatibility (Godot 4.5)** — The dedicated 2D navigation server replaced the unified NavigationServer. Verify the API surface matches usage in #4 Movement/Interaction.
 
@@ -746,4 +747,4 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 
 7. **#17 Feedback and #18 Onboarding are Vertical Slice** — Their ADRs (ADR-0016, ADR-0017) are deferred. MVP must still provide minimum feedback (owned by #13 repair ceremony, #7 Hub safety, #16 UI clarity) and first-loop guidance (owned by #7, #9, #11, #13, #14, #16 collectively).
 
-8. **Single-threaded Web export and voyage calculation** — Voyage risk resolution (#10) uses authored encounter tables (not simulation), so single-threaded is acceptable. If future versions add procedural generation, Web Worker feasibility should be evaluated.
+8. **C# build and test path** — The first implementation sprint must add a `dotnet build` check and a desktop/headless validation route before retiring GDScript prototype tests.

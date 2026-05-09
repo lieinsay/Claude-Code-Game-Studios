@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-05-05"
+last_updated: "2026-05-09"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -152,7 +152,8 @@ state_ownership:
     added: 2026-05-04
     revised: ""
   - state: web_lifecycle_state
-    status: active
+    status: superseded
+    superseded_by: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
     owner_system: SessionShell (#2 platform-session-shell)
     adr: docs/architecture/adr-0006-web-platform-constraints.md
     interface: "JavaScriptBridge callbacks: _on_visibility_changed(state) / _on_page_resume(persisted). SessionShell owns lifecycle state machine (boot → title → loading → playing → paused → error). Persistence receives pagehide emergency save trigger."
@@ -160,6 +161,16 @@ state_ownership:
     referenced_by:
       - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+    revised: 2026-05-09
+  - state: desktop_lifecycle_state
+    status: active
+    owner_system: SessionShell (#2 platform-session-shell)
+    adr: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
+    interface: "DesktopLifecycleState enum: Boot, Title, Loading, Playing, Paused, Quitting, Error. SessionShell owns focus/pause/quit transitions and save boundaries."
+    write_access: SessionShell-only
+    referenced_by:
+      - docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
+    added: 2026-05-09
     revised: ""
   - state: player_knowledge_state
     status: active
@@ -983,7 +994,8 @@ api_decisions:
     added: 2026-05-04
     revised: ""
   - purpose: web_export_config
-    status: active
+    status: superseded
+    superseded_by: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
     api: "GDScript only (no C#) + single-threaded export + Compatibility renderer (WebGL 2) + user:// → IndexedDB. Custom HTML shell for lifecycle events."
     not: "C# scripts (cannot export to Web); GDExtension in Web export path; threaded export (requires COOP/COEP headers — unsupported by common static hosts); Vulkan/Forward+ renderer (not available on Web)"
     adr: docs/architecture/adr-0006-web-platform-constraints.md
@@ -991,6 +1003,16 @@ api_decisions:
     referenced_by:
       - docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+    revised: 2026-05-09
+  - purpose: desktop_csharp_config
+    status: active
+    api: "Godot 4.6.2 .NET + C# primary implementation + desktop export. Track Godot .NET project files; verify with dotnet build and desktop/headless launch."
+    not: "Web-first GDScript-only export path; IndexedDB/browser lifecycle as MVP requirements; untracked .csproj/.sln project metadata."
+    adr: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
+    reason: "The active product target is desktop C#. Godot 4 C# cannot export to Web, so Web constraints are superseded rather than mixed into implementation stories."
+    referenced_by:
+      - docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
+    added: 2026-05-09
     revised: ""
   - purpose: dictionary_knowledge_storage
     status: active
@@ -1218,18 +1240,28 @@ forbidden_patterns:
     adr: docs/architecture/adr-0005-resource-pool-system.md
     added: 2026-05-04
   - pattern: thread_api_usage
-    status: active
+    status: superseded
+    superseded_by: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
     description: "Do not use Thread, Mutex, Semaphore, or WorkerThreadPool APIs anywhere in the project. All code must assume single-threaded execution on the browser main thread."
     why: "Web export uses single-threaded mode (threaded export requires COOP/COEP headers unavailable on common static hosts). Thread APIs will cause runtime errors or silent failure in Web export. All game logic must complete within 16.6ms/frame on the main thread."
     adr: docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+    revised: 2026-05-09
 
   - pattern: csharp_for_web
-    status: active
+    status: superseded
+    superseded_by: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
     description: "Do not use C# scripts for any code that must run in the Web export. All game logic must be GDScript. C# files (.cs) in the project are a Web export blocking error."
     why: "Godot 4 C# projects cannot be exported to Web — this is a hard engine limitation. C# assemblies are not compiled to WebAssembly in the Godot Web export pipeline."
     adr: docs/architecture/adr-0006-web-platform-constraints.md
     added: 2026-05-04
+    revised: 2026-05-09
+  - pattern: web_lifecycle_requirement
+    status: active
+    description: "Do not add new MVP implementation requirements that depend on browser lifecycle APIs, IndexedDB, AudioContext activation, WebGL 2, or JavaScriptBridge callbacks."
+    why: "ADR-0019 pivots the active target to desktop C#. Keeping Web-only requirements in new stories would split the implementation contract."
+    adr: docs/architecture/adr-0019-desktop-csharp-platform-pivot.md
+    added: 2026-05-09
 
   - pattern: gdextension_for_web
     status: active

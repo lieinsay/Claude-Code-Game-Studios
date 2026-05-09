@@ -100,9 +100,9 @@ This supplements (not replaces) the agent's built-in knowledge.
 - **Android**: Edge-to-edge display, camera feed access, 16KB page support (Android 15+)
 - **Linux**: Wayland subwindow support for multi-window capability
 
-## Web Export (4.6.2 project constraint)
+## Desktop C# Project Constraint (ADR-0019)
 
-- Use GDScript for the Web-first build. Godot 4 C# projects currently cannot be exported to Web.
-- Target WebGL 2 through the Compatibility renderer for browser builds.
-- Treat browser behavior as part of design: audio needs user activation, background tabs pause processing, persistence depends on IndexedDB availability, and fullscreen/mouse capture must happen from user input.
-- Prefer single-threaded Web export unless the host can satisfy cross-origin isolation requirements for threaded export.
+- Use Godot .NET/C# for new gameplay and systems code.
+- Godot 4 C# projects currently cannot be exported to Web, so Web is not an MVP target.
+- Treat desktop lifecycle as the active platform boundary: focus loss, pause, quit, local save promotion, and desktop build/export validation.
+- Keep browser behavior only as historical ADR-0006 context unless a future ADR reintroduces Web as a separate target.

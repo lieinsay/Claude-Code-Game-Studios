@@ -2,9 +2,11 @@
 
 *Created: 2026-04-26*
 *Status: Draft*
+*Last Updated: 2026-05-09*
 
 > **Source Concept**: `design/gdd/game-concept.md`
-> **Engine / Platform**: Godot 4.6.2 + GDScript; Web desktop browsers first; keyboard/mouse input.
+> **Engine / Platform**: Godot 4.6.2 .NET + C#; desktop-first; keyboard/mouse input.
+> **Platform Pivot Note**: ADR-0019 supersedes Web-first performance and browser-window assumptions for active implementation. Existing Web-specific art production notes should be read as conservative 2D readability/performance constraints until refreshed, not as a Web export requirement.
 
 ---
 

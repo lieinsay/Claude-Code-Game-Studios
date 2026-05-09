@@ -2,8 +2,11 @@
 
 > **无障碍等级**: Basic (基础)
 > **创建日期**: 2026-05-05
-> **引擎**: Godot 4.6.2 (Web-first)
+> **最近更新**: 2026-05-09
+> **引擎**: Godot 4.6.2 .NET (desktop-first, C#)
 > **参考**: WCAG AA (TR-ui-004 已引用对比度要求)
+
+> **Platform Pivot Note**: ADR-0019 将活动实现目标从 Web 导出切换为桌面 Godot .NET/C#。本文件的无障碍承诺以桌面键鼠体验为准；旧 Web 限制不再作为 MVP 阻塞条件。
 
 ## 等级定义
 
@@ -34,8 +37,8 @@
 
 ## 已知限制
 
-- Godot 4.6 Web 导出不支持系统级屏幕阅读器 API（AccessKit 4.5 为桌面专用）
-- Web 浏览器自带缩放会改变 Canvas 渲染分辨率，不保证 UI 布局一致性
+- MVP 仍不承诺系统级屏幕阅读器支持；桌面 AccessKit / 原生辅助 API 评估推迟到 Comprehensive 级。
+- 桌面窗口缩放、分辨率变化和 DPI 缩放必须不破坏基础 UI 可读性；完整大字体模式推迟到 Standard 级。
 - MVP 阶段不开发专门的无障碍设置界面 — 键位重映射使用 Godot 内置 Input Map 对话框
 
 ## 审查计划

@@ -25,10 +25,11 @@ Always cross-reference this directory before suggesting Godot API calls.
 
 ## Project Configuration Notes
 
-- Project language is pinned to GDScript. Do not suggest Godot 4 C# for the Web-first build: Godot 4 C# projects currently cannot be exported to Web.
-- Primary target is Web desktop browsers. Use the Compatibility renderer / WebGL 2 constraints for rendering decisions.
-- Web exports should prefer single-threaded export unless the hosting target can provide cross-origin isolation requirements for thread support.
-- Browser persistence, audio activation, fullscreen/mouse capture, and background tab pause behavior must be treated as design constraints.
+- Project language has pivoted to C# via Godot .NET. See `docs/architecture/adr-0019-desktop-csharp-platform-pivot.md`.
+- Primary target is Windows desktop. Linux desktop is secondary after the first stable desktop build.
+- Web is no longer an MVP target because Godot 4 C# projects cannot be exported to Web.
+- Browser persistence, audio activation, fullscreen/mouse capture, IndexedDB, and background tab pause behavior are historical constraints from ADR-0006 and do not govern new implementation work.
+- Desktop lifecycle, local filesystem persistence through `user://`, .NET build verification, and Godot .NET signal patterns must be validated before gameplay migration.
 
 ## Verified Sources
 

@@ -2,8 +2,9 @@
 
 > **Status**: In Review (Round 4 revision applied 2026-04-29 — 7 blockers resolved: add_loot formula, discard op, carried loss Pillar 4 constraint, stack_merge priority, route consumption pool+interface, signal ACs)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-04-29
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 世界会回应照料; 飞艇是家，不只是载具
+> **Platform Pivot Note**: ADR-0019 supersedes browser storage assumptions. Active resource/cargo implementation targets desktop Godot .NET/C# and desktop persistence boundaries.
 
 ## Overview
 

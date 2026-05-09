@@ -2,9 +2,10 @@
 
 > **Status**: In Design
 > **Author**: User + Codex
-> **Last Updated**: 2026-04-26
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 世界会回应照料; 飞艇是家，不只是载具
 > **System Index**: `design/gdd/systems-index.md`
+> **Platform Pivot Note**: ADR-0019 supersedes Web/GDScript implementation assumptions. Active registry implementation targets desktop Godot .NET/C#; browser-only diagnostics and GDScript API names are legacy notes until refreshed.
 
 ## Overview
 
@@ -33,7 +34,7 @@
 9. 所有列表型查询必须返回确定性顺序，不能依赖字典遍历顺序、导出顺序或文件顺序。
 10. Schema 必须保持明确类型、低嵌套、低异构。新增内容类别需要更新 GDD 或后续架构说明，不能随意塞进万能字段。
 11. 内容 ID 一旦进入 `Active` 状态就不可复用。旧 ID 退役后可以保留兼容映射，但不能赋予新含义。
-12. 错误必须可诊断，并能在 Web 浏览器运行环境中定位：重复 ID、缺字段、引用缺失、Schema 版本不兼容、非法查询条件、资源引用失效。
+12. 错误必须可诊断，并能在桌面开发和运行环境中定位：重复 ID、缺字段、引用缺失、Schema 版本不兼容、非法查询条件、资源引用失效。
 
 ### States and Transitions
 

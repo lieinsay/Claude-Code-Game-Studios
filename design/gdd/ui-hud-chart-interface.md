@@ -2,9 +2,11 @@
 
 > **Status**: Designed (CD APPROVED, suggestions applied)
 > **Author**: lieinsay + ux-designer + game-designer + ui-programmer
-> **Last Updated**: 2026-05-03
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: P1 (规划先于冒险), P2 (世界会回应照料), P3 (飞艇是家), P4 (未知带来温和压力), P5 (少量深关系胜过大量收集)
 > **Creative Director Review (CD-GDD-ALIGN)**: APPROVED 2026-05-03 — R1 (color deviation rationale in C.9), R2 (post-repair world-change hint in OQ #6), R3 (first-repair guidance in Edge Cases) all applied
+
+> **Platform Pivot Note**: ADR-0019 supersedes Web export constraints for active UI implementation. MVP UI now targets desktop Godot 4.6.2 .NET/C# with keyboard/mouse input, window focus recovery, and desktop renderer validation. Existing WebGL / browser recovery notes are historical unless restated as desktop behavior below.
 
 ## Overview
 
@@ -263,7 +265,7 @@ PROXIMITY_ENTER → PRELOAD → READY → ACTIVE → PROXIMITY_EXIT → CLOSE
 | 结算摘要入场 | 0.5s | ease-out | 撤离完成 | #11 |
 | 命名模态弹出 | 0.3s | ease-out | 到达序列中 naming_eligible | #15 |
 
-**动画性能约束**（Godot 4.6 WebGL 2）：
+**动画性能约束**（Godot 4.6.2 desktop renderer）：
 - 所有 UI 动画使用 `create_tween()`（SceneTreeTween），禁止手动 `_process()` 插值
 - 墨水扩散动画必须使用 ShaderMaterial + uniform `progress`（GPU 侧完成），禁止 Canvas `draw_*()` 逐帧绘制
 - 全屏羊皮纸纹理使用 `NinePatchRect`（9-slice）展开，不使用整张 2048×2048 纹理
@@ -442,7 +444,7 @@ band_color(hull_integrity):
 
 ## Edge Cases
 
-- **若浏览器切页后恢复（`NOTIFICATION_APPLICATION_RESUMED`）**：UI 状态从内存恢复——所有面板的可见性、数据绑定和焦点位置与切页前一致。信号驱动的 HUD 在切页期间不收信号，自然冻结。恢复后第一个状态变化信号触发脏标记→完整刷新。若 `_process` delta > 1.0s（异常大 delta = 浏览器激进冻结恢复），触发一次全量 `_request_full_ui_refresh()`。
+- **若桌面窗口失焦、最小化或系统暂停后恢复（`NOTIFICATION_APPLICATION_FOCUS_IN` / resume equivalent）**：UI 状态从内存或最近有效 UI model 恢复——所有面板的可见性、数据绑定和焦点位置与恢复前一致。信号驱动的 HUD 在暂停期间不接收玩法更新，自然冻结。恢复后第一个状态变化信号触发脏标记→完整刷新。若 `_process` delta > 1.0s（异常大 delta = 系统暂停或恢复），触发一次全量 `_request_full_ui_refresh()`。
 
 - **若多个模态同时请求打开**：UIManager 按优先级裁决。S7（战斗威胁）覆盖当前模态（保存状态→覆盖）。S10（伙伴命名）排队（当前模态关闭后自动打开）。其余模态请求被丢弃并转为非模态 Toast "当前无法操作"。同一优先级不会同时触发（战斗威胁和容量取舍已被 #11 EC-11-04 保护——取舍面板打开时探索暂停）。
 
@@ -450,7 +452,7 @@ band_color(hull_integrity):
 
 - **若零物品面板打开**：每个面板必须实现空状态视图。嗅辨面板（S11）零合格物品时显示"猫没有闻到任何值得注意的气味——试试从探索中带回更多材料"（#15 E.2.a）。仓库（S12）为空时显示"从探索中带回材料或拆包货物来填充"（#5）。航图（S4）无可见路线时显示"没有可读取的航线——去情报台了解更多信息"。
 
-- **若 departure_locked 期间有面板请求**：UIManager 维护 `_departure_locked` 标志（由 `route_committed` 信号置 true，2.0s 定时器后清）。锁定期间 `open_screen()` 和 `open_modal()` 静默拒绝。锁定开始时 `force_close_all_panels()` 强制关闭所有已打开面板。定时器使用 `SceneTreeTimer`（非 `await`——Web 后台切页不安全）。
+- **若 departure_locked 期间有面板请求**：UIManager 维护 `_departure_locked` 标志（由 `route_committed` 信号置 true，2.0s 定时器后清）。锁定期间 `open_screen()` 和 `open_modal()` 静默拒绝。锁定开始时 `force_close_all_panels()` 强制关闭所有已打开面板。定时器使用 `SceneTreeTimer`，并在桌面暂停/恢复后由 UIManager 校验锁状态。
 
 - **若命名模态触发条件与到达序列时序冲突**：`naming_prompt_eligibility()` 是 4 路合取（#15 `naming_prompt_eligibility` 公式）。到达序列完成时检查此条件——若 true，S10 在到达序列的最后 0.3s 弹出。若 `naming_skip_count >= NAMING_SKIP_MAX`（3），即使其余 3 条件满足也不弹出。S10 阻断所有 UI 含出航控件（#15 E.1.g）。
 
@@ -464,7 +466,7 @@ band_color(hull_integrity):
 
 - **若玩家在战斗决策面板中按 Esc**：无效。S7 要求必须选择一个响应（E/T/R）。Esc 在此面板中被消费但不触发任何动作。此行为需要在面板中通过视觉提示说明（"选择一个响应以继续"）。
 
-- **若 Web 后台冻结恢复后 UI 与游戏状态不同步**：`_process` 检测 delta > 1.0s → 调用 `_request_full_ui_refresh()` → 遍历所有活跃 HUD 元素，重新从领域系统拉取最新值并强制写入节点（绕过脏标记优化，确保一致性）。
+- **若桌面暂停/恢复后 UI 与游戏状态不同步**：`_process` 检测 delta > 1.0s → 调用 `_request_full_ui_refresh()` → 遍历所有活跃 HUD 元素，重新从领域系统拉取最新值并强制写入节点（绕过脏标记优化，确保一致性）。
 
 - **若玩家首次返回 Hub 且携带了修复材料**：此时玩家可能尚未意识到"材料可以用于修复世界节点"。修复站点（S8 锚点）在 Hub 中应有微妙的视觉引导——不同于完整的新手引导教程（#18 的范畴），而是一个低侵入性的环境提示（如修复站点锚点发出微弱脉冲光，或在靠近时显示一行提示文字"这里似乎可以用材料修复"）。具体引导形式和触发条件由 #18（新手引导与首轮闭环）最终定义，但 S8 面板的打开锚点必须预留可被引导系统高亮的标记接口（`highlightable = true` + `highlight_priority` 字段）。（Owner: #18 + ux-designer, Target: Vertical Slice）
 
@@ -589,7 +591,7 @@ band_color(hull_integrity):
 
 - 在 `design/ux/` 创建之前，故事文件引用本 GDD 的 Detailed Design 作为 UI 规格的临时来源
 - Theme 资源：创建单一 `ui_theme.tres`，定义所有颜色常量、字体规格、StyleBox（focus/hover/disabled）
-- 字体：不超过 3 种规格——标题（24px）、正文（16px）、标注（12px）。Web 导出使用系统回退字体或轻量嵌入字体
+- 字体：不超过 3 种规格——标题（24px）、正文（16px）、标注（12px）。桌面构建使用项目内嵌字体或系统回退字体，并验证 DPI 缩放下的可读性
 - 所有可见字符串使用 `tr()` 包装，为后续本地化做准备
 
 ## Acceptance Criteria
@@ -636,9 +638,9 @@ band_color(hull_integrity):
 - **AC-18**：GIVEN 模态面板 S6a（容量取舍）已打开，WHEN 战斗威胁触发（S7 打开），THEN S6a 状态保存到 `combat_override_stack`，S6a 透明度降至 20% 且 `process_mode=DISABLED`，S7 在独立 CanvasLayer（layer=100）渲染。GIVEN 玩家选择应急处理或硬扛，WHEN 战斗结算完成，THEN S6a 恢复至覆盖前的完整状态（滚动位置、选中索引、物品决策上下文不丢失）。
 - **AC-19**：GIVEN 无模态面板打开，WHEN 多个非模态面板同时打开（S11 嗅辨 + S12 仓库），THEN 两个面板均可交互，后打开的面板视觉上覆盖在先打开的上方。WASD 移动仍可用。
 
-### 浏览器恢复
+### 桌面窗口恢复
 
-- **AC-20**：GIVEN 玩家在 Hub 中 S1 HUD 显示正常、S12 仓库面板打开，WHEN 浏览器切页→切回（`NOTIFICATION_APPLICATION_RESUMED`），THEN S1 HUD 显示与切页前一致，S12 仓库面板仍在打开状态、焦点位置不变，WASD 移动恢复。
+- **AC-20**：GIVEN 玩家在 Hub 中 S1 HUD 显示正常、S12 仓库面板打开，WHEN 桌面窗口失焦/最小化后恢复（focus-in / resume notification），THEN S1 HUD 显示与恢复前一致，S12 仓库面板仍在打开状态、焦点位置不变，WASD 移动恢复。
 
 ## Open Questions
 
@@ -648,7 +650,7 @@ band_color(hull_integrity):
 
 3. **面板缓存池大小**：当前默认 2 实例（LRU）。MVP 有 5 个模态站点——缓存全部 5 个可以消除重复加载但增加 ~150KB 内存。需在 Greybox 阶段验证内存预算后确定。（Owner: ui-programmer, Target: Greybox Vertical Slice）
 
-4. **墨水扩散 Shader 的 WebGL 2 兼容性**：ShaderMaterial 路线在 4.6.2 Compatibility 渲染器上需要验证。如果 `texture()` 采样在 WebGL 2 中有精度问题，回退方案是什么？（Owner: technical-artist, Target: Technical Prototype）
+4. **墨水扩散 Shader 的桌面渲染兼容性**：ShaderMaterial 路线需要在 Godot 4.6.2 桌面 Compatibility / Forward+ 渲染器上验证。如果目标桌面渲染器的 `texture()` 采样或 uniform 更新出现性能/精度问题，回退方案是什么？（Owner: technical-artist, Target: Technical Prototype）
 
 5. **命名模态的到达序列弹出时机**：当前指定"到达序列的最后 0.3s 弹出"。如果到达序列总时长可配置，这个相对时机是否需要调整为绝对时机（如"到达序列开始后 1.5s"）？（Owner: narrative-director + ux-designer, Target: UX spec 创建时确定）
 

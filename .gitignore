@@ -53,9 +53,7 @@ export_presets.cfg
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-*.csproj
 *.unityproj
-*.sln
 *.suo
 *.tmp
 *.user
@@ -67,6 +65,9 @@ export_presets.cfg
 *.mdb
 *.opendb
 *.VC.db
+# Godot C# project files are source artifacts and must be tracked.
+!*.csproj
+!*.sln
 crashlytics-buildid.txt
 sysinfo.txt
 # Uncomment if using Unity:

@@ -2,8 +2,9 @@
 
 > **Status**: Re-Revised (re-review feedback applied — 4 BLOCKING + 2 RECOMMENDED fixed; 2026-05-04 C2 fix: repair_kit requirement 5→4 — closes supply gap with starting quantity)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-04
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 世界会回应照料; 规划先于冒险
+> **Platform Pivot Note**: ADR-0019 supersedes browser lifecycle assumptions. Active repair implementation targets desktop Godot .NET/C#; browser-tab ritual recovery notes should be read as desktop pause/resume recovery until refreshed.
 
 ## Overview
 

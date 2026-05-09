@@ -1,71 +1,77 @@
 # Technical Preferences
 
-<!-- Engine configured 2026-05-05. Values sourced from architecture.md, VERSION.md, and ADRs. -->
+<!-- Platform/language pivot recorded 2026-05-09 by ADR-0019. -->
 
 ## Engine & Language
 
-- **Engine**: Godot 4.6.2
-- **Language**: GDScript
-- **Rendering**: Compatibility renderer (WebGL 2 — Web-first target)
-- **Physics**: Godot 2D physics (Jolt default in 4.6, not used for MVP)
+- **Engine**: Godot 4.6.2 .NET
+- **Language**: C# (.NET, primary)
+- **Rendering**: Desktop 2D. Start with Compatibility renderer for prototype parity; evaluate Forward+ after the C# Foundation spike.
+- **Physics**: Godot 2D physics for MVP; Jolt 3D default is not relevant unless 3D systems are introduced later.
 
 ## Input & Platform
 
-- **Target Platforms**: Web desktop browsers (primary); Windows/Linux desktop (secondary)
+- **Target Platforms**: Windows desktop (primary); Linux desktop (secondary after first stable desktop build)
 - **Input Methods**: Keyboard/Mouse
 - **Primary Input**: Keyboard/Mouse
 - **Gamepad Support**: None (MVP)
 - **Touch Support**: None (MVP)
-- **Platform Notes**: Single-threaded Web export (no SharedArrayBuffer requirement); AudioContext activation requires user gesture; `pagehide`/`visibilitychange` best-effort save ≤20ms budget; IndexedDB storage via `user://` mapping; WebGL 2 Compatibility renderer constraints apply to all rendering decisions.
+- **Platform Notes**: Web is no longer an MVP target. Remove browser-only assumptions such as AudioContext activation, IndexedDB persistence, `pagehide`, `visibilitychange`, JavaScriptBridge lifecycle callbacks, WebGL 2 limits, and single-threaded Web export constraints from new implementation work. Desktop lifecycle is handled by SessionShell focus, pause, quit, and save boundaries.
 
 ## Naming Conventions
 
 - **Classes**: PascalCase (e.g., `InteractionRegistry`, `SnapshotPackage`)
-- **Variables**: snake_case (e.g., `route_id`, `hull_band_integrity`)
-- **Signals/Events**: `{noun}_{verb_past}` (e.g., `deposit_committed`, `route_committed`)
-- **Files**: snake_case (e.g., `interaction_registry.gd`, `snapshot_package.gd`)
+- **Namespaces**: PascalCase rooted at `CloudWeaverVoyage` (e.g., `CloudWeaverVoyage.Core`)
+- **Public Members**: PascalCase (e.g., `RouteId`, `CaptureSnapshot`)
+- **Private Fields**: `_camelCase` (e.g., `_routeId`, `_hullBandIntegrity`)
+- **Locals/Parameters**: camelCase (e.g., `routeId`, `hullBandIntegrity`)
+- **Signals/Events**: Godot signal delegates use PascalCase event names with `{Noun}{VerbPast}` (e.g., `DepositCommitted`, `RouteCommitted`); emitted semantic event IDs remain snake_case where data-driven content requires stable IDs.
+- **Files**: PascalCase matching class names for C# (e.g., `InteractionRegistry.cs`, `SnapshotPackage.cs`)
 - **Scenes/Prefabs**: PascalCase (e.g., `AirshipHub.tscn`, `ExplorationScene.tscn`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `DOMAIN_READY`, `KNOWLEDGE_UNREVEALED`)
+- **Constants**: PascalCase or UPPER_SNAKE_CASE only when matching existing data IDs; prefer C# enum values for state names.
 - **Autoload names**: PascalCase matching class name (e.g., `Registry`, `Persistence`, `Intel`)
 
 ## Performance Budgets
 
 - **Target Framerate**: 60fps (16.67ms frame budget)
-- **Frame Budget**: 16ms (game logic headroom after engine overhead ~12ms)
-- **Draw Calls**: ≤ 200 (WebGL 2 Compatibility renderer)
-- **Memory Ceiling**: 200MB total heap (Web browser tab); Autoload pool ≤10MB; AirshipHub scene ≤30MB; Peak memory (Exploration active) ≤100MB
+- **Frame Budget**: 16ms gameplay frame budget
+- **Draw Calls**: ≤ 400 for MVP desktop 2D scenes until profiling says otherwise
+- **Memory Ceiling**: 512MB MVP desktop soft ceiling; Autoload pool ≤20MB; AirshipHub scene ≤60MB; Peak memory (Exploration active) ≤200MB
 
 ### Sub-budgets
 
-- **Web boot time**: <2s from `boot_requested` to `session_ready` (warm cache)
-- **Autoload _ready()**: <100ms total across all 9 Autoloads
+- **Desktop boot time**: <2s from `boot_requested` to `session_ready` on a warm local build
+- **Autoload `_Ready()`**: <100ms total across all Autoloads
 - **Save/load**: 2MB snapshot, p95 <50ms encode+SHA-256; max 100ms
 - **Signal emit**: single emit <0.01ms (consumer count ≤5)
-- **Scene transition**: <500ms (exit cleanup + instantiate + _ready())
+- **Scene transition**: <500ms (exit cleanup + instantiate + `_Ready()`)
 
 ## Testing
 
-- **Framework**: GUT (Godot Unit Test) — gdUnit4
-- **Minimum Coverage**: Logic stories require automated unit tests (BLOCKING gate); Integration stories require integration test or documented playtest
-- **Required Tests**: Balance formulas, gameplay systems, signal contracts, state machine transitions, save/load roundtrip
+- **Framework**: C# validation path required for new systems. Existing GdUnit4/GDScript tests remain temporary regression evidence until C# parity tests replace them.
+- **Build Check**: `dotnet build` must pass once the Godot .NET project files exist.
+- **Minimum Coverage**: Logic stories require automated unit tests or C# headless validation; Integration stories require integration test or documented playtest.
+- **Required Tests**: Balance formulas, gameplay systems, signal contracts, state machine transitions, save/load roundtrip.
 
 ## Forbidden Patterns
 
-- `dictionary_signal_payload` — signal payload must be typed parameters, not Dictionary
-- `untyped_signal_param` — all signal parameters must have explicit type annotations
-- `string_signal_connect` — use `sender.signal_name.connect(receiver.method)` not `connect("name", ...)`
-- `deferred_emit` — use synchronous `.emit()` not `.emit.call_deferred()` for cross-system signals
-- `process_connect` — no dynamic connect/disconnect in `_process()`/`_physics_process()`
-- `store_var_save` — no `store_var()`/`get_var()` Variant blob for save data (use Canonical JSON)
-- `hardcoded_value` — all gameplay values must come from Registry (data-driven)
-- `direct_cross_autoload_in_ready` — no calling other Autoload methods in `_ready()`
-- `bare_dictionary_payload` — no Node/Resource/Object/Callable references in signal payload
-- `signal_cascade_depth_3plus` — max signal cascade depth = 2
+- `dictionary_signal_payload` — signal payload must be typed parameters, not raw dictionaries, unless an ADR explicitly defines a JSON-like cross-system package.
+- `untyped_signal_param` — all signal parameters must have explicit type annotations.
+- `string_signal_connect` — use typed C# signal/event patterns, not string-based connection names.
+- `deferred_emit` — do not defer cross-system signals unless an ADR explicitly requires next-frame ordering.
+- `process_connect` — no dynamic connect/disconnect in `_Process()`/`_PhysicsProcess()`.
+- `store_var_save` — no Variant blob save data; use Canonical JSON.
+- `hardcoded_value` — gameplay values come from Registry/data definitions, not literals inside gameplay logic.
+- `direct_cross_autoload_in_ready` — no calling other Autoload methods in `_Ready()`.
+- `bare_object_payload` — no Node/Resource/Object/Callable references in persistence payloads.
+- `signal_cascade_depth_3plus` — max signal cascade depth = 2.
+- `web_lifecycle_requirement` — do not require browser lifecycle behavior for MVP desktop stories.
 
 ## Allowed Libraries / Addons
 
-- gdUnit4 (testing)
-- GDScript built-in only (no external addons for MVP)
+- Godot .NET runtime and .NET SDK required for C#.
+- gdUnit4 may remain during migration for legacy GDScript regression checks.
+- No new third-party runtime dependencies for MVP without an explicit ADR/request.
 
 ## Architecture Decisions Log
 
@@ -74,32 +80,34 @@
 | ADR-0001 | Autoload/Scene Boot Order | Accepted |
 | ADR-0002 | Signal Communication Protocol | Accepted |
 | ADR-0003 | Save System / JSON Serialization | Accepted |
-| ADR-0004 | InteractionHandler @abstract | Accepted |
+| ADR-0004 | InteractionHandler Base | Accepted |
 | ADR-0005 | Resource Pool System | Accepted |
-| ADR-0006 | Web Platform Constraints | Accepted |
+| ADR-0006 | Web Platform Constraints | Superseded for active MVP by ADR-0019 |
 | ADR-0007 | Intel / Knowledge System | Accepted |
 | ADR-0008 | Chart Route State Machine | Accepted |
 | ADR-0009 | Module / Hull System | Accepted |
 | ADR-0010 | EncounterContext Type | Accepted |
 | ADR-0011 | WorldRepair State Machine | Accepted |
 | ADR-0012 | UI / Input Routing | Accepted |
+| ADR-0019 | Desktop C# Platform Pivot | Accepted |
 
 ## Engine Specialists
 
 - **Primary**: godot-specialist
-- **Language/Code Specialist**: godot-gdscript-specialist
+- **Language/Code Specialist**: godot-csharp-specialist
 - **Shader Specialist**: godot-shader-specialist
-- **UI Specialist**: godot-specialist (GDscript UI via Control nodes)
-- **Additional Specialists**: N/A (MVP — no GDExtension, no C#, no networking)
-- **Routing Notes**: All game code is GDScript — route to godot-gdscript-specialist for code review and implementation. Route rendering/shader questions to godot-shader-specialist. Use godot-specialist for general engine questions and scene architecture.
+- **UI Specialist**: godot-specialist + godot-csharp-specialist for C# UI scripts
+- **Additional Specialists**: godot-gdextension-specialist only if native plugins become necessary after profiling
+- **Routing Notes**: All new game code is C# by default. Route implementation/review to `godot-csharp-specialist`; route scene-tree and Godot node architecture questions to `godot-specialist`. Prefer C# before considering GDExtension; escalate to native only with profiling evidence.
 
 ### File Extension Routing
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (.gd) | godot-gdscript-specialist |
+| Game code (.cs) | godot-csharp-specialist |
+| Legacy prototype code (.gd) | godot-gdscript-specialist for migration review only |
 | Shader / material files (.gdshader, .tres) | godot-shader-specialist |
 | UI / screen files (.tscn with Control root) | godot-specialist |
 | Scene / prefab / level files (.tscn) | godot-specialist |
-| Native extension / plugin files | N/A (MVP — no GDExtension) |
+| Native extension / plugin files | godot-gdextension-specialist |
 | General architecture review | technical-director |

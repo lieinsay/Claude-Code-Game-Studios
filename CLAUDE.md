@@ -5,14 +5,15 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: Godot 4.6.2
-- **Language**: GDScript
+- **Engine**: Godot 4.6.2 .NET
+- **Language**: C#
 - **Version Control**: Git with trunk-based development
-- **Build System**: Godot headless CLI (`godot --headless`)
+- **Build System**: Godot .NET CLI/editor build + `dotnet build`
 - **Asset Pipeline**: Godot native import system (.tscn, .tres, .gd)
 
-> **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
-> dedicated sub-specialists. Use the set matching your engine.
+> **Note**: This project now targets desktop Godot .NET/C#. Route code work to
+> `godot-csharp-specialist`; use `godot-specialist` for scene architecture and
+> `godot-shader-specialist` for rendering/shader questions.
 
 ## Project Structure
 

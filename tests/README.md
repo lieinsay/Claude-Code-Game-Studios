@@ -1,7 +1,7 @@
 # Test Infrastructure
 
 **Engine**: Godot 4.6.2
-**Test Framework**: GdUnit4
+**Test Framework**: C# parity runners during migration; GdUnit4 legacy regression tests
 **CI**: `.github/workflows/tests.yml`
 **Setup date**: 2026-05-05
 
@@ -9,6 +9,7 @@
 
 ```
 tests/
+  csharp/        # C# parity and migration validation runners
   unit/           # Isolated unit tests (formulas, state machines, logic)
   integration/    # Cross-system and save/load tests
   smoke/          # Critical path test list for /smoke-check gate
@@ -18,7 +19,11 @@ tests/
 ## Running Tests
 
 ```bash
-# Headless (for CI):
+# C# migration validation:
+dotnet build CloudWeaverVoyage.sln
+dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj
+
+# Legacy GDScript headless (requires Godot CLI):
 godot --headless --script tests/gdunit4_runner.gd
 
 # In-editor:

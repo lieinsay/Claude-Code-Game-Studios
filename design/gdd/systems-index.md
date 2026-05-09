@@ -2,10 +2,12 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-08
+> **Last Updated**: 2026-05-09
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
+
+> **Platform Pivot Note (2026-05-09)**: ADR-0019 supersedes Web-first / GDScript implementation constraints for active production work. MVP implementation now targets desktop Godot 4.6.2 .NET with C#; remaining Web references in older GDD text are historical unless this index or a refreshed system GDD restates them as current desktop requirements.
 
 ---
 
@@ -101,7 +103,7 @@ Scope boundary: this system does not own mutable runtime state.
 
 ### 2. 平台与会话壳
 
-Web-first application shell: loading, start/continue, audio activation, tab focus recovery, keyboard/mouse entry points, and session lifecycle.
+Desktop application shell: loading, start/continue, audio activation, window focus / pause recovery, keyboard/mouse entry points, and session lifecycle.
 
 ### 3. 本地存档与世界状态持久化
 
@@ -187,7 +189,7 @@ GDD: `design/gdd/partner-relationships.md` — 8 required sections + self-check 
 
 ### 16. UI / HUD / 航图界面
 
-MVP 呈现层外壳，将 15 个领域系统的数据与状态转换为统一的画面体验。拥有 12 个屏幕（S1-S12）、模态栈（单模态 + 战斗覆盖）、输入路由（4 层优先级）、HUD 更新策略（信号驱动 + 脏标记批量更新）、12 个动画时序合约。视觉语言使用航路修复主义（UI 像可被阅读的航海图），统一 UI 语义色板（8 色）覆盖 #8/#12/#13 的色值冲突，统一玩家面向术语（船体完整性、随身物品栏、货舱、云海币）。完整屏幕流状态机覆盖 Hub→航图→探索→返回 闭环。WCAG AA 对比度合规，Web 后台冻结恢复兼容。
+MVP 呈现层外壳，将 15 个领域系统的数据与状态转换为统一的画面体验。拥有 12 个屏幕（S1-S12）、模态栈（单模态 + 战斗覆盖）、输入路由（4 层优先级）、HUD 更新策略（信号驱动 + 脏标记批量更新）、12 个动画时序合约。视觉语言使用航路修复主义（UI 像可被阅读的航海图），统一 UI 语义色板（8 色）覆盖 #8/#12/#13 的色值冲突，统一玩家面向术语（船体完整性、随身物品栏、货舱、云海币）。完整屏幕流状态机覆盖 Hub→航图→探索→返回 闭环。WCAG AA 对比度合规，桌面窗口失焦、暂停与恢复兼容。
 
 Scope boundary: #16 拥有布局、模态管理、屏幕流、输入路由、动画时序和无障碍。#16 不发明新机制——领域系统拥有数据和状态机。
 
@@ -246,7 +248,7 @@ MVP owner note: this system is not the only owner of the first loop. MVP GDDs fo
 ### Foundation Layer
 
 1. **内容数据与状态注册表** — foundational static content and IDs used by all gameplay systems.
-2. **平台与会话壳** — Web application lifecycle and input entry.
+2. **平台与会话壳** — Desktop application lifecycle and input entry.
 3. **本地存档与世界状态持久化** — depends on content data and platform shell.
 4. **玩家移动与交互** — depends on platform shell.
 
@@ -313,7 +315,7 @@ Potential cycles and resolutions:
 | 战斗与威胁处理 | Scope | Can become a full combat subgame. | MVP threat-resolution layer only: 1 threat, 1-2 responses, 3 outcomes. |
 | 世界修复与解锁 | Design | If feedback is weak, the core fantasy fails. | MVP includes 1 permanent repair outcome with visible route/settlement change. |
 | 空港 / 村镇状态与集市交易 | Scope / Design | Market can become a full economy. | MVP uses walk-up stall purchase plus fixed or repair-flag-driven stock changes. |
-| UI / HUD / 航图界面 | UX | Too much state can overwhelm Web UI. | Prioritize route, cargo, risk, repair, and market purchase clarity. |
+| UI / HUD / 航图界面 | UX | Too much state can overwhelm desktop UI clarity. | Prioritize route, cargo, risk, repair, and market purchase clarity. |
 
 ---
 

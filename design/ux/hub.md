@@ -2,10 +2,11 @@
 
 > **Status**: In Design
 > **Author**: lieinsay + ux-designer
-> **Last Updated**: 2026-05-05
+> **Last Updated**: 2026-05-09
 > **Journey Phase(s)**: 核心循环起点与终点 — 整备/归港
 > **Template**: UX Spec
 > **GDD Reference**: `design/gdd/airship-hub.md`, `design/gdd/ui-hud-chart-interface.md`
+> **Platform Pivot Note**: ADR-0019 supersedes Web/browser lifecycle assumptions. Active Hub UX targets desktop Godot .NET/C# with keyboard/mouse input and desktop focus/pause recovery.
 
 ---
 
@@ -64,7 +65,7 @@ Hub 支持两种到达模式，玩家的情绪状态和 UX 需求截然不同。
 Hub 在导航层级中占据根级场景位置——它不是菜单中的一个选项，而是玩家启动/读档后直接站在其中的"默认所在地"。
 
 ```
-[空状态（页面加载）]
+[空状态（应用启动 / 加载）]
     │
     └── 平台与会话壳（加载/恢复/后台/错误处理）
           │  放行后 ↓
@@ -88,7 +89,7 @@ Hub 在导航层级中占据根级场景位置——它不是菜单中的一个�
 
 **层级关系说明：**
 
-- **向上**：壳层（平台与会话壳）负责浏览器生命周期和恢复流程。壳层放行后，玩家第一眼永远是 Hub + S1 HUD 覆盖层。
+- **向上**：壳层（平台与会话壳）负责桌面应用生命周期、窗口焦点/暂停/退出恢复流程。壳层放行后，玩家第一眼永远是 Hub + S1 HUD 覆盖层。
 - **向下**：所有"外出"——航图、探索、集市——都是从 Hub 出发、最终回到 Hub 的子屏幕（见 GDD #16 C.2 屏幕流）。Hub 场景在前往航图/探索期间保持内存驻留（GDD #7 性能策略），返航时不重载——强化"离开家→回到家"的连续感。
 - **横向**：M 键快捷打开航图是 Hub 内的唯一非步行导航捷径。设计意图是：熟练玩家在多次循环后可能不想每次走过整个船身去舱门，但保留步行选择给沉浸感玩家（GDD #16 Open Question #1）。
 
@@ -157,7 +158,7 @@ Hub 场景为横版剖面侧视图，分四个舱室、两个楼层，中部楼�
 
 | 组件 | 类型 | 数量 | 说明 |
 |------|------|------|------|
-| 可交互站点（Interactable） | `Node2D` 继承 `Interactable` @abstract | 10 | 每个含 `Area2D` 检测子节点、`CollisionShape2D`（圆形） |
+| 可交互站点（Interactable） | `Node2D` + C# `Interactable` / `InteractionHandler` base pattern | 10 | 每个含 `Area2D` 检测子节点、`CollisionShape2D`（圆形） |
 | 玩家角色 | `CharacterBody2D` | 1 | `player.tscn`场景实例化 |
 | 房间边界碰撞体 | `StaticBody2D` + `CollisionShape2D`（矩形） | 4+ | 定义舱室 walkable areas |
 | 楼梯/梯子过渡区域 | `Area2D` | 1 | 玩家进入后 Y 轴移动改变楼层 |
@@ -376,7 +377,7 @@ S1 HUD 为只读显示层（Layer 3），所有元素 `focus_mode = Control.FOCU
 
 ### 动画约束与边界
 
-- 所有动画总时长（同一帧内并行动画）不超过 2.5s——避免浏览器 tab 后台时动画队列堆积
+- 所有动画总时长（同一帧内并行动画）不超过 2.5s——避免桌面失焦/暂停恢复时动画队列堆积
 - 遮罩动画使用 `CanvasModulate`（全局颜色乘算），不使用额外全屏 Sprite——节省一个 draw call
 - 货舱拼装动画期间，玩家移动冻结（`Rooted`），但其他站点仍可交互——避免"安装模块 = 卡住看动画"
 - `departure_locked` 期间看门狗超时（`departure_lock_duration * 3`）：强制中断动画、恢复 `landed`、写入错误日志（GDD #7 边缘情况）
