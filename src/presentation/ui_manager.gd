@@ -3,7 +3,6 @@
 ## Owns 12-screen state machine, single-slot modal stack, 4-layer input routing.
 ## Consumes data from all domain systems; does not own gameplay state.
 
-class_name UIManager
 extends Node
 
 enum Screen {

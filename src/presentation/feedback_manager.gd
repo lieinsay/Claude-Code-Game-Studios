@@ -4,7 +4,6 @@
 ## Vertical Slice system — MVP stub subscribes to signals
 ## but defers full implementation to Production Sprint 2+.
 
-class_name FeedbackManager
 extends Node
 
 ## Signals

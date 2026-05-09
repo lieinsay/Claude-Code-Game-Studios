@@ -4,7 +4,6 @@
 ## Owns repair conditions, state changes, and unlock results.
 ## repair_completed signal consumed by 4 cross-layer systems.
 
-class_name WorldRepair
 extends Node
 
 enum RepairState {
