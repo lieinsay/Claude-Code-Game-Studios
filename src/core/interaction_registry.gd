@@ -4,7 +4,6 @@
 ## Owns 5-state focus machine and dual-channel dispatch
 ## (interaction_used signal + handle_use() method call).
 
-class_name InteractionRegistry
 extends Node
 
 enum FocusState {

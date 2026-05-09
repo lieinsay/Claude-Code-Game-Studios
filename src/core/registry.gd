@@ -6,7 +6,6 @@
 ## Boot order: loaded first — all other systems depend on stable IDs.
 ## Phase 2: loads static content, emits registry_ready.
 
-class_name Registry
 extends Node
 
 # Content lifecycle states

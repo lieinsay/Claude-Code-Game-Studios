@@ -7,7 +7,6 @@
 ## Persistence serializes and restores it.
 ## REF: ADR-0003, control-manifest.md
 
-class_name Persistence
 extends Node
 
 # Domain state for snapshot readiness
