@@ -45,7 +45,7 @@
 |------|--------|
 | `design/gdd/systems-index.md` | Clean — Platform Pivot Note + Director Review Notes reflect desktop |
 | `design/registry/entities.yaml` | Clean — no platform assumptions |
-| `production/sprints/sprint-001-desktop-csharp-pivot.md` | Clean |
+| `production/session-state/platform-pivot-foundation-completion-2026-05-09.md` | Clean |
 | `production/epics/` (all 16 epics) | Mixed — many story files have gdscript code blocks and browser references (see §Production Epic Notes) |
 | `docs/architecture/adr-0002, 0005, 0010, 0015` | gdscript code examples present but marked as implementation illustrations |
 
@@ -118,7 +118,7 @@ when the browser tab is hidden, elapsed_time stops accumulating, and when the ta
 - `design/art/art-bible.md` — 仅在 Platform Pivot Note 有 Web 字眼
 - `design/ux/hub.md` — 清晰桌面 UX spec
 - `docs/architecture/control-manifest.md` — 明确禁止 browser-only requirements
-- `production/sprints/sprint-001-desktop-csharp-pivot.md` — 正确定义 pivot sprint
+- `production/session-state/platform-pivot-foundation-completion-2026-05-09.md` — 正确归档 pivot foundation completion
 - `design/gdd/local-save-world-state-persistence.md` §Historical Web Contract — 正确标注为 superseded
 
 ---

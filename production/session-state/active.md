@@ -26,34 +26,37 @@ Task: ✅ 平台转向复审完成 (CONCERNS — 0 blockers, 10 文件修复)
 
 **Verdict: CONCERNS (0 blockers, 6 warnings fixed, 4 nice-to-have fixed)**
 
-### 待续
+### 平台转向 Foundation Spike — 2026-05-09 完成
 
-- [ ] C# Foundation spike: migrate `Registry` and `Persistence`
-- [ ] Refresh remaining production epic/story notes that still assume Web/GDScript (N-04)
-- [ ] S001-06: Refresh production epic/story notes
+- [x] C# Foundation spike: migrated `SnapshotPackage`, `Registry`, and `Persistence`.
+- [x] C# parity runner expanded to SnapshotPackage + Registry + Persistence.
+- [x] Production epic index now states ADR-0019 as the active implementation contract and treats older GDScript/Web snippets as historical pseudocode.
+- [x] Renderer default recorded: Compatibility renderer remains the desktop MVP default; Forward+ is deferred until evidence justifies it.
+- [x] Legacy GDScript prototype files labeled in `src/LEGACY_GDSCRIPT.md`.
+- [x] Completion trace written: `production/session-state/platform-pivot-foundation-completion-2026-05-09.md`.
 
 
-## Current: Pre-Production — Platform Pivot — 2026-05-09
+## Current: Pre-Production — Desktop C# Foundation Ready — 2026-05-09
 
 ### Platform / Language Pivot 进行中
 
 - [x] Decision accepted: abandon Web MVP target and move to Godot 4.6.2 .NET + C# desktop-first.
 - [x] ADR-0019 created: `docs/architecture/adr-0019-desktop-csharp-platform-pivot.md`.
 - [x] Technical preferences updated: C# primary, Windows desktop primary, Web lifecycle constraints superseded.
-- [x] Sprint 001 created: `production/sprints/sprint-001-desktop-csharp-pivot.md`.
+- [x] Temporary Sprint 001 pivot task created and completed; durable completion trace now lives in `production/session-state/platform-pivot-foundation-completion-2026-05-09.md`.
 - [x] Interim .NET 8 solution created: `CloudWeaverVoyage.sln`, `CloudWeaverVoyage.csproj`.
 - [x] Godot command registered: `D:\Godot\godot.cmd` and user PATH shim `~\.local\bin\godot.cmd`.
 - [x] Verification: `godot --version` PASS (`4.6.2.stable.mono.official.71f334935`).
 - [x] Verification: `godot --headless --path . --quit` PASS when allowed to write normal user cache/log files.
 - [x] Verification: `godot --headless --path . --build-solutions --quit` PASS when allowed to write normal user cache/log files.
-- [x] C# Foundation spike started: `SnapshotPackage` migrated with parity runner.
+- [x] C# Foundation spike completed: `SnapshotPackage`, `Registry`, and `Persistence` migrated with parity runner coverage.
 - [x] C# build/validation docs updated in `tests/README.md`.
 - [x] Active design contracts refreshed for desktop C# pivot: `systems-index`, `game-concept`, platform shell, local save/persistence, UI/HUD, accessibility, art bible, Hub UX, and affected GDDs with Web lifecycle/storage/performance assumptions.
 - [x] Verification: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors).
-- [x] Verification: `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS (5/5 checks).
+- [x] Verification: `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS (20/20 checks).
 - [x] Generate/verify C# project files with the Godot .NET CLI.
-- [ ] Continue C# Foundation spike: migrate `Registry` and `Persistence`.
-- [ ] Refresh remaining production epic/story notes that still assume Web/GDScript.
+- [x] Continue C# Foundation spike: migrate `Registry` and `Persistence`.
+- [x] Refresh remaining production epic/story notes at the index level: ADR-0019 governs active implementation; older story snippets are historical pseudocode until individually refreshed.
 
 ### P2 已完成
 

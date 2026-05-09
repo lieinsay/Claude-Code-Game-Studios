@@ -298,7 +298,7 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 
 ### Open Questions
 
-- **Godot .NET 桌面工程验证是否完整？** 通过 Sprint 001 验证 `.csproj` / `.sln`、`dotnet build`、桌面/headless 启动和 C# Foundation spike。
+- **Godot .NET 桌面工程验证是否完整？** 已通过平台转向 Foundation 完成记录验证 `.csproj` / `.sln`、`dotnet build`、桌面/headless 启动路径和 C# Foundation spike。
 - **飞艇内部横版行走手感是否成立？** 通过技术验证原型验证舱室移动、交互、模块切换和状态显示。
 - **地图式探索是否足够有张力？** 通过灰盒测试验证安全线与高风险线的对照。
 - **修复反馈是否足够强？** 通过 1 个设施修复后的永久航线/NPC/视觉变化验证。

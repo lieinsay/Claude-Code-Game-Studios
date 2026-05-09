@@ -4,6 +4,15 @@
 > **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
 > **ADR Coverage**: 17 Accepted + 2 Deferred (ADR-0019 platform pivot active)
 
+## Active Implementation Contract
+
+ADR-0019 governs all new implementation work. Existing story files may still
+contain GDScript snippets, Web lifecycle references, or browser-storage examples
+from the original planning pass; treat those as historical pseudocode unless a
+story has been explicitly refreshed for C#. Implement systems in desktop
+Godot .NET/C# by default and translate old examples through the current
+technical preferences and control manifest.
+
 ## Foundation Layer
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |

@@ -934,14 +934,14 @@ graph TB
         F9["document-index.md<br/>GDScript Web-first → C# Desktop-first"]
     end
 
-    subgraph Clean["已确认清洁 (7 文件)"]
+    subgraph Clean["已确认清洁 / 已归档 (7 文件)"]
         C1["systems-index.md"]
         C2["ui-hud-chart-interface.md"]
         C3["accessibility-requirements.md"]
         C4["art-bible.md"]
         C5["ux/hub.md"]
         C6["control-manifest.md"]
-        C7["sprint-001-desktop-csharp-pivot.md"]
+        C7["platform-pivot-foundation-completion-2026-05-09.md"]
     end
 
     DECISION --> Fixed

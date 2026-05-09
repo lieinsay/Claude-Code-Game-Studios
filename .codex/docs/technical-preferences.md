@@ -6,7 +6,7 @@
 
 - **Engine**: Godot 4.6.2 .NET
 - **Language**: C# (.NET, primary)
-- **Rendering**: Desktop 2D. Start with Compatibility renderer for prototype parity; evaluate Forward+ after the C# Foundation spike.
+- **Rendering**: Desktop 2D. Compatibility renderer is the desktop MVP default for prototype parity and stable 2D behavior; evaluate Forward+ only after a visual/performance story produces evidence that it improves the MVP.
 - **Physics**: Godot 2D physics for MVP; Jolt 3D default is not relevant unless 3D systems are introduced later.
 
 ## Input & Platform
