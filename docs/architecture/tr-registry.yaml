@@ -431,7 +431,7 @@ requirements:
   - id: TR-ui-004
     system: ui-hud-chart-interface
     gdd: design/gdd/ui-hud-chart-interface.md
-    requirement: "WCAG AA contrast compliance; browser tab freeze recovery"
+    requirement: "WCAG AA contrast compliance; desktop window focus recovery"
     created: 2026-05-05
     revised: ""
     status: active

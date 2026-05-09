@@ -2,11 +2,58 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: P3 原型
-Task: ✅ P3 全场景验证 PASS — 场景 A (122.35ms) + 场景 B 存档往返 + 场景 C 信号扇出 (49/49 checks)
+Feature: 平台转向复审
+Task: ✅ 平台转向复审完成 (CONCERNS — 0 blockers, 10 文件修复)
 <!-- /STATUS -->
 
-## Current: Pre-Production — 2026-05-09
+### 平台转向复审 — 2026-05-09 完成
+
+- [x] `/review-all-gdds` — PASS (前次: 0 blockers, 16/16 Approved)
+- [x] 平台转向复审报告: `design/gdd/platform-pivot-review-2026-05-09.md`
+- [x] 修复 6 个 WARNING 级 Web/GDScript 残余 (10 个文件):
+  - `platform-session-shell.md`: `beforeunload` → 桌面退出请求
+  - `player-movement-interaction.md`: gdscript IDL 标注 + AC-WEB → AC-FOCUS + 浏览器 API → 窗口事件
+  - `airship-hub.md`: pagehide/WebGL 2/Web 引擎/Web 约束 → 桌面等价物
+  - `navigation-route-risk.md`: AC-18 browser tab → game window focus
+  - `exploration-scavenge-scenario.md`: EC-11-20/21 visibilitychange/localStorage → 桌面等价物
+  - `local-save-world-state-persistence.md`: iframe/cookie → 桌面存储策略
+- [x] 修复 4 个 NICE-TO-HAVE:
+  - `game-concept.md`: Web 性能预算 → Compatibility 桌面性能预算
+  - `tr-registry.yaml`: browser tab freeze → desktop window focus
+  - `document-index.md`: GDScript Web-first → C# Desktop-first
+  - `document-index.md`: 平台转向 Mermaid 架构图 + 修正文件总览
+- [x] `docs/document-index.md` 更新 — 平台转向架构图 + 审查记录
+
+**Verdict: CONCERNS (0 blockers, 6 warnings fixed, 4 nice-to-have fixed)**
+
+### 待续
+
+- [ ] C# Foundation spike: migrate `Registry` and `Persistence`
+- [ ] Refresh remaining production epic/story notes that still assume Web/GDScript (N-04)
+- [ ] S001-06: Refresh production epic/story notes
+
+
+## Current: Pre-Production — Platform Pivot — 2026-05-09
+
+### Platform / Language Pivot 进行中
+
+- [x] Decision accepted: abandon Web MVP target and move to Godot 4.6.2 .NET + C# desktop-first.
+- [x] ADR-0019 created: `docs/architecture/adr-0019-desktop-csharp-platform-pivot.md`.
+- [x] Technical preferences updated: C# primary, Windows desktop primary, Web lifecycle constraints superseded.
+- [x] Sprint 001 created: `production/sprints/sprint-001-desktop-csharp-pivot.md`.
+- [x] Interim .NET 8 solution created: `CloudWeaverVoyage.sln`, `CloudWeaverVoyage.csproj`.
+- [x] Godot command registered: `D:\Godot\godot.cmd` and user PATH shim `~\.local\bin\godot.cmd`.
+- [x] Verification: `godot --version` PASS (`4.6.2.stable.mono.official.71f334935`).
+- [x] Verification: `godot --headless --path . --quit` PASS when allowed to write normal user cache/log files.
+- [x] Verification: `godot --headless --path . --build-solutions --quit` PASS when allowed to write normal user cache/log files.
+- [x] C# Foundation spike started: `SnapshotPackage` migrated with parity runner.
+- [x] C# build/validation docs updated in `tests/README.md`.
+- [x] Active design contracts refreshed for desktop C# pivot: `systems-index`, `game-concept`, platform shell, local save/persistence, UI/HUD, accessibility, art bible, Hub UX, and affected GDDs with Web lifecycle/storage/performance assumptions.
+- [x] Verification: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors).
+- [x] Verification: `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS (5/5 checks).
+- [x] Generate/verify C# project files with the Godot .NET CLI.
+- [ ] Continue C# Foundation spike: migrate `Registry` and `Persistence`.
+- [ ] Refresh remaining production epic/story notes that still assume Web/GDScript.
 
 ### P2 已完成
 
@@ -108,7 +155,7 @@ Task: ✅ P3 全场景验证 PASS — 场景 A (122.35ms) + 场景 B 存档往�
 | 2 | 缺少 interaction-patterns.md | 🟡 MEDIUM | ✅ 已创建 — 10 个交互模式提取完成 |
 | 3 | 缺少 architecture-traceability.md | 🟡 MEDIUM | ✅ 已创建 — 54 TR 全覆盖矩阵 |
 | 4 | 4 个延期 ADR 无时间表 | 🟡 MEDIUM | ADR-0013, ADR-0014, ADR-0015 已清除; 剩余 0016-0017 Production 前完成 |
-| 5 | Dual-focus + Web 生命周期未测试 | 🟡 MEDIUM | Sprint 1 Spike 任务 |
+| 5 | Desktop focus / pause lifecycle needs C# validation | 🟡 MEDIUM | Sprint 1 Spike 任务 |
 | 6 | 仅 1 个示例测试 | 🟡 LOW | 随 Foundation/Core 实现同步编写 |
 | 7 | 无视觉参考/Mood Board | 🟡 LOW | 概念美术开始前整理 |
 | 8 | UX Specs 未交叉引用 Art Bible | 🟡 LOW | 早期 Pre-Production 轻量对齐 |

@@ -2,8 +2,9 @@
 
 > **Status**: Approved (CD-GDD-ALIGN: APPROVE WITH NOTES — 1 blocker resolved)
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-02
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 未知带来温和压力
+> **Platform Pivot Note**: ADR-0019 supersedes browser timer/lifecycle assumptions. Active voyage implementation targets desktop Godot .NET/C#; tab-throttle edge cases should be read as desktop pause/resume timing requirements.
 
 ## Overview
 
@@ -670,7 +671,7 @@ elapsed_time 用 float，每帧累加 delta。抵达判定的 epsilon = 0.01s，
 
 **AC-17**: For `route.storm-cut-01` (medium, critical hull): `T_voyage_base = 120 / 0.75 = 160s`, `T_check = 12 × 0.8 = 9.6s`, `N_checks = ⌊160/9.6⌋ = 16`.
 
-**AC-18**: The encounter timer uses engine delta, not wall-clock time — when the browser tab is hidden, `elapsed_time` stops accumulating, and when the tab is restored, encounters queue and settle without being missed.
+**AC-18**: The encounter timer uses engine delta, not wall-clock time — when the game window loses focus or is minimized, `elapsed_time` stops accumulating, and when the window is restored, encounters queue and settle without being missed.
 
 **AC-19**: The voyage progress bar displays `min(100%, elapsed_time / T_voyage × 100)` and is clamped to 100% — arrival is detected when `elapsed_time >= T_voyage - epsilon` where `epsilon = 0.01s`.
 

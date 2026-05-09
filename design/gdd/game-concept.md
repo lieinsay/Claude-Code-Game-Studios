@@ -2,17 +2,19 @@
 
 *Created: 2026-04-26*
 *Status: Draft*
+*Last Updated: 2026-05-09*
 
 > **Creative Director Review (CD-PILLARS)**: CONCERNS accepted 2026-04-26. Pillar 2 wording revised and Pillar 2 / Pillar 3 responsibility boundary clarified.
 > **Art Director Review (AD-CONCEPT-VISUAL)**: CONCERNS accepted 2026-04-26. Visual identity anchor selected with platform and scope caveats.
 > **Technical Director Review (TD-FEASIBILITY)**: CONCERNS accepted 2026-04-26. Web-first 2D technical boundaries added.
 > **Producer Review (PR-SCOPE)**: OPTIMISTIC accepted 2026-04-26. Scope reduced to a 2D Web-first official lightweight product.
+> **Platform Pivot Note (2026-05-09)**: ADR-0019 supersedes the original Web-first product target. Active MVP implementation is desktop Godot 4.6.2 .NET/C# with keyboard/mouse input; older browser-specific scope notes are historical constraints unless restated by refreshed architecture/design docs.
 
 ---
 
 ## Elevator Pitch
 
-《云海织航》是一款 Web-first 2D 空海探索与移动家园游戏。玩家在只有空中陆地和无尽海面的世界里经营一艘可步行飞艇，通过整备、航线规划、探索搜撤和设施修复，把孤立的空港与村镇重新连接起来。
+《云海织航》是一款桌面 2D 空海探索与移动家园游戏。玩家在只有空中陆地和无尽海面的世界里经营一艘可步行飞艇，通过整备、航线规划、探索搜撤和设施修复，把孤立的空港与村镇重新连接起来。
 
 ---
 
@@ -21,12 +23,12 @@
 | Aspect | Detail |
 | ---- | ---- |
 | **Genre** | 2D 开放式探索 / 移动家园 / 轻搜撤 / 世界修复 |
-| **Platform** | Web-first：桌面浏览器优先（Chrome / Edge / Firefox）；移动浏览器为后续实验目标；PC 完整版后续扩展 |
+| **Platform** | Desktop-first：Godot 4.6.2 .NET/C#；Windows 桌面优先；其他桌面平台后续评估；Web 不再是 MVP 目标 |
 | **Target Audience** | 喜欢创造、探索、低压规划、基地成长和世界反馈的中度玩家 |
 | **Player Count** | 单人优先 |
-| **Session Length** | 30-90 分钟；Web 首发版本目标为 45-90 分钟短体量正式产品 |
-| **Monetization** | 待定；Web 首发可按免费试玩、付费轻量版或后续 PC 扩展再评估 |
-| **Estimated Scope** | Medium (5-9 months, solo / small team, Web-first 2D official lightweight version); PC-later full version is Large (1-2+ years, scope dependent) |
+| **Session Length** | 30-90 分钟；桌面 MVP 目标为 45-90 分钟短体量正式产品 |
+| **Monetization** | 待定；桌面 MVP 可按免费试玩、付费轻量版或后续扩展再评估 |
+| **Estimated Scope** | Medium (5-9 months, solo / small team, desktop-first 2D official lightweight version); broader full version is Large (1-2+ years, scope dependent) |
 | **Comparable Titles** | 《方舟：生存进化》、Dark and Darker、《杀戮尖塔》、《永劫无间》 |
 
 ---
@@ -236,7 +238,7 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 | **Age range** | 16-35 |
 | **Gaming experience** | 中度玩家；喜欢生存、建造、探索、轻经营或短循环策略 |
 | **Time availability** | 平日 30-60 分钟，周末可进行 90 分钟左右完整 Session |
-| **Platform preference** | 桌面浏览器首发；后续 PC 版扩展 |
+| **Platform preference** | Windows 桌面优先；Godot 4.6.2 .NET/C#；其他桌面平台后续评估 |
 | **Current games they play** | 生存建造、轻搜撤、基地经营、探索类独立游戏、短循环策略游戏 |
 | **What they're looking for** | 能创造和居住的移动家园、低压但有取舍的探索、能看见世界变好的反馈 |
 | **What would turn them away** | 高频 PvP、强限时、恶劣惩罚、大量同质刷子内容、无反馈跑腿任务 |
@@ -247,24 +249,24 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 
 | Consideration | Assessment |
 | ---- | ---- |
-| **Recommended Engine** | Web-first 阶段待定。由 `$setup-engine` 根据桌面浏览器交付约束、2D 工作流、包体、存档、性能和团队熟悉度决定。PC-later 可重新评估技术栈，不承诺与 Web 版同工程。 |
-| **Key Technical Challenges** | 浏览器加载和性能、2D 横版飞艇 Hub 与地图式探索切换、本地存档和恢复、音频激活、后台切页恢复、世界状态持久化。 |
+| **Recommended Engine** | Godot 4.6.2 .NET / C#。ADR-0019 是当前权威平台决策；Web-first 引擎选择问题已关闭。 |
+| **Key Technical Challenges** | Godot .NET/C# 工程与构建、2D 横版飞艇 Hub 与地图式探索切换、桌面本地存档和恢复、窗口焦点/暂停/退出恢复、世界状态持久化。 |
 | **Art Style** | 2D 风格化；横版飞艇剖面 + 俯视/地图式航线与探索。 |
-| **Art Pipeline Complexity** | Medium：自定义 2D 场景、舱室、地图符号、角色/伙伴和状态变化；首发必须服从 Web 性能预算。 |
+| **Art Pipeline Complexity** | Medium：自定义 2D 场景、舱室、地图符号、角色/伙伴和状态变化；首发必须服从 Compatibility renderer 桌面性能预算。 |
 | **Audio Needs** | Moderate：飞艇环境声、航线风声、危险提示、修复反馈、轻量音乐层次。 |
 | **Networking** | None for launch. |
-| **Content Volume** | Web 首发：1 个 Hub、2 个模块、1 个起始据点、2 条航线、1 个探索点、1 个伙伴功能、1 个永久修复反馈。 |
+| **Content Volume** | 桌面 MVP：1 个 Hub、2 个模块、1 个起始据点、2 条航线、1 个探索点、1 个伙伴功能、1 个永久修复反馈。 |
 | **Procedural Systems** | 首发不做重度程序生成。未知感来自手工设计的风险标记、航线状态和探索点取舍。 |
 
 ### Technical Boundaries
 
-- Web 首发是正式轻量产品，不是纯 Demo。
-- 桌面浏览器优先；移动浏览器只作为后续实验目标。
-- 不承诺 Web 与 PC 共用同一代码库或同一工程。
+- 桌面 MVP 是正式轻量产品，不是纯 Demo。
+- Windows 桌面优先；Linux / macOS 或 Web 仅作为后续独立评估目标。
+- 不承诺未来 Web 与桌面 C# MVP 共用同一代码库或同一工程。
 - 不做连续开放世界、无缝空海航行或大型动态载具模拟。
 - 不做持续 NPC 生态、复杂贸易网络、实时多人或高频网络同步。
-- 浏览器后台挂起、音频激活、本地存档、首屏加载和重新聚焦行为是设计约束，不是后期实现细节。
-- 首发前必须验证：加载、性能、存档恢复、音频、切页恢复、整备到修复的完整闭环。
+- 桌面窗口失焦、暂停/退出请求、本地存档、首屏加载和重新聚焦行为是设计约束，不是后期实现细节。
+- 首发前必须验证：加载、性能、存档恢复、音频、窗口焦点/暂停恢复、整备到修复的完整闭环。
 
 ---
 
@@ -278,14 +280,14 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 
 ### Technical Risks
 
-- **Web 交付稳定性**：加载、帧率、内存、存档、音频和切页恢复必须在早期验证。
+- **桌面交付稳定性**：加载、帧率、内存、存档、音频和窗口焦点/暂停恢复必须在早期验证。
 - **2D 视角切换一致性**：横版飞艇与俯视/地图式探索需要清晰交互和叙事衔接。
 - **世界状态持久化**：设施修复、航线变化和 NPC/视觉状态必须可靠保存。
 
 ### Market Risks
 
 - **定位需要解释**：它不是标准生存、不是标准搜撤、也不是纯经营，宣传必须抓住“飞艇家园 + 世界复连”。
-- **Web 玩家耐心有限**：首屏加载、引导和第一轮闭环必须足够快。
+- **桌面玩家耐心有限**：首屏加载、引导和第一轮闭环必须足够快。
 - **轻量版体量较小**：如果完成感不足，可能被当成 Demo 而非正式产品。
 
 ### Scope Risks
@@ -296,7 +298,7 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 
 ### Open Questions
 
-- **Web-first 引擎选择是什么？** 通过 `$setup-engine` 评估 Godot、Unity、纯 Web/Canvas/WebGL 或其他方案。
+- **Godot .NET 桌面工程验证是否完整？** 通过 Sprint 001 验证 `.csproj` / `.sln`、`dotnet build`、桌面/headless 启动和 C# Foundation spike。
 - **飞艇内部横版行走手感是否成立？** 通过技术验证原型验证舱室移动、交互、模块切换和状态显示。
 - **地图式探索是否足够有张力？** 通过灰盒测试验证安全线与高风险线的对照。
 - **修复反馈是否足够强？** 通过 1 个设施修复后的永久航线/NPC/视觉变化验证。
@@ -331,7 +333,7 @@ One-line visual rule: 每个画面都要像一个正在被修补、扩建、重�
 
 | Tier | Content | Features | Timeline |
 | ---- | ---- | ---- | ---- |
-| **Technical Prototype** | 1 个简化 Hub、1 个简化探索点 | 加载、性能、输入、音频、存档、切页恢复、最短闭环验证 | 2-4 weeks |
+| **Technical Prototype** | 1 个简化 Hub、1 个简化探索点 | 加载、性能、输入、音频、存档、窗口焦点/暂停恢复、最短闭环验证 | 2-4 weeks |
 | **Greybox Vertical Slice** | 1 个 Hub、1 条航线、1 个探索点、1 个材料、1 个修复结果 | 整备 -> 出航 -> 搜撤 -> 带回 -> 修复 | 4-8 weeks after prototype |
 | **Web Official Lightweight Version** | 1 个 Hub、2 个模块、1 个起始据点、2 条航线、1 个探索点、1 个伙伴功能、1 个永久修复反馈 | 可交付短体量产品、完整 Session、存档恢复、基础引导、Web 发布包装 | 5-9 months total, solo / small team |
 | **PC-Later Full Vision** | 1 个区域群、4-6 个空港/村镇、10-15 条航线、3-5 个探索/副本类型、3-6 个深关系伙伴 | 更完整的飞艇成长、世界阶段、伙伴关系、视觉表现和内容体量 | Large (1-2+ years, team and tech dependent) |

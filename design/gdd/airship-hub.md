@@ -2,10 +2,11 @@
 
 > **Status**: Approved（三轮复审 + CD-GDD-ALIGN 通过 2026-05-01；lean re-review 确认 2026-05-02 — 2 项建议修正，无阻断项）
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-01
+> **Last Updated**: 2026-05-09
 > **Creative Director Review (CD-GDD-ALIGN)**: APPROVED 2026-05-01 — 阻断项修复完成，软机械后果采纳，建议批准
 > **Design Review**: NEEDS REVISION 2026-04-30 (Round 1) → NEEDS REVISION 2026-04-30 (Round 2) → REVISED 2026-05-01 (Round 3)
 > **Implements Pillar**: 飞艇是家，不只是载具; 规划先于冒险
+> **Platform Pivot Note**: ADR-0019 supersedes Web/browser lifecycle assumptions. Active Hub implementation targets desktop Godot .NET/C#; WebGL/browser performance notes are conservative 2D performance guidance only until refreshed.
 
 ## Overview
 
@@ -244,9 +245,9 @@ The `departure_lock_timer` formula is defined as:
 **状态转换中断：**
 
 - **If 存档在 `departure_locked` 期间触发**: 捕获状态为 `departure_locked`，但 `departure_locked` 不是稳定边界。重载时回到 `landed`，出航确认丢失（安全降级）。
-- **If 浏览器 `pagehide` 在 `arrival` 动画中触发**: best-effort 存档捕获 `in_transit`。重载时重新触发 arrival 动画，然后转入 `landed`。
+- **If 桌面窗口失焦/最小化在 `arrival` 动画中触发**: best-effort 存档捕获 `in_transit`。重载时重新触发 arrival 动画，然后转入 `landed`。
 - **If `departure_locked` 动画期间游戏崩溃且无存档**: 重启后 Hub 回到最近稳定存档（通常 `landed`）。出航确认丢失——可接受。
-- **If `departure_locked` 持续超过 `departure_lock_duration * 3`（看门狗超时）**: 动画系统未发射完成信号（着色器挂起、资源加载失败等）。看门狗强制恢复 Hub 为 `landed`、解除移动冻结、写入错误日志并显示"出航中断"提示。这是单线程 Web 环境的必要最后防线——不依赖外部信号完成。
+- **If `departure_locked` 持续超过 `departure_lock_duration * 3`（看门狗超时）**: 动画系统未发射完成信号（着色器挂起、资源加载失败等）。看门狗强制恢复 Hub 为 `landed`、解除移动冻结、写入错误日志并显示"出航中断"提示。这是单线程渲染环境的必要最后防线——不依赖外部信号完成。
 
 **零值/空值/极限值：**
 
@@ -346,7 +347,7 @@ The `departure_lock_timer` formula is defined as:
 - **出航锁定动画**：确认出航后 ~2s 的过渡动画——舱门模式：舱门开启+引擎点火；舵轮模式：舵轮特写+船体转向。动画播放期间移动冻结。
 - **返航抵达动画**：到达目的地后 ~1-2s 的着陆/停靠动画，然后 Hub 恢复控制。视觉上传达"到家了"的安稳感。
 - **状态指示灯**：模块接口用颜色编码显示安装状态（绿=正常、黄=损伤、灭=空槽）。站点可用/不可用通过视觉高亮/灰化区分。
-- **风格约束**：服从"航路修复主义"锚点——修补痕迹可见、拼接感、旧物改造感。不追求崭新或完美。服从 WebGL 2 / Compatibility renderer 性能预算——2D sprite + 少量 shader，不做大量粒子或后处理。
+- **风格约束**：服从"航路修复主义"锚点——修补痕迹可见、拼接感、旧物改造感。不追求崭新或完美。服从 Compatibility renderer 桌面性能预算——2D sprite + 少量 shader，不做大量粒子或后处理。
 
 ### 音频需求
 
@@ -356,13 +357,13 @@ The `departure_lock_timer` formula is defined as:
 - **模块拼装**：舱室拼装到船体时的机械锁定/铆接声——短促、有力、一次性的确认音。
 - **站点交互**：每个站点 Use 时轻量反馈音（点击/确认音），不抢注意力。
 - **返航抵达**：引擎减速 + 着陆缓冲声——与 departure_lock 的开场音形成闭环。
-- **音量约束**：所有 Hub 音频不盖过背景音乐，MVP 不做空间音频（Web 约束）。
+- **音量约束**：所有 Hub 音频不盖过背景音乐，MVP 不做空间音频以控制实现复杂度。
 
 ### 性能策略
 
-- **纹理图集打包**：Hub 场景所有 sprite 纹理必须合并为图集，目标 draw call ≤ 10。未合图状态下每个 sprite 为独立 canvas item，draw call 可达 20-30，WebGL 2 渲染管线压力线性增长。
+- **纹理图集打包**：Hub 场景所有 sprite 纹理必须合并为图集，目标 draw call ≤ 10。未合图状态下每个 sprite 为独立 canvas item，draw call 可达 20-30，Compatibility 渲染管线压力线性增长。
 - **场景资源驻留**：Hub 场景在前往航图/探索期间保持内存驻留（`ResourceLoader` 不卸载），仅切换活动场景。避免返航时完整重载造成的 2-5s 等待。代价为 Hub 资产（~50-65MB）与航图/探索场景资产共享内存预算。
-- **首屏加载**：Hub 为首个玩家可见场景，所有 Hub 资产 + Godot Web 引擎（~15-20MB 压缩）需在首屏可见前下载。需提供加载进度指示。
+- **首屏加载**：Hub 为首个玩家可见场景，所有 Hub 资产 + Godot 桌面运行时需在首屏可见前加载。需提供加载进度指示。
 
 ## UI Requirements
 

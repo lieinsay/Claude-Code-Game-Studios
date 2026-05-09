@@ -2,8 +2,9 @@
 
 > **Status**: In Review (Revision 2 applied 2026-05-03 — 5 blockers resolved: B1 F-11-04 batch extract_carried_to_storage atomicity, B2 build_threat_context environmental guard, B3 F-11-01 empty pool guard, B4 registry compute_loss max(1→0) sync, B5 4 GM commands added; R1 knowledge-gated descriptions added — dual-variant description_enhanced gated on #6 has_relevant_intel())
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-05-03
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 未知带来温和压力
+> **Platform Pivot Note**: ADR-0019 supersedes browser storage/lifecycle assumptions. Active exploration implementation targets desktop Godot .NET/C#; browser-tab edge cases should be read as desktop pause/quit/restart recovery requirements until individually refreshed.
 
 ## Overview
 
@@ -707,14 +708,14 @@ intel_yield(intel_point_id):
 
 ### E7. 浏览器特定
 
-**EC-11-20: 页面失去焦点 / 长时间闲置**
-- 触发：标签页 visibilitychange → hidden，或 >30 分钟无交互
-- 处理：探索无全局计时器，无惩罚。(a) 搜索动画中 → 跳过动画直接显示结果（F-11-01 在动画前已计算），(b) 撤离读条中 → 读条中断并重置（计时器在后台不可靠），需重新撤离，(c) ARRIVING 中 → 跳过描述文本直接进入 EXPLORING，(d) EXPLORING → 恢复为 idle。
+**EC-11-20: 窗口失焦 / 长时间闲置**
+- 触发：桌面窗口失焦、最小化，或 >30 分钟无交互
+- 处理：探索无全局计时器，无惩罚。(a) 搜索动画中 → 跳过动画直接显示结果（F-11-01 在动画前已计算），(b) 撤离读条中 → 读条中断并重置（计时器在暂停期间不可靠），需重新撤离，(c) ARRIVING 中 → 跳过描述文本直接进入 EXPLORING，(d) EXPLORING → 恢复为 idle。
 - 玩家感知：部分感知。撤离读条被打断（有反馈），搜索动画被跳过（无反馈）。
 - 依赖：#2
 
-**EC-11-21: localStorage 配额满——持久化失败**
-- 触发：localStorage.setItem() 抛出 QuotaExceededError
+**EC-11-21: 磁盘空间不足——持久化失败**
+- 触发：持久化写入失败（磁盘满或权限不足）
 - 处理：HUD 显示非阻塞警告"⚠ 存储空间不足，探索进度可能无法保存。"30 秒内不重复显示。DEPARTED 结算写入失败时按 EC-11-03 重试逻辑处理。探索仍可继续但不保证恢复。
 - 玩家感知：是。HUD 持久警告图标。
 - 依赖：#3

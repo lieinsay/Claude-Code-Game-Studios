@@ -2,7 +2,7 @@
 
 > **最后更新**: 2026-05-09
 > **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 49 Verification Checks + 39 Tests + SessionShell Boot Chain)
-> **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置, project.godot 已初始化)
+> **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
 > **源代码**: 15 个 .gd 文件 (9 Autoload + SessionShell + Bootstrap + Data Class + Abstract Base) + 7 个测试文件 (39 test cases + 49 verification checks) + 1 个 .tscn 场景文件
@@ -173,7 +173,7 @@ graph TB
     end
 
     subgraph Platform["🖧 Platform 层"]
-        ENGINE["Godot 4.6.2 + GDScript + Web Export"]
+        ENGINE["Godot 4.6.2 + .NET + C# Desktop"]
     end
 
     %% Foundation 依赖
@@ -900,6 +900,8 @@ graph LR
 | 2026-05-04 | `/review-all-gdds` Phase 5 — 最终裁决 | PASS WITH NOTES | [phase5-report](../production/session-state/phase5-final-verdict.md) |
 | 2026-05-04 | `/create-architecture` — 主架构 | TD+LP 双签收 | [architecture.md](architecture/architecture.md) |
 | 2026-05-05 | `/gate-check technical-setup` — Technical Setup→Pre-Production | CONCERNS — 4 阻塞项已清除 | 本文档第三节 |
+| 2026-05-09 | `/review-all-gdds` 重新验证 — 16 GDDs cross-review | PASS (0 blockers, 15 warnings) | [rerun-report](../design/gdd/gdd-cross-review-2026-05-08-rerun.md) |
+| 2026-05-09 | **平台转向复审** — Web/GDScript 残余清理 | **CONCERNS** (0 blockers, 6 warnings 已修复) | [platform-pivot-review](../design/gdd/platform-pivot-review-2026-05-09.md) |
 | 2026-05-05 | ADR 批量 Acceptance — 12/12 Accepted | 通过 | 全部 12 ADR Status→Accepted |
 | 2026-05-05 | TR Registry 填充 — 54 TR 条目 | 通过 | [tr-registry.yaml](architecture/tr-registry.yaml) |
 | 2026-05-05 | `/architecture-review` — 架构完整性审计 | CONCERNS (65.4% TR coverage, Combat #12 gap) | [architecture-review-2026-05-05](architecture/architecture-review-2026-05-05.md) |
@@ -910,6 +912,45 @@ graph LR
 | 2026-05-08 | ADR-0014 Settlement/Market + 6 Stories (#14) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-08 | ADR-0015 Partner/Relationships + 6 Stories (#15) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-08 | #16 UI/HUD 6 Stories (3 Logic + 3 Integration) | 通过 | [active.md](../production/session-state/active.md) |
+
+### 平台转向复审 — 修正文件总览 (2026-05-09)
+
+```mermaid
+graph TB
+    subgraph ADR0019["ADR-0019 权威平台决策"]
+        DECISION["Desktop Godot 4.6.2 .NET / C#"]
+        SUPERSEDE["Supersedes ADR-0006 Web Constraints"]
+    end
+
+    subgraph Fixed["已修复 (10 文件)"]
+        F1["platform-session-shell.md<br/>beforeunload → 桌面退出请求"]
+        F2["player-movement-interaction.md<br/>gdscript IDL 标注 + AC-WEB → AC-FOCUS"]
+        F3["airship-hub.md<br/>pagehide → 桌面失焦 · WebGL 2 → Compatibility"]
+        F4["navigation-route-risk.md<br/>browser tab → game window focus"]
+        F5["exploration-scavenge-scenario.md<br/>visibilitychange → 桌面失焦 · localStorage → 磁盘满"]
+        F6["local-save-persistence.md<br/>iframe/cookie → 桌面存储策略"]
+        F7["game-concept.md<br/>Web 性能预算 → Compatibility 桌面预算"]
+        F8["tr-registry.yaml<br/>browser tab freeze → desktop focus recovery"]
+        F9["document-index.md<br/>GDScript Web-first → C# Desktop-first"]
+    end
+
+    subgraph Clean["已确认清洁 (7 文件)"]
+        C1["systems-index.md"]
+        C2["ui-hud-chart-interface.md"]
+        C3["accessibility-requirements.md"]
+        C4["art-bible.md"]
+        C5["ux/hub.md"]
+        C6["control-manifest.md"]
+        C7["sprint-001-desktop-csharp-pivot.md"]
+    end
+
+    DECISION --> Fixed
+    SUPERSEDE --> Fixed
+```
+
+> **Verdict**: CONCERNS — 0 blockers, 6 WARNING 已修复, 4 NICE-TO-HAVE 已修复。
+> 平台转向核心目标已达成。C# 实现者可从 GDD 和架构文档中无障碍理解桌面契约。
+> 详见 [platform-pivot-review-2026-05-09.md](../design/gdd/platform-pivot-review-2026-05-09.md)
 
 ---
 
@@ -1170,11 +1211,11 @@ graph TB
   tests/           ██████░░░░░░░░░░░░░░   7 文件  (Unit ×3 + Integration ×3 + Verification ×1, 39 cases + 49 checks)
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
-  📊 总计: ~383 个文档/源代码/测试文件 + 12 个配置/数据文件
+  📊 总计: ~384 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
   📋 Epic/Story: 16/18 Epic 完成 (115 Stories) | Feature 层 5/5 ✅ | Presentation 层 1/3
-  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot | 测试: 7 文件 39 用例 + 49 verification checks | P3 场景 A/B/C 全 PASS
-  ✅ Pre-Production P3 — 架构原型完成 | Foundation + Core + Feature 全部 Epic 分解完成
+  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot (P3 原型) | 目标: C# via ADR-0019
+  ✅ Pre-Production P3 — 架构原型完成 | 平台转向复审: CONCERNS (0 blockers, 6 warnings 已修复)
 ```
 
 ---
@@ -1202,6 +1243,7 @@ graph TB
 - [x] **Feature 层 Epic/Story 分解** — 5/5 Epic (30 Stories): #11/#12/#13/#14/#15
 - [x] **Presentation 层 #16 UI/HUD** — 1/3 Epic (6 Stories)
 - [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 39 Tests + 49 Verification Checks (2026-05-09)
+- [x] **平台转向复审** — Web/GDScript 残余清理: 10 个文件修复, 0 blockers, CONCERNS verdict (2026-05-09)
 - [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器 / WebGL 2)
 - [x] **源代码架构文档** — `docs/document-index.md` §五 (Autoload 依赖图 + Boot Chain + Persistence 管道 + 信号拓扑 + 测试架构)
 - [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS

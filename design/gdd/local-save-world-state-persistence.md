@@ -2,19 +2,21 @@
 
 > **Status**: In Design
 > **Author**: User + Codex
-> **Last Updated**: 2026-04-28
+> **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 世界会回应照料; 飞艇是家，不只是载具
 > **System Index**: `design/gdd/systems-index.md`
 > **Creative Director Review (CD-GDD-ALIGN)**: APPROVED 2026-04-28
-> **Design Review**: APPROVED WITH CAVEATS 2026-04-28; revision passes address formula ownership, Snapshot Package contract, Web persistence invariants, SaveLocked / WriteLocked reachability, atomic promotion, Web lifecycle, UX/focus requirements, performance telemetry, and testability.
+> **Design Review**: APPROVED WITH CAVEATS 2026-04-28; revision passes address formula ownership, Snapshot Package contract, persistence invariants, SaveLocked / WriteLocked reachability, atomic promotion, lifecycle, UX/focus requirements, performance telemetry, and testability.
+
+> **Platform Pivot Note**: ADR-0019 supersedes this GDD's original Web persistence assumptions. Active MVP persistence targets desktop Godot 4.6.2 .NET/C# using `user://` / local filesystem semantics behind a C# service boundary. Browser storage, IndexedDB, JavaScriptBridge, `pagehide`, and Web quota requirements below are historical unless restated here as desktop storage / focus / quit requirements.
 
 ## Overview
 
-`本地存档与世界状态持久化` 是《云海织航》的连续性保障系统。它负责把资源、模块、航线状态、修复状态、村镇/市场状态、探索状态、设置和安全继续点序列化到本地存档，并在 Start / Continue / Suspend / Resume 等会话节点中验证、恢复或锁定这些数据。这个系统不拥有运行时世界状态，也不替代各领域系统的状态管理；它只负责保存领域系统声明的可持久化快照、恢复到最近安全继续点、处理版本迁移，并在内容 ID、Schema 或浏览器存储能力不可靠时给出安全结果。玩家不会直接“玩”这个系统，但会通过它相信自己的飞艇、修复过的灯塔、已稳定的航线和带回的材料不会因为刷新页面、关闭标签页或隔天回来而消失；世界会等他们回来，照料过的痕迹会继续存在。
+`本地存档与世界状态持久化` 是《云海织航》的连续性保障系统。它负责把资源、模块、航线状态、修复状态、村镇/市场状态、探索状态、设置和安全继续点序列化到本地存档，并在 Start / Continue / Suspend / Resume 等会话节点中验证、恢复或锁定这些数据。这个系统不拥有运行时世界状态，也不替代各领域系统的状态管理；它只负责保存领域系统声明的可持久化快照、恢复到最近安全继续点、处理版本迁移，并在内容 ID、Schema 或桌面存储能力不可靠时给出安全结果。玩家不会直接“玩”这个系统，但会通过它相信自己的飞艇、修复过的灯塔、已稳定的航线和带回的材料不会因为退出应用、崩溃重启或隔天回来而消失；世界会等他们回来，照料过的痕迹会继续存在。
 
 ## Player Fantasy
 
-玩家不应该感觉自己在管理存档，而应该感觉这个空海世界会稳稳接住自己的离开与归来。关闭标签页、刷新页面、隔天回来，或从一次浏览器恢复中继续时，玩家期待看到的不是一串技术状态，而是熟悉的飞艇仍然可靠，带回的材料仍被安放，已修复的灯塔仍亮着，已稳定的航线仍然成立。
+玩家不应该感觉自己在管理存档，而应该感觉这个空海世界会稳稳接住自己的离开与归来。退出应用、重启游戏、隔天回来，或从一次窗口恢复中继续时，玩家期待看到的不是一串技术状态，而是熟悉的飞艇仍然可靠，带回的材料仍被安放，已修复的灯塔仍亮着，已稳定的航线仍然成立。
 
 这个系统服务的是一种克制的安全感：玩家相信自己的照料不会白费，世界不会因为现实中的短暂离开而散开。保存提示、继续入口、恢复提示和锁定原因可以被玩家直接看见，但它们的语气必须像可靠的港口记录，而不是冷冰冰的数据管理界面。理想体验是“返航不是重来，而是续上生活”：玩家重新进入时，飞艇像家一样完整接住他们，世界也保留他们曾经修补、连接和照料过的痕迹。
 
@@ -33,20 +35,20 @@
 7. 所有持久写入必须走 `Staging -> Verify -> Promotion`。新快照完成写入、读回验证和内容兼容校验前，旧的 `Safe Continue Point` 必须保持不变。
 8. 设置、游戏进度和继续点摘要必须逻辑分离。设置写入失败不得污染游戏进度；游戏进度损坏不得删除可用设置。
 9. 存档系统只在稳定边界创建安全继续点：Hub 停靠点、航线选择提交后、探索/搜撤结算后、修复结果提交后、交易库存落定后、设置应用确认后。
-10. `Suspend`、`pagehide`、标签页隐藏或关闭前事件只能触发 best-effort 快照请求；只有写入完成并读回验证通过，才能升级为新的 `last_verified_checkpoint`。
+10. `Suspend`、窗口失焦、最小化、退出请求或关闭前事件只能触发 best-effort 快照请求；只有写入完成并读回验证通过，才能升级为新的 `last_verified_checkpoint`。
 11. 如果某个领域系统报告 `Blocked`、`Not Ready` 或处于未结算中间态，存档系统必须跳过本次 promotion，并继续保留上一个安全点。
-12. 浏览器存储能力的权威判定由本系统拥有。平台壳/平台适配层只提供原始 `persistence_probe` 信号和浏览器生命周期信号；本系统计算 `storage_capability = PersistentAvailable / WriteLocked / EphemeralOnly`，并通过 `query_continue_state` 与保存状态查询返回给平台壳呈现。平台壳不得根据本地文件存在、浏览器 API 存在或旧探测结果重算该能力。
+12. 桌面存储能力的权威判定由本系统拥有。平台壳/平台适配层只提供原始 `persistence_probe` 信号和桌面生命周期信号；本系统计算 `storage_capability = PersistentAvailable / WriteLocked / EphemeralOnly`，并通过 `query_continue_state` 与保存状态查询返回给平台壳呈现。平台壳不得根据本地文件存在、单次 API 成功或旧探测结果重算该能力。
 13. `EphemeralOnly` 是降级 fallback，不是正常战役模式。它只允许临时试航、构建检查、教程级低承诺操作和不会改变正式世界状态的演示动作；不得允许玩家提交世界修复、长期资源积累、关系/村镇变化、飞艇家园布置或任何会被玩家理解为“世界记住了”的正式照料结果。
 14. 损坏与版本不兼容必须分开处理：损坏进入 `Quarantined`；可解析但当前不能恢复的版本/内容不兼容进入 `Locked` 或迁移流程。
 15. 迁移必须显式、单向、可中止。迁移在 staging 副本上执行，成功并验证后 promotion；失败时原工件保持锁定，不被改写。
 16. `SaveLocked`、`PreservedLocked`、`RecoveryRequired` 必须携带原因码，不能互相替代。
 17. `continue_availability` 的最终判定由本系统拥有。`平台与会话壳` 只能通过 `query_continue_state` 读取并呈现 `Enabled` / `PreservedLocked` / `Hidden`，不得用本地公式重新计算或覆盖该结果。
 18. 每个领域系统导出的 `Snapshot Package` 必须满足本 GDD 的最小契约；缺失契约字段、版本字段、稳定 ID 解析结果或领域错误码时，不得进入 promotion。
-19. `Staging -> Verify -> Promotion` 是语义契约，不依赖最终存储后端。无论 ADR 选择 Godot `user://`、JavaScript bridge、IndexedDB 包装层或混合方案，实现都必须保证：旧 `Safe` 在新工件完成写入、读回、校验和兼容验证前保持不变。
-20. `pagehide`、`visibilitychange hidden`、浏览器关闭和后台挂起永远不是正确性路径，只能触发 best-effort 请求；任何未完成或未读回验证的写入都不得成为 `last_verified_checkpoint`。
+19. `Staging -> Verify -> Promotion` 是语义契约，不依赖最终存储后端。ADR-0019 的活动后端为 Godot `user://` / 本地文件系统封装；实现必须保证：旧 `Safe` 在新工件完成写入、读回、校验和兼容验证前保持不变。
+20. 窗口失焦、最小化、退出请求、进程关闭和后台挂起永远不是正确性路径，只能触发 best-effort 请求；任何未完成或未读回验证的写入都不得成为 `last_verified_checkpoint`。
 21. 自动备份是独立工件，不得与主继续点共用同一记录 ID。主档损坏且备份可验证时，备份提升必须走显式 `BackupPromoting -> Safe` 路径，并把旧主档标记为 `Quarantined`。
 22. 最近安全继续点摘要必须是玩家可理解的世界事实摘要，至少包含最近安全地点/会话边界、一个关键世界变化或飞艇状态、保存时间；不得只显示内部版本、路径、checksum 或 slot metadata。
-23. MVP 必须记录开发诊断指标：快照字节数、可用配额余量、序列化耗时、写入耗时、读回耗时、checksum 耗时、promotion 结果、失败原因码、pagehide best-effort 结果和备份提升结果。
+23. MVP 必须记录开发诊断指标：快照字节数、可用磁盘/预算余量、序列化耗时、写入耗时、读回耗时、checksum 耗时、promotion 结果、失败原因码、退出/挂起 best-effort 结果和备份提升结果。
 24. 飞艇家园相关快照的最小可恢复范围包括：当前 Hub 停靠点/入口、舱室或生活空间稳定 ID、玩家可见的储物/模块/伙伴驻点状态、关键交互锚点状态，以及能表达“这仍是我的家”的最低生活痕迹。具体摆放、装饰和扩展字段由 `飞艇家园 Hub` GDD 细化。
 25. 设置是独立 `settings` snapshot artifact，游戏进度是独立 `progress` snapshot artifact。二者必须有独立版本、完整性校验、最近已验证指针和恢复路径。
 26. 会话中途进入 `SaveLocked` 时，存档系统必须立即打开写屏障：后续世界修复、长期资源积累、关系/村镇变化、飞艇家园布置和任何会被玩家理解为永久照料结果的提交都必须暂停、拒绝或转入明确临时模式。玩家必须看到 Return Title、Retry Save Capability 或 Enter Temporary Flight 之类的安全选择；旧 `Safe` 继续点不得被覆盖。
@@ -76,7 +78,7 @@
 
 - `domain_id` 必须唯一；同一保存工件中同一领域不能提供两个互相竞争的包。
 - `payload` 中不得包含 Node、Resource 实例、对象句柄、场景路径、显示名、翻译文本、hover/selection、动画中段或临时表现状态。
-- `payload_allowed_types_only` 的设计层白名单为：bool、int、finite float、string、enum string、stable ID string、array、dictionary/null marker；array 与 dictionary 只能递归包含同一白名单类型。GDScript / Godot `Variant` 实现不得夹带 `Object`、`Node`、`Resource`、`Callable`、`Signal`、`RID`、`NodePath`、`PackedScene`、活引用或任何引擎句柄。最终 API 类型可由 ADR / Control Manifest 收窄，但不得放宽本白名单。
+- `payload_allowed_types_only` 的设计层白名单为：bool、int、finite float、string、enum string、stable ID string、array、dictionary/null marker；array 与 dictionary 只能递归包含同一白名单类型。C# DTO / Godot `Variant` bridge 实现不得夹带 `Object`、`Node`、`Resource`、`Callable`、`Signal`、`RID`、`NodePath`、`PackedScene`、活引用或任何引擎句柄。最终 API 类型可由 ADR / Control Manifest 收窄，但不得放宽本白名单。
 - dictionary key 必须是 string，key 必须使用 canonical bytewise ascending order 编码；array 保持领域系统声明顺序；dictionary/array 禁止循环引用和共享引用语义；float 禁止 `NaN`、`Infinity`、`-Infinity`；null 只能使用明确的 `null` marker，不能用缺字段暗示 null。
 - 所有 string 必须先规范化为 Unicode NFC，再编码为 UTF-8；stable ID 与 dictionary key 必须额外满足 ASCII lowercase `kind.slug` / snake-case 风格约束。规范化后重复的 dictionary key 必须让 `snapshot_package_validity=false`。
 - float 必须以 IEEE-754 binary64 语义进入 canonical codec，并以规范化十进制文本或等价固定宽度二进制编码写入；`-0.0` 必须规范化为 `0.0`。空 payload 允许存在，但必须显式编码为空 dictionary，不能省略 `payload` 字段。
@@ -100,7 +102,7 @@
 | `probe_generation` | Platform adapter + Persistence | 最近一次 capability probe 的 ID、时间戳、触发来源和 TTL。 |
 | `backup_generation` | Persistence | 最近可验证自动备份 generation；不等同于 current。 |
 
-`current_generation` 只能在 `promotion_success=true` 后切换。`manifest_pointer` 更新失败时必须继续指向旧 generation。`last_verified_checkpoint` 只能指向已验证 generation，不能指向 `Staging`、未完成 `Verify`、pagehide-only marker 或失败迁移副本。
+`current_generation` 只能在 `promotion_success=true` 后切换。`manifest_pointer` 更新失败时必须继续指向旧 generation。`last_verified_checkpoint` 只能指向已验证 generation，不能指向 `Staging`、未完成 `Verify`、shutdown-only marker 或失败迁移副本。
 
 generation 必须单调递增或使用可比较的 commit sequence；启动恢复时若 manifest pointer 指向的 generation 低于已记录的 `last_verified_checkpoint.generation`、与 checksum/summary 不匹配，或看起来是旧 pointer replay / rollback，必须拒绝该 pointer，保留最近已验证 generation 或进入 `RecoveryRequired`。
 
@@ -113,7 +115,19 @@ generation 必须单调递增或使用可比较的 commit sequence；启动恢�
 | `settings` Quarantined，`progress` Safe 可用 | 只重置或回退设置；Continue 仍按 progress 计算。 |
 | `progress` Quarantined，settings Safe 可用 | Continue 不得 `Enabled`，但 settings 可保留。 |
 
-### Web Persistence Contract
+### Desktop Persistence Contract
+
+ADR-0019 的活动实现路径为桌面 Godot .NET/C#。本节原始 Web contract 中关于 custom HTML shell、JS shim、IndexedDB、BFCache、`visibilitychange` 和 `pagehide` 的要求不再约束 MVP；保留它们只用于解释旧评审语境。活动桌面要求如下：
+
+| Contract Area | Requirement |
+|---|---|
+| Storage boundary | C# persistence service owns all snapshot write/read/verify/promotion operations behind a narrow Godot-facing API. |
+| Desktop file boundary | Use `user://` / local filesystem paths through Godot .NET-compatible APIs or a wrapped C# file service. Every promotion still requires write -> flush/close -> reopen/readback -> checksum before pointer swap. |
+| Lifecycle boundary | Focus loss, minimize, pause, and quit requests are best-effort triggers only. Correctness comes from previously verified safe checkpoints, not from last-moment shutdown saves. |
+| Capability probe | The persistence system computes `PersistentAvailable` / `WriteLocked` / `EphemeralOnly` from real write/read/checksum probes and migration checks. |
+| Atomicity | Existing `Safe` remains valid until the new generation has fully passed verify and promotion. |
+
+#### Historical Web Contract (Superseded By ADR-0019)
 
 最终持久化后端由 ADR 决定，但本 GDD 要求以下后端无关语义：
 
@@ -228,7 +242,7 @@ The `quota_reserve_ok` formula is defined as:
 | `readback_copy_bytes` | `R` | int | >= 0 | 读回 verify 时同时驻留的副本字节数。 |
 | `checksum_buffer_bytes` | `C` | int | >= 0 | checksum 计算需要的缓冲字节数。 |
 | `serialization_transient_bytes` | `T` | int | >= 0 | 序列化过程最坏瞬时分配字节数。 |
-| `backend_persistence_inflation_factor` | `F` | float | >= 1.0 | IndexedDB、JS bridge、base64、metadata 包装等导致的持久化膨胀系数。 |
+| `backend_persistence_inflation_factor` | `F` | float | >= 1.0 | manifest、backup、base64 或 metadata 包装等导致的持久化膨胀系数。 |
 | `backend_working_set_inflation_bytes` | `K` | int | >= 0 | 后端适配层、JS bridge 或编码包装引入的额外工作集字节数。 |
 | `quota_reserve_multiplier` | `X` | float | >= 0 | 追加安全余量倍数，MVP 默认为 0.5。 |
 | `available_storage_bytes` | `A` | int | >= 0 | 平台壳/适配层估算出的可用持久存储字节数。 |
@@ -418,11 +432,11 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 
 ## Edge Cases
 
-- **If 底层浏览器存储 API 看起来可用，但新写入配额、reserve 或 write roundtrip probe 失败，且旧档 read probe 仍通过**: `storage_capability = WriteLocked`。旧 `Safe` 可继续验证和呈现，但新持久保存进入 `SaveLocked` 写屏障。
+- **If 底层桌面存储 API 看起来可用，但新写入 reserve 或 write roundtrip probe 失败，且旧档 read probe 仍通过**: `storage_capability = WriteLocked`。旧 `Safe` 可继续验证和呈现，但新持久保存进入 `SaveLocked` 写屏障。
 - **If fresh install 没有旧档，但存储后端、配额、reserve 和 write roundtrip 全部通过**: `existing_archive_read_class=NotApplicable`，`storage_capability = PersistentAvailable`。不得因为没有旧 manifest 就进入 `EphemeralOnly`。
-- **If 隐私模式、站点策略、平台壳策略、底层 API 缺失、存储后端不可调用或旧档存在但 read probe 失败**: `storage_capability = EphemeralOnly`。当前页面只能进入临时试航或无保存模式，`continue_availability = Hidden`，且不得生成新的持久 Continue。
-- **If `pagehide`、标签页关闭、失焦或隐藏发生时，任何可持久化领域系统仍处于 `Blocked`、`Not Ready` 或未结算中间态**: 只允许 best-effort 保存请求，不得 promotion；最近一次已验证的 `Safe` 继续点保持不变。
-- **If `pagehide` 触发时 staging 已开始写入，但 Verify 尚未完成**: 本次 staging 作废，不得升级为 `last_verified_checkpoint`；系统回落到原来的 `Safe` 或 `Dirty` 状态。
+- **If 平台壳策略、底层 API 缺失、存储路径不可调用、权限不足或旧档存在但 read probe 失败**: `storage_capability = EphemeralOnly`。当前会话只能进入临时试航或无保存模式，`continue_availability = Hidden`，且不得生成新的持久 Continue。
+- **If 退出请求、关闭、失焦或隐藏发生时，任何可持久化领域系统仍处于 `Blocked`、`Not Ready` 或未结算中间态**: 只允许 best-effort 保存请求，不得 promotion；最近一次已验证的 `Safe` 继续点保持不变。
+- **If 退出/挂起触发时 staging 已开始写入，但 Verify 尚未完成**: 本次 staging 作废，不得升级为 `last_verified_checkpoint`；系统回落到原来的 `Safe` 或 `Dirty` 状态。
 - **If 写入成功但读回校验失败**: 该次 promotion 失败，旧 `Safe` 保持不变；若写入后的主工件无法确认与读回一致，则该工件进入 `Quarantined`，不得静默修补。
 - **If 启动恢复时，已有档案的读回失败、checksum 不通过、结构解析失败或 manifest pointer 不可信**: 该工件进入 `Quarantined` 并触发 backup failover；只有备份提升完成后才能重新输出 `Enabled`，否则 `continue_availability=Hidden` 或 `PreservedLocked`，不能当作可恢复进度。
 - **If 旧档需要迁移，且迁移链完整，staging / verify / promotion 全部成功**: `migration_outcome = Upgraded`；旧工件不被直接覆盖，升级后的副本成为新的 `Safe`。
@@ -432,7 +446,7 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - **If 设置写入失败但进度写入成功，或进度写入失败但设置写入成功**: 失败的一侧必须独立回滚，另一侧保持最近已验证值，二者不得互相删除、覆盖或连带进入 `Quarantined`。
 - **If 主档损坏，但自动备份满足完整性、版本兼容和稳定 ID 解析**: 进入 `BackupPromoting`，备份提升为唯一可用 `Safe`，主档进入 `Quarantined`，继续入口按备份状态重新计算；提升结果必须写入诊断摘要。
 - **If 主档损坏，且自动备份不存在或备份也不满足恢复条件**: 主档进入 `Quarantined`，`backup_failover_outcome = NoUsableBackup`，外部 Continue 不得显示为 `Enabled`。
-- **If 会话处于 `EphemeralOnly` 临时模式**: 允许玩家在当前页面内临时试航、检查构建或体验非正式流程；不得提交世界修复、长期资源积累、关系/村镇变化或飞艇家园布置。退出、刷新、关闭后进度视为不可恢复，且 `Continue` 必须保持 `Hidden`。
+- **If 会话处于 `EphemeralOnly` 临时模式**: 允许玩家在当前桌面进程内临时试航、检查构建或体验非正式流程；不得提交世界修复、长期资源积累、关系/村镇变化或飞艇家园布置。退出或关闭后进度视为不可恢复，且 `Continue` 必须保持 `Hidden`。
 - **If 玩家在已有 `Safe` 继续点存在时选择新游戏**: 必须创建新的会话上下文；旧继续点在新会话第一次成功 promotion 前保持原样。若新会话失败、取消或返回标题，旧档不得被删除或覆盖。
 
 ## Dependencies
@@ -458,24 +472,24 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 | Knob | Default / MVP Intent | Safe Range | Too Low / Too Strict | Too High / Too Loose |
 |---|---|---|---|---|
 | `autosave_stable_boundary_only` | true | true | false 会允许中间态保存，增加坏档风险 | 不适用；MVP 固定为 true |
-| `backup_artifact_count` | 1 automatic backup | 1-2 | 无备份时主档损坏后无法回退 | 备份过多增加 Web 存储压力 |
+| `backup_artifact_count` | 1 automatic backup | 1-2 | 无备份时主档损坏后无法回退 | 备份过多增加磁盘写入和恢复复杂度 |
 | `quota_reserve_multiplier` | 0.5x encoded memory artifact bytes, minimum 512 KiB | 0.25-1.0 | staging、备份、读回副本或迁移副本可能挤爆配额/内存 | 过高会过早进入 `WriteLocked` |
-| `backend_persistence_inflation_factor` | 1.5 | 1.0-3.0 | 低估 IndexedDB / JS bridge / base64 / wrapper 开销 | 过高会过早进入 `WriteLocked` |
-| `backend_working_set_inflation_bytes` | 256 KiB | 0-2 MiB | 低估 JS bridge 或编码包装临时分配 | 过高会过早阻止保存 |
-| `staging_write_timeout_seconds` | 3s | 1-8s | 正常 Web 写入可能被过早判失败 | 玩家离开/恢复时等待过久 |
+| `backend_persistence_inflation_factor` | 1.0 | 1.0-2.0 | 低估 manifest / metadata / backup wrapper 开销 | 过高会过早进入 `WriteLocked` |
+| `backend_working_set_inflation_bytes` | 256 KiB | 0-2 MiB | 低估编码包装临时分配 | 过高会过早阻止保存 |
+| `staging_write_timeout_seconds` | 3s | 1-8s | 正常桌面写入可能被过早判失败 | 玩家离开/恢复时等待过久 |
 | `snapshot_encode_budget_ms` | 16ms target, 50ms warning | 8-100ms | 预算过严会误报正常低端机 | 预算过宽会让保存卡顿难定位 |
 | `checksum_budget_ms` | 8ms target, 30ms warning | 4-60ms | 大快照容易误报 | checksum 成为主线程卡顿源 |
-| `readback_verify_budget_ms` | 20ms target, 100ms warning | 10-150ms | Web 存储抖动下误报 | 恢复/保存反馈显得迟钝 |
+| `readback_verify_budget_ms` | 20ms target, 100ms warning | 10-150ms | 桌面磁盘抖动下误报 | 恢复/保存反馈显得迟钝 |
 | `diagnostic_report_max_kb` | 32 KB copyable report | 8-128 KB | 太小会截断有用诊断 | 太大会增加复制与字符串构建成本 |
 | `readback_verify_required` | true | true | false 会让“写入请求”伪装成“保存成功” | 不适用；MVP 固定为 true |
-| `minimum_save_interval_seconds` | 5s between committed saves | 2-15s | 频繁写入造成浏览器存储压力 | 太久会让稳定边界后的进度迟迟不落盘 |
-| `pagehide_marker_budget_ms` | 20ms marker/flush only, no success promise | 0-50ms | 完全不尝试会错过已准备 marker | 过度依赖会错误承诺关闭前强保存并伤害 BFCache |
+| `minimum_save_interval_seconds` | 5s between committed saves | 2-15s | 频繁写入造成磁盘与备份压力 | 太久会让稳定边界后的进度迟迟不落盘 |
+| `shutdown_marker_budget_ms` | 20ms marker/flush only, no success promise | 0-50ms | 完全不尝试会错过已准备 marker | 过度依赖会错误承诺关闭前强保存 |
 | `continue_validation_strictness` | strict | strict | 不严格会进入损坏或不兼容会话 | 不适用；MVP 固定为 strict |
 | `migration_retry_limit` | 1 explicit retry per launch | 0-3 | 迁移抖动没有重试机会 | 反复迁移可能增加损坏和误导 |
 | `diagnostic_detail_level` | player-safe summary + developer detail copy | low / medium / developer | 太低无法解释锁定原因 | 太高会把内部字段暴露给普通玩家 |
 | `ephemeral_warning_frequency` | before session start and on exit attempt | start-only / start+exit | 玩家可能误以为进度会保存 | 反复弹窗会破坏进入节奏 |
-| `max_snapshot_size_mb` | 2 MB MVP target | 1-8 MB | 太小会限制后续状态增长 | 太大增加 Web 存储失败和加载压力 |
-| `diagnostic_metrics_required` | true | true | false 会让 Web 存储问题难复现 | 不适用；MVP 固定为 true |
+| `max_snapshot_size_mb` | 2 MB MVP target | 1-8 MB | 太小会限制后续状态增长 | 太大增加磁盘写入、读回和加载压力 |
+| `diagnostic_metrics_required` | true | true | false 会让存档问题难复现 | 不适用；MVP 固定为 true |
 | `save_success_feedback_delay_ms` | 300ms minimum visible feedback | 150-800ms | 反馈闪过，玩家不信保存成功 | 停留太久显得打扰 |
 
 固定设计值：
@@ -483,7 +497,7 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - `autosave_stable_boundary_only = true`
 - `readback_verify_required = true`
 - `continue_validation_strictness = strict`
-- `pagehide` / `visibilitychange hidden` 永远不能承诺强保存完成
+- shutdown / suspend / focus-loss best-effort 永远不能承诺强保存完成
 - `EphemeralOnly` 永远不能生成持久 Continue，也不能被文案包装成完整可恢复的正常游玩
 - `diagnostic_metrics_required = true`
 
@@ -492,14 +506,14 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - encode、checksum 或 readback 超过 target 但低于 warning 时，保存仍可继续，但必须记录开发诊断 warning。
 - 任一阶段超过 warning 时，本次仍以正确性优先完成或失败，但下一次自动保存必须延后至少 `minimum_save_interval_seconds`，并在开发诊断中标记 `PERF_SAVE_BUDGET_EXCEEDED`。
 - 连续两次超过 warning 时，系统必须降低自动保存频率或提示开发诊断；不得把超预算写入包装成无问题的正常保存。
-- pagehide / suspend best-effort 路径不得同步构建完整可复制诊断报告，只记录固定大小结构化指标，报告文本按需生成。
+- shutdown / suspend best-effort 路径不得同步构建完整可复制诊断报告，只记录固定大小结构化指标，报告文本按需生成。
 
 保存热路径统计口径：
 
 - `save_hot_path_budget_ms` 由 encode + write + readback + checksum + promotion pointer update + structured diagnostics append 组成；MVP target 为 60ms，warning 为 180ms。
 - 预算按单次保存的 wall-clock duration 记录，同时保留各阶段耗时；性能验收使用开发构建最近 20 次稳定边界保存的 p95。
 - structured diagnostics 只能追加固定大小的标量、enum、reason code、generation ID、duration 和小型 metadata；不得同步字符串化完整报告，不得复制完整玩家存档 payload，不得在保存热路径分配超过 4 KiB 的诊断记录。`diagnostic_report_max_kb` 只限制按需复制报告，不属于保存热路径预算。
-- `pagehide` / suspend best-effort 不纳入稳定保存成功率，只记录是否发出请求、是否已有预编码 staging、是否在预算内完成轻量 flush。
+- shutdown / suspend best-effort 不纳入稳定保存成功率，只记录是否发出请求、是否已有预编码 staging、是否在预算内完成轻量 flush。
 
 ## Visual/Audio Requirements
 
@@ -509,7 +523,7 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 |---|---|---|---|
 | Stable autosave committed | 小型状态标记或短文本提示，确认“已保存”或等价语义；不遮挡操作 | 可选极短柔和确认音；必须可关闭 | High |
 | Staging started | 轻量保存中状态，不承诺已完成 | None | Medium |
-| Pagehide / suspend best-effort requested | 不显示“已保存成功”；若界面仍可见，只显示“正在保护最近进度”类语义 | None | High |
+| Shutdown / suspend best-effort requested | 不显示“已保存成功”；若界面仍可见，只显示“正在保护最近进度”类语义 | None | High |
 | EphemeralOnly session | 入口前显示清楚但不恐吓的“临时试航 / 本次不会留下正式进度”提示 | None or soft marker | High |
 | Continue Enabled | Continue 入口显示最近安全继续点摘要 | Optional soft confirm on selection | High |
 | Continue PreservedLocked | 锁定图标 + 原因摘要 + 可行动选项；强调“数据仍被保留” | No alarm; optional low warning tick | High |
@@ -563,7 +577,7 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 | Ephemeral Session Warning | 进入临时会话前确认 | “临时试航 / 本次不会留下正式进度”提示、继续临时试航、返回标题 |
 | RecoveryRequired Screen | 当前流程不能自动恢复时给玩家选择 | Retry、New Session、Return Title、备份恢复结果、迁移状态；默认焦点在 Retry，若 Retry 不可用则在 Return Title |
 | Migration Status | 显示旧档迁移进度和结果 | 使用 Player-Facing Translation Layer 文案显示检查中、已更新、已保留但不可继续、记录需检查；普通玩家界面不得直接显示 `Migrating`、`Upgraded`、`PreservedLocked`、`Quarantined` 内部状态名 |
-| Developer Save Diagnostics | 开发期排查存档问题 | 工件状态、reason code、metadata 摘要、迁移步骤、备份状态、快照字节数、配额余量、encode/write/readback/checksum 耗时、pagehide 结果、复制报告 |
+| Developer Save Diagnostics | 开发期排查存档问题 | 工件状态、reason code、metadata 摘要、迁移步骤、备份状态、快照字节数、存储余量、encode/write/readback/checksum 耗时、shutdown/suspend 结果、复制报告 |
 
 最近安全继续点摘要必须至少包含：
 
@@ -579,7 +593,7 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - 玩家选择 `New Session` 时，不得立即覆盖旧 `Safe` 继续点；UI 必须等新会话第一次成功 promotion 后才可把新档视为最近安全点。
 - `EphemeralOnly` 进入前必须有明确确认；确认按钮文案必须说明“临时试航 / 无保存继续”语义，不能写成普通 Start 或 Continue。
 - 保存成功提示只能在 `promotion_success = true` 后显示。
-- `pagehide` 或 `suspend_requested` 不能显示“保存成功”，除非读回验证已经完成。
+- shutdown marker 或 `suspend_requested` 不能显示“保存成功”，除非读回验证已经完成。
 - `SaveLocked` overlay 可见时，正式世界变更提交按钮、修复确认、长期资源落定、关系/村镇变化和飞艇家园布置提交必须禁用或转为临时预览；默认操作为 Retry Save Capability 或 Return Title，临时试航必须二次确认。
 - `SaveLocked` overlay 默认焦点为 Retry Save Capability；若当前 probe TTL 未过且重试不可用，默认焦点为 Return Title。Escape / Back 返回最近安全标题态，不关闭写屏障；live region 必须说明“旧安全记录仍被保留，新的正式进度现在不能可靠记录”。
 - 玩家从 `SaveLocked` 选择 Enter Temporary Flight 时，必须二次确认并调用 `enter_temporary_flight()`；进入后 `mode=EphemeralOnly`，不得继续显示普通保存成功或普通 Continue 语义。
@@ -615,10 +629,10 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - **GIVEN** `raw_persistent_api_ok=true`、`storage_backend_probe_ok=true`、`existing_archive_read_class=Readable` 或 `NotApplicable`、`policy_forces_ephemeral=false`，但 `quota_ok=false`、`quota_reserve_ok=false` 或 `write_roundtrip_ok=false`，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果必须是 `WriteLocked`。
 - **GIVEN** `raw_persistent_api_ok=false`、`storage_backend_probe_ok=false`、`existing_archive_read_class=Unreadable` 或 `policy_forces_ephemeral=true`，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果必须是 `EphemeralOnly`。
 - **GIVEN** fresh install 没有旧 manifest 或 continue artifact，且 `existing_archive_read_class=NotApplicable`、其他持久化探测全部通过，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果必须是 `PersistentAvailable`，不得因为无旧档输出 `EphemeralOnly`。
-- **GIVEN** 平台壳需要显示存储能力或 Continue 状态，**WHEN** 状态被呈现，**THEN** 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据浏览器 API、文件存在、旧 probe 或本地公式重新计算。
+- **GIVEN** 平台壳需要显示存储能力或 Continue 状态，**WHEN** 状态被呈现，**THEN** 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据桌面 API、文件存在、旧 probe 或本地公式重新计算。
 - **GIVEN** `quota_reserve_ok=false` 且 `existing_archive_read_class=Readable`，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果必须是 `WriteLocked`，旧 `Safe` 继续点不得被覆盖或隐藏。
 - **GIVEN** `quota_reserve_ok=false` 且 `existing_archive_read_class=Unreadable`，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果必须是 `EphemeralOnly`，不得显示可用持久 Continue。
-- **GIVEN** `OS.is_userfs_persistent()`、API presence 或 IndexedDB presence 返回可用，但当前嵌入上下文的真实 write/flush/readback/checksum roundtrip 未完成，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果不得是 `PersistentAvailable`。
+- **GIVEN** `user://` 路径、API presence 或文件存在返回可用，但真实 write/flush/readback/checksum roundtrip 未完成，**WHEN** 本系统计算 `storage_capability`，**THEN** 结果不得是 `PersistentAvailable`。
 
 ### Snapshot Package Validity
 
@@ -672,13 +686,13 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - **GIVEN** 主继续点 parse、structure、integrity、version 或 stable ID 任一检查失败，且没有备份或备份 parse、structure、integrity、version、stable ID 任一检查失败，**WHEN** 计算 `backup_failover_outcome`，**THEN** 结果必须是 `NoUsableBackup`，Continue 不得显示为 `Enabled`。
 - **GIVEN** `main_usable=true`，**WHEN** 计算 `backup_failover_outcome`，**THEN** 结果必须是 `NotNeeded`，且现有主 `Safe` 继续作为当前可用继续点。
 
-### Web Lifecycle And Degraded Modes
+### Desktop Lifecycle And Degraded Modes
 
-- **GIVEN** 页面进入 `pagehide` 或 `suspend_requested` 且 staging 正在进行但 verify 尚未完成，**WHEN** 页面关闭继续推进，**THEN** 系统可以发出 best-effort flush，但不得设置 `promotion_success=true`，不得替换 `last_verified_checkpoint`，不得阻塞页面关闭。
-- **GIVEN** `pagehide`、`visibilitychange hidden`、`beforeunload` 或 `unload` 触发，**WHEN** 尚无预编码 staging 可轻量 flush，**THEN** 系统不得启动新的完整序列化、迁移、备份提升或诊断文本生成。
-- **GIVEN** `pagehide`、`visibilitychange hidden`、`beforeunload` 或 `unload` 触发，**WHEN** 处理 lifecycle marker，**THEN** 系统不得启动 readback、checksum、full serialization、migration、backup promotion 或 diagnostics text formatting；只能使用已预编码 marker，且必须在 `pagehide_marker_budget_ms` 内放弃。
-- **GIVEN** Godot 启动完成前 JS shim 已收到 `visibilitychange hidden` 或 `pagehide`，**WHEN** Godot 平台适配层完成初始化，**THEN** 该缓存事件必须转为壳层 lifecycle token，不得丢弃。
-- **GIVEN** `pageshow.persisted=true` 或任意 suspend 后第一次 `pageshow`，**WHEN** 页面恢复，**THEN** capability probe 必须失效并重新探测，即使 TTL 尚未过期。
+- **GIVEN** 桌面退出请求或 `suspend_requested` 发生且 staging 正在进行但 verify 尚未完成，**WHEN** 应用关闭继续推进，**THEN** 系统可以发出 best-effort flush，但不得设置 `promotion_success=true`，不得替换 `last_verified_checkpoint`，不得阻塞关闭。
+- **GIVEN** 窗口失焦、最小化、系统暂停或退出请求触发，**WHEN** 尚无预编码 staging 可轻量 flush，**THEN** 系统不得启动新的完整序列化、迁移、备份提升或诊断文本生成。
+- **GIVEN** 窗口失焦、最小化、系统暂停或退出请求触发，**WHEN** 处理 lifecycle marker，**THEN** 系统不得启动 readback、checksum、full serialization、migration、backup promotion 或 diagnostics text formatting；只能使用已预编码 marker，且必须在 `shutdown_marker_budget_ms` 内放弃。
+- **GIVEN** Godot .NET 平台适配层在壳层完成初始化前收到 pause / quit / focus-lost 信号，**WHEN** 壳层完成初始化，**THEN** 该缓存事件必须转为壳层 lifecycle token，不得丢弃。
+- **GIVEN** 任意 suspend 后第一次 focus/resume，**WHEN** 窗口恢复，**THEN** capability probe 必须失效并重新探测，即使 TTL 尚未过期。
 - **GIVEN** 工件处于 `Staging` 或 `Verify`，**WHEN** UI 轮询保存状态，**THEN** UI 可以显示保存中或正在保护最近进度，但不得显示保存成功。
 - **GIVEN** `EphemeralOnly` 会话已确认进入，**WHEN** 玩家尝试提交世界修复、长期资源积累、关系/村镇变化或飞艇家园布置，**THEN** 系统必须拒绝正式提交，且 `continue_availability=Hidden`；任何临时预览都必须显式标记为非持久化，并且不得创建或修改正式世界状态快照。
 - **GIVEN** 会话中途进入 `SaveLocked`，**WHEN** 玩家尝试提交世界修复、长期资源积累、关系/村镇变化或飞艇家园布置，**THEN** 系统必须阻止正式提交并显示 Retry Save Capability / Return Title / Enter Temporary Flight 选择。
@@ -695,16 +709,16 @@ The `backup_failover_outcome` formula is scoped to `artifact_kind=progress` for 
 - **GIVEN** 最近安全继续点可用，**WHEN** Title / Ready Continue Entry 显示摘要，**THEN** 摘要必须包含最近安全边界、一个玩家可识别的世界事实、保存时间或相对时间，且不得只显示内部版本、路径、checksum 或 slot metadata。
 - **GIVEN** `quota_reserve_ok` 被计算，**WHEN** 系统估算持久存储和峰值工作集，**THEN** 必须输出 `required_bytes`、`peak_working_set_bytes`、`safety_margin_bytes`、`backend_persistence_inflation_factor`、`backend_working_set_inflation_bytes`、`available_storage_bytes` 和 `available_working_set_bytes`；任一必需项超出安全余量时不得返回 `PersistentAvailable`。
 - **GIVEN** `available_working_set_bytes` 无法由平台适配层提供，**WHEN** 计算 `quota_reserve_ok`，**THEN** 必须使用 16 MiB fallback，并在诊断中标记 `WORKING_SET_BUDGET_FALLBACK`。
-- **GIVEN** capability probe 已完成，**WHEN** probe TTL 过期、write failure、readback mismatch、quota failure、policy change 或 iframe/cookie policy change 发生，**THEN** 本系统必须让 probe 失效并重新探测；过期 probe 不得作为 `PersistentAvailable` 依据。
-- **GIVEN** 每次保存、迁移、恢复、备份提升或 capability probe 完成，**WHEN** 开发诊断摘要生成，**THEN** 摘要必须包含快照字节数、配额余量、encode/write/readback/checksum 耗时、promotion 结果、失败原因码、pagehide 结果和备份提升结果；保存热路径只能追加预分配、固定大小、allocation-free 的结构化记录，不得同步生成完整可复制文本报告。
+- **GIVEN** capability probe 已完成，**WHEN** probe TTL 过期、write failure、readback mismatch、quota failure、policy change 或平台存储策略变更（磁盘配额/权限/文件系统变更）发生，**THEN** 本系统必须让 probe 失效并重新探测；过期 probe 不得作为 `PersistentAvailable` 依据。
+- **GIVEN** 每次保存、迁移、恢复、备份提升或 capability probe 完成，**WHEN** 开发诊断摘要生成，**THEN** 摘要必须包含快照字节数、存储余量、encode/write/readback/checksum 耗时、promotion 结果、失败原因码、shutdown/suspend 结果和备份提升结果；保存热路径只能追加预分配、固定大小、allocation-free 的结构化记录，不得同步生成完整可复制文本报告。
 
 ## Open Questions
 
 | Question | Owner | Target | Resolution |
 |---|---|---|---|
-| Godot Web 导出最终通过哪一层实现持久化：Godot `FileAccess` / `user://` 路径，还是自定义 JavaScript bridge + 浏览器存储包装层，或两者混合？ | Technical Direction | ADR | Resolved for GDD: MVP 必须使用 custom HTML shell 或等价 JS shim 接入 `visibilitychange`、`pagehide`、`pageshow` 和 capability probe，并通过 Godot `JavaScriptBridge` / 平台适配层传给壳层。ADR 只决定底层存储后端细节；不得回退为纯 GDScript `user://` lifecycle blind path。 |
+| 桌面 C# 持久化最终通过哪一层实现：Godot `FileAccess` / `user://`、C# `System.IO` wrapper，还是二者分层？ | Technical Direction | ADR / Control Manifest | Resolved for GDD: MVP 使用桌面 Godot .NET/C# 路径；存档服务拥有 write/read/verify/promotion，平台壳只传递 focus/pause/quit/capability 信号，不直接执行 promotion。 |
 | 存档工件的具体格式采用 JSON、二进制、Resource、自定义容器，还是分层 manifest + payload？ | Technical Direction / Persistence Implementation | ADR | Resolved for GDD: 必须是分层 manifest + canonical encoded payload，自定义确定性 codec；禁止 raw `store_var` / `get_var` Variant blob 作为权威存档格式。ADR 可决定 JSON-like 或二进制编码，但必须满足本 GDD 的 canonical key、finite float、null、checksum 和 metadata 覆盖规则。 |
-| `Snapshot Package` 的最终 GDScript API 名称和具体类型如何命名？ | Architecture | Control Manifest / ADR | Open；最小字段、版本字段、状态字段和阻塞错误码契约已由本 GDD 定义。 |
+| `Snapshot Package` 的最终 C# API 名称和具体类型如何命名？ | Architecture | Control Manifest / ADR | Open；最小字段、版本字段、状态字段和阻塞错误码契约已由本 GDD 定义。 |
 | 存档迁移表由注册表、存档系统还是独立 migration module 提供具体数据？ | Technical Direction | ADR | Open；但本 GDD 已固定迁移所有权：本系统调度迁移、staging、verify、promotion 和 outcome；注册表只提供稳定 ID 生命周期、内容域版本和迁移提示。 |
 | Player-Facing Translation Layer 的最终中文文案、英文/本地化版本和界面布局由 UI/HUD GDD 还是 UX spec 最终定稿？ | UX / UI | UI GDD / UX spec | Open；但本 GDD 已固定普通玩家不得看到内部状态名，且 `SaveLocked`、`PreservedLocked`、`EphemeralOnly`、`Quarantined` 必须有可行动、非恐吓的玩家语义。 |
 | 自动备份是否允许玩家手动恢复，还是只作为系统内部回退？ | Product / UX | UX spec | Open；MVP 必须支持系统内部自动提升，手动恢复入口可由 UX spec 决定。 |

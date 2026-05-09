@@ -2,10 +2,11 @@
 
 > **Status**: Approved
 > **Author**: User + Claude Code
-> **Last Updated**: 2026-04-29
+> **Last Updated**: 2026-05-09
 > **Review Verdict**: APPROVED (re-review 2026-04-29)
 > **Implements Pillar**: 飞艇是家，不只是载具; 规划先于冒险; 未知带来温和压力
 > **System Index**: `design/gdd/systems-index.md`
+> **Platform Pivot Note**: ADR-0019 supersedes browser lifecycle assumptions. Active input implementation targets desktop Godot .NET/C#; lifecycle gates should be interpreted as shell-normalized desktop focus/pause/quit signals.
 
 ## Overview
 
@@ -159,9 +160,10 @@ collision_multiplier = 0.0 if actual_velocity.length() == 0 and intended_velocit
 
 #### Interactable Contract
 
-所有可交互对象必须继承 `Interactable` 基类（使用 Godot 4.5+ `@abstract` 装饰器）：
+所有可交互对象必须继承 `Interactable` 基类。以下为历史 IDL 草案（GDScript 语法），C# 实现使用 `abstract partial class` + `[Export]` 属性：
 
 ```gdscript
+# 历史 IDL 草案 — C# 实现参考: abstract partial class Interactable : Node2D
 class_name Interactable
 extends Node2D
 
@@ -468,7 +470,7 @@ The `use_gate` formula is defined as:
 - 本系统不拥有货币、库存、资源、修复、市场、模块安装、探索奖励、战斗、剧情或存档结果。
 - 本系统不打开领域 UI；它只发送 `interaction_used`，由领域系统决定是否打开 UI。
 - 本系统不做自动寻路、不跨场景保持焦点、不跨房间远程交互。
-- 本系统不直接订阅浏览器 `visibilitychange`、`pagehide`、`focus` 等事件；这些都由 `平台与会话壳` 归一化后传入。
+- 本系统不直接订阅窗口焦点、暂停、退出等平台事件；这些都由 `平台与会话壳` 归一化后传入。
 - 下游系统可以拒绝 `Use`，但必须返回可解释的原因，不能让交互静默失败。
 
 ## Tuning Knobs
@@ -834,7 +836,7 @@ MVP 不做：
 
 - [ ] **AC-GATE-001 — Shell Gating**: `input_gate_state` 仅在 `平台与会话壳` 发出
   `input_gate_open` / `input_gate_closed` / `input_gate_reacquire` 信号时变化。验证：直接调用
-  浏览器 visibilitychange 事件不改变 gate state。
+  平台窗口焦点事件不改变 gate state。
 - [ ] **AC-GATE-002 — Reacquire Consumes First Input**: 当 `input_gate_state` 为 `InputReacquire`
   时，第一次键盘/鼠标输入不产生移动或 `Use`。验证：从后台恢复后，恢复帧的按键被消费，角色不动。
 - [ ] **AC-GATE-003 — Reacquire No Backfill**: 在 `InputReacquire` 期间按住移动键，切换到
@@ -949,15 +951,13 @@ MVP 不做：
   `ui_modal_blocked`。验证：打开菜单后查询 UI 数据，`world_focus_id` 仍为进入菜单前的目标 ID，
   但按 E 返回 `Blocked(ui_modal_blocked)`。
 
-### Web-Specific
+### Desktop Focus / Recovery
 
-- [ ] **AC-WEB-001 — Page Hide Stops Input**: 浏览器 `pagehide` / `visibilitychange=hidden` 时
-  （通过壳层转发），输入门关闭，移动和使用全部阻断。验证：切换浏览器标签后回来，角色仍在原位。
-- [ ] **AC-WEB-002 — No Audio Before Gesture**: 在用户首次点击/按键（壳层音频激活）之前，所有
-  语义事件仍正常发出但反馈系统不播放音频。验证：页面加载后不点击直接按移动键，有视觉反馈但无声音。
-- [ ] **AC-WEB-003 — Browser Restore With Mouse Over Target**: 浏览器 BFCache 恢复时若鼠标
-  正悬停在目标上，焦点仅在下一有效玩法帧刷新；恢复帧不自动执行 `Use`。验证：在目标上悬停 →
-  切换标签页 → 切回，角色不自动使用目标，焦点在恢复后重新获取。
+> **Platform Pivot Note**: 原 Web-Specific ACs (AC-WEB-001 ~ AC-WEB-003) 已改写为桌面等价物。浏览器 BFCache、AudioContext 手势要求等不再作为 MVP 约束。
+
+- [ ] **AC-FOCUS-001 — Window Focus Loss Stops Input**: 桌面窗口失焦/最小化时（通过壳层转发），输入门关闭，移动和使用全部阻断。验证：Alt+Tab 切走后回来，角色仍在原位。
+- [ ] **AC-FOCUS-002 — Window Restore With Mouse Over Target**: 桌面窗口恢复时若鼠标正悬停在目标上，焦点仅在下一有效玩法帧刷新；恢复帧不自动执行 `Use`。验证：在目标上悬停 → 最小化窗口 → 恢复，角色不自动使用目标，焦点在恢复后重新获取。
+- [ ] **AC-FOCUS-003 — Audio Activation Follows Shell**: 音频激活由平台壳层的音频门统一管理，本系统不拥有音频激活逻辑。验证：所有语义事件正常发出，无论音频是否激活。
 
 ## Open Questions
 
