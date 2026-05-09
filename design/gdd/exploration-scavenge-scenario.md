@@ -279,6 +279,7 @@ search_yield(sp_id, zone, state):
 - `draw_count[Uncommon] = {1,2}`, `random_int(1,2)` → 2
 - 不放回抽取 2 个条目，数量随机：cloud_crystal ×3, ancient_relay_part ×1
 - **结果**: `{items: [("cloud_crystal", 3), ("ancient_relay_part", 1)], is_empty: false, search_consumed: true}`
+- **repair_kit 额外判定**：主搜索产出结算后，独立判定 `random() < repair_kit_drop_rate` (MVP 值 0.25)。若通过，追加 `repair_kit ×1` 到产出列表。该判定与品质投骰无关——即使是 Poor 品质档位或空结果，仍可能产出 repair_kit。预期单次探索 1-2 个（6 搜索点 × 0.25 = 1.5 期望值）。
 
 ---
 
@@ -771,6 +772,7 @@ intel_yield(intel_point_id):
 | 11 | `search_points_per_zone` | dict | 总和 4–10 | {A:1, B:1, C:2, D:2} 共 6 | 各区域搜索点分布。数量越多单次探索可搜刮越久 |
 | 12 | `intel_points_per_template` | int | 1–4 | 2 | 情报点数量。情报稀缺且固定产出，过多会稀释价值感 |
 | 13 | `threat_points_per_template` | int | 1–6 | 2+ | 威胁点基础数量。danger-changed 变体可在此基础上新增 1-2 |
+| 14 | `repair_kit_drop_rate` | float | 0.15–0.35 | 0.25 | repair_kit 在搜索点中的掉落概率（独立于品质投骰，每搜索点额外判定一次）。预期单次探索 1-2 个（6 搜索点 × 0.25 = 1.5 期望）。低于 0.15 可能导致灯塔修复不可达；高于 0.35 牺牲 repair_kit 稀缺性的取舍张力 |
 
 ## Visual/Audio Requirements
 

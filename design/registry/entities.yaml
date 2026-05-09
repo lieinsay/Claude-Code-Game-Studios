@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: "2026-05-02"
+last_updated: "2026-05-08"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -60,6 +60,20 @@ entities:
     location_type: port  # MVP starting port
     services: [stall.gh-lens-workshop, stall.gh-sail-shop, stall.gh-chart-studio, stall.gh-general]  # populated by #14
     added: 2026-05-02
+    revised: ""
+
+  - name: location.glass-harbor-outskirts
+    status: active
+    source: design/gdd/world-repair-unlock.md
+    referenced_by:
+      - design/gdd/world-repair-unlock.md
+      - design/gdd/port-village-market.md
+    kind: location
+    location_type: outskirts  # sub-area outside main port; lighthouse/repair node location
+    parent_location: location.glass-harbor
+    services: []
+    notes: "Lighthouse outskirt area connected to glass-harbor. Contains repair_node.starlight_dock (#13). Shares glass-harbor's region but distinct as exploration-adjacent zone."
+    added: 2026-05-08
     revised: ""
 
   - name: location.sky-reef-outpost
@@ -552,9 +566,9 @@ formulas:
       - response_choice
       - encounter_params.full_damage_min
       - encounter_params.full_damage_max
-    output_range: "[0, 12, 18] — 0 or uniform_int(12, 18)"
+    output_range: "[0, 8, 12] — 0 or uniform_int(8, 12)"
     expression: "0 if response_choice ≠ tank; uniform_int(full_damage_min, full_damage_max) if tank"
-    notes: "Guard: uniform_int(12, 18). Each integer equally likely (1/7)."
+    notes: "Guard: uniform_int(8, 12). Each integer equally likely (1/5)."
     added: 2026-05-02
     revised: ""
 
@@ -569,7 +583,7 @@ formulas:
       - eligible_modules
     output_range: "[{module_damaged: bool, target_slot_id: slot_a | slot_b | null}]"
     expression: "if tank AND random() < module_damage_chance AND count(eligible_modules) > 0: target = random_choice(eligible_modules); else: {false, null}"
-    notes: "Eligible modules exclude already-damaged slots (pre-selection filtering). Guard: module_damage_chance = 0.50."
+    notes: "Eligible modules exclude already-damaged slots (pre-selection filtering). Guard: module_damage_chance = 0.30."
     added: 2026-05-02
     revised: ""
 

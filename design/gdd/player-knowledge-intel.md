@@ -514,7 +514,7 @@ path_satisfied(path) = AND(condition_met(c)) for each c in path.conditions
 **Path C — 世界事件（修复）：**
 | 条件 | 检查方式 |
 |------|---------|
-| 灯塔修复完成 | `world_repair.repair_lighthouse_01` completed |
+| 灯塔修复完成 | `world_repair.repair_node.starlight_dock` completed |
 
 **Path D — 伙伴 + 地点访问：**
 | 条件 | 检查方式 |
@@ -803,30 +803,30 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 
 ### 下游依赖（这些系统依赖本系统）
 
-#### #4 `航图与航线规划` — 尚未设计
+#### #4 `航图与航线规划` — Approved (2026-05-02)
 - **下游需要**：`query_route_knowledge(route_id)`（知识状态 + 可见/隐藏风险标签 + 来源）、`query_route_accessibility(route_id)`（是否可通行 + 阻塞原因，阻塞原因可能关联到未解锁能力）。
 - **合约**：本系统是航图展示信息的真相源。航图只读不写。若路线未注册（`unknown`），航图不显示该路线。
 - **预期接口（待 GDD 确认）**：`get_all_known_routes()`、`get_all_known_locations()`——用于航图初始渲染时的批量查询。
 - **潜在冲突**：航线可通行性取决于能力解锁状态——航图系统需要知道"因为没解锁灯塔信号解读能力，所以这条隐藏航线不可见"或"不可通行原因 = 需要灯塔信号解读"。此逻辑在本系统的 `query_route_accessibility()` 中返回，航图系统只消费结果。
-- **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中引用本系统提供知识查询接口。
+- **对端 GDD 中的反向引用**：#9 GDD Dependencies 节已双向标注本系统为数据源。
 
-#### #5 `航行与路线风险` — 尚未设计
+#### #5 `航行与路线风险` — Approved (2026-05-02)
 - **下游需要**：`query_route_knowledge()`、`query_pattern_state(pattern_id)`。
 - **上游提供**：航行事件（`route_travel_completed`、`player_entered_zone`、`player_hit_obstacle`、`player_navigated_fog_zone`）——供规律知识检测和观测事件触发。
 - **合约**：航线系统拥有遭遇生成和风险判定；本系统只消费事件用于观测检测和能力解锁计数。
-- **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中双向标注。
+- **对端 GDD 中的反向引用**：#10 GDD Dependencies 节已双向标注本系统为数据源。
 
-#### #7 `探索 / 搜撤场景` — 尚未设计
+#### #7 `探索 / 搜撤场景` — Approved (2026-05-03)
 - **下游需要**：`query_location_discovery()`。
 - **上游提供**：探索事件（`player_discovered_location`、`player_followed_entity`、`player_observed_signal`）——供规律知识检测和地点知识状态推进。
 - **合约**：探索系统拥有生成规则和撤离判定；本系统消费事件更新知识状态。
-- **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中双向标注。
+- **对端 GDD 中的反向引用**：#11 GDD Dependencies 节已双向标注本系统为数据源。
 
-#### #9 `世界修复与解锁` — 尚未设计
+#### #9 `世界修复与解锁` — Approved (2026-05-04)
 - **下游需要**：`query_ability_state(ability_id)`——修复特定设施的行为可能解锁能力。
 - **上游提供**：修复完成事件（`repair_node_completed`）——可能触发能力解锁条件检查。
 - **合约**：修复系统拥有解锁的叙事语义；本系统只检查能力解锁条件是否满足。修复事件本身不直接解锁能力——它只是一条路径中的一个条件。
-- **对端 GDD 中的反向引用**：待该 GDD 创建时，需在 Dependencies 中双向标注。
+- **对端 GDD 中的反向引用**：#13 GDD Dependencies 节已双向标注本系统为数据源。
 
 #### #15 `伙伴功能与关系` — 已批准 GDD (2026-05-02)
 - **下游需要**：`query_pattern_state()`、`query_location_discovery()`——伙伴可能根据玩家已知信息改变对话或行为。
@@ -834,10 +834,10 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 - **合约**：伙伴系统拥有关系状态和侦察规则；本系统提供知识写入接口（`reveal_rumor`）和查询接口。MVP 仅 `partner.sky-cat` 一个伙伴实体（#15 R15.5），#6 Part 8 的三个伙伴身份锚点为 Post-MVP 内容。
 - **对端 GDD 中的反向引用**：#15 GDD 已双向标注本系统为下游（Interactions 表）。#15 的 Cross-GDD Revision Flags（Flags 1+2）已识别本节的过期引用。
 
-#### UI / HUD / 航图界面 — 尚未设计
+#### UI / HUD / 航图界面 — Designed (2026-05-03)
 - **下游需要**：`query_pattern_state()`、`query_ability_state()`、`query_route_knowledge()`、`get_pattern_log()`（图鉴日志列表）、`get_ability_list()`（所有能力及其解锁状态）。
 - **合约**：UI 只读不写。本系统提供所有展示所需的查询接口。
-- **对端 GDD 中的反向引用**：待 UI GDD 创建时，需引用本系统为数据源。
+- **对端 GDD 中的反向引用**：#16 GDD Dependencies 节已双向标注本系统为数据源。
 
 ### 下游系统接口汇总
 
@@ -1043,7 +1043,7 @@ is_intel_consumed(intel_id) = intel_id ∈ consumed_intel_ids
 
 **AC-6.3** 鸟类飞行方向理解——Path C：老水手在队 + 触发至少 1 次鸟类被动观测事件后，能力解锁（即使规律仍为 `undiscovered`）。
 
-**AC-6.4** 灯塔信号解读——Path C：修复 `repair_lighthouse_01` 后，能力解锁（即使从未观察过灯塔规律）。
+**AC-6.4** 灯塔信号解读——Path C：修复 `repair_node.starlight_dock` 后，能力解锁（即使从未观察过灯塔规律）。
 
 **AC-6.5** 灯塔信号解读——Path D：灯塔看守后裔在队 + 访问至少 1 个灯塔地点（verified）后，能力解锁。
 

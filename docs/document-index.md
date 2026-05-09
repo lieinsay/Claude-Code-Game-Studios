@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-08
-> **项目阶段**: Pre-Production — P3 进行中 (Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 1/3 Epic Story 框架完成)
-> **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置)
+> **最后更新**: 2026-05-09
+> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 26 Tests + SessionShell Boot Chain)
+> **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置, project.godot 已初始化)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
-> **文档总数**: ~360 个 .md 文件 + 10 个配置/数据文件
+> **源代码**: 15 个 .gd 文件 (9 Autoload + SessionShell + Bootstrap + Data Class + Abstract Base) + 4 个测试文件 (26 test cases) + 1 个 .tscn 场景文件
 
 ---
 
@@ -46,6 +46,14 @@ graph TB
         PHASES["Phase 2-5 审查报告"]
     end
 
+    subgraph 源代码["💻 源代码层 src/"]
+        CORE["core/ (7)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart"]
+        FEATURE["feature/ (1)<br/>WorldRepair"]
+        PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
+        SHELL["session_shell.gd<br/>Phase 0→7 Boot Chain"]
+        TEST["tests/ (4)<br/>26 个测试用例<br/>gdUnit4"]
+    end
+
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
         AGENTS["agents/ (49)<br/>AI Agent 定义"]
         SKILLS["skills/ (70)<br/>技能定义"]
@@ -58,9 +66,12 @@ graph TB
     入口 --> 架构
     设计 --> 架构
     架构 --> 生产
+    架构 --> 源代码
+    生产 --> 源代码
     基础设施 -.-> 设计
     基础设施 -.-> 架构
     基础设施 -.-> 生产
+    基础设施 -.-> 源代码
 ```
 
 ### 入口文档
@@ -569,7 +580,202 @@ graph TB
 
 ---
 
-## 五、审查与质量门禁流程
+## 五、P3 架构原型 — 源代码架构
+
+> **完成日期**: 2026-05-09 · **文件数**: 15 `.gd` + 1 `.tscn` + 4 test files + `project.godot`
+> **9 个 Autoload** (Foundation 5 + Core 1 + Feature 1 + Presentation 2) · **26 个测试用例** (Unit 21 + Integration 5)
+> **验证方式**: Godot 4.6.2 编辑器中运行 `src/session_shell.tscn` → 控制台输出 `Architecture boot: PASS`
+
+### 9 Autoload 依赖层次图
+
+```mermaid
+graph TB
+    subgraph Foundation["📦 Foundation Layer — Autoload #1~#5"]
+        REG["#1 Registry<br/>静态内容目录<br/>5 种 QueryResult"]
+        PERSIST["#2 Persistence<br/>Canonical JSON<br/>staging→verify→promotion"]
+        INTERACT["#3 InteractionRegistry<br/>可交互对象注册<br/>5 态焦点机"]
+        RES["#4 ResourcesManager<br/>6 资源池<br/>fill fullest first merge"]
+        INTEL["#5 IntelManager<br/>知识状态机<br/>reveal_rumor + observation"]
+    end
+
+    subgraph Core["🔧 Core Layer — Autoload #6"]
+        CHART["#6 ChartManager<br/>航线状态机<br/>route_selectability + departure 确认"]
+    end
+
+    subgraph Feature["⚔️ Feature Layer — Autoload #7"]
+        WR["#7 WorldRepair<br/>修复状态机<br/>commit_deposit → repair_completed"]
+    end
+
+    subgraph Presentation["🖥️ Presentation Layer — Autoload #8~#9"]
+        UI["#8 UIManager<br/>12 屏 FSM<br/>单槽模态栈 + 4 层输入路由"]
+        FB["#9 FeedbackManager<br/>语义事件中心<br/>VS stub"]
+    end
+
+    subgraph Shell["🚀 SessionShell (主场景 / 非 Autoload)"]
+        SHELL["session_shell.gd<br/>Phase 0→7 引导链<br/>Web 生命周期钩子"]
+    end
+
+    REG -->|"registry_ready"| PERSIST
+    PERSIST -->|"persistence_ready"| INTERACT
+    INTERACT -->|"interaction_registry_ready"| RES
+    RES -->|"resources_ready"| INTEL
+    INTEL -->|"intel_ready"| CHART
+    CHART -->|"chart_ready"| WR
+    WR -->|"world_repair_ready"| UI
+    UI -->|"ui_ready"| FB
+    FB -->|"feedback_ready → session_ready"| SHELL
+
+    PERSIST -.->|"save_completed / load_completed"| REG
+    PERSIST -.->|"SnapshotPackage"| REG
+    RES -.->|"resource_changed"| UI
+    INTEL -.->|"knowledge_revealed"| CHART
+    CHART -.->|"route_committed"| PERSIST
+    WR -.->|"repair_completed → fan-out ×4"| REG
+    WR -.->|"repair_completed → fan-out ×4"| CHART
+    WR -.->|"repair_completed → fan-out ×4"| PERSIST
+    WR -.->|"repair_completed → fan-out ×4"| UI
+    UI -.->|"ui_panel_opened/closed"| FB
+```
+
+### SessionShell 引导链 (Phase 0→7)
+
+```mermaid
+sequenceDiagram
+    participant Engine as Godot Engine
+    participant Shell as SessionShell
+    participant Auto as 9 Autoloads
+    participant DOM as Browser DOM
+
+    Engine->>Shell: _ready() → Phase 0
+    Note over Shell: 🟢 BOOTING<br/>set_input_gate(true)
+
+    Shell->>Shell: Phase 1: Wait process_frame
+    Note over Shell: Ensure Autoload _ready() complete
+
+    Shell->>Auto: Phase 2: await Registry.initialize()
+    Auto-->>Shell: registry_ready
+
+    Shell->>Auto: Phase 3: await Persistence request
+    Auto-->>Shell: persistence_ready
+
+    Shell->>Auto: Phase 4: await InteractionRegistry
+    Auto-->>Shell: interaction_registry_ready
+
+    Shell->>Auto: Phase 5: await ResourcesManager
+    Auto-->>Shell: resources_ready
+
+    Shell->>Auto: Phase 6: Intel → Chart → WorldRepair → UI → Feedback
+    Auto-->>Shell: session_ready
+
+    Shell->>Shell: Phase 7: set_input_gate(false)
+    Note over Shell: 🟢 IDLE<br/>"Architecture boot: PASS (XX.XX ms)"
+
+    DOM-->>Shell: visibilitychange → pause
+    Shell->>Auto: request_save_progress()
+    Note over Shell: 🟡 PAUSED
+
+    DOM-->>Shell: visibilitychange → resume
+    Shell->>Shell: Phase 7 recovery
+    Note over Shell: 🟢 IDLE
+```
+
+### Persistence 管道 (ADR-0003)
+
+```mermaid
+graph LR
+    subgraph COLLECT["1. COLLECTING"]
+        S1["各 Autoload<br/>register_domain_serializer"]
+        S2["collect →<br/>SnapshotPackage"]
+    end
+
+    subgraph ENCODE["2. ENCODING"]
+        E1["Canonical JSON<br/>sorted keys"]
+        E2["NaN/Inf → null<br/>-0.0 → 0.0"]
+    end
+
+    subgraph VERIFY["3. VERIFYING"]
+        V1["SHA-256 checksum"]
+        V2["Schema version check"]
+    end
+
+    subgraph PROMOTE["4. PROMOTING"]
+        P1["staging → safe"]
+        P2["emit promotion_completed"]
+    end
+
+    COLLECT --> ENCODE
+    ENCODE --> VERIFY
+    VERIFY -->|"checksum pass"| PROMOTE
+    VERIFY -->|"checksum fail"| FAIL["save_failed"]
+    PROMOTE --> DONE["save_completed"]
+```
+
+### 测试架构
+
+```mermaid
+graph TB
+    subgraph Unit["Unit Tests (21 cases)"]
+        U1["test_registry_query.gd<br/>6 cases<br/>QueryResult discrimination"]
+        U2["test_resources_merge.gd<br/>7 cases<br/>Stack merge algorithm"]
+        U3["test_persistence_roundtrip.gd<br/>8 cases<br/>JSON + SHA-256 + SnapshotPackage"]
+    end
+
+    subgraph Integration["Integration Tests (5 cases)"]
+        I1["test_boot_chain.gd<br/>5 cases<br/>Autoload init + Signal protocol"]
+    end
+
+    subgraph Runner["Test Runner"]
+        R1["gdUnit4<br/>tests/gdunit4_runner.gd"]
+        R2["CI: .github/workflows/tests.yml"]
+    end
+
+    Unit --> Runner
+    Integration --> Runner
+    Runner --> R1
+    Runner --> R2
+```
+
+### 源代码文件清单
+
+| 层级 | 文件 | 行数 | Autoload # | 职责 |
+|------|------|------|------------|------|
+| **Foundation** | `src/core/registry.gd` | ~100 | #1 | 静态内容目录 + 查询引擎 |
+| | `src/core/registry_bootstrap.gd` | ~90 | — | 引导数据 (4 地点/2 航线/6 资源等) |
+| | `src/core/persistence.gd` | ~150 | #2 | Canonical JSON + SHA-256 + staging→verify→promotion |
+| | `src/core/snapshot_package.gd` | ~40 | — | RefCounted 数据类 (to_dict/from_dict) |
+| | `src/core/interaction_registry.gd` | ~80 | #3 | 可交互对象注册 + 焦点状态机 |
+| | `src/core/interactable.gd` | ~30 | — | @abstract 基类 (所有可交互对象) |
+| | `src/core/resources_manager.gd` | ~120 | #4 | 6 资源池 + fill fullest first merge |
+| | `src/core/intel_manager.gd` | ~100 | #5 | 知识状态机 + reveal_rumor |
+| **Core** | `src/core/chart_manager.gd` | ~100 | #6 | 航线状态机 + route_selectability |
+| **Feature** | `src/feature/world_repair.gd` | ~80 | #7 | 修复状态机 + commit_deposit |
+| **Presentation** | `src/presentation/ui_manager.gd` | ~110 | #8 | 12 屏 FSM + 模态栈 + 4 层输入路由 |
+| | `src/presentation/feedback_manager.gd` | ~60 | #9 | 语义事件中心 (VS stub) |
+| **Shell** | `src/session_shell.gd` | ~120 | — | Phase 0→7 引导链 + Web 生命周期钩子 |
+| | `src/session_shell.tscn` | 6 | — | 主场景文件 |
+| **Config** | `project.godot` | ~80 | — | Godot 4.6.2 项目配置 (9 Autoload 声明) |
+| **Tests** | `tests/unit/test_registry_query.gd` | 60 | — | 6 测试用例 |
+| | `tests/unit/test_resources_merge.gd` | 67 | — | 7 测试用例 |
+| | `tests/unit/test_persistence_roundtrip.gd` | 93 | — | 8 测试用例 |
+| | `tests/integration/test_boot_chain.gd` | 66 | — | 5 测试用例 |
+| **Proto** | `prototypes/p3-architecture/README.md` | ~80 | — | 验证清单 + 运行说明 |
+
+### 架构关键决策
+
+| 决策 | 说明 |
+|------|------|
+| **9 Autoload 串行加载** | ADR-0001 顺序: Registry→Persistence→InteractionRegistry→Resources→Intel→Chart→WorldRepair→UIManager→FeedbackManager |
+| **SessionShell 非 Autoload** | 作为主场景根节点，不注册 Autoload — Phase 0→7 中等待所有 Autoload ready 后发射 `session_ready` |
+| **Canonical JSON** | 键递归排序 (bytewise ASCII)、NaN/Inf→null、-0.0→0.0 — 保证同一状态永远产生相同字节 |
+| **ADR-0002 Signal 协议** | 全部信号使用 `{noun}_{verb_past}` (如 `repair_completed`, `route_committed`)，类型化参数，同步 `.emit()` |
+| **Interactable @abstract** | 所有可交互对象继承 `Interactable`，实现 `handle_use()` 返回 `UseResult` 枚举 (ACCEPTED/REJECTED/BUSY) |
+| **Web-first 约束** | Compatibility 渲染器、单线程 Web export、AudioContext 用户手势激活、`pagehide`/`visibilitychange` 最佳努力存档 |
+| **Forbidden patterns** | 9 条禁止模式（见 control-manifest.md），包括 string_signal_connect、bare_dictionary_payload、hardcoded_value 等 |
+| **Autoload pool ≤10MB** | 所有 Autoload 的内存总和不超过 10MB；主场景 ≤30MB；总堆 ≤200MB |
+
+---
+
+## 六、审查与质量门禁流程
 
 ```mermaid
 graph LR
@@ -702,7 +908,7 @@ UX SPECS             --      --      --     --      --      --      --     █�
 
 ---
 
-## 六、Studio 基础设施
+## 七、Studio 基础设施
 
 ### Agent 体系 (49 个)
 
@@ -811,7 +1017,7 @@ graph LR
 
 ---
 
-## 七、规范与模板
+## 八、规范与模板
 
 ### 路径规则 (11 个)
 
@@ -846,7 +1052,7 @@ graph LR
 
 ---
 
-## 八、文档阅读路线图
+## 九、文档阅读路线图
 
 ### 新成员入门路径
 
@@ -873,7 +1079,7 @@ graph TB
 
 ---
 
-## 九、统计概览
+## 十、统计概览
 
 ```
 文档分布 (按目录)
@@ -883,19 +1089,22 @@ graph TB
   production/      ████████████████░░░░  130+ 文件  (Epics/Stories + 会话状态 + 日志)
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
-  src/             █░░░░░░░░░░░░░░░░░░░   1 文件  (占位)
+  src/             ████████░░░░░░░░░░░░  16 文件  (9 Autoload .gd + Bootstrap + DataClass + Abstract + Shell + .tscn)
+  tests/           ████░░░░░░░░░░░░░░░░   4 文件  (Unit ×3 + Integration ×1, 26 test cases)
+  prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
-  📊 总计: ~360 个 Markdown 文档 + 10 个配置/数据文件
+  📊 总计: ~380 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
   📋 Epic/Story: 16/18 Epic 完成 (115 Stories) | Feature 层 5/5 ✅ | Presentation 层 1/3
-  ✅ Pre-Production P3 进行中 — Foundation + Core + Feature 全部完成, Presentation 1/3
+  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot | 测试: 4 文件 26 用例 | 26/115 Stories 有测试 (23%)
+  ✅ Pre-Production P3 — 架构原型完成 | Foundation + Core + Feature 全部 Epic 分解完成
 ```
 
 ---
 
-## 十、待创建文档
+## 十一、待创建文档
 
-> 更新于 2026-05-08 — Pre-Production P3 进行中。
+> 更新于 2026-05-09 — Pre-Production P3 架构原型完成。
 
 ### 已全部完成 ✅
 
@@ -915,6 +1124,9 @@ graph TB
 - [x] **Core 层 Epic/Story 分解** — 5/5 Epic (40 Stories)
 - [x] **Feature 层 Epic/Story 分解** — 5/5 Epic (30 Stories): #11/#12/#13/#14/#15
 - [x] **Presentation 层 #16 UI/HUD** — 1/3 Epic (6 Stories)
+- [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 26 Tests (2026-05-09)
+- [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器 / WebGL 2)
+- [x] **源代码架构文档** — `docs/document-index.md` §五 (Autoload 依赖图 + Boot Chain + Persistence 管道 + 测试架构)
 
 ### 仍待完成
 
@@ -923,7 +1135,9 @@ graph TB
 - [ ] **#17 feedback-fx-audio Epic/Story 分解** — Vertical Slice 阶段
 - [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
-- [ ] **P3 原型** — Core Loop 可玩原型 + Vertical Slice 范围定义
+- [ ] **在 Godot 编辑器中手动验证** — 打开项目 → 运行 session_shell.tscn → 确认 "Architecture boot: PASS"
+- [ ] **手动验证存档往返** — 模拟状态 → save → load → 状态一致
+- [ ] **手动验证信号协议** — repair_completed 扇出到 4 消费者
 
 ---
 
