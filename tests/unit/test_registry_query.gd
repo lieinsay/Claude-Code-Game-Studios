@@ -3,6 +3,8 @@
 # REF: content-registry Story 001 AC-1, AC-5/6, AC-7
 extends Node
 
+const RegistryScript := preload("res://src/core/registry.gd")
+
 func test_registry_query_by_id_found() -> void:
 	var registry := _make_registry()
 	var result: Dictionary = registry.query_by_id(&"location.glass-harbor")
@@ -15,7 +17,7 @@ func test_registry_query_by_id_not_found() -> void:
 	assert(result.status == registry.QueryResult.NOT_FOUND, "Expected NOT_FOUND")
 
 func test_registry_query_unloaded_returns_unloaded() -> void:
-	var registry := Registry.new()
+	var registry := RegistryScript.new()
 	# Don't initialize — should return UNLOADED
 	var result: Dictionary = registry.query_by_id(&"anything")
 	assert(result.status == registry.QueryResult.UNLOADED, "Expected UNLOADED for uninitialized registry")
@@ -49,8 +51,8 @@ func test_registry_domain_loaded_tracking() -> void:
 
 ## Helper
 
-func _make_registry() -> Registry:
-	var reg := Registry.new()
+func _make_registry():
+	var reg = RegistryScript.new()
 	reg._initialize_content()
 	return reg
 

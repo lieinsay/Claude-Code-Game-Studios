@@ -112,13 +112,9 @@ func _collect_and_save(artifact: int) -> void:
 	# Step 2: Encode to Canonical JSON, compute SHA-256
 	_pipeline_phase = PipelinePhase.WRITING_STAGING
 	var encoded: String = _canonical_json_encode(manifest)
-
-	# Step 3: Write staging (in-memory for prototype)
-	_staging_data = manifest
 	var checksum: String = _compute_checksum(encoded)
-	manifest["_checksum"] = checksum
 
-	# Step 4: Verify (readback + checksum + schema)
+	# Step 3: Verify — re-encode WITHOUT _checksum and compare
 	_pipeline_phase = PipelinePhase.VERIFYING
 	var re_encoded: String = _canonical_json_encode(manifest)
 	var re_checksum: String = _compute_checksum(re_encoded)
@@ -128,7 +124,9 @@ func _collect_and_save(artifact: int) -> void:
 		_pipeline_phase = PipelinePhase.IDLE
 		return
 
-	# Step 5: Promote
+	# Step 4: Stamp checksum and promote
+	manifest["_checksum"] = checksum
+	_staging_data = manifest
 	_pipeline_phase = PipelinePhase.PROMOTING
 	_safe_data = manifest
 	_current_generation = manifest.generation
