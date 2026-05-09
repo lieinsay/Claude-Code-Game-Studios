@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-09
-> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 49 Verification Checks + 26 Unit Tests + SessionShell Boot Chain)
+> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 49 Verification Checks + 39 Tests + SessionShell Boot Chain)
 > **引擎**: Godot 4.6.2 + GDScript (Web-first, 已正式配置, project.godot 已初始化)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
-> **源代码**: 15 个 .gd 文件 (9 Autoload + SessionShell + Bootstrap + Data Class + Abstract Base) + 4 个测试文件 (26 test cases) + 1 个 .tscn 场景文件
+> **源代码**: 15 个 .gd 文件 (9 Autoload + SessionShell + Bootstrap + Data Class + Abstract Base) + 7 个测试文件 (39 test cases + 49 verification checks) + 1 个 .tscn 场景文件
 
 ---
 
@@ -582,9 +582,9 @@ graph TB
 
 ## 五、P3 架构原型 — 源代码架构
 
-> **完成日期**: 2026-05-09 · **文件数**: 15 `.gd` + 1 `.tscn` + 4 test files + `project.godot`
-> **9 个 Autoload** (Foundation 5 + Core 1 + Feature 1 + Presentation 2) · **26 个测试用例** (Unit 21 + Integration 5)
-> **验证方式**: Godot 4.6.2 编辑器中运行 `src/session_shell.tscn` → 控制台输出 `Architecture boot: PASS`
+> **完成日期**: 2026-05-09 · **文件数**: 15 `.gd` + 1 `.tscn` + 7 test files + `project.godot`
+> **9 个 Autoload** (Foundation 5 + Core 1 + Feature 1 + Presentation 2) · **39 个测试用例 + 49 verification checks** (Unit 21 + Integration 18 + Verification 49)
+> **验证方式**: Godot 4.6.2 `--headless --script tests/p3_verification.gd` → 49/49 PASS
 
 ### 9 Autoload 依赖层次图
 
@@ -714,25 +714,99 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph Unit["Unit Tests (21 cases)"]
-        U1["test_registry_query.gd<br/>6 cases<br/>QueryResult discrimination"]
-        U2["test_resources_merge.gd<br/>7 cases<br/>Stack merge algorithm"]
-        U3["test_persistence_roundtrip.gd<br/>8 cases<br/>JSON + SHA-256 + SnapshotPackage"]
+    subgraph Unit["Unit Tests — 21 cases"]
+        U1["test_registry_query.gd<br/>6 cases"]
+        U2["test_resources_merge.gd<br/>7 cases"]
+        U3["test_persistence_roundtrip.gd<br/>8 cases"]
     end
 
-    subgraph Integration["Integration Tests (5 cases)"]
-        I1["test_boot_chain.gd<br/>5 cases<br/>Autoload init + Signal protocol"]
+    subgraph Integration["Integration Tests — 18 cases"]
+        I1["test_boot_chain.gd<br/>5 cases<br/>引导链 + 信号协议"]
+        I2["test_save_roundtrip.gd<br/>7 cases<br/>存档往返 (场景 B)"]
+        I3["test_signal_fanout.gd<br/>6 cases<br/>信号扇出 (场景 C)"]
+    end
+
+    subgraph Verification["Verification — 49 checks"]
+        V1["p3_verification.gd<br/>49 checks<br/>Scene B + C 全场景"]
     end
 
     subgraph Runner["Test Runner"]
-        R1["gdUnit4<br/>tests/gdunit4_runner.gd"]
-        R2["CI: .github/workflows/tests.yml"]
+        R1["gdUnit4 runner"]
+        R2["headless --script"]
     end
 
     Unit --> Runner
     Integration --> Runner
+    Verification --> Runner
     Runner --> R1
     Runner --> R2
+```
+
+### 信号交互拓扑
+
+跨系统信号流向全景 — 展示 9 个 Autoload + SessionShell 之间的所有信号契约。
+
+```mermaid
+graph TB
+    subgraph SignalFlow["Signal Flow — 信号扇出拓扑"]
+        direction TB
+
+        subgraph Producers["📤 信号生产者"]
+            PERSIST_S["Persistence<br/>save_completed<br/>load_completed<br/>promotion_completed<br/>save_failed / load_failed"]
+            RES_S["ResourcesManager<br/>resource_changed"]
+            INTEL_S["IntelManager<br/>knowledge_revealed<br/>rumor_recorded"]
+            CHART_S["ChartManager<br/>route_committed<br/>departure_confirmed"]
+            WR_S["WorldRepair<br/>repair_completed ⚡×4<br/>deposit_committed<br/>repair_failed"]
+            UI_S["UIManager<br/>ui_panel_opened<br/>ui_panel_closed<br/>screen_changed"]
+        end
+
+        subgraph Consumers["📥 信号消费者"]
+            REG_C["Registry"]
+            PERSIST_C["Persistence"]
+            CHART_C["ChartManager"]
+            UI_C["UIManager"]
+            FB_C["FeedbackManager"]
+        end
+
+        WR_S -->|"repair_completed → 4 consumers"| REG_C
+        WR_S -->|"repair_completed"| CHART_C
+        WR_S -->|"repair_completed"| PERSIST_C
+        WR_S -->|"repair_completed"| UI_C
+        CHART_S -->|"route_committed"| PERSIST_C
+        RES_S -->|"resource_changed"| UI_C
+        INTEL_S -->|"knowledge_revealed"| CHART_C
+        UI_S -->|"panel events"| FB_C
+        PERSIST_S -->|"save/load events"| REG_C
+    end
+
+    subgraph Legend["图例"]
+        L1["─── 同步 emit()"]
+        L2["⚡ 扇出 (≥4 consumers)"]
+    end
+```
+
+### WorldRepair 信号扇出详图
+
+`repair_completed` 是项目中第一个 4 消费者扇出信号 — P3 场景 C 验证的核心。
+
+```mermaid
+graph LR
+    WR["WorldRepair<br/>commit_deposit()"]
+    SIG["repair_completed<br/>(node_id: StringName)"]
+
+    C1["ChartManager<br/>→ 更新航线可达性<br/>(修复节点解锁航线)"]
+    C2["IntelManager<br/>→ 记录修复事件<br/>(knowledge_revealed)"]
+    C3["Registry<br/>→ 更新节点状态<br/>(REPAIRED 标记)"]
+    C4["UIManager<br/>→ 刷新 HUD<br/>(修复进度条更新)"]
+
+    WR -->|"deposit → all materials →"| SIG
+    SIG --> C1
+    SIG --> C2
+    SIG --> C3
+    SIG --> C4
+
+    C1 -.->|"后续触发"| ROUTE["route_selectability 更新"]
+    C2 -.->|"后续触发"| KNOWLEDGE["knowledge_revealed 信号"]
 ```
 
 ### 源代码文件清单
@@ -1093,13 +1167,13 @@ graph TB
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             ████████░░░░░░░░░░░░  16 文件  (9 Autoload .gd + Bootstrap + DataClass + Abstract + Shell + .tscn)
-  tests/           ████░░░░░░░░░░░░░░░░   4 文件  (Unit ×3 + Integration ×1, 26 test cases)
+  tests/           ██████░░░░░░░░░░░░░░   7 文件  (Unit ×3 + Integration ×3 + Verification ×1, 39 cases + 49 checks)
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
-  📊 总计: ~380 个文档/源代码/测试文件 + 12 个配置/数据文件
+  📊 总计: ~383 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
   📋 Epic/Story: 16/18 Epic 完成 (115 Stories) | Feature 层 5/5 ✅ | Presentation 层 1/3
-  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot | 测试: 4 文件 26 用例 | 26/115 Stories 有测试 (23%)
+  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot | 测试: 7 文件 39 用例 + 49 verification checks | P3 场景 A/B/C 全 PASS
   ✅ Pre-Production P3 — 架构原型完成 | Foundation + Core + Feature 全部 Epic 分解完成
 ```
 
@@ -1127,9 +1201,10 @@ graph TB
 - [x] **Core 层 Epic/Story 分解** — 5/5 Epic (40 Stories)
 - [x] **Feature 层 Epic/Story 分解** — 5/5 Epic (30 Stories): #11/#12/#13/#14/#15
 - [x] **Presentation 层 #16 UI/HUD** — 1/3 Epic (6 Stories)
-- [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 26 Tests (2026-05-09)
+- [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 39 Tests + 49 Verification Checks (2026-05-09)
 - [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器 / WebGL 2)
-- [x] **源代码架构文档** — `docs/document-index.md` §五 (Autoload 依赖图 + Boot Chain + Persistence 管道 + 测试架构)
+- [x] **源代码架构文档** — `docs/document-index.md` §五 (Autoload 依赖图 + Boot Chain + Persistence 管道 + 信号拓扑 + 测试架构)
+- [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS
 
 ### 仍待完成
 
@@ -1138,9 +1213,6 @@ graph TB
 - [ ] **#17 feedback-fx-audio Epic/Story 分解** — Vertical Slice 阶段
 - [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
-- [ ] **在 Godot 编辑器中手动验证** — 打开项目 → 运行 session_shell.tscn → 确认 "Architecture boot: PASS"
-- [ ] **手动验证存档往返** — 模拟状态 → save → load → 状态一致
-- [ ] **手动验证信号协议** — repair_completed 扇出到 4 消费者
 
 ---
 
