@@ -1,8 +1,10 @@
 # 多人协作生产计划 — 云海织航 MVP
 
-> 生成: 2026-05-10 | 基于: 16 Epic × 115 Story 完整分解
+> 生成: 2026-05-10 | 最后更新: 2026-05-10
+> 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
+> 当前状态: **Phase 0 完成 | Phase 1 进行中**
 
 ---
 
@@ -53,31 +55,32 @@ D-C (Core 后半 + Feature 层)
 
 ---
 
-## 三、Phase 0 — 环境准备 (全员，并行)
+## 三、Phase 0 — 环境准备 (✅ 已完成 — 2026-05-10)
 
 **所有人同步完成，不依赖任何 Epic。**
 
 ```
-Week 0 (2-3 天)
+Week 0 (2-3 天) — ✅ 全部完成
 ┌─────────────────────────────────────────────────────────┐
-│ D-A  □ Godot 4.6.2 .NET 项目搭建                        │
-│      □ project.godot C# feature 确认                     │
-│      □ .csproj + .sln 模板确认                           │
-│      □ 目录结构 scaffold (src/core, tests/unit, etc.)    │
+│ D-A  ☑ Godot 4.6.2 .NET 项目搭建                        │
+│      ☑ project.godot C# feature 确认                     │
+│      ☑ .csproj + .sln 模板确认                           │
+│      ☑ 目录结构 scaffold (src/core, tests/unit, etc.)    │
 │                                                         │
-│ D-B  □ C# 编码规范落地                                   │
-│      □ .editorconfig 配置                                │
-│      □ dotnet build 验证通过                             │
-│      □ 测试框架选型 + CI 配置                            │
+│ D-B  ☑ C# 编码规范落地                                   │
+│      ☑ .editorconfig 配置                                │
+│      ☑ dotnet build 验证通过                             │
+│      ☑ 测试框架选型 + CI 配置                            │
 │                                                         │
-│ D-C  □ C# Foundation Parity 验证                         │
-│      □ SnapshotPackage / Registry / Persistence C# 验证   │
-│      □ 20/20 parity checks 通过                          │
-│      □ LEGACY_GDSCRIPT.md 审查                           │
+│ D-C  ☑ C# Foundation Parity 验证                         │
+│      ☑ 9/9 Autoload + SessionBootChain 迁移到 C#         │
+│      ☑ 70/70 parity checks 通过 (从 20 扩展到 70)         │
+│      ☑ LEGACY_GDSCRIPT.md 审查                           │
+│      ☑ Story-001 10/10 AC PASS                           │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS + Foundation Parity 20/20 PASS
+**门禁**: `dotnet build` PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001 10/10 PASS ✅
 
 ---
 
@@ -89,7 +92,7 @@ Week 0 (2-3 天)
 D-A ───────────────────────────────────────────────────────
   Epic #1 Content Registry
   ┌──────────────────────────────────────────────────────┐
-  │ Story 001 □ ID Registry Core + Query Engine   (L, 2d)│  ← D-A 先做
+  │ Story 001 ☑ ID Registry Core + Query Engine   (L, 2d)│  ← ✅ 完成!
   │ Story 002 □ Schema Validation                 (L, 2d)│  ← 与 001 并行
   │   ↓ (001+002 完成后)                                  │
   │ Story 003 □ Content Lifecycle                 (L, 1d)│

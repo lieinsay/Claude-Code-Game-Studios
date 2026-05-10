@@ -1,8 +1,32 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-10
+> 生成日期: 2026-05-10 | 最后更新: 2026-05-10
 > 基于: systems-index.md 依赖图 + 16 Epic 115 Story
 > 用途: 可视化所有生产任务的依赖关系、并行机会、关键路径
+> 当前状态: **Phase 0 完成 | Phase 1 Story-001 完成**
+
+---
+
+## 零、当前进度 (2026-05-10)
+
+### Phase 0: 环境准备 — ✅ 完成
+
+| 任务 | 状态 | 证据 |
+|------|------|------|
+| Godot 4.6.2 .NET 项目搭建 | ✅ | `project.godot` C# feature + `[dotnet]` 段 |
+| C# Foundation 全量迁移 | ✅ | 9/9 Autoload + SessionBootChain → C# |
+| dotnet build 验证 | ✅ | 0 errors, 3 warnings |
+| FoundationParity 验证 | ✅ | **70/70 PASS** (从 20 扩展到 70) |
+| content-registry Story-001 | ✅ | **10/10 AC PASS** |
+
+### Phase 1 启动状态
+
+| Epic | Story | 状态 | 测试 |
+|------|-------|------|------|
+| #1 Content Registry | 001 ID Registry Core + Query Engine | ✅ Done | 10/10 |
+| #1 Content Registry | 002-008 | ⏳ Ready | — |
+| #2 Session Shell | 001-007 | ⏳ Ready | — |
+| #3-#16 其余 | 全部 Story | ⏳ Pending | — |
 
 ---
 
