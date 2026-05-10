@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <OutputPath>bin\IdRegistryCoreTest\</OutputPath>
+    <OutputPath>bin\ContentLifecycleTest\</OutputPath>
     <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ContentLifecycleProgram.cs" />
     <ProjectReference Include="..\..\..\CloudWeaverVoyage.csproj" />
   </ItemGroup>
 </Project>

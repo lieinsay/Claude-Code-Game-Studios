@@ -50,7 +50,7 @@ graph TB
         CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>FoundationParity 70/70<br/>Registry Story-002 11/11"]
+        TEST["tests/<br/>FoundationParity 70/70<br/>Registry Story-002 11/11<br/>Registry Story-003 6/6"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -111,7 +111,7 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成 (115 Stories) |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
-| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002 Done; Story-003 readiness refreshed) |
+| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002/003 Done; Story-004 next) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
 | [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8 Stories) |
 | [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
@@ -581,8 +581,8 @@ graph TB
 
 ## 五、C# Foundation 实现进度
 
-> **当前状态**: Content Registry Story-001/002 完成；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS。
+> **当前状态**: Content Registry Story-001/002/003 完成；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS；`dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` → 6/6 PASS。
 
 ### Content Registry 完成项
 
@@ -590,6 +590,7 @@ graph TB
 |-------|------|------|------|
 | [Story-001: ID Registry Core + Query Engine](../production/epics/content-registry/story-001-id-registry-core-query.md) | Done | `src/core/content/Registry.cs` — 稳定 ID、查询状态、确定性排序、分页上限、域隔离 | `tests/unit/registry/IdRegistryCoreTest.csproj` |
 | [Story-002: Schema Validation](../production/epics/content-registry/story-002-schema-validation.md) | Done | `src/core/content/Registry.cs` — definition_validity U/K/R/S、受控词表、必填字段、运行时字段拒绝、只读边界 | `tests/unit/registry/IdRegistryCoreTest.csproj` — 11/11 PASS |
+| [Story-003: Content Lifecycle](../production/epics/content-registry/story-003-content-lifecycle.md) | Done | `src/core/content/Registry.cs` — Draft/Active/Deprecated/Retired 生命周期、Retired ID 防复用、fantasy-critical 改义拦截、migration hint、emit-after-mutation 事件 | `tests/unit/registry/ContentLifecycleTest.csproj` — 6/6 PASS |
 
 ### Story Readiness 元数据收口
 
@@ -597,7 +598,7 @@ graph TB
 |------|------|------|
 | `production/epics/**/*.md` | 115/115 aligned | 所有 Story 已补齐 `Manifest Version: 2026-05-09`、ADR-0019 Implementation Contract、Type、Estimate、Test Evidence |
 | Legacy platform wording | Cleared | Story 文本不再要求 Web/GDScript/ADR-0006 路径；实现入口按 Desktop Godot .NET/C# 翻译 |
-| Story-003 Content Lifecycle | Ready metadata refreshed | 生命周期 Story 只负责 status / migration hint；Deprecated/Retired 引用错误由 Story-004 Reference Integrity 判定 |
+| Story-003 Content Lifecycle | Done | 生命周期 Story 提供 status / migration hint；Deprecated/Retired 引用错误由 Story-004 Reference Integrity 判定 |
 
 ### C# Foundation 文件清单
 
@@ -616,14 +617,15 @@ graph TB
 | **Presentation** | `src/presentation/FeedbackManager.cs` | 语义反馈事件中心 |
 | **Tests** | `tests/csharp/FoundationParity/Program.cs` | C# Foundation parity checks (70/70) |
 | **Tests** | `tests/unit/registry/Program.cs` | Content Registry Story-001/002 acceptance checks |
+| **Tests** | `tests/unit/registry/ContentLifecycleProgram.cs` | Content Registry Story-003 lifecycle acceptance checks |
 
 ### 下一开发入口
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P1 | [Story-003: Content Lifecycle](../production/epics/content-registry/story-003-content-lifecycle.md) | 继续 Content Registry，补 Draft/Active/Deprecated/Retired 生命周期规则 |
-| P2 | `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` | Story-003 实现时扩展 Registry unit runner，保持 Story-001/002 11/11 回归 |
-| P3 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-003 前后跑 Foundation parity，防止基础层回退 |
+| P1 | [Story-004: Reference Integrity](../production/epics/content-registry/story-004-reference-integrity.md) | 继续 Content Registry，补引用完整性、Deprecated/Retired 引用错误判定与引用诊断 |
+| P2 | `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` + `dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` | Story-004 实现前后保持 Story-001/002/003 回归 |
+| P3 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-004 前后跑 Foundation parity，防止基础层回退 |
 
 ---
 
@@ -1269,7 +1271,7 @@ graph TB
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-10 — Desktop C# Foundation Ready；Content Registry Story-001/002 完成；115 个 Story readiness 元数据完成 ADR-0019 收口。
+> 更新于 2026-05-10 — Desktop C# Foundation Ready；Content Registry Story-001/002/003 完成；下一步 Story-004 Reference Integrity；115 个 Story readiness 元数据完成 ADR-0019 收口。
 
 ### 已全部完成 ✅
 
@@ -1294,7 +1296,7 @@ graph TB
 - [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器)
 - [x] **源代码架构文档** — `docs/document-index.md` §五/§六 (C# Foundation 进度 + P3 原型架构)
 - [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS
-- [x] **Content Registry Story-001/002** — C# Registry ID/query + Schema Validation；`IdRegistryCoreTest.csproj` 11/11 PASS
+- [x] **Content Registry Story-001/002/003** — C# Registry ID/query + Schema Validation + Content Lifecycle；`IdRegistryCoreTest.csproj` 11/11 PASS；`ContentLifecycleTest.csproj` 6/6 PASS
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成

@@ -30,6 +30,7 @@ public enum RegistryQueryStatus
     Unloaded = 2,
     Deprecated = 3,
     VersionIncompatible = 4,
+    Retired = 5,
 }
 
 /// <summary>
@@ -47,6 +48,43 @@ public sealed record RegistryRegistrationResult(
     bool Success,
     string? ErrorCode,
     string? EntityId);
+
+/// <summary>
+/// Structured migration hint for deprecated or retired content IDs.
+/// </summary>
+public sealed record ContentMigrationHint(
+    string OriginalId,
+    ContentStatus Status,
+    string? SuggestedReplacementId,
+    string? MigrationNote,
+    string? RetiredDate);
+
+/// <summary>
+/// Current lifecycle resolution for a stable content ID.
+/// </summary>
+public sealed record ContentLifecycleResolution(
+    string ContentId,
+    ContentStatus? Status,
+    ContentMigrationHint? MigrationHint,
+    bool IsKnown);
+
+/// <summary>
+/// Result returned by lifecycle state mutations.
+/// </summary>
+public sealed record ContentLifecycleChangeResult(
+    bool Success,
+    string? ErrorCode,
+    string ContentId,
+    ContentStatus? PreviousStatus,
+    ContentStatus? NewStatus);
+
+/// <summary>
+/// Event payload emitted after a content lifecycle mutation is committed.
+/// </summary>
+public sealed record ContentStatusChangedEvent(
+    string ContentId,
+    ContentStatus OldStatus,
+    ContentStatus NewStatus);
 
 /// <summary>
 /// Structured diagnostic emitted by static content definition validation.
@@ -138,10 +176,40 @@ public sealed class Registry
         "repaired",
     ];
 
+    private static readonly string[] FantasyCriticalKinds =
+    [
+        "route",
+        "location",
+        "repair-node",
+        "home-space",
+        "home-anchor",
+        "companion",
+    ];
+
+    private static readonly string[] SemanticIdentityFields =
+    [
+        "kind",
+        "owner_domain",
+        "region_tag",
+        "location_kind",
+        "home_space_id",
+        "anchor_kind",
+        "origin_location_id",
+        "destination_id",
+        "location_id",
+        "role_tags",
+    ];
+
     private readonly Dictionary<string, Dictionary<string, object?>> content = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ContentMigrationHint> retiredIds = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedDomains = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedKinds = new(StringComparer.Ordinal);
     private readonly Dictionary<string, HashSet<string>> domainKindMap = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Fires after a content ID changes lifecycle status and the registry state is already mutated.
+    /// </summary>
+    public event Action<ContentStatusChangedEvent>? ContentStatusChanged;
 
     /// <summary>
     /// Gets whether the registry has completed its initial content bootstrap.
@@ -188,11 +256,19 @@ public sealed class Registry
                     CloneEntity(entity),
                     "entity_deprecated"),
                 ContentStatus.Retired => new RegistryQueryResult(
-                    RegistryQueryStatus.NotFound,
-                    null,
+                    RegistryQueryStatus.Retired,
+                    CloneEntity(entity),
                     "entity_retired"),
                 _ => new RegistryQueryResult(RegistryQueryStatus.Found, CloneEntity(entity), null),
             };
+        }
+
+        if (retiredIds.TryGetValue(entityId, out var retiredRecord))
+        {
+            return new RegistryQueryResult(
+                RegistryQueryStatus.Retired,
+                MigrationHintToEntity(retiredRecord),
+                "entity_retired");
         }
 
         return IsLoadedIdFamily(entityId)
@@ -287,9 +363,21 @@ public sealed class Registry
                 return new RegistryRegistrationResult(false, "ERR_INVALID_ID_FORMAT", id);
             }
 
-            if (!seenIds.Add(id) || content.ContainsKey(id))
+            if (retiredIds.ContainsKey(id))
+            {
+                return new RegistryRegistrationResult(false, "ERR_ID_REUSE", id);
+            }
+
+            if (!seenIds.Add(id))
             {
                 return new RegistryRegistrationResult(false, "ERR_DUPLICATE_ID", id);
+            }
+
+            if (content.TryGetValue(id, out var existing))
+            {
+                return IsFantasyCriticalRedefinition(existing, definition)
+                    ? new RegistryRegistrationResult(false, "ERR_ID_REDEFINITION", id)
+                    : new RegistryRegistrationResult(false, "ERR_DUPLICATE_ID", id);
             }
 
             var normalizedId = id.Normalize(NormalizationForm.FormKC);
@@ -333,6 +421,112 @@ public sealed class Registry
     }
 
     /// <summary>
+    /// Changes content lifecycle status along the one-way Draft -> Active -> Deprecated -> Retired path.
+    /// </summary>
+    public ContentLifecycleChangeResult ChangeContentStatus(
+        string entityId,
+        ContentStatus newStatus,
+        string? migrationTargetId = null,
+        string? migrationNote = null,
+        string? retiredDate = null)
+    {
+        if (!content.TryGetValue(entityId, out var entity))
+        {
+            if (retiredIds.TryGetValue(entityId, out var retiredRecord))
+            {
+                return new ContentLifecycleChangeResult(
+                    false,
+                    "ERR_ALREADY_RETIRED",
+                    entityId,
+                    retiredRecord.Status,
+                    newStatus);
+            }
+
+            return new ContentLifecycleChangeResult(false, "ERR_CONTENT_NOT_FOUND", entityId, null, newStatus);
+        }
+
+        var oldStatus = ReadContentStatus(entity);
+        if (!IsValidLifecycleTransition(oldStatus, newStatus))
+        {
+            return new ContentLifecycleChangeResult(false, "ERR_INVALID_STATUS_TRANSITION", entityId, oldStatus, newStatus);
+        }
+
+        if (newStatus == ContentStatus.Retired)
+        {
+            var hint = new ContentMigrationHint(
+                entityId,
+                ContentStatus.Retired,
+                migrationTargetId,
+                migrationNote,
+                retiredDate);
+
+            content.Remove(entityId);
+            retiredIds[entityId] = hint;
+        }
+        else
+        {
+            entity["status"] = newStatus.ToString();
+            if (newStatus == ContentStatus.Deprecated)
+            {
+                entity["migration_target"] = migrationTargetId;
+                entity["migration_note"] = migrationNote;
+            }
+        }
+
+        ContentStatusChanged?.Invoke(new ContentStatusChangedEvent(entityId, oldStatus, newStatus));
+        return new ContentLifecycleChangeResult(true, null, entityId, oldStatus, newStatus);
+    }
+
+    /// <summary>
+    /// Resolves lifecycle status and migration guidance without conflating retired IDs with missing IDs.
+    /// </summary>
+    public ContentLifecycleResolution ResolveContentLifecycle(string entityId)
+    {
+        if (content.TryGetValue(entityId, out var entity))
+        {
+            var status = ReadContentStatus(entity);
+            var hint = status == ContentStatus.Deprecated
+                ? new ContentMigrationHint(
+                    entityId,
+                    status,
+                    ReadNullableString(entity, "migration_target"),
+                    ReadNullableString(entity, "migration_note"),
+                    ReadNullableString(entity, "retired_date"))
+                : null;
+
+            return new ContentLifecycleResolution(entityId, status, hint, IsKnown: true);
+        }
+
+        if (retiredIds.TryGetValue(entityId, out var retiredRecord))
+        {
+            return new ContentLifecycleResolution(entityId, ContentStatus.Retired, retiredRecord, IsKnown: true);
+        }
+
+        return new ContentLifecycleResolution(entityId, null, null, IsKnown: false);
+    }
+
+    /// <summary>
+    /// Resolves old save references to deprecated or retired IDs and returns any available migration hint.
+    /// </summary>
+    public ContentMigrationHint? ResolveLegacyId(string entityId)
+    {
+        return ResolveContentLifecycle(entityId).MigrationHint;
+    }
+
+    /// <summary>
+    /// Returns whether runtime state is referencing a known stable content ID instead of replacing static content.
+    /// </summary>
+    public bool IsStableRuntimeReference(string entityId, string? expectedKind = null)
+    {
+        if (content.TryGetValue(entityId, out var entity))
+        {
+            return expectedKind is null || string.Equals(ReadString(entity, "kind"), expectedKind, StringComparison.Ordinal);
+        }
+
+        return retiredIds.ContainsKey(entityId) && expectedKind is null;
+    }
+
+    /// <summary>
     /// Rejects attempts to write runtime or player state through the static registry API.
     /// </summary>
     public RegistryRegistrationResult SetEntity(string entityId, IReadOnlyDictionary<string, object?> _)
@@ -373,6 +567,17 @@ public sealed class Registry
         return entity.TryGetValue(key, out var value) ? value?.ToString() ?? string.Empty : string.Empty;
     }
 
+    private static string? ReadNullableString(IReadOnlyDictionary<string, object?> entity, string key)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return null;
+        }
+
+        var text = value.ToString();
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
     private static int ReadInt(IReadOnlyDictionary<string, object?> entity, string key, int fallback = 0)
     {
         if (!entity.TryGetValue(key, out var value) || value is null)
@@ -402,6 +607,81 @@ public sealed class Registry
         return entity.ToDictionary(pair => pair.Key, pair => CloneValue(pair.Value), StringComparer.Ordinal);
     }
 
+    private static Dictionary<string, object?> MigrationHintToEntity(ContentMigrationHint hint)
+    {
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["id"] = hint.OriginalId,
+            ["status"] = hint.Status.ToString(),
+            ["migration_target"] = hint.SuggestedReplacementId,
+            ["migration_note"] = hint.MigrationNote,
+            ["retired_date"] = hint.RetiredDate,
+        };
+    }
+
+    private static bool IsValidLifecycleTransition(ContentStatus oldStatus, ContentStatus newStatus)
+    {
+        return (oldStatus, newStatus) is
+            (ContentStatus.Draft, ContentStatus.Active) or
+            (ContentStatus.Active, ContentStatus.Deprecated) or
+            (ContentStatus.Deprecated, ContentStatus.Retired);
+    }
+
+    private static bool IsFantasyCriticalRedefinition(
+        IReadOnlyDictionary<string, object?> existing,
+        IReadOnlyDictionary<string, object?> replacement)
+    {
+        var existingKind = ReadString(existing, "kind");
+        var replacementKind = ReadString(replacement, "kind");
+        if (!FantasyCriticalKinds.Contains(existingKind, StringComparer.Ordinal)
+            && !FantasyCriticalKinds.Contains(replacementKind, StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        foreach (var field in SemanticIdentityFields)
+        {
+            if (!existing.TryGetValue(field, out var existingValue)
+                || !replacement.TryGetValue(field, out var replacementValue))
+            {
+                continue;
+            }
+
+            if (!ValuesEquivalent(existingValue, replacementValue))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ValuesEquivalent(object? left, object? right)
+    {
+        if (left is null || right is null)
+        {
+            return left is null && right is null;
+        }
+
+        if (left is string || right is string)
+        {
+            return string.Equals(left.ToString(), right.ToString(), StringComparison.Ordinal);
+        }
+
+        if (left is System.Collections.IEnumerable leftEnumerable
+            && right is System.Collections.IEnumerable rightEnumerable)
+        {
+            return leftEnumerable
+                .Cast<object?>()
+                .Select(value => value?.ToString() ?? string.Empty)
+                .SequenceEqual(
+                    rightEnumerable.Cast<object?>().Select(value => value?.ToString() ?? string.Empty),
+                    StringComparer.Ordinal);
+        }
+
+        return Equals(left, right);
+    }
+
     private RegistryDefinitionValidationResult ValidateDefinition(
         IReadOnlyDictionary<string, object?> definition,
         bool requireGloballyUniqueId)
@@ -411,7 +691,7 @@ public sealed class Registry
         var kind = ReadString(definition, "kind");
 
         var hasUniqueId = StableIdPattern.IsMatch(id)
-            && (!requireGloballyUniqueId || !content.ContainsKey(id));
+            && (!requireGloballyUniqueId || (!content.ContainsKey(id) && !retiredIds.ContainsKey(id)));
         if (!hasUniqueId)
         {
             diagnostics.Add(CreateDiagnostic(

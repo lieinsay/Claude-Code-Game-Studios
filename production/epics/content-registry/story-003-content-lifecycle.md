@@ -1,7 +1,7 @@
 # Story 003: Content Lifecycle
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Done — 2026-05-10
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -31,12 +31,12 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN 内容经历 Draft → Active → Deprecated → Retired，WHEN 以稳定 ID 查询或引用它，THEN 状态必须被明确识别，不得与 NOT_FOUND 混淆
-- [ ] **AC-2**: GIVEN 某个 Active ID 已退役 (Retired)，WHEN 新内容尝试复用该 ID，THEN 校验必须失败 (ERR_ID_REUSE)
-- [ ] **AC-3**: GIVEN 某个 fantasy-critical ID（route/location/repair-node/home-space/home-anchor/companion）已进入 Active，WHEN 后续内容包试图把该 ID 改义为另一个地点/房间/伙伴/修复目标/航线，THEN 校验返回 ID 改义或复用错误
-- [ ] **AC-4**: GIVEN `home-space`、`home-anchor` 或 `companion` 的运行时状态发生升级/模块替换/关系进展，WHEN 保存或恢复该状态，THEN 状态变化必须引用原稳定 ID，不能通过替换静态 ID 表达
-- [ ] **AC-5**: GIVEN 旧存档引用 Deprecated 或 Retired ID，WHEN 注册表解析该 ID，THEN 返回生命周期状态和迁移提示（迁移表引用）——具体存档迁移由 Persistence 执行
-- [ ] **AC-6**: GIVEN 新 Active 内容尝试引用 Deprecated 或 Retired ID，WHEN Story 003 查询生命周期信息，THEN Registry 必须返回足够的 status 与 migration hint 供 Story 004 的引用完整性校验判定 `ERR_REFERENCE_TO_DEPRECATED` / `ERR_REFERENCE_TO_RETIRED`
+- [x] **AC-1**: GIVEN 内容经历 Draft → Active → Deprecated → Retired，WHEN 以稳定 ID 查询或引用它，THEN 状态必须被明确识别，不得与 NOT_FOUND 混淆
+- [x] **AC-2**: GIVEN 某个 Active ID 已退役 (Retired)，WHEN 新内容尝试复用该 ID，THEN 校验必须失败 (ERR_ID_REUSE)
+- [x] **AC-3**: GIVEN 某个 fantasy-critical ID（route/location/repair-node/home-space/home-anchor/companion）已进入 Active，WHEN 后续内容包试图把该 ID 改义为另一个地点/房间/伙伴/修复目标/航线，THEN 校验返回 ID 改义或复用错误
+- [x] **AC-4**: GIVEN `home-space`、`home-anchor` 或 `companion` 的运行时状态发生升级/模块替换/关系进展，WHEN 保存或恢复该状态，THEN 状态变化必须引用原稳定 ID，不能通过替换静态 ID 表达
+- [x] **AC-5**: GIVEN 旧存档引用 Deprecated 或 Retired ID，WHEN 注册表解析该 ID，THEN 返回生命周期状态和迁移提示（迁移表引用）——具体存档迁移由 Persistence 执行
+- [x] **AC-6**: GIVEN 新 Active 内容尝试引用 Deprecated 或 Retired ID，WHEN Story 003 查询生命周期信息，THEN Registry 必须返回足够的 status 与 migration hint 供 Story 004 的引用完整性校验判定 `ERR_REFERENCE_TO_DEPRECATED` / `ERR_REFERENCE_TO_RETIRED`
 
 ---
 
@@ -94,7 +94,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/registry/ContentLifecycleTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created — C# implementation with 6/6 AC checks passing
 
 ---
 
@@ -102,3 +102,13 @@
 
 - Depends on: Story 001 (ID Registry Core —— 生命周期管理依赖 ID 注册机制)
 - Unlocks: Story 005 (Domain Loading 需区分 Active vs Draft 内容)
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-10
+**Criteria**: 6/6 passing
+**Deviations**: None
+**Test Evidence**: Logic unit test at `tests/unit/registry/ContentLifecycleTest.csproj`
+**Code Review**: Complete — local code-review pass, event emit-after-mutation coverage added

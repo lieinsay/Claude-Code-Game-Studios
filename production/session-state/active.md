@@ -2,9 +2,24 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: Production Story Readiness Metadata
-Task: ✅ 115/115 Story readiness metadata aligned to ADR-0019
+Feature: Content Registry
+Task: ✅ Story-003 Content Lifecycle Done
 <!-- /STATUS -->
+
+## Session Extract — /story-done 2026-05-10
+
+- Verdict: COMPLETE
+- Story: `production/epics/content-registry/story-003-content-lifecycle.md` — Story 003: Content Lifecycle
+- Tech debt logged: None
+- Next recommended: `production/epics/content-registry/story-004-reference-integrity.md` — Story 004: Reference Integrity
+
+## Session Extract — /dev-story 2026-05-10
+
+- Story: `production/epics/content-registry/story-003-content-lifecycle.md` — Story 003: Content Lifecycle
+- Files changed: `src/core/content/Registry.cs`, `tests/unit/registry/ContentLifecycleTest.csproj`, `tests/unit/registry/ContentLifecycleProgram.cs`, `tests/unit/registry/IdRegistryCoreTest.csproj`, `CloudWeaverVoyage.sln`, `production/epics/content-registry/story-003-content-lifecycle.md`, `production/session-state/active.md`
+- Test written: `tests/unit/registry/ContentLifecycleTest.csproj` — 6/6 Story-003 AC checks passing
+- Blockers: None
+- Next: `/code-review src/core/content/Registry.cs tests/unit/registry/ContentLifecycleProgram.cs` then `/story-done production/epics/content-registry/story-003-content-lifecycle.md`
 
 ### 全量 Story Readiness 元数据收口 — 2026-05-10
 
