@@ -1,7 +1,7 @@
 # Story 001: ID Registry Core + Query Engine
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Done — 2026-05-10
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: Not yet created — run `/create-control-manifest`
@@ -30,16 +30,16 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN registry 中存在某个稳定 ID 的唯一 Active 定义，WHEN 通过该稳定 ID 查询，THEN 只返回一份 canonical definition
-- [ ] **AC-2**: GIVEN 同一稳定 ID 出现两份定义，WHEN 运行注册表校验，THEN 必须返回 `ERR_DUPLICATE_ID`，不能任意选一份通过
-- [ ] **AC-3**: GIVEN ID 不符合格式规则或归一化后发生碰撞，WHEN 注册表校验，THEN 返回 ID 格式或归一化冲突错误
-- [ ] **AC-4**: GIVEN 目标已加载且存在，WHEN 查询，THEN 返回定义本体
-- [ ] **AC-5**: GIVEN 目标所属域未加载，WHEN 查询，THEN 返回 `UNLOADED`，不得返回 `NOT_FOUND`
-- [ ] **AC-6**: GIVEN 目标不存在且所属域已加载完成，WHEN 查询，THEN 返回 `NOT_FOUND`
-- [ ] **AC-7**: GIVEN 列表查询返回多条内容，WHEN 执行查询，THEN 结果按 `sort_order ASC, id ASC` 排序，且多次查询顺序一致
-- [ ] **AC-8**: GIVEN 查询结果超过 `max_query_result_count`，WHEN 执行列表查询，THEN 返回受控分页或截断，不得一次性无界返回
-- [ ] **AC-9**: GIVEN registry 只加载部分内容域，WHEN 查询已加载域的内容，THEN 不需要等待未加载域完成即可返回结果
-- [ ] **AC-10**: GIVEN registry 只加载部分内容域，WHEN 查询未加载域的内容，THEN 返回 `UNLOADED`，且不得触发任意文件系统扫描
+- [x] **AC-1**: GIVEN registry 中存在某个稳定 ID 的唯一 Active 定义，WHEN 通过该稳定 ID 查询，THEN 只返回一份 canonical definition
+- [x] **AC-2**: GIVEN 同一稳定 ID 出现两份定义，WHEN 运行注册表校验，THEN 必须返回 `ERR_DUPLICATE_ID`，不能任意选一份通过
+- [x] **AC-3**: GIVEN ID 不符合格式规则或归一化后发生碰撞，WHEN 注册表校验，THEN 返回 ID 格式或归一化冲突错误
+- [x] **AC-4**: GIVEN 目标已加载且存在，WHEN 查询，THEN 返回定义本体
+- [x] **AC-5**: GIVEN 目标所属域未加载，WHEN 查询，THEN 返回 `UNLOADED`，不得返回 `NOT_FOUND`
+- [x] **AC-6**: GIVEN 目标不存在且所属域已加载完成，WHEN 查询，THEN 返回 `NOT_FOUND`
+- [x] **AC-7**: GIVEN 列表查询返回多条内容，WHEN 执行查询，THEN 结果按 `sort_order ASC, id ASC` 排序，且多次查询顺序一致
+- [x] **AC-8**: GIVEN 查询结果超过 `max_query_result_count`，WHEN 执行列表查询，THEN 返回受控分页或截断，不得一次性无界返回
+- [x] **AC-9**: GIVEN registry 只加载部分内容域，WHEN 查询已加载域的内容，THEN 不需要等待未加载域完成即可返回结果
+- [x] **AC-10**: GIVEN registry 只加载部分内容域，WHEN 查询未加载域的内容，THEN 返回 `UNLOADED`，且不得触发任意文件系统扫描
 
 ---
 
@@ -103,8 +103,10 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/registry/id_registry_core_test.gd` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/registry/IdRegistryCoreTest.csproj` — exists and passes (10/10 AC)
+**Status**: [x] Created — C# implementation with 10/10 AC checks passing
+**C# Source**: `src/core/Registry.cs`
+**Test Source**: `tests/unit/registry/Program.cs`
 
 ---
 

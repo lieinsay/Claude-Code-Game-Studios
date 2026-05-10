@@ -60,11 +60,18 @@ public sealed class Registry
     private readonly Dictionary<string, Dictionary<string, object?>> content = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedDomains = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedKinds = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, HashSet<string>> domainKindMap = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets whether the registry has completed its initial content bootstrap.
     /// </summary>
     public bool IsInitialized { get; private set; }
+
+    /// <summary>
+    /// Maximum number of results returned by list queries before pagination.
+    /// Default 200 per performance budget. Set to 0 for unlimited (dev tools only).
+    /// </summary>
+    public int MaxQueryResultCount { get; set; } = 200;
 
     /// <summary>
     /// Loads the prototype static content set into the registry.
@@ -109,30 +116,32 @@ public sealed class Registry
 
     /// <summary>
     /// Lists active or draft content definitions for a kind in deterministic order.
+    /// Results are capped at MaxQueryResultCount when set; 0 = unlimited.
     /// </summary>
     public IReadOnlyList<IReadOnlyDictionary<string, object?>> ListByKind(string kind)
     {
-        return content.Values
-            .Where(entity => string.Equals(ReadString(entity, "kind"), kind, StringComparison.Ordinal))
-            .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
-            .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
-            .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
-            .Select(CloneEntity)
-            .ToList();
+        return ApplyResultLimit(
+            content.Values
+                .Where(entity => string.Equals(ReadString(entity, "kind"), kind, StringComparison.Ordinal))
+                .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
+                .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
+                .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
+                .Select(CloneEntity));
     }
 
     /// <summary>
     /// Lists active or draft content definitions for an owner domain in deterministic order.
+    /// Results are capped at MaxQueryResultCount when set; 0 = unlimited.
     /// </summary>
     public IReadOnlyList<IReadOnlyDictionary<string, object?>> ListByDomain(string domain)
     {
-        return content.Values
-            .Where(entity => string.Equals(ReadString(entity, "owner_domain"), domain, StringComparison.Ordinal))
-            .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
-            .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
-            .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
-            .Select(CloneEntity)
-            .ToList();
+        return ApplyResultLimit(
+            content.Values
+                .Where(entity => string.Equals(ReadString(entity, "owner_domain"), domain, StringComparison.Ordinal))
+                .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
+                .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
+                .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
+                .Select(CloneEntity));
     }
 
     /// <summary>
@@ -148,6 +157,17 @@ public sealed class Registry
         if (!string.IsNullOrWhiteSpace(kind))
         {
             loadedKinds.Add(kind);
+            var ownerDomain = ReadString(entity, "owner_domain");
+            if (!string.IsNullOrWhiteSpace(ownerDomain))
+            {
+                if (!domainKindMap.TryGetValue(ownerDomain, out var kinds))
+                {
+                    kinds = new HashSet<string>(StringComparer.Ordinal);
+                    domainKindMap[ownerDomain] = kinds;
+                }
+
+                kinds.Add(kind);
+            }
         }
     }
 
@@ -252,7 +272,24 @@ public sealed class Registry
     private bool IsLoadedIdFamily(string entityId)
     {
         var separator = entityId.IndexOf('.', StringComparison.Ordinal);
-        return separator > 0 && loadedKinds.Contains(entityId[..separator]);
+        if (separator <= 0)
+        {
+            return false;
+        }
+
+        var kind = entityId[..separator];
+        return loadedKinds.Contains(kind) || domainKindMap.Values.Any(kinds => kinds.Contains(kind));
+    }
+
+    private IReadOnlyList<IReadOnlyDictionary<string, object?>> ApplyResultLimit(
+        IEnumerable<IReadOnlyDictionary<string, object?>> results)
+    {
+        if (MaxQueryResultCount > 0)
+        {
+            return results.Take(MaxQueryResultCount).ToList();
+        }
+
+        return results.ToList();
     }
 }
 

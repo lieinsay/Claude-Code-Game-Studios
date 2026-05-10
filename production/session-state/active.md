@@ -2,9 +2,48 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: 平台转向复审
-Task: ✅ 平台转向复审完成 (CONCERNS — 0 blockers, 10 文件修复)
+Feature: Foundation Layer — content-registry Story-001
+Task: ✅ Story-001 完成 (10/10 AC PASS)
 <!-- /STATUS -->
+
+### Foundation Layer: content-registry Story-001 Done — 2026-05-10
+
+- [x] `src/core/Registry.cs` — 升级: `MaxQueryResultCount` 分页 + `domainKindMap` 域隔离 + `ApplyResultLimit`
+- [x] `tests/unit/registry/IdRegistryCoreTest.csproj` — 新增测试项目: 10/10 AC 全部 PASS
+- [x] `tests/unit/registry/Program.cs` — Story-001 10 个 AC 测试
+- [x] `production/epics/content-registry/story-001-id-registry-core-query.md` — 状态更新: Ready → Done
+- [x] `CloudWeaverVoyage.sln` — 新增 IdRegistryCoreTest 项目引用
+- [x] `dotnet run --project tests/unit/registry` — 10/10 PASS
+
+### C# Autoload 全量迁移 — 2026-05-10 完成
+
+- [x] `src/core/InteractionRegistry.cs` — 5 状态焦点机 + 注册/取消注册 + FocusChanged 事件
+- [x] `src/core/ResourcesManager.cs` — 6 资源池 + "fill fullest first" 合并 + SupplyClassCapacity
+- [x] `src/core/IntelManager.cs` — KnowledgeState 机 + RevealRumor (confidence clamp) + PatternObserved
+- [x] `src/core/ChartManager.cs` — ChartState 机 (Idle→DepartureLocked) + RouteSelectability + RouteCommitted
+- [x] `src/feature/WorldRepair.cs` — RepairState 机 + CommitDeposit + RepairCompleted 扇出信号
+- [x] `src/presentation/UIManager.cs` — 12 屏 FSM + ModalStack + CombatOverride + InputLayer 路由
+- [x] `src/presentation/FeedbackManager.cs` — SemanticEventHub (ADR-0016 桩) + Subscribe/EmitFeedback
+- [x] `src/core/SessionBootChain.cs` — Phase 0→7 引导链 + ShellState 转换 + InputGate
+- [x] `tests/csharp/FoundationParity/Program.cs` — 70/70 checks PASS (从 20 扩展到 70)
+- [x] `dotnet build CloudWeaverVoyage.sln --no-restore` — PASS (0 errors, 3 warnings — 未使用 API 事件)
+- [x] `dotnet run --project tests/csharp/FoundationParity` — PASS (70/70)
+
+**C# Autoload 迁移对照:**
+
+| # | Autoload | GDScript | C# | Namespace |
+|---|----------|----------|----|-----------|
+| 1 | Registry | registry.gd | Registry.cs | Core |
+| 2 | Persistence | persistence.gd | Persistence.cs | Core |
+| — | SnapshotPackage | snapshot_package.gd | SnapshotPackage.cs | Core |
+| 3 | InteractionRegistry | interaction_registry.gd | InteractionRegistry.cs | Core |
+| 4 | Resources | resources_manager.gd | ResourcesManager.cs | Core |
+| 5 | Intel | intel_manager.gd | IntelManager.cs | Core |
+| 6 | Chart | chart_manager.gd | ChartManager.cs | Core |
+| 7 | WorldRepair | world_repair.gd | WorldRepair.cs | Feature |
+| 8 | UIManager | ui_manager.gd | UIManager.cs | Presentation |
+| 9 | FeedbackManager | feedback_manager.gd | FeedbackManager.cs | Presentation |
+| — | SessionShell | session_shell.gd | SessionBootChain.cs | Core |
 
 ### 平台转向复审 — 2026-05-09 完成
 
