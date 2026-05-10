@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -64,7 +65,7 @@
 
 ### Serializer
 
-```gdscript
+```text
 func _serialize_world_repair() -> Dictionary:
     var serialized_nodes: Dictionary = {}
     for node_id in repair_nodes:
@@ -119,7 +120,7 @@ func _compute_repair_progress_from_deposited(node_id: StringName, deposited: Dic
 
 ### Pool 6 Cross-Validation
 
-```gdscript
+```text
 func _cross_validate_with_pool_6() -> void:
     # 对每个已修复或部分提交的节点，交叉验证 deposited 计数器
     for node_id in repair_nodes:
@@ -150,7 +151,7 @@ func _cross_validate_with_pool_6() -> void:
 
 ### Domain Registration
 
-```gdscript
+```text
 func _on_feature_ready() -> void:
     # 注册 domain serializer（遵循 ADR-0003）
     Persistence.register_domain_serializer("world-repair", _serialize_world_repair)
@@ -189,7 +190,7 @@ func _on_feature_ready() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/world-repair/persistence_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/world-repair/PersistenceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

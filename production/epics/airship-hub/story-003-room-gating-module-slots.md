@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -59,7 +60,7 @@
 
 ### room_exists() Formula
 
-```gdscript
+```text
 # Room base existence table
 const ROOM_BASE_EXISTS: Dictionary = {
     &"cockpit": true,
@@ -95,7 +96,7 @@ func _is_module_installed(module_id: StringName) -> bool:
 
 ### Module Slot State Mirror
 
-```gdscript
+```text
 enum ModuleSlotState {
     EMPTY,        # 未安装模块
     INSTALLED,    # 已安装，正常工作
@@ -126,7 +127,7 @@ func _is_module_installed_eval(state: int) -> bool:
 
 ### Cargo Hold Lifecycle
 
-```gdscript
+```text
 func _on_cargo_hold_appeared() -> void:
     # 货舱拼装到船体——播放拼装动画，开放步行区域
     _play_room_attach_animation(&"cargo_hold")
@@ -143,7 +144,7 @@ func _on_cargo_hold_disappeared() -> void:
 
 ### Cargo Bay Content Protection
 
-```gdscript
+```text
 func can_unequip_module(slot_id: StringName) -> bool:
     if slot_id == &"cargo_module":
         var usage: Dictionary = ResourcesManager.get_cargo_bay_usage()
@@ -158,7 +159,7 @@ func get_unequip_block_reason(slot_id: StringName) -> String:
 
 ### Visual Display Mapping
 
-```gdscript
+```text
 func _get_slot_indicator_color(state: int) -> Color:
     match state:
         MODULE_SLOT_EMPTY:
@@ -216,7 +217,7 @@ func _get_slot_indicator_shape(state: int) -> String:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/room_gating_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/RoomGatingTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

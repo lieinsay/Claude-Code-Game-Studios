@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -12,7 +13,7 @@
 **Requirement**: `TR-ui-003`
 
 **ADR Governing Implementation**: ADR-0012 (§6 HUD 更新策略, §7 面板生命周期, C.6/C.7)
-**ADR Decision Summary**: HUD 更新核心原则：信号驱动 + 脏标记批量更新——永不做 _process() 轮询。领域信号到达→_dirty_flags[element_id]=true + _pending_payloads[element_id]=payload 保存。_process(process_priority=-10) 中若 dirty_flags 非空→遍历脏元素更新→clear。空闲帧 dirty_flags 为空时 _process 零开销（立即返回）。Web tab freeze 恢复：NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量强制刷新。HUD 可见性门控：S1 仅在 Hub 场景激活时可见，S5 仅在 EXPLORING/EXTRACTING 阶段可见（ARRIVING/DEPARTED 隐藏）。11 个信号→HUD 元素映射（hull_integrity_changed→船体条、storage_changed→仓库余量、carried_changed→随身物品栏格等）。
+**ADR Decision Summary**: HUD 更新核心原则：信号驱动 + 脏标记批量更新——永不做 _process() 轮询。领域信号到达→_dirty_flags[element_id]=true + _pending_payloads[element_id]=payload 保存。_process(process_priority=-10) 中若 dirty_flags 非空→遍历脏元素更新→clear。空闲帧 dirty_flags 为空时 _process 零开销（立即返回）。desktop window freeze 恢复：NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量强制刷新。HUD 可见性门控：S1 仅在 Hub 场景激活时可见，S5 仅在 EXPLORING/EXTRACTING 阶段可见（ARRIVING/DEPARTED 隐藏）。11 个信号→HUD 元素映射（hull_integrity_changed→船体条、storage_changed→仓库余量、carried_changed→随身物品栏格等）。
 
 面板生命周期：非模态面板（S2 非模态/S11/S12）距离驱动——进入 1.5× anchor_radius 预加载面板数据（异步），按 Use 打开（0.25s 羊皮纸翻开动画），离开 2× anchor_radius 自动关闭（0.15s 合上动画），手动 Esc 立即关闭。模态面板（S3/S6a/S6c/S7/S8/S9/S10）事件驱动——不依赖距离，仅手动关闭（Esc/按钮/系统事件）。全屏面板（S4）场景级 visible 切换。懒加载策略：S4 首次进入 load() 缓存 PackedScene（5-20ms）；S2 使用单个通用 StationDetailPanel 模板（数据从 Registry 绑定）；S7 HUD 初始化时 preload()；缓存池最大 2 面板实例（LRU 淘汰），场景切换时清空。
 
@@ -78,7 +79,7 @@
 
 ### Dirty Flag Core
 
-```gdscript
+```text
 func _on_signal(element_id: StringName, payload: Variant) -> void:
     _state["_dirty_flags"][element_id] = true
     _state["_pending_payloads"][element_id] = payload
@@ -93,7 +94,7 @@ func _process(_delta: float) -> void:
 
 ### Signal Subscription (in _on_feature_ready)
 
-```gdscript
+```text
 func _connect_hud_signals() -> void:
     AirshipModuleSystem.hull_integrity_changed.connect(_on_signal.bind(&"hull_bar"))
     AirshipModuleSystem.hull_band_changed.connect(_on_signal.bind(&"hull_band"))
@@ -108,7 +109,7 @@ func _connect_hud_signals() -> void:
 
 ### Panel Lifecycle — Non-Modal
 
-```gdscript
+```text
 func _on_proximity_enter(anchor_id: StringName) -> void:
     var panel_id := _anchor_to_panel_id(anchor_id)
     if panel_id == &"":
@@ -123,7 +124,7 @@ func _on_proximity_exit(anchor_id: StringName) -> void:
 
 ### Cache Pool (LRU)
 
-```gdscript
+```text
 const PANEL_CACHE_MAX := 2
 
 func _cache_panel(panel_id: StringName, instance: Control) -> void:
@@ -141,7 +142,7 @@ func _cache_panel(panel_id: StringName, instance: Control) -> void:
 - 屏幕状态机的 HUD 可见性门控触发——属于 Story 001（_apply_screen_visibility）
 - 4 层输入路由的鼠标穿透规则（mouse_filter=IGNORE）——属于 Story 002
 - 羊皮纸翻开/合上动画实现——属于 Story 005
-- Web tab freeze 的 full_ui_refresh 实现——属于 Story 006
+- desktop window freeze 的 full_ui_refresh 实现——属于 Story 006
 - 各领域系统的信号发射——属于各自系统的 Epic
 - StationDetailPanel 模板的 UI 布局——属于 #16 UIManager 场景实现
 
@@ -162,7 +163,7 @@ func _cache_panel(panel_id: StringName, instance: Control) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/ui-hud-interface/hud_update_panel_lifecycle_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

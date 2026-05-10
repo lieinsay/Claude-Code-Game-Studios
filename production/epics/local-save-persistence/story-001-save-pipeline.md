@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -15,7 +16,7 @@
 **ADR Decision Summary**: 三段式保存工作流：Staging（写入暂存区→不修改 manifest pointer）→ Verify（readback+SHA-256 checksum+Schema 兼容性+稳定 ID 解析）→ Promotion（原子切换 current pointer/generation）。任何阶段失败→旧 Safe 保持不变。禁止 `store_var()`/`get_var()` Variant blob——所有快照使用 Canonical JSON。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 纯 GDScript + JSON；`user://` 映射到 IndexedDB；SHA-256 通过 `Crypto` 单例（Godot 4.x built-in）。
+**Engine Notes**: 纯 C# + JSON；`user://` 映射到 user:// storage；SHA-256 通过 `Crypto` 单例（Godot 4.x built-in）。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: Canonical JSON 序列化；SHA-256 校验；原子三阶段 promotion
@@ -49,7 +50,7 @@
 
 - Story 002: Snapshot Package 的 validity 判定
 - Story 003: storage_capability 判定（PersistentAvailable/WriteLocked/EphemeralOnly）
-- Story 008: pagehide/beforeunload 期间的 best-effort flush
+- Story 008: suspend_requested/quit_requested 期间的 best-effort flush
 
 ---
 
@@ -72,7 +73,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/persistence/save_pipeline_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/persistence/SavePipelineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

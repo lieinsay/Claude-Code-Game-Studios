@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -83,8 +84,8 @@
 
 ### Signal Declarations (HubManager Autoload #7)
 
-```gdscript
-# HubManager.gd — Autoload #7
+```text
+# HubManager.cs — Autoload #7
 extends Node
 
 # === Hub → External Signals (ADR-0002 compliant) ===
@@ -111,7 +112,7 @@ signal room_existence_changed(room_id: StringName, now_exists: bool)
 
 ### Emit-After-Mutation Pattern
 
-```gdscript
+```text
 # All signal emits follow this pattern:
 # 1. Mutate state first
 # 2. Emit signal second
@@ -132,7 +133,7 @@ func _transition_docking(new_state: int) -> void:
 
 ### HUD Data Provider Interface
 
-```gdscript
+```text
 # Hub 提供 HUD 数据的查询接口——UI 系统 #16 按需调用
 # Hub 不拥有 HUD 节点的引用——仅提供数据
 
@@ -170,7 +171,7 @@ func _get_cargo_load_display() -> Variant:
 
 ### HUD Update Registration (On-Change Pattern)
 
-```gdscript
+```text
 # HUD 系统 #16 在 _ready() 中连接 Hub signal
 # 每次 signal 触发 → HUD 查询对应指标 → 更新显示
 # 不使用 _process() 轮询
@@ -207,7 +208,7 @@ func _refresh_hull_integrity() -> void:
 
 ### Departure Lock Panel Force Close
 
-```gdscript
+```text
 func _on_departure_locked() -> void:
     _set_movement_rooted(true)
     _disable_all_stations_during_lock()
@@ -221,7 +222,7 @@ func _on_departure_locked() -> void:
 
 ### Signal Cascade Depth Enforcement
 
-```gdscript
+```text
 # 静态分析辅助：Hub signal → 下游 consumer → 下游再 emit 的深度检查
 # Hub 信号的直接 consumer:
 #   departure_initiated → ChartSystem.initiate_departure() / NavigationSystem.initiate_free_flight()
@@ -234,7 +235,7 @@ func _on_departure_locked() -> void:
 
 ### Station is_enabled() with Departure Lock
 
-```gdscript
+```text
 # HubStation.is_enabled() 已包含 departure_locked 检查（Story 002 AC-13）
 func is_enabled() -> bool:
     if HubManager.docking_state != HubManager.DockingState.LANDED:
@@ -282,7 +283,7 @@ func is_enabled() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/hub/signal_contract_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/SignalContractTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

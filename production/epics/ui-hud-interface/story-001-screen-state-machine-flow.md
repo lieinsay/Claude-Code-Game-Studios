@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### Screen State Enum
 
-```gdscript
+```text
 const SCREEN_HUB: StringName = &"HUB"
 const SCREEN_CHART: StringName = &"CHART"
 const SCREEN_CHART_ROUTE_SELECTED: StringName = &"CHART_ROUTE_SELECTED"
@@ -75,7 +76,7 @@ const SCREEN_HUB_ARRIVING: StringName = &"HUB_ARRIVING"
 
 ### Screen Type Classification
 
-```gdscript
+```text
 enum ScreenType {
     HUD_OVERLAY,   # S1, S5 — 常驻 HUD，mouse_filter=IGNORE
     FULLSCREEN,    # S4 — 全屏，visible 切换
@@ -87,7 +88,7 @@ enum ScreenType {
 
 ### Screen Transition
 
-```gdscript
+```text
 func _transition_screen(new_screen: StringName) -> int:
     if _state["_departure_locked"] and new_screen != &"CHART":
         return ScreenResult.ERR_DEPARTURE_LOCKED
@@ -104,7 +105,7 @@ func _transition_screen(new_screen: StringName) -> int:
 
 ### Departure Lock
 
-```gdscript
+```text
 func _enter_departure_locked() -> void:
     _state["_departure_locked"] = true
     _force_close_all_panels()
@@ -143,7 +144,7 @@ func _on_lock_timer_complete() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/ui-hud-interface/screen_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

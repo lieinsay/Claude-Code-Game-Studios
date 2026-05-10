@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -12,7 +13,7 @@
 **Requirement**: `TR-repair-001`, `TR-repair-002`, `TR-repair-003`
 
 **ADR Governing Implementation**: ADR-0011 (§5e visual_state_changed, §Risks table, MVP 视觉规格)
-**ADR Decision Summary**: GDD 定义了 12 个边缘案例 + Creative Director 约束要求 MVP 必须承担"可见恢复"反馈的归属权（#17 为 Vertical Slice，修复本身的视觉/世界反馈在本系统内定义最低版本）。视觉规格：known 状态灰暗/破损 sprite → repaired 状态发光 sprite + modulate 呼吸动画（±10% opacity, 周期 3s）+ 半透明光束从灯塔向航线方向 + 暖色光点粒子（6-8 个，上浮，2-4s 生命周期，48px 半径生成）。音频规格：提交材料短促确认音 <0.5s + 最后提交嗡鸣渐强→清脆"叮"声 2-3s。仪式持续 5.0s ± 0.5s。Web 标签页暂停恢复后仪式基于 delta 继续。
+**ADR Decision Summary**: GDD 定义了 12 个边缘案例 + Creative Director 约束要求 MVP 必须承担"可见恢复"反馈的归属权（#17 为 Vertical Slice，修复本身的视觉/世界反馈在本系统内定义最低版本）。视觉规格：known 状态灰暗/破损 sprite → repaired 状态发光 sprite + modulate 呼吸动画（±10% opacity, 周期 3s）+ 半透明光束从灯塔向航线方向 + 暖色光点粒子（6-8 个，上浮，2-4s 生命周期，48px 半径生成）。音频规格：提交材料短促确认音 <0.5s + 最后提交嗡鸣渐强→清脆"叮"声 2-3s。仪式持续 5.0s ± 0.5s。桌面窗口暂停恢复后仪式基于 delta 继续。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
@@ -73,7 +74,7 @@
 
 ### EC-13-12: Browser Tab Suspend During Ceremony
 
-- [ ] **AC-14**: GIVEN 修复仪式播放中（5.0s 动画），WHEN 浏览器标签页被暂停（pagehide），THEN 动画暂停。恢复后基于 `delta` 继续——不跳过剩余动画、不卡死、不从头开始。仪式总时长基于累计 delta（非挂钟时间）
+- [ ] **AC-14**: GIVEN 修复仪式播放中（5.0s 动画），WHEN 桌面窗口被暂停（suspend_requested），THEN 动画暂停。恢复后基于 `delta` 继续——不跳过剩余动画、不卡死、不从头开始。仪式总时长基于累计 delta（非挂钟时间）
 
 ### MVP Visual Feedback (Creative Director Constraint)
 
@@ -103,7 +104,7 @@
 
 ### Visual Feedback — MVP Minimal Spec
 
-```gdscript
+```text
 # WorldRepair Autoload #13 — MVP 视觉反馈（#17 就绪前由本系统直接管理）
 
 # 灯塔视觉状态
@@ -151,7 +152,7 @@ func _trigger_repair_ceremony(node_id: StringName) -> void:
 
 ### Visual Sprite & Beam
 
-```gdscript
+```text
 func _apply_beacon_sprite(state: StringName) -> void:
     # 通过 visual_state_anchor 获取对应的 sprite 节点
     # known → 灰暗/破损纹理；repaired → 发光纹理（暖黄色光晕）
@@ -175,7 +176,7 @@ func _spawn_beacon_particles(_delta: float) -> void:
 
 ### Audio Feedback
 
-```gdscript
+```text
 func _play_deposit_confirm_audio() -> void:
     # 短促确认音 <0.5s — 金属/石料碰撞感
     # 使用 Godot AudioStreamPlayer 播放一次性音效
@@ -190,8 +191,8 @@ func _play_ceremony_audio() -> void:
 
 ### Browser Tab Suspend Safe
 
-```gdscript
-# Godot Web 导出中，pagehide/visibilitychange 事件会暂停 `_process` 调用。
+```text
+# Godot 桌面构建中，suspend_requested/window_focus_changed 事件会暂停 `_process` 调用。
 # 当标签页恢复时，`_process` 恢复——delta 会是自上次 process 以来经过的实际时间。
 # 
 # 这意味着 _ceremony_elapsed += delta 在恢复后自动包含暂停期间的时间。
@@ -210,7 +211,7 @@ func _play_ceremony_audio() -> void:
 
 ### Config Validation
 
-```gdscript
+```text
 func _validate_ceremony_config() -> void:
     # 防御性配置验证——在 feature_ready 阶段调用
     if CEREMONY_DURATION <= 0.0:
@@ -253,7 +254,7 @@ func _validate_ceremony_config() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/world-repair/edge_cases_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/world-repair/EdgeCasesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

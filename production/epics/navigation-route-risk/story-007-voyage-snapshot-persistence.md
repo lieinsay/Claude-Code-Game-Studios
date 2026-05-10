@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -84,7 +85,7 @@
 
 ### Snapshot Capture
 
-```gdscript
+```text
 func _capture_voyage_snapshot() -> Dictionary:
     return {
         "route_id": _active_voyage.get("route_id", &""),
@@ -126,7 +127,7 @@ func _attempt_degraded_save(snapshot: Dictionary) -> void:
 
 ### Snapshot Restoration
 
-```gdscript
+```text
 func _restore_voyage_from_snapshot(snapshot: Dictionary) -> void:
     var state: StringName = snapshot.get("voyage_state", &"IDLE")
 
@@ -192,7 +193,7 @@ func _restore_completed_voyage(snapshot: Dictionary) -> void:
 
 ### Serialization Helpers
 
-```gdscript
+```text
 func _serialize_for_json(value: Variant) -> Variant:
     if value is StringName:
         return String(value)
@@ -235,7 +236,7 @@ func _deserialize_encounters(raw: Array) -> Array:
 
 ### Persistence Integration
 
-```gdscript
+```text
 # Navigation 在 _finalize_voyage() 步骤 (5) 中调用
 func _persist_voyage_snapshot(ctx: Dictionary) -> void:
     var snapshot := _capture_voyage_snapshot()
@@ -254,7 +255,7 @@ func restore_from_snapshot(snapshot: Dictionary) -> void:
 ## Out of Scope
 
 - Persistence.capture_snapshot() 的具体实现和 Canonical JSON 序列化——属于 #3 local-save-persistence Epic
-- 存档的跨会话持久化（IndexedDB 写入/读取）——属于 #3 Persistence
+- 存档的跨会话持久化（user:// storage 写入/读取）——属于 #3 Persistence
 - progress.voyage snapshot 的 schema 迁移系统——属于 #3 Persistence 的存档迁移逻辑
 - 存档文件的加密/压缩——属于 #3 Persistence
 
@@ -284,7 +285,7 @@ func restore_from_snapshot(snapshot: Dictionary) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/voyage_snapshot_persistence_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/navigation/VoyageSnapshotPersistenceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

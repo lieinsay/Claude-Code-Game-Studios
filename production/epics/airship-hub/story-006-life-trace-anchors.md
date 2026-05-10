@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### Trace Anchor Data Model
 
-```gdscript
+```text
 enum TraceAnchorID {
     CHART_NOTES,
     STORAGE_FULLNESS,
@@ -90,7 +91,7 @@ var _trace_anchors: Dictionary = {}  # Dict[int, Dictionary]
 
 ### Tier Mapping Functions
 
-```gdscript
+```text
 # === Chart Notes — 数据源：IntelManager ===
 
 func _derive_chart_notes_tier() -> int:
@@ -150,7 +151,7 @@ func _derive_hull_repairs_tier() -> int:
 
 ### Trace Anchor Refresh Cycle
 
-```gdscript
+```text
 # 在以下时机刷新所有痕迹锚点：
 # 1. arrival → landed 转换完成（_on_landed）
 # 2. 玩家在 Hub 中完成影响锚点的操作后（如拆包入库、模块检查）
@@ -185,14 +186,14 @@ func _on_trace_anchor_changed(anchor_id: int, old_tier: int, new_tier: int) -> v
 
 ### Signal Definition
 
-```gdscript
+```text
 # ADR-0002 compliant: {noun}_{verb_past}
 signal trace_anchor_changed(anchor_id: int, new_tier: int)
 ```
 
 ### Max Tier Constants
 
-```gdscript
+```text
 const TRACE_ANCHOR_MAX_TIERS: Dictionary = {
     TraceAnchorID.CHART_NOTES: 2,       # 0=干净, 1=有笔记, 2=写满了
     TraceAnchorID.STORAGE_FULLNESS: 2,  # 0=空, 1=部分满, 2=满
@@ -206,7 +207,7 @@ func _get_max_tier(anchor_id: int) -> int:
 
 ### Snapshot Integration (for Story 008)
 
-```gdscript
+```text
 # trace_anchors 作为 progress.airship 的一部分持久化
 func _build_trace_anchor_snapshot() -> Dictionary:
     var snapshot: Dictionary = {}
@@ -222,7 +223,7 @@ func _restore_trace_anchors(snapshot: Dictionary) -> void:
 
 ### Partner Nest Narrative Items Mapping
 
-```gdscript
+```text
 # 4 阶段巢穴的叙事物品——由 PartnerSystem #15 R11 定义
 # Hub 仅持有 tier→物品名称映射用于 display_hint / UI 展示
 const NEST_STAGE_ITEMS: Dictionary = {
@@ -282,7 +283,7 @@ func _get_accumulated_items(tier: int) -> Array:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/trace_anchors_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/TraceAnchorsTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

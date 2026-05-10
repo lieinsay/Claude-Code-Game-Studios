@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -73,7 +74,7 @@
 
 ### Formula 4 — Damage Accumulation
 
-```gdscript
+```text
 func _resolve_encounter_check() -> void:
     var hits: Array[Dictionary] = _collect_encounter_hits()
     if hits.is_empty():
@@ -116,7 +117,7 @@ func _get_hull_integrity_effective() -> int:
 
 ### Dynamic Hull Band Transitions
 
-```gdscript
+```text
 func _get_hull_band(integrity: int) -> StringName:
     if integrity >= 76:
         return &"intact"
@@ -152,7 +153,7 @@ func _check_hull_band_transition() -> void:
 
 ### Module Damage During Voyage
 
-```gdscript
+```text
 func _apply_module_damage_if_hit(special_effects: Array[StringName]) -> void:
     if &"module_damage_20pct_scout" in special_effects:
         if randf() < 0.20:
@@ -169,7 +170,7 @@ func _apply_module_damage_if_hit(special_effects: Array[StringName]) -> void:
 
 ### Damage Writing at Voyage End
 
-```gdscript
+```text
 func _write_damage_to_hull() -> void:
     if _accumulated_damage > 0:
         ModuleHullManager.apply_hull_damage(_accumulated_damage)
@@ -210,7 +211,7 @@ func _write_damage_to_hull() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/damage_bands_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/navigation/DamageBandsTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -70,7 +71,7 @@
 
 ### IntelConsumeResult Structure
 
-```gdscript
+```text
 # 返回 Dictionary:
 # {
 #   success: bool,
@@ -90,7 +91,7 @@
 
 ### Core Algorithm
 
-```gdscript
+```text
 func consume_intel(intel_id: StringName) -> Dictionary:
     var result: Dictionary = {
         "success": false,
@@ -177,7 +178,7 @@ func consume_intel(intel_id: StringName) -> Dictionary:
 
 ### is_intel_consumed Query
 
-```gdscript
+```text
 func is_intel_consumed(intel_id: StringName) -> bool:
     return intel_id in consumed_intel_ids
 ```
@@ -186,7 +187,7 @@ func is_intel_consumed(intel_id: StringName) -> bool:
 
 `lookup_intel()` 依赖 Registry 提供静态 intel 定义。IntelManager 在 Phase 3 (core_data_ready) 从 Registry 加载 intel 定义缓存:
 
-```gdscript
+```text
 var _intel_def_cache: Dictionary = {}  # Dict[StringName, Dictionary]
 
 func _cache_intel_defs() -> void:
@@ -228,7 +229,7 @@ func _cache_intel_defs() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/intel_consume_algorithm_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/IntelConsumeAlgorithmTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

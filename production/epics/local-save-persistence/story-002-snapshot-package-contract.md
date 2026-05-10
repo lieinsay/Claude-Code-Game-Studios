@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -15,7 +16,7 @@
 **ADR Decision Summary**: Snapshot Package 是领域系统与存档系统之间唯一合法的可持久化边界。不是运行时对象副本，不是任意 Dictionary dump——是领域系统主动声明的、可校验的状态包。包级校验覆盖必填字段、payload 类型白名单、canonical 编码规则、stable ID 可解析性和 domain_state 准入。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 纯 GDScript；payload_allowed_types_only 白名单为 bool/int/float/string/enum string/stable ID string/array/dictionary；禁止 Object/Node/Resource/Callable/Signal/RID/NodePath/PackedScene 进入 payload。
+**Engine Notes**: 纯 C#；payload_allowed_types_only 白名单为 bool/int/float/string/enum string/stable ID string/array/dictionary；禁止 Object/Node/Resource/Callable/Signal/RID/NodePath/PackedScene 进入 payload。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: `snapshot_package_validity` 全字段校验；payload 类型白名单 enforced at codec level
@@ -84,7 +85,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/persistence/snapshot_package_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/persistence/SnapshotPackageTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

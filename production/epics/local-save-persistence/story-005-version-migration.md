@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -75,7 +76,7 @@
   - Given: 旧工件 version=1、迁移链 [1→2, 2→3]，步骤 2→3 的 verify 失败
   - When: `execute_migration(artifact)`
   - Then: staging 副本作废，原工件保持 version=1 不变，`migration_outcome=PreservedLocked`
-  - Edge cases: 迁移到一半页面关闭 → 下次启动重读原工件，staging 残留被清理
+  - Edge cases: 迁移到一半应用关闭请求 → 下次启动重读原工件，staging 残留被清理
 
 - **AC-6**: Corrupt artifact → Quarantined (not migration)
   - Given: 旧工件 checksum 不匹配
@@ -88,7 +89,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/persistence/migration_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/persistence/MigrationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

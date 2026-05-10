@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -71,8 +72,8 @@
 
 ### ModuleHullManager Core Structure
 
-```gdscript
-# ModuleHullManager.gd — Autoload #8
+```text
+# ModuleHullManager.cs — Autoload #8
 extends Node
 
 enum ModuleType { EMPTY, SCOUT, CARGO }
@@ -93,7 +94,7 @@ var _slots: Dictionary = {}  # Dict[StringName, Dictionary]
 
 ### Efficiency Coefficient Table
 
-```gdscript
+```text
 const EFFICIENCY_TABLE: Dictionary = {
     ModuleType.SCOUT: {
         VisibleState.EMPTY: 0.0,
@@ -122,7 +123,7 @@ func get_module_efficiency(slot_id: StringName) -> float:
 
 ### Install / Uninstall Operations
 
-```gdscript
+```text
 func install_module(slot_id: StringName, module_type: int) -> int:
     if not _is_valid_slot(slot_id):
         return ERR_INVALID_PARAMETER
@@ -189,7 +190,7 @@ func _get_uninstall_refund(module_type: int) -> Dictionary:
 
 ### Post-Voyage Unchecked Transition
 
-```gdscript
+```text
 # 航行系统 #10 在返航时调用——写入 actual_state
 func on_voyage_completed(module_damage_flags: Dictionary) -> void:
     for slot_id in SLOT_IDS:
@@ -220,7 +221,7 @@ func on_voyage_completed(module_damage_flags: Dictionary) -> void:
 
 ### Check & Repair Flow
 
-```gdscript
+```text
 func check_module(slot_id: StringName) -> int:
     var slot: Dictionary = _slots[slot_id]
     if slot["visible_state"] != VisibleState.UNCHECKED:
@@ -260,7 +261,7 @@ func repair_module(slot_id: StringName) -> int:
 
 ### Empty Slot Interactability
 
-```gdscript
+```text
 func is_slot_interactable(slot_id: StringName) -> bool:
     return _is_valid_slot(slot_id)
     # 空槽位和已安装槽位均可交互——只是交互行为不同
@@ -306,7 +307,7 @@ func is_slot_interactable(slot_id: StringName) -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/modules/slot_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/modules/SlotStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

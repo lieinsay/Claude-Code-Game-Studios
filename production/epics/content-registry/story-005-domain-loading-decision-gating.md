@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -35,7 +36,7 @@
 - [ ] **AC-3**: GIVEN 玩家打开世界修复或市场界面，WHEN `world`、`resources` 或相关 `intel` 内容域不是 COMPLETE，THEN 界面不得展示可执行修复、摊位商品或材料用途
 - [ ] **AC-4**: GIVEN 玩家决策界面已经基于一组内容定义打开，WHEN 异步加载/缓存刷新/内容包重载发生，THEN 当前界面的可选项、排序和引用结果不得变化，除非界面关闭并用新的完整 snapshot 重建
 - [ ] **AC-5**: GIVEN 内容包或 Schema 版本不兼容，WHEN 查询/启动内容层，THEN 返回 `VERSION_INCOMPATIBLE`——不得静默降级或自动补字段
-- [ ] **AC-6**: GIVEN 内容包版本不兼容，WHEN Web 构建启动内容层，THEN 必须失败在内容层边界并给出可复制诊断，不得进入半可用状态
+- [ ] **AC-6**: GIVEN 内容包版本不兼容，WHEN 桌面构建启动内容层，THEN 必须失败在内容层边界并给出可复制诊断，不得进入半可用状态
 
 ---
 
@@ -84,7 +85,7 @@
   - Edge cases: schema_version 在 supported_versions 范围内→正常加载
 
 - **AC-6**: Fatal at content layer boundary
-  - Given: Web 构建内容包 VERSION_INCOMPATIBLE
+  - Given: 桌面构建内容包 VERSION_INCOMPATIBLE
   - When: SessionShell 请求进入 Ready 状态
   - Then: Registry 返回 FAILED 状态+可复制诊断，壳层显示安全错误界面
   - Edge cases: 不是所有域 FAILED——已 COMPLETE 的域保持可用
@@ -94,7 +95,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/registry/domain_loading_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/registry/DomainLoadingTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

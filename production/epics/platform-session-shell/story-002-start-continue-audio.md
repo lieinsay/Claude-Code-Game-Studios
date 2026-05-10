@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +14,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0006: Web Platform Constraints
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: Start 永远表示新会话；Continue 只在验证存在可恢复会话时显示或启用。音频激活必须由明确用户手势触发——Start/Continue 的确认输入在同一手势中尝试音频解锁。audio_gate 有四种状态：Pass/SoftFail/HardFail/Muted。in-flight token 去重防止并行会话创建。
 
 **Engine**: Godot 4.6.2 | **Risk**: MEDIUM
-**Engine Notes**: AudioContext 激活依赖 Web 平台的用户手势要求；`JavaScriptBridge` 传递浏览器事件到 Godot。
+**Engine Notes**: audio device readiness 激活依赖 桌面平台的用户手势要求；SessionShell receives desktop window lifecycle notifications from Godot。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: Start/Continue 令牌去重；音频失败为软失败不锁死游戏
@@ -48,7 +49,7 @@
 - 去重逻辑: `if _active_token != null and _active_token.intent == new_intent: return ERR_BUSY`
 - Audio gate 枚举: `enum AudioGate { REQUIRES_GESTURE, PASS, SOFT_FAIL, HARD_FAIL, MUTED }`
 - `_try_audio_unlock()` 在用户手势内调用 `AudioServer.set_bus_mute(master_bus, false)` + 播放短静音音频→检查 `AudioServer.get_bus_volume_db()` 确认激活
-- audio_gate=HardFail 时→进入 `FatalBlocked`（仅当浏览器完全不支持音频且游戏要求音频）
+- audio_gate=HardFail 时→进入 `FatalBlocked`（仅当桌面音频设备不可用且游戏要求音频）
 - PreservedLocked 原因字符串由存档系统提供——壳层直接渲染，不本地生成
 
 ---
@@ -80,7 +81,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/session/entry_audio_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/session/EntryAudioTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

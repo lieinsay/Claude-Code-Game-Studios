@@ -4,7 +4,9 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002 完成**
+> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002 完成 | 115 Story readiness 元数据已对齐**
+
+> **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
 ---
 

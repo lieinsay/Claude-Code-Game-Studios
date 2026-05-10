@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -69,8 +70,8 @@
 
 ### Signal Declarations
 
-```gdscript
-# ModuleHullManager.gd — Autoload #8
+```text
+# ModuleHullManager.cs — Autoload #8
 extends Node
 
 # === Module Signals ===
@@ -88,7 +89,7 @@ signal departure_readiness_changed(can_depart: bool, reasons: Array[StringName])
 
 ### Emit Helper — Slot State Change
 
-```gdscript
+```text
 func _emit_slot_changed(slot_id: StringName, old_visible: int, new_visible: int) -> void:
     # StringName conversion for signal params
     var old_s: StringName = _visible_state_to_string(old_visible)
@@ -118,7 +119,7 @@ func _visible_state_to_string(state: int) -> StringName:
 
 ### Emit Helper — Efficiency Change (Deduplicated)
 
-```gdscript
+```text
 # Per-slot cached efficiency for deduplication
 var _cached_efficiency: Dictionary = {}  # Dict[StringName, float]
 
@@ -133,7 +134,7 @@ func _emit_efficiency_if_changed(slot_id: StringName) -> void:
 
 ### Emit Ordering — Post-Voyage Example
 
-```gdscript
+```text
 func on_voyage_completed(module_damage_flags: Dictionary) -> void:
     for slot_id in SLOT_IDS:
         var slot: Dictionary = _slots[slot_id]
@@ -164,7 +165,7 @@ func on_voyage_completed(module_damage_flags: Dictionary) -> void:
 
 ### Re-entrancy Guard
 
-```gdscript
+```text
 var _is_mutating: bool = false
 
 func _guard_mutation() -> bool:
@@ -187,7 +188,7 @@ func _release_mutation() -> void:
 
 ### Hub Connection Example
 
-```gdscript
+```text
 # HubManager._ready():
 func _connect_module_signals() -> void:
     ModuleHullManager.slot_state_changed.connect(_on_slot_state_changed)
@@ -226,7 +227,7 @@ func _on_departure_readiness_changed(can_depart: bool, reasons: Array[StringName
 ## QA Test Cases
 
 - **AC-1**: Signal declarations
-  - Given: ModuleHullManager.gd
+  - Given: ModuleHullManager.cs
   - When: 检查 signal 声明
   - Then: 6 signals, all typed params, no Dictionary
 
@@ -245,7 +246,7 @@ func _on_departure_readiness_changed(can_depart: bool, reasons: Array[StringName
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/modules/signal_contract_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/modules/SignalContractTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

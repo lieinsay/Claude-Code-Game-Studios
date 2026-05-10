@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -57,7 +58,7 @@
 
 ### repair_progress Formula
 
-```gdscript
+```text
 func _compute_repair_progress(node_id: StringName) -> float:
     var required: Dictionary = _get_required_resources(node_id)
     if required.is_empty():
@@ -89,7 +90,7 @@ func _compute_repair_progress(node_id: StringName) -> float:
 
 ### repair_completion Formula
 
-```gdscript
+```text
 func _check_repair_completion(node_id: StringName) -> bool:
     var required: Dictionary = _get_required_resources(node_id)
     if required.is_empty():
@@ -110,7 +111,7 @@ func _check_repair_completion(node_id: StringName) -> bool:
 
 ### route_enhancement Query
 
-```gdscript
+```text
 func get_route_enhancements(node_id: StringName) -> Array[Dictionary]:
     # 仅在 repair_completion 后调用才有意义
     # 返回修复节点关联的航线增强效果列表
@@ -137,7 +138,7 @@ func get_route_enhancements(node_id: StringName) -> Array[Dictionary]:
 
 ### Hazard Floor Guard (consumed by #9)
 
-```gdscript
+```text
 # 此防御属于 #9 Chart ——此处作为合约参考
 # 当 #9 应用 route_enhancement 时：
 func apply_hazard_reduction(current_hazard: float, reduction_magnitude: float) -> float:
@@ -168,7 +169,7 @@ func apply_hazard_reduction(current_hazard: float, reduction_magnitude: float) -
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/world-repair/formulas_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/world-repair/FormulasTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -69,7 +70,7 @@
 
 ### Domain Serializer Registration
 
-```gdscript
+```text
 func _on_core_data_ready() -> void:
     # Phase 3 — Persistence (Phase 2) 已 ready
     Persistence.register_domain_serializer("intel", _serialize_intel, _deserialize_intel)
@@ -84,7 +85,7 @@ func _on_core_data_ready() -> void:
 
 ### Serialize Intel
 
-```gdscript
+```text
 func _serialize_intel() -> Dictionary:
     return {
         "domain_id": "intel",
@@ -100,7 +101,7 @@ func _serialize_intel() -> Dictionary:
 
 ### Deserialize Intel
 
-```gdscript
+```text
 func _deserialize_intel(snapshot: Dictionary) -> void:
     # 清空所有状态
     _clear_all_state()
@@ -165,7 +166,7 @@ func _clear_all_state() -> void:
 
 ### MVP Starting State
 
-```gdscript
+```text
 func _init_new_game_state() -> void:
     _clear_all_state()
 
@@ -201,7 +202,7 @@ func _init_new_game_state() -> void:
 
 ### StringName ↔ String Conversion Helper
 
-```gdscript
+```text
 # JSON 持久化 StringName key 的辅助方法
 static func _dict_keys_to_stringname(d: Dictionary) -> Dictionary:
     var result: Dictionary = {}
@@ -252,7 +253,7 @@ static func _array_to_stringname_array(arr: Array) -> Array:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/intel/persistence_integration_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/intel/PersistenceIntegrationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

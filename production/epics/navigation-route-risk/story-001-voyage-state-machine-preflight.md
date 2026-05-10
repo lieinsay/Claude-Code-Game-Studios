@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -62,7 +63,7 @@
 
 ### NavigationManager Autoload #10 — State Storage
 
-```gdscript
+```text
 # Navigation Autoload #10 — 内部状态
 var _voyage_state: StringName = &"IDLE"
 var _active_voyage: Dictionary = {}
@@ -84,7 +85,7 @@ const TERMINAL_STATES := [&"ARRIVED", &"RETREATED", &"FORCED_LANDING", &"ABORTED
 
 ### Signal Receiving & State Machine Entry
 
-```gdscript
+```text
 func _on_route_committed(route_id: StringName, destination_id: StringName, hazard_tags: Array[StringName]) -> void:
     if _voyage_state != &"IDLE":
         push_warning("Navigation: route_committed received while in %s state — rejected" % _voyage_state)
@@ -106,7 +107,7 @@ func _on_route_committed(route_id: StringName, destination_id: StringName, hazar
 
 ### _preflight_check()
 
-```gdscript
+```text
 func _preflight_check(route_id: StringName, destination_id: StringName,
                        signal_hazard_tags: Array[StringName]) -> Dictionary:
     # 1. 验证 route_id 在注册表中存在
@@ -156,7 +157,7 @@ func _preflight_check(route_id: StringName, destination_id: StringName,
 
 ### _resolve_hazard_tags()
 
-```gdscript
+```text
 func _resolve_hazard_tags(signal_tags: Array[StringName], registry_tags: Array) -> Array[StringName]:
     var registry_set: Dictionary = {}
     for tag in registry_tags:
@@ -185,7 +186,7 @@ func _resolve_hazard_tags(signal_tags: Array[StringName], registry_tags: Array) 
 
 ### Retreat Flow
 
-```gdscript
+```text
 func request_retreat() -> void:
     if _voyage_state != &"IN_PROGRESS":
         return
@@ -229,7 +230,7 @@ func is_retreat_allowed() -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/navigation/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

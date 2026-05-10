@@ -1,35 +1,36 @@
-# Story 006: Edge Cases, Web Recovery & Accessibility
+# Story 006: Edge Cases, Desktop Recovery & Accessibility
 
 > **Epic**: UI / HUD / 航图界面
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/ui-hud-chart-interface.md`
 **Requirement**: `TR-ui-001`, `TR-ui-002`, `TR-ui-003`, `TR-ui-004`
 
-**ADR Governing Implementation**: ADR-0012 (§6 Web tab freeze 恢复, §5 dual-focus 同步, §9 空状态视图, C.9 WCAG AA, Edge Cases 全部 13 项)
-**ADR Decision Summary**: 本 Story 覆盖 GDD 全部 13 个边缘情况 + Web 浏览器特殊性 + WCAG AA 无障碍验证。核心边缘情况：浏览器 tab freeze 恢复（NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量刷新）；多模态同时请求（S7 覆盖 / S10 排队 / 其余丢弃→Toast）；面板打开期间底层数据变更（面板使用打开时快照——不自动刷新；提交动作通过领域 API 写回）；零物品面板空状态视图（S11/S12/S4）；departure_locked 期间面板请求静默拒绝；命名模态到达序列时序冲突（4 路合取 + skip_count >= 3 不弹出）；船体归零返回 Hub（船体红波段 + 闪烁扳手图标 + can_depart()=false）；货舱模块未安装（S1 货舱区域置灰 + "无货舱"文本）；战斗威胁覆盖容量取舍面板竞态防御；Tab 导航时面板内无可聚焦元素（焦点不穿透）；S7 战斗面板中 Esc 无效；Web 后台冻结恢复 UI 不同步（delta > 1.0s 全量刷新）。WCAG AA 硬性要求：所有 <24px 颜色编码元素必须形状+颜色+文字三重编码；船体波段=色条+分段数+形状(✓/⚡/○)；材料满足/不足=颜色+✓/✗图标+文字；危险红 #D4644B 在帆布米 #E4D2B3 上对比度 ≥ 4.52:1。
+**ADR Governing Implementation**: ADR-0012 (§6 desktop window freeze 恢复, §5 dual-focus 同步, §9 空状态视图, C.9 WCAG AA, Edge Cases 全部 13 项)
+**ADR Decision Summary**: 本 Story 覆盖 GDD 全部 13 个边缘情况 + 桌面窗口生命周期特殊性 + WCAG AA 无障碍验证。核心边缘情况：桌面窗口失焦/恢复 恢复（NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量刷新）；多模态同时请求（S7 覆盖 / S10 排队 / 其余丢弃→Toast）；面板打开期间底层数据变更（面板使用打开时快照——不自动刷新；提交动作通过领域 API 写回）；零物品面板空状态视图（S11/S12/S4）；departure_locked 期间面板请求静默拒绝；命名模态到达序列时序冲突（4 路合取 + skip_count >= 3 不弹出）；船体归零返回 Hub（船体红波段 + 闪烁扳手图标 + can_depart()=false）；货舱模块未安装（S1 货舱区域置灰 + "无货舱"文本）；战斗威胁覆盖容量取舍面板竞态防御；Tab 导航时面板内无可聚焦元素（焦点不穿透）；S7 战斗面板中 Esc 无效；桌面后台恢复 UI 不同步（delta > 1.0s 全量刷新）。WCAG AA 硬性要求：所有 <24px 颜色编码元素必须形状+颜色+文字三重编码；船体波段=色条+分段数+形状(✓/⚡/○)；材料满足/不足=颜色+✓/✗图标+文字；危险红 #D4644B 在帆布米 #E4D2B3 上对比度 ≥ 4.52:1。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
 **Control Manifest Rules (Presentation layer)**:
 - Required: NOTIFICATION_APPLICATION_RESUMED 时 delta > 1.0s → 全量 UI 刷新；所有 <24px 颜色编码元素三重编码（颜色+形状+文字）；面板空状态视图必须存在——不显示空白面板
 - Forbidden: 在 freeze 恢复后信任脏标记——必须强制全量刷新；仅用颜色区分状态——24px 以下元素必须附加形状/图标/文字
-- Guardrail: 墨水扩散 Shader 在 WebGL 2 上精度不足→回退 create_tween() 控制 ColorRect 片段沿航线路径依次显示
+- Guardrail: 墨水扩散 Shader 在 desktop Compatibility renderer 上精度不足→回退 create_tween() 控制 ColorRect 片段沿航线路径依次显示
 
 ---
 
 ## Acceptance Criteria
 
-### Web Browser Tab Freeze Recovery
+### Desktop Window Focus Recovery
 
-- [ ] **AC-1**: GIVEN 玩家在 Hub S1 HUD 正常 + S12 仓库面板打开，WHEN 浏览器切页→切回（NOTIFICATION_APPLICATION_RESUMED），THEN S1 HUD 与切页前一致 + S12 面板仍在打开状态 + 焦点位置不变 + WASD 移动恢复
-- [ ] **AC-2**: GIVEN 浏览器 freeze 恢复 + _process delta > 1.0s，WHEN 检测到异常大 delta，THEN _request_full_ui_refresh() 被调用。所有活跃 HUD 元素从领域系统强制拉取最新值——绕过脏标记。面板状态从内存恢复
-- [ ] **AC-3**: GIVEN 浏览器 freeze 恢复 + delta ≤ 1.0s（正常切页），WHEN 检测，THEN 不触发 full_ui_refresh。依赖正常脏标记更新
+- [ ] **AC-1**: GIVEN 玩家在 Hub S1 HUD 正常 + S12 仓库面板打开，WHEN 桌面窗口失焦→切回（NOTIFICATION_APPLICATION_RESUMED），THEN S1 HUD 与窗口失焦前一致 + S12 面板仍在打开状态 + 焦点位置不变 + WASD 移动恢复
+- [ ] **AC-2**: GIVEN 桌面窗口恢复 恢复 + _process delta > 1.0s，WHEN 检测到异常大 delta，THEN _request_full_ui_refresh() 被调用。所有活跃 HUD 元素从领域系统强制拉取最新值——绕过脏标记。面板状态从内存恢复
+- [ ] **AC-3**: GIVEN 桌面窗口恢复 恢复 + delta ≤ 1.0s（正常窗口失焦），WHEN 检测，THEN 不触发 full_ui_refresh。依赖正常脏标记更新
 
 ### Data Race — Panel Open Snapshot
 
@@ -86,9 +87,9 @@
 
 ## Implementation Notes
 
-### Web Freeze Recovery
+### Desktop Focus Recovery
 
-```gdscript
+```text
 var _last_delta: float = 0.0
 
 func _process(delta: float) -> void:
@@ -110,7 +111,7 @@ func _request_full_ui_refresh() -> void:
 
 ### Triple Encoding Helper
 
-```gdscript
+```text
 func _set_hull_indicator(band: int) -> void:
     var color: Color
     var shape: String
@@ -136,7 +137,7 @@ func _set_hull_indicator(band: int) -> void:
 
 ### Highlightable Anchor
 
-```gdscript
+```text
 func _register_highlightable(anchor_node: Node, panel_id: StringName, priority: int) -> void:
     anchor_node.set_meta(&"highlightable", true)
     anchor_node.set_meta(&"highlight_priority", priority)
@@ -149,15 +150,15 @@ func _register_highlightable(anchor_node: Node, panel_id: StringName, priority: 
 
 - 引导高亮的视觉实现（脉冲光、提示文字）——属于 #18 Onboarding
 - #11 EC-11-04 的具体保护逻辑——属于 exploration-scavenge Epic
-- 墨水扩散 Shader WebGL 2 回退方案的 GLSL → Tween 迁移——属于 godot-shader-specialist
-- 浏览器 AudioContext 恢复——属于 ADR-0006 / platform-session-shell Epic
+- 墨水扩散 Shader desktop Compatibility renderer 回退方案的 GLSL → Tween 迁移——属于 godot-shader-specialist
+- 桌面 audio device readiness 恢复——属于 ADR-0019 / platform-session-shell Epic
 - can_depart()=false 的业务逻辑——属于 #8 Module/Hull Epic
 
 ---
 
 ## QA Test Cases
 
-- **AC-1-3**: Web tab freeze → resume (delta > 1.0s vs normal)
+- **AC-1-3**: desktop window freeze → resume (delta > 1.0s vs normal)
 - **AC-4/5**: Panel snapshot isolation during data changes
 - **AC-6-8**: Empty state views (S4/S11/S12)
 - **AC-9/10**: Naming modal timing + skip lockout
@@ -174,7 +175,7 @@ func _register_highlightable(anchor_node: Node, panel_id: StringName, priority: 
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/ui-hud-interface/edge_cases_web_a11y_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

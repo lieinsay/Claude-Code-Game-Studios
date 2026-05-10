@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -64,7 +65,7 @@
 
 ### Starting State (already covered in Story 007 — restated here for context)
 
-```gdscript
+```text
 # 新游戏起始状态在 Story 007 _apply_starting_state() 中完整定义
 # slot_a: empty
 # slot_b: cargo installed
@@ -73,7 +74,7 @@
 
 ### Scout Module Acquisition Integration
 
-```gdscript
+```text
 # 侦察模块的"获得"由探索系统 #11 或任务系统管理
 # ModuleHullManager 提供查询接口——检查侦察模块是否已解锁
 
@@ -103,7 +104,7 @@ func can_install_module_type(module_type: int) -> bool:
 
 ### install_module Update — Scout Availability Gate
 
-```gdscript
+```text
 func install_module(slot_id: StringName, module_type: int) -> int:
     # ... existing validation ...
 
@@ -116,7 +117,7 @@ func install_module(slot_id: StringName, module_type: int) -> int:
 
 ### apply_hull_damage Interface
 
-```gdscript
+```text
 func apply_hull_damage(amount: int) -> void:
     if amount <= 0:
         return  # 静默无操作
@@ -145,7 +146,7 @@ func apply_hull_damage(amount: int) -> void:
 
 ### apply_module_damage Interface
 
-```gdscript
+```text
 var _module_damage_types: Dictionary = {}  # Dict[StringName, String]
 
 func apply_module_damage(slot_id: StringName, damage_type: StringName) -> void:
@@ -185,7 +186,7 @@ func get_module_damage_type(slot_id: StringName) -> StringName:
 
 ### Mid-Exploration can_depart Context
 
-```gdscript
+```text
 # 中探索期间，玩家可能在特定检查点尝试出航
 # apply_hull_damage 和 apply_module_damage 末尾均调用 _check_departure_readiness()
 # 这确保 can_depart() 始终反映最新损伤状态
@@ -196,7 +197,7 @@ func get_module_damage_type(slot_id: StringName) -> StringName:
 
 ### get_installed_slots for Combat System
 
-```gdscript
+```text
 func get_installed_slots() -> Array[StringName]:
     var installed: Array[StringName] = []
     for slot_id in SLOT_IDS:
@@ -241,7 +242,7 @@ func get_installed_slots() -> Array[StringName]:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/modules/combat_damage_interface_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/modules/CombatDamageInterfaceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

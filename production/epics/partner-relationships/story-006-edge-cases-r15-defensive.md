@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -28,7 +29,7 @@
 ### E.1 Naming Edge Cases
 
 - [ ] **AC-1**: GIVEN 玩家从未成功嗅辨（sniff_success_occurred=false），WHEN 多次归港，THEN naming UI 永不触发。猫未证明自己（E.1.a）
-- [ ] **AC-2**: GIVEN 第 3 次 skip + 页面关闭瞬间，WHEN skip_naming()，THEN name="那只猫" 被写入。静默——无通知弹窗（E.1.b）
+- [ ] **AC-2**: GIVEN 第 3 次 skip + 应用关闭请求瞬间，WHEN skip_naming()，THEN name="那只猫" 被写入。静默——无通知弹窗（E.1.b）
 - [ ] **AC-3**: GIVEN naming_state=PROMPTED + 玩家提交 "   "（纯空格），WHEN submit_partner_name("   ")，THEN 拒绝 {error: "name_empty"}。skip_count 不增加（E.1.c）
 - [ ] **AC-4**: GIVEN 命名 UI 打开时存档，WHEN 读档，THEN naming_state=PENDING + skip_count 保留。下次归港重新触发（E.1.e）
 - [ ] **AC-5**: GIVEN 命名 UI 打开时 Hub→departure_locked，WHEN 触发，THEN departure 推迟——命名 modal 先于 departure 控件可用（E.1.g）
@@ -86,7 +87,7 @@
 
 ### E.5.a Reveal Rumor Failure
 
-```gdscript
+```text
 func _safe_reveal_rumor(reveal_target: StringName, hazard_hint: StringName, confidence: int) -> bool:
     if IntelManager == null:
         push_warning("Partner: IntelManager unavailable")
@@ -99,7 +100,7 @@ func _safe_reveal_rumor(reveal_target: StringName, hazard_hint: StringName, conf
 
 ### R15 Verification — Data Model Audit
 
-```gdscript
+```text
 # R15.1 验证: 在 PartnerState 中搜索 forbidden 字段
 const FORBIDDEN_FIELDS: Array = ["affection", "friendship", "bond", "relationship_level"]
 
@@ -126,14 +127,14 @@ func _debug_verify_r15_guards() -> bool:
 
 ### E.2.h Spam Prevention
 
-```gdscript
+```text
 # sniffing 状态门控已在 Story 002 scout_sniff() Step 0 实现
 # 验证方式: mock 快速连续调用 → assert 仅 1 次成功
 ```
 
 ### E.1.g Naming Blocks Departure
 
-```gdscript
+```text
 # 由 #16 UI 层实现——命名 modal 打开期间 departure 按钮不可用
 # Partner 系统仅提供状态: naming_state == PROMPTED → UI 阻塞 departure
 ```
@@ -165,7 +166,7 @@ func _debug_verify_r15_guards() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/partner-relationships/edge_cases_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/partner-relationships/EdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -109,7 +110,7 @@
 
 ### E.7 Narrative Fallback
 
-```gdscript
+```text
 func _get_npc_display_name(npc_id: StringName) -> String:
     var npc_def := Registry.query_entity(npc_id)
     var narrative_key: String = npc_def.get("narrative_key", "")
@@ -132,7 +133,7 @@ func _get_npc_display_name(npc_id: StringName) -> String:
 
 ### E.9 Repair During Purchase
 
-```gdscript
+```text
 # 购买界面打开期间收到修复信号——不修改当前商品列表
 # 实现方式：get_stall_goods() 在界面打开时快照商品列表 → UI 缓存该列表
 # 界面关闭重开后重新调用 get_stall_goods() 获取最新列表
@@ -141,7 +142,7 @@ func _get_npc_display_name(npc_id: StringName) -> String:
 
 ### E.13 Quantity Clamping
 
-```gdscript
+```text
 func clamp_purchase_quantity(good_id: StringName, requested: int) -> int:
     if requested < 1:
         return 1
@@ -151,7 +152,7 @@ func clamp_purchase_quantity(good_id: StringName, requested: int) -> int:
 
 ### E.15/E.16 Edge Cases in validate_purchase_request
 
-```gdscript
+```text
 # E.15 (price=0) 和 E.16 (货币恰好等于 total_cost) 已在 Story 002 的
 # validate_purchase_request() 中自然处理：
 # - price=0 → total_cost=0 → ResourcesManager 不扣货币但仍然转移货物
@@ -161,7 +162,7 @@ func clamp_purchase_quantity(good_id: StringName, requested: int) -> int:
 
 ### Signal Documentation for UI Consumers
 
-```gdscript
+```text
 # SettlementManager 为 UI/FX 系统提供的信号合同：
 #
 # UI (#16) 应连接:
@@ -216,7 +217,7 @@ func clamp_purchase_quantity(good_id: StringName, requested: int) -> int:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/settlement-market/edge_cases_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/settlement-market/EdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

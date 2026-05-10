@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -75,7 +76,7 @@
 
 ### Snapshot Builder
 
-```gdscript
+```text
 func build_snapshot() -> Dictionary:
     var modules_snapshot: Dictionary = {}
 
@@ -97,7 +98,7 @@ func build_snapshot() -> Dictionary:
 
 ### Snapshot Restorer
 
-```gdscript
+```text
 func restore_from_snapshot(snapshot: Dictionary) -> bool:
     if not _validate_snapshot(snapshot):
         push_error("Module snapshot validation failed — using safe defaults")
@@ -145,7 +146,7 @@ func restore_from_snapshot(snapshot: Dictionary) -> bool:
 
 ### Snapshot Validation
 
-```gdscript
+```text
 func _validate_snapshot(snapshot: Dictionary) -> bool:
     if snapshot.is_empty():
         return false
@@ -165,7 +166,7 @@ func _validate_snapshot(snapshot: Dictionary) -> bool:
 
 ### Starting State (New Game)
 
-```gdscript
+```text
 func _apply_starting_state() -> void:
     # 清空所有槽位
     for slot_id in SLOT_IDS:
@@ -197,7 +198,7 @@ func _apply_starting_state() -> void:
 
 ### Domain Serializer Registration
 
-```gdscript
+```text
 func register_domain_serializer() -> void:
     Persistence.register_domain(&"modules_hull", {
         "build": build_snapshot,
@@ -208,7 +209,7 @@ func register_domain_serializer() -> void:
 
 ### StringName↔String for Slot Keys
 
-```gdscript
+```text
 # 序列化时: str(&"slot_a") → "slot_a"
 # 反序列化时: StringName("slot_a") → &"slot_a"
 
@@ -254,7 +255,7 @@ func _module_type_from_int(value: int) -> int:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/modules/snapshot_persistence_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/modules/SnapshotPersistenceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

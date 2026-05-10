@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -62,7 +63,7 @@
 
 ### ResourceResult Enum (from ADR-0005 Section 2)
 
-```gdscript
+```text
 enum ResourceResult {
     SUCCESS,
     ERR_TARGET_FULL,
@@ -82,7 +83,7 @@ enum ResourceResult {
 
 ### Atomic Operation Pattern
 
-```gdscript
+```text
 func add(pool_id: StringName, resource_id: StringName, quantity: int) -> ResourceResult:
     # 1. 验证: quantity >= 0, resource_id 在 Registry 中且未 retired
     # 2. 计算: stack_merge(pool_id, resource_id, quantity)
@@ -165,7 +166,7 @@ transfer_valid = (source_count >= Q) AND target_valid_for_kind AND target_can_ta
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/core_operations_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/resources/CoreOperationsTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

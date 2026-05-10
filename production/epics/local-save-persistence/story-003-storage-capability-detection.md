@@ -4,23 +4,24 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/local-save-world-state-persistence.md`
 **Requirement**: `TR-persistence-003`
 
-**ADR Governing Implementation**: ADR-0003: Save System / JSON Serialization; ADR-0006: Web Platform Constraints
-**ADR Decision Summary**: 浏览器存储能力的权威判定由存档系统拥有。平台壳只提供原始 `persistence_probe` 信号；本系统计算 `storage_capability = PersistentAvailable / WriteLocked / EphemeralOnly`。probe 必须带 TTL——过期 probe 只能保守进入 WriteLocked 或重探，不得作为 PersistentAvailable 依据。`OS.is_userfs_persistent()` 只能作为 hint——只有当前页面上下文的真实 write/flush/readback/checksum roundtrip 可以让 `write_roundtrip_ok=true`。
+**ADR Governing Implementation**: ADR-0003: Save System / JSON Serialization; ADR-0019: Desktop C# Platform Pivot
+**ADR Decision Summary**: 本地存储能力的权威判定由存档系统拥有。平台壳只提供原始 `persistence_probe` 信号；本系统计算 `storage_capability = PersistentAvailable / WriteLocked / EphemeralOnly`。probe 必须带 TTL——过期 probe 只能保守进入 WriteLocked 或重探，不得作为 PersistentAvailable 依据。`OS.is_userfs_persistent()` 只能作为 hint——只有当前页面上下文的真实 write/flush/readback/checksum roundtrip 可以让 `write_roundtrip_ok=true`。
 
 **Engine**: Godot 4.6.2 | **Risk**: MEDIUM
-**Engine Notes**: `user://` 在 Web 导出中映射到 IndexedDB；`FileAccess` 写入/读回 roundtrip 验证；`JavaScriptBridge` 查询 `navigator.storage.estimate()` 获取配额。
+**Engine Notes**: `user://` 在 桌面构建中映射到 user:// storage；`FileAccess` 写入/读回 roundtrip 验证；Persistence uses FileAccess write/readback probes to classify storage capability。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: probe TTL 机制；write roundtrip 验证；quota reserve 计算
 - Forbidden: 不得仅凭 `OS.is_userfs_persistent()` 判定 PersistentAvailable
-- Guardrail: boot probe TTL 30s；resume/pageshow probe TTL 10s
+- Guardrail: boot probe TTL 30s；resume/resume_requested probe TTL 10s
 
 ---
 
@@ -35,7 +36,7 @@
 - [ ] **AC-7**: GIVEN `quota_reserve_ok=false` 且 `existing_archive_read_class=Unreadable`，WHEN 计算 `storage_capability`，THEN 结果为 `EphemeralOnly`，不显示可用持久 Continue
 - [ ] **AC-8**: GIVEN probe TTL 已过期、write failure、readback mismatch、quota failure 或 policy change 发生，WHEN 下次 capability 查询，THEN probe 失效并重探；过期 probe 不得作为 `PersistentAvailable` 依据
 - [ ] **AC-9**: GIVEN `available_working_set_bytes` 无法由平台适配层提供，WHEN 计算 `quota_reserve_ok`，THEN 使用 16 MiB fallback 并在诊断中标记 `WORKING_SET_BUDGET_FALLBACK`
-- [ ] **AC-10**: GIVEN 平台壳需要显示存储能力或 Continue 状态，WHEN 查询，THEN 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据浏览器 API、文件存在或本地公式重算
+- [ ] **AC-10**: GIVEN 平台壳需要显示存储能力或 Continue 状态，WHEN 查询，THEN 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据桌面平台 API、文件存在或本地公式重算
 
 ---
 
@@ -47,8 +48,8 @@
   - `safety_margin_bytes = max(encoded_memory_artifact_bytes * 0.5, 512 KiB)`
   - `peak_working_set_bytes = encoded_memory_artifact_bytes + readback_copy_bytes + checksum_buffer_bytes + serialization_transient_bytes + migration_temp_bytes + backend_working_set_inflation_bytes`
 - `backend_persistence_inflation_factor`: MVP default 1.5；`backend_working_set_inflation_bytes`: MVP default 256 KiB
-- Probe TTL: boot probe 30s；resume/pageshow probe 10s
-- Probe cache 失效触发: write failure、readback mismatch、quota failure、policy change、iframe/cookie policy change、`pageshow` after any suspension
+- Probe TTL: boot probe 30s；resume/resume_requested probe 10s
+- Probe cache 失效触发: write failure、readback mismatch、quota failure、policy change、iframe/cookie policy change、`resume_requested` after any suspension
 - `existing_archive_read_class` 枚举: `Readable` / `Unreadable` / `NotApplicable`
 - `probe_generation` 必须记录: probe ID、timestamp、trigger source、TTL
 
@@ -58,7 +59,7 @@
 
 - Story 001: promotion 流程本身（capability 是 promotion 的前置条件）
 - Story 004: Continue Availability 的最终 UI 呈现
-- Story 008: Web 生命周期事件（pagehide/pageshow）对 probe 的具体触发
+- Story 008: 桌面生命周期事件（suspend_requested/resume_requested）对 probe 的具体触发
 
 ---
 
@@ -74,7 +75,7 @@
   - Given: 上次 probe 结果 PersistentAvailable，TTL=30s 已过
   - When: `get_storage_capability()` 被调用
   - Then: probe 标记为 stale，触发重探；重探完成前保守返回 WriteLocked
-  - Edge cases: resume probe TTL=10s → pageshow 后必然过期
+  - Edge cases: resume probe TTL=10s → resume_requested 后必然过期
 
 - **AC-9**: Working set budget fallback
   - Given: 平台适配层未提供 `available_working_set_bytes`
@@ -87,7 +88,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/persistence/storage_capability_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/persistence/StorageCapabilityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---
@@ -95,4 +96,4 @@
 ## Dependencies
 
 - Depends on: None — Story 003 是独立的 capability 判定模块；可与 Story 001/002 并行实现
-- Unlocks: Story 004 (Continue Availability 依赖 storage_capability)；Story 008 (Web Lifecycle 触发 probe 重探)
+- Unlocks: Story 004 (Continue Availability 依赖 storage_capability)；Story 008 (Desktop Lifecycle 触发 probe 重探)

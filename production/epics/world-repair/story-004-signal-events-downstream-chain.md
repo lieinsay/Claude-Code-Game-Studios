@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -76,7 +77,7 @@
 
 ### Signal Declaration
 
-```gdscript
+```text
 # WorldRepair Autoload #13 — 信号声明（遵循 ADR-0002 typed params）
 signal repair_progress_changed(node_id: StringName, progress: float, deposited: Dictionary)
 signal repair_completed(node_id: StringName)
@@ -85,7 +86,7 @@ signal visual_state_changed(node_id: StringName, visual_state: StringName)
 
 ### Emit Call in submit_deposit
 
-```gdscript
+```text
 func submit_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
     # ... 验证 + commit_deposit + 计数器更新 + progress 计算 ...
 
@@ -106,7 +107,7 @@ func submit_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
 
 ### Fan-out Connection Points (contract reference)
 
-```gdscript
+```text
 # 消费方连接——在各自的 _ready() 或 feature_ready 回调中建立
 # 以下为合约参考，实际实现位于各消费系统中：
 
@@ -131,7 +132,7 @@ func submit_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
 
 ### Consumer-side Contract (from #6 and #9 perspective)
 
-```gdscript
+```text
 # === #6 Intel — on_repair_completed consumer ===
 func on_repair_completed(repair_node_id: StringName) -> void:
     # 重评估所有依赖 repair 的 ability unlock path
@@ -160,7 +161,7 @@ func _on_world_repair_completed(repair_node_id: StringName) -> void:
 
 ### Fan-out Safety
 
-```gdscript
+```text
 # Godot signal 默认行为：若消费者回调中抛出异常，后续连接的回调不被调用。
 # 但 ADR-0002 要求任一消费者异常不阻止其他消费者。
 # 消费方应自行处理异常——生产方（WorldRepair）在 emit 时不做额外保护
@@ -199,7 +200,7 @@ func _on_world_repair_completed(repair_node_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/world-repair/signal_downstream_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/world-repair/SignalDownstreamTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

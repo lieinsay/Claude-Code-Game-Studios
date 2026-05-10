@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -62,7 +63,7 @@
 
 ### Serialization
 
-```gdscript
+```text
 func _serialize_partner() -> Dictionary:
     var p := partners[MVP_PARTNER_ID]
     return {
@@ -79,7 +80,7 @@ func _serialize_partner() -> Dictionary:
 
 ### Deserialization with Consistency Correction
 
-```gdscript
+```text
 func _deserialize_partner(snapshot: Dictionary) -> void:
     var p := partners[MVP_PARTNER_ID]
     p["name"] = snapshot.get("name", "")
@@ -123,7 +124,7 @@ func _deserialize_partner(snapshot: Dictionary) -> void:
 
 ### Snapshot Trigger
 
-```gdscript
+```text
 func _trigger_snapshot() -> void:
     var snapshot := _serialize_partner()
     Persistence.capture_snapshot("progress.partner_skycat", snapshot)
@@ -159,7 +160,7 @@ func _trigger_snapshot() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/partner-relationships/persistence_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/partner-relationships/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

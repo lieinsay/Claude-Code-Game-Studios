@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### Serialization
 
-```gdscript
+```text
 func _serialize_settlement() -> Dictionary:
     var serialized_settlements := {}
     for sid in settlements:
@@ -94,7 +95,7 @@ func _serialize_settlement() -> Dictionary:
 
 ### Deserialization
 
-```gdscript
+```text
 func _deserialize_settlement(snapshot: Dictionary) -> void:
     # 恢复 settlements
     var settlements_data: Dictionary = snapshot.get("settlements", {})
@@ -144,7 +145,7 @@ func _deserialize_settlement(snapshot: Dictionary) -> void:
 
 ### Snapshot Trigger
 
-```gdscript
+```text
 func _trigger_snapshot() -> void:
     var snapshot := _serialize_settlement()
     var success := Persistence.capture_snapshot("progress.settlement-market", snapshot)
@@ -154,7 +155,7 @@ func _trigger_snapshot() -> void:
 
 ### Consistency Reconciliation
 
-```gdscript
+```text
 func _reconcile_settlement_state() -> void:
     # 修正 settlement_state 与 stall 状态不一致
     for sid in settlements:
@@ -182,7 +183,7 @@ func _reconcile_settlement_state() -> void:
 - Persistence.capture_snapshot() / restore_snapshot() 实现——属于 local-save-persistence Epic
 - JSON.stringify() / JSON.parse() 与 Canonical JSON 格式——属于 ADR-0003
 - Registry.has_entity() 实现——属于 content-registry Epic
-- 快照失败 UI 警告（如 localStorage 配额满）——属于 #16 UIManager
+- 快照失败 UI 警告（如 user:// storage 配额满）——属于 #16 UIManager
 
 ---
 
@@ -207,7 +208,7 @@ func _reconcile_settlement_state() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/settlement-market/persistence_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/settlement-market/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

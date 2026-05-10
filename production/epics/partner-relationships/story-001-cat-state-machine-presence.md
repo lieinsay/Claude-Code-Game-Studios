@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -61,7 +62,7 @@
 
 ### Cat State Enum & Storage
 
-```gdscript
+```text
 const CAT_SLEEPING_ON_INTEL_STATION: int = 0
 const CAT_IDLE_LIVING_QUARTERS: int = 1
 const CAT_FOLLOWING_PLAYER_TO_BENCH: int = 2
@@ -76,14 +77,14 @@ var _state_frozen: bool = false
 
 ### R2 Presence Contract
 
-```gdscript
+```text
 func query_partner_present() -> bool:
     return true  # 恒 true——猫永远在飞艇上
 ```
 
 ### State Transition
 
-```gdscript
+```text
 func _transition_cat_state(target_state: int) -> bool:
     if _state_frozen:
         return false
@@ -101,7 +102,7 @@ func _transition_cat_state(target_state: int) -> bool:
 
 ### Hub Event Handlers
 
-```gdscript
+```text
 func on_hub_state_changed(new_state: int) -> void:
     match new_state:
         HUB_LANDED:
@@ -128,7 +129,7 @@ func on_player_entered_zone(zone_id: StringName) -> void:
 
 ### Cooldown Tick
 
-```gdscript
+```text
 func _process(delta: float) -> void:
     # 仅用于 cooldown 和 sniff lockout 倒计时——不触发状态变更
     if _cat_state_cooldown > 0.0:
@@ -172,7 +173,7 @@ func _process(delta: float) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/partner-relationships/cat_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/partner-relationships/CatStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

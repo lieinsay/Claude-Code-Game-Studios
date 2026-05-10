@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -77,7 +78,7 @@
 
 ### Combat Override
 
-```gdscript
+```text
 func _open_modal_combat_override(panel_id: StringName, data: Dictionary) -> void:
     if _state["_modal_panel"] != null:
         _state["_combat_override_stack"] = {
@@ -107,7 +108,7 @@ func _restore_from_combat_override() -> void:
 
 ### Input Layer Determination
 
-```gdscript
+```text
 func _get_active_input_layer() -> int:
     if _state["_modal_panel"] != null:
         return 0
@@ -122,7 +123,7 @@ func _get_active_input_layer() -> int:
 
 ### Global Key Dispatch
 
-```gdscript
+```text
 func _unhandled_input(event: InputEvent) -> void:
     var layer := _get_active_input_layer()
 
@@ -176,7 +177,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/ui-hud-interface/modal_stack_input_routing_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

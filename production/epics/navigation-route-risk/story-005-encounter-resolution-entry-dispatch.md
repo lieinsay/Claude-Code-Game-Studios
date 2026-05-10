@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -76,7 +77,7 @@
 
 ### Encounter Table Definition
 
-```gdscript
+```text
 const ENCOUNTER_TABLES: Dictionary = {
     &"safe": [
         {"type": &"calm_passage",          "weight": 0.40, "d_min": 0, "d_max": 0, "effects": []},
@@ -112,7 +113,7 @@ func _validate_encounter_tables() -> void:
 
 ### Encounter Entry Drawing
 
-```gdscript
+```text
 func _draw_encounter_entry(hazard_tag: StringName) -> Dictionary:
     var table: Array = ENCOUNTER_TABLES.get(hazard_tag, [])
     if table.is_empty():
@@ -151,7 +152,7 @@ func _build_empty_entry(hazard_tag: StringName) -> Dictionary:
 
 ### Full Encounter Resolution
 
-```gdscript
+```text
 func _resolve_encounter_check() -> void:
     # 1. 对隐藏标签进行 reveal 判定（在抽取前）
     _process_hidden_tag_reveals()
@@ -205,7 +206,7 @@ func _process_hidden_tag_reveals() -> void:
 
 ### Special Effects Application
 
-```gdscript
+```text
 func _apply_special_effects(hits: Array[Dictionary]) -> void:
     for entry in hits:
         for effect in entry.get("special_effect_tags", []):
@@ -234,7 +235,7 @@ func _apply_special_effects(hits: Array[Dictionary]) -> void:
 
 ### encounter_triggered Signal
 
-```gdscript
+```text
 signal encounter_triggered(entry: Dictionary)
 # entry: EncounterEntry Dictionary — encounter_type, hazard_tag, damage_amount,
 #        special_effect_tags, was_hidden, time_offset
@@ -276,7 +277,7 @@ signal encounter_triggered(entry: Dictionary)
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/encounter_resolution_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/navigation/EncounterResolutionTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

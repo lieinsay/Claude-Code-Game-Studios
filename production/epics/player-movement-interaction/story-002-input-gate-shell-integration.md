@@ -4,22 +4,23 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/player-movement-interaction.md`
 **Requirement**: `TR-movement-002`
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0002: Signal Communication Protocol; ADR-0006: Web Platform Constraints
-**ADR Decision Summary**: `InteractionRegistry`（Autoload #3）消费 `平台与会话壳` 的 `input_gate_open`/`input_gate_closed`/`input_gate_reacquire` 信号来管理输入门状态。输入门三态：`InputClosed`（壳层未放行/overlay/后台）→ `InputReacquire`（恢复后等待第一下输入被消费）→ `InputOpen`（正常玩法输入）。浏览器生命周期事件由壳层归一化后传入——本系统不直接订阅 `visibilitychange`/`pagehide`。
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0002: Signal Communication Protocol; ADR-0019: Desktop C# Platform Pivot
+**ADR Decision Summary**: `InteractionRegistry`（Autoload #3）消费 `平台与会话壳` 的 `input_gate_open`/`input_gate_closed`/`input_gate_reacquire` 信号来管理输入门状态。输入门三态：`InputClosed`（壳层未放行/overlay/后台）→ `InputReacquire`（恢复后等待第一下输入被消费）→ `InputOpen`（正常玩法输入）。桌面窗口生命周期事件由壳层归一化后传入——本系统不直接订阅 `window_focus_changed`/`suspend_requested`。
 
 **Engine**: Godot 4.6.2 | **Risk**: MEDIUM
 **Engine Notes**: 信号连接使用 `sender.signal_name.connect(receiver.method)`；`InputReacquire` 期间第一下输入消费使用 `Input.is_anything_pressed()` 检测。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 信号使用 typed params；input gate 三态机不可绕过
-- Forbidden: 不得直接订阅浏览器事件（`visibilitychange`、`pagehide`、`focus`）；不得在 `_process()` 中动态 connect/disconnect
+- Forbidden: 不得直接订阅桌面窗口生命周期事件（`window_focus_changed`、`suspend_requested`、`focus`）；不得在 `_process()` 中动态 connect/disconnect
 - Guardrail: `first_resume_input_consumed = true`（固定不可调）
 
 ---
@@ -30,7 +31,7 @@
 - [ ] **AC-2**: GIVEN `input_gate_state` 为 `InputReacquire`，WHEN 玩家按下任意键或点击鼠标，THEN 该输入被消费（不产生移动或 Use），状态切换为 `InputOpen`
 - [ ] **AC-3**: GIVEN `InputReacquire` 期间玩家按住移动键不放，WHEN 切换到 `InputOpen`，THEN 角色不自动开始移动（需松开再按才走）
 - [ ] **AC-4**: GIVEN 壳层显示 overlay（设置/存档菜单），WHEN `input_gate_closed` 发出，THEN 移动和 Use 立即阻断；按移动键和 E/Space 均无效果
-- [ ] **AC-5**: GIVEN 浏览器 `pagehide`/`visibilitychange=hidden` 通过壳层转发为 `input_gate_closed`，WHEN 标签页隐藏，THEN 输入门关闭，移动和使用全部阻断
+- [ ] **AC-5**: GIVEN 桌面窗口 `suspend_requested`/`window_focus_changed=hidden` 通过壳层转发为 `input_gate_closed`，WHEN 窗口失焦或暂停，THEN 输入门关闭，移动和使用全部阻断
 - [ ] **AC-6**: GIVEN `input_gate_state` 变化，WHEN 新状态生效，THEN 发出 `input_gate_changed` 语义事件（包含 `previous_gate` 和 `new_gate`）
 
 ---
@@ -60,14 +61,14 @@
 - Story 001: 具体移动计算和碰撞
 - Story 003: 焦点状态机（门关闭时清空焦点是副作用，但焦点逻辑由 Story 003 拥有）
 - Story 004: Use gate 的具体阻断检查
-- 壳层如何检测浏览器生命周期（由 platform-session-shell Epic 拥有）
+- 壳层如何检测桌面窗口生命周期（由 platform-session-shell Epic 拥有）
 
 ---
 
 ## QA Test Cases
 
 - **AC-2**: Reacquire consumes first input
-  - Given: 从 BFCache 恢复，`input_gate_state = InputReacquire`
+  - Given: 从 desktop resume 恢复，`input_gate_state = InputReacquire`
   - When: 玩家按 W 键
   - Then: 角色不移动；`input_gate_state → InputOpen`；下一帧按 W 才走
   - Edge cases: 鼠标点击也消费 → 不触发 Use；任意键（包括 Tab）都消费
@@ -89,7 +90,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/input_gate_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/movement/InputGateTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

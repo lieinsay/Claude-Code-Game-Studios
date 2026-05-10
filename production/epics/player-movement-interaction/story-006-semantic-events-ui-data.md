@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -51,7 +52,7 @@
 每个语义事件包含: `event_type`、`timestamp`、`source_system="player_movement_interaction"`、`payload` (dict——仅内部使用，不通过 signal 传递)
 
 **Signal 定义**（typed）:
-```gdscript
+```text
 signal interaction_focus_changed(focused_id: StringName)
 signal interaction_used(target_id: StringName, interaction_type: StringName)
 signal use_blocked(target_id: StringName, block_reason: StringName)
@@ -81,7 +82,7 @@ signal input_gate_changed(previous_gate: StringName, new_gate: StringName)
 ### Cross-cutting rules:
 - 表现优先级: `interaction_used > use_blocked > interaction_focus_changed > movement_blocked`（同帧冲突时）
 - 音频预算: 并发音源 ≤3，超出时丢弃最早播放中的非循环音
-- Web 约束: 音频只在壳层 AudioContext 激活（用户手势）后播放；激活前的语义事件保留但不播放历史音频
+- 桌面约束: 音频只在壳层 audio device readiness 激活（用户手势）后播放；激活前的语义事件保留但不播放历史音频
 - 色盲安全: 所有焦点/阻断视觉反馈同时含非色相维度（轮廓样式、亮度、形状变化）
 
 ---
@@ -114,7 +115,7 @@ signal input_gate_changed(previous_gate: StringName, new_gate: StringName)
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/semantic_events_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/movement/SemanticEventsTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

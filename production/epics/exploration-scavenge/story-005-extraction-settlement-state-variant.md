@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -19,7 +20,7 @@
 **Control Manifest Rules (Feature layer)**:
 - Required: extraction_loss_settlement 必须先判定损耗再批量转移——不可分批；Unique 物品 (Q=1, max_stack=1) 永不损耗，独立于 λ 值；每堆至少保留 1（compute_loss 的 max(0, ceil(Q×λ)) 受限于 min(Q-1, ...)）；撤退提取 (retreat_flagged=true) 使用 λ_forced=0.25
 - Forbidden: 在 EXTRACTING 阶段允许玩家移动或交互（除威胁打断）；在 DEPARTED 结算完成前允许玩家进入下一次探索；损耗结算时修改 Unique 物品的 quantity
-- Guardrail: DEPARTED 结算写入失败时保留结算包在内存中——提供手动重试按钮；结算包在页面关闭前一直保留
+- Guardrail: DEPARTED 结算写入失败时保留结算包在内存中——提供手动重试按钮；结算包在应用关闭请求前一直保留
 
 ---
 
@@ -56,7 +57,7 @@
 ### DEPARTED Settlement
 
 - [ ] **AC-20**: GIVEN DEPARTED 阶段 + 结算执行，WHEN _finalize_extraction()，THEN 执行顺序：(1) F-11-04 损耗结算 + 批量转移，(2) 情报结算写入 IntelManager，(3) 船体后果汇总展示，(4) F-11-05 状态变体更新，(5) 持久化快照，(6) extraction_completed 信号发射
-- [ ] **AC-21**: GIVEN DEPARTED 结算写入失败（模拟 localStorage 满），WHEN 触发 EC-11-03 重试逻辑，THEN 自动重试 1s→2s→4s→8s（最多 4 次）。全部失败后显示"保存失败。你的探索收获暂时保留。请检查浏览器存储空间后点击重试。"+ 手动重试按钮
+- [ ] **AC-21**: GIVEN DEPARTED 结算写入失败（模拟 user:// storage 满），WHEN 触发 EC-11-03 重试逻辑，THEN 自动重试 1s→2s→4s→8s（最多 4 次）。全部失败后显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮
 - [ ] **AC-22**: GIVEN extraction_completed 发射后，WHEN Platform #2 收到信号，THEN 过渡回 Hub 场景。ExplorationManager session_phase→IDLE
 
 ---
@@ -65,7 +66,7 @@
 
 ### Extraction Loss Settlement
 
-```gdscript
+```text
 const LAMBDA_SUCCESS: float = 0.08
 const LAMBDA_FORCED: float = 0.25
 
@@ -112,7 +113,7 @@ func compute_loss(qty: int, lambda: float) -> int:
 
 ### State Variant Transition
 
-```gdscript
+```text
 func state_variant_transition(current_state: int, all_searched: bool, env_threat_active: bool) -> int:
     if env_threat_active:
         return STATE_DANGER_CHANGED  # 优先规则
@@ -133,7 +134,7 @@ func state_variant_transition(current_state: int, all_searched: bool, env_threat
 
 ### Finalize Extraction
 
-```gdscript
+```text
 func _finalize_extraction() -> void:
     # (1) 损耗结算 + 批量转移
     var carried := ResourcesManager.get_pool_contents("pool_5")
@@ -171,7 +172,7 @@ func _finalize_extraction() -> void:
 
 ### Settlement Retry
 
-```gdscript
+```text
 const RETRY_DELAYS := [1.0, 2.0, 4.0, 8.0]  # 秒
 
 var _pending_settlement: Dictionary = {}  # 保留在内存中直到写入成功
@@ -226,7 +227,7 @@ func _attempt_settlement_retry(settlement: Dictionary, damage_summary: Dictionar
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/exploration/extraction_settlement_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/exploration/ExtractionSettlementTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### discard()
 
-```gdscript
+```text
 func discard(pool_id: StringName, resource_id: StringName, quantity: int) -> ResourceResult:
     # 有效目标池守卫: on_person, in_storage, loaded, carried
     # deposited 终态不可丢弃；listed 由集市系统拥有
@@ -72,7 +73,7 @@ func discard(pool_id: StringName, resource_id: StringName, quantity: int) -> Res
 
 ### consume_in_combat()
 
-```gdscript
+```text
 func consume_in_combat(resource_id: StringName, quantity: int) -> ResourceResult:
     # consume(Pool 5, resource_id, quantity) 的薄封装
     # 仅操作 carried 池
@@ -81,7 +82,7 @@ func consume_in_combat(resource_id: StringName, quantity: int) -> ResourceResult
 
 ### commit_deposit()
 
-```gdscript
+```text
 func commit_deposit(repair_node_id: StringName, resource_costs: Dictionary) -> ResourceResult:
     # resource_costs: { resource_id: quantity, ... }
     # 1. 验证所有 resource_id 在 Registry 中
@@ -93,7 +94,7 @@ func commit_deposit(repair_node_id: StringName, resource_costs: Dictionary) -> R
 
 ### add_loot()
 
-```gdscript
+```text
 func add_loot(resource_id: StringName, quantity: int) -> ResourceResult:
     # 探索拾取入口——委托给 add(carried, resource_id, quantity)
     # 内部使用 add_loot_valid = slot_capacity_check OR (has_match AND E+Q<=max_stack)
@@ -143,7 +144,7 @@ func add_loot(resource_id: StringName, quantity: int) -> ResourceResult:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/resources/specialized_ops_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/resources/SpecializedOpsTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -64,7 +65,7 @@
 
 ### Formula 3 — Scout Preview Window
 
-```gdscript
+```text
 func calculate_preview_window(scout_efficiency: float) -> float:
     var n_preview: int = floori(scout_efficiency * 2.0)
     if n_preview <= 0:
@@ -87,7 +88,7 @@ func get_effective_scout_efficiency() -> float:
 
 ### Preview Entry Building
 
-```gdscript
+```text
 func _build_pending_encounters() -> void:
     _pending_encounters.clear()
     var preview_window: float = calculate_preview_window(_active_voyage.get("scout_efficiency", 0.0))
@@ -128,7 +129,7 @@ func _generate_preview(check_time: float) -> Dictionary:
 
 ### Formula 5 — Hidden Tag Reveal
 
-```gdscript
+```text
 const BASE_REVEAL_CHANCE: float = 0.30
 
 func _check_hidden_tag_reveal(hidden_tag: StringName, force_reveal: bool = false) -> bool:
@@ -158,7 +159,7 @@ func reveal_all_hidden_tags() -> void:
 
 ### Preview Window on Scout Module Damage
 
-```gdscript
+```text
 func _on_scout_efficiency_changed(new_eff: float) -> void:
     var old_preview: float = calculate_preview_window(_active_voyage.get("scout_efficiency", 0.0))
     _active_voyage["scout_efficiency"] = new_eff
@@ -205,7 +206,7 @@ func _on_scout_efficiency_changed(new_eff: float) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/scout_reveal_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/navigation/ScoutRevealTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Done — 2026-05-10
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -17,7 +18,7 @@
 **ADR Decision Summary**: Registry 在 Phase 2 (foundation_start) 启动为 Autoload #1；提供全游戏共享的只读 `query_entity(id)` / `list_by_kind(kind)` / `list_by_domain(domain)` 查询接口；所有列表查询按 `sort_order ASC, id ASC` 确定性排序；ID 一旦注册不可变。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 纯 GDScript 数据结构和字典查询，无引擎特定 API 依赖。
+**Engine Notes**: 纯 C# 数据结构和字典查询，无引擎特定 API 依赖。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: Registry 在 Phase 2 初始化，提供全游戏共享查询

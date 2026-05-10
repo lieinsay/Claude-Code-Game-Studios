@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### swap_module Two-Phase Implementation
 
-```gdscript
+```text
 func swap_module(slot_id: StringName, new_module_type: int) -> int:
     # === Phase 1: Validation ===
     if not _is_valid_slot(slot_id):
@@ -124,7 +125,7 @@ func swap_module(slot_id: StringName, new_module_type: int) -> int:
 
 ### Net Cost Calculation
 
-```gdscript
+```text
 func _calculate_swap_net_cost(old_type: int, old_visible: int, new_type: int) -> Dictionary:
     var install_cost: Dictionary = _get_install_cost(new_type)
     var refund: Dictionary = _get_swap_refund(old_type, old_visible)
@@ -158,7 +159,7 @@ func _get_swap_refund(module_type: int, visible_state: int) -> Dictionary:
 
 ### Cargo Bay Protection Gate
 
-```gdscript
+```text
 # swap_module 的货舱占用保护在验证阶段
 # 货舱有货物 + 旧模块为货仓 + 新模块非货仓 → 拒绝
 # 若旧模块为货仓 + 新模块也为货仓 → 允许（货舱容积可能变化但货物仍可访问）
@@ -166,7 +167,7 @@ func _get_swap_refund(module_type: int, visible_state: int) -> Dictionary:
 
 ### Error Codes
 
-```gdscript
+```text
 enum SwapError {
     OK = 0,
     ERR_INVALID_PARAMETER,
@@ -215,7 +216,7 @@ enum SwapError {
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/modules/swap_module_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/modules/SwapModuleTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

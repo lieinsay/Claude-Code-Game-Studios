@@ -2,9 +2,21 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: Foundation Layer — content-registry Story-002
-Task: ✅ Story-002 完成 (11/11 checks PASS)
+Feature: Production Story Readiness Metadata
+Task: ✅ 115/115 Story readiness metadata aligned to ADR-0019
 <!-- /STATUS -->
+
+### 全量 Story Readiness 元数据收口 — 2026-05-10
+
+- [x] `production/epics/**/*.md` — 115 个 Story 统一 `Manifest Version: 2026-05-09`
+- [x] 115 个 Story 补齐 ADR-0019 Desktop Godot .NET/C# implementation contract
+- [x] Story test evidence 从 legacy `.gd` 路径翻译为 C# `.csproj` evidence path
+- [x] 补齐缺失 `Estimate` 的 UI story，并保留 Type/Test Evidence gate
+- [x] `production/epics/content-registry/story-003-content-lifecycle.md` — 范围校正: Lifecycle 提供 status/migration hint；Deprecated/Retired 引用错误由 Story-004 Reference Integrity 判定
+- [x] `docs/document-index.md`, `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md` — reference 状态同步
+- [x] `git diff --check` — PASS
+- [x] `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` — 11/11 PASS
+- [x] `dotnet build CloudWeaverVoyage.sln --no-restore` — PASS (0 errors; NU1900 SSL advisory warnings only)
 
 ### Foundation Layer: content-registry Story-002 Done — 2026-05-10
 

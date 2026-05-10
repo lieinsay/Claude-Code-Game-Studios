@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +14,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: Registry 管理内容定义生命周期——Draft→Active→Deprecated→Retired。Active ID 不可复用。Deprecated 内容仍可解析但新内容不应引用。Retired 仅用于旧存档兼容迁移。fantasy-critical ID（route/location/repair-node/home-space/home-anchor/companion）一旦 Active 不能改义。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 状态机为纯 GDScript 枚举+字典；生命周期变更通过信号通知下游（`content_status_changed`）。
+**Engine Notes**: 状态机为纯 C# `enum` + `Dictionary<string, ...>` 数据结构；生命周期变更通过 C# event/delegate 通知下游（`ContentStatusChanged`）。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 状态转换遵循单向路径——Draft→Active→Deprecated→Retired，不可逆向
@@ -35,8 +36,7 @@
 - [ ] **AC-3**: GIVEN 某个 fantasy-critical ID（route/location/repair-node/home-space/home-anchor/companion）已进入 Active，WHEN 后续内容包试图把该 ID 改义为另一个地点/房间/伙伴/修复目标/航线，THEN 校验返回 ID 改义或复用错误
 - [ ] **AC-4**: GIVEN `home-space`、`home-anchor` 或 `companion` 的运行时状态发生升级/模块替换/关系进展，WHEN 保存或恢复该状态，THEN 状态变化必须引用原稳定 ID，不能通过替换静态 ID 表达
 - [ ] **AC-5**: GIVEN 旧存档引用 Deprecated 或 Retired ID，WHEN 注册表解析该 ID，THEN 返回生命周期状态和迁移提示（迁移表引用）——具体存档迁移由 Persistence 执行
-- [ ] **AC-6**: GIVEN 新 Active 内容尝试新增对 Deprecated ID 的引用（非兼容路径），WHEN 运行引用校验，THEN 返回 `ERR_REFERENCE_TO_DEPRECATED`
-- [ ] **AC-7**: GIVEN 新内容引用 Retired ID，WHEN 运行引用校验，THEN 返回 `ERR_REFERENCE_TO_RETIRED`——仅旧存档兼容解析允许
+- [ ] **AC-6**: GIVEN 新 Active 内容尝试引用 Deprecated 或 Retired ID，WHEN Story 003 查询生命周期信息，THEN Registry 必须返回足够的 status 与 migration hint 供 Story 004 的引用完整性校验判定 `ERR_REFERENCE_TO_DEPRECATED` / `ERR_REFERENCE_TO_RETIRED`
 
 ---
 
@@ -44,13 +44,13 @@
 
 *Derived from ADR-0001 + GDD Lifecycle rules:*
 
-- 状态机使用枚举 `enum ContentStatus { DRAFT, ACTIVE, DEPRECATED, RETIRED }`
+- 状态机使用 C# 枚举 `enum ContentStatus { Draft, Active, Deprecated, Retired }`
 - 合法转换: DRAFT→ACTIVE, ACTIVE→DEPRECATED, DEPRECATED→RETIRED
 - 非法转换（DRAFT→RETIRED 跳过 Active、ACTIVE→DRAFT 回退）→记录诊断 warning 并拒绝
-- Retired ID 存储在独立字典 `retired_ids: Dictionary[StringName, RetiredRecord]`，包含 migration_target 和 retirement_reason
+- Retired ID 存储在独立字典 `retiredIds: Dictionary<string, RetiredRecord>`，包含 `migration_target` 和 `retirement_reason`
 - fantasy-critical ID 改义检测：新内容注册时，若 ID 已存在于 retired_ids 或当前 active_entries 但 owner_domain/kind 不同→ERR_ID_REUSE
 - 迁移提示结构：`{original_id, status, suggested_replacement_id, migration_note, retired_date}`
-- 状态变更通过信号 `content_status_changed(id, old_status, new_status)` emit-after-mutation
+- 状态变更通过 C# event/delegate `ContentStatusChanged(id, oldStatus, newStatus)` emit-after-mutation
 
 ---
 
@@ -93,7 +93,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/registry/content_lifecycle_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/registry/ContentLifecycleTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -62,7 +63,7 @@
 
 ### signal Declarations
 
-```gdscript
+```text
 ## 出航承诺信号 — 单次发射，不可逆
 signal route_committed(route_id: StringName, destination_id: StringName, hazard_tags: Array[StringName])
 
@@ -75,7 +76,7 @@ signal chart_state_changed(old_state: StringName, new_state: StringName)
 
 ### _commit_departure() — Full Flow
 
-```gdscript
+```text
 func _commit_departure(route_id: StringName) -> void:
     # Step 1: 刷新风险数据 — 两步确认第一步必须展示最新状态
     var accessibility: Dictionary = _query_route_accessibility(route_id)
@@ -122,7 +123,7 @@ func _commit_departure(route_id: StringName) -> void:
 
 ### Two-Step Confirmation Entry Points
 
-```gdscript
+```text
 func request_confirm_departure(route_id: StringName) -> Dictionary:
     """Step 1: 玩家点击'确认出航'按钮 — 刷新数据并返回最终摘要"""
     if _state["_chart_state"] != &"ROUTE_SELECTED":
@@ -155,7 +156,7 @@ func confirm_departure(route_id: StringName) -> void:
 
 ### Forced Deselect
 
-```gdscript
+```text
 func _force_deselect(reason: StringName) -> void:
     if _state["_chart_state"] != &"ROUTE_SELECTED":
         return
@@ -172,7 +173,7 @@ func _force_deselect(reason: StringName) -> void:
 
 ### _enter_error_state()
 
-```gdscript
+```text
 func _enter_error_state(violations: Array) -> void:
     _state["_chart_state"] = &"ERROR"
     _state["_retry_cooldown_remaining"] = Registry.get_constant(&"base_retry_cooldown", 2.0)
@@ -215,7 +216,7 @@ func _enter_error_state(violations: Array) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/departure_confirmation_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/chart/DepartureConfirmationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

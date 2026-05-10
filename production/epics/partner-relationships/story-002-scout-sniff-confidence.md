@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -73,7 +74,7 @@
 
 ### Core Algorithm
 
-```gdscript
+```text
 const REACTION_EARS_BACK_TAIL_POINT: int = 0  # 有效线索
 const REACTION_CIRCLES_TWICE: int = 1          # 强信号
 const REACTION_RUBS_FACE: int = 2              # 弱信号
@@ -128,7 +129,7 @@ func scout_sniff(item_id: StringName) -> Dictionary:
 
 ### Signature Reader
 
-```gdscript
+```text
 func _get_sniff_signature(item_id: StringName) -> Dictionary:
     var item_def := Registry.query_entity(item_id)
     if item_def.is_empty():
@@ -141,7 +142,7 @@ func _get_sniff_signature(item_id: StringName) -> Dictionary:
 
 ### Sniffable Items Filter
 
-```gdscript
+```text
 func get_sniffable_items() -> Array:
     var inventory: Array = ResourcesManager.get_inventory_items()
     var candidates: Array = []
@@ -183,7 +184,7 @@ func get_sniffable_items() -> Array:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/partner-relationships/scout_sniff_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/partner-relationships/ScoutSniffTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,9 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: UI
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Estimate**: M
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +15,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0006: Web Platform Constraints, ADR-0012: UI / Input Routing
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0019: Desktop C# Platform Pivot, ADR-0012: UI / Input Routing
 **ADR Decision Summary**: 壳层 UI 是进入/加载/音频/恢复/错误提示的焦点所有者——包含 Loading 屏幕、Start/Continue 入口、Audio 激活确认、PreservedLocked 说明、EphemeralOnly 警告、FatalBlocked 安全错误 UI、RecoveryRequired 重试界面。壳层 UI 仅在 SessionActive 无 overlay 时将焦点交给下游。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: Godot Control 节点——Web 兼容（Compatibility 渲染器）；loading 动画使用 `_process()` 中的 delta 驱动但不能超过 2ms/frame。
+**Engine Notes**: Godot Control 节点——桌面兼容（Compatibility 渲染器）；loading 动画使用 `_process()` 中的 delta 驱动但不能超过 2ms/frame。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 键盘优先——所有 UI 必须有键盘快捷键
@@ -45,7 +47,7 @@
 - Loading 屏幕: 显示加载子阶段文本 (`loading_phase_changed` 信号驱动) + 动画进度条
 - Entry 屏幕 (Ready): Start 按钮（快捷键 Enter）+ Continue 按钮（Enable/Locked/Hidden 三态）+ Settings 入口
 - PreservedLocked 面板: 锁定图标 + 原因文本 + "开始新会话" 按钮 + "返回标题" 按钮——Continue 按钮灰显不可点击
-- EphemeralOnly 确认弹窗: "⚠ 本次进度不会保存——浏览器存储不可用。是否继续？" + "继续（不保存）" / "返回"
+- EphemeralOnly 确认弹窗: "⚠ 本次进度不会保存——本地存储不可用。是否继续？" + "继续（不保存）" / "返回"
 - FatalBlocked 屏幕: 错误图标 + 面向玩家的安全提示文本 + "重试" / "刷新页面" 按钮——无 ERR_* 代码
 - RecoveryRequired 屏幕: "无法恢复会话" + Retry/New Session/Return Title——保留继续点状态
 - 键盘导航: Tab 顺序 Start→Continue→Settings→Return Title；Enter=确认；Esc=返回

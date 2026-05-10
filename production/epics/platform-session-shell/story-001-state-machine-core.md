@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +14,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0006: Web Platform Constraints
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: SessionShell 在 Phase 1 (engine_init) 第一个启动，管理 10 主状态 + 加载子阶段。平台状态机是确定性的——每个状态有明确允许的玩家输入和退出条件。加载子阶段 (BaseBoot/ContentDomainCheck/StorageCapabilityCheck/SessionMetadataCheck/EntryRenderReady) 用于诊断分类但不升级为主状态。
 
-**Engine**: Godot 4.6.2 | **Risk**: MEDIUM (Web platform constraints)
-**Engine Notes**: 单线程 Web 导出；Compatibility 渲染器；`JavaScriptBridge` 用于浏览器生命周期事件。
+**Engine**: Godot 4.6.2 | **Risk**: MEDIUM (desktop lifecycle constraints)
+**Engine Notes**: 单线程 桌面构建；Compatibility 渲染器；Godot window notifications用于桌面窗口生命周期事件。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 状态转换必须通过守卫检查；非法转换记录诊断 warning 并拒绝
@@ -34,8 +35,8 @@
 - [ ] **AC-4**: GIVEN 游戏处于 BackgroundSuspended，WHEN 页面恢复可见且可交互，THEN 状态转入 `ResumePending`，仍不得接受普通玩法输入
 - [ ] **AC-5**: GIVEN ResumePending 且页面已回前台、挂起 token 有效、玩家完成重新激活、焦点恢复且内容域可用，THEN 状态转入 `SessionActive`
 - [ ] **AC-6**: GIVEN ResumePending 且挂起 token 无效、内容域不可恢复或恢复检查失败，THEN 状态转入 `RecoveryRequired`
-- [ ] **AC-7**: GIVEN 核心资源缺失、构建不兼容、缺少必需 Web runtime 或内容域版本不兼容，WHEN 加载失败，THEN 状态转入 `FatalBlocked`
-- [ ] **AC-8**: GIVEN 加载子阶段中任一失败，WHEN 报告错误，THEN 必须包含失败子阶段 (BaseBoot/ContentDomainCheck/StorageCapabilityCheck/SessionMetadataCheck/EntryRenderReady)、失败类型、是否可重试、浏览器可见性/焦点状态
+- [ ] **AC-7**: GIVEN 核心资源缺失、构建不兼容、缺少必需 desktop runtime 或内容域版本不兼容，WHEN 加载失败，THEN 状态转入 `FatalBlocked`
+- [ ] **AC-8**: GIVEN 加载子阶段中任一失败，WHEN 报告错误，THEN 必须包含失败子阶段 (BaseBoot/ContentDomainCheck/StorageCapabilityCheck/SessionMetadataCheck/EntryRenderReady)、失败类型、是否可重试、桌面窗口焦点/焦点状态
 
 ---
 
@@ -53,7 +54,7 @@
 ## Out of Scope
 
 - Story 002: Start/Continue 入口逻辑和 Audio Activation
-- Story 003: Background Suspend/Resume 的浏览器事件处理
+- Story 003: Background Suspend/Resume 的桌面窗口生命周期事件处理
 - Story 004: failure_severity 判定和 Recovery 路径
 
 ---
@@ -67,7 +68,7 @@
   - Edge cases: 任一个子阶段失败→转入 RecoveryRequired 或 FatalBlocked
 
 - **AC-8**: Load phase tracked in failures
-  - Given: StorageCapabilityCheck 阶段 IndexedDB probe 超时
+  - Given: StorageCapabilityCheck 阶段 user:// storage probe 超时
   - When: 加载失败
   - Then: 诊断报告包含 `load_phase: STORAGE_CAPABILITY_CHECK`, `retryable: true`
   - Edge cases: 多个子阶段失败→报告每个阶段的失败，按执行顺序排列
@@ -77,7 +78,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/session/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/session/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

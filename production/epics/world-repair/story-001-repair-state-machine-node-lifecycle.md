@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -56,7 +57,7 @@
 
 ### REPAIR_STATE Enum & Storage Structure
 
-```gdscript
+```text
 # WorldRepair Autoload #13 — 状态枚举
 const REPAIR_STATE_UNREVEALED: int = 0
 const REPAIR_STATE_KNOWN: int = 1
@@ -75,7 +76,7 @@ var repair_nodes: Dictionary = {}
 
 ### State Transition Function
 
-```gdscript
+```text
 func _transition_state(node_id: StringName, target_state: int) -> bool:
     var current: int = get_repair_state(node_id)
 
@@ -103,7 +104,7 @@ func _transition_state(node_id: StringName, target_state: int) -> bool:
 
 ### on_player_arrived_at_repair_node
 
-```gdscript
+```text
 func on_player_arrived_at_repair_node(node_id: StringName) -> void:
     if not repair_nodes.has(node_id):
         push_warning("WorldRepair: unknown repair node — %s" % node_id)
@@ -120,7 +121,7 @@ func on_player_arrived_at_repair_node(node_id: StringName) -> void:
 
 ### Node Initialization
 
-```gdscript
+```text
 func _init_new_game_state() -> void:
     repair_nodes.clear()
 
@@ -171,7 +172,7 @@ func _init_new_game_state() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/world-repair/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/world-repair/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -17,7 +18,7 @@
 **ADR Decision Summary**: Registry 负责引用完整性校验——所有 `references` 字段必须解析到有效定义；引用状态必须符合生命周期规则；不能有自循环或闭环依赖。所有必需引用解析失败→条目不能进入 Active。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 引用图遍历为纯 GDScript——小规模图（每个内容最多 16 条引用），性能不受影响。
+**Engine Notes**: 引用图遍历为纯 C#——小规模图（每个内容最多 16 条引用），性能不受影响。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 引用校验在内容注册前完成——引用不完整的条目不能进入可查询集合
@@ -95,7 +96,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/registry/reference_integrity_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/registry/ReferenceIntegrityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -15,7 +16,7 @@
 **ADR Decision Summary**: 3 条规律 (pattern.bird-flight-direction, pattern.lighthouse-signals, pattern.fog-navigation) 各拥有 6 个独立观测事件。observation_score = SUM(weight(e)) for unique triggered event IDs。5 种事件权重: narrative_hint=1, log_fragment=2, partner_comment=3, passive_observation=4, active_investigation=7。4 级状态机: undiscovered → partially_observed (≥5) → confirmed (≥10) + confirmed+ 增强层 (confirmed AND pattern_usage_success=true)。同一观测事件仅计首次触发——证据多样性优先于重复次数。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 纯 GDScript Dictionary[StringName] 存储，无引擎 API 依赖。GDScript 的 `StringName` 在 Dictionary key 中自动转换 string，反序列化时需 `StringName(str)` 显式转换。
+**Engine Notes**: 纯 C# Dictionary[StringName] 存储，无引擎 API 依赖。C# 的 `StringName` 在 Dictionary key 中自动转换 string，反序列化时需 `StringName(str)` 显式转换。
 
 **Control Manifest Rules (Core layer)**:
 - Required: observation_score 仅对 triggered_events 集合中的唯一事件 ID 累加；pattern_state 由 IntelManager 唯一拥有
@@ -63,7 +64,7 @@
 
 ### Data Structures
 
-```gdscript
+```text
 # PatternState Dictionary (per pattern_id)
 # {
 #   observation_score: int,
@@ -91,7 +92,7 @@ const CONFIRMATION_THRESHOLD_DEFAULT: int = 10
 
 ### Core Algorithm: report_observation_event()
 
-```gdscript
+```text
 func report_observation_event(pattern_id: StringName, event_id: StringName) -> void:
     # 防御性校验
     if not _validate_pattern_id(pattern_id):
@@ -128,7 +129,7 @@ func report_observation_event(pattern_id: StringName, event_id: StringName) -> v
 
 ### State Computation
 
-```gdscript
+```text
 func _compute_pattern_state(score: int, pattern_id: StringName) -> int:
     var partial_threshold: int = _get_threshold(pattern_id, "partial")
     var confirmation_threshold: int = _get_threshold(pattern_id, "confirmation")
@@ -148,7 +149,7 @@ func is_confirmed_plus(pattern_id: StringName) -> bool:
 
 ### Event Weight Lookup
 
-```gdscript
+```text
 # 从 Registry 加载的事件权重表，按 pattern_id → event_id → weight 索引
 # 若事件不在定义表中（未注册事件），返回 0 并记录 warning
 var _event_weight_table: Dictionary = {}  # Dict[StringName, Dict[StringName, int]]
@@ -160,7 +161,7 @@ func _get_event_weight(pattern_id: StringName, event_id: StringName) -> int:
 
 ### Pattern Usage Success
 
-```gdscript
+```text
 func report_pattern_usage_success(pattern_id: StringName) -> void:
     var ps: Dictionary = _get_or_init_pattern(pattern_id)
     var was_confirmed_plus: bool = is_confirmed_plus(pattern_id)
@@ -174,7 +175,7 @@ func report_pattern_usage_success(pattern_id: StringName) -> void:
 
 ### Threshold Override Table
 
-```gdscript
+```text
 # 按规律覆盖阈值（MVP 全部使用默认值，此机制为调优预留）
 var _threshold_overrides: Dictionary = {}  # Dict[StringName, {partial: int, confirmation: int}]
 
@@ -190,7 +191,7 @@ func _get_threshold(pattern_id: StringName, threshold_type: String) -> int:
 
 在 `_ready()` 或 `core_data_ready` 初始化时:
 
-```gdscript
+```text
 func _validate_thresholds() -> void:
     for pattern_id in _event_weight_table:
         var partial: int = _get_threshold(pattern_id, "partial")
@@ -234,7 +235,7 @@ func _validate_thresholds() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/pattern_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/PatternStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

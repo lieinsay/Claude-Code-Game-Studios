@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -100,7 +101,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/persistence/continue_availability_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/persistence/ContinueAvailabilityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---
@@ -108,4 +109,4 @@
 ## Dependencies
 
 - Depends on: Story 001 (Promotion 生成 Safe checkpoint)；Story 002 (snapshot_package_validity 是 restore_readiness 的前置)；Story 003 (storage_capability 是 continue_availability 的输入)
-- Unlocks: Story 005 (Migration — PreservedLocked 触发迁移入口)；Story 008 (Web Lifecycle — 恢复时 Continue 判定)
+- Unlocks: Story 005 (Migration — PreservedLocked 触发迁移入口)；Story 008 (Desktop Lifecycle — 恢复时 Continue 判定)

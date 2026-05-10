@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### Signal Connection
 
-```gdscript
+```text
 func _on_feature_ready() -> void:
     _connect_signals()
 
@@ -98,7 +99,7 @@ func _register_open_stalls() -> void:
 
 ### use_requested Handler
 
-```gdscript
+```text
 func on_use_requested(target_id: StringName) -> void:
     if not stalls.has(target_id):
         return  # 不是摊位——静默忽略
@@ -112,7 +113,7 @@ func on_use_requested(target_id: StringName) -> void:
 
 ### Purchase Delegation
 
-```gdscript
+```text
 func validate_purchase_request(stall_id: StringName, good_id: StringName, quantity: int) -> Dictionary:
     if not _is_resources_available():
         return {"valid": false, "reason": &"system_unavailable", "total_cost": 0}
@@ -156,7 +157,7 @@ func _is_resources_available() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/settlement-market/signal_integration_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/settlement-market/SignalIntegrationTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -71,7 +72,7 @@
 
 ### Query Method Implementations
 
-```gdscript
+```text
 # 1. 地点知识查询
 func query_knowledge_state(location_id: StringName) -> Dictionary:
     return {
@@ -274,7 +275,7 @@ func _collect_sources(entity_id: StringName) -> Array:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/query_interface_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/QueryInterfaceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

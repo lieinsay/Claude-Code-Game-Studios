@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### Domain Serializer Registration
 
-```gdscript
+```text
 func _ready() -> void:
     # Phase 5 foundation_ready — Persistence 已 ready
     Persistence.register_domain_serializer("resources", _serialize_resources, _deserialize_resources)
@@ -76,7 +77,7 @@ func _ready() -> void:
 
 ### Serialize Resources (ADR-0005 Section 7)
 
-```gdscript
+```text
 func _serialize_resources() -> Dictionary:
     return {
         "domain": "resources",
@@ -101,7 +102,7 @@ func _serialize_pool(pool_id: StringName) -> Dictionary:
 
 ### Deserialize Resources
 
-```gdscript
+```text
 func _deserialize_resources(snapshot: Dictionary) -> void:
     # 清空所有池
     _pools.clear()
@@ -117,7 +118,7 @@ func _deserialize_resources(snapshot: Dictionary) -> void:
 
 ### Reset for New Game
 
-```gdscript
+```text
 func reset_for_new_game(starting_snapshot: Dictionary) -> void:
     _pools.clear()
     _init_pools()
@@ -128,7 +129,7 @@ func reset_for_new_game(starting_snapshot: Dictionary) -> void:
 
 ### EC-05: Module Destroyed — Cargo Loss
 
-```gdscript
+```text
 func handle_cargo_bay_module_destroyed() -> Dictionary:
     # 1. 对货舱中每个货物堆计算损失：loss = min(Q-1, max(1, ceil(Q×0.4)))
     # 2. retention = Q - loss
@@ -140,7 +141,7 @@ func handle_cargo_bay_module_destroyed() -> Dictionary:
 
 ### Supply Class Queries
 
-```gdscript
+```text
 func get_carried_intel() -> Dictionary:
     # 过滤 carried 池中 supply_class=intel 的资源
     # 返回 {resource_id: quantity, ...}
@@ -189,7 +190,7 @@ func get_carried_contents_by_tag(material_tag: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/resources/persistence_integration_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/resources/PersistenceIntegrationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

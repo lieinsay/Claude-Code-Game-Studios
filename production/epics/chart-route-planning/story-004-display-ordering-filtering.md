@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -72,7 +73,7 @@
 
 ### Formula 5 — route_display_order
 
-```gdscript
+```text
 func route_display_order(route_id: StringName) -> int:
     var knowledge_state: int = _query_knowledge_state(route_id)
     var distance_band: StringName = Registry.get_route_distance_band(route_id)
@@ -104,7 +105,7 @@ func route_display_order(route_id: StringName) -> int:
 
 ### get_visible_routes() — Sorted with Filter
 
-```gdscript
+```text
 func get_visible_routes() -> Array:
     var visible: Array[StringName] = []
 
@@ -127,7 +128,7 @@ func get_visible_routes() -> Array:
 
 ### hide_rumored Toggle
 
-```gdscript
+```text
 func set_hide_rumored(hide: bool) -> void:
     if _state["_hide_rumored"] == hide:
         return
@@ -163,7 +164,7 @@ func _build_visible_routes_list() -> Array[StringName]:
 
 ### Filter State Signal
 
-```gdscript
+```text
 signal filter_changed(hide_rumored: bool)
 
 func get_filter_state() -> Dictionary:
@@ -172,7 +173,7 @@ func get_filter_state() -> Dictionary:
 
 ### get_route_display_data() — For UI Panel
 
-```gdscript
+```text
 func get_route_display_data(route_id: StringName) -> Dictionary:
     """返回航线在 UI 中展示所需的所有数据——不返回视觉属性"""
     var knowledge: int = _query_knowledge_state(route_id)
@@ -227,7 +228,7 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/display_order_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/chart/DisplayOrderTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

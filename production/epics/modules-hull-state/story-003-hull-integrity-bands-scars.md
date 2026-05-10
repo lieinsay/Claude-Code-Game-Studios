@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -67,7 +68,7 @@
 
 ### Hull Integrity Data Model
 
-```gdscript
+```text
 const HULL_INTEGRITY_MAX: int = 100
 const HULL_INTEGRITY_MIN: int = 0
 
@@ -85,7 +86,7 @@ var _hull_band: int = HullBand.INTACT
 
 ### Band Determination
 
-```gdscript
+```text
 func _get_hull_band(integrity: int) -> int:
     if integrity >= 76:
         return HullBand.INTACT
@@ -113,7 +114,7 @@ func _get_band_boundaries(band: int) -> Dictionary:
 
 ### Apply Hull Damage
 
-```gdscript
+```text
 func apply_hull_damage(amount: int) -> void:
     if amount <= 0:
         return
@@ -166,7 +167,7 @@ func _count_band_crossings(from_integrity: int, to_integrity: int, starting_band
 
 ### Band Penalty Query
 
-```gdscript
+```text
 const BAND_PENALTIES: Dictionary = {
     HullBand.INTACT: {
         "speed_multiplier": 1.0,
@@ -203,7 +204,7 @@ func get_hull_band_efficiency_multiplier() -> float:
 
 ### Hull Repair
 
-```gdscript
+```text
 const HULL_REPAIR_VALUE_PER_KIT: int = 5
 
 func repair_hull(kit_count: int) -> int:
@@ -237,7 +238,7 @@ func repair_hull(kit_count: int) -> int:
 
 ### Band Re-Entry Detection (for AC-11)
 
-```gdscript
+```text
 # _count_band_crossings 自动处理波段重新进入
 # 因为 starting_band 参数为事件前的波段
 # 若玩家修复从 critical→damaged→再受伤害进入 critical
@@ -277,7 +278,7 @@ func repair_hull(kit_count: int) -> int:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/modules/hull_integrity_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/modules/HullIntegrityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

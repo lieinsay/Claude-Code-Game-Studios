@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -66,7 +67,7 @@
 
 ### Data-Driven Path Configuration
 
-```gdscript
+```text
 # 从 Registry 加载到 IntelManager
 var ability_unlock_paths: Dictionary = {
     "ability.bird-flight-understanding": {
@@ -158,7 +159,7 @@ var ability_unlock_paths: Dictionary = {
 
 ### Core Algorithm: check_unlock_conditions()
 
-```gdscript
+```text
 func check_unlock_conditions(ability_id: StringName) -> bool:
     # 已解锁 → 短路
     if ability_state.get(ability_id, ABILITY_LOCKED) == ABILITY_UNLOCKED:
@@ -183,7 +184,7 @@ func _path_satisfied(path: Dictionary) -> bool:
 
 ### Condition Evaluators
 
-```gdscript
+```text
 # 条件类型 → evaluator 映射
 var _condition_evaluators: Dictionary = {}
 
@@ -248,7 +249,7 @@ func _eval_fog_traversal_count(cond: Dictionary) -> bool:
 
 ### Re-evaluation Trigger
 
-```gdscript
+```text
 # 在每个上游事件方法完成后调用
 func _reevaluate_ability_unlocks() -> void:
     for ability_id in ability_unlock_paths:
@@ -258,7 +259,7 @@ func _reevaluate_ability_unlocks() -> void:
 
 ### Startup Validation
 
-```gdscript
+```text
 func _validate_ability_paths() -> void:
     for ability_id in ability_unlock_paths:
         var paths: Array = ability_unlock_paths[ability_id].get("paths", [])
@@ -303,7 +304,7 @@ func _validate_ability_paths() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/ability_unlock_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/AbilityUnlockTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

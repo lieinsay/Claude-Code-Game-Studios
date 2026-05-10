@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,7 +14,7 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0006: Web Platform Constraints
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: 壳层只做输入门禁——SessionActive 下普通玩法输入下放给玩家移动与交互系统，壳层仅保留 Esc 暂停和生命周期级拦截。壳层 overlay 可见时焦点不传入 HUD 或玩法层。input_gate 三态：Open（正常玩法输入）、Reacquire（恢复后需重新激活）、Blocked（壳层拦截）。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
@@ -68,7 +69,7 @@
   - Given: Loading overlay 可见
   - When: 玩家按 W/A/S/D/E/Tab
   - Then: 所有按键被壳层捕获——角色不移动、背包不打开
-  - Edge cases: 系统快捷键（如浏览器 Ctrl+W）不受影响（由浏览器处理）
+  - Edge cases: 系统快捷键（如操作系统窗口快捷键）不受影响（由操作系统处理）
 
 - **AC-5**: Reacquire gate → single input only
   - Given: input_gate=Reacquire，恢复面板显示
@@ -81,7 +82,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/session/input_gate_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/session/InputGateTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -64,7 +65,7 @@
 
 ### State Enums & Storage Structure
 
-```gdscript
+```text
 # SettlementManager Autoload #14 — 状态枚举
 const SETTLEMENT_DORMANT: int = 0
 const SETTLEMENT_RECOVERING: int = 1
@@ -96,7 +97,7 @@ var npcs: Dictionary = {}
 
 ### State Transition Functions
 
-```gdscript
+```text
 func _transition_stall_state(stall_id: StringName, target_state: int) -> bool:
     var current: int = get_stall_state(stall_id)
 
@@ -143,7 +144,7 @@ func _transition_npc_state(npc_id: StringName, target_state: int) -> bool:
 
 ### Initialization
 
-```gdscript
+```text
 func _init_new_game_state() -> void:
     settlements.clear()
     stalls.clear()
@@ -227,7 +228,7 @@ func _init_new_game_state() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/settlement-market/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/settlement-market/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -59,7 +60,7 @@
 
 ### Threat Configuration Table (C8)
 
-```gdscript
+```text
 # 定义在 Registry (#1) 中——通过 EncounterContext → #11 传递
 # 以下为 guard 类型的完整配置
 
@@ -79,7 +80,7 @@ const GUARD_THREAT_CONFIG: Dictionary = {
 
 ### CombatManager Configuration Reader
 
-```gdscript
+```text
 # CombatManager 内部——从 encounter_params 安全读取配置值
 # 所有数值来自 encounter_params，不硬编码
 
@@ -126,7 +127,7 @@ func _validate_threat_params(params: Dictionary) -> Dictionary:
 
 ### Exploration-side Configuration Retrieval
 
-```gdscript
+```text
 # 此函数属于 #11 Exploration，此处作为合约参考
 func _build_threat_context_for_guard(threat_id: StringName, position: Vector2) -> Dictionary:
     var config: Dictionary = Registry.get_threat_config(&"guard")
@@ -144,7 +145,7 @@ func _build_threat_context_for_guard(threat_id: StringName, position: Vector2) -
 
 ### can_be_suppressed Handling
 
-```gdscript
+```text
 func get_available_responses() -> Array[Dictionary]:
     var params: Dictionary = _current_threat_context.get("encounter_params", {})
     var can_suppress: bool = _get_param(params, &"can_be_suppressed", true)
@@ -192,7 +193,7 @@ func get_available_responses() -> Array[Dictionary]:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/combat/threat_config_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/combat/ThreatConfigTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

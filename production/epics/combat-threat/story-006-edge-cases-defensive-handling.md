@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -85,7 +86,7 @@
 
 ### EC-12-01: Low Hull Tank Guard
 
-```gdscript
+```text
 func _execute_settlement(response_choice: StringName) -> Dictionary:
     # ... 步骤 1-4 ...
 
@@ -108,7 +109,7 @@ func _execute_settlement(response_choice: StringName) -> Dictionary:
 
 ### EC-12-04: eligible_modules Filter
 
-```gdscript
+```text
 func _get_eligible_module_slots() -> Array[StringName]:
     var eligible: Array[StringName] = []
     for slot_id in [&"slot_a", &"slot_b"]:
@@ -124,7 +125,7 @@ func _get_eligible_module_slots() -> Array[StringName]:
 
 ### EC-12-05: retreat_flagged Persistence
 
-```gdscript
+```text
 # CombatManager 内部状态
 var _current_retreat_flagged: bool = false
 
@@ -149,7 +150,7 @@ func reset_retreat_flagged() -> void:
 
 ### EC-12-06: Knockback Direction Fallback
 
-```gdscript
+```text
 func calc_knockback(response_choice: StringName, encounter_params: Dictionary,
                     threat_context: Dictionary) -> Dictionary:
     # ... distance calculation ...
@@ -173,7 +174,7 @@ func calc_knockback(response_choice: StringName, encounter_params: Dictionary,
 
 ### EC-12-10: #12 Unavailable Guard
 
-```gdscript
+```text
 # 此防御属于 #11 Exploration
 func _on_threat_triggered(threat_context: Dictionary) -> void:
     if not Combat or not Combat.has_method("resolve_threat"):
@@ -187,7 +188,7 @@ func _on_threat_triggered(threat_context: Dictionary) -> void:
 
 ### Defensive Input Validation
 
-```gdscript
+```text
 const VALID_RESPONSES: Array[StringName] = [&"emergency_handling", &"tank", &"retreat"]
 
 func _submit_response(response_choice: StringName) -> void:
@@ -242,7 +243,7 @@ func resolve_threat(threat_context: Dictionary) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/combat/edge_cases_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/combat/EdgeCasesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

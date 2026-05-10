@@ -4,7 +4,8 @@
 > **Status**: Done — 2026-05-10
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -110,7 +111,7 @@
 
 **Completed**: 2026-05-10
 **Criteria**: 8/8 passing; verification runner reports 11/11 checks including batch/direct rejection and nested typed-dictionary runtime-field regression coverage.
-**Deviations**: None blocking. Story text was refreshed from legacy GDScript/Web wording to active desktop C# implementation under ADR-0019.
+**Deviations**: None blocking. Story text was refreshed from legacy pre-pivot wording to active desktop C# implementation under ADR-0019.
 **Test Evidence**: Logic test at `tests/unit/registry/IdRegistryCoreTest.csproj`; run with `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj`.
 **Code Review**: Complete — local review found and fixed one defensive gap in recursive runtime-field scanning for nested typed dictionaries.
 **Next Recommended**: `production/epics/content-registry/story-003-content-lifecycle.md`

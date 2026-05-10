@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -59,7 +60,7 @@
 
 ### Signal Connections in core_data_ready
 
-```gdscript
+```text
 func _on_core_data_ready() -> void:
     # 注册 domain serializer
     register_serializer()
@@ -77,7 +78,7 @@ func _on_core_data_ready() -> void:
 
 ### Knowledge Change Handler
 
-```gdscript
+```text
 func _on_knowledge_changed(location_id: StringName, _prev: int, _new: int) -> void:
     # 仅在航图打开期间响应
     if _state["_chart_state"] not in [&"BROWSING", &"ROUTE_SELECTED"]:
@@ -115,7 +116,7 @@ func _on_knowledge_changed(location_id: StringName, _prev: int, _new: int) -> vo
 
 ### Ability Unlock Handler
 
-```gdscript
+```text
 func _on_ability_changed(_ability_id: StringName, _unlock_path: StringName) -> void:
     if _state["_chart_state"] not in [&"BROWSING", &"ROUTE_SELECTED"]:
         return
@@ -131,7 +132,7 @@ func _reevaluate_all_routes_accessibility() -> void:
 
 ### World Repair Handler
 
-```gdscript
+```text
 func _on_repair_completed(node_id: StringName) -> void:
     if _state["_chart_state"] not in [&"BROWSING", &"ROUTE_SELECTED"]:
         return
@@ -158,7 +159,7 @@ func _evaluate_route_enhancements(node_id: StringName) -> Array[StringName]:
 
 ### Docked Location Change Detection
 
-```gdscript
+```text
 # Chart 缓存上次已知停靠地点，在每次 get_visible_routes/route_selectability 前检查
 var _cached_docked_location: StringName = &""
 
@@ -214,7 +215,7 @@ func _check_docked_location_changed() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/external_state_response_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/chart/ExternalStateResponseTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

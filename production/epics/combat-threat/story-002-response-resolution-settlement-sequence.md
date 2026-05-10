@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -88,7 +89,7 @@
 
 ### _execute_settlement()
 
-```gdscript
+```text
 func _execute_settlement(response_choice: StringName) -> Dictionary:
     var ctx: Dictionary = _current_threat_context
     var params: Dictionary = ctx.get("encounter_params", {})
@@ -157,7 +158,7 @@ func _outcome_for_response(response_choice: StringName) -> String:
 
 ### Response Availability
 
-```gdscript
+```text
 func get_available_responses() -> Array[Dictionary]:
     var responses: Array[Dictionary] = []
 
@@ -232,7 +233,7 @@ func check_emergency_available() -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/combat/response_resolution_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/combat/ResponseResolutionTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

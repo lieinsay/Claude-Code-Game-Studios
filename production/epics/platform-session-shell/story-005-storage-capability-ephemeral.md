@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +14,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0006: Web Platform Constraints
+**ADR Governing Implementation**: ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: 壳层通过存档系统返回的 `storage_capability` 判定存储能力——不本地计算。三态：PersistentAvailable（正常保存）、WriteLocked（可读不可写——允许 Continue 但不允许新保存）、EphemeralOnly（完全不持久化——临时会话）。WriteLocked 时壳层允许进入已验证旧 Continue，同时显示"新进度当前无法可靠保存"。
 
 **Engine**: Godot 4.6.2 | **Risk**: MEDIUM
-**Engine Notes**: IndexedDB 可用性检测通过 `JavaScriptBridge`；Godot `user://` 映射到 IndexedDB origin-private 存储。
+**Engine Notes**: `user://` storage 可用性由 Persistence 通过 FileAccess write/readback probe 判定；SessionShell 只展示返回的 storage_capability。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: storage_capability 由存档系统返回——壳层不得本地计算或缓存判定
@@ -28,8 +29,8 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 浏览器存储不可用或写入被阻止，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
-- [ ] **AC-2**: GIVEN 浏览器存储 API/后端 probe/配额/写入 roundtrip/策略/旧档读取状态变化，WHEN 壳层收到浏览器/JS 侧信号，THEN 壳层只把 raw persistence_probe 传给存档系统——storage_capability 由存档系统返回（PersistentAvailable/WriteLocked/EphemeralOnly）
+- [ ] **AC-1**: GIVEN 本地存储不可用或写入被阻止，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
+- [ ] **AC-2**: GIVEN 本地存储 API/后端 probe/配额/写入 roundtrip/策略/旧档读取状态变化，WHEN 壳层收到桌面平台侧信号，THEN 壳层只把 raw persistence_probe 传给存档系统——storage_capability 由存档系统返回（PersistentAvailable/WriteLocked/EphemeralOnly）
 - [ ] **AC-3**: GIVEN 存档系统返回 storage_capability=WriteLocked 且 continue_availability=Enabled，WHEN 玩家检查 Continue，THEN 壳层允许进入已验证旧 Continue，同时显示"新进度当前无法可靠保存"——不隐藏或覆盖旧继续点
 - [ ] **AC-4**: GIVEN 存档系统返回 storage_capability=EphemeralOnly，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
 - [ ] **AC-5**: GIVEN 不存在继续点，WHEN 计算 continue_availability，THEN 结果为 Hidden
@@ -76,7 +77,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/session/storage_capability_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/session/StorageCapabilityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

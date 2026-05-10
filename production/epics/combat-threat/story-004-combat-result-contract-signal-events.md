@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -74,7 +75,7 @@
 
 ### combat_result Signal Declaration
 
-```gdscript
+```text
 # CombatManager Autoload #12 — signal declarations
 signal threat_resolved(outcome: String, threat_id: StringName)
 signal threat_suppressed(threat_id: StringName)
@@ -89,7 +90,7 @@ signal threat_retreated(threat_id: StringName)
 
 ### Signal Emission Logic
 
-```gdscript
+```text
 func _emit_resolution_signals(result: Dictionary) -> void:
     var outcome: String = result.get("outcome", "")
     var threat_id: StringName = _current_threat_context.get("threat_id", &"")
@@ -108,7 +109,7 @@ func _emit_resolution_signals(result: Dictionary) -> void:
 
 ### combat_result Structure Validation
 
-```gdscript
+```text
 func _validate_combat_result(result: Dictionary) -> bool:
     var required_fields: Array[StringName] = [
         &"outcome", &"hull_damage", &"module_damage",
@@ -133,7 +134,7 @@ func _validate_combat_result(result: Dictionary) -> bool:
 
 ### Backward Compatibility — #12 Unavailable
 
-```gdscript
+```text
 # 当 #12 未实现或不可用时，#11 的防御性处理
 # （此函数属于 #11 Exploration，此处仅作为合约参考）
 func _resolve_threat_safe(threat_context: Dictionary) -> Dictionary:
@@ -176,7 +177,7 @@ func _resolve_threat_safe(threat_context: Dictionary) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/combat/combat_result_signal_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/combat/CombatResultSignalTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

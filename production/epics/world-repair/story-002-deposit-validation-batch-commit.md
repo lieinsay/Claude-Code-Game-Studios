@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### VIOLATION Constants
 
-```gdscript
+```text
 # WorldRepair Autoload #13 — Violation 类型常量
 const VIOLATION_INVALID_NODE: StringName = &"invalid_node"
 const VIOLATION_EMPTY_OFFER: StringName = &"empty_offer"
@@ -71,7 +72,7 @@ const VIOLATION_ALREADY_REPAIRED: StringName = &"already_repaired"
 
 ### validate_deposit
 
-```gdscript
+```text
 func validate_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
     var violations: Array[StringName] = []
 
@@ -113,7 +114,7 @@ func validate_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
 
 ### submit_deposit
 
-```gdscript
+```text
 func submit_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
     # 步骤 1: 验证
     var validation: Dictionary = validate_deposit(node_id, offer)
@@ -168,7 +169,7 @@ func submit_deposit(node_id: StringName, offer: Dictionary) -> Dictionary:
 
 ### _get_required_resources Helper
 
-```gdscript
+```text
 func _get_required_resources(node_id: StringName) -> Dictionary:
     var node_def: Dictionary = Registry.query_entity(node_id)
     if node_def.is_empty():
@@ -207,7 +208,7 @@ func _get_required_resources(node_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/world-repair/deposit_validation_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/world-repair/DepositValidationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

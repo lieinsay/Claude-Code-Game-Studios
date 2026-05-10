@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -69,7 +70,7 @@
 
 ### search_yield Implementation
 
-```gdscript
+```text
 func search_yield(sp_id: StringName, state: int, zone: StringName) -> Dictionary:
     if state == STATE_LOOTED:
         return {items: [], is_empty: true, search_consumed: false,
@@ -107,7 +108,7 @@ func search_yield(sp_id: StringName, state: int, zone: StringName) -> Dictionary
 
 ### Quality Tier Weighted Random
 
-```gdscript
+```text
 func _weighted_random_tier(weights: Dictionary) -> StringName:
     var total: float = 0.0
     for w in weights.values():
@@ -125,7 +126,7 @@ func _weighted_random_tier(weights: Dictionary) -> StringName:
 
 ### Data Tables (from Registry)
 
-```gdscript
+```text
 # empty_chance 表 — Registry key: "exploration.empty_chance"
 # unlooted: {A_core: 0.00, B_inner: 0.05, C_mid: 0.20, D_outer: 0.35}
 # danger-changed: {A_core: 0.15, B_inner: 0.20, C_mid: 0.35, D_outer: 0.50}
@@ -144,7 +145,7 @@ const DRAW_COUNT_TABLE := {
 
 ### Intel Yield
 
-```gdscript
+```text
 func perform_intel_interaction(intel_point_id: StringName) -> Dictionary:
     if session_intel_interacted.get(intel_point_id, false):
         return {intel_id: &"", is_empty: true, message: "此处已调查过"}
@@ -168,7 +169,7 @@ func perform_intel_interaction(intel_point_id: StringName) -> Dictionary:
 
 ### Search Point Description
 
-```gdscript
+```text
 func get_search_point_description(sp_id: StringName) -> String:
     var sp_def := Registry.query_entity(sp_id)
     var state_key := _state_to_key(get_exploration_point_state(current_exploration_point_id))
@@ -205,7 +206,7 @@ func get_search_point_description(sp_id: StringName) -> String:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/search_scavenge_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/exploration/SearchScavengeTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

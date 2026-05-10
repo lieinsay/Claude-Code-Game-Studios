@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -63,7 +64,7 @@
 
 ### Method Signatures (Full Set)
 
-```gdscript
+```text
 # 8 个上游事件接收方法:
 
 # 1. 情报消耗 — 由 ResourcesManager 调用
@@ -129,7 +130,7 @@ func on_repair_completed(repair_node_id: StringName) -> void:
 
 ### Re-evaluation Entry Point
 
-```gdscript
+```text
 # 在每个事件方法末尾统一调用
 func _reevaluate_ability_unlocks() -> void:
     for ability_id in ability_unlock_paths:
@@ -139,7 +140,7 @@ func _reevaluate_ability_unlocks() -> void:
 
 ### Additional State Variables
 
-```gdscript
+```text
 # 伙伴相关
 var active_crew: Array = []  # Array[StringName]
 
@@ -152,7 +153,7 @@ var fog_traversal_count: int = 0
 
 ### Defensive Validation
 
-```gdscript
+```text
 func _validate_pattern_id(pattern_id: StringName) -> bool:
     # pattern_id 必须在 event_weight_table 中有定义
     return _event_weight_table.has(pattern_id)
@@ -198,7 +199,7 @@ func _validate_location_id(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/event_receivers_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/EventReceiversTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

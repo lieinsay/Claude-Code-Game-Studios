@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### F.1 Total Cost
 
-```gdscript
+```text
 func calculate_total_cost(good_id: StringName, quantity: int) -> int:
     var good_def := Registry.query_entity(good_id)
     var price: int = good_def.get("price", 0)
@@ -79,7 +80,7 @@ func calculate_total_cost(good_id: StringName, quantity: int) -> int:
 
 ### Purchase Validation
 
-```gdscript
+```text
 func validate_purchase_request(stall_id: StringName, good_id: StringName, quantity: int) -> Dictionary:
     # 1. 验证摊位已开启
     if get_stall_state(stall_id) < STALL_OPEN_BASIC:
@@ -107,7 +108,7 @@ func validate_purchase_request(stall_id: StringName, good_id: StringName, quanti
 
 ### Purchase Execution
 
-```gdscript
+```text
 func execute_purchase(stall_id: StringName, good_id: StringName, quantity: int) -> Dictionary:
     # 防御性二次验证
     var validation := validate_purchase_request(stall_id, good_id, quantity)
@@ -135,7 +136,7 @@ func execute_purchase(stall_id: StringName, good_id: StringName, quantity: int) 
 
 ### Good Visibility Filter
 
-```gdscript
+```text
 func get_stall_goods(stall_id: StringName) -> Array:
     var stall_state: int = get_stall_state(stall_id)
     if stall_state < STALL_OPEN_BASIC:
@@ -154,7 +155,7 @@ func get_stall_goods(stall_id: StringName) -> Array:
 
 ### Max Affordable
 
-```gdscript
+```text
 func get_max_affordable(good_id: StringName) -> int:
     var good_def := Registry.query_entity(good_id)
     var price: int = good_def.get("price", 1)
@@ -205,7 +206,7 @@ func get_max_affordable(good_id: StringName) -> int:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/settlement-market/purchase_flow_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/settlement-market/PurchaseFlowTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

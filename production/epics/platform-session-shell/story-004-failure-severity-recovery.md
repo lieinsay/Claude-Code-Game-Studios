@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -13,11 +14,11 @@
 
 *Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time.*
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0006: Web Platform Constraints
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order, ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: 所有失败必须 fail closed——停在壳层安全界面，允许重试/返回标题/开始新会话/查看错误。失败不得覆盖有效继续点、污染现有会话、生成损坏状态或自动清空失效续档。failure_severity 分三级：HardFail（进入 FatalBlocked）、SoftFail（带警告路径继续）、RecoverableFail（进入 RecoveryRequired）。
 
 **Engine**: Godot 4.6.2 | **Risk**: MEDIUM
-**Engine Notes**: `user://` 映射到 IndexedDB——存储失败可通过此路径检测。
+**Engine Notes**: `user://` 映射到 user:// storage——存储失败可通过此路径检测。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 失败必须 fail closed；继续点保护（失败不删除/降级/覆盖）
@@ -77,7 +78,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/session/failure_severity_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/session/FailureSeverityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

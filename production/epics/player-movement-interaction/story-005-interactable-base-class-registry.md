@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -39,7 +40,7 @@
 ## Implementation Notes
 
 - `Interactable` 基类结构:
-  ```gdscript
+  ```text
   @icon("res://assets/icons/interactable.svg")
   class_name Interactable
   extends Node2D
@@ -90,7 +91,7 @@
   - Given: 子类 `BrokenInteractable extends Interactable` 未实现 `handle_use()`
   - When: 场景包含 BrokenInteractable 实例化
   - Then: Godot 引擎报错，场景加载失败
-  - Edge cases: 子类实现了 `handle_use()` 但返回类型不是 `UseResult` → GDScript 类型错误
+  - Edge cases: 子类实现了 `handle_use()` 但返回类型不是 `UseResult` → C# 类型错误
 
 - **AC-3**: Unregister before queue_free
   - Given: 场景中有 3 个 Interactable，候选池包含它们
@@ -109,7 +110,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/interactable_registry_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/movement/InteractableRegistryTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

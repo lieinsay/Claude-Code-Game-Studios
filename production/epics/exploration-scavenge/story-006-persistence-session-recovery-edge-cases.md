@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -19,7 +20,7 @@
 **Control Manifest Rules (Feature layer)**:
 - Required: 持久化快照必须在状态变更后立即写入——不可延迟至帧末；恢复时以实际 Pool 5 状态为准（从 ResourcesManager 读取）——exploration snapshot 仅持久化探索点状态；恢复后发现不一致时静默修复
 - Forbidden: EXTRACTING 阶段快照持久化 extraction 进度为"可恢复"——读条原子操作，中断后必须重新开始；fallback context 掩盖上游 bug 时静默——必须记录 internal_error_log
-- Guardrail: localStorage 配额满时 HUD 显示非阻塞警告——30s 防抖，不重复刷屏
+- Guardrail: user:// storage 配额满时 HUD 显示非阻塞警告——30s 防抖，不重复刷屏
 
 ---
 
@@ -27,17 +28,17 @@
 
 ### EC-11-01: Tab Close During EXPLORING
 
-- [ ] **AC-1**: GIVEN session_phase=EXPLORING + 已搜索 3/6 搜索点 + Pool 5 有 2 格物品 + 已触发 1 个环境威胁 (env_threat_active=true)，WHEN 浏览器标签页关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING + 已搜索的 3 点不可再次搜索 + Pool 5 恢复 2 格物品 + env_threat_active=true + 显示"你在探索中中断了"提示。最近一次快照后的进度丢失（最多 1 次搜索或 1 次威胁结算）
+- [ ] **AC-1**: GIVEN session_phase=EXPLORING + 已搜索 3/6 搜索点 + Pool 5 有 2 格物品 + 已触发 1 个环境威胁 (env_threat_active=true)，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING + 已搜索的 3 点不可再次搜索 + Pool 5 恢复 2 格物品 + env_threat_active=true + 显示"你在探索中中断了"提示。最近一次快照后的进度丢失（最多 1 次搜索或 1 次威胁结算）
 - [ ] **AC-2**: GIVEN 恢复后 + Pool 5 快照与实际 ResourcesManager 状态不一致（模拟持久化损坏），WHEN _restore_active_session()，THEN 以 ResourcesManager 实际 Pool 5 状态为准 + 静默修复 occupied_slots + 不通知玩家（EC-11-09）
 
 ### EC-11-02: Tab Close During EXTRACTING
 
-- [ ] **AC-3**: GIVEN session_phase=EXTRACTING + 读条进行到 1.5s，WHEN 浏览器标签页关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING（不是 DEPARTED）+ 玩家位置在撤离锚点旁 + 提取进度未保留 + 需重新触发撤离。读条是原子操作——不完整则不计数
+- [ ] **AC-3**: GIVEN session_phase=EXTRACTING + 读条进行到 1.5s，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING（不是 DEPARTED）+ 玩家位置在撤离锚点旁 + 提取进度未保留 + 需重新触发撤离。读条是原子操作——不完整则不计数
 
 ### EC-11-03: DEPARTED Settlement Write Failure
 
-- [ ] **AC-4**: GIVEN DEPARTED 结算写入因 localStorage 配额满而失败，WHEN 自动重试 4 次（1s/2s/4s/8s）全部失败，THEN UI 显示"保存失败。你的探索收获暂时保留。请检查浏览器存储空间后点击重试。"+ 手动重试按钮。结算包保留在内存中
-- [ ] **AC-5**: GIVEN 手动重试按钮点击 + localStorage 已清理，WHEN 重试，THEN 结算包成功写入 + extraction_completed 发射 + session_phase→DEPARTED→IDLE
+- [ ] **AC-4**: GIVEN DEPARTED 结算写入因 user:// storage 配额满而失败，WHEN 自动重试 4 次（1s/2s/4s/8s）全部失败，THEN UI 显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮。结算包保留在内存中
+- [ ] **AC-5**: GIVEN 手动重试按钮点击 + user:// storage 已清理，WHEN 重试，THEN 结算包成功写入 + extraction_completed 发射 + session_phase→DEPARTED→IDLE
 
 ### EC-11-08: Hull Reaches Zero During Exploration
 
@@ -55,13 +56,13 @@
 
 ### EC-11-20: Page Loses Focus / Long Idle
 
-- [ ] **AC-11**: GIVEN session_phase=EXPLORING + 玩家 idle，WHEN 页面 visibilitychange→hidden 或 >30分钟无交互，THEN 探索无全局计时器——无惩罚。恢复时 phase 保持 EXPLORING + session_substate→SUBSTATE_IDLE
-- [ ] **AC-12**: GIVEN session_phase=EXTRACTING + 读条进行中，WHEN 页面 visibilitychange→hidden 时间 >5s，THEN 读条中断并重置（计时器在后台不可靠）+ session_phase→EXPLORING + 玩家在锚点旁
+- [ ] **AC-11**: GIVEN session_phase=EXPLORING + 玩家 idle，WHEN 页面 window_focus_changed→hidden 或 >30分钟无交互，THEN 探索无全局计时器——无惩罚。恢复时 phase 保持 EXPLORING + session_substate→SUBSTATE_IDLE
+- [ ] **AC-12**: GIVEN session_phase=EXTRACTING + 读条进行中，WHEN 页面 window_focus_changed→hidden 时间 >5s，THEN 读条中断并重置（计时器在后台不可靠）+ session_phase→EXPLORING + 玩家在锚点旁
 - [ ] **AC-13**: GIVEN session_phase=ARRIVING + 页面隐藏 >5s，WHEN 恢复，THEN 跳过 ARRIVING 描述文本 → 自动进入 EXPLORING
 
-### EC-11-21: localStorage Quota Exceeded
+### EC-11-21: user:// storage Quota Exceeded
 
-- [ ] **AC-14**: GIVEN localStorage.setItem() 抛出 QuotaExceededError 在 EXPLORING 阶段快照时，WHEN 检测到，THEN HUD 显示非阻塞警告 "⚠ 存储空间不足，探索进度可能无法保存。" + 30s 内不重复显示
+- [ ] **AC-14**: GIVEN user:// storage.setItem() 抛出 QuotaExceededError 在 EXPLORING 阶段快照时，WHEN 检测到，THEN HUD 显示非阻塞警告 "⚠ 存储空间不足，探索进度可能无法保存。" + 30s 内不重复显示
 - [ ] **AC-15**: GIVEN 快照失败后 + 30s 防抖已过 + 再次快照仍失败，THEN 再次显示警告（不累积，替换上一条）
 
 ### ADR-0003 Serialization Roundtrip
@@ -81,7 +82,7 @@
 
 ### Snapshot Triggers
 
-```gdscript
+```text
 # 快照触发点:
 # (1) 每次搜索完成后 → perform_search() 返回前
 # (2) 威胁结算完成后 → on_combat_result() 或 _handle_environmental_threat() 返回前
@@ -107,7 +108,7 @@ func _handle_snapshot_failure() -> void:
 
 ### Session Restore
 
-```gdscript
+```text
 func _restore_active_session(snapshot: Dictionary) -> void:
     var session := snapshot.get("active_session", {})
     if session.is_empty():
@@ -166,8 +167,8 @@ func _reconcile_pool_state() -> void:
 
 ### Page Visibility Handling
 
-```gdscript
-# 由 Platform #2 调用——ExplorationManager 不直接监听 visibilitychange
+```text
+# 由 Platform #2 调用——ExplorationManager 不直接监听 window_focus_changed
 func on_page_hidden() -> void:
     match session_phase:
         PHASE_ARRIVING:
@@ -191,7 +192,7 @@ func on_page_visible() -> void:
 
 ### Serialization
 
-```gdscript
+```text
 func _serialize_exploration() -> Dictionary:
     var serialized_points := {}
     for point_id in exploration_points:
@@ -243,10 +244,10 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 ## Out of Scope
 
 - Persistence.capture_snapshot() / restore_snapshot() 内部实现——属于 local-save-persistence Epic
-- localStorage 配额检测与 QuotaExceededError 捕获——属于 Platform #2
+- user:// storage 配额检测与 QuotaExceededError 捕获——属于 Platform #2
 - HUD 警告渲染（存储警告、中断提示、船体严重损毁警告）——属于 #16 UIManager
 - ResourcesManager.reconcile_pool_5() 实现——属于 resources-goods-capacity Epic
-- 页面 visibilitychange 事件的初始监听——属于 Platform #2
+- 页面 window_focus_changed 事件的初始监听——属于 Platform #2
 
 ---
 
@@ -260,7 +261,7 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 - **AC-8**: Pool 5 inconsistency scan & silent fix
 - **AC-9**: Cleared threat zone → permanently safe
 - **AC-11–13**: Page visibility handling (idle resume / extraction interrupt / arriving skip)
-- **AC-14–15**: localStorage quota warning with 30s cooldown
+- **AC-14–15**: user:// storage quota warning with 30s cooldown
 - **AC-16–18**: Serialization roundtrip fidelity (all states)
 - **AC-19–20**: Defensive invalid state recovery
 
@@ -269,12 +270,12 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/exploration/persistence_recovery_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/exploration/PersistenceRecoveryTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---
 
 ## Dependencies
 
-- Depends on: Story 001–005 (all exploration stories), local-save-persistence Epic (capture_snapshot, restore_snapshot, ADR-0003), platform-session-shell Epic (visibilitychange, localStorage 配额), resources-goods-capacity Epic (reconcile_pool_5)
+- Depends on: Story 001–005 (all exploration stories), local-save-persistence Epic (capture_snapshot, restore_snapshot, ADR-0003), platform-session-shell Epic (window_focus_changed, user:// storage 配额), resources-goods-capacity Epic (reconcile_pool_5)
 - Unlocks: N/A — 这是探索 Epic 的最后一个 Story

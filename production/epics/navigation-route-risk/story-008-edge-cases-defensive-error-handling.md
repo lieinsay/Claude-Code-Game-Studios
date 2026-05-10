@@ -4,20 +4,21 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/navigation-route-risk.md`
 **Requirement**: `TR-navigation-001`, `TR-navigation-002`, `TR-navigation-003`
 
-**ADR Governing Implementation**: ADR-0010 (fallback context, EncounterContext validation, writing order enforcement), ADR-0002 (signal consistency, max cascade depth 2), ADR-0006 (Web platform constraints — browser tab throttling, engine delta)
+**ADR Governing Implementation**: ADR-0010 (fallback context, EncounterContext validation, writing order enforcement), ADR-0002 (signal consistency, max cascade depth 2), ADR-0019 (desktop lifecycle constraints — desktop focus/pause delta handling, engine delta)
 **ADR Decision Summary**: GDD 定义了 36 个边缘案例覆盖 11 个类别：状态转换边界、数值边界、航行中波段动态变化、隐藏标签与揭示、模块状态变化、遭遇效果叠加与冲突、玩家行为、存档与恢复、上游数据一致性、平台与计时、配置错误防御。这些边缘案例分布在 Stories 001-007 的实现中，本 Story 作为系统级边缘案例的集中验证和防御性错误处理层，确保所有跨 Story 的边缘行为正确、所有防御性检查到位。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
 **Control Manifest Rules (Core layer)**:
-- Required: FORCED_LANDING 优先于 ARRIVED；retreat 在 0% 进度合法；终态下拒绝所有操作；多标签伤害取 max 不叠加；N_checks=0 零遭遇合法；波段边界用 ≥/≤ 判断；浏览器标签页切换后遭遇按 elapsed_time 排队结算不丢失；T_check 硬下限 4s；Δ_hull 范围验证 + 失败回退到 T_base=12s
+- Required: FORCED_LANDING 优先于 ARRIVED；retreat 在 0% 进度合法；终态下拒绝所有操作；多标签伤害取 max 不叠加；N_checks=0 零遭遇合法；波段边界用 ≥/≤ 判断；桌面窗口切换后遭遇按 elapsed_time 排队结算不丢失；T_check 硬下限 4s；Δ_hull 范围验证 + 失败回退到 T_base=12s
 - Forbidden: 信任 #9 的预检结果而不在 VOYAGE_PREPARING 结尾重新查询 #8；在终态下接受新的 route_committed；产生负值 hull_integrity；遭遇检查间隔 < 4s；使用挂钟时间
 - Guardrail: ε=0.01s 抵达容差；单次伤害上限 6 点——一次检查不可能跨越两个波段；fallback context 触发记录 internal_error_log
 
@@ -80,7 +81,7 @@
 
 ### Platform & Timing Edge Cases
 
-- [ ] **AC-30**: GIVEN 浏览器标签页切出 + Δt=30s（标签页挂起），WHEN 恢复，THEN elapsed_time 仅累加实际 delta——不按挂钟时间跳跃。遭遇按 elapsed_time 排队结算——不丢失
+- [ ] **AC-30**: GIVEN 桌面窗口切出 + Δt=30s（窗口暂停），WHEN 恢复，THEN elapsed_time 仅累加实际 delta——不按挂钟时间跳跃。遭遇按 elapsed_time 排队结算——不丢失
 - [ ] **AC-31**: GIVEN 浮点累积导致 elapsed_time ≈ T_voyage + 0.001s，WHEN 抵达判定，THEN ε=0.01s 容差——正确触发 ARRIVED。防止浮点误差跳过抵达
 
 ### Config Validation
@@ -108,7 +109,7 @@
 
 ### State Transition Guard
 
-```gdscript
+```text
 func _is_terminal_state(state: StringName) -> bool:
     return state in [&"ARRIVED", &"RETREATED", &"FORCED_LANDING", &"ABORTED_PREFLIGHT"]
 
@@ -130,7 +131,7 @@ func _on_route_committed(route_id: StringName, destination_id: StringName,
 
 ### FORCED_LANDING Priority
 
-```gdscript
+```text
 func _process_voyage(delta: float) -> void:
     if _voyage_state != &"IN_PROGRESS":
         return
@@ -155,7 +156,7 @@ func _process_voyage(delta: float) -> void:
 
 ### Config Validation at Startup
 
-```gdscript
+```text
 func _validate_configuration() -> void:
     # 验证 Δ_hull 范围
     for band in HULL_BAND_CHECK_OFFSETS:
@@ -183,11 +184,11 @@ func _validate_configuration() -> void:
             DISTANCE_DURATION[band] = 60.0
 ```
 
-### Browser Tab Throttling Safe Timer
+### desktop focus/pause delta handling Safe Timer
 
-```gdscript
+```text
 # 使用引擎 _process(delta) — 不是挂钟时间
-# 标签页挂起时 Godot 暂停 _process 调用
+# 窗口暂停时 Godot 暂停 _process 调用
 # 恢复后 delta 变大但 elapsed_time 按实际经过帧数累加
 
 func _process(delta: float) -> void:
@@ -205,7 +206,7 @@ func _process_voyage(delta: float) -> void:
 
 ### Empty Encounter Set Handling
 
-```gdscript
+```text
 func _max_damage(hits: Array[Dictionary]) -> int:
     if hits.is_empty():
         return 0  # 显式定义：空集 → 0
@@ -217,7 +218,7 @@ func _max_damage(hits: Array[Dictionary]) -> int:
 
 ### IN_PROGRESS → IN_PROGRESS No-Op
 
-```gdscript
+```text
 func _transition_to(new_state: StringName) -> Dictionary:
     if _is_terminal_state(_voyage_state):
         return {"allowed": false, "reason": "terminal state"}
@@ -230,7 +231,7 @@ func _transition_to(new_state: StringName) -> Dictionary:
 
 ### Retreat at 0% Progress
 
-```gdscript
+```text
 func request_retreat() -> void:
     if _voyage_state != &"IN_PROGRESS":
         return
@@ -249,7 +250,7 @@ func is_retreat_allowed() -> bool:
 
 ## Out of Scope
 
-- 浏览器标签页切出/恢复时的具体 UI 提示（"你离开了 X 秒"）——属于 UX 设计，OQ-07
+- 桌面窗口切出/恢复时的具体 UI 提示（"你离开了 X 秒"）——属于 UX 设计，OQ-07
 - 存档加密和压缩——属于 #3 Persistence 的系统级安全
 - 跨版本存档迁移的具体策略（哪些存档可迁移、哪些废弃）——属于 #3 Persistence
 - 配置值的热重载（运行时修改遭遇表/距离带）——Phase 2+
@@ -286,7 +287,7 @@ func is_retreat_allowed() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/edge_cases_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/navigation/EdgeCasesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

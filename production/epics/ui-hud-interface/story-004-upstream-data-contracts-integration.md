@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -64,7 +65,7 @@
 
 ### Data Binding on Panel Open
 
-```gdscript
+```text
 func _bind_panel_data(panel_id: StringName, panel: Control, context: Dictionary) -> void:
     match panel_id:
         &"S4":
@@ -94,7 +95,7 @@ func _safe_call(target: Object, method: StringName, default: Variant) -> Variant
 
 ### Upstream Query Interface Registry
 
-```gdscript
+```text
 const UPSTREAM_QUERIES: Dictionary = {
     &"S1": [&"get_hull_integrity", &"get_module_states", &"get_storage_state", &"get_cargo_state", &"get_currency"],
     &"S4": [&"get_chart_state", &"get_visible_routes", &"get_filter_state"],
@@ -131,7 +132,7 @@ const UPSTREAM_QUERIES: Dictionary = {
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/ui-hud-interface/upstream_data_contracts_test.gd` — must exist and pass, OR documented playtest
+**Required evidence**: `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj` — must exist and pass, OR documented playtest
 **Status**: [ ] Not yet created
 
 ---

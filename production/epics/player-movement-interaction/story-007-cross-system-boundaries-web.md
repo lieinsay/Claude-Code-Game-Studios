@@ -1,25 +1,26 @@
-# Story 007: Cross-System Boundaries & Web Constraints
+# Story 007: Cross-System Boundaries & Desktop Lifecycle Constraints
 
 > **Epic**: Player Movement & Interaction
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/player-movement-interaction.md`
 **Requirement**: `TR-movement-007`
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0006: Web Platform Constraints
-**ADR Decision Summary**: 本系统不拥有货币、库存、资源、修复、市场、模块安装、探索奖励、战斗、剧情或存档结果。不触发场景切换——只在新场景加载后被场景过渡系统放置。场景过渡时立即清空焦点。浏览器生命周期事件由壳层归一化后传入——本系统不直接订阅 `visibilitychange`/`pagehide`。音频在用户手势激活前静默。
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot
+**ADR Decision Summary**: 本系统不拥有货币、库存、资源、修复、市场、模块安装、探索奖励、战斗、剧情或存档结果。不触发场景切换——只在新场景加载后被场景过渡系统放置。场景过渡时立即清空焦点。桌面窗口生命周期事件由壳层归一化后传入——本系统不直接订阅 `window_focus_changed`/`suspend_requested`。音频在用户手势激活前静默。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: `CharacterBody2D` 位置由场景过渡系统通过 `global_position` 设置；`Input.is_anything_pressed()` 用于 BFCache 恢复检测。
+**Engine Notes**: `CharacterBody2D` 位置由场景过渡系统通过 `global_position` 设置；`Input.is_anything_pressed()` 用于 desktop resume 恢复检测。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 场景过渡时清空焦点 + 注销所有 Interactable；`direct_cross_autoload_in_ready` 禁止
-- Forbidden: 不得直接读写 currency/inventory/save/repair/market 变量；不得触发场景切换；不得直接订阅浏览器事件
+- Forbidden: 不得直接读写 currency/inventory/save/repair/market 变量；不得触发场景切换；不得直接订阅桌面窗口生命周期事件
 - Guardrail: 音频在用户手势激活前不播放
 
 ---
@@ -36,11 +37,11 @@
 - [ ] **AC-6**: GIVEN 场景 A 中玩家聚焦目标，WHEN 场景过渡触发，THEN 场景 B 加载后 `world_focus_id = null`（不继承旧焦点）
 - [ ] **AC-7**: GIVEN 同一稳定 ID 的对象被销毁后重建，WHEN 新对象注册，THEN 旧焦点状态、粘性加成和待处理 Use 均不保留
 
-### Web-Specific
+### Desktop Lifecycle
 
-- [ ] **AC-8**: GIVEN 浏览器 `pagehide`/`visibilitychange=hidden` 通过壳层转发为 `input_gate_closed`，WHEN 标签页隐藏，THEN 输入门关闭，角色位置不变
-- [ ] **AC-9**: GIVEN 用户首次点击/按键（AudioContext 激活）之前，WHEN 玩家按移动键或在目标间切换焦点，THEN 语义事件正常发出但反馈系统不播放音频
-- [ ] **AC-10**: GIVEN 浏览器 BFCache 恢复时鼠标正悬停在目标上，WHEN 恢复帧执行，THEN 焦点仅在下一有效玩法帧刷新；恢复帧不自动执行 Use
+- [ ] **AC-8**: GIVEN 桌面窗口 `suspend_requested`/`window_focus_changed=hidden` 通过壳层转发为 `input_gate_closed`，WHEN 窗口失焦或暂停，THEN 输入门关闭，角色位置不变
+- [ ] **AC-9**: GIVEN 用户首次点击/按键（audio device readiness 激活）之前，WHEN 玩家按移动键或在目标间切换焦点，THEN 语义事件正常发出但反馈系统不播放音频
+- [ ] **AC-10**: GIVEN 桌面窗口恢复时鼠标正悬停在目标上，WHEN 恢复帧执行，THEN 焦点仅在下一有效玩法帧刷新；恢复帧不自动执行 Use
 
 ---
 
@@ -58,14 +59,14 @@
   5. 新场景 `world_focus_id = null`（不继承）
 - ID 重用规则: `interaction_id` 相同的不同实例视为不同目标；`unregister` → 清除相关状态 → 新 `register` 重新开始
 
-### Web Constraints
+### Desktop Lifecycle Constraints
 
-- 浏览器事件边界: 本系统只接收壳层归一化后的 `input_gate_open`/`input_gate_closed`/`input_gate_reacquire` 信号——不直接订阅 `visibilitychange`、`pagehide`、`pageshow`、`focus`、`blur`
-- BFCache 恢复:
-  - `pageshow.persisted=true` → 壳层发出 `input_gate_reacquire`
+- 桌面窗口生命周期事件边界: 本系统只接收壳层归一化后的 `input_gate_open`/`input_gate_closed`/`input_gate_reacquire` 信号——不直接订阅 `window_focus_changed`、`suspend_requested`、`resume_requested`、`focus`、`blur`
+- desktop resume 恢复:
+  - `resume_requested.persisted=true` → 壳层发出 `input_gate_reacquire`
   - 恢复帧不自动执行 Use（即使鼠标悬停在目标上）
   - 焦点在下一有效玩法帧刷新
-- 音频手势门: 壳层在首次用户交互后激活 AudioContext → FeedbackManager 开始播放音频。在此之前，所有语义事件正常 emit，FeedbackManager 自行判断是否静默
+- 音频手势门: 壳层在首次用户交互后激活 audio device readiness → FeedbackManager 开始播放音频。在此之前，所有语义事件正常 emit，FeedbackManager 自行判断是否静默
 
 ---
 
@@ -73,8 +74,8 @@
 
 - Story 002: Input gate 状态机和壳层信号的具体实现
 - Story 005: 注册/注销机制（本 Story 只验证边界隔离）
-- Story 006: 语义事件的具体发射（本 Story 只验证 Web 约束下事件行为）
-- 壳层如何检测浏览器生命周期（由 platform-session-shell 拥有）
+- Story 006: 语义事件的具体发射（本 Story 只验证 桌面约束下事件行为）
+- 壳层如何检测桌面窗口生命周期（由 platform-session-shell 拥有）
 
 ---
 
@@ -86,9 +87,9 @@
   - Then: exit_cleanup 中焦点清空 → 所有 Interactable 注销 → 场景 B 加载后 `query_focus_state()` 返回 `world_focus_id=""`、`focus_state="NoFocus"`
   - Edge cases: 场景过渡期间按 E → `use_gate=Blocked(input_closed)`（门在过渡开始时关闭）
 
-- **AC-10**: BFCache restore with mouse over target
-  - Given: 鼠标悬停在 target A 上，标签页被隐藏（BFCache），然后切回
-  - When: `pageshow.persisted=true` → 壳层发出 `input_gate_reacquire`
+- **AC-10**: desktop resume restore with mouse over target
+  - Given: 鼠标悬停在 target A 上，标签页被隐藏（desktop resume），然后切回
+  - When: `resume_requested.persisted=true` → 壳层发出 `input_gate_reacquire`
   - Then: 恢复帧不自动 Use；`pointer_score` 在下一有效玩法帧刷新；焦点在键盘/鼠标有效输入后才重新获取
   - Edge cases: 恢复时 target A 已被禁用 → 焦点不获取 A
 
@@ -103,7 +104,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/cross_system_boundaries_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/movement/CrossSystemBoundariesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

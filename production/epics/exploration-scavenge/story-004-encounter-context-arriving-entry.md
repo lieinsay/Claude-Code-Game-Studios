@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -63,7 +64,7 @@
 
 ### EncounterContext Validation
 
-```gdscript
+```text
 func _validate_encounter_context(ctx) -> Dictionary:
     if ctx == null or not ctx is Dictionary:
         _log_internal_error("Exploration: null or non-Dictionary EncounterContext")
@@ -93,7 +94,7 @@ func _validate_encounter_context(ctx) -> Dictionary:
 
 ### Arrival Mode Entry
 
-```gdscript
+```text
 func enter_exploration(ctx: Dictionary) -> void:
     var validated := _validate_encounter_context(ctx)
     encounter_context = validated
@@ -150,7 +151,7 @@ func _enter_arriving_retreated(ctx: Dictionary) -> void:
 
 ### Fallback Context
 
-```gdscript
+```text
 func _build_fallback_context() -> Dictionary:
     return {
         "route_id": &"unknown",
@@ -167,7 +168,7 @@ func _build_fallback_context() -> Dictionary:
 
 ### Navigation Signal Connection
 
-```gdscript
+```text
 # 在 feature_ready 中连接 Navigation 信号
 func _on_feature_ready() -> void:
     Navigation.voyage_completed.connect(_on_voyage_completed)
@@ -207,7 +208,7 @@ func _on_voyage_completed(ctx: Dictionary) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/exploration/encounter_context_entry_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/exploration/EncounterContextEntryTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

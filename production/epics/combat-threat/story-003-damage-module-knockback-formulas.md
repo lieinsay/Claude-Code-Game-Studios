@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -61,7 +62,7 @@
 
 ### calc_hull_damage
 
-```gdscript
+```text
 func calc_hull_damage(response_choice: StringName, encounter_params: Dictionary) -> int:
     if response_choice != &"tank":
         return 0
@@ -73,7 +74,7 @@ func calc_hull_damage(response_choice: StringName, encounter_params: Dictionary)
 
 ### calc_module_damage
 
-```gdscript
+```text
 func calc_module_damage(response_choice: StringName, encounter_params: Dictionary) -> Dictionary:
     if response_choice != &"tank":
         return {"module_damaged": false, "target_slot_id": &""}
@@ -101,7 +102,7 @@ func _get_eligible_module_slots() -> Array[StringName]:
 
 ### check_emergency_available
 
-```gdscript
+```text
 func check_emergency_available() -> bool:
     var carried: Dictionary = ResourcesManager.get_carried_contents_by_tag("repair-material")
     return carried.get("repair_kit", 0) >= 1
@@ -109,7 +110,7 @@ func check_emergency_available() -> bool:
 
 ### calc_knockback
 
-```gdscript
+```text
 func calc_knockback(response_choice: StringName, encounter_params: Dictionary,
                     threat_context: Dictionary) -> Dictionary:
     var distance: float = 0.0
@@ -173,7 +174,7 @@ func _get_threat_facing(threat_context: Dictionary) -> Vector2:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/combat/damage_formulas_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/combat/DamageFormulasTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -75,7 +76,7 @@
 
 ### Data Structures
 
-```gdscript
+```text
 # 地点知识状态: StringName → int (enum)
 const KNOWLEDGE_UNKNOWN: int = 0
 const KNOWLEDGE_RUMORED: int = 1
@@ -94,7 +95,7 @@ var personal_notes: Dictionary = {}
 
 ### Core Method: reveal_rumor()
 
-```gdscript
+```text
 func reveal_rumor(location_id: StringName, source_tag: StringName, hazard_tags: Array, confidence: int) -> void:
     var current_state: int = knowledge_state.get(location_id, KNOWLEDGE_UNKNOWN)
 
@@ -137,7 +138,7 @@ func reveal_rumor(location_id: StringName, source_tag: StringName, hazard_tags: 
 
 ### Core Method: player_arrived_at()
 
-```gdscript
+```text
 func player_arrived_at(location_id: StringName) -> void:
     var current_state: int = knowledge_state.get(location_id, KNOWLEDGE_UNKNOWN)
 
@@ -154,7 +155,7 @@ func player_arrived_at(location_id: StringName) -> void:
 
 ### Location Advancement (used by consume_intel)
 
-```gdscript
+```text
 func _advance_location_knowledge(location_id: StringName) -> Dictionary:
     # 返回 {previous_state: int, new_state: int} 或空（若未推进）
     var current: int = knowledge_state.get(location_id, KNOWLEDGE_UNKNOWN)
@@ -170,7 +171,7 @@ func _advance_location_knowledge(location_id: StringName) -> Dictionary:
 
 ### Confidence Text Mapping
 
-```gdscript
+```text
 func _confidence_to_label(confidence: int) -> String:
     if confidence <= 33:
         return "不确定"
@@ -182,7 +183,7 @@ func _confidence_to_label(confidence: int) -> String:
 
 ### Non-Degradation Guard
 
-```gdscript
+```text
 func _can_transition_location(current: int, target: int) -> bool:
     if current == KNOWLEDGE_VERIFIED:
         return false
@@ -195,7 +196,7 @@ func _can_transition_location(current: int, target: int) -> bool:
 
 ### Lazy Initialization for Unknown Locations
 
-```gdscript
+```text
 func _ensure_location_initialized(location_id: StringName) -> void:
     if not knowledge_state.has(location_id):
         knowledge_state[location_id] = KNOWLEDGE_UNKNOWN
@@ -236,7 +237,7 @@ func _ensure_location_initialized(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/location_knowledge_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/intel/LocationKnowledgeStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

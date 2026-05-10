@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -74,7 +75,7 @@
 
 ### Departure Flow (Mode A — Chart)
 
-```gdscript
+```text
 func _on_door_use_requested() -> void:
     if docking_state != DockingState.LANDED:
         return
@@ -106,7 +107,7 @@ func _on_door_use_requested() -> void:
 
 ### Departure Flow (Mode B — Direct)
 
-```gdscript
+```text
 func _on_helm_use_requested() -> void:
     if docking_state != DockingState.LANDED:
         return
@@ -130,7 +131,7 @@ func _on_helm_use_requested() -> void:
 
 ### R9: Confirmation Dialog Data Assembly
 
-```gdscript
+```text
 func _build_departure_confirmation_data(mode: StringName) -> Dictionary:
     return {
         "mode": mode,
@@ -179,7 +180,7 @@ func _get_route_risk_rating(mode: StringName) -> String:
 
 ### Hub State Package
 
-```gdscript
+```text
 func _build_hub_state_package() -> Dictionary:
     return {
         "docked_location_id": _current_docked_location,
@@ -192,7 +193,7 @@ func _build_hub_state_package() -> Dictionary:
 
 ### Uninformed Departure Penalty Tracking
 
-```gdscript
+```text
 # 记录出航前的站点访问状态——传递给航行系统
 func _get_departure_penalties() -> Dictionary:
     var penalties: Dictionary = {}
@@ -239,7 +240,7 @@ func _get_departure_penalties() -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/departure_modes_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/DepartureModesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

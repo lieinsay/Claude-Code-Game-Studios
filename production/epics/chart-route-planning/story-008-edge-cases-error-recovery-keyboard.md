@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -94,7 +95,7 @@
 
 ### Empty State Context Messages
 
-```gdscript
+```text
 enum ChartEmptyReason {
     NO_KNOWN_ROUTES,          # EC-12: 从未有过航线
     ALL_RUMORED_HIDDEN,       # EC-14: 全部传闻+筛选隐藏
@@ -131,7 +132,7 @@ func get_empty_chart_reason() -> int:
 
 ### EC-15 — Data Consistency Violation Detection
 
-```gdscript
+```text
 func _detect_consistency_violation(route_id: StringName) -> void:
     var knowledge: int = _query_knowledge_state(route_id)
     var accessibility: Dictionary = _query_route_accessibility(route_id)
@@ -147,7 +148,7 @@ func _detect_consistency_violation(route_id: StringName) -> void:
 
 ### Partial Query Failure Handling
 
-```gdscript
+```text
 func _batch_query_routes(all_routes: Array) -> Dictionary:
     var visible: Array[StringName] = []
     var failed_count: int = 0
@@ -169,7 +170,7 @@ func _batch_query_routes(all_routes: Array) -> Dictionary:
 
 ### Keyboard Navigation Data (For UIManager)
 
-```gdscript
+```text
 func get_keyboard_nav_order() -> Array[StringName]:
     """返回键盘 Tab 导航的顺序——UIManager 据此分配焦点"""
     return get_visible_routes()  # 已按 display_order 排序
@@ -185,7 +186,7 @@ func is_interaction_allowed() -> bool:
 
 ### Cache-Consistency Check
 
-```gdscript
+```text
 func _validate_cache_consistency() -> void:
     """检查 _visible_routes 与 Registry 的一致性——EC-8 防御"""
     var registry_routes: Array = Registry.list_by_kind(&"route")
@@ -243,7 +244,7 @@ func _validate_cache_consistency() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/edge_cases_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/chart/EdgeCasesTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

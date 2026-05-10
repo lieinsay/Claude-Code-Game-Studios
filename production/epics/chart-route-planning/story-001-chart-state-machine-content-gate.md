@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -67,7 +68,7 @@
 
 ### ChartManager Autoload #9 — State Storage
 
-```gdscript
+```text
 # Chart Autoload #9 — 内部状态 Dictionary
 var _state: Dictionary = {
     "_chart_state": &"LOADING",
@@ -89,7 +90,7 @@ const ROUTE_SUB_STATES: Array[StringName] = [&"BROWSABLE", &"SELECTED", &"UNAVAI
 
 ### chart_state_transition() — Pure Function
 
-```gdscript
+```text
 func chart_state_transition(trigger: StringName, payload: Dictionary = {}) -> Dictionary:
     var current: StringName = _state["_chart_state"]
 
@@ -127,7 +128,7 @@ func chart_state_transition(trigger: StringName, payload: Dictionary = {}) -> Di
 
 ### Content Domain Gate
 
-```gdscript
+```text
 const REQUIRED_DOMAINS: Array[StringName] = [&"routes", &"world", &"intel", &"threats"]
 
 func _check_content_domains() -> bool:
@@ -145,7 +146,7 @@ func _check_content_domains() -> bool:
 
 ### open_chart() — Entry Point
 
-```gdscript
+```text
 func open_chart() -> void:
     _state["_chart_state"] = &"LOADING"
     _state["_internal_warning_counter"] = 0
@@ -187,7 +188,7 @@ func _safe_query_knowledge(route_id: StringName) -> int:
 
 ### State Transition Application
 
-```gdscript
+```text
 func _apply_transition(result: Dictionary) -> void:
     if not result["allowed"]:
         return
@@ -214,7 +215,7 @@ func _on_entered_error() -> void:
 
 ### Route Sub-State Machine
 
-```gdscript
+```text
 func _set_route_sub_state(route_id: StringName, new_state: StringName) -> void:
     var old_state: StringName = _state["_route_states"].get(route_id, &"BROWSABLE")
     if old_state == new_state:
@@ -239,7 +240,7 @@ func _set_all_routes_locked() -> void:
 
 ### RETRY Flow
 
-```gdscript
+```text
 func retry_open_chart() -> void:
     if _state["_retry_cooldown_remaining"] > 0.0:
         return
@@ -287,7 +288,7 @@ func retry_open_chart() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/chart/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

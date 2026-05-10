@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -56,7 +57,7 @@
 
 ### Cargo Item Structure
 
-```gdscript
+```text
 # 货物在货舱中的存储格式：
 {
     "resource_id": "cargo.iron_crate",      # 货物自身的 stable ID
@@ -136,7 +137,7 @@ unpack_valid = (has_match AND overflow_qty = 0) OR volume_availability(storage, 
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/cargo_unpack_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/resources/CargoUnpackTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

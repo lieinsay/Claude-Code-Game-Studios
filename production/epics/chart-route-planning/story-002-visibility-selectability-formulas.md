@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -69,7 +70,7 @@
 
 ### Formula 1 — route_visibility
 
-```gdscript
+```text
 func route_visibility(route_id: StringName, hide_rumored: bool) -> bool:
     var knowledge_state: int = _query_knowledge_state(route_id)
 
@@ -100,7 +101,7 @@ func _query_knowledge_state(route_id: StringName) -> int:
 
 ### Formula 2 — route_selectability（短路求值）
 
-```gdscript
+```text
 func route_selectability(route_id: StringName) -> StringName:
     # 分支 1: 不可见 → hidden（短路——避免对隐藏航线进行后续查询）
     if not route_visibility(route_id, _state["_hide_rumored"]):
@@ -132,7 +133,7 @@ func route_selectability(route_id: StringName) -> StringName:
 
 ### AirshipHub Timing Safety Guard
 
-```gdscript
+```text
 func _get_current_docked_location_safe() -> StringName:
     if not is_instance_valid(AirshipHub) or not AirshipHub.has_method("get_current_docked_location"):
         return &""
@@ -141,7 +142,7 @@ func _get_current_docked_location_safe() -> StringName:
 
 ### Query Route Accessibility (Safe)
 
-```gdscript
+```text
 func _query_route_accessibility(route_id: StringName) -> Dictionary:
     if not IntelManager.has_method("query_route_accessibility"):
         return {"traversable": false}
@@ -155,7 +156,7 @@ func _query_route_accessibility(route_id: StringName) -> Dictionary:
 
 ### Re-evaluate All Routes
 
-```gdscript
+```text
 func _reevaluate_all_routes() -> void:
     for route_id in _state["_visible_routes"]:
         var selectability: StringName = route_selectability(route_id)
@@ -202,7 +203,7 @@ func _reevaluate_routes_for_location(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/visibility_selectability_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/chart/VisibilitySelectabilityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

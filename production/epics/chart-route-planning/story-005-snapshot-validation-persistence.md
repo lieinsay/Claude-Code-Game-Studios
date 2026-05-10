@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -82,7 +83,7 @@
 
 ### Snapshot Builder
 
-```gdscript
+```text
 func _build_snapshot_package(route_id: StringName) -> SnapshotPackage:
     var pkg := SnapshotPackage.new()
     pkg.domain_id = &"progress.routes"
@@ -104,7 +105,7 @@ func _build_snapshot_package(route_id: StringName) -> SnapshotPackage:
 
 ### Formula 4 — snapshot_package_validity
 
-```gdscript
+```text
 func snapshot_package_validity(pkg: SnapshotPackage, current_time: float,
                                 timestamp_tolerance: float, route_registry: Array) -> Dictionary:
     var violations: Array = []
@@ -163,7 +164,7 @@ func snapshot_package_validity(pkg: SnapshotPackage, current_time: float,
 
 ### Domain Serializer
 
-```gdscript
+```text
 func register_serializer() -> void:
     Persistence.register_domain_serializer("progress.routes", _serialize_routes)
 
@@ -189,7 +190,7 @@ func _deserialize_routes(snapshot: SnapshotPackage) -> void:
 
 ### Resume Departure Sequence
 
-```gdscript
+```text
 func _resume_departure_sequence() -> void:
     # 恢复出航序列——跳过航图渲染，直接移交 Navigation
     var route_id: StringName = _state["_last_committed_route_id"]
@@ -245,7 +246,7 @@ func _resume_departure_sequence() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/snapshot_persistence_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/chart/SnapshotPersistenceTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

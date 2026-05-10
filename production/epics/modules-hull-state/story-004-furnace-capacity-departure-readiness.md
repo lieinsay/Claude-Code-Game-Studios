@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -83,7 +84,7 @@
 
 ### Furnace Ratings
 
-```gdscript
+```text
 const FURNACE_RATING: Dictionary = {
     ModuleType.SCOUT: 8,
     ModuleType.CARGO: 12,
@@ -96,7 +97,7 @@ func _get_furnace_rating(module_type: int) -> int:
 
 ### M_max Calculation
 
-```gdscript
+```text
 func get_max_cargo_capacity() -> int:
     var total: float = 0.0
     for slot_id in SLOT_IDS:
@@ -119,7 +120,7 @@ func get_max_cargo_capacity() -> int:
 
 ### can_depart() Implementation
 
-```gdscript
+```text
 func can_depart() -> Dictionary:
     var reasons: Array[StringName] = []
 
@@ -146,7 +147,7 @@ func can_depart() -> Dictionary:
 
 ### Departure Readiness Change Detection
 
-```gdscript
+```text
 var _cached_can_depart: bool = false
 var _cached_reasons: Array[StringName] = []
 
@@ -164,7 +165,7 @@ func _check_departure_readiness() -> void:
 
 ### Overloaded Departure Block Message
 
-```gdscript
+```text
 func get_departure_block_messages() -> Array[String]:
     var result: Dictionary = can_depart()
     if result["can"]:
@@ -189,7 +190,7 @@ func get_departure_block_messages() -> Array[String]:
 
 ### Hub Integration Point
 
-```gdscript
+```text
 # Hub 出航确认前调用
 # HubManager._on_pre_departure_check():
 #     var readiness: Dictionary = ModuleHullManager.can_depart()
@@ -235,7 +236,7 @@ func get_departure_block_messages() -> Array[String]:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/modules/departure_readiness_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/modules/DepartureReadinessTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

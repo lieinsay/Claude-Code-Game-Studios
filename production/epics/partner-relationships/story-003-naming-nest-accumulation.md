@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -72,7 +73,7 @@
 
 ### Naming Eligibility
 
-```gdscript
+```text
 func _is_naming_eligible() -> bool:
     var p := partners[MVP_PARTNER_ID]
     if p["naming_state"] != NAMING_PENDING:
@@ -86,7 +87,7 @@ func _is_naming_eligible() -> bool:
 
 ### Name Submission
 
-```gdscript
+```text
 func submit_partner_name(submitted_name: String) -> Dictionary:
     var p := partners[MVP_PARTNER_ID]
     if p["naming_done"]:
@@ -109,7 +110,7 @@ func submit_partner_name(submitted_name: String) -> Dictionary:
 
 ### Name Skip
 
-```gdscript
+```text
 func skip_naming() -> void:
     var p := partners[MVP_PARTNER_ID]
     p["naming_skip_count"] += 1
@@ -127,7 +128,7 @@ func skip_naming() -> void:
 
 ### Nest Accumulation
 
-```gdscript
+```text
 const NEST_ITEMS: Array = ["旧船帆碎布", "锈蚀的测风链环", "玩家绳头", "空港徽章残片"]
 
 func _accumulate_nest_item() -> void:
@@ -182,7 +183,7 @@ func _accumulate_nest_item() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/partner-relationships/naming_nest_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/partner-relationships/NamingNestTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

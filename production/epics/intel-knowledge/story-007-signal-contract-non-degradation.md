@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -78,7 +79,7 @@
 
 ### Full Signal Declarations
 
-```gdscript
+```text
 # === IntelManager Signal Declarations (ADR-0002 compliant) ===
 
 # 地点知识变化
@@ -113,7 +114,7 @@ signal rumor_confidence_changed(source_tag: StringName, location_id: StringName,
 
 所有方法遵循此模式:
 
-```gdscript
+```text
 func reveal_rumor(location_id: StringName, source_tag: StringName, hazard_tags: Array, confidence: int) -> void:
     # 1. 防御性检查
     var current_state: int = knowledge_state.get(location_id, KNOWLEDGE_UNKNOWN)
@@ -137,7 +138,7 @@ func reveal_rumor(location_id: StringName, source_tag: StringName, hazard_tags: 
 
 ### Non-Degradation Guards
 
-```gdscript
+```text
 # 地点知识非退化
 func _can_transition_location(current: int, target: int) -> bool:
     if current == KNOWLEDGE_VERIFIED:
@@ -159,7 +160,7 @@ func _can_transition_location(current: int, target: int) -> bool:
 
 ### Confidence Adjustment on Verification
 
-```gdscript
+```text
 func _adjust_rumor_confidence_on_verification(location_id: StringName) -> void:
     var sources: Array = rumor_sources.get(location_id, [])
     for source in sources:
@@ -214,14 +215,14 @@ IntelManager 自身保证: 所有 signal emit 为同步 `.emit()`——不通过
 - **AC-3 and AC-4**: Typed params
   - Given: 所有 signal 声明
   - When: 检查 signal 参数
-  - Then: 每个参数有显式 GDScript 类型注解——无 Variant 或 Dictionary 参数
+  - Then: 每个参数有显式 C# 类型注解——无 Variant 或 Dictionary 参数
 
 ---
 
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/intel/signal_contract_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/intel/SignalContractTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

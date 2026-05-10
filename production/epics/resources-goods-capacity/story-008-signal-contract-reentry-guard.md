@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### Signal Definitions (from ADR-0005 Section 6)
 
-```gdscript
+```text
 # 状态变更通知 — typed params only
 signal pool_changed(pool_id: StringName)
 signal resource_added(pool_id: StringName, resource_id: StringName, quantity: int)
@@ -83,7 +84,7 @@ signal mass_changed(new_mass: int)
 
 ### Emit-After-Mutation Pattern
 
-```gdscript
+```text
 func add(pool_id: StringName, resource_id: StringName, quantity: int) -> ResourceResult:
     # 1. 验证
     # 2. 执行变更（修改 _pools）
@@ -96,7 +97,7 @@ func add(pool_id: StringName, resource_id: StringName, quantity: int) -> Resourc
 
 ### Reentry Guard
 
-```gdscript
+```text
 var _busy: bool = false
 
 func _guard_enter() -> bool:
@@ -166,7 +167,7 @@ func add(...) -> ResourceResult:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/resources/signal_contract_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/resources/SignalContractTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

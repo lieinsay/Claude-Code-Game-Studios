@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -56,7 +57,7 @@
 
 ### Capacity Constants (from ADR-0005 Section 4)
 
-```gdscript
+```text
 const CARRY_BASE_SLOTS: int = 5
 const CARRIED_BASE_SLOTS: int = 5
 const STORAGE_BASE_VOLUME: int = 1000
@@ -72,7 +73,7 @@ const MASS_CLASS_TABLE: Dictionary = {
 
 ### Capacity Check Functions
 
-```gdscript
+```text
 func _slot_available(pool_id: StringName, new_stacks: int) -> bool:
     var used = _count_used_slots(pool_id)
     var total = _get_pool_total_slots(pool_id)
@@ -105,7 +106,7 @@ required_volume = new_stacks × item_volume
 
 ### Capacity Bonus Injection
 
-```gdscript
+```text
 func set_carry_slot_bonus(bonus: int) -> void:
 func set_storage_volume_bonus(bonus: int) -> void:
 func set_cargo_module_volume_bonus(bonus: int) -> void:
@@ -143,7 +144,7 @@ func set_cargo_module_volume_bonus(bonus: int) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/capacity_system_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/resources/CapacitySystemTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

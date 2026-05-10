@@ -4,7 +4,9 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: UI
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Estimate**: M
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -17,7 +19,7 @@
 **ADR Decision Summary**: Registry 的诊断 UI 是开发期工具面板集（非玩家界面）——提供 Registry Overview、Content Item Inspector、Reference Graph、Error List、Query Tester 和 Copyable Report Panel。Reference Graph 必须提供"只看错误链路"模式。Error List 支持按 severity/error_code/kind/domain 过滤。UI 仅在调试构建中可用。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: UI 使用 Godot Control 节点；图表使用 `draw_*` 方法或轻量 2D 节点；Web 调试界面不得依赖大量半透明层或持续粒子。
+**Engine Notes**: UI 使用 Godot Control 节点；图表使用 `draw_*` 方法或轻量 2D 节点；桌面调试工具不得依赖大量半透明层或持续粒子。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: 键盘优先（模式 #10）——所有诊断工具必须支持完整键盘操作
@@ -31,10 +33,10 @@
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
 - [ ] **AC-1**: GIVEN registry 存在任一错误，WHEN 打开开发期诊断工具，THEN 必须能看到 Registry Overview、Content Item Inspector、Reference Graph、Error List、Query Tester 五个面板
-- [ ] **AC-2**: GIVEN Web 调试界面打开 Registry Overview，WHEN registry 存在 fatal 或 error 诊断，THEN 高严重度问题必须在首屏可见
+- [ ] **AC-2**: GIVEN 桌面调试工具打开 Registry Overview，WHEN registry 存在 fatal 或 error 诊断，THEN 高严重度问题必须在首屏可见
 - [ ] **AC-3**: GIVEN 某条错误显示在诊断 UI，WHEN 查看或复制错误，THEN 必须包含 severity、error_code、content_id、source_ref、blocking_scope 和 suggested_action
 - [ ] **AC-4**: GIVEN 错误列表存在多条错误，WHEN 使用批量复制，THEN 输出 Registry Diagnostic Summary 表格（含 severity/error_code/content_id/kind/field_path/blocking_scope/suggested_action）
-- [ ] **AC-5**: GIVEN Web 调试界面打开 Reference Graph，WHEN 引用图较大，THEN 必须提供"只看错误链路"模式，避免整图阻塞排查
+- [ ] **AC-5**: GIVEN 桌面调试工具打开 Reference Graph，WHEN 引用图较大，THEN 必须提供"只看错误链路"模式，避免整图阻塞排查
 - [ ] **AC-6**: GIVEN 用户不使用鼠标操作开发期诊断工具，WHEN 通过键盘导航，THEN 必须能访问筛选、Error List、Inspector、Reference Graph、Query Tester 和 Copyable Report Panel，并能看到当前焦点
 
 ---

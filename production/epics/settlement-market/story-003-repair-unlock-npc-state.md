@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -68,7 +69,7 @@
 
 ### F.2 Stall Unlock Check
 
-```gdscript
+```text
 func is_stall_unlocked(stall_id: StringName, completed_node_ids: Array) -> bool:
     var stall_def := _get_stall_def(stall_id)
     if stall_def.is_empty():
@@ -88,7 +89,7 @@ func is_stall_unlocked(stall_id: StringName, completed_node_ids: Array) -> bool:
 
 ### Repair Completed Handler
 
-```gdscript
+```text
 func on_repair_completed(node_id: StringName) -> void:
     # 1. 查询 node_id 的 linked_location_id
     var repair_def := Registry.query_entity(node_id)
@@ -138,7 +139,7 @@ func on_repair_completed(node_id: StringName) -> void:
 
 ### F.3 Activity Aggregation
 
-```gdscript
+```text
 func recalculate_settlement_activity(settlement_id: StringName) -> void:
     var active_count := 0
     var total_stalls := 0
@@ -163,7 +164,7 @@ func recalculate_settlement_activity(settlement_id: StringName) -> void:
 
 ### NPC Unlock Coupled to Stall
 
-```gdscript
+```text
 func _unlock_npc_for_stall(stall_id: StringName) -> void:
     for npc_id in npcs:
         if npcs[npc_id]["stall_id"] == stall_id:
@@ -174,7 +175,7 @@ func _unlock_npc_for_stall(stall_id: StringName) -> void:
 
 ### Settlement Stalls Query
 
-```gdscript
+```text
 func _get_settlement_stalls(settlement_id: StringName) -> Array:
     var result: Array = []
     for stall_id in stalls:
@@ -225,7 +226,7 @@ func _get_stall_def(stall_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/settlement-market/unlock_activity_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/settlement-market/UnlockActivityTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

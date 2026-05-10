@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -62,7 +63,7 @@
 
 ### Phase & Sub-state Enums
 
-```gdscript
+```text
 # ExplorationManager Autoload #11 — 阶段枚举
 const PHASE_IDLE: int = 0
 const PHASE_ARRIVING: int = 1
@@ -85,7 +86,7 @@ const EXTRACTION_RETREAT: StringName = &"retreat"
 
 ### Phase Transition Function
 
-```gdscript
+```text
 func _transition_phase(target_phase: int, reason: StringName = &"") -> bool:
     var current := session_phase
 
@@ -143,7 +144,7 @@ func _transition_phase(target_phase: int, reason: StringName = &"") -> bool:
 
 ### Extraction Timer
 
-```gdscript
+```text
 const EXTRACTION_DURATION: float = 2.5  # 秒
 
 var _extraction_elapsed: float = 0.0
@@ -213,7 +214,7 @@ func _interrupt_extraction(reason: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/exploration/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

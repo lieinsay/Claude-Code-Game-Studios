@@ -4,14 +4,15 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/airship-hub.md`
 **Requirement**: `TR-hub-001`
 
-**ADR Governing Implementation**: ADR-0001 (Autoload Boot Order — Hub Scene Phase 4 scene_ready, ResourceLoader 不卸载), ADR-0003 (Save System — progress.airship 快照包, Canonical JSON, Staging→Verify→Promotion), ADR-0006 (Web Platform Constraints — 单线程, pagehide best-effort)
+**ADR Governing Implementation**: ADR-0001 (Autoload Boot Order — Hub Scene Phase 4 scene_ready, ResourceLoader 不卸载), ADR-0003 (Save System — progress.airship 快照包, Canonical JSON, Staging→Verify→Promotion), ADR-0019 (desktop lifecycle constraints — 单线程, suspend_requested best-effort)
 **ADR Decision Summary**: Hub 场景在前往航图/探索期间保持内存驻留（ResourceLoader 不卸载），仅切换活动场景。progress.airship 快照包仅存储独立变量（module_slot_state、trace_anchors、departure_snapshot），room_state 和 station_state 在加载时重新派生——不双重存储。departure_locked 快照降级为 landed。JSON 序列化使用 Canonical JSON（sorted keys, NFC, finite floats only, StringName→String 转换）。快照损坏时使用安全默认状态。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
@@ -19,7 +20,7 @@
 **Control Manifest Rules (Core layer)**:
 - Required: progress.airship 快照包仅存储独立变量——room_state 和 station_state 加载时重新派生；departure_locked 快照降级为 landed；StringName 序列化时转为 String、反序列化转回 StringName
 - Forbidden: 双重存储（派生状态与源数据同时持久化）；store_var()/get_var() Variant blob 作为存档格式；在 departure_locked/in_transit/arrival 瞬态触发完整存档
-- Guardrail: 快照损坏→安全默认状态+警告提示；场景加载超时→保留 departure_locked→恢复 landed；Web pagehide 在 20ms budget 内完成 best-effort flush
+- Guardrail: 快照损坏→安全默认状态+警告提示；场景加载超时→保留 departure_locked→恢复 landed；desktop suspend_requested 在 20ms budget 内完成 best-effort flush
 
 ---
 
@@ -51,13 +52,13 @@
 - [ ] **AC-5**: GIVEN docking_state = landed，WHEN 存档系统触发 progress.airship 保存，THEN 完整快照被序列化并写入
 - [ ] **AC-6**: GIVEN docking_state = departure_locked + 存档触发，WHEN 快照构建，THEN docking_state 降级为 landed——departure_locked 不是稳定边界，不持久化
 - [ ] **AC-7**: GIVEN docking_state = in_transit，WHEN 存档触发，THEN 快照中 docking_state = in_transit——作为稳定航行状态可持久化
-- [ ] **AC-8**: GIVEN docking_state = arrival，WHEN pagehide/存档触发，THEN 快照中 docking_state = in_transit——arrival 是瞬态动画，不持久化
+- [ ] **AC-8**: GIVEN docking_state = arrival，WHEN suspend_requested/存档触发，THEN 快照中 docking_state = in_transit——arrival 是瞬态动画，不持久化
 
 ### Snapshot Restoration
 
 - [ ] **AC-9**: GIVEN progress.airship 快照 docking_state = landed，WHEN Hub 从快照加载，THEN 恢复为 landed——module_slot_state 和 trace_anchors 恢复快照值，station_state 重新派生
 - [ ] **AC-10**: GIVEN 快照 docking_state = in_transit，WHEN Hub 加载，THEN 重新触发 arrival → landed 转换（玩家返回 Hub，抵达动画播放，生成在舱门）
-- [ ] **AC-11**: GIVEN 快照 docking_state = departure_locked（手动构造的测试夹具或 pagehide 捕获的瞬态），WHEN Hub 加载，THEN 降级为 landed——日志记录 "departure_locked 降级为 landed"，出航确认丢失
+- [ ] **AC-11**: GIVEN 快照 docking_state = departure_locked（手动构造的测试夹具或 suspend_requested 捕获的瞬态），WHEN Hub 加载，THEN 降级为 landed——日志记录 "departure_locked 降级为 landed"，出航确认丢失
 
 ### Snapshot Corruption & Safe Defaults
 
@@ -74,9 +75,9 @@
 - [ ] **AC-16**: GIVEN module_slot_state 字典的 key 为 StringName（如 `&"cargo_module"`），WHEN 序列化到 Canonical JSON，THEN key 转换为 String（`"cargo_module"`）
 - [ ] **AC-17**: GIVEN 快照 JSON 中 module_slot_state 的 key 为 String，WHEN 反序列化恢复，THEN key 转换回 StringName——Hub 内部始终使用 StringName
 
-### Web Lifecycle Integration
+### Desktop Lifecycle Integration
 
-- [ ] **AC-18**: GIVEN 浏览器 pagehide 事件触发，WHEN best-effort 存档执行，THEN progress.airship 序列化+flush 在 ≤20ms budget 内完成——若超时则部分写入由 backup 故障转移保护
+- [ ] **AC-18**: GIVEN 桌面窗口 suspend_requested 事件触发，WHEN best-effort 存档执行，THEN progress.airship 序列化+flush 在 ≤20ms budget 内完成——若超时则部分写入由 backup 故障转移保护
 
 ---
 
@@ -84,7 +85,7 @@
 
 ### progress.airship Snapshot Builder
 
-```gdscript
+```text
 # HubManager 提供快照构建接口——由存档系统 #3 调用
 func build_progress_airship_snapshot() -> Dictionary:
     var snapshot: Dictionary = {}
@@ -117,7 +118,7 @@ func build_progress_airship_snapshot() -> Dictionary:
 
 ### Snapshot Restoration
 
-```gdscript
+```text
 func restore_from_progress_airship(snapshot: Dictionary) -> bool:
     if not _validate_snapshot_schema(snapshot):
         push_error("progress.airship 快照 Schema 验证失败——使用安全默认状态")
@@ -159,7 +160,7 @@ func restore_from_progress_airship(snapshot: Dictionary) -> bool:
 
 ### StringName↔String Conversion
 
-```gdscript
+```text
 func _serialize_module_slot_state() -> Dictionary:
     var serialized: Dictionary = {}
     for slot_id in _module_slot_state:
@@ -182,7 +183,7 @@ func _restore_module_slot_state(serialized: Dictionary) -> void:
 
 ### Snapshot Schema Validation
 
-```gdscript
+```text
 func _validate_snapshot_schema(snapshot: Dictionary) -> bool:
     if snapshot.is_empty():
         return false
@@ -222,7 +223,7 @@ func _validate_stale_ids() -> void:
 
 ### Scene Transition Atomicy
 
-```gdscript
+```text
 # SceneTree 场景切换——Hub 场景保持驻留
 func _switch_to_navigation_scene(target_scene_path: String, mode: StringName) -> void:
     # 1. 确保 Hub 场景不被卸载
@@ -267,7 +268,7 @@ func _return_to_hub_scene() -> void:
 
 ### Scene Load Failure Handling
 
-```gdscript
+```text
 func _on_scene_load_failed(mode: StringName) -> void:
     # 目标场景加载失败——保持 Hub 场景不变
     # Hub 在 departure_locked 中——恢复到 landed
@@ -280,29 +281,29 @@ func _on_scene_load_failed(mode: StringName) -> void:
     departure_rejected.emit(mode, &"SCENE_LOAD_FAILED")
 ```
 
-### Web pagehide Best-Effort Flush
+### Desktop suspend_requested Best-Effort Flush
 
-```gdscript
-# 在 HubManager._ready() 中注册 Web 生命周期回调
+```text
+# 在 HubManager._ready() 中注册 桌面生命周期回调
 func _register_web_lifecycle() -> void:
-    if OS.get_name() != "Web":
+    if desktop lifecycle support unavailable:
         return
 
-    # JavaScriptBridge 监听页面隐藏事件
+    # SessionShell receives desktop suspend/focus events
     var js_code: String = """
-    document.addEventListener('visibilitychange', function() {
+    document.addEventListener('window_focus_changed', function() {
         if (document.visibilityState === 'hidden') {
             // 通知 Godot 执行 best-effort flush
         }
     });
     """
     # 具体 JS 互操作由存档系统 #3 处理
-    # Hub 仅确保在 pagehide 前 docking_state 调至稳定值
+    # Hub 仅确保在 suspend_requested 前 docking_state 调至稳定值
 ```
 
 ### Domain Serializer Registration
 
-```gdscript
+```text
 # HubManager 在 Persistence 系统 core_data_ready 时注册领域序列化器
 func register_domain_serializer() -> void:
     Persistence.register_domain(&"airship", {
@@ -318,7 +319,7 @@ func register_domain_serializer() -> void:
 
 - 存档系统的 Staging→Verify→Promotion 工作流——属于 local-save-persistence Epic #3
 - Canonical JSON sorted-keys 辅助函数的实现——属于存档系统 #3
-- Web JavaScriptBridge 互操作的具体实现——属于存档系统 #3 + platform-session-shell #2
+- Desktop lifecycle notification handling的具体实现——属于存档系统 #3 + platform-session-shell #2
 - SceneTree.change_scene_to_file() vs 手动场景管理的最终方案选择——属于 platform-session-shell #2
 - 航图/自由飞行场景的具体加载逻辑——属于 Chart #9 和 Navigation #10
 - 版本迁移的完整框架（migration pipeline）——属于存档系统 #3
@@ -357,7 +358,7 @@ func register_domain_serializer() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/hub/persistence_transition_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/PersistenceTransitionTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

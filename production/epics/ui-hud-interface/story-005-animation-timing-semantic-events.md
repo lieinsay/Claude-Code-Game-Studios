@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -69,7 +70,7 @@
 
 ### Tween Wrapper
 
-```gdscript
+```text
 func _tween_panel_open(panel: Control) -> void:
     panel.modulate.a = 0.0
     panel.scale = Vector2(0.9, 0.9)
@@ -89,7 +90,7 @@ func _tween_panel_close(panel: Control) -> void:
 
 ### Ink Spread ShaderMaterial
 
-```gdscript
+```text
 func _play_ink_spread() -> void:
     var mat := _ink_spread_material as ShaderMaterial
     var tw := create_tween()
@@ -102,7 +103,7 @@ func _set_ink_progress(value: float, mat: ShaderMaterial) -> void:
 
 ### Semantic Event Emission
 
-```gdscript
+```text
 func _emit_ui_event(signal_name: StringName, args: Array = []) -> void:
     # emit-after-action — domain state already committed
     match signal_name:
@@ -140,7 +141,7 @@ func _emit_ui_event(signal_name: StringName, args: Array = []) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/ui-hud-interface/animation_events_test.gd` — must exist and pass, OR documented playtest
+**Required evidence**: `tests/integration/ui-hud-interface/AnimationEventsTest.csproj` — must exist and pass, OR documented playtest
 **Status**: [ ] Not yet created
 
 ---

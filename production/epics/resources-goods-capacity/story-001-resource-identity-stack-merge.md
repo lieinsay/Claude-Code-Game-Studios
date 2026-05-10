@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -58,7 +59,7 @@
 
 ### Resource Identity
 
-```gdscript
+```text
 # 资源身份仅由稳定 ID 确定
 # 运行时存储: { "resource_id": StringName, "quantity": int }
 # 不存储显示名、文件路径或节点引用
@@ -140,7 +141,7 @@ algorithm stack_merge(pool_id, resource_id, quantity):
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/stack_merge_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/resources/StackMergeTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

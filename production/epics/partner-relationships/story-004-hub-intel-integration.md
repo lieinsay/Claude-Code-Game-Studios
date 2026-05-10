@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -65,7 +66,7 @@
 
 ### Feature Ready Sequence
 
-```gdscript
+```text
 func _on_feature_ready() -> void:
     # 1. 加载/初始化快照
     var snapshot := Persistence.restore_snapshot("progress.partner_skycat")
@@ -95,7 +96,7 @@ func _dispatch_on_partner_joined() -> void:
 
 ### Sync with Hub State
 
-```gdscript
+```text
 func sync_with_hub_state(hub_state: int) -> void:
     match hub_state:
         HUB_LANDED:
@@ -116,7 +117,7 @@ func sync_with_hub_state(hub_state: int) -> void:
 
 ### Intel API Safety
 
-```gdscript
+```text
 func _safe_reveal_rumor(reveal_target: StringName, hazard_hint: StringName, confidence: int) -> void:
     if IntelManager == null or not IntelManager.has_method("reveal_rumor"):
         push_warning("Partner: IntelManager unavailable — rumor not delivered")
@@ -156,7 +157,7 @@ func _safe_reveal_rumor(reveal_target: StringName, hazard_hint: StringName, conf
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/partner-relationships/hub_intel_integration_test.gd` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/partner-relationships/HubIntelIntegrationTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [ ] Not yet created
 
 ---

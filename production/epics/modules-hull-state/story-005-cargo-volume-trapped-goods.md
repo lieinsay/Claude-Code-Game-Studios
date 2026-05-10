@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### V_effective Calculation
 
-```gdscript
+```text
 const CARGO_VOLUME_BONUS: int = 500  # 每个货仓模块的容积加成
 
 func get_effective_cargo_volume() -> int:
@@ -86,7 +87,7 @@ func get_effective_cargo_volume() -> int:
 
 ### Update Cargo Bay Volume on Any Efficiency Change
 
-```gdscript
+```text
 var _cached_v_effective: int = 0
 
 func _on_module_state_changed(slot_id: StringName) -> void:
@@ -109,7 +110,7 @@ func _check_and_update_cargo_volume() -> void:
 
 ### Integration Points in Existing Methods
 
-```gdscript
+```text
 # install_module / uninstall_module / repair_module / check_module / swap_module
 # 每个方法的末尾都调用：
 #   _check_and_update_cargo_volume()
@@ -120,7 +121,7 @@ func _check_and_update_cargo_volume() -> void:
 
 ### Trapped Goods Detection (Reference — Owned by Resources #5)
 
-```gdscript
+```text
 # 资源系统 #5 的 update_cargo_bay_effective_volume() 实现参考:
 # func update_cargo_bay_effective_volume(new_volume: int) -> void:
 #     _cargo_bay_effective_volume = new_volume
@@ -133,7 +134,7 @@ func _check_and_update_cargo_volume() -> void:
 
 ### Slot-Level Cargo Contribution Query
 
-```gdscript
+```text
 func get_slot_cargo_volume_contribution(slot_id: StringName) -> int:
     var slot: Dictionary = _slots.get(slot_id, {})
     if slot.is_empty() or slot["visible_state"] == VisibleState.EMPTY:
@@ -184,7 +185,7 @@ func get_slot_cargo_volume_contribution(slot_id: StringName) -> int:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/modules/cargo_volume_trapped_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/modules/CargoVolumeTrappedTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

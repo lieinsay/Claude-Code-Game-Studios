@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -65,7 +66,7 @@
 
 ### Read-Only Query Interfaces
 
-```gdscript
+```text
 func get_chart_state() -> StringName:
     return _state["_chart_state"]
 
@@ -98,7 +99,7 @@ func get_filter_state() -> Dictionary:
 
 ### Signal Declarations
 
-```gdscript
+```text
 ## 出航承诺 -- 3 typed params, sync emit
 signal route_committed(route_id: StringName, destination_id: StringName, hazard_tags: Array[StringName])
 
@@ -117,7 +118,7 @@ signal filter_changed(hide_rumored: bool)
 
 ### UIManager Data Contract
 
-```gdscript
+```text
 func get_route_display_data(route_id: StringName) -> Dictionary:
     """返回航线在 UI 中展示所需的所有数据。
     注意：不含视觉属性。UIManager 持有 knowledge_state→视觉编码 的映射表。"""
@@ -145,7 +146,7 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 
 ### UIManager Visual Encoding Lookup (Documentation)
 
-```gdscript
+```text
 # UIManager 持有此映射表——Chart 不定义视觉属性
 # const KNOWLEDGE_VISUAL: Dictionary = {
 #     KNOWLEDGE_RUMORED:    {"line": "dashed", "opacity": 0.6, "endpoint": "dashed_circle", "width": 2},
@@ -198,7 +199,7 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/uimanager_contract_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/chart/UimanagerContractTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

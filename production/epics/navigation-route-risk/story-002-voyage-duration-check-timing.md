@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -12,13 +13,13 @@
 **Requirement**: `TR-navigation-002`
 
 **ADR Governing Implementation**: ADR-0010 (EncounterContext Type — Navigation 生产端时间推进)
-**ADR Decision Summary**: 航行以时间推进——使用引擎 delta 而非挂钟时间（Web 标签页切换安全）。Formula 1 (T_voyage) = T_distance / s_hull + ΣT_flat + ΣT_temp。T_distance 由距离带确定（short=60s, medium=120s, long=180s）。s_hull 由船体波段确定（intact=1.0, damaged=0.9, critical=0.75）。Formula 2 (T_check) = T_base × (1 + Δ_hull)。T_base=12s 默认。Δ_hull 偏移（intact=0, damaged=-0.10, critical=-0.20）——船越破遭遇越密集。N_checks = ⌊T_voyage_base / T_check⌋。关键约束：T_voyage 的基准部分（T_distance/s_hull）在启动时固定，遭遇效果叠加到基准上。N_checks 以基准时长计算——防止遭遇→延长时间→更多遭遇的正反馈循环。
+**ADR Decision Summary**: 航行以时间推进——使用引擎 delta 而非挂钟时间（桌面窗口失焦/恢复安全）。Formula 1 (T_voyage) = T_distance / s_hull + ΣT_flat + ΣT_temp。T_distance 由距离带确定（short=60s, medium=120s, long=180s）。s_hull 由船体波段确定（intact=1.0, damaged=0.9, critical=0.75）。Formula 2 (T_check) = T_base × (1 + Δ_hull)。T_base=12s 默认。Δ_hull 偏移（intact=0, damaged=-0.10, critical=-0.20）——船越破遭遇越密集。N_checks = ⌊T_voyage_base / T_check⌋。关键约束：T_voyage 的基准部分（T_distance/s_hull）在启动时固定，遭遇效果叠加到基准上。N_checks 以基准时长计算——防止遭遇→延长时间→更多遭遇的正反馈循环。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
 **Control Manifest Rules (Core layer)**:
 - Required: 使用引擎 _process(delta) 推进 elapsed_time——不用挂钟时间；进度条到达 100% 的判定 epsilon=0.01s；N_checks 以 T_voyage_base 计算不受遭遇效果影响
-- Forbidden: 使用挂钟时间计时（Web 标签页切换节流会导致跳过遭遇）
+- Forbidden: 使用挂钟时间计时（桌面窗口失焦/恢复节流会导致跳过遭遇）
 - Guardrail: T_check 硬下限 4s——防止 wind_shear 连续命中使间隔过短；T_voyage 上限防止无限延长
 
 ---
@@ -57,7 +58,7 @@
 
 ### Timing with Engine Delta
 
-- [ ] **AC-13**: GIVEN 航程 IN_PROGRESS，WHEN 浏览器标签页切换导致 delta 变大，THEN elapsed_time 正确累积。遭遇按 elapsed_time 触发——恢复后排队结算，不"错过"
+- [ ] **AC-13**: GIVEN 航程 IN_PROGRESS，WHEN 桌面窗口切换导致 delta 变大，THEN elapsed_time 正确累积。遭遇按 elapsed_time 触发——恢复后排队结算，不"错过"
 - [ ] **AC-14**: GIVEN elapsed_time ≥ T_voyage，WHEN 抵达判定，THEN 使用 epsilon=0.01s 容差。浮点比较防止跳过抵达触发
 
 ---
@@ -66,7 +67,7 @@
 
 ### Formula 1 — Voyage Total Duration
 
-```gdscript
+```text
 const DISTANCE_DURATION: Dictionary = {
     &"short": 60.0,
     &"medium": 120.0,
@@ -110,7 +111,7 @@ func recalculate_voyage_duration_for_band_change(new_hull_band: StringName) -> v
 
 ### Formula 2 — Encounter Check Timing
 
-```gdscript
+```text
 const BASE_CHECK_INTERVAL: float = 12.0
 const CHECK_INTERVAL_MIN: float = 4.0
 
@@ -145,7 +146,7 @@ func _get_voyage_base_duration() -> float:
 
 ### Time Advancement with Engine Delta
 
-```gdscript
+```text
 const ARRIVAL_EPSILON: float = 0.01
 
 func _process_voyage(delta: float) -> void:
@@ -211,7 +212,7 @@ func _should_trigger_next_check() -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/timing_formulas_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/navigation/TimingFormulasTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

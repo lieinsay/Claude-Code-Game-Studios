@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -60,7 +61,7 @@
 
 ### State Machine
 
-```gdscript
+```text
 # CombatManager Autoload #12
 enum CombatState {
     IDLE,
@@ -112,7 +113,7 @@ func _enqueue_threat(threat_context: Dictionary) -> void:
 
 ### State Transitions
 
-```gdscript
+```text
 func _submit_response(response_choice: StringName) -> void:
     if _state != CombatState.AWAITING_RESPONSE:
         return
@@ -149,7 +150,7 @@ func _transition_to_idle_or_next() -> void:
 
 ### Threat Queue Management
 
-```gdscript
+```text
 func get_queue_depth() -> int:
     return _threat_queue.size()
 
@@ -165,7 +166,7 @@ func _is_threat_still_active(threat_id: StringName) -> bool:
 
 ### Signal Declarations
 
-```gdscript
+```text
 signal threat_triggered(threat_context: Dictionary)
 # 消费方: #16 (UI — 显示决策面板), #17 (Feedback — 警报音)
 
@@ -200,7 +201,7 @@ signal combat_result_ready(result: Dictionary)
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/combat/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/combat/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

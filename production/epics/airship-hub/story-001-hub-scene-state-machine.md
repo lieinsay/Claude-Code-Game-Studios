@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -15,7 +16,7 @@
 **ADR Decision Summary**: Hub 场景在 Phase 4 (scene_ready) 加载，HubManager Autoload #7 管理站点注册和交互路由。双层四舱横版剖面布局：上层驾驶舱+生活舱，下层工程舱+货舱，中部楼梯连通。4 态停靠状态机 (landed → departure_locked → in_transit → arrival → landed)。2 种玩家生成点：首航→舵轮附近甲板中心，返航→舱门位置。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: SceneTree.change_scene_to_file() 用于场景切换。Hub 场景需在前往航图/探索期间保持内存驻留——ResourceLoader 不卸载 Hub 场景（single-threaded Web 环境避免返航时 2-5s 完整重载）。使用 Texture Atlas 打包 sprite，draw call ≤ 10。
+**Engine Notes**: SceneTree.change_scene_to_file() 用于场景切换。Hub 场景需在前往航图/探索期间保持内存驻留——ResourceLoader 不卸载 Hub 场景（single-threaded 桌面环境避免返航时 2-5s 完整重载）。使用 Texture Atlas 打包 sprite，draw call ≤ 10。
 
 **Control Manifest Rules (Core layer)**:
 - Required: Hub 拥有飞艇内部空间布局、碰撞体、可行走区域；HubManager 为 Autoload #7
@@ -60,7 +61,7 @@
 
 ### Docking State Machine
 
-```gdscript
+```text
 enum DockingState {
     LANDED,
     DEPARTURE_LOCKED,
@@ -128,7 +129,7 @@ func _on_arrival() -> void:
 
 ### Player Spawn Points
 
-```gdscript
+```text
 enum SpawnReason { FIRST_LOAD, RETURN_FROM_VOYAGE, SAVE_LOAD }
 
 func _get_spawn_position(reason: int) -> Vector2:
@@ -143,7 +144,7 @@ func _get_spawn_position(reason: int) -> Vector2:
 
 ### Departure Lock Timer + Watchdog
 
-```gdscript
+```text
 var base_lock_duration: float = 2.0
 var _lock_timer: float = 0.0
 var _watchdog_timer: float = 0.0
@@ -169,7 +170,7 @@ func _process(delta: float) -> void:
 
 ### Startup Validation
 
-```gdscript
+```text
 func _validate_config() -> void:
     if is_nan(base_lock_duration) or base_lock_duration < 1.0 or base_lock_duration > 5.0:
         push_error("base_lock_duration invalid (%.2f) — using default 2.0" % base_lock_duration)
@@ -206,7 +207,7 @@ func _validate_config() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/docking_state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/DockingStateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

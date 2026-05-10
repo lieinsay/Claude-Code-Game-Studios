@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -89,7 +90,7 @@ States (Pool):
 
 ### Terminal State Enforcement
 
-```gdscript
+```text
 func transfer(from_pool: StringName, to_pool: StringName, ...) -> ResourceResult:
     # deposited 不可转出（终态守卫）
     if from_pool == &"deposited":
@@ -101,7 +102,7 @@ func transfer(from_pool: StringName, to_pool: StringName, ...) -> ResourceResult
 
 本系统不拥有 `extraction_loss_ratio` 参数——它由探索系统拥有。本系统暴露结算接口：
 
-```gdscript
+```text
 func extract_carried_to_storage() -> Dictionary:
     # 探索成功撤离: 全部 carried → in_storage
     # 返回转移摘要
@@ -149,7 +150,7 @@ func apply_extraction_loss(loss_ratio: float) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/state_machine_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/resources/StateMachineTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

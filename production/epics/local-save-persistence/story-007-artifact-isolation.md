@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Foundation
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -93,7 +94,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/persistence/artifact_isolation_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/persistence/ArtifactIsolationTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---
@@ -101,4 +102,4 @@
 ## Dependencies
 
 - Depends on: Story 001 (promotion 流程)；Story 002 (snapshot_package_validity)；Story 004 (continue_availability——本 Story 实现非干扰规则)
-- Unlocks: Story 008 (Web Lifecycle——pagehide 时需判断两侧 artifact 各自是否需要 best-effort flush)
+- Unlocks: Story 008 (Desktop Lifecycle——suspend_requested 时需判断两侧 artifact 各自是否需要 best-effort flush)

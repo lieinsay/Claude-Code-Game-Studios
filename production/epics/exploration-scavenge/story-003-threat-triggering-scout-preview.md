@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Feature
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -70,7 +71,7 @@
 
 ### Threat Trigger
 
-```gdscript
+```text
 func check_threat_trigger(player_pos: Vector2, trigger_type: StringName) -> Dictionary:
     var triggered_threats := []
     for tp_id in session_threats_active:
@@ -111,7 +112,7 @@ func _threat_trigger_single(tp: Dictionary, trigger_type: StringName, player_pos
 
 ### Scout Preview
 
-```gdscript
+```text
 var _eta_scout_snapshot: float = 0.0
 
 func _snapshot_eta_scout() -> void:
@@ -128,7 +129,7 @@ func get_scout_preview_level() -> int:
 
 ### Threat Priority Sort
 
-```gdscript
+```text
 func _sort_threats_by_priority(threats: Array, player_pos: Vector2) -> Array:
     threats.sort_custom(func(a, b):
         var cat_a := a.threat_point.threat_category
@@ -146,7 +147,7 @@ func _sort_threats_by_priority(threats: Array, player_pos: Vector2) -> Array:
 
 ### Combat Result Callback
 
-```gdscript
+```text
 func on_combat_result(result: Dictionary) -> void:
     match result.get("outcome", &""):
         &"suppressed":
@@ -164,7 +165,7 @@ func on_combat_result(result: Dictionary) -> void:
 
 ### Trigger Probability Table
 
-```gdscript
+```text
 const TRIGGER_PROB_TABLE := {
     THREAT_ENVIRONMENTAL: 1.0,   # 环境威胁必触发
     THREAT_GUARD: 0.70,          # 守卫威胁 70% proximity 触发
@@ -201,7 +202,7 @@ const TRIGGER_PROB_TABLE := {
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/threat_triggering_test.gd` — must exist and pass
+**Required evidence**: `tests/unit/exploration/ThreatTriggeringTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

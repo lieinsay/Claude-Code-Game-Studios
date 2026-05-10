@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Integration
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -75,7 +76,7 @@
 
 ### _build_encounter_context()
 
-```gdscript
+```text
 func _build_encounter_context() -> Dictionary:
     return {
         "route_id": _active_voyage.get("route_id", &""),
@@ -104,7 +105,7 @@ func _voyage_state_to_result() -> StringName:
 
 ### voyage_completed Signal Declaration
 
-```gdscript
+```text
 # Navigation Autoload #10
 signal voyage_completed(encounter_context: Dictionary)
 # 遵循 ADR-0002: typed params, sync emit, emit-after-mutation
@@ -114,7 +115,7 @@ signal voyage_completed(encounter_context: Dictionary)
 
 ### _finalize_voyage() with Writing Order
 
-```gdscript
+```text
 func _finalize_voyage() -> void:
     # 步骤 (1): 写入 #8 船体伤害
     _write_damage_to_hull()
@@ -162,7 +163,7 @@ func _emit_voyage_end_feedback(ctx: Dictionary) -> void:
 
 ### _validate_encounter_context() — Exploration (#11) 消费端
 
-```gdscript
+```text
 # 此函数属于 Exploration (#11)，此处作为合约参考
 func _validate_encounter_context(ctx: Dictionary) -> Dictionary:
     if ctx == null or not ctx is Dictionary:
@@ -196,7 +197,7 @@ func _build_fallback_context() -> Dictionary:
 
 ### VoyageResult Constants
 
-```gdscript
+```text
 const VOYAGE_RESULT_ARRIVED: StringName = &"arrived"
 const VOYAGE_RESULT_RETREATED: StringName = &"retreated"
 const VOYAGE_RESULT_FORCED_LANDING: StringName = &"forced_landing"
@@ -236,7 +237,7 @@ const VOYAGE_RESULT_FORCED_LANDING: StringName = &"forced_landing"
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/encounter_context_signal_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/navigation/EncounterContextSignalTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

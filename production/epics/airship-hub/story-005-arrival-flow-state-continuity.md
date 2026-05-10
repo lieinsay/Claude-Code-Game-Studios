@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -19,7 +20,7 @@
 **Control Manifest Rules (Core layer)**:
 - Required: arrival→landed 转换后 R5 状态连续性验证（货舱/模块/仓库/修复痕迹保留）；返航生成点在舱门位置
 - Forbidden: arrival 后硬编码重置任何持久状态；departure_locked 快照直接恢复（必须降级为 landed）
-- Guardrail: arrival 动画期间 pagehide → best-effort 存档捕获 in_transit，重载时重新触发 arrival → landed
+- Guardrail: arrival 动画期间 suspend_requested → best-effort 存档捕获 in_transit，重载时重新触发 arrival → landed
 
 ---
 
@@ -50,7 +51,7 @@
 
 ### Arrival Edge Cases
 
-- [ ] **AC-12**: GIVEN arrival 动画播放中 + 浏览器 pagehide 触发，WHEN best-effort 存档捕获，THEN 存档中 docking_state = in_transit（arrival 是瞬态不持久化）——重载时重新触发 arrival → landed
+- [ ] **AC-12**: GIVEN arrival 动画播放中 + 桌面窗口 suspend_requested 触发，WHEN best-effort 存档捕获，THEN 存档中 docking_state = in_transit（arrival 是瞬态不持久化）——重载时重新触发 arrival → landed
 - [ ] **AC-13**: GIVEN progress.airship 快照损坏，WHEN Hub 加载失败，THEN 使用安全默认状态：全部站点 ready、生成点甲板中心（首次加载逻辑）、痕迹锚点初始值——并显示警告提示
 
 ---
@@ -59,7 +60,7 @@
 
 ### Arrival Flow
 
-```gdscript
+```text
 func trigger_arrival() -> void:
     if docking_state != DockingState.IN_TRANSIT:
         push_warning("trigger_arrival called in state %d — ignored" % docking_state)
@@ -98,7 +99,7 @@ func _on_landed(from_state: int) -> void:
 
 ### R5: State Continuity Verification
 
-```gdscript
+```text
 # Hub 不拥有这些状态——仅验证下游系统在返航后保留了状态
 func _verify_state_continuity() -> Dictionary:
     var issues: Array = []
@@ -124,7 +125,7 @@ func _verify_state_continuity() -> Dictionary:
 
 ### Post-Load Station State Derivation
 
-```gdscript
+```text
 # 快照中仅存储独立变量（module_slot_state、trace_anchors）
 # station_state 在加载时重新派生——不双重存储
 func _derive_all_station_states() -> void:
@@ -143,7 +144,7 @@ func _check_cargo_bay_condition() -> bool:
 
 ### Departure Snapshot for Continuity Verification
 
-```gdscript
+```text
 # 出航前保存关键状态摘要——返航后用于验证 R5 连续性
 var _departure_snapshot: Dictionary = {}
 
@@ -164,7 +165,7 @@ func _get_current_module_states() -> Dictionary:
 
 ### Arrival Animation Contract
 
-```gdscript
+```text
 func _play_arrival_animation() -> void:
     # 视觉/Feel 类型——具体动画由 AnimationPlayer 驱动
     # Hub 仅负责：
@@ -177,7 +178,7 @@ func _play_arrival_animation() -> void:
 
 ### Snapshot Corruption Fallback
 
-```gdscript
+```text
 func _load_from_snapshot(snapshot: Dictionary) -> bool:
     if snapshot.is_empty() or not _validate_snapshot(snapshot):
         push_warning("progress.airship 快照损坏或为空——使用安全默认状态")
@@ -234,8 +235,8 @@ func _apply_safe_defaults() -> void:
   - When: _derive_all_station_states()
   - Then: cargo-bay = ready（条件满足）, 所有站点 state = ready（busy 不持久化）
 
-- **AC-12**: Arrival + pagehide edge case
-  - Given: arrival 动画播放中, pagehide 触发
+- **AC-12**: Arrival + suspend_requested edge case
+  - Given: arrival 动画播放中, suspend_requested 触发
   - When: best-effort 存档
   - Then: docking_state 捕获为 in_transit（arrival 瞬态不持久化）
   - When: 重载
@@ -246,7 +247,7 @@ func _apply_safe_defaults() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/arrival_flow_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/ArrivalFlowTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---

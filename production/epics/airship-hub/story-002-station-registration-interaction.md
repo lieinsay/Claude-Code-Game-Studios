@@ -4,7 +4,8 @@
 > **Status**: Ready
 > **Layer**: Core
 > **Type**: Logic
-> **Manifest Version**: Not yet created — run `/create-control-manifest`
+> **Manifest Version**: 2026-05-09
+> **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
@@ -75,7 +76,7 @@
 
 ### HubManager Station Registry
 
-```gdscript
+```text
 # HubManager Autoload #7 — manages station registration
 extends Node
 
@@ -93,7 +94,7 @@ func get_all_stations() -> Array:
 
 ### HubStation Base Class
 
-```gdscript
+```text
 # 每个可交互站点继承此基类
 class_name HubStation
 extends Node2D
@@ -151,7 +152,7 @@ func _on_use() -> void:
 
 ### Interaction Routing Pattern
 
-```gdscript
+```text
 # 示例：情报台站点
 class_name IntelDeskStation
 extends HubStation
@@ -197,7 +198,7 @@ func _on_use() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/station_registry_test.gd` — must exist and pass
+**Required evidence**: `tests/integration/hub/StationRegistryTest.csproj` — must exist and pass
 **Status**: [ ] Not yet created
 
 ---
