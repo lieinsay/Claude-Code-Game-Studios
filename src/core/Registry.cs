@@ -159,6 +159,11 @@ public sealed class Registry
     /// </summary>
     public void InitializeContent()
     {
+        if (IsInitialized)
+        {
+            return;
+        }
+
         RegistryBootstrap.Bootstrap(this);
         IsInitialized = true;
     }
@@ -226,9 +231,22 @@ public sealed class Registry
     }
 
     /// <summary>
-    /// Registers one content definition without schema validation.
+    /// Registers one content definition after schema validation.
     /// </summary>
     public void RegisterContent(string entityId, IReadOnlyDictionary<string, object?> definition)
+    {
+        var entity = CloneMutable(definition);
+        entity["id"] = entityId;
+
+        var result = RegisterBatch([entity]);
+        if (!result.Success)
+        {
+            throw new InvalidOperationException(
+                $"Registry content registration failed for '{entityId}': {result.ErrorCode}");
+        }
+    }
+
+    private void InsertContentUnchecked(string entityId, IReadOnlyDictionary<string, object?> definition)
     {
         var entity = CloneMutable(definition);
         entity["id"] = entityId;
@@ -299,7 +317,7 @@ public sealed class Registry
 
         foreach (var (id, definition) in pending)
         {
-            RegisterContent(id, definition);
+            InsertContentUnchecked(id, definition);
         }
 
         return new RegistryRegistrationResult(true, null, null);
@@ -744,9 +762,11 @@ public static class RegistryBootstrap
     /// </summary>
     public static void Bootstrap(Registry registry)
     {
-        foreach (var definition in CreatePrototypeDefinitions())
+        var result = registry.RegisterBatch(CreatePrototypeDefinitions());
+        if (!result.Success)
         {
-            registry.RegisterContent((string)definition["id"]!, definition);
+            throw new InvalidOperationException(
+                $"Registry bootstrap failed for '{result.EntityId}': {result.ErrorCode}");
         }
 
         registry.SetDomainLoaded("core_content");
@@ -756,27 +776,48 @@ public static class RegistryBootstrap
     {
         yield return Entity("location.glass-harbor", "location", "玻璃港", 1, new()
         {
+            ["region_tag"] = "starter-sea",
+            ["location_kind"] = "settlement",
+            ["service_tags"] = new[] { "market", "repair" },
+            ["local_identity_tags"] = new[] { "glass-buoys" },
+            ["settlement_need_tags"] = new[] { "navigation-aid", "trade-link" },
             ["type"] = "settlement",
             ["description"] = "起始空港聚落——修复前的第一站",
         });
         yield return Entity("location.glass-harbor-outskirts", "location", "玻璃港近郊", 2, new()
         {
+            ["region_tag"] = "starter-sea",
+            ["location_kind"] = "outskirts",
+            ["service_tags"] = new[] { "repair" },
+            ["local_identity_tags"] = new[] { "glass-buoys" },
+            ["settlement_need_tags"] = new[] { "safety", "navigation-aid" },
             ["type"] = "outskirts",
             ["description"] = "玻璃港附近郊区——灯塔修复节点所在地",
         });
         yield return Entity("location.sky-reef-outpost", "location", "空礁前哨", 3, new()
         {
+            ["region_tag"] = "sky-reef",
+            ["location_kind"] = "outpost",
+            ["service_tags"] = new[] { "navigation" },
+            ["local_identity_tags"] = new[] { "reef-beacons" },
+            ["settlement_need_tags"] = new[] { "navigation-aid", "safety" },
             ["type"] = "outpost",
             ["description"] = "安全航线的目的地——小型探索前哨",
         });
         yield return Entity("location.cloudwatch-ruins", "location", "云观站废墟", 4, new()
         {
+            ["region_tag"] = "storm-belt",
+            ["location_kind"] = "ruins",
+            ["service_tags"] = new[] { "exploration" },
+            ["local_identity_tags"] = new[] { "cloudwatch" },
+            ["settlement_need_tags"] = new[] { "repair-materials", "safety" },
             ["type"] = "ruins",
             ["description"] = "高风险航线的目的地——探索搜撤场景",
         });
 
         yield return Entity("route.sky-reef-arc-01", "route", "空礁航线", 1, new()
         {
+            ["origin_location_id"] = "location.glass-harbor",
             ["destination_id"] = "location.sky-reef-outpost",
             ["origin_id"] = "location.glass-harbor",
             ["traversable"] = false,
@@ -787,55 +828,72 @@ public static class RegistryBootstrap
         });
         yield return Entity("route.storm-cut-01", "route", "风暴捷径", 2, new()
         {
+            ["origin_location_id"] = "location.glass-harbor",
             ["destination_id"] = "location.cloudwatch-ruins",
             ["origin_id"] = "location.glass-harbor",
             ["traversable"] = true,
-            ["hazard_tags"] = new[] { "mist", "low-visibility", "guard" },
+            ["hazard_tags"] = new[] { "mist", "low-visibility", "raider" },
             ["distance_band"] = "medium",
             ["encounter_check_count"] = 10,
         });
 
         yield return Entity("resource.repair_kit", "resource", "维修套件", 1, new()
         {
+            ["unit"] = "kit",
             ["stack_rule"] = "stackable",
+            ["material_tags"] = new[] { "repair-material" },
             ["max_stack"] = 99,
             ["supply_class"] = "repair",
         });
         yield return Entity("resource.basic_supply", "resource", "基础补给品", 2, new()
         {
+            ["unit"] = "crate",
             ["stack_rule"] = "stackable",
+            ["material_tags"] = new[] { "food" },
             ["max_stack"] = 99,
             ["supply_class"] = "basic",
         });
         yield return Entity("resource.cloud_coin", "resource", "云海币", 3, new()
         {
+            ["unit"] = "coin",
             ["stack_rule"] = "stackable",
+            ["material_tags"] = new[] { "currency" },
             ["max_stack"] = 9999,
             ["supply_class"] = "basic",
         });
         yield return Entity("resource.ancient_lens", "resource", "古代透镜", 4, new()
         {
+            ["unit"] = "piece",
             ["stack_rule"] = "unique",
+            ["material_tags"] = new[] { "intel" },
             ["max_stack"] = 1,
             ["supply_class"] = "intel",
             ["cat_sniff_signature"] = "ancient_optics",
         });
         yield return Entity("resource.navigation_chart", "resource", "旧航海图", 5, new()
         {
+            ["unit"] = "chart",
             ["stack_rule"] = "stackable",
+            ["material_tags"] = new[] { "navigation-aid" },
             ["max_stack"] = 20,
             ["supply_class"] = "navigation",
         });
         yield return Entity("resource.beacon_crystal", "resource", "信标水晶", 6, new()
         {
+            ["unit"] = "crystal",
             ["stack_rule"] = "stackable",
+            ["material_tags"] = new[] { "repair-material" },
             ["max_stack"] = 99,
             ["supply_class"] = "repair",
         });
 
-        yield return Entity("repair_node.starlight_dock", "repair_node", "星光灯塔", 1, new()
+        yield return Entity("repair_node.starlight_dock", "repair-node", "星光灯塔", 1, new()
         {
             ["location_id"] = "location.glass-harbor-outskirts",
+            ["node_kind"] = "beacon",
+            ["restoration_theme"] = "lighthouse",
+            ["settlement_need_tags"] = new[] { "navigation-aid", "safety" },
+            ["repair_visible_state_tags"] = new[] { "dark", "lit", "connected" },
             ["required_materials"] = new Dictionary<string, int>
             {
                 ["resource.repair_kit"] = 4,
@@ -851,6 +909,10 @@ public static class RegistryBootstrap
 
         yield return Entity("threat.guard-sentinel", "threat", "警戒哨兵", 1, new()
         {
+            ["threat_class"] = "guard",
+            ["encounter_tags"] = new[] { "raider" },
+            ["counter_tags"] = new[] { "evade", "retreat" },
+            ["severity_tier"] = "moderate",
             ["threat_type"] = "guard",
             ["trigger_radius"] = 120.0,
             ["trigger_probability"] = 0.70,
@@ -860,8 +922,11 @@ public static class RegistryBootstrap
             ["can_retreat"] = true,
         });
 
-        yield return Entity("partner.sky-cat", "companion", "航海猫", 1, new()
+        yield return Entity("companion.sky-cat", "companion", "航海猫", 1, new()
         {
+            ["role_tags"] = new[] { "scout" },
+            ["origin_location_id"] = "location.glass-harbor",
+            ["archetype_tags"] = new[] { "sky-cat" },
             ["companion_type"] = "cat",
             ["abilities"] = new[] { "scout_sniff" },
             ["max_confidence"] = 66,
@@ -875,14 +940,37 @@ public static class RegistryBootstrap
         int sortOrder,
         Dictionary<string, object?> extra)
     {
+        var key = id.Replace('.', '_').Replace('-', '_');
         var entity = new Dictionary<string, object?>(extra, StringComparer.Ordinal)
         {
             ["id"] = id,
             ["kind"] = kind,
             ["display_name"] = displayName,
+            ["name_key"] = $"content.{key}.name",
+            ["description_key"] = $"content.{key}.desc",
+            ["schema_version"] = 1,
+            ["tags"] = new[] { kind },
+            ["owner_domain"] = OwnerDomainForKind(kind),
+            ["references"] = Array.Empty<string>(),
+            ["status"] = "Active",
             ["content_status"] = ContentStatus.Active,
             ["sort_order"] = sortOrder,
         };
         return entity;
+    }
+
+    private static string OwnerDomainForKind(string kind)
+    {
+        return kind switch
+        {
+            "resource" or "cargo" => "resources",
+            "module" or "home-space" or "home-anchor" => "airship",
+            "route" => "routes",
+            "location" or "repair-node" or "stall-good" => "world",
+            "companion" => "companions",
+            "threat" => "threats",
+            "intel" => "intel",
+            _ => "world",
+        };
     }
 }

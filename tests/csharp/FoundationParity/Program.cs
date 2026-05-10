@@ -253,14 +253,23 @@ static bool RegistryListByKindReturnsDeterministicSort()
 static bool RegistryQueryReturnsDeprecatedStatus()
 {
     var registry = MakeInitializedRegistry();
-    registry.RegisterContent("test.deprecated_item", new Dictionary<string, object?>
+    registry.RegisterContent("resource.deprecated-item", new Dictionary<string, object?>
     {
-        ["id"] = "test.deprecated_item",
-        ["kind"] = "test",
-        ["content_status"] = ContentStatus.Deprecated,
+        ["id"] = "resource.deprecated-item",
+        ["kind"] = "resource",
+        ["owner_domain"] = "resources",
+        ["status"] = "Deprecated",
+        ["name_key"] = "content.resource_deprecated_item.name",
+        ["description_key"] = "content.resource_deprecated_item.desc",
+        ["schema_version"] = 1,
+        ["tags"] = new[] { "test" },
         ["sort_order"] = 1,
+        ["references"] = Array.Empty<string>(),
+        ["unit"] = "chunk",
+        ["stack_rule"] = "stackable",
+        ["material_tags"] = new[] { "test" },
     });
-    var result = registry.QueryById("test.deprecated_item");
+    var result = registry.QueryById("resource.deprecated-item");
     return result.Status == RegistryQueryStatus.Deprecated
         && result.Entity is not null
         && result.Error == "entity_deprecated";

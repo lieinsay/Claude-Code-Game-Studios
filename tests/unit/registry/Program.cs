@@ -13,6 +13,7 @@ Run("AC-6: repair-node and stall-good require settlement and visible-state tags"
 Run("AC-7: registry rejects runtime write attempts without mutation", Ac7ReadonlyWriteRejectedWithoutMutation);
 Run("AC-8: read queries return static deep copies", Ac8QueriesReturnStaticDeepCopies);
 Run("Batch: invalid schema does not enter queryable collection", RegisterBatchRejectsInvalidSchemaAtomically);
+Run("Direct register: invalid schema does not enter queryable collection", DirectRegisterRejectsInvalidSchema);
 
 if (failed > 0)
 {
@@ -213,6 +214,26 @@ static bool RegisterBatchRejectsInvalidSchemaAtomically()
     return !result.Success
         && result.ErrorCode == "ERR_SCHEMA_INVALID"
         && query.Status == RegistryQueryStatus.NotFound;
+}
+
+static bool DirectRegisterRejectsInvalidSchema()
+{
+    var registry = new Registry();
+    var invalid = ValidLocation("location.direct-invalid");
+    invalid["region_tag"] = "unknown-region";
+
+    try
+    {
+        registry.RegisterContent("location.direct-invalid", invalid);
+        return false;
+    }
+    catch (InvalidOperationException ex) when (ex.Message.Contains("ERR_SCHEMA_INVALID", StringComparison.Ordinal))
+    {
+    }
+
+    registry.InitializeContent();
+    var query = registry.QueryById("location.direct-invalid");
+    return query.Status == RegistryQueryStatus.NotFound;
 }
 
 static HashSet<string> MissingRequiredFields(RegistryDefinitionValidationResult validation)
