@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run GdUnit4 Tests
+    name: Run C# Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -17,18 +17,16 @@ jobs:
         with:
           lfs: true
 
-      - name: Run GdUnit4 Tests
-        uses: MikeSchulze/gdUnit4-action@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          godot-version: "4.6.2"
-          paths: |
-            tests/unit
-            tests/integration
-          report-name: test-results
+          dotnet-version: "8.0.x"
 
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: reports/
+      - name: Build
+        run: dotnet build CloudWeaverVoyage.sln
+
+      - name: Run foundation parity
+        run: dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj
+
+      - name: Run registry unit tests
+        run: dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
