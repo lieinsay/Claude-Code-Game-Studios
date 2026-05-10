@@ -13,7 +13,7 @@ config_version=5
 config/name="云海织航"
 config/description="Desktop-first 2D 空海探索与移动家园游戏 — 云海织航"
 config/version="0.1.0-dev"
-run/main_scene="res://src/session_shell.tscn"
+run/main_scene="res://src/scenes/SessionShell.tscn"
 config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
