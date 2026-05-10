@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中**
+> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002 完成**
 
 ---
 
@@ -77,10 +77,11 @@ Week 0 (2-3 天) — ✅ 全部完成
 │      ☑ 70/70 parity checks 通过 (从 20 扩展到 70)         │
 │      ☑ LEGACY_GDSCRIPT.md 审查                           │
 │      ☑ Story-001 10/10 AC PASS                           │
+│      ☑ Story-002 Schema Validation 9/9 AC PASS            │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001 10/10 PASS ✅
+**门禁**: `dotnet build` PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001 10/10 PASS ✅ + Story-002 9/9 PASS ✅
 
 ---
 
@@ -92,8 +93,8 @@ Week 0 (2-3 天) — ✅ 全部完成
 D-A ───────────────────────────────────────────────────────
   Epic #1 Content Registry
   ┌──────────────────────────────────────────────────────┐
-  │ Story 001 ☑ ID Registry Core + Query Engine   (L, 2d)│  ← ✅ 完成!
-  │ Story 002 □ Schema Validation                 (L, 2d)│  ← 与 001 并行
+  │ Story 001 ☑ ID Registry Core + Query Engine   (L, 2d)│  ← ✅ 完成
+  │ Story 002 ☑ Schema Validation                 (L, 2d)│  ← ✅ 完成
   │   ↓ (001+002 完成后)                                  │
   │ Story 003 □ Content Lifecycle                 (L, 1d)│
   │ Story 004 □ Reference Integrity               (L, 1d)│  ← 003+004 并行
@@ -158,7 +159,7 @@ D-C ─────────────────────────�
 
 **Phase 1 门禁**:
 - [ ] `dotnet build` PASS
-- [ ] Registry 查询 API 6 项测试 PASS
+- [x] Registry 查询/API + Schema Validation 测试 PASS (`tests/unit/registry`: Story-002 9/9)
 - [ ] Persistence 往返测试 8 项 PASS
 - [ ] Session Shell 状态机 5 项测试 PASS
 - [ ] Movement WASD + Click-to-Move 手动验证 PASS

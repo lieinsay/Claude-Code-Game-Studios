@@ -349,3 +349,10 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - [x] 统计数据更新 (src/ 16 文件, tests/ 4 文件, prototypes/ 1 文件)
 - [x] §十一待完成列表 — P3 原型标记 ✅
 - [x] 全部 7 个节号重新编排 (原 §五→§六, §六→§七, ... §十→§十一)
+
+## Session Extract — /dev-story 2026-05-10
+- Story: `production/epics/content-registry/story-002-schema-validation.md` — Story 002: Schema Validation
+- Files changed: `src/core/Registry.cs`, `tests/unit/registry/Program.cs`
+- Test written: `tests/unit/registry/Program.cs` — 9 Story 002 acceptance checks
+- Blockers: None
+- Next: /code-review `src/core/Registry.cs` `tests/unit/registry/Program.cs` then /story-done `production/epics/content-registry/story-002-schema-validation.md`

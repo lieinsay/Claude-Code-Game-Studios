@@ -3,7 +3,7 @@
 > 生成日期: 2026-05-10 | 最后更新: 2026-05-10
 > 基于: systems-index.md 依赖图 + 16 Epic 115 Story
 > 用途: 可视化所有生产任务的依赖关系、并行机会、关键路径
-> 当前状态: **Phase 0 完成 | Phase 1 Story-001 完成**
+> 当前状态: **Phase 0 完成 | Phase 1 Content Registry Story-001/002 完成**
 
 ---
 
@@ -15,18 +15,28 @@
 |------|------|------|
 | Godot 4.6.2 .NET 项目搭建 | ✅ | `project.godot` C# feature + `[dotnet]` 段 |
 | C# Foundation 全量迁移 | ✅ | 9/9 Autoload + SessionBootChain → C# |
-| dotnet build 验证 | ✅ | 0 errors, 3 warnings |
+| dotnet build 验证 | ✅ | 0 errors, 0 warnings |
 | FoundationParity 验证 | ✅ | **70/70 PASS** (从 20 扩展到 70) |
 | content-registry Story-001 | ✅ | **10/10 AC PASS** |
+| content-registry Story-002 | ✅ | **9/9 AC PASS** |
 
 ### Phase 1 启动状态
 
 | Epic | Story | 状态 | 测试 |
 |------|-------|------|------|
 | #1 Content Registry | 001 ID Registry Core + Query Engine | ✅ Done | 10/10 |
-| #1 Content Registry | 002-008 | ⏳ Ready | — |
+| #1 Content Registry | 002 Schema Validation | ✅ Done | 9/9 |
+| #1 Content Registry | 003-008 | ⏳ Ready | — |
 | #2 Session Shell | 001-007 | ⏳ Ready | — |
 | #3-#16 其余 | 全部 Story | ⏳ Pending | — |
+
+### Content Registry 当前验证证据
+
+| Story | 验证命令 | 结果 |
+|------|----------|------|
+| Story-001 / Story-002 单元验证 | `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` | Story-002 9/9 PASS |
+| Foundation 回归 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | 70/70 PASS |
+| 项目构建 | `dotnet build CloudWeaverVoyage.csproj` | 0 errors, 0 warnings |
 
 ---
 

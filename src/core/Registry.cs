@@ -49,6 +49,29 @@ public sealed record RegistryRegistrationResult(
     string? EntityId);
 
 /// <summary>
+/// Structured diagnostic emitted by static content definition validation.
+/// </summary>
+public sealed record RegistryDiagnostic(
+    string EventId,
+    string Severity,
+    string ErrorCode,
+    string ContentId,
+    string Field,
+    string Message,
+    IReadOnlyDictionary<string, object?> Details);
+
+/// <summary>
+/// Definition validity result using the GDD U/K/R/S terms.
+/// </summary>
+public sealed record RegistryDefinitionValidationResult(
+    bool Valid,
+    bool HasUniqueId,
+    bool MatchesKindSchema,
+    bool RequiredFieldsPresent,
+    bool HasNoRuntimeFields,
+    IReadOnlyList<RegistryDiagnostic> Diagnostics);
+
+/// <summary>
 /// Static content catalog for stable IDs and deterministic read-only queries.
 /// </summary>
 public sealed class Registry
@@ -56,6 +79,64 @@ public sealed class Registry
     private static readonly Regex StableIdPattern = new(
         "^[a-z][a-z0-9_-]*\\.[a-z0-9][a-z0-9_-]*$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private const int CurrentSchemaVersion = 1;
+
+    private static readonly string[] CommonRequiredFields =
+    [
+        "id",
+        "kind",
+        "name_key",
+        "description_key",
+        "schema_version",
+        "tags",
+        "sort_order",
+        "owner_domain",
+        "references",
+    ];
+
+    private static readonly Dictionary<string, string[]> KindRequiredFields = new(StringComparer.Ordinal)
+    {
+        ["resource"] = ["unit", "stack_rule", "material_tags"],
+        ["cargo"] = ["linked_resource_id", "mass_class", "handling_class"],
+        ["module"] = ["slot_type", "compatibility_tags", "effect_tags"],
+        ["home-space"] = ["space_kind", "home_function_tags", "access_tags"],
+        ["home-anchor"] = ["home_space_id", "anchor_kind", "interaction_tags", "home_feedback_tags"],
+        ["route"] = ["origin_location_id", "destination_id", "distance_band", "hazard_tags"],
+        ["location"] = ["region_tag", "location_kind", "service_tags", "local_identity_tags", "settlement_need_tags"],
+        ["repair-node"] = ["location_id", "node_kind", "restoration_theme", "settlement_need_tags", "repair_visible_state_tags"],
+        ["stall-good"] = ["commodity_tags", "vendor_tags", "supply_class", "local_identity_tags", "settlement_need_tags", "repair_visible_state_tags"],
+        ["companion"] = ["role_tags", "origin_location_id", "archetype_tags"],
+        ["threat"] = ["threat_class", "encounter_tags", "counter_tags", "severity_tier"],
+        ["intel"] = ["entry_type", "linked_content_ids", "source_tags", "presentation_tier"],
+    };
+
+    private static readonly Dictionary<string, string[]> ControlledVocabularies = new(StringComparer.Ordinal)
+    {
+        ["owner_domain"] = ["resources", "airship", "world", "routes", "intel", "companions", "threats"],
+        ["kind"] = ["resource", "cargo", "module", "home-space", "home-anchor", "route", "location", "repair-node", "stall-good", "companion", "threat", "intel"],
+        ["region_tag"] = ["starter-sea", "sky-reef", "storm-belt", "old-harbor-chain"],
+        ["settlement_need_tags"] = ["food", "repair-materials", "navigation-aid", "safety", "trade-link", "home-comfort"],
+        ["repair_visible_state_tags"] = ["dark", "damaged", "patched", "lit", "connected", "inhabited", "stock-improved"],
+        ["home_function_tags"] = ["storage", "planning", "rest", "module-access", "companion-station", "crafting-light"],
+        ["hazard_tags"] = ["safe", "mist", "storm", "raider", "low-visibility", "unstable-current"],
+        ["severity_tier"] = ["minor", "moderate", "severe"],
+        ["supply_class"] = ["basic", "repair", "navigation", "local-specialty", "intel"],
+        ["presentation_tier"] = ["hint", "clue", "warning", "lore"],
+    };
+
+    private static readonly string[] RuntimeFieldDenylist =
+    [
+        "quantity",
+        "inventory",
+        "unlocked",
+        "discovered",
+        "durability",
+        "current_price",
+        "relationship",
+        "installed",
+        "repaired",
+    ];
 
     private readonly Dictionary<string, Dictionary<string, object?>> content = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedDomains = new(StringComparer.Ordinal);
@@ -172,7 +253,7 @@ public sealed class Registry
     }
 
     /// <summary>
-    /// Registers a batch atomically after checking ID format, normalization collisions, and duplicates.
+    /// Registers a batch atomically after checking ID and definition validity.
     /// </summary>
     public RegistryRegistrationResult RegisterBatch(IEnumerable<IReadOnlyDictionary<string, object?>> definitions)
     {
@@ -208,10 +289,37 @@ public sealed class Registry
 
         foreach (var (id, definition) in pending)
         {
+            var validation = ValidateDefinition(definition, requireGloballyUniqueId: false);
+            if (!validation.Valid)
+            {
+                var diagnostic = validation.Diagnostics.First();
+                return new RegistryRegistrationResult(false, diagnostic.ErrorCode, id);
+            }
+        }
+
+        foreach (var (id, definition) in pending)
+        {
             RegisterContent(id, definition);
         }
 
         return new RegistryRegistrationResult(true, null, null);
+    }
+
+    /// <summary>
+    /// Validates a static content definition against ID, kind schema, required fields, controlled vocabularies,
+    /// and static/runtime separation rules.
+    /// </summary>
+    public RegistryDefinitionValidationResult ValidateDefinition(IReadOnlyDictionary<string, object?> definition)
+    {
+        return ValidateDefinition(definition, requireGloballyUniqueId: true);
+    }
+
+    /// <summary>
+    /// Rejects attempts to write runtime or player state through the static registry API.
+    /// </summary>
+    public RegistryRegistrationResult SetEntity(string entityId, IReadOnlyDictionary<string, object?> _)
+    {
+        return new RegistryRegistrationResult(false, "ERR_READONLY_REGISTRY", entityId);
     }
 
     /// <summary>
@@ -232,6 +340,13 @@ public sealed class Registry
 
     private static ContentStatus ReadContentStatus(IReadOnlyDictionary<string, object?> entity)
     {
+        if (entity.TryGetValue("status", out var statusValue)
+            && statusValue is not null
+            && Enum.TryParse<ContentStatus>(statusValue.ToString(), ignoreCase: true, out var status))
+        {
+            return status;
+        }
+
         return (ContentStatus)ReadInt(entity, "content_status", (int)ContentStatus.Draft);
     }
 
@@ -266,7 +381,333 @@ public sealed class Registry
 
     private static Dictionary<string, object?> CloneMutable(IReadOnlyDictionary<string, object?> entity)
     {
-        return entity.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+        return entity.ToDictionary(pair => pair.Key, pair => CloneValue(pair.Value), StringComparer.Ordinal);
+    }
+
+    private RegistryDefinitionValidationResult ValidateDefinition(
+        IReadOnlyDictionary<string, object?> definition,
+        bool requireGloballyUniqueId)
+    {
+        var diagnostics = new List<RegistryDiagnostic>();
+        var id = ReadString(definition, "id");
+        var kind = ReadString(definition, "kind");
+
+        var hasUniqueId = StableIdPattern.IsMatch(id)
+            && (!requireGloballyUniqueId || !content.ContainsKey(id));
+        if (!hasUniqueId)
+        {
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_DEFINITION_VALIDITY_U",
+                id,
+                "id",
+                "U",
+                "Content ID must be a unique stable ID before schema validation."));
+        }
+
+        var matchesKindSchema = true;
+        if (!KindRequiredFields.ContainsKey(kind))
+        {
+            matchesKindSchema = false;
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_SCHEMA_INVALID",
+                id,
+                "kind",
+                "K",
+                "Content kind is not in the controlled vocabulary.",
+                new Dictionary<string, object?> { ["allowed_values"] = ControlledVocabularies["kind"] }));
+        }
+
+        if (!string.IsNullOrWhiteSpace(id)
+            && !string.IsNullOrWhiteSpace(kind)
+            && !IdPrefixMatchesKind(id, kind))
+        {
+            matchesKindSchema = false;
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_SCHEMA_INVALID",
+                id,
+                "kind",
+                "K",
+                "Content kind must match the stable ID prefix."));
+        }
+
+        if (ReadInt(definition, "schema_version", 0) != CurrentSchemaVersion)
+        {
+            matchesKindSchema = false;
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_SCHEMA_INVALID",
+                id,
+                "schema_version",
+                "K",
+                $"Content schema_version must be {CurrentSchemaVersion}.",
+                new Dictionary<string, object?> { ["allowed_values"] = new[] { CurrentSchemaVersion } }));
+        }
+
+        foreach (var diagnostic in ValidateControlledVocabularies(definition, id))
+        {
+            matchesKindSchema = false;
+            diagnostics.Add(diagnostic);
+        }
+
+        var requiredFieldsPresent = true;
+        foreach (var field in RequiredFieldsForKind(kind))
+        {
+            if (HasRequiredValue(definition, field))
+            {
+                continue;
+            }
+
+            requiredFieldsPresent = false;
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_SCHEMA_MISSING_REQUIRED_FIELD",
+                id,
+                field,
+                "R",
+                "Definition is missing a required schema field."));
+        }
+
+        var runtimeFields = FindRuntimeFields(definition).ToArray();
+        var hasNoRuntimeFields = runtimeFields.Length == 0;
+        foreach (var field in runtimeFields)
+        {
+            diagnostics.Add(CreateDiagnostic(
+                "ERR_RUNTIME_FIELD_IN_STATIC_DATA",
+                id,
+                field,
+                "S",
+                "Static content definitions cannot include runtime state fields."));
+        }
+
+        return new RegistryDefinitionValidationResult(
+            hasUniqueId && matchesKindSchema && requiredFieldsPresent && hasNoRuntimeFields,
+            hasUniqueId,
+            matchesKindSchema,
+            requiredFieldsPresent,
+            hasNoRuntimeFields,
+            diagnostics);
+    }
+
+    private static IEnumerable<string> RequiredFieldsForKind(string kind)
+    {
+        foreach (var field in CommonRequiredFields)
+        {
+            yield return field;
+        }
+
+        if (!HasStatusFieldRequirement(kind))
+        {
+            yield return "status";
+        }
+
+        if (!KindRequiredFields.TryGetValue(kind, out var requiredFields))
+        {
+            yield break;
+        }
+
+        foreach (var field in requiredFields)
+        {
+            yield return field;
+        }
+    }
+
+    private static bool HasStatusFieldRequirement(string kind)
+    {
+        return string.IsNullOrWhiteSpace(kind);
+    }
+
+    private static bool HasRequiredValue(IReadOnlyDictionary<string, object?> definition, string field)
+    {
+        if (field == "status" && !definition.ContainsKey("status") && definition.ContainsKey("content_status"))
+        {
+            return definition["content_status"] is not null;
+        }
+
+        if (!definition.TryGetValue(field, out var value) || value is null)
+        {
+            return false;
+        }
+
+        if (value is string stringValue)
+        {
+            return !string.IsNullOrWhiteSpace(stringValue);
+        }
+
+        if (field == "references")
+        {
+            return true;
+        }
+
+        if (value is System.Collections.IEnumerable enumerable)
+        {
+            return enumerable.Cast<object?>().Any();
+        }
+
+        return true;
+    }
+
+    private static bool IdPrefixMatchesKind(string id, string kind)
+    {
+        var separator = id.IndexOf('.', StringComparison.Ordinal);
+        if (separator <= 0)
+        {
+            return false;
+        }
+
+        var idPrefix = id[..separator].Replace('_', '-');
+        return string.Equals(idPrefix, kind, StringComparison.Ordinal);
+    }
+
+    private static IEnumerable<RegistryDiagnostic> ValidateControlledVocabularies(
+        IReadOnlyDictionary<string, object?> definition,
+        string id)
+    {
+        foreach (var (field, allowedValues) in ControlledVocabularies.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+        {
+            if (!definition.TryGetValue(field, out var value) || value is null)
+            {
+                continue;
+            }
+
+            var invalidValues = ValuesForVocabularyCheck(value)
+                .Where(fieldValue => !allowedValues.Contains(fieldValue, StringComparer.Ordinal))
+                .ToArray();
+            if (invalidValues.Length == 0)
+            {
+                continue;
+            }
+
+            yield return CreateDiagnostic(
+                "ERR_SCHEMA_INVALID",
+                id,
+                field,
+                "K",
+                "Controlled vocabulary value is not allowed.",
+                new Dictionary<string, object?>
+                {
+                    ["invalid_values"] = invalidValues,
+                    ["allowed_values"] = allowedValues,
+                });
+        }
+    }
+
+    private static IEnumerable<string> ValuesForVocabularyCheck(object value)
+    {
+        if (value is string stringValue)
+        {
+            yield return stringValue;
+            yield break;
+        }
+
+        if (value is System.Collections.IEnumerable enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                if (item is not null)
+                {
+                    yield return item.ToString() ?? string.Empty;
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<string> FindRuntimeFields(IReadOnlyDictionary<string, object?> definition)
+    {
+        foreach (var (key, value) in definition)
+        {
+            if (RuntimeFieldDenylist.Any(denied => IsRuntimeFieldName(key, denied)))
+            {
+                yield return key;
+            }
+
+            if (value is IReadOnlyDictionary<string, object?> nested)
+            {
+                foreach (var nestedField in FindRuntimeFields(nested))
+                {
+                    yield return $"{key}.{nestedField}";
+                }
+            }
+            else if (value is System.Collections.IEnumerable enumerable && value is not string)
+            {
+                var index = 0;
+                foreach (var item in enumerable)
+                {
+                    if (item is IReadOnlyDictionary<string, object?> nestedItem)
+                    {
+                        foreach (var nestedField in FindRuntimeFields(nestedItem))
+                        {
+                            yield return $"{key}[{index}].{nestedField}";
+                        }
+                    }
+
+                    index++;
+                }
+            }
+        }
+    }
+
+    private static bool IsRuntimeFieldName(string key, string denied)
+    {
+        return string.Equals(key, denied, StringComparison.Ordinal)
+            || string.Equals(key, $"current_{denied}", StringComparison.Ordinal)
+            || key.EndsWith($"_{denied}", StringComparison.Ordinal);
+    }
+
+    private static RegistryDiagnostic CreateDiagnostic(
+        string errorCode,
+        string contentId,
+        string field,
+        string validityTerm,
+        string message,
+        IReadOnlyDictionary<string, object?>? details = null)
+    {
+        var diagnosticDetails = new Dictionary<string, object?>(details ?? new Dictionary<string, object?>(), StringComparer.Ordinal)
+        {
+            ["validity_term"] = validityTerm,
+        };
+
+        return new RegistryDiagnostic(
+            "registry_definition_validation_failed",
+            "error",
+            errorCode,
+            contentId,
+            field,
+            message,
+            diagnosticDetails);
+    }
+
+    private static object? CloneValue(object? value)
+    {
+        if (value is null || value is string || value.GetType().IsValueType)
+        {
+            return value;
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> dictionary)
+        {
+            return CloneMutable(dictionary);
+        }
+
+        if (value is System.Collections.IDictionary nonGenericDictionary)
+        {
+            var clone = new Dictionary<string, object?>(StringComparer.Ordinal);
+            foreach (var key in nonGenericDictionary.Keys)
+            {
+                if (key is null)
+                {
+                    continue;
+                }
+
+                clone[key.ToString() ?? string.Empty] = CloneValue(nonGenericDictionary[key]);
+            }
+
+            return clone;
+        }
+
+        if (value is System.Collections.IEnumerable enumerable)
+        {
+            return enumerable.Cast<object?>().Select(CloneValue).ToArray();
+        }
+
+        return value;
     }
 
     private bool IsLoadedIdFamily(string entityId)

@@ -1,265 +1,292 @@
 using CloudWeaverVoyage.Core;
 
-Console.WriteLine("=== Story 001: ID Registry Core + Query Engine — Acceptance Criteria ===");
+Console.WriteLine("=== Story 002: Registry Schema Validation — Acceptance Criteria ===");
 var failed = 0;
 var total = 0;
 
-// AC-1: Unique canonical query
-total++;
-if (Ac1UniqueCanonicalQuery())
-    Console.WriteLine($"[PASS] AC-1: unique canonical query");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-1"); }
-
-// AC-2: Duplicate ID rejection
-total++;
-if (Ac2DuplicateIdRejection())
-    Console.WriteLine($"[PASS] AC-2: duplicate ID rejection");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-2"); }
-
-// AC-3: ID format validation
-total++;
-if (Ac3IdFormatValidation())
-    Console.WriteLine($"[PASS] AC-3: ID format validation (uppercase, spaces, path separators)");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-3"); }
-
-// AC-4: Found returns definition
-total++;
-if (Ac4FoundReturnsDefinition())
-    Console.WriteLine($"[PASS] AC-4: found returns definition");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-4"); }
-
-// AC-5: Unloaded domain returns UNLOADED
-total++;
-if (Ac5UnloadedDomainReturnsUnloaded())
-    Console.WriteLine($"[PASS] AC-5: unloaded domain returns UNLOADED");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-5"); }
-
-// AC-6: Not found returns NOT_FOUND
-total++;
-if (Ac6NotFoundReturnsNotFound())
-    Console.WriteLine($"[PASS] AC-6: not found returns NOT_FOUND");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-6"); }
-
-// AC-7: Deterministic sort order
-total++;
-if (Ac7DeterministicSort())
-    Console.WriteLine($"[PASS] AC-7: deterministic sort (sort_order ASC, id ASC)");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-7"); }
-
-// AC-8: Max query result count pagination
-total++;
-if (Ac8MaxQueryResultCount())
-    Console.WriteLine($"[PASS] AC-8: max_query_result_count pagination");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-8"); }
-
-// AC-9: Domain-scoped partial query
-total++;
-if (Ac9DomainScopedPartialQuery())
-    Console.WriteLine($"[PASS] AC-9: domain-scoped partial query independence");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-9"); }
-
-// AC-10: No filesystem scan for unloaded domain
-total++;
-if (Ac10NoFilesystemScanForUnloaded())
-    Console.WriteLine($"[PASS] AC-10: unloaded domain query returns UNLOADED, no scan");
-else { failed++; Console.Error.WriteLine($"[FAIL] AC-10"); }
+Run("AC-1: complete valid definition passes", Ac1CompleteValidDefinitionPasses);
+Run("AC-2: validation reports U/K/R/S failure terms", Ac2ValidationReportsValidityTerms);
+Run("AC-3: runtime field contamination is rejected", Ac3RuntimeFieldContaminationDetected);
+Run("AC-4: controlled vocabularies are enforced", Ac4ControlledVocabularyEnforced);
+Run("AC-5: location requires dedicated region/local/settlement fields", Ac5LocationRequiresDedicatedFields);
+Run("AC-6: repair-node and stall-good require settlement and visible-state tags", Ac6RepairAndStallSchemasRequireTags);
+Run("AC-7: registry rejects runtime write attempts without mutation", Ac7ReadonlyWriteRejectedWithoutMutation);
+Run("AC-8: read queries return static deep copies", Ac8QueriesReturnStaticDeepCopies);
+Run("Batch: invalid schema does not enter queryable collection", RegisterBatchRejectsInvalidSchemaAtomically);
 
 if (failed > 0)
 {
-    Console.Error.WriteLine($"Story 001 AC validation failed: {failed}/{total} checks failed.");
+    Console.Error.WriteLine($"Story 002 AC validation failed: {failed}/{total} checks failed.");
     return 1;
 }
 
-Console.WriteLine($"Story 001 AC validation passed: {total}/{total} checks passed.");
+Console.WriteLine($"Story 002 AC validation passed: {total}/{total} checks passed.");
 return 0;
 
-static Registry MakePopulatedRegistry()
+void Run(string label, Func<bool> test)
+{
+    total++;
+    if (test())
+    {
+        Console.WriteLine($"[PASS] {label}");
+        return;
+    }
+
+    failed++;
+    Console.Error.WriteLine($"[FAIL] {label}");
+}
+
+static bool Ac1CompleteValidDefinitionPasses()
 {
     var registry = new Registry();
-    registry.RegisterContent("resource.iron-ore", new Dictionary<string, object?>
+    var definition = ValidResource("resource.iron-ore");
+    var validation = registry.ValidateDefinition(definition);
+    var registration = registry.RegisterBatch([definition]);
+
+    return validation.Valid
+        && validation.HasUniqueId
+        && validation.MatchesKindSchema
+        && validation.RequiredFieldsPresent
+        && validation.HasNoRuntimeFields
+        && validation.Diagnostics.Count == 0
+        && registration.Success;
+}
+
+static bool Ac2ValidationReportsValidityTerms()
+{
+    var registry = new Registry();
+    registry.RegisterContent("resource.existing", ValidResource("resource.existing"));
+
+    var invalid = ValidResource("resource.existing");
+    invalid["kind"] = "cargo";
+    invalid.Remove("linked_resource_id");
+    invalid.Remove("unit");
+    invalid["durability"] = 10;
+
+    var validation = registry.ValidateDefinition(invalid);
+    var terms = validation.Diagnostics
+        .Select(diagnostic => Convert.ToString(diagnostic.Details["validity_term"]))
+        .ToHashSet(StringComparer.Ordinal);
+
+    return !validation.Valid
+        && !validation.HasUniqueId
+        && !validation.MatchesKindSchema
+        && !validation.RequiredFieldsPresent
+        && !validation.HasNoRuntimeFields
+        && terms.SetEquals(["U", "K", "R", "S"]);
+}
+
+static bool Ac3RuntimeFieldContaminationDetected()
+{
+    var registry = new Registry();
+    var contaminated = ValidResource("resource.current-quantity-test");
+    contaminated["storage"] = new Dictionary<string, object?>
+    {
+        ["current_quantity"] = 5,
+    };
+
+    var validation = registry.ValidateDefinition(contaminated);
+    var batch = registry.RegisterBatch([contaminated]);
+
+    return !validation.Valid
+        && !validation.HasNoRuntimeFields
+        && validation.Diagnostics.Any(diagnostic =>
+            diagnostic.ErrorCode == "ERR_RUNTIME_FIELD_IN_STATIC_DATA"
+            && diagnostic.Field == "storage.current_quantity")
+        && !batch.Success
+        && batch.ErrorCode == "ERR_RUNTIME_FIELD_IN_STATIC_DATA";
+}
+
+static bool Ac4ControlledVocabularyEnforced()
+{
+    var registry = new Registry();
+    var invalid = ValidResource("resource.bad-domain");
+    invalid["owner_domain"] = "gameplay";
+
+    var validation = registry.ValidateDefinition(invalid);
+    var diagnostic = validation.Diagnostics.SingleOrDefault(diagnostic =>
+        diagnostic.ErrorCode == "ERR_SCHEMA_INVALID"
+        && diagnostic.Field == "owner_domain");
+
+    return !validation.Valid
+        && !validation.MatchesKindSchema
+        && diagnostic is not null
+        && ((string[])diagnostic.Details["allowed_values"]!).SequenceEqual([
+            "resources", "airship", "world", "routes", "intel", "companions", "threats",
+        ]);
+}
+
+static bool Ac5LocationRequiresDedicatedFields()
+{
+    var registry = new Registry();
+    var broadTagsOnly = ValidLocation("location.glass-harbor");
+    broadTagsOnly.Remove("region_tag");
+    broadTagsOnly.Remove("local_identity_tags");
+    broadTagsOnly.Remove("settlement_need_tags");
+    broadTagsOnly["tags"] = new[] { "starter-sea", "glass-buoys", "navigation-aid" };
+
+    var validation = registry.ValidateDefinition(broadTagsOnly);
+    var missingFields = validation.Diagnostics
+        .Where(diagnostic => diagnostic.ErrorCode == "ERR_SCHEMA_MISSING_REQUIRED_FIELD")
+        .Select(diagnostic => diagnostic.Field)
+        .ToHashSet(StringComparer.Ordinal);
+
+    return !validation.Valid
+        && !validation.RequiredFieldsPresent
+        && missingFields.SetEquals(["region_tag", "local_identity_tags", "settlement_need_tags"]);
+}
+
+static bool Ac6RepairAndStallSchemasRequireTags()
+{
+    var registry = new Registry();
+
+    var repairNode = ValidRepairNode("repair-node.starlight-dock");
+    repairNode.Remove("settlement_need_tags");
+    repairNode.Remove("repair_visible_state_tags");
+
+    var stallGood = ValidStallGood("stall-good.fresh-rations");
+    stallGood.Remove("settlement_need_tags");
+    stallGood.Remove("repair_visible_state_tags");
+
+    var repairValidation = registry.ValidateDefinition(repairNode);
+    var stallValidation = registry.ValidateDefinition(stallGood);
+
+    return MissingRequiredFields(repairValidation).SetEquals(["settlement_need_tags", "repair_visible_state_tags"])
+        && MissingRequiredFields(stallValidation).SetEquals(["settlement_need_tags", "repair_visible_state_tags"]);
+}
+
+static bool Ac7ReadonlyWriteRejectedWithoutMutation()
+{
+    var registry = new Registry();
+    registry.RegisterContent("resource.iron-ore", ValidResource("resource.iron-ore"));
+    registry.InitializeContent();
+
+    var before = registry.QueryById("resource.iron-ore");
+    var write = registry.SetEntity("resource.iron-ore", new Dictionary<string, object?>
     {
         ["id"] = "resource.iron-ore",
         ["kind"] = "resource",
-        ["display_name"] = "铁矿石",
-        ["content_status"] = ContentStatus.Active,
-        ["sort_order"] = 10,
-        ["owner_domain"] = "resources",
+        ["name_key"] = "content.resource.changed.name",
     });
-    registry.RegisterContent("resource.copper-ore", new Dictionary<string, object?>
-    {
-        ["id"] = "resource.copper-ore",
-        ["kind"] = "resource",
-        ["display_name"] = "铜矿石",
-        ["content_status"] = ContentStatus.Active,
-        ["sort_order"] = 10,
-        ["owner_domain"] = "resources",
-    });
-    registry.RegisterContent("location.glass-harbor", new Dictionary<string, object?>
-    {
-        ["id"] = "location.glass-harbor",
-        ["kind"] = "location",
-        ["display_name"] = "玻璃港",
-        ["content_status"] = ContentStatus.Active,
-        ["sort_order"] = 1,
-        ["owner_domain"] = "world",
-    });
+    var after = registry.QueryById("resource.iron-ore");
+
+    return !write.Success
+        && write.ErrorCode == "ERR_READONLY_REGISTRY"
+        && before.Entity is not null
+        && after.Entity is not null
+        && Convert.ToString(before.Entity["name_key"]) == Convert.ToString(after.Entity["name_key"])
+        && Convert.ToString(after.Entity["name_key"]) == "content.resource_iron_ore.name";
+}
+
+static bool Ac8QueriesReturnStaticDeepCopies()
+{
+    var registry = new Registry();
+    registry.RegisterContent("resource.iron-ore", ValidResource("resource.iron-ore"));
     registry.InitializeContent();
-    return registry;
-}
 
-// AC-1: GIVEN registry 中存在某个稳定 ID 的唯一 Active 定义
-// WHEN 通过该稳定 ID 查询 THEN 只返回一份 canonical definition
-static bool Ac1UniqueCanonicalQuery()
-{
-    var registry = MakePopulatedRegistry();
-    var result = registry.QueryById("resource.iron-ore");
-    return result.Status == RegistryQueryStatus.Found
-        && result.Entity is not null
-        && Convert.ToString(result.Entity["display_name"]) == "铁矿石"
-        && Convert.ToString(result.Entity["kind"]) == "resource";
-}
-
-// AC-2: GIVEN 同一稳定 ID 出现两份定义
-// WHEN 运行注册表校验 THEN 必须返回 ERR_DUPLICATE_ID
-static bool Ac2DuplicateIdRejection()
-{
-    var registry = new Registry();
-    var batchResult = registry.RegisterBatch([
-        new Dictionary<string, object?> { ["id"] = "resource.iron-ore", ["kind"] = "resource" },
-        new Dictionary<string, object?> { ["id"] = "resource.iron-ore", ["kind"] = "resource" },
-    ]);
-    return !batchResult.Success
-        && batchResult.ErrorCode == "ERR_DUPLICATE_ID";
-}
-
-// AC-3: GIVEN ID 不符合格式规则或归一化后发生碰撞
-// WHEN 注册表校验 THEN 返回 ID 格式或归一化冲突错误
-static bool Ac3IdFormatValidation()
-{
-    var registry = new Registry();
-
-    var resultUpper = registry.RegisterBatch([
-        new Dictionary<string, object?> { ["id"] = "Resource.Iron-Ore", ["kind"] = "resource" },
-    ]);
-    var resultSpace = registry.RegisterBatch([
-        new Dictionary<string, object?> { ["id"] = "resource iron ore", ["kind"] = "resource" },
-    ]);
-    var resultSlash = registry.RegisterBatch([
-        new Dictionary<string, object?> { ["id"] = "resource.iron/ore", ["kind"] = "resource" },
-    ]);
-
-    return !resultUpper.Success && resultUpper.ErrorCode == "ERR_INVALID_ID_FORMAT"
-        && !resultSpace.Success && resultSpace.ErrorCode == "ERR_INVALID_ID_FORMAT"
-        && !resultSlash.Success && resultSlash.ErrorCode == "ERR_INVALID_ID_FORMAT";
-}
-
-// AC-4: GIVEN 目标已加载且存在 WHEN 查询 THEN 返回定义本体
-static bool Ac4FoundReturnsDefinition()
-{
-    var registry = MakePopulatedRegistry();
-    var result = registry.QueryById("location.glass-harbor");
-    return result.Status == RegistryQueryStatus.Found
-        && result.Entity is not null
-        && Convert.ToString(result.Entity["id"]) == "location.glass-harbor"
-        && Convert.ToString(result.Entity["display_name"]) == "玻璃港";
-}
-
-// AC-5: GIVEN 目标所属域未加载 WHEN 查询 THEN 返回 UNLOADED
-static bool Ac5UnloadedDomainReturnsUnloaded()
-{
-    var registry = MakePopulatedRegistry();
-    var result = registry.QueryById("module.wind-sail-mk1");
-    return result.Status == RegistryQueryStatus.Unloaded
-        && result.Error == "domain_unloaded";
-}
-
-// AC-6: GIVEN 目标不存在且所属域已加载完成 WHEN 查询 THEN 返回 NOT_FOUND
-static bool Ac6NotFoundReturnsNotFound()
-{
-    var registry = MakePopulatedRegistry();
-    // "resource" kind is loaded because resource.iron-ore etc exist
-    var result = registry.QueryById("resource.nonexistent");
-    return result.Status == RegistryQueryStatus.NotFound
-        && result.Error == "id_not_found";
-}
-
-// AC-7: GIVEN 列表查询返回多条内容
-// WHEN 执行查询 THEN 结果按 sort_order ASC, id ASC 排序
-static bool Ac7DeterministicSort()
-{
-    var registry = new Registry();
-    registry.RegisterContent("resource.beta", new Dictionary<string, object?>
+    var first = registry.QueryById("resource.iron-ore").Entity;
+    if (first is null || first["cat_sniff_signature"] is not Dictionary<string, object?> signature)
     {
-        ["id"] = "resource.beta", ["kind"] = "resource",
-        ["content_status"] = ContentStatus.Active, ["sort_order"] = 20,
-    });
-    registry.RegisterContent("resource.alpha", new Dictionary<string, object?>
-    {
-        ["id"] = "resource.alpha", ["kind"] = "resource",
-        ["content_status"] = ContentStatus.Active, ["sort_order"] = 10,
-    });
-    registry.RegisterContent("resource.gamma", new Dictionary<string, object?>
-    {
-        ["id"] = "resource.gamma", ["kind"] = "resource",
-        ["content_status"] = ContentStatus.Active, ["sort_order"] = 10,
-    });
-
-    var result1 = registry.ListByKind("resource");
-    var result2 = registry.ListByKind("resource");
-    var ids1 = result1.Select(e => Convert.ToString(e["id"])).ToArray();
-    var ids2 = result2.Select(e => Convert.ToString(e["id"])).ToArray();
-
-    // sort_order=10 first: alpha < gamma alphabetically; then sort_order=20: beta
-    return ids1.SequenceEqual(ids2)
-        && ids1.Length == 3
-        && ids1[0] == "resource.alpha"
-        && ids1[1] == "resource.gamma"
-        && ids1[2] == "resource.beta";
-}
-
-// AC-8: GIVEN 查询结果超过 max_query_result_count
-// WHEN 执行列表查询 THEN 返回受控分页或截断
-static bool Ac8MaxQueryResultCount()
-{
-    var registry = new Registry();
-    for (var i = 0; i < 50; i++)
-    {
-        registry.RegisterContent($"resource.test-{i:D3}", new Dictionary<string, object?>
-        {
-            ["id"] = $"resource.test-{i:D3}",
-            ["kind"] = "resource",
-            ["content_status"] = ContentStatus.Active,
-            ["sort_order"] = i,
-        });
+        return false;
     }
 
-    registry.MaxQueryResultCount = 10;
-    var results = registry.ListByKind("resource");
-    return results.Count == 10
-        && Convert.ToString(results[0]["id"]) == "resource.test-000";
+    signature["confidence"] = 0;
+    signature["unlocked"] = true;
+
+    var second = registry.QueryById("resource.iron-ore").Entity;
+    return second is not null
+        && second["cat_sniff_signature"] is Dictionary<string, object?> secondSignature
+        && Convert.ToInt32(secondSignature["confidence"]) == 65
+        && !secondSignature.ContainsKey("unlocked");
 }
 
-// AC-9: GIVEN registry 只加载部分内容域
-// WHEN 查询已加载域的内容 THEN 不需要等待未加载域完成即可返回结果
-static bool Ac9DomainScopedPartialQuery()
+static bool RegisterBatchRejectsInvalidSchemaAtomically()
 {
-    var registry = MakePopulatedRegistry();
-    // "resource" kind is loaded (from MakePopulatedRegistry), "module" is not
-    var resourceResult = registry.QueryById("resource.iron-ore");
-    var moduleResult = registry.QueryById("module.wind-sail-mk1");
-    return resourceResult.Status == RegistryQueryStatus.Found
-        && moduleResult.Status == RegistryQueryStatus.Unloaded;
+    var registry = new Registry();
+    var invalid = ValidLocation("location.invalid-vocab");
+    invalid["region_tag"] = "unknown-region";
+
+    var result = registry.RegisterBatch([invalid]);
+    registry.InitializeContent();
+    var query = registry.QueryById("location.invalid-vocab");
+
+    return !result.Success
+        && result.ErrorCode == "ERR_SCHEMA_INVALID"
+        && query.Status == RegistryQueryStatus.NotFound;
 }
 
-// AC-10: GIVEN 查询未加载域的内容 WHEN 执行 THEN 返回 UNLOADED
-// 且不得触发任意文件系统扫描
-static bool Ac10NoFilesystemScanForUnloaded()
+static HashSet<string> MissingRequiredFields(RegistryDefinitionValidationResult validation)
 {
-    var registry = MakePopulatedRegistry();
-    // Query for something in an unloaded domain — should return UNLOADED
-    // without attempting filesystem access (verified implicitly: no I/O in pure C#)
-    var result = registry.QueryById("airship.hull-band-1");
-    return result.Status == RegistryQueryStatus.Unloaded
-        && result.Error == "domain_unloaded"
-        && result.Entity is null;
+    return validation.Diagnostics
+        .Where(diagnostic => diagnostic.ErrorCode == "ERR_SCHEMA_MISSING_REQUIRED_FIELD")
+        .Select(diagnostic => diagnostic.Field)
+        .ToHashSet(StringComparer.Ordinal);
+}
+
+static Dictionary<string, object?> ValidResource(string id)
+{
+    var definition = BaseDefinition(id, "resource", "resources");
+    definition["unit"] = "chunk";
+    definition["stack_rule"] = "stackable";
+    definition["material_tags"] = new[] { "metal", "repair-material" };
+    definition["cat_sniff_signature"] = new Dictionary<string, object?>
+    {
+        ["reveal_target"] = "location.glass-harbor",
+        ["hazard_hint"] = "old-harbor-chain",
+        ["confidence"] = 65,
+        ["pattern_id"] = "pattern.ancient-optics",
+    };
+    return definition;
+}
+
+static Dictionary<string, object?> ValidLocation(string id)
+{
+    var definition = BaseDefinition(id, "location", "world");
+    definition["region_tag"] = "starter-sea";
+    definition["location_kind"] = "harbor";
+    definition["service_tags"] = new[] { "market", "repair" };
+    definition["local_identity_tags"] = new[] { "glass-buoys" };
+    definition["settlement_need_tags"] = new[] { "navigation-aid", "trade-link" };
+    return definition;
+}
+
+static Dictionary<string, object?> ValidRepairNode(string id)
+{
+    var definition = BaseDefinition(id, "repair-node", "world");
+    definition["location_id"] = "location.glass-harbor";
+    definition["node_kind"] = "beacon";
+    definition["restoration_theme"] = "lighthouse";
+    definition["settlement_need_tags"] = new[] { "navigation-aid", "safety" };
+    definition["repair_visible_state_tags"] = new[] { "dark", "lit", "connected" };
+    return definition;
+}
+
+static Dictionary<string, object?> ValidStallGood(string id)
+{
+    var definition = BaseDefinition(id, "stall-good", "world");
+    definition["commodity_tags"] = new[] { "food" };
+    definition["vendor_tags"] = new[] { "harbor-stall" };
+    definition["supply_class"] = "basic";
+    definition["local_identity_tags"] = new[] { "glass-harbor" };
+    definition["settlement_need_tags"] = new[] { "food" };
+    definition["repair_visible_state_tags"] = new[] { "stock-improved" };
+    return definition;
+}
+
+static Dictionary<string, object?> BaseDefinition(string id, string kind, string ownerDomain)
+{
+    var key = id.Replace('.', '_').Replace('-', '_');
+    return new Dictionary<string, object?>(StringComparer.Ordinal)
+    {
+        ["id"] = id,
+        ["kind"] = kind,
+        ["owner_domain"] = ownerDomain,
+        ["status"] = "Active",
+        ["name_key"] = $"content.{key}.name",
+        ["description_key"] = $"content.{key}.desc",
+        ["schema_version"] = 1,
+        ["tags"] = new[] { "test" },
+        ["sort_order"] = 10,
+        ["references"] = Array.Empty<string>(),
+    };
 }
