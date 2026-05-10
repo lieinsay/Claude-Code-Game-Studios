@@ -643,6 +643,13 @@ public sealed class Registry
                     yield return $"{key}.{nestedField}";
                 }
             }
+            else if (value is System.Collections.IDictionary nestedDictionary)
+            {
+                foreach (var nestedField in FindRuntimeFields(DictionaryToObjectMap(nestedDictionary)))
+                {
+                    yield return $"{key}.{nestedField}";
+                }
+            }
             else if (value is System.Collections.IEnumerable enumerable && value is not string)
             {
                 var index = 0;
@@ -651,6 +658,13 @@ public sealed class Registry
                     if (item is IReadOnlyDictionary<string, object?> nestedItem)
                     {
                         foreach (var nestedField in FindRuntimeFields(nestedItem))
+                        {
+                            yield return $"{key}[{index}].{nestedField}";
+                        }
+                    }
+                    else if (item is System.Collections.IDictionary nestedDictionaryItem)
+                    {
+                        foreach (var nestedField in FindRuntimeFields(DictionaryToObjectMap(nestedDictionaryItem)))
                         {
                             yield return $"{key}[{index}].{nestedField}";
                         }
@@ -667,6 +681,22 @@ public sealed class Registry
         return string.Equals(key, denied, StringComparison.Ordinal)
             || string.Equals(key, $"current_{denied}", StringComparison.Ordinal)
             || key.EndsWith($"_{denied}", StringComparison.Ordinal);
+    }
+
+    private static Dictionary<string, object?> DictionaryToObjectMap(System.Collections.IDictionary dictionary)
+    {
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var key in dictionary.Keys)
+        {
+            if (key is null)
+            {
+                continue;
+            }
+
+            result[key.ToString() ?? string.Empty] = dictionary[key];
+        }
+
+        return result;
     }
 
     private static RegistryDiagnostic CreateDiagnostic(

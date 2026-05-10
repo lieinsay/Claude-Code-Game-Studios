@@ -14,6 +14,7 @@ Run("AC-7: registry rejects runtime write attempts without mutation", Ac7Readonl
 Run("AC-8: read queries return static deep copies", Ac8QueriesReturnStaticDeepCopies);
 Run("Batch: invalid schema does not enter queryable collection", RegisterBatchRejectsInvalidSchemaAtomically);
 Run("Direct register: invalid schema does not enter queryable collection", DirectRegisterRejectsInvalidSchema);
+Run("Regression: nested typed dictionaries are scanned for runtime fields", NestedTypedDictionaryRuntimeFieldsAreRejected);
 
 if (failed > 0)
 {
@@ -234,6 +235,24 @@ static bool DirectRegisterRejectsInvalidSchema()
     registry.InitializeContent();
     var query = registry.QueryById("location.direct-invalid");
     return query.Status == RegistryQueryStatus.NotFound;
+}
+
+static bool NestedTypedDictionaryRuntimeFieldsAreRejected()
+{
+    var registry = new Registry();
+    var contaminated = ValidResource("resource.typed-dictionary-contamination");
+    contaminated["typed_payload"] = new Dictionary<string, int>
+    {
+        ["current_quantity"] = 3,
+    };
+
+    var validation = registry.ValidateDefinition(contaminated);
+
+    return !validation.Valid
+        && !validation.HasNoRuntimeFields
+        && validation.Diagnostics.Any(diagnostic =>
+            diagnostic.ErrorCode == "ERR_RUNTIME_FIELD_IN_STATIC_DATA"
+            && diagnostic.Field == "typed_payload.current_quantity");
 }
 
 static HashSet<string> MissingRequiredFields(RegistryDefinitionValidationResult validation)

@@ -2,13 +2,22 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: Foundation Layer — content-registry Story-001
-Task: ✅ Story-001 完成 (10/10 AC PASS)
+Feature: Foundation Layer — content-registry Story-002
+Task: ✅ Story-002 完成 (11/11 checks PASS)
 <!-- /STATUS -->
+
+### Foundation Layer: content-registry Story-002 Done — 2026-05-10
+
+- [x] `src/core/content/Registry.cs` — Schema Validation: definition_validity U/K/R/S flags, required fields, controlled vocabularies, runtime field denylist, read-only write rejection, deep-copy query boundary
+- [x] `tests/unit/registry/Program.cs` — Story-002 acceptance checks expanded to 11/11 PASS, including nested typed-dictionary runtime-field regression coverage
+- [x] `production/epics/content-registry/story-002-schema-validation.md` — 状态更新: Ready → Done
+- [x] `production/epics/content-registry/EPIC.md` — Story-001/002 状态同步为 Done
+- [x] `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` — 11/11 PASS
+- [x] `dotnet build CloudWeaverVoyage.sln --no-restore` — PASS (0 errors, warnings only)
 
 ### Foundation Layer: content-registry Story-001 Done — 2026-05-10
 
-- [x] `src/core/Registry.cs` — 升级: `MaxQueryResultCount` 分页 + `domainKindMap` 域隔离 + `ApplyResultLimit`
+- [x] `src/core/content/Registry.cs` — 升级: `MaxQueryResultCount` 分页 + `domainKindMap` 域隔离 + `ApplyResultLimit`
 - [x] `tests/unit/registry/IdRegistryCoreTest.csproj` — 新增测试项目: 10/10 AC 全部 PASS
 - [x] `tests/unit/registry/Program.cs` — Story-001 10 个 AC 测试
 - [x] `production/epics/content-registry/story-001-id-registry-core-query.md` — 状态更新: Ready → Done
@@ -352,7 +361,14 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 
 ## Session Extract — /dev-story 2026-05-10
 - Story: `production/epics/content-registry/story-002-schema-validation.md` — Story 002: Schema Validation
-- Files changed: `src/core/Registry.cs`, `tests/unit/registry/Program.cs`
-- Test written: `tests/unit/registry/Program.cs` — 9 Story 002 acceptance checks
+- Files changed: `src/core/content/Registry.cs`, `tests/unit/registry/Program.cs`
+- Test written: `tests/unit/registry/Program.cs` — 11 Story 002 acceptance/regression checks
 - Blockers: None
-- Next: /code-review `src/core/Registry.cs` `tests/unit/registry/Program.cs` then /story-done `production/epics/content-registry/story-002-schema-validation.md`
+- Next: /code-review `src/core/content/Registry.cs` `tests/unit/registry/Program.cs` then /story-done `production/epics/content-registry/story-002-schema-validation.md`
+
+## Session Extract — /story-done 2026-05-10
+- Verdict: COMPLETE
+- Story: `production/epics/content-registry/story-002-schema-validation.md` — Story 002: Schema Validation
+- Code review: Complete — local review; nested typed-dictionary runtime-field scan fixed before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/content-registry/story-003-content-lifecycle.md` — Story 003: Content Lifecycle

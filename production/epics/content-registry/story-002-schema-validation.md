@@ -1,7 +1,7 @@
 # Story 002: Schema Validation
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Done — 2026-05-10
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: Not yet created — run `/create-control-manifest`
@@ -17,7 +17,7 @@
 **ADR Decision Summary**: Registry 负责所有静态内容定义的 Schema 校验——12 种内容 kind 各有最小必填字段；受控词表字段值必须来自允许列表；定义不能包含运行时字段（库存、价格、解锁、耐久、关系值）。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
-**Engine Notes**: 校验为纯 GDScript 字典/数组遍历——无引擎 API 依赖。校验在内容导入时执行（非每帧）。
+**Engine Notes**: 校验为纯 C# 字典/数组遍历——无 Godot 引擎 API 依赖。校验在内容导入时执行（非每帧）。
 
 **Control Manifest Rules (Foundation layer)**:
 - Required: Schema 校验在内容注册前完成——不合规定义不得进入可查询集合
@@ -30,14 +30,14 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN 内容定义满足唯一 ID、kind/schema 匹配、必填字段齐全且不含运行时字段，WHEN 计算 `definition_validity`，THEN 结果为 true
-- [ ] **AC-2**: GIVEN 内容定义缺少任一 `definition_validity` 条件，WHEN 运行校验，THEN 结果为 false，并指出具体失败项（U/K/R/S）
-- [ ] **AC-3**: GIVEN 定义混入库存、价格、解锁、修复、耐久、关系等运行时字段，WHEN 运行定义校验，THEN 返回 `ERR_RUNTIME_FIELD_IN_STATIC_DATA`
-- [ ] **AC-4**: GIVEN 内容定义使用受控词表字段（owner_domain, kind, region_tag, settlement_need_tags 等），WHEN 运行 Schema 校验，THEN 字段值必须来自受控词表，未知值返回可诊断错误
-- [ ] **AC-5**: GIVEN `location` 内容进入注册表，WHEN 运行 Schema 校验，THEN 验证 region_tag、local_identity_tags、settlement_need_tags 字段完整，不能只用宽泛 tags 兜底
-- [ ] **AC-6**: GIVEN `repair-node` 或 `stall-good` 内容进入注册表，WHEN 运行 Schema 校验，THEN 验证 settlement_need_tags 和 repair_visible_state_tags 字段完整
-- [ ] **AC-7**: GIVEN 下游系统尝试写回玩家态/世界态/库存态/解锁态，WHEN 调用注册表接口，THEN 操作必须被拒绝，且不产生任何状态变更
-- [ ] **AC-8**: GIVEN 正常只读查询，WHEN 注册表返回内容，THEN 只能返回静态内容定义，不返回可写句柄或 runtime instance
+- [x] **AC-1**: GIVEN 内容定义满足唯一 ID、kind/schema 匹配、必填字段齐全且不含运行时字段，WHEN 计算 `definition_validity`，THEN 结果为 true
+- [x] **AC-2**: GIVEN 内容定义缺少任一 `definition_validity` 条件，WHEN 运行校验，THEN 结果为 false，并指出具体失败项（U/K/R/S）
+- [x] **AC-3**: GIVEN 定义混入库存、价格、解锁、修复、耐久、关系等运行时字段，WHEN 运行定义校验，THEN 返回 `ERR_RUNTIME_FIELD_IN_STATIC_DATA`
+- [x] **AC-4**: GIVEN 内容定义使用受控词表字段（owner_domain, kind, region_tag, settlement_need_tags 等），WHEN 运行 Schema 校验，THEN 字段值必须来自受控词表，未知值返回可诊断错误
+- [x] **AC-5**: GIVEN `location` 内容进入注册表，WHEN 运行 Schema 校验，THEN 验证 region_tag、local_identity_tags、settlement_need_tags 字段完整，不能只用宽泛 tags 兜底
+- [x] **AC-6**: GIVEN `repair-node` 或 `stall-good` 内容进入注册表，WHEN 运行 Schema 校验，THEN 验证 settlement_need_tags 和 repair_visible_state_tags 字段完整
+- [x] **AC-7**: GIVEN 下游系统尝试写回玩家态/世界态/库存态/解锁态，WHEN 调用注册表接口，THEN 操作必须被拒绝，且不产生任何状态变更
+- [x] **AC-8**: GIVEN 正常只读查询，WHEN 注册表返回内容，THEN 只能返回静态内容定义，不返回可写句柄或 runtime instance
 
 ---
 
@@ -94,8 +94,10 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/registry/schema_validation_test.gd` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/registry/IdRegistryCoreTest.csproj` — exists and passes (11/11 checks)
+**Status**: [x] Created — C# implementation with 8/8 AC checks plus 3 registration/regression checks passing
+**C# Source**: `src/core/content/Registry.cs`
+**Test Source**: `tests/unit/registry/Program.cs`
 
 ---
 
@@ -103,3 +105,12 @@
 
 - Depends on: Story 001 (ID Registry Core —— Schema 校验依赖已注册的 ID)
 - Unlocks: Story 005 (Domain Loading 需要 Schema 校验通过的内容才能 COMPLETE)
+
+## Completion Notes
+
+**Completed**: 2026-05-10
+**Criteria**: 8/8 passing; verification runner reports 11/11 checks including batch/direct rejection and nested typed-dictionary runtime-field regression coverage.
+**Deviations**: None blocking. Story text was refreshed from legacy GDScript/Web wording to active desktop C# implementation under ADR-0019.
+**Test Evidence**: Logic test at `tests/unit/registry/IdRegistryCoreTest.csproj`; run with `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj`.
+**Code Review**: Complete — local review found and fixed one defensive gap in recursive runtime-field scanning for nested typed dictionaries.
+**Next Recommended**: `production/epics/content-registry/story-003-content-lifecycle.md`

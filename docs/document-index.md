@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-09
-> **项目阶段**: Pre-Production — P3 架构原型完成 (9 Autoload + 49 Verification Checks + 39 Tests + SessionShell Boot Chain)
+> **最后更新**: 2026-05-10
+> **项目阶段**: Pre-Production — Desktop C# Foundation Ready (Content Registry Story-001/002 Done)
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
-> **源代码**: 15 个 .gd 文件 (9 Autoload + SessionShell + Bootstrap + Data Class + Abstract Base) + 7 个测试文件 (39 test cases + 49 verification checks) + 1 个 .tscn 场景文件
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (11 个 C# 源文件 + 2 个 C# 测试项目)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -47,11 +47,10 @@ graph TB
     end
 
     subgraph 源代码["💻 源代码层 src/"]
-        CORE["core/ (7)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart"]
+        CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        SHELL["session_shell.gd<br/>Phase 0→7 Boot Chain"]
-        TEST["tests/ (4)<br/>26 个测试用例<br/>gdUnit4"]
+        TEST["tests/<br/>FoundationParity 70/70<br/>Registry Story-002 11/11"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -112,7 +111,7 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成 (115 Stories) |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
-| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories) |
+| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002 Done) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
 | [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8 Stories) |
 | [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
@@ -580,7 +579,46 @@ graph TB
 
 ---
 
-## 五、P3 架构原型 — 源代码架构
+## 五、C# Foundation 实现进度
+
+> **当前状态**: Content Registry Story-001/002 完成；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS。
+
+### Content Registry 完成项
+
+| Story | 状态 | 实现 | 验证 |
+|-------|------|------|------|
+| [Story-001: ID Registry Core + Query Engine](../production/epics/content-registry/story-001-id-registry-core-query.md) | Done | `src/core/content/Registry.cs` — 稳定 ID、查询状态、确定性排序、分页上限、域隔离 | `tests/unit/registry/IdRegistryCoreTest.csproj` |
+| [Story-002: Schema Validation](../production/epics/content-registry/story-002-schema-validation.md) | Done | `src/core/content/Registry.cs` — definition_validity U/K/R/S、受控词表、必填字段、运行时字段拒绝、只读边界 | `tests/unit/registry/IdRegistryCoreTest.csproj` — 11/11 PASS |
+
+### C# Foundation 文件清单
+
+| 层级 | 文件 | 职责 |
+|------|------|------|
+| **Core / Boot** | `src/core/boot/SessionBootChain.cs` | Phase 0→7 引导链 + ShellState / InputGate |
+| **Core / Content** | `src/core/content/Registry.cs` | 内容注册表、查询、Schema 校验、Bootstrap 原型定义 |
+| **Core / Persistence** | `src/core/persistence/Persistence.cs` | Staging→Verify→Promotion 存档管道 |
+| **Core / Persistence** | `src/core/persistence/SnapshotPackage.cs` | SnapshotPackage 数据契约 |
+| **Core / Interaction** | `src/core/interaction/InteractionRegistry.cs` | 交互焦点状态机 + Use Gate |
+| **Core / Resources** | `src/core/resources/ResourcesManager.cs` | 6 资源池 + stack merge |
+| **Core / Intel** | `src/core/intel/IntelManager.cs` | KnowledgeState / Rumor / Pattern 逻辑 |
+| **Core / Chart** | `src/core/chart/ChartManager.cs` | ChartState / RouteSelectability / departure 确认 |
+| **Feature** | `src/features/world_repair/WorldRepair.cs` | 修复状态机 + deposit / repair_completed |
+| **Presentation** | `src/presentation/UIManager.cs` | 屏幕 FSM + ModalStack + InputLayer |
+| **Presentation** | `src/presentation/FeedbackManager.cs` | 语义反馈事件中心 |
+| **Tests** | `tests/csharp/FoundationParity/Program.cs` | C# Foundation parity checks (70/70) |
+| **Tests** | `tests/unit/registry/Program.cs` | Content Registry Story-001/002 acceptance checks |
+
+### 下一开发入口
+
+| 优先级 | 下一步 | 说明 |
+|--------|--------|------|
+| P1 | [Story-003: Content Lifecycle](../production/epics/content-registry/story-003-content-lifecycle.md) | 继续 Content Registry，补 Draft/Active/Deprecated/Retired 生命周期规则 |
+| P2 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-003 前后跑 Foundation parity，防止基础层回退 |
+
+---
+
+## 六、P3 架构原型 — 源代码架构
 
 > **完成日期**: 2026-05-09 · **文件数**: 15 `.gd` + 1 `.tscn` + 7 test files + `project.godot`
 > **9 个 Autoload** (Foundation 5 + Core 1 + Feature 1 + Presentation 2) · **39 个测试用例 + 49 verification checks** (Unit 21 + Integration 18 + Verification 49)
@@ -852,7 +890,7 @@ graph LR
 
 ---
 
-## 六、审查与质量门禁流程
+## 七、审查与质量门禁流程
 
 ```mermaid
 graph LR
@@ -979,7 +1017,7 @@ graph TB
 │  │  ✅ ADR Acceptance:   12 Proposed → 16 Accepted + 2 Deferred          │   │
 │  │  ✅ TR Registry:      0 entries → 54 TRs populated                     │   │
 │  │  ✅ TR Coverage:      65.4% → 100% (54/54 TRs)                        │   │
-│  │  ✅ Engine Config:    [CHOOSE] → Godot 4.6.2 + GDScript                │   │
+│  │  ✅ Engine Config:    [CHOOSE] → Godot 4.6.2 .NET + C# Desktop-first    │   │
 │  │  ✅ Tech Preferences: [TO BE CONFIGURED] → fully populated             │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
@@ -1026,7 +1064,7 @@ UX SPECS             --      --      --     --      --      --      --     █�
 
 ---
 
-## 七、Studio 基础设施
+## 八、Studio 基础设施
 
 ### Agent 体系 (49 个)
 
@@ -1135,7 +1173,7 @@ graph LR
 
 ---
 
-## 八、规范与模板
+## 九、规范与模板
 
 ### 路径规则 (11 个)
 
@@ -1170,7 +1208,7 @@ graph LR
 
 ---
 
-## 九、文档阅读路线图
+## 十、文档阅读路线图
 
 ### 新成员入门路径
 
@@ -1197,7 +1235,7 @@ graph TB
 
 ---
 
-## 十、统计概览
+## 十一、统计概览
 
 ```
 文档分布 (按目录)
@@ -1220,16 +1258,16 @@ graph TB
 
 ---
 
-## 十一、待创建文档
+## 十二、待创建文档
 
-> 更新于 2026-05-09 — Pre-Production P3 架构原型完成。
+> 更新于 2026-05-10 — Desktop C# Foundation Ready；Content Registry Story-001/002 完成。
 
 ### 已全部完成 ✅
 
 - [x] **16 个 ADR** (Foundation 6 + Core 6 + Feature 4) — 全部 Accepted
 - [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 54 条全部录入
 - [x] **TR 覆盖率 100%** — 54/54 TRs 有完整 ADR 覆盖
-- [x] **引擎正式配置** — `CLAUDE.md` — Godot 4.6.2 + GDScript
+- [x] **引擎正式配置** — `CLAUDE.md` — Godot 4.6.2 .NET + C# Desktop-first
 - [x] **Control Manifest** — `docs/architecture/control-manifest.md`
 - [x] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md`
 - [x] **Architecture Review Report** — `docs/architecture/architecture-review-2026-05-05.md`
@@ -1244,9 +1282,10 @@ graph TB
 - [x] **Presentation 层 #16 UI/HUD** — 1/3 Epic (6 Stories)
 - [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 39 Tests + 49 Verification Checks (2026-05-09)
 - [x] **平台转向复审** — Web/GDScript 残余清理: 10 个文件修复, 0 blockers, CONCERNS verdict (2026-05-09)
-- [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器 / WebGL 2)
-- [x] **源代码架构文档** — `docs/document-index.md` §五 (Autoload 依赖图 + Boot Chain + Persistence 管道 + 信号拓扑 + 测试架构)
+- [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器)
+- [x] **源代码架构文档** — `docs/document-index.md` §五/§六 (C# Foundation 进度 + P3 原型架构)
 - [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS
+- [x] **Content Registry Story-001/002** — C# Registry ID/query + Schema Validation；`IdRegistryCoreTest.csproj` 11/11 PASS
 
 ### 仍待完成
 
