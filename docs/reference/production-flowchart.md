@@ -1,13 +1,13 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-10 | 最后更新: 2026-05-10
+> 生成日期: 2026-05-10 | 最后更新: 2026-05-11
 > 基于: systems-index.md 依赖图 + 16 Epic 115 Story
 > 用途: 可视化所有生产任务的依赖关系、并行机会、关键路径
-> 当前状态: **Phase 0 完成 | Phase 1 Content Registry Story-001/002/003 完成 | 下一步 Story-004 Reference Integrity | 115 Story readiness 元数据已对齐 ADR-0019**
+> 当前状态: **Phase 0 完成 | Phase 1 Content Registry Story-001/002/003/004 完成 | 下一步 Story-005 Domain Loading & Decision UI Gating | 115 Story readiness 元数据已对齐 ADR-0019**
 
 ---
 
-## 零、当前进度 (2026-05-10)
+## 零、当前进度 (2026-05-11)
 
 ### Phase 0: 环境准备 — ✅ 完成
 
@@ -20,6 +20,7 @@
 | content-registry Story-001 | ✅ | **10/10 AC PASS** |
 | content-registry Story-002 | ✅ | **11/11 AC PASS** |
 | content-registry Story-003 | ✅ | **6/6 AC PASS** |
+| content-registry Story-004 | ✅ | **7/7 AC PASS** |
 | 全量 Story readiness 元数据 | ✅ | **115/115 aligned** — Manifest 2026-05-09、ADR-0019、C# test evidence、Estimate/Type/Test Evidence |
 
 ### Phase 1 启动状态
@@ -29,8 +30,9 @@
 | #1 Content Registry | 001 ID Registry Core + Query Engine | ✅ Done | 10/10 |
 | #1 Content Registry | 002 Schema Validation | ✅ Done | 11/11 |
 | #1 Content Registry | 003 Content Lifecycle | ✅ Done | 6/6 |
-| #1 Content Registry | 004 Reference Integrity | ⏭️ Next | C# evidence path |
-| #1 Content Registry | 005-008 | ⏳ Ready metadata aligned | C# evidence paths |
+| #1 Content Registry | 004 Reference Integrity | ✅ Done | 7/7 |
+| #1 Content Registry | 005 Domain Loading & Decision UI Gating | ⏭️ Next | C# evidence path |
+| #1 Content Registry | 006-008 | ⏳ Ready metadata aligned | C# evidence paths |
 | #2 Session Shell | 001-007 | ⏳ Ready | — |
 | #3-#16 其余 | 全部 Story | ⏳ Ready metadata aligned | C# evidence paths |
 
@@ -40,6 +42,7 @@
 |------|----------|------|
 | Story-001 / Story-002 单元验证 | `dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` | 11/11 PASS |
 | Story-003 Content Lifecycle 单元验证 | `dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` | 6/6 PASS |
+| Story-004 Reference Integrity 单元验证 | `dotnet run --project tests/unit/registry/ReferenceIntegrityTest.csproj` | 7/7 PASS |
 | Story readiness 元数据扫描 | `production/epics/**/*.md` structural scan | 115/115 PASS |
 | Foundation 回归 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | 70/70 PASS |
 | 项目构建 | `dotnet build CloudWeaverVoyage.csproj` | 0 errors, 0 warnings |

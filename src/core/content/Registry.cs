@@ -110,6 +110,45 @@ public sealed record RegistryDefinitionValidationResult(
     IReadOnlyList<RegistryDiagnostic> Diagnostics);
 
 /// <summary>
+/// Structured reference chain diagnostic emitted by content reference integrity validation.
+/// </summary>
+public sealed record RegistryReferenceDiagnostic(
+    string ErrorCode,
+    string SourceId,
+    string TargetId,
+    IReadOnlyList<string> ReferenceChain,
+    string Message);
+
+/// <summary>
+/// Result returned by reference graph validation for one static content definition.
+/// </summary>
+public sealed record RegistryReferenceValidationResult(
+    bool Valid,
+    bool ReferenceValidity,
+    IReadOnlyList<RegistryReferenceDiagnostic> Diagnostics);
+
+/// <summary>
+/// Status for queries that require exactly one deterministic content match.
+/// </summary>
+public enum RegistryUniqueQueryStatus
+{
+    Found = 0,
+    NotFound = 1,
+    AmbiguousQuery = 2,
+}
+
+/// <summary>
+/// Result returned by query APIs that must never silently choose among multiple matches.
+/// </summary>
+public sealed record RegistryUniqueQueryResult(
+    RegistryUniqueQueryStatus Status,
+    IReadOnlyDictionary<string, object?>? Entity,
+    string? ErrorCode,
+    IReadOnlyList<string> MatchedIds);
+
+internal readonly record struct RegistryReferenceSpec(string Id, bool Optional);
+
+/// <summary>
 /// Static content catalog for stable IDs and deterministic read-only queries.
 /// </summary>
 public sealed class Registry
@@ -221,6 +260,12 @@ public sealed class Registry
     /// Default 200 per performance budget. Set to 0 for unlimited (dev tools only).
     /// </summary>
     public int MaxQueryResultCount { get; set; } = 200;
+
+    /// <summary>
+    /// Maximum transitive reference depth inspected per root item.
+    /// Defaults to the GDD guardrail of 16 references per item.
+    /// </summary>
+    public int MaxReferencesPerItem { get; set; } = 16;
 
     /// <summary>
     /// Loads the prototype static content set into the registry.
@@ -403,6 +448,24 @@ public sealed class Registry
             }
         }
 
+        var pendingLookup = pending.ToDictionary(pair => pair.Id, pair => pair.Definition, StringComparer.Ordinal);
+        foreach (var (id, definition) in pending)
+        {
+            if (ReadContentStatus(definition) != ContentStatus.Active)
+            {
+                continue;
+            }
+
+            var referenceValidation = ValidateReferences(definition, pendingLookup);
+            if (!referenceValidation.Valid)
+            {
+                return new RegistryRegistrationResult(
+                    false,
+                    referenceValidation.Diagnostics.First().ErrorCode,
+                    id);
+            }
+        }
+
         foreach (var (id, definition) in pending)
         {
             InsertContentUnchecked(id, definition);
@@ -418,6 +481,67 @@ public sealed class Registry
     public RegistryDefinitionValidationResult ValidateDefinition(IReadOnlyDictionary<string, object?> definition)
     {
         return ValidateDefinition(definition, requireGloballyUniqueId: true);
+    }
+
+    /// <summary>
+    /// Validates that every required reference resolves to an allowed lifecycle state and that
+    /// the transitive reference graph has no self-loop or closed dependency cycle.
+    /// </summary>
+    public RegistryReferenceValidationResult ValidateReferences(IReadOnlyDictionary<string, object?> definition)
+    {
+        var rootId = ReadString(definition, "id");
+        var additionalDefinitions = string.IsNullOrWhiteSpace(rootId)
+            ? new Dictionary<string, IReadOnlyDictionary<string, object?>>(StringComparer.Ordinal)
+            : new Dictionary<string, IReadOnlyDictionary<string, object?>>(StringComparer.Ordinal)
+            {
+                [rootId] = definition,
+            };
+
+        return ValidateReferences(definition, additionalDefinitions);
+    }
+
+    /// <summary>
+    /// Finds exactly one active content definition by tag set, returning AMBIGUOUS_QUERY when
+    /// the supplied criteria are not specific enough to identify a single canonical item.
+    /// </summary>
+    public RegistryUniqueQueryResult QueryUniqueByTags(IEnumerable<string> requiredTags, string? kind = null)
+    {
+        var required = requiredTags
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var matches = content.Values
+            .Where(entity => ReadContentStatus(entity) == ContentStatus.Active)
+            .Where(entity => kind is null || string.Equals(ReadString(entity, "kind"), kind, StringComparison.Ordinal))
+            .Where(entity => required.IsSubsetOf(ReadStringSet(entity, "tags")))
+            .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
+            .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
+            .ToArray();
+
+        if (matches.Length == 0)
+        {
+            return new RegistryUniqueQueryResult(
+                RegistryUniqueQueryStatus.NotFound,
+                null,
+                "NOT_FOUND",
+                Array.Empty<string>());
+        }
+
+        var matchedIds = matches.Select(entity => ReadString(entity, "id")).ToArray();
+        if (matches.Length > 1)
+        {
+            return new RegistryUniqueQueryResult(
+                RegistryUniqueQueryStatus.AmbiguousQuery,
+                null,
+                "AMBIGUOUS_QUERY",
+                matchedIds);
+        }
+
+        return new RegistryUniqueQueryResult(
+            RegistryUniqueQueryStatus.Found,
+            CloneEntity(matches[0]),
+            null,
+            matchedIds);
     }
 
     /// <summary>
@@ -548,6 +672,257 @@ public sealed class Registry
     public void SetDomainLoaded(string domain)
     {
         loadedDomains.Add(domain);
+    }
+
+    private RegistryReferenceValidationResult ValidateReferences(
+        IReadOnlyDictionary<string, object?> definition,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>> additionalDefinitions)
+    {
+        var diagnostics = new List<RegistryReferenceDiagnostic>();
+        var rootId = ReadString(definition, "id");
+        if (string.IsNullOrWhiteSpace(rootId))
+        {
+            return new RegistryReferenceValidationResult(false, false, [
+                new RegistryReferenceDiagnostic(
+                    "ERR_INVALID_ID_FORMAT",
+                    string.Empty,
+                    string.Empty,
+                    Array.Empty<string>(),
+                    "Reference validation requires a stable source ID."),
+            ]);
+        }
+
+        VisitReferences(
+            definition,
+            additionalDefinitions,
+            new List<string> { rootId },
+            diagnostics);
+
+        return new RegistryReferenceValidationResult(
+            diagnostics.Count == 0,
+            diagnostics.Count == 0,
+            diagnostics);
+    }
+
+    private void VisitReferences(
+        IReadOnlyDictionary<string, object?> entity,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>> additionalDefinitions,
+        List<string> path,
+        List<RegistryReferenceDiagnostic> diagnostics)
+    {
+        if (path.Count > MaxReferencesPerItem + 1)
+        {
+            diagnostics.Add(new RegistryReferenceDiagnostic(
+                "ERR_REFERENCE_DEPTH_EXCEEDED",
+                path[0],
+                path[^1],
+                ChainWithStatuses(path, additionalDefinitions),
+                "Reference graph exceeded max_references_per_item."));
+            return;
+        }
+
+        var sourceStatus = ReadContentStatus(entity);
+        foreach (var reference in ExtractReferenceSpecs(entity))
+        {
+            if (string.IsNullOrWhiteSpace(reference.Id))
+            {
+                continue;
+            }
+
+            var cycleStart = path.IndexOf(reference.Id);
+            if (cycleStart >= 0)
+            {
+                var cycle = path.Skip(cycleStart).Concat([reference.Id]).ToArray();
+                diagnostics.Add(new RegistryReferenceDiagnostic(
+                    "ERR_REFERENCE_CYCLE",
+                    path[0],
+                    reference.Id,
+                    ChainWithStatuses(cycle, additionalDefinitions),
+                    "Reference graph contains a self-loop or closed dependency cycle."));
+                continue;
+            }
+
+            var resolution = ResolveReferenceTarget(reference.Id, additionalDefinitions);
+            if (!resolution.IsKnown)
+            {
+                if (reference.Optional)
+                {
+                    continue;
+                }
+
+                diagnostics.Add(new RegistryReferenceDiagnostic(
+                    resolution.IsUnloaded ? "UNLOADED_REFERENCE" : "ERR_MISSING_REFERENCE",
+                    path[0],
+                    reference.Id,
+                    ChainWithStatuses(path.Concat([reference.Id]), additionalDefinitions),
+                    resolution.IsUnloaded
+                        ? "Reference target belongs to an unloaded domain or kind."
+                        : "Required reference target could not be resolved."));
+                continue;
+            }
+
+            if (sourceStatus == ContentStatus.Active)
+            {
+                var statusError = resolution.Status switch
+                {
+                    ContentStatus.Draft => "ERR_REFERENCE_TO_DRAFT",
+                    ContentStatus.Deprecated => "ERR_REFERENCE_TO_DEPRECATED",
+                    ContentStatus.Retired => "ERR_REFERENCE_TO_RETIRED",
+                    _ => null,
+                };
+
+                if (statusError is not null)
+                {
+                    diagnostics.Add(new RegistryReferenceDiagnostic(
+                        statusError,
+                        path[0],
+                        reference.Id,
+                        ChainWithStatuses(path.Concat([reference.Id]), additionalDefinitions),
+                        "Active content cannot depend on a target with this lifecycle status."));
+                }
+            }
+
+            if (resolution.Entity is null)
+            {
+                continue;
+            }
+
+            path.Add(reference.Id);
+            VisitReferences(resolution.Entity, additionalDefinitions, path, diagnostics);
+            path.RemoveAt(path.Count - 1);
+        }
+    }
+
+    private ReferenceTargetResolution ResolveReferenceTarget(
+        string entityId,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>> additionalDefinitions)
+    {
+        if (additionalDefinitions.TryGetValue(entityId, out var additional))
+        {
+            return ReferenceTargetResolution.Found(additional, ReadContentStatus(additional));
+        }
+
+        if (content.TryGetValue(entityId, out var entity))
+        {
+            return ReferenceTargetResolution.Found(entity, ReadContentStatus(entity));
+        }
+
+        if (retiredIds.TryGetValue(entityId, out var retiredRecord))
+        {
+            return ReferenceTargetResolution.Found(null, retiredRecord.Status);
+        }
+
+        return IsLoadedIdFamily(entityId)
+            ? ReferenceTargetResolution.Missing()
+            : ReferenceTargetResolution.Unloaded();
+    }
+
+    private IReadOnlyList<string> ChainWithStatuses(
+        IEnumerable<string> ids,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>> additionalDefinitions)
+    {
+        return ids.Select(id =>
+        {
+            var status = ResolveReferenceTarget(id, additionalDefinitions).Status;
+            return status is null ? id : $"{id}({status})";
+        }).ToArray();
+    }
+
+    private static IEnumerable<RegistryReferenceSpec> ExtractReferenceSpecs(IReadOnlyDictionary<string, object?> entity)
+    {
+        if (!entity.TryGetValue("references", out var references) || references is null)
+        {
+            yield break;
+        }
+
+        if (references is string singleReference)
+        {
+            yield return new RegistryReferenceSpec(singleReference, Optional: false);
+            yield break;
+        }
+
+        if (references is not System.Collections.IEnumerable enumerable)
+        {
+            yield break;
+        }
+
+        foreach (var item in enumerable)
+        {
+            switch (item)
+            {
+                case null:
+                    continue;
+                case string id:
+                    yield return new RegistryReferenceSpec(id, Optional: false);
+                    continue;
+                case IReadOnlyDictionary<string, object?> typedReference:
+                    yield return ReferenceSpecFromDictionary(typedReference);
+                    continue;
+                case System.Collections.IDictionary dictionaryReference:
+                    yield return ReferenceSpecFromDictionary(DictionaryToObjectMap(dictionaryReference));
+                    continue;
+            }
+        }
+    }
+
+    private static RegistryReferenceSpec ReferenceSpecFromDictionary(IReadOnlyDictionary<string, object?> reference)
+    {
+        var id = ReadFirstString(reference, ["id", "target_id", "ref_id", "content_id"]);
+        return new RegistryReferenceSpec(id, ReadBool(reference, "optional"));
+    }
+
+    private static HashSet<string> ReadStringSet(IReadOnlyDictionary<string, object?> entity, string key)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        if (value is string text)
+        {
+            return new HashSet<string>([text], StringComparer.Ordinal);
+        }
+
+        if (value is System.Collections.IEnumerable enumerable)
+        {
+            return enumerable
+                .Cast<object?>()
+                .Where(item => item is not null)
+                .Select(item => item?.ToString() ?? string.Empty)
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .ToHashSet(StringComparer.Ordinal);
+        }
+
+        return new HashSet<string>(StringComparer.Ordinal);
+    }
+
+    private static string ReadFirstString(IReadOnlyDictionary<string, object?> entity, IEnumerable<string> keys)
+    {
+        foreach (var key in keys)
+        {
+            var value = ReadString(entity, key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static bool ReadBool(IReadOnlyDictionary<string, object?> entity, string key)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return false;
+        }
+
+        return value switch
+        {
+            bool boolValue => boolValue,
+            string stringValue when bool.TryParse(stringValue, out var parsed) => parsed,
+            _ => false,
+        };
     }
 
     private static ContentStatus ReadContentStatus(IReadOnlyDictionary<string, object?> entity)
@@ -1048,6 +1423,30 @@ public sealed class Registry
 
         var kind = entityId[..separator];
         return loadedKinds.Contains(kind) || domainKindMap.Values.Any(kinds => kinds.Contains(kind));
+    }
+
+    private sealed record ReferenceTargetResolution(
+        bool IsKnown,
+        bool IsUnloaded,
+        IReadOnlyDictionary<string, object?>? Entity,
+        ContentStatus? Status)
+    {
+        public static ReferenceTargetResolution Found(
+            IReadOnlyDictionary<string, object?>? entity,
+            ContentStatus status)
+        {
+            return new ReferenceTargetResolution(true, false, entity, status);
+        }
+
+        public static ReferenceTargetResolution Missing()
+        {
+            return new ReferenceTargetResolution(false, false, null, null);
+        }
+
+        public static ReferenceTargetResolution Unloaded()
+        {
+            return new ReferenceTargetResolution(false, true, null, null);
+        }
     }
 
     private IReadOnlyList<IReadOnlyDictionary<string, object?>> ApplyResultLimit(

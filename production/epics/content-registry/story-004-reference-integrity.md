@@ -1,7 +1,7 @@
 # Story 004: Reference Integrity
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -31,13 +31,13 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN 所需引用都可解析、引用状态允许且不存在非法自循环，WHEN 计算 `reference_validity`，THEN 结果为 true
-- [ ] **AC-2**: GIVEN 任一引用缺失、状态非法或形成循环，WHEN 运行引用校验，THEN 结果为 false，并定位到具体引用链
-- [ ] **AC-3**: GIVEN 必需引用无法解析，WHEN 校验，THEN 返回 `ERR_MISSING_REFERENCE`——引用者不能进入 Active
-- [ ] **AC-4**: GIVEN 引用目标处于 Draft，WHEN Active 内容引用它，THEN 返回 `ERR_REFERENCE_TO_DRAFT`——禁止 Active 依赖 Draft
-- [ ] **AC-5**: GIVEN 引用形成自循环或闭环依赖，WHEN 校验，THEN 返回 `ERR_REFERENCE_CYCLE` 并报告完整循环链路
-- [ ] **AC-6**: GIVEN 引用目标所属域 UNLOADED，WHEN 解析引用，THEN 返回 `UNLOADED_REFERENCE`——不得自动加载或隐式扫描
-- [ ] **AC-7**: GIVEN 查询条件不足导致多个候选内容匹配，WHEN 查询，THEN 返回 `AMBIGUOUS_QUERY`——不得猜测第一个结果
+- [x] **AC-1**: GIVEN 所需引用都可解析、引用状态允许且不存在非法自循环，WHEN 计算 `reference_validity`，THEN 结果为 true
+- [x] **AC-2**: GIVEN 任一引用缺失、状态非法或形成循环，WHEN 运行引用校验，THEN 结果为 false，并定位到具体引用链
+- [x] **AC-3**: GIVEN 必需引用无法解析，WHEN 校验，THEN 返回 `ERR_MISSING_REFERENCE`——引用者不能进入 Active
+- [x] **AC-4**: GIVEN 引用目标处于 Draft，WHEN Active 内容引用它，THEN 返回 `ERR_REFERENCE_TO_DRAFT`——禁止 Active 依赖 Draft
+- [x] **AC-5**: GIVEN 引用形成自循环或闭环依赖，WHEN 校验，THEN 返回 `ERR_REFERENCE_CYCLE` 并报告完整循环链路
+- [x] **AC-6**: GIVEN 引用目标所属域 UNLOADED，WHEN 解析引用，THEN 返回 `UNLOADED_REFERENCE`——不得自动加载或隐式扫描
+- [x] **AC-7**: GIVEN 查询条件不足导致多个候选内容匹配，WHEN 查询，THEN 返回 `AMBIGUOUS_QUERY`——不得猜测第一个结果
 
 ---
 
@@ -97,7 +97,9 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/registry/ReferenceIntegrityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created — C# implementation with 7/7 AC checks passing
+**C# Source**: `src/core/content/Registry.cs`
+**Test Source**: `tests/unit/registry/ReferenceIntegrityProgram.cs`
 
 ---
 
@@ -105,3 +107,12 @@
 
 - Depends on: Story 001 (ID Registry Core), Story 003 (Content Lifecycle —— 需要状态判定引用合法性)
 - Unlocks: Story 005 (Domain Loading 需要引用完整性校验完成)
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-11
+**Criteria**: 7/7 passing
+**Deviations**: None
+**Test Evidence**: Logic unit test at `tests/unit/registry/ReferenceIntegrityTest.csproj`
+**Code Review**: Complete — local code-review pass; reference-chain status annotation gap fixed before closure

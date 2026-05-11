@@ -399,3 +399,17 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Code review: Complete — local review; nested typed-dictionary runtime-field scan fixed before closure
 - Tech debt logged: None
 - Next recommended: `production/epics/content-registry/story-003-content-lifecycle.md` — Story 003: Content Lifecycle
+
+## Session Extract — /dev-story 2026-05-11
+- Story: `production/epics/content-registry/story-004-reference-integrity.md` — Story 004: Reference Integrity
+- Files changed: `src/core/content/Registry.cs`, `tests/unit/registry/ReferenceIntegrityProgram.cs`, `tests/unit/registry/ReferenceIntegrityTest.csproj`, `production/epics/content-registry/story-004-reference-integrity.md`
+- Test written: `tests/unit/registry/ReferenceIntegrityTest.csproj` — 7 Story 004 acceptance checks
+- Blockers: None
+- Next: /code-review `src/core/content/Registry.cs` `tests/unit/registry/ReferenceIntegrityProgram.cs` then /story-done `production/epics/content-registry/story-004-reference-integrity.md`
+
+## Session Extract — /story-done 2026-05-11
+- Verdict: COMPLETE
+- Story: `production/epics/content-registry/story-004-reference-integrity.md` — Story 004: Reference Integrity
+- Code review: Complete — reference-chain status annotation gap fixed before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/content-registry/story-005-domain-loading-decision-gating.md` — Story 005: Domain Loading & Decision UI Gating

@@ -13,7 +13,7 @@
 | 001 | [ID Registry Core + Query Engine](story-001-id-registry-core-query.md) | Logic | Done | ADR-0001 |
 | 002 | [Schema Validation](story-002-schema-validation.md) | Logic | Done | ADR-0001 |
 | 003 | [Content Lifecycle](story-003-content-lifecycle.md) | Logic | Done | ADR-0001 |
-| 004 | [Reference Integrity](story-004-reference-integrity.md) | Logic | Ready | ADR-0001 |
+| 004 | [Reference Integrity](story-004-reference-integrity.md) | Logic | Done | ADR-0001 |
 | 005 | [Domain Loading & Decision UI Gating](story-005-domain-loading-decision-gating.md) | Integration | Ready | ADR-0001, ADR-0002 |
 | 006 | [Diagnostic System](story-006-diagnostic-system.md) | Logic | Ready | ADR-0001 |
 | 007 | [Diagnostic UI — Dev Tools](story-007-diagnostic-ui.md) | UI | Ready | ADR-0001, ADR-0012 |
@@ -50,4 +50,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/story-readiness production/epics/content-registry/story-003-content-lifecycle.md`, then implement Story 003.
+Run `/story-readiness production/epics/content-registry/story-005-domain-loading-decision-gating.md`, then implement Story 005.
