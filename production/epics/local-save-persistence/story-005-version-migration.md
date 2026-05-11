@@ -1,7 +1,7 @@
 # Story 005: Version Migration
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -27,15 +27,15 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN `migration_required=true`、`migration_chain_available=false`、`parse_ok=true`、`integrity_ok=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，不得为 `AlreadyCurrent`
-- [ ] **AC-2**: GIVEN `migration_required=true`、`migration_chain_available=true`、`staging_ok=true`、`verify_ok=true`、`promotion_success=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `Upgraded`，写入迁移记录
-- [ ] **AC-3**: GIVEN `migration_required=true` 且迁移过程中 `staging_ok=false`、`verify_ok=false` 或 `promotion_success=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，原工件保持不改写
-- [ ] **AC-4**: GIVEN `migration_required=false`、`parse_ok=true`、`integrity_ok=true`、`direct_restore_compatible=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `AlreadyCurrent`
-- [ ] **AC-5**: GIVEN `migration_required=false`、`parse_ok=true`、`integrity_ok=true` 但 `direct_restore_compatible=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，不得为 `AlreadyCurrent`
-- [ ] **AC-6**: GIVEN `parse_ok=false` 或 `integrity_ok=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `Quarantined`（损坏工件不管版本直接隔离）
-- [ ] **AC-7**: GIVEN `migration_required=true` 且迁移链可用，WHEN 执行迁移，THEN 迁移在 staging 副本上执行；原工件在 promotion 成功前不被修改
-- [ ] **AC-8**: GIVEN 迁移成功 promotion 后，WHEN 记录迁移结果，THEN 迁移记录包含: 旧版本号、新版本号、迁移链版本列表、各步骤耗时、最终 outcome
-- [ ] **AC-9**: GIVEN 同一 launch 中迁移已失败过一次（`migration_retry_limit=1`），WHEN 再次请求迁移，THEN 拒绝重试并保持 `PreservedLocked`
+- [x] **AC-1**: GIVEN `migration_required=true`、`migration_chain_available=false`、`parse_ok=true`、`integrity_ok=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，不得为 `AlreadyCurrent`
+- [x] **AC-2**: GIVEN `migration_required=true`、`migration_chain_available=true`、`staging_ok=true`、`verify_ok=true`、`promotion_success=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `Upgraded`，写入迁移记录
+- [x] **AC-3**: GIVEN `migration_required=true` 且迁移过程中 `staging_ok=false`、`verify_ok=false` 或 `promotion_success=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，原工件保持不改写
+- [x] **AC-4**: GIVEN `migration_required=false`、`parse_ok=true`、`integrity_ok=true`、`direct_restore_compatible=true`，WHEN 计算 `migration_outcome`，THEN 结果为 `AlreadyCurrent`
+- [x] **AC-5**: GIVEN `migration_required=false`、`parse_ok=true`、`integrity_ok=true` 但 `direct_restore_compatible=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `PreservedLocked`，不得为 `AlreadyCurrent`
+- [x] **AC-6**: GIVEN `parse_ok=false` 或 `integrity_ok=false`，WHEN 计算 `migration_outcome`，THEN 结果为 `Quarantined`（损坏工件不管版本直接隔离）
+- [x] **AC-7**: GIVEN `migration_required=true` 且迁移链可用，WHEN 执行迁移，THEN 迁移在 staging 副本上执行；原工件在 promotion 成功前不被修改
+- [x] **AC-8**: GIVEN 迁移成功 promotion 后，WHEN 记录迁移结果，THEN 迁移记录包含: 旧版本号、新版本号、迁移链版本列表、各步骤耗时、最终 outcome
+- [x] **AC-9**: GIVEN 同一 launch 中迁移已失败过一次（`migration_retry_limit=1`），WHEN 再次请求迁移，THEN 拒绝重试并保持 `PreservedLocked`
 
 ---
 
@@ -90,7 +90,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/persistence/MigrationTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 12/12 — 2026-05-11
 
 ---
 

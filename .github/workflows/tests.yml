@@ -66,3 +66,9 @@ jobs:
 
       - name: Run persistence storage capability unit tests
         run: dotnet run --project tests/unit/persistence/StorageCapabilityTest.csproj
+
+      - name: Run persistence migration unit tests
+        run: dotnet run --project tests/unit/persistence/MigrationTest.csproj
+
+      - name: Run persistence continue availability integration tests
+        run: dotnet run --project tests/integration/persistence/ContinueAvailabilityTest.csproj

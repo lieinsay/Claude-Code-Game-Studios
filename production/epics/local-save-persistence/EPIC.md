@@ -44,8 +44,8 @@ This epic is complete when:
 | 001 | [Staging → Verify → Promotion Pipeline](story-001-save-pipeline.md) | Logic | TR-persistence-001 | ADR-0003 | Complete |
 | 002 | [Snapshot Package Contract](story-002-snapshot-package-contract.md) | Logic | TR-persistence-002 | ADR-0003 | Complete |
 | 003 | [Storage Capability Detection](story-003-storage-capability-detection.md) | Logic | TR-persistence-003 | ADR-0003, ADR-0006 | Complete |
-| 004 | [Continue Availability & Restore Readiness](story-004-continue-availability-restore-readiness.md) | Integration | TR-persistence-004 | ADR-0003 | Ready |
-| 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Ready |
+| 004 | [Continue Availability & Restore Readiness](story-004-continue-availability-restore-readiness.md) | Integration | TR-persistence-004 | ADR-0003 | Complete |
+| 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Complete |
 | 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Ready |
 | 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Ready |
 | 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Ready |

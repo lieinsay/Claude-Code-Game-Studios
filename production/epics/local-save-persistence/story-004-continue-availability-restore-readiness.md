@@ -1,7 +1,7 @@
 # Story 004: Continue Availability & Restore Readiness
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -27,16 +27,16 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN `archive_present=true`、`artifact_state=Safe`、`integrity_ok=true`、`version_compatible=true`、`stable_ids_resolved=true`、`migration_required=false`、`quarantined=false`，WHEN 计算 `restore_readiness(progress)`，THEN 结果为 true
-- [ ] **AC-2**: GIVEN `archive_present=false`，WHEN 计算 `continue_availability`，THEN 结果为 `Hidden`
-- [ ] **AC-3**: GIVEN `progress.storage_capability=PersistentAvailable`、`archive_present=true`、`restore_readiness(progress)=true`，WHEN 计算 `continue_availability`，THEN 结果为 `Enabled`
-- [ ] **AC-4**: GIVEN `progress.storage_capability=WriteLocked`、`archive_present=true`、`restore_readiness(progress)=true`，WHEN 计算 `continue_availability`，THEN 结果为 `Enabled`，且新持久保存进入 `SaveLocked` 写屏障
-- [ ] **AC-5**: GIVEN `archive_present=true` 且 `restore_readiness(progress)=false` 因为 `migration_required=true`、版本不兼容、内容域不兼容或稳定 ID 需要迁移，WHEN 计算 `continue_availability`，THEN 结果为 `PreservedLocked` 并带 reason_code
-- [ ] **AC-6**: GIVEN Title / Ready Continue Entry 需要呈现 Continue，WHEN 壳层读取状态，THEN 必须消费 `query_continue_state().continue_availability`，不得根据文件存在、slot metadata、settings 或本地内容域状态重算
-- [ ] **AC-7**: GIVEN 存档工件解析失败、结构损坏或完整性校验失败，WHEN 启动恢复前检查，THEN 工件状态变为 `Quarantined`，不得作为 `Enabled` 继续点
-- [ ] **AC-8**: GIVEN `query_continue_state()` 被调用，WHEN 返回结果，THEN 输出至少包含 `continue_availability`、`storage_capability`、`write_barrier_mode`、`reason_code`、`checkpoint_summary`、`last_verified_checkpoint`、`current_generation` 和 `artifact_kind=progress`
-- [ ] **AC-9**: GIVEN settings artifact 进入 Quarantined 且 progress artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 仍按 progress 输出，不得因 settings 损坏变为 Hidden 或 PreservedLocked
-- [ ] **AC-10**: GIVEN progress artifact 进入 Quarantined 且 settings artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 不得为 Enabled，但 settings 不得被删除或覆盖
+- [x] **AC-1**: GIVEN `archive_present=true`、`artifact_state=Safe`、`integrity_ok=true`、`version_compatible=true`、`stable_ids_resolved=true`、`migration_required=false`、`quarantined=false`，WHEN 计算 `restore_readiness(progress)`，THEN 结果为 true
+- [x] **AC-2**: GIVEN `archive_present=false`，WHEN 计算 `continue_availability`，THEN 结果为 `Hidden`
+- [x] **AC-3**: GIVEN `progress.storage_capability=PersistentAvailable`、`archive_present=true`、`restore_readiness(progress)=true`，WHEN 计算 `continue_availability`，THEN 结果为 `Enabled`
+- [x] **AC-4**: GIVEN `progress.storage_capability=WriteLocked`、`archive_present=true`、`restore_readiness(progress)=true`，WHEN 计算 `continue_availability`，THEN 结果为 `Enabled`，且新持久保存进入 `SaveLocked` 写屏障
+- [x] **AC-5**: GIVEN `archive_present=true` 且 `restore_readiness(progress)=false` 因为 `migration_required=true`、版本不兼容、内容域不兼容或稳定 ID 需要迁移，WHEN 计算 `continue_availability`，THEN 结果为 `PreservedLocked` 并带 reason_code
+- [x] **AC-6**: GIVEN Title / Ready Continue Entry 需要呈现 Continue，WHEN 壳层读取状态，THEN 必须消费 `query_continue_state().continue_availability`，不得根据文件存在、slot metadata、settings 或本地内容域状态重算
+- [x] **AC-7**: GIVEN 存档工件解析失败、结构损坏或完整性校验失败，WHEN 启动恢复前检查，THEN 工件状态变为 `Quarantined`，不得作为 `Enabled` 继续点
+- [x] **AC-8**: GIVEN `query_continue_state()` 被调用，WHEN 返回结果，THEN 输出至少包含 `continue_availability`、`storage_capability`、`write_barrier_mode`、`reason_code`、`checkpoint_summary`、`last_verified_checkpoint`、`current_generation` 和 `artifact_kind=progress`
+- [x] **AC-9**: GIVEN settings artifact 进入 Quarantined 且 progress artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 仍按 progress 输出，不得因 settings 损坏变为 Hidden 或 PreservedLocked
+- [x] **AC-10**: GIVEN progress artifact 进入 Quarantined 且 settings artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 不得为 Enabled，但 settings 不得被删除或覆盖
 
 ---
 
@@ -102,7 +102,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/persistence/ContinueAvailabilityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 10/10 — 2026-05-11
 
 ---
 
