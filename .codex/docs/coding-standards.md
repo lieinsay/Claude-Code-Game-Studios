@@ -1,6 +1,9 @@
 # Coding Standards
 
 - All game code must include doc comments on public APIs
+- All code comments and public API doc comments must be written in Chinese.
+  Keep code identifiers, API names, and quoted external messages in their
+  original language when needed for clarity.
 - Every system must have a corresponding architecture decision record in `docs/architecture/`
 - Gameplay values must be data-driven (external config), never hardcoded
 - All public methods must be unit-testable (dependency injection over singletons)
