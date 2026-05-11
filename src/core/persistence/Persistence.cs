@@ -153,6 +153,30 @@ public sealed class Persistence
     }
 
     /// <summary>
+    /// Validates all domain packages in a collection for contract compliance and duplicate IDs.
+    /// Returns the first failing result, or Ok when all pass.
+    /// </summary>
+    public static SnapshotValidationResult ValidateDomainPackages(IEnumerable<SnapshotPackage> packages)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var pkg in packages)
+        {
+            if (!seen.Add(pkg.DomainId))
+            {
+                return new SnapshotValidationResult(false, "ERR_DUPLICATE_DOMAIN_PACKAGE");
+            }
+
+            var result = pkg.ValidateContract();
+            if (!result.Valid)
+            {
+                return result;
+            }
+        }
+
+        return SnapshotValidationResult.Ok;
+    }
+
+    /// <summary>
     /// Computes a lower-case SHA-256 checksum for text.
     /// </summary>
     public static string ComputeChecksum(string data)

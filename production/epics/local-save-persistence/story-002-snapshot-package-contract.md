@@ -1,7 +1,7 @@
 # Story 002: Snapshot Package Contract
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -27,15 +27,15 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 领域系统导出包含 `domain_id`、`snapshot_schema_version`、`content_domain_versions`、`stable_id_refs`、`payload`、`domain_state=Ready` 的完整包，且 `schema_version_known=true`、`domain_error_blocking=false`、payload 只含允许类型、内容域版本兼容、稳定 ID 全解析为 Active/Deprecated，WHEN 计算 `snapshot_package_validity`，THEN 结果为 true
-- [ ] **AC-2**: GIVEN 包缺少 `domain_id`、`snapshot_schema_version`、`content_domain_versions`、`stable_id_refs`、`payload` 或 `domain_state` 任一必填字段，WHEN 计算 validity，THEN 结果为 false 并输出缺字段 reason code
-- [ ] **AC-3**: GIVEN `schema_version_known=false`，WHEN 计算 validity，THEN 结果为 false，不得进入 migration 以外的 promotion 路径
-- [ ] **AC-4**: GIVEN `domain_state=Blocked`、`NotReady` 或 `Settling`，或 `domain_error_blocking=true`，WHEN 计算 validity，THEN 结果为 false，保留旧 Safe
-- [ ] **AC-5**: GIVEN 任一 stable ID 解析为 `Retired`、`NOT_FOUND`、`UNLOADED` 或 `VERSION_INCOMPATIBLE`，WHEN 计算 validity，THEN 结果为 false；Retired 不得被当作可保存成功
-- [ ] **AC-6**: GIVEN payload 中包含 Object/Node/Resource/Callable/Signal/RID/NodePath/PackedScene 引用，WHEN 计算 validity，THEN 结果为 false 并输出 `ERR_FORBIDDEN_TYPE_IN_PAYLOAD`
-- [ ] **AC-7**: GIVEN payload dictionary key 在 NFC 规范化后重复、key 不是 string、key 未 canonical bytewise ascending 排序、float 为 NaN/Inf/-Inf、或 `-0.0` 未规范化为 `0.0`，WHEN 计算 validity，THEN 结果为 false
-- [ ] **AC-8**: GIVEN checksum 只覆盖裸 payload 而未覆盖 snapshot_schema_version、content_domain_versions、stable_id_refs、artifact_kind、artifact_generation 和 manifest_pointer_target，WHEN 计算 validity，THEN 结果为 false（checksum 范围不足）
-- [ ] **AC-9**: GIVEN 同一保存工件中同一 `domain_id` 出现两次，WHEN 收集 Snapshot Package，THEN 拒绝重复包，输出 `ERR_DUPLICATE_DOMAIN_PACKAGE`
+- [x] **AC-1**: GIVEN 领域系统导出包含 `domain_id`、`snapshot_schema_version`、`content_domain_versions`、`stable_id_refs`、`payload`、`domain_state=Ready` 的完整包，且 `schema_version_known=true`、`domain_error_blocking=false`、payload 只含允许类型、内容域版本兼容、稳定 ID 全解析为 Active/Deprecated，WHEN 计算 `snapshot_package_validity`，THEN 结果为 true
+- [x] **AC-2**: GIVEN 包缺少 `domain_id`、`snapshot_schema_version`、`content_domain_versions`、`stable_id_refs`、`payload` 或 `domain_state` 任一必填字段，WHEN 计算 validity，THEN 结果为 false 并输出缺字段 reason code
+- [x] **AC-3**: GIVEN `schema_version_known=false`，WHEN 计算 validity，THEN 结果为 false，不得进入 migration 以外的 promotion 路径
+- [x] **AC-4**: GIVEN `domain_state=Blocked`、`NotReady` 或 `Settling`，或 `domain_error_blocking=true`，WHEN 计算 validity，THEN 结果为 false，保留旧 Safe
+- [x] **AC-5**: GIVEN 任一 stable ID 解析为 `Retired`、`NOT_FOUND`、`UNLOADED` 或 `VERSION_INCOMPATIBLE`，WHEN 计算 validity，THEN 结果为 false；Retired 不得被当作可保存成功
+- [x] **AC-6**: GIVEN payload 中包含 Object/Node/Resource/Callable/Signal/RID/NodePath/PackedScene 引用，WHEN 计算 validity，THEN 结果为 false 并输出 `ERR_FORBIDDEN_TYPE_IN_PAYLOAD`
+- [x] **AC-7**: GIVEN payload dictionary key 在 NFC 规范化后重复、key 不是 string、key 未 canonical bytewise ascending 排序、float 为 NaN/Inf/-Inf、或 `-0.0` 未规范化为 `0.0`，WHEN 计算 validity，THEN 结果为 false
+- [x] **AC-8**: GIVEN checksum 只覆盖裸 payload 而未覆盖 snapshot_schema_version、content_domain_versions、stable_id_refs、artifact_kind、artifact_generation 和 manifest_pointer_target，WHEN 计算 validity，THEN 结果为 false（checksum 范围不足）
+- [x] **AC-9**: GIVEN 同一保存工件中同一 `domain_id` 出现两次，WHEN 收集 Snapshot Package，THEN 拒绝重复包，输出 `ERR_DUPLICATE_DOMAIN_PACKAGE`
 
 ---
 
@@ -86,7 +86,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/persistence/SnapshotPackageTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 18/18 — 2026-05-11
 
 ---
 

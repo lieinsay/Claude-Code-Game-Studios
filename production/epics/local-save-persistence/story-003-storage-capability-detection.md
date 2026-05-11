@@ -1,7 +1,7 @@
 # Story 003: Storage Capability Detection
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -27,16 +27,16 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN `raw_persistent_api_ok=true`、`storage_backend_probe_ok=true`、`existing_archive_read_class IN {Readable, NotApplicable}`、`quota_ok=true`、`quota_reserve_ok=true`、`write_roundtrip_ok=true`、`policy_forces_ephemeral=false`，WHEN 计算 `storage_capability`，THEN 结果为 `PersistentAvailable`
-- [ ] **AC-2**: GIVEN `raw_persistent_api_ok=true`、`storage_backend_probe_ok=true`、`existing_archive_read_class IN {Readable, NotApplicable}`、`policy_forces_ephemeral=false`，但 `quota_ok=false`、`quota_reserve_ok=false` 或 `write_roundtrip_ok=false`，WHEN 计算 `storage_capability`，THEN 结果为 `WriteLocked`
-- [ ] **AC-3**: GIVEN `raw_persistent_api_ok=false`、`storage_backend_probe_ok=false`、`existing_archive_read_class=Unreadable` 或 `policy_forces_ephemeral=true`，WHEN 计算 `storage_capability`，THEN 结果为 `EphemeralOnly`
-- [ ] **AC-4**: GIVEN fresh install 无旧 manifest，`existing_archive_read_class=NotApplicable`、其他探测全部通过，WHEN 计算 `storage_capability`，THEN 结果为 `PersistentAvailable`（不得因无旧档输出 EphemeralOnly）
-- [ ] **AC-5**: GIVEN `OS.is_userfs_persistent()` 返回 true 但 write/flush/readback/checksum roundtrip 未完成，WHEN 计算 `storage_capability`，THEN 结果不得为 `PersistentAvailable`
-- [ ] **AC-6**: GIVEN `quota_reserve_ok=false` 且 `existing_archive_read_class=Readable`，WHEN 计算 `storage_capability`，THEN 结果为 `WriteLocked`，旧 Safe 继续点不被覆盖
-- [ ] **AC-7**: GIVEN `quota_reserve_ok=false` 且 `existing_archive_read_class=Unreadable`，WHEN 计算 `storage_capability`，THEN 结果为 `EphemeralOnly`，不显示可用持久 Continue
-- [ ] **AC-8**: GIVEN probe TTL 已过期、write failure、readback mismatch、quota failure 或 policy change 发生，WHEN 下次 capability 查询，THEN probe 失效并重探；过期 probe 不得作为 `PersistentAvailable` 依据
-- [ ] **AC-9**: GIVEN `available_working_set_bytes` 无法由平台适配层提供，WHEN 计算 `quota_reserve_ok`，THEN 使用 16 MiB fallback 并在诊断中标记 `WORKING_SET_BUDGET_FALLBACK`
-- [ ] **AC-10**: GIVEN 平台壳需要显示存储能力或 Continue 状态，WHEN 查询，THEN 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据桌面平台 API、文件存在或本地公式重算
+- [x] **AC-1**: GIVEN `raw_persistent_api_ok=true`、`storage_backend_probe_ok=true`、`existing_archive_read_class IN {Readable, NotApplicable}`、`quota_ok=true`、`quota_reserve_ok=true`、`write_roundtrip_ok=true`、`policy_forces_ephemeral=false`，WHEN 计算 `storage_capability`，THEN 结果为 `PersistentAvailable`
+- [x] **AC-2**: GIVEN `raw_persistent_api_ok=true`、`storage_backend_probe_ok=true`、`existing_archive_read_class IN {Readable, NotApplicable}`、`policy_forces_ephemeral=false`，但 `quota_ok=false`、`quota_reserve_ok=false` 或 `write_roundtrip_ok=false`，WHEN 计算 `storage_capability`，THEN 结果为 `WriteLocked`
+- [x] **AC-3**: GIVEN `raw_persistent_api_ok=false`、`storage_backend_probe_ok=false`、`existing_archive_read_class=Unreadable` 或 `policy_forces_ephemeral=true`，WHEN 计算 `storage_capability`，THEN 结果为 `EphemeralOnly`
+- [x] **AC-4**: GIVEN fresh install 无旧 manifest，`existing_archive_read_class=NotApplicable`、其他探测全部通过，WHEN 计算 `storage_capability`，THEN 结果为 `PersistentAvailable`（不得因无旧档输出 EphemeralOnly）
+- [x] **AC-5**: GIVEN `OS.is_userfs_persistent()` 返回 true 但 write/flush/readback/checksum roundtrip 未完成，WHEN 计算 `storage_capability`，THEN 结果不得为 `PersistentAvailable`
+- [x] **AC-6**: GIVEN `quota_reserve_ok=false` 且 `existing_archive_read_class=Readable`，WHEN 计算 `storage_capability`，THEN 结果为 `WriteLocked`，旧 Safe 继续点不被覆盖
+- [x] **AC-7**: GIVEN `quota_reserve_ok=false` 且 `existing_archive_read_class=Unreadable`，WHEN 计算 `storage_capability`，THEN 结果为 `EphemeralOnly`，不显示可用持久 Continue
+- [x] **AC-8**: GIVEN probe TTL 已过期、write failure、readback mismatch、quota failure 或 policy change 发生，WHEN 下次 capability 查询，THEN probe 失效并重探；过期 probe 不得作为 `PersistentAvailable` 依据
+- [x] **AC-9**: GIVEN `available_working_set_bytes` 无法由平台适配层提供，WHEN 计算 `quota_reserve_ok`，THEN 使用 16 MiB fallback 并在诊断中标记 `WORKING_SET_BUDGET_FALLBACK`
+- [x] **AC-10**: GIVEN 平台壳需要显示存储能力或 Continue 状态，WHEN 查询，THEN 壳层必须读取本系统返回的 `storage_capability` 和 `query_continue_state()`，不得根据桌面平台 API、文件存在或本地公式重算
 
 ---
 
@@ -89,7 +89,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/persistence/StorageCapabilityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 17/17 — 2026-05-11
 
 ---
 

@@ -57,3 +57,12 @@ jobs:
 
       - name: Run registry domain loading integration tests
         run: dotnet run --project tests/integration/registry/DomainLoadingTest.csproj
+
+      - name: Run persistence save pipeline unit tests
+        run: dotnet run --project tests/unit/persistence/SavePipelineTest.csproj
+
+      - name: Run persistence snapshot package unit tests
+        run: dotnet run --project tests/unit/persistence/SnapshotPackageTest.csproj
+
+      - name: Run persistence storage capability unit tests
+        run: dotnet run --project tests/unit/persistence/StorageCapabilityTest.csproj

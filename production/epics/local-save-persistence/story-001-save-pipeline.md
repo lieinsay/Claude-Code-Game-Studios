@@ -1,7 +1,7 @@
 # Story 001: Staging → Verify → Promotion Pipeline
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -27,11 +27,11 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN staging_written+readback_verified+checksum_ok+schema_compatible+stable_id_resolved+no_domain_blockers，WHEN 计算 promotion_success，THEN 结果为 true
-- [ ] **AC-2**: GIVEN staging 缺字段/部分写入/checksum 不一致/Schema 不兼容/稳定 ID 不可解析/领域 blocker，WHEN promotion，THEN promotion_success=false，旧 Safe 不变
-- [ ] **AC-3**: GIVEN 新保存从 Staging 开始，WHEN staging 已写入但尚未进入 Verify，THEN current_generation、manifest pointer、last_verified_checkpoint 仍指向旧 Safe
-- [ ] **AC-4**: GIVEN promotion_success=true，WHEN promotion 提交发生，THEN 只能通过权威 current pointer/generation 切换让新工件成为当前继续点
-- [ ] **AC-5**: GIVEN manifest pointer 指向的 generation 低于 last_verified_checkpoint.generation 或 checksum 不匹配，WHEN 启动恢复检查，THEN 该 pointer 必须被拒绝
+- [x] **AC-1**: GIVEN staging_written+readback_verified+checksum_ok+schema_compatible+stable_id_resolved+no_domain_blockers，WHEN 计算 promotion_success，THEN 结果为 true
+- [x] **AC-2**: GIVEN staging 缺字段/部分写入/checksum 不一致/Schema 不兼容/稳定 ID 不可解析/领域 blocker，WHEN promotion，THEN promotion_success=false，旧 Safe 不变
+- [x] **AC-3**: GIVEN 新保存从 Staging 开始，WHEN staging 已写入但尚未进入 Verify，THEN current_generation、manifest pointer、last_verified_checkpoint 仍指向旧 Safe
+- [x] **AC-4**: GIVEN promotion_success=true，WHEN promotion 提交发生，THEN 只能通过权威 current pointer/generation 切换让新工件成为当前继续点
+- [x] **AC-5**: GIVEN manifest pointer 指向的 generation 低于 last_verified_checkpoint.generation 或 checksum 不匹配，WHEN 启动恢复检查，THEN 该 pointer 必须被拒绝
 
 ---
 
@@ -74,7 +74,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/persistence/SavePipelineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 11/11 — 2026-05-11
 
 ---
 
@@ -82,3 +82,12 @@
 
 - Depends on: None — Story 001 是 persistence 的前置
 - Unlocks: Story 004 (Continue Availability), Story 005 (Migration)
+
+---
+
+## Completion Notes
+**Completed**: 2026-05-11
+**Criteria**: 5/5 passing
+**Deviations**: None — Persistence.cs from Foundation Spike already implements the full Staging→Verify→Promotion pipeline with canonical JSON and SHA-256; test programme verifies all ACs against the existing implementation
+**Test Evidence**: Logic: `tests/unit/persistence/SavePipelineTest.csproj` — 11/11 PASS
+**Code Review**: Skipped — Lean mode

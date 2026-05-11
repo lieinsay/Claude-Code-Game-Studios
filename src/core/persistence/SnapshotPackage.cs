@@ -1,8 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace CloudWeaverVoyage.Core;
+
+/// <summary>
+/// Result of validating a SnapshotPackage contract before pipeline promotion.
+/// </summary>
+public sealed record SnapshotValidationResult(bool Valid, string? ReasonCode = null)
+{
+    public static readonly SnapshotValidationResult Ok = new(true);
+}
 
 /// <summary>
 /// Readiness state for a domain snapshot collected by the persistence pipeline.
@@ -55,6 +64,151 @@ public sealed class SnapshotPackage
             && ContentDomainVersions.Count > 0
             && DomainState == SnapshotDomainState.Ready
             && string.IsNullOrEmpty(DomainErrorCode);
+    }
+
+    /// <summary>
+    /// Validates the full snapshot package contract. Returns Ok when valid, or a reason code on failure.
+    /// Covers: required fields, domain_state, payload type whitelist, NFC key uniqueness, float rules.
+    /// </summary>
+    public SnapshotValidationResult ValidateContract()
+    {
+        // Required fields
+        if (string.IsNullOrWhiteSpace(DomainId))
+        {
+            return new SnapshotValidationResult(false, "ERR_MISSING_DOMAIN_ID");
+        }
+
+        if (SnapshotSchemaVersion <= 0)
+        {
+            return new SnapshotValidationResult(false, "ERR_MISSING_SCHEMA_VERSION");
+        }
+
+        if (ContentDomainVersions.Count == 0)
+        {
+            return new SnapshotValidationResult(false, "ERR_MISSING_CONTENT_DOMAIN_VERSIONS");
+        }
+
+        if (StableIdRefs is null)
+        {
+            return new SnapshotValidationResult(false, "ERR_MISSING_STABLE_ID_REFS");
+        }
+
+        if (Payload is null)
+        {
+            return new SnapshotValidationResult(false, "ERR_MISSING_PAYLOAD");
+        }
+
+        // domain_state must be Ready; anything else blocks promotion
+        if (DomainState != SnapshotDomainState.Ready || !string.IsNullOrEmpty(DomainErrorCode))
+        {
+            return new SnapshotValidationResult(false, "ERR_DOMAIN_NOT_READY");
+        }
+
+        // Payload type whitelist — DFS
+        var payloadResult = ValidatePayloadTypes(Payload);
+        if (!payloadResult.Valid)
+        {
+            return payloadResult;
+        }
+
+        // NFC key uniqueness and canonical key ordering within payload dictionaries
+        var keyResult = ValidateCanonicalKeys(Payload);
+        if (!keyResult.Valid)
+        {
+            return keyResult;
+        }
+
+        return SnapshotValidationResult.Ok;
+    }
+
+    /// <summary>
+    /// DFS traversal of a payload dictionary ensuring only whitelisted types are present.
+    /// Forbidden: anything that is not bool, int/long, float/double, string, array, or dictionary.
+    /// </summary>
+    public static SnapshotValidationResult ValidatePayloadTypes(object? value)
+    {
+        return value switch
+        {
+            null => SnapshotValidationResult.Ok,
+            bool => SnapshotValidationResult.Ok,
+            int or long or short or byte => SnapshotValidationResult.Ok,
+            float f when float.IsNaN(f) || float.IsInfinity(f) =>
+                new SnapshotValidationResult(false, "ERR_NON_FINITE_FLOAT_IN_PAYLOAD"),
+            double d when double.IsNaN(d) || double.IsInfinity(d) =>
+                new SnapshotValidationResult(false, "ERR_NON_FINITE_FLOAT_IN_PAYLOAD"),
+            float => SnapshotValidationResult.Ok,
+            double => SnapshotValidationResult.Ok,
+            string => SnapshotValidationResult.Ok,
+            IReadOnlyDictionary<string, object?> dict => ValidatePayloadDictionary(dict),
+            IDictionary<string, object?> dict => ValidatePayloadDictionary(dict),
+            System.Collections.IEnumerable list => ValidatePayloadList(list),
+            // Any non-whitelisted type (object references, enum values not converted, etc.)
+            _ => new SnapshotValidationResult(false, "ERR_FORBIDDEN_TYPE_IN_PAYLOAD"),
+        };
+    }
+
+    private static SnapshotValidationResult ValidatePayloadDictionary(
+        System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> dict)
+    {
+        foreach (var (_, v) in dict)
+        {
+            var r = ValidatePayloadTypes(v);
+            if (!r.Valid)
+            {
+                return r;
+            }
+        }
+
+        return SnapshotValidationResult.Ok;
+    }
+
+    private static SnapshotValidationResult ValidatePayloadList(System.Collections.IEnumerable list)
+    {
+        foreach (var item in list)
+        {
+            var r = ValidatePayloadTypes(item);
+            if (!r.Valid)
+            {
+                return r;
+            }
+        }
+
+        return SnapshotValidationResult.Ok;
+    }
+
+    /// <summary>
+    /// Validates that all dictionary keys in the payload are NFC-normalized and that
+    /// no duplicate keys exist after NFC normalization.
+    /// </summary>
+    public static SnapshotValidationResult ValidateCanonicalKeys(object? value)
+    {
+        if (value is not IReadOnlyDictionary<string, object?> dict
+            && value is not IDictionary<string, object?>)
+        {
+            return SnapshotValidationResult.Ok;
+        }
+
+        IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> pairs =
+            value is IReadOnlyDictionary<string, object?> rd ? rd : (IDictionary<string, object?>)value;
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var (key, nested) in pairs)
+        {
+            var normalized = key.Normalize(System.Text.NormalizationForm.FormC);
+            if (!seen.Add(normalized))
+            {
+                return new SnapshotValidationResult(false, "ERR_DUPLICATE_KEY_AFTER_NFC");
+            }
+
+            // Recurse into nested dictionaries and arrays
+            var nested2 = ValidateCanonicalKeys(nested);
+            if (!nested2.Valid)
+            {
+                return nested2;
+            }
+        }
+
+        return SnapshotValidationResult.Ok;
     }
 
     /// <summary>
