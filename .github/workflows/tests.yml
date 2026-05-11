@@ -55,6 +55,9 @@ jobs:
       - name: Run shell UI model tests
         run: dotnet run --project tests/integration/session/ShellUiTest.csproj
 
+      - name: Run presentation diagnostic UI tests
+        run: dotnet run --project tests/unit/presentation/DiagnosticUITest.csproj
+
       - name: Run registry domain loading integration tests
         run: dotnet run --project tests/integration/registry/DomainLoadingTest.csproj
 

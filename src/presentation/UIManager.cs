@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CloudWeaverVoyage.Core;
 
 namespace CloudWeaverVoyage.Presentation;
 
@@ -132,5 +133,23 @@ public sealed class UIManager
     public bool IsModalOpen()
     {
         return !string.IsNullOrEmpty(modalPanel);
+    }
+
+    /// <summary>
+    /// Opens the registry diagnostic developer tools when debug-build gating allows it.
+    /// Returns null in release builds or when another non-combat modal already owns input.
+    /// </summary>
+    public RegistryDiagnosticDevTools? OpenRegistryDiagnosticTools(
+        Registry registry,
+        IEnumerable<RegistryDiagnosticEvent> diagnostics,
+        bool? isDebugBuild = null)
+    {
+        var tools = RegistryDiagnosticDevTools.TryOpen(registry, diagnostics, isDebugBuild);
+        if (tools is null)
+        {
+            return null;
+        }
+
+        return OpenModal("registry_diagnostic_tools") ? tools : null;
     }
 }
