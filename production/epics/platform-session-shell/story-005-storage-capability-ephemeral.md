@@ -1,7 +1,7 @@
 # Story 005: Storage Capability & Ephemeral Sessions
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -29,13 +29,13 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 本地存储不可用或写入被阻止，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
-- [ ] **AC-2**: GIVEN 本地存储 API/后端 probe/配额/写入 roundtrip/策略/旧档读取状态变化，WHEN 壳层收到桌面平台侧信号，THEN 壳层只把 raw persistence_probe 传给存档系统——storage_capability 由存档系统返回（PersistentAvailable/WriteLocked/EphemeralOnly）
-- [ ] **AC-3**: GIVEN 存档系统返回 storage_capability=WriteLocked 且 continue_availability=Enabled，WHEN 玩家检查 Continue，THEN 壳层允许进入已验证旧 Continue，同时显示"新进度当前无法可靠保存"——不隐藏或覆盖旧继续点
-- [ ] **AC-4**: GIVEN 存档系统返回 storage_capability=EphemeralOnly，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
-- [ ] **AC-5**: GIVEN 不存在继续点，WHEN 计算 continue_availability，THEN 结果为 Hidden
-- [ ] **AC-6**: GIVEN 继续点存在且完整性、内容域都通过，WHEN 计算 continue_availability，THEN 结果为 Enabled
-- [ ] **AC-7**: GIVEN 继续点存在但完整性失败或内容域不匹配，WHEN 计算 continue_availability，THEN 结果为 PreservedLocked——继续点仍保持存在
+- [x] **AC-1**: GIVEN 本地存储不可用或写入被阻止，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
+- [x] **AC-2**: GIVEN 本地存储 API/后端 probe/配额/写入 roundtrip/策略/旧档读取状态变化，WHEN 壳层收到桌面平台侧信号，THEN 壳层只把 raw persistence_probe 传给存档系统——storage_capability 由存档系统返回（PersistentAvailable/WriteLocked/EphemeralOnly）
+- [x] **AC-3**: GIVEN 存档系统返回 storage_capability=WriteLocked 且 continue_availability=Enabled，WHEN 玩家检查 Continue，THEN 壳层允许进入已验证旧 Continue，同时显示"新进度当前无法可靠保存"——不隐藏或覆盖旧继续点
+- [x] **AC-4**: GIVEN 存档系统返回 storage_capability=EphemeralOnly，WHEN 玩家选择 Start，THEN 壳层显示临时会话无保存提示；玩家确认后可进入临时会话，但不生成持久化继续点
+- [x] **AC-5**: GIVEN 不存在继续点，WHEN 计算 continue_availability，THEN 结果为 Hidden
+- [x] **AC-6**: GIVEN 继续点存在且完整性、内容域都通过，WHEN 计算 continue_availability，THEN 结果为 Enabled
+- [x] **AC-7**: GIVEN 继续点存在但完整性失败或内容域不匹配，WHEN 计算 continue_availability，THEN 结果为 PreservedLocked——继续点仍保持存在
 
 ---
 
@@ -78,7 +78,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/session/StorageCapabilityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -86,3 +86,10 @@
 
 - Depends on: Story 001 (State Machine), Persistence (#3) — storage_capability 判定
 - Unlocks: Story 002 (Entry UI 消费 continue_availability)
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 7/7 passing
+**Test Evidence**: Integration test at `tests/integration/session/StorageCapabilityTest.csproj`.
+**Code Review**: Local review complete — no blocking issues found.

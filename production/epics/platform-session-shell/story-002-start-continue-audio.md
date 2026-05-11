@@ -1,7 +1,7 @@
 # Story 002: Start / Continue Entry + Audio Activation
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -29,16 +29,16 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN Ready 且 audio_gate=Pass 或 Muted，WHEN 玩家选择 Start，THEN 创建 Start in-flight token 进入 SessionStarting
-- [ ] **AC-2**: GIVEN Ready 且 audio_gate 需用户手势，WHEN 玩家选择 Start/Continue，THEN 在該手勢中嘗試音頻解鎖；若仍需确认→AwaitingAudioActivation
-- [ ] **AC-3**: GIVEN AwaitingAudioActivation，WHEN 音频解锁成功，THEN audio_gate=Pass→转入 SessionStarting
-- [ ] **AC-4**: GIVEN AwaitingAudioActivation，WHEN 音频解锁失败但玩家选无声继续，THEN audio_gate=Muted→转入 SessionStarting
-- [ ] **AC-5**: GIVEN 存在旧会话，WHEN 玩家选择 Start，THEN 创建新会话意图，不沿用旧会话上下文，不修改现有继续点
-- [ ] **AC-6**: GIVEN continue_availability=Enabled，WHEN 玩家选择 Continue，THEN 创建 Continue in-flight token 进入 SessionStarting
-- [ ] **AC-7**: GIVEN continue_availability=PreservedLocked，WHEN 玩家选择 Continue，THEN 不进入 SessionStarting——显示锁定原因+Return Title+New Session，不删除继续点
-- [ ] **AC-8**: GIVEN continue_availability=Hidden，WHEN 渲染入口，THEN Continue 不可见或不可选
-- [ ] **AC-9**: GIVEN 玩家连续重复点击 Start/Continue，WHEN 多次输入发生，THEN 只接受第一次，其余去重，不并行创建两个会话
-- [ ] **AC-10**: GIVEN Start/Continue in-flight token 已创建，WHEN 相同入口再次触发，THEN 不创建第二个 token
+- [x] **AC-1**: GIVEN Ready 且 audio_gate=Pass 或 Muted，WHEN 玩家选择 Start，THEN 创建 Start in-flight token 进入 SessionStarting
+- [x] **AC-2**: GIVEN Ready 且 audio_gate 需用户手势，WHEN 玩家选择 Start/Continue，THEN 在該手勢中嘗試音頻解鎖；若仍需确认→AwaitingAudioActivation
+- [x] **AC-3**: GIVEN AwaitingAudioActivation，WHEN 音频解锁成功，THEN audio_gate=Pass→转入 SessionStarting
+- [x] **AC-4**: GIVEN AwaitingAudioActivation，WHEN 音频解锁失败但玩家选无声继续，THEN audio_gate=Muted→转入 SessionStarting
+- [x] **AC-5**: GIVEN 存在旧会话，WHEN 玩家选择 Start，THEN 创建新会话意图，不沿用旧会话上下文，不修改现有继续点
+- [x] **AC-6**: GIVEN continue_availability=Enabled，WHEN 玩家选择 Continue，THEN 创建 Continue in-flight token 进入 SessionStarting
+- [x] **AC-7**: GIVEN continue_availability=PreservedLocked，WHEN 玩家选择 Continue，THEN 不进入 SessionStarting——显示锁定原因+Return Title+New Session，不删除继续点
+- [x] **AC-8**: GIVEN continue_availability=Hidden，WHEN 渲染入口，THEN Continue 不可见或不可选
+- [x] **AC-9**: GIVEN 玩家连续重复点击 Start/Continue，WHEN 多次输入发生，THEN 只接受第一次，其余去重，不并行创建两个会话
+- [x] **AC-10**: GIVEN Start/Continue in-flight token 已创建，WHEN 相同入口再次触发，THEN 不创建第二个 token
 
 ---
 
@@ -82,7 +82,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/session/EntryAudioTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -90,3 +90,10 @@
 
 - Depends on: Story 001 (State Machine Core)
 - Unlocks: Story 005 (Storage Capability 影响 continue_availability), Story 007 (Entry UI)
+
+## Implementation Notes
+
+**Implemented**: 2026-05-11
+**Criteria**: 10/10 passing
+**Test Evidence**: Integration test at `tests/integration/session/EntryAudioTest.csproj` — 10 acceptance checks passing.
+**Code Review**: Local review complete — no blocking issues found.

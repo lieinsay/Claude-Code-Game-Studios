@@ -447,3 +447,31 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Code review: Complete — deprecated-reference severity context tightened before closure
 - Tech debt logged: None
 - Next recommended: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
+
+## Session Extract — parallel #2 startup 2026-05-11
+- Target: `production/epics/platform-session-shell/EPIC.md` — Epic #2 Platform Session Shell
+- Plan: Story 001 first as shared state-machine kernel; then Story 002 Entry/Audio and Story 003 Suspend/Resume in parallel; Story 004 failure severity can join after kernel review; Story 006 waits for 003; Story 007 waits for 002/004/005.
+- Story started: `production/epics/platform-session-shell/story-001-state-machine-core.md` — Story 001: Platform State Machine Core
+- Files changed: `src/core/boot/SessionBootChain.cs`, `tests/unit/session/StateMachineTest.csproj`, `tests/unit/session/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/platform-session-shell/story-001-state-machine-core.md`, `production/epics/platform-session-shell/EPIC.md`
+- Test written: `tests/unit/session/StateMachineTest.csproj` — 8/8 Story 001 acceptance checks passing
+- Verification: `dotnet run --project tests/unit/session/StateMachineTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Parallel agents started: Story 002 Entry/Audio token flow; Story 003 Desktop suspend/resume flow
+- Blockers: None
+- Next: /code-review `src/core/boot/SessionBootChain.cs` `tests/unit/session/StateMachineProgram.cs` then /story-done `production/epics/platform-session-shell/story-001-state-machine-core.md`
+
+## Session Extract — parallel #2 progress 2026-05-11
+- Stories implemented in parallel: `production/epics/platform-session-shell/story-002-start-continue-audio.md`, `production/epics/platform-session-shell/story-003-background-suspend-resume.md`
+- Files changed: `src/core/session/EntryAudioFlow.cs`, `tests/integration/session/EntryAudioTest.csproj`, `tests/integration/session/EntryAudioProgram.cs`, `src/core/session/DesktopSessionLifecycle.cs`, `tests/integration/session/SuspendResumeTest.csproj`, `tests/integration/session/SuspendResumeProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/platform-session-shell/story-002-start-continue-audio.md`, `production/epics/platform-session-shell/story-003-background-suspend-resume.md`, `production/epics/platform-session-shell/EPIC.md`, `docs/reference/production-flowchart.md`
+- Tests written: `tests/integration/session/EntryAudioTest.csproj` — 10/10 Story 002 checks passing; `tests/integration/session/SuspendResumeTest.csproj` — 7/7 Story 003 checks passing
+- Blockers: None
+- Next: /code-review `src/core/session/EntryAudioFlow.cs` `tests/integration/session/EntryAudioProgram.cs` `src/core/session/DesktopSessionLifecycle.cs` `tests/integration/session/SuspendResumeProgram.cs`; then /story-done Story 002 and Story 003
+
+## Session Extract — #2 platform-session-shell complete 2026-05-11
+- Verdict: COMPLETE
+- Epic: `production/epics/platform-session-shell/EPIC.md` — Platform Session Shell (#2)
+- Stories completed: Story 001 State Machine Core, Story 002 Start/Continue Entry + Audio Activation, Story 003 Background Suspend/Resume, Story 004 Failure Severity & Recovery Paths, Story 005 Storage Capability & Ephemeral Sessions, Story 006 Input Gate & Shell Overlay Control, Story 007 Shell UI — Entry, Loading & Error Screens
+- Files changed: `src/core/boot/SessionBootChain.cs`, `src/core/session/EntryAudioFlow.cs`, `src/core/session/DesktopSessionLifecycle.cs`, `src/core/session/FailureRecoveryPolicy.cs`, `src/core/session/StorageCapabilityCoordinator.cs`, `src/core/session/ShellInputGate.cs`, `src/presentation/ShellUiPresenter.cs`, `tests/unit/session/*`, `tests/integration/session/*`, `production/qa/evidence/shell-ui-evidence.md`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/platform-session-shell/*.md`, `production/epics/index.md`, `docs/reference/production-flowchart.md`
+- Test evidence: Story 001 8/8; Story 002 10/10; Story 003 7/7; Story 004 9/9; Story 005 7/7; Story 006 6/6; Story 007 8/8 model + scene checks; FoundationParity 70/70
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors)
+- Residual risk reduced: Story 007 now has a concrete Godot `CanvasLayer`/`Control` scene mounted by `SessionShell`, Godot 4.6.2 scene-load checks, and generated loading screenshot evidence. Remaining risk is dynamic runtime data binding/polish.
+- Unlocked: #4 player-movement-interaction can start now; #3 local-save-persistence starts after #1 content-registry completes.

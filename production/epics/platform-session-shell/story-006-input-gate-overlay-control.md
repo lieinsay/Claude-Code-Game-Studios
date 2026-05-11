@@ -1,7 +1,7 @@
 # Story 006: Input Gate & Shell Overlay Control
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -29,12 +29,12 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 会话状态为 Active、页面在前台、输入焦点正常且无模态阻挡，WHEN 计算 input_gate，THEN 结果为 Open
-- [ ] **AC-2**: GIVEN 会话状态为 BackgroundSuspended 且页面已回前台，WHEN 计算 input_gate，THEN 结果为 Reacquire
-- [ ] **AC-3**: GIVEN 壳层 overlay 可见，WHEN 玩家使用鼠标/键盘/快捷键操作，THEN 焦点和输入必须停留在壳层 overlay——不得传入 HUD 或玩法层
-- [ ] **AC-4**: GIVEN SessionActive 且 input_gate=Open，WHEN 玩家按 Esc，THEN 壳层拦截并打开暂停菜单（或触发威胁决策面板优先于暂停——由 ADR-0018 定义）
-- [ ] **AC-5**: GIVEN ResumePending 且 input_gate=Reacquire，WHEN 玩家按下键盘/鼠标，THEN 该输入只用于重新激活——`input_gate` 变为 Open——不触发任何玩法动作
-- [ ] **AC-6**: GIVEN 壳层 overlay 关闭且 input_gate=Open，WHEN 玩家按下 W/A/S/D/E/Tab/I/M，THEN 输入路由至 #4 (InteractionRegistry) 或 #16 (UIManager)
+- [x] **AC-1**: GIVEN 会话状态为 Active、页面在前台、输入焦点正常且无模态阻挡，WHEN 计算 input_gate，THEN 结果为 Open
+- [x] **AC-2**: GIVEN 会话状态为 BackgroundSuspended 且页面已回前台，WHEN 计算 input_gate，THEN 结果为 Reacquire
+- [x] **AC-3**: GIVEN 壳层 overlay 可见，WHEN 玩家使用鼠标/键盘/快捷键操作，THEN 焦点和输入必须停留在壳层 overlay——不得传入 HUD 或玩法层
+- [x] **AC-4**: GIVEN SessionActive 且 input_gate=Open，WHEN 玩家按 Esc，THEN 壳层拦截并打开暂停菜单（或触发威胁决策面板优先于暂停——由 ADR-0018 定义）
+- [x] **AC-5**: GIVEN ResumePending 且 input_gate=Reacquire，WHEN 玩家按下键盘/鼠标，THEN 该输入只用于重新激活——`input_gate` 变为 Open——不触发任何玩法动作
+- [x] **AC-6**: GIVEN 壳层 overlay 关闭且 input_gate=Open，WHEN 玩家按下 W/A/S/D/E/Tab/I/M，THEN 输入路由至 #4 (InteractionRegistry) 或 #16 (UIManager)
 
 ---
 
@@ -83,7 +83,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/session/InputGateTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -92,3 +92,10 @@
 - Depends on: Story 001 (State Machine), Story 003 (Suspend/Resume)
 - Depends on: InteractionRegistry (#4) — 玩法输入路由目标
 - Unlocks: Story 007 (Shell UI 需要 input_gate 保护)
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 6/6 passing
+**Test Evidence**: Integration test at `tests/integration/session/InputGateTest.csproj`.
+**Code Review**: Local review complete — no blocking issues found.

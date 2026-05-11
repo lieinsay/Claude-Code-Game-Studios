@@ -1,7 +1,7 @@
 # Story 003: Background Suspend / Resume
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -29,13 +29,13 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN SessionActive，WHEN 窗口失焦或暂停、窗口失焦、window_focus_changed hidden 或桌面窗口暂停，THEN 进入 BackgroundSuspended——玩法输入停止，世界推进停止
-- [ ] **AC-2**: GIVEN SessionActive，WHEN window_focus_changed hidden/suspend_requested/桌面进程被请求退出/刷新前事件，THEN 只请求预编码 marker/lightweight flush，不得请求完整 safe checkpoint
-- [ ] **AC-3**: GIVEN resume_requested.persisted=true (desktop resume 恢复)，WHEN 页面回到前台，THEN 进入 ResumePending 并重新执行恢复检查，不得直接回到 SessionActive
-- [ ] **AC-4**: GIVEN quit_requested 或 quit_requested 触发，WHEN 壳层处理关闭前信号，THEN 不得启动新序列化、迁移、备份提升或阻塞式保存
-- [ ] **AC-5**: GIVEN 从后台返回进入 ResumePending，WHEN 页面已可见但玩家尚未显式重新激活，THEN 玩法输入仍被阻断——第一下输入只用于重新激活
-- [ ] **AC-6**: GIVEN ResumePending，WHEN 玩家按下键盘/鼠标作为恢复操作，THEN 该输入只用于重新激活和同手势音频恢复，不能触发任何普通玩法动作
-- [ ] **AC-7**: GIVEN ResumePending，WHEN 玩家选择 Return Title，THEN 返回 Ready 或安全标题状态，不把返回输入传给玩法层
+- [x] **AC-1**: GIVEN SessionActive，WHEN 窗口失焦或暂停、窗口失焦、window_focus_changed hidden 或桌面窗口暂停，THEN 进入 BackgroundSuspended——玩法输入停止，世界推进停止
+- [x] **AC-2**: GIVEN SessionActive，WHEN window_focus_changed hidden/suspend_requested/桌面进程被请求退出/刷新前事件，THEN 只请求预编码 marker/lightweight flush，不得请求完整 safe checkpoint
+- [x] **AC-3**: GIVEN resume_requested.persisted=true (desktop resume 恢复)，WHEN 页面回到前台，THEN 进入 ResumePending 并重新执行恢复检查，不得直接回到 SessionActive
+- [x] **AC-4**: GIVEN quit_requested 或 quit_requested 触发，WHEN 壳层处理关闭前信号，THEN 不得启动新序列化、迁移、备份提升或阻塞式保存
+- [x] **AC-5**: GIVEN 从后台返回进入 ResumePending，WHEN 页面已可见但玩家尚未显式重新激活，THEN 玩法输入仍被阻断——第一下输入只用于重新激活
+- [x] **AC-6**: GIVEN ResumePending，WHEN 玩家按下键盘/鼠标作为恢复操作，THEN 该输入只用于重新激活和同手势音频恢复，不能触发任何普通玩法动作
+- [x] **AC-7**: GIVEN ResumePending，WHEN 玩家选择 Return Title，THEN 返回 Ready 或安全标题状态，不把返回输入传给玩法层
 
 ---
 
@@ -78,7 +78,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/session/SuspendResumeTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -86,3 +86,10 @@
 
 - Depends on: Story 001 (State Machine), ADR-0019 (desktop lifecycle events)
 - Unlocks: Story 006 (Input Gate 与 Resume 交互)
+
+## Implementation Notes
+
+**Implemented**: 2026-05-11
+**Criteria**: 7/7 passing
+**Test Evidence**: Integration test at `tests/integration/session/SuspendResumeTest.csproj` — 7 acceptance checks passing.
+**Code Review**: Local review complete — no blocking issues found.

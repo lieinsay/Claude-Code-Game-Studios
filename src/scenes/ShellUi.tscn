@@ -1,0 +1,312 @@
+[gd_scene format=3]
+
+[node name="ShellUiLayer" type="CanvasLayer"]
+layer = 100
+
+[node name="ShellUiRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="LoadingPanel" type="PanelContainer" parent="ShellUiRoot"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -110.0
+offset_right = 260.0
+offset_bottom = 110.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoadingStack" type="VBoxContainer" parent="ShellUiRoot/LoadingPanel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="LoadingTitleLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
+layout_mode = 2
+text = "Loading Session Shell"
+horizontal_alignment = 1
+
+[node name="LoadingPhaseLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
+layout_mode = 2
+text = "Checking game data..."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LoadingProgress" type="ProgressBar" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
+layout_mode = 2
+value = 42.0
+show_percentage = false
+
+[node name="CancelLoadingButton" type="Button" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Cancel  Esc"
+
+[node name="EntryPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -170.0
+offset_right = 300.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EntryStack" type="VBoxContainer" parent="ShellUiRoot/EntryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EntryTitleLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+text = "Cloud Weaver Voyage"
+horizontal_alignment = 1
+
+[node name="ContinueLockReasonLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+text = "Continue point locked: content domain mismatch"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="StartButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Start  Enter"
+focus_neighbor_bottom = NodePath("../ContinueButton")
+
+[node name="ContinueButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Continue  C"
+focus_neighbor_top = NodePath("../StartButton")
+focus_neighbor_bottom = NodePath("../SettingsButton")
+
+[node name="ContinueLockedButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+disabled = true
+text = "Continue Locked  C"
+
+[node name="NewSessionButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "New Session  N"
+
+[node name="ReturnTitleButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return Title  Esc"
+
+[node name="SettingsButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Settings  Tab"
+focus_neighbor_top = NodePath("../ContinueButton")
+
+[node name="AudioActivationPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -130.0
+offset_right = 280.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AudioStack" type="VBoxContainer" parent="ShellUiRoot/AudioActivationPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AudioPromptLabel" type="Label" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
+layout_mode = 2
+text = "Activate audio to begin."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ConfirmAudioButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Activate Audio  Enter"
+
+[node name="ContinueMutedButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Continue Muted  M"
+
+[node name="AudioReturnTitleButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return Title  Esc"
+
+[node name="EphemeralWarningPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -125.0
+offset_right = 300.0
+offset_bottom = 125.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EphemeralStack" type="VBoxContainer" parent="ShellUiRoot/EphemeralWarningPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EphemeralMessageLabel" type="Label" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
+layout_mode = 2
+text = "Progress will not be saved because local storage is unavailable."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ContinueWithoutSavingButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Continue Without Saving  Enter"
+
+[node name="EphemeralReturnButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return  Esc"
+
+[node name="ResumePanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -100.0
+offset_right = 260.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResumeStack" type="VBoxContainer" parent="ShellUiRoot/ResumePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ResumeMessageLabel" type="Label" parent="ShellUiRoot/ResumePanel/ResumeStack"]
+layout_mode = 2
+text = "Session paused. Press any key to resume."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ReactivateButton" type="Button" parent="ShellUiRoot/ResumePanel/ResumeStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Reactivate  Any Key"
+
+[node name="ResumeReturnTitleButton" type="Button" parent="ShellUiRoot/ResumePanel/ResumeStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return Title  Esc"
+
+[node name="RecoveryPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -150.0
+offset_right = 300.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RecoveryStack" type="VBoxContainer" parent="ShellUiRoot/RecoveryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RecoveryMessageLabel" type="Label" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
+layout_mode = 2
+text = "The session could not be restored."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="RetryButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Retry  R"
+
+[node name="RecoveryNewSessionButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "New Session  N"
+
+[node name="RecoveryReturnTitleButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return Title  Esc"
+
+[node name="RecoveryErrorDetailsButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Error Details  D"
+
+[node name="FatalPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -140.0
+offset_right = 300.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FatalStack" type="VBoxContainer" parent="ShellUiRoot/FatalPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FatalMessageLabel" type="Label" parent="ShellUiRoot/FatalPanel/FatalStack"]
+layout_mode = 2
+text = "A safe startup error blocked gameplay."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="FatalRetryButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Retry  R"
+
+[node name="FatalReturnTitleButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Return Title  Esc"
+
+[node name="FatalErrorDetailsButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
+layout_mode = 2
+focus_mode = 2
+text = "Error Details  D"

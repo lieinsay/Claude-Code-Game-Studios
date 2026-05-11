@@ -1,7 +1,7 @@
 # Story 004: Failure Severity & Recovery Paths
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -29,15 +29,15 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 内容域 FAILED，WHEN 玩家尝试进入/恢复会话，THEN 转入 RecoveryRequired——允许 Retry/New Session/Return Title
-- [ ] **AC-2**: GIVEN 内容域 VERSION_INCOMPATIBLE，WHEN 玩家尝试进入/恢复会话，THEN 转入 FatalBlocked 或版本不兼容安全态——不得进入玩法
-- [ ] **AC-3**: GIVEN 必需内容域集合中同时存在 FAILED 和 LOADING，WHEN 计算聚合 required_content_domain_status，THEN 结果必须为 FAILED
-- [ ] **AC-4**: GIVEN 必需内容域集合中任一域为 VERSION_INCOMPATIBLE，WHEN 计算聚合，THEN 结果必须为 VERSION_INCOMPATIBLE
-- [ ] **AC-5**: GIVEN 任一失败路径被触发，WHEN 失败被处理，THEN 已存在的有效继续点必须保持原样——不得被删除、覆盖、降级或自动清空
-- [ ] **AC-6**: GIVEN 没有硬门槛失败但音频为 SoftFail 或存储为 EphemeralOnly，WHEN 计算 failure_severity，THEN 结果为 SoftFail
-- [ ] **AC-7**: GIVEN 存储能力为 WriteLocked 且无其他硬门槛失败，WHEN 计算 failure_severity，THEN 结果为 SoftFail——壳层显示新进度无法可靠保存
-- [ ] **AC-8**: GIVEN 内容域失败类型为 Recoverable，WHEN 计算 failure_severity，THEN 结果为 RecoverableFail——进入 RecoveryRequired 而非 FatalBlocked
-- [ ] **AC-9**: GIVEN 任一硬门槛失败（基础加载失败/内容域致命/Continue=Hidden/Resume 不就绪/音频 HardFail），WHEN 计算 failure_severity，THEN 结果为 HardFail
+- [x] **AC-1**: GIVEN 内容域 FAILED，WHEN 玩家尝试进入/恢复会话，THEN 转入 RecoveryRequired——允许 Retry/New Session/Return Title
+- [x] **AC-2**: GIVEN 内容域 VERSION_INCOMPATIBLE，WHEN 玩家尝试进入/恢复会话，THEN 转入 FatalBlocked 或版本不兼容安全态——不得进入玩法
+- [x] **AC-3**: GIVEN 必需内容域集合中同时存在 FAILED 和 LOADING，WHEN 计算聚合 required_content_domain_status，THEN 结果必须为 FAILED
+- [x] **AC-4**: GIVEN 必需内容域集合中任一域为 VERSION_INCOMPATIBLE，WHEN 计算聚合，THEN 结果必须为 VERSION_INCOMPATIBLE
+- [x] **AC-5**: GIVEN 任一失败路径被触发，WHEN 失败被处理，THEN 已存在的有效继续点必须保持原样——不得被删除、覆盖、降级或自动清空
+- [x] **AC-6**: GIVEN 没有硬门槛失败但音频为 SoftFail 或存储为 EphemeralOnly，WHEN 计算 failure_severity，THEN 结果为 SoftFail
+- [x] **AC-7**: GIVEN 存储能力为 WriteLocked 且无其他硬门槛失败，WHEN 计算 failure_severity，THEN 结果为 SoftFail——壳层显示新进度无法可靠保存
+- [x] **AC-8**: GIVEN 内容域失败类型为 Recoverable，WHEN 计算 failure_severity，THEN 结果为 RecoverableFail——进入 RecoveryRequired 而非 FatalBlocked
+- [x] **AC-9**: GIVEN 任一硬门槛失败（基础加载失败/内容域致命/Continue=Hidden/Resume 不就绪/音频 HardFail），WHEN 计算 failure_severity，THEN 结果为 HardFail
 
 ---
 
@@ -79,7 +79,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/session/FailureSeverityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -88,3 +88,10 @@
 - Depends on: Story 001 (State Machine — RecoveryRequired/FatalBlocked 状态)
 - Depends on: Registry (#1) — 内容域状态数据来源
 - Unlocks: Story 007 (Failure UI 渲染)
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 9/9 passing
+**Test Evidence**: Logic test at `tests/unit/session/FailureSeverityTest.csproj`.
+**Code Review**: Local review complete — no blocking issues found.

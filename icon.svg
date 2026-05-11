@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cloud Weaver Voyage icon">
+  <rect width="128" height="128" rx="18" fill="#2f4f58"/>
+  <path d="M22 71c3-13 14-23 28-23 6-13 20-21 35-17 14 4 24 17 24 32 9 4 15 12 15 22 0 14-11 25-25 25H40c-13 0-24-10-24-23 0-7 2-12 6-16Z" fill="#f4e8c6"/>
+  <path d="M33 80h62l-11 17H44L33 80Z" fill="#7ca7a1"/>
+  <path d="M47 58h34l9 22H38l9-22Z" fill="#d5a24b"/>
+  <path d="M64 28v30" stroke="#f4e8c6" stroke-width="6" stroke-linecap="round"/>
+  <path d="M54 39h31" stroke="#f4e8c6" stroke-width="6" stroke-linecap="round"/>
+</svg>

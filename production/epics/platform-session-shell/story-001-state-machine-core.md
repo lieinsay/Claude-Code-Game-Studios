@@ -1,7 +1,7 @@
 # Story 001: Platform State Machine Core
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -29,14 +29,14 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 基础资源、内容域状态和会话元数据检查完成，WHEN 检查全部通过，THEN 状态转入 `Ready`，并显示可交互的 Start/Continue 入口
-- [ ] **AC-2**: GIVEN 游戏处于 SessionStarting，WHEN 会话上下文、内容域、可继续性和输入焦点全部通过，THEN 状态转入 `SessionActive`
-- [ ] **AC-3**: GIVEN 游戏处于 SessionStarting，WHEN 继续会话失败、内容域失败、存储状态不支持继续或会话元数据损坏，THEN 状态转入 `RecoveryRequired`
-- [ ] **AC-4**: GIVEN 游戏处于 BackgroundSuspended，WHEN 页面恢复可见且可交互，THEN 状态转入 `ResumePending`，仍不得接受普通玩法输入
-- [ ] **AC-5**: GIVEN ResumePending 且页面已回前台、挂起 token 有效、玩家完成重新激活、焦点恢复且内容域可用，THEN 状态转入 `SessionActive`
-- [ ] **AC-6**: GIVEN ResumePending 且挂起 token 无效、内容域不可恢复或恢复检查失败，THEN 状态转入 `RecoveryRequired`
-- [ ] **AC-7**: GIVEN 核心资源缺失、构建不兼容、缺少必需 desktop runtime 或内容域版本不兼容，WHEN 加载失败，THEN 状态转入 `FatalBlocked`
-- [ ] **AC-8**: GIVEN 加载子阶段中任一失败，WHEN 报告错误，THEN 必须包含失败子阶段 (BaseBoot/ContentDomainCheck/StorageCapabilityCheck/SessionMetadataCheck/EntryRenderReady)、失败类型、是否可重试、桌面窗口焦点/焦点状态
+- [x] **AC-1**: GIVEN 基础资源、内容域状态和会话元数据检查完成，WHEN 检查全部通过，THEN 状态转入 `Ready`，并显示可交互的 Start/Continue 入口
+- [x] **AC-2**: GIVEN 游戏处于 SessionStarting，WHEN 会话上下文、内容域、可继续性和输入焦点全部通过，THEN 状态转入 `SessionActive`
+- [x] **AC-3**: GIVEN 游戏处于 SessionStarting，WHEN 继续会话失败、内容域失败、存储状态不支持继续或会话元数据损坏，THEN 状态转入 `RecoveryRequired`
+- [x] **AC-4**: GIVEN 游戏处于 BackgroundSuspended，WHEN 页面恢复可见且可交互，THEN 状态转入 `ResumePending`，仍不得接受普通玩法输入
+- [x] **AC-5**: GIVEN ResumePending 且页面已回前台、挂起 token 有效、玩家完成重新激活、焦点恢复且内容域可用，THEN 状态转入 `SessionActive`
+- [x] **AC-6**: GIVEN ResumePending 且挂起 token 无效、内容域不可恢复或恢复检查失败，THEN 状态转入 `RecoveryRequired`
+- [x] **AC-7**: GIVEN 核心资源缺失、构建不兼容、缺少必需 desktop runtime 或内容域版本不兼容，WHEN 加载失败，THEN 状态转入 `FatalBlocked`
+- [x] **AC-8**: GIVEN 加载子阶段中任一失败，WHEN 报告错误，THEN 必须包含失败子阶段 (BaseBoot/ContentDomainCheck/StorageCapabilityCheck/SessionMetadataCheck/EntryRenderReady)、失败类型、是否可重试、桌面窗口焦点/焦点状态
 
 ---
 
@@ -79,7 +79,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/session/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -87,3 +87,10 @@
 
 - Depends on: None — Story 001 是 platform-session-shell 的前置
 - Unlocks: Story 002-007 (所有后续 Story 依赖状态机)
+
+## Implementation Notes
+
+**Implemented**: 2026-05-11
+**Criteria**: 8/8 passing
+**Test Evidence**: Logic test at `tests/unit/session/StateMachineTest.csproj` — 8 acceptance checks passing.
+**Code Review**: Local review complete — no blocking issues found.

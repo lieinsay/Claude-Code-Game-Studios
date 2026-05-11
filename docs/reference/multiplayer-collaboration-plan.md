@@ -104,16 +104,14 @@ D-A ─────────────────────────�
   │ Story 004 ☑ Reference Integrity               (L, 1d)│  ← ✅ 完成
   │ Story 005 ☑ Domain Loading & Decision Gating  (I, 1d)│  ← ✅ 完成
   │ Story 006 ☑ Diagnostic System                 (L, 1d)│  ← ✅ 完成
-  │ Story 007 □ Diagnostic UI (Dev Tools)         (U, 2d)│  ← 下一步
+  │ Story 007 🚧 Diagnostic UI (Dev Tools)        (U, 2d)│  ← 进行中
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
   Epic #2 Session Shell
   ┌──────────────────────────────────────────────────────┐
-  │ Story 001 □ Shell 状态机核心                  (L, 2d)│
-  │ Story 002 □ Start/Continue + 音频激活        (I, 2d)│  ← 等 001
-  │ Story 003 □ Background Suspend/Resume         (I, 1d)│  ← 等 001
-  │ Story 004 □ Failure Severity + Recovery       (L, 1d)│  ← 等 001
+  │ Story 001-007 ☑ Platform Session Shell        (Done)│  ← ✅ 完成
+  │ 解锁: #4 Movement 可开工；#3 Persistence 等 #1 完成 │
   └──────────────────────────────────────────────────────┘
 
 D-C ───────────────────────────────────────────────────────
@@ -136,7 +134,7 @@ D-A ─────────────────────────�
   │ Epic #1:                                             │
   │ Story 005 ☑ Domain Loading + UI Gating       (I, 2d)│  ← ✅ 完成
   │ Story 006 ☑ Diagnostic System                (L, 1d)│  ← ✅ 完成
-  │ Story 007 □ Diagnostic UI (Dev Tools)        (U, 2d)│  ← 等 006
+  │ Story 007 🚧 Diagnostic UI (Dev Tools)       (U, 2d)│  ← 进行中
   │ Story 008 □ Player-Facing Boundary           (I, 2d)│  ← 等 005
   │                                                       │
   │ Epic #3:  (等 #1+#2 完成)                             │
@@ -146,12 +144,10 @@ D-A ─────────────────────────�
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
-  Epic #2 剩余 + Epic #4 Movement
+  Epic #2 已完成 + Epic #4 Movement 可开工
   ┌──────────────────────────────────────────────────────┐
   │ Epic #2:                                             │
-  │ Story 005 □ Storage Capability + Ephemeral   (I, 2d)│
-  │ Story 006 □ Input Gate + Shell Overlay        (I, 1d)│
-  │ Story 007 □ Shell UI (加载/错误屏)            (U, 2d)│  ← 等 005+006
+  │ Story 001-007 ☑ Platform Session Shell       (Done) │  ← ✅ 完成
   │                                                       │
   │ Epic #4:  (等 #2 完成)                                │
   │ Story 001 □ Movement System (WASD+Click)     (L, 2d)│  ← 核心！
@@ -161,15 +157,15 @@ D-B ─────────────────────────�
 D-C ───────────────────────────────────────────────────────
   等 #1 完成 → 可以开始阅读 Registry API 文档
   等 #3 Story 001 完成 → 可以开始写 #5 和 #6 的桩代码
-  等 #2 完成 → 可以开始写集成测试桩
+  #2 已完成 → 可以启动 #4 Movement，并为 #3/#4 写集成测试桩
 ```
 
 **Phase 1 门禁**:
-- [ ] `dotnet build` PASS
+- [x] `dotnet build` PASS
 - [x] Registry 查询/API + Schema Validation 测试 PASS (`tests/unit/registry`: Story-002 11/11)
 - [x] Registry Content Lifecycle 测试 PASS (`tests/unit/registry/ContentLifecycleTest.csproj`: Story-003 6/6)
 - [ ] Persistence 往返测试 8 项 PASS
-- [ ] Session Shell 状态机 5 项测试 PASS
+- [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
 - [ ] Movement WASD + Click-to-Move 手动验证 PASS
 
 ---
@@ -581,9 +577,9 @@ D-C: 性能分析 + 优化
 | Epic | 第一个 Story | 阻塞条件 | 满足于 |
 |------|-------------|----------|--------|
 | #1 Registry | 001 | 无 | Phase 0 完成即刻 |
-| #2 Shell | 001 | 无 | Phase 0 完成即刻 |
-| #3 Persistence | 001 | #1 查询 API + #2 生命周期 | Week 2 |
-| #4 Movement | 001 | #2 输入路由 | Week 2 |
+| #2 Shell | 001 | 无 | ✅ Complete — 2026-05-11 |
+| #3 Persistence | 001 | #1 查询 API + #2 生命周期 | 等 #1 完成 |
+| #4 Movement | 001 | #2 输入路由 | ✅ 已满足，可开工 |
 | #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |
 | #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |
 | #7 Hub | 001 | #1 ID + #3 快照 + #4 移动 | Week 4 |

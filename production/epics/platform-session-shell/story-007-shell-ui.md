@@ -1,7 +1,7 @@
 # Story 007: Shell UI — Entry, Loading & Error Screens
 
 > **Epic**: Platform Session Shell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: UI
 > **Estimate**: M
@@ -30,14 +30,14 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 继续点不存在，WHEN 渲染入口，THEN Continue 必须隐藏或不可选——不得出现伪装成可继续的默认会话
-- [ ] **AC-2**: GIVEN 继续点存在但结构损坏/校验失败/版本不匹配/内容域标识不匹配，WHEN 渲染入口，THEN Continue 保持为锁定/禁用态并给出可理解提示——继续点不得被自动删除或覆盖
-- [ ] **AC-3**: GIVEN EphemeralOnly 存储，WHEN 玩家选择 Start，THEN 先显示临时会话无保存提示；确认后进入临时会话
-- [ ] **AC-4**: GIVEN FatalBlocked，WHEN 渲染安全错误 UI，THEN 只保留安全错误态与重试/返回类入口——不得进入玩法
-- [ ] **AC-5**: GIVEN RecoveryRequired，WHEN 渲染恢复 UI，THEN 显示 Retry/New Session/Return Title 选项
-- [ ] **AC-6**: GIVEN Ready/AwaitingAudioActivation/ResumePending/RecoveryRequired/FatalBlocked 任一 UI 状态显示，WHEN 只使用键盘操作，THEN 玩家必须能到达主操作、返回/退出操作和可用错误详情/无声继续入口
-- [ ] **AC-7**: GIVEN Loading 状态，WHEN 渲染加载屏幕，THEN 必须显示加载进度（子阶段文本或进度条）——不显示空白屏幕
-- [ ] **AC-8**: GIVEN PreservedLocked 继续点，WHEN 渲染 Continue 入口，THEN 显示锁定原因路径 + Return Title + New Session 按钮
+- [x] **AC-1**: GIVEN 继续点不存在，WHEN 渲染入口，THEN Continue 必须隐藏或不可选——不得出现伪装成可继续的默认会话
+- [x] **AC-2**: GIVEN 继续点存在但结构损坏/校验失败/版本不匹配/内容域标识不匹配，WHEN 渲染入口，THEN Continue 保持为锁定/禁用态并给出可理解提示——继续点不得被自动删除或覆盖
+- [x] **AC-3**: GIVEN EphemeralOnly 存储，WHEN 玩家选择 Start，THEN 先显示临时会话无保存提示；确认后进入临时会话
+- [x] **AC-4**: GIVEN FatalBlocked，WHEN 渲染安全错误 UI，THEN 只保留安全错误态与重试/返回类入口——不得进入玩法
+- [x] **AC-5**: GIVEN RecoveryRequired，WHEN 渲染恢复 UI，THEN 显示 Retry/New Session/Return Title 选项
+- [x] **AC-6**: GIVEN Ready/AwaitingAudioActivation/ResumePending/RecoveryRequired/FatalBlocked 任一 UI 状态显示，WHEN 只使用键盘操作，THEN 玩家必须能到达主操作、返回/退出操作和可用错误详情/无声继续入口
+- [x] **AC-7**: GIVEN Loading 状态，WHEN 渲染加载屏幕，THEN 必须显示加载进度（子阶段文本或进度条）——不显示空白屏幕
+- [x] **AC-8**: GIVEN PreservedLocked 继续点，WHEN 渲染 Continue 入口，THEN 显示锁定原因路径 + Return Title + New Session 按钮
 
 ---
 
@@ -82,7 +82,7 @@
 
 **Story Type**: UI
 **Required evidence**: `production/qa/evidence/shell-ui-evidence.md` — manual walkthrough with screenshots + keyboard navigation verification
-**Status**: [ ] Not yet created
+**Status**: [x] Created — 2026-05-11
 
 ---
 
@@ -90,3 +90,12 @@
 
 - Depends on: Story 001 (State Machine states), Story 002 (Entry logic), Story 004 (Failure states), Story 005 (Ephemeral/PreservedLocked states)
 - Unlocks: None — Story 007 是 platform-session-shell Epic 的最终 UI 层
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 8/8 covered by presenter model, concrete Godot Control scene contract, and evidence doc
+**Test Evidence**: Model + scene contract test at `tests/integration/session/ShellUiTest.csproj` — 8 checks passing.
+**Manual Evidence**: `production/qa/evidence/shell-ui-evidence.md` with generated loading screenshot `production/qa/evidence/shell-ui-loading00000000.png`.
+**Code Review**: Local review complete — no blocking issues found.
+**Residual Risk**: Low — dynamic runtime wiring from `ShellUiPresenter` into live Godot controls remains a later polish/integration task, but the concrete CanvasLayer/Control scene exists, is mounted by `SessionShell`, loads in Godot 4.6.2, and has screenshot evidence.

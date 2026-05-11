@@ -34,5 +34,26 @@ jobs:
       - name: Run registry diagnostic unit tests
         run: dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj
 
+      - name: Run session state machine unit tests
+        run: dotnet run --project tests/unit/session/StateMachineTest.csproj
+
+      - name: Run session entry/audio integration tests
+        run: dotnet run --project tests/integration/session/EntryAudioTest.csproj
+
+      - name: Run session suspend/resume integration tests
+        run: dotnet run --project tests/integration/session/SuspendResumeTest.csproj
+
+      - name: Run session failure severity unit tests
+        run: dotnet run --project tests/unit/session/FailureSeverityTest.csproj
+
+      - name: Run session storage capability integration tests
+        run: dotnet run --project tests/integration/session/StorageCapabilityTest.csproj
+
+      - name: Run session input gate integration tests
+        run: dotnet run --project tests/integration/session/InputGateTest.csproj
+
+      - name: Run shell UI model tests
+        run: dotnet run --project tests/integration/session/ShellUiTest.csproj
+
       - name: Run registry domain loading integration tests
         run: dotnet run --project tests/integration/registry/DomainLoadingTest.csproj

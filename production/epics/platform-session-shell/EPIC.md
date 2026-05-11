@@ -3,20 +3,20 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/platform-session-shell.md
 > **Architecture Module**: Autoload #2 — SessionShell
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Stories**: 7 created
 
 ## Stories
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | [Platform State Machine Core](story-001-state-machine-core.md) | Logic | Ready | ADR-0001, ADR-0006 |
-| 002 | [Start/Continue Entry + Audio Activation](story-002-start-continue-audio.md) | Integration | Ready | ADR-0001, ADR-0006 |
-| 003 | [Background Suspend/Resume](story-003-background-suspend-resume.md) | Integration | Ready | ADR-0006 |
-| 004 | [Failure Severity & Recovery Paths](story-004-failure-severity-recovery.md) | Logic | Ready | ADR-0001, ADR-0006 |
-| 005 | [Storage Capability & Ephemeral Sessions](story-005-storage-capability-ephemeral.md) | Integration | Ready | ADR-0006 |
-| 006 | [Input Gate & Shell Overlay Control](story-006-input-gate-overlay-control.md) | Integration | Ready | ADR-0001, ADR-0006 |
-| 007 | [Shell UI — Entry, Loading & Error Screens](story-007-shell-ui.md) | UI | Ready | ADR-0001, ADR-0006, ADR-0012 |
+| 001 | [Platform State Machine Core](story-001-state-machine-core.md) | Logic | Complete | ADR-0001, ADR-0006 |
+| 002 | [Start/Continue Entry + Audio Activation](story-002-start-continue-audio.md) | Integration | Complete | ADR-0001, ADR-0006 |
+| 003 | [Background Suspend/Resume](story-003-background-suspend-resume.md) | Integration | Complete | ADR-0006 |
+| 004 | [Failure Severity & Recovery Paths](story-004-failure-severity-recovery.md) | Logic | Complete | ADR-0001, ADR-0006 |
+| 005 | [Storage Capability & Ephemeral Sessions](story-005-storage-capability-ephemeral.md) | Integration | Complete | ADR-0006 |
+| 006 | [Input Gate & Shell Overlay Control](story-006-input-gate-overlay-control.md) | Integration | Complete | ADR-0001, ADR-0006 |
+| 007 | [Shell UI — Entry, Loading & Error Screens](story-007-shell-ui.md) | UI | Complete | ADR-0001, ADR-0006, ADR-0012 |
 
 ## Overview
 
