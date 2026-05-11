@@ -17,7 +17,7 @@
 | 005 | [Domain Loading & Decision UI Gating](story-005-domain-loading-decision-gating.md) | Integration | Complete | ADR-0001, ADR-0002 |
 | 006 | [Diagnostic System](story-006-diagnostic-system.md) | Logic | Complete | ADR-0001 |
 | 007 | [Diagnostic UI — Dev Tools](story-007-diagnostic-ui.md) | UI | In Progress | ADR-0001, ADR-0012 |
-| 008 | [Player-Facing Boundary](story-008-player-facing-boundary.md) | Integration | Ready | ADR-0001, ADR-0002 |
+| 008 | [Player-Facing Boundary](story-008-player-facing-boundary.md) | Integration | Complete | ADR-0001, ADR-0002 |
 
 ## Overview
 

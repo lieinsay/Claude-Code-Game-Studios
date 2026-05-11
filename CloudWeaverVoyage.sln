@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StorageCapabilityTest", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputGateTest", "tests\integration\session\InputGateTest.csproj", "{4626F046-26ED-4BEB-93B9-3E60580797C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerBoundaryTest", "tests\integration\registry\PlayerBoundaryTest.csproj", "{10A53102-A748-433E-B854-A1ECFBCE7B78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{4626F046-26ED-4BEB-93B9-3E60580797C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4626F046-26ED-4BEB-93B9-3E60580797C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4626F046-26ED-4BEB-93B9-3E60580797C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10A53102-A748-433E-B854-A1ECFBCE7B78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10A53102-A748-433E-B854-A1ECFBCE7B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10A53102-A748-433E-B854-A1ECFBCE7B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10A53102-A748-433E-B854-A1ECFBCE7B78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,5 +116,6 @@ Global
 		{E8E1C30A-BB4B-4C88-BBDB-91C2751E5608} = {5CF80B4D-0EE7-4ACA-8CF1-8CB696A9FA87}
 		{09555DB3-4625-4C57-B32C-891E2E1C2B1F} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{4626F046-26ED-4BEB-93B9-3E60580797C2} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
+		{10A53102-A748-433E-B854-A1ECFBCE7B78} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 	EndGlobalSection
 EndGlobal

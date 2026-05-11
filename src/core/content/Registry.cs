@@ -74,6 +74,24 @@ public sealed record RegistryQueryResult(
     string? Error);
 
 /// <summary>
+/// Player-facing display fields extracted from a static content definition.
+/// Contains only fields safe to show directly in player UI: no internal error codes,
+/// no diagnostic fields, and no runtime state. All display text is provided as
+/// localization keys, not raw strings.
+/// </summary>
+/// <param name="NameKey">Localization key for the content's display name (e.g. "content.location_glass_harbor.name").</param>
+/// <param name="DescriptionKey">Localization key for the content's description (e.g. "content.location_glass_harbor.desc").</param>
+/// <param name="IconRef">Optional icon reference string for asset lookup; null when the definition has no icon.</param>
+/// <param name="Tags">Read-only tag set used for UI filtering and classification.</param>
+/// <param name="SortOrder">Stable sort position for deterministic list ordering in UI.</param>
+public sealed record PlayerDisplayInfo(
+    string NameKey,
+    string DescriptionKey,
+    string? IconRef,
+    IReadOnlyList<string> Tags,
+    int SortOrder);
+
+/// <summary>
 /// Result returned when registering content in bulk.
 /// </summary>
 public sealed record RegistryRegistrationResult(
@@ -902,6 +920,116 @@ public sealed class Registry
     public DomainReadinessResult CheckDecisionSurfaceReady(DecisionSurface surface)
     {
         return CheckDomainsReady(DecisionSurfaceDomains[surface]);
+    }
+
+    /// <summary>
+    /// Returns the player-safe display fields for a content definition by stable ID.
+    /// Only exposes name_key, description_key, icon_ref, tags, and sort_order — never
+    /// internal error codes, diagnostic fields, or runtime state.
+    /// Returns null when the ID is not found, unloaded, deprecated, or retired.
+    /// Callers that need the full entity for logic should use <see cref="QueryById"/> instead.
+    /// </summary>
+    /// <param name="entityId">Stable content ID in <c>kind.identifier</c> format.</param>
+    /// <returns>
+    /// Player-safe display fields, or null when the entity is unavailable to player UI
+    /// (not found, deprecated, retired, or ID is null/empty).
+    /// </returns>
+    /// <example>
+    /// var info = registry.GetDisplayInfo("location.glass-harbor");
+    /// if (info is not null)
+    ///     label.Text = Tr(info.NameKey);
+    /// </example>
+    public PlayerDisplayInfo? GetDisplayInfo(string entityId)
+    {
+        if (string.IsNullOrEmpty(entityId))
+        {
+            return null;
+        }
+
+        if (!content.TryGetValue(entityId, out var entity))
+        {
+            return null;
+        }
+
+        var status = ReadContentStatus(entity);
+        // Depends on Deprecated(2) < Retired(3) in enum ordinal order — keep suppressed statuses adjacent.
+        if (status >= ContentStatus.Deprecated)
+        {
+            return null;
+        }
+
+        var tags = ReadStringSet(entity, "tags")
+            .OrderBy(tag => tag, StringComparer.Ordinal)
+            .ToArray();
+
+        return new PlayerDisplayInfo(
+            NameKey: ReadString(entity, "name_key"),
+            DescriptionKey: ReadString(entity, "description_key"),
+            IconRef: ReadNullableString(entity, "icon_ref"),
+            Tags: tags,
+            SortOrder: ReadInt(entity, "sort_order", int.MaxValue));
+    }
+
+    /// <summary>
+    /// Maps an internal registry query status or domain failure state to a player-safe
+    /// error string that contains no ERR_* codes, reference chains, or diagnostic details.
+    /// Suitable for direct display in player-facing UI error surfaces.
+    /// </summary>
+    /// <param name="queryStatus">The <see cref="RegistryQueryStatus"/> returned by a failed query.</param>
+    /// <returns>
+    /// A short, player-readable message string. Possible values:
+    /// <list type="bullet">
+    ///   <item><description>"正在加载..." — domain is unloaded or still loading (transient)</description></item>
+    ///   <item><description>"无法加载游戏数据——请重试或联系支持" — domain failed to load (persistent)</description></item>
+    ///   <item><description>null — no player-visible error (Found, or caller should handle silently)</description></item>
+    /// </list>
+    /// </returns>
+    /// <example>
+    /// var result = registry.QueryById("location.glass-harbor");
+    /// var msg = Registry.GetPlayerSafeError(result.Status);
+    /// if (msg is not null) ShowErrorBanner(msg);
+    /// </example>
+    public static string? GetPlayerSafeError(RegistryQueryStatus queryStatus)
+    {
+        return queryStatus switch
+        {
+            RegistryQueryStatus.Found => null,
+            // NotFound: logic layer handles missing content; player UI should not show an error
+            RegistryQueryStatus.NotFound => null,
+            RegistryQueryStatus.Unloaded => "正在加载...",
+            RegistryQueryStatus.VersionIncompatible => "游戏内容需要更新——请重启客户端",
+            // Deprecated/Retired: content is silently suppressed, not surfaced as an error
+            RegistryQueryStatus.Deprecated or RegistryQueryStatus.Retired => null,
+            _ => "无法加载游戏数据——请重试或联系支持",
+        };
+    }
+
+    /// <summary>
+    /// Maps a domain loading failure state to a player-safe error string for decision-surface
+    /// UI fallback. Returns null when the domain is complete (no error to surface).
+    /// </summary>
+    /// <param name="domainStatus">The <see cref="DomainStatus"/> of a content domain.</param>
+    /// <returns>
+    /// A short, player-readable message string. Possible values:
+    /// <list type="bullet">
+    ///   <item><description>"正在加载..." — domain is loading or partial (transient)</description></item>
+    ///   <item><description>"无法加载游戏数据——请重试或联系支持" — domain failed</description></item>
+    ///   <item><description>null — domain is complete; no error to surface</description></item>
+    /// </list>
+    /// </returns>
+    /// <example>
+    /// var status = registry.GetDomainStatus("world");
+    /// var msg = Registry.GetPlayerSafeError(status);
+    /// if (msg is not null) ShowRetryDialog(msg);
+    /// </example>
+    public static string? GetPlayerSafeError(DomainStatus domainStatus)
+    {
+        return domainStatus switch
+        {
+            DomainStatus.Complete => null,
+            DomainStatus.Unloaded or DomainStatus.Loading or DomainStatus.Partial => "正在加载...",
+            _ => "无法加载游戏数据——请重试或联系支持",
+        };
     }
 
     /// <summary>

@@ -1,7 +1,7 @@
 # Story 008: Player-Facing Boundary
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -93,7 +93,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/registry/PlayerBoundaryTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 11/11 — 2026-05-11
 
 ---
 
@@ -102,3 +102,10 @@
 - Depends on: Story 005 (Domain Loading & Decision Gating —— 玩家 UI 错误 fallback 依赖域状态)
 - Depends on: ADR-0012 (UI/Input Routing —— 错误提示的 UI 渲染由 UIManager 提供)
 - Unlocks: None — Story 008 是 Registry Epic 的最终集成边界
+
+## Completion Notes
+**Completed**: 2026-05-11
+**Criteria**: 4/4 passing
+**Deviations**: None
+**Test Evidence**: Integration test at `tests/integration/registry/PlayerBoundaryTest.csproj` — PASS 11/11
+**Code Review**: Complete — QL-TEST-COVERAGE: ADEQUATE; LP-CODE-REVIEW: APPROVED WITH SUGGESTIONS (both suggestions applied: ContentStatus ordinal comment + collapsed redundant DomainStatus.Failed arm)

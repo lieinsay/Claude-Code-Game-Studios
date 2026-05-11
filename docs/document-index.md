@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-10
-> **项目阶段**: Pre-Production — Desktop C# Foundation Ready (Story readiness metadata aligned)
+> **最后更新**: 2026-05-11
+> **项目阶段**: Pre-Production — Desktop C# Foundation Ready | Epic #1 内容注册表 7/8 Complete
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 16/18 Epic 完成 — 115 Stories (59 Logic + 53 Integration + 2 UI + 1 Config)
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (11 个 C# 源文件 + 2 个 C# 测试项目)；GDScript P3 原型保留为迁移参考；115 个生产 Story 已对齐 ADR-0019 readiness 元数据
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (11 个 C# 源文件 + 4 个 C# 测试项目)；GDScript P3 原型保留为迁移参考；115 个生产 Story 已对齐 ADR-0019 readiness 元数据
 
 ---
 
@@ -50,7 +50,7 @@ graph TB
         CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>FoundationParity 70/70<br/>Registry Story-002 11/11<br/>Registry Story-003 6/6"]
+        TEST["tests/<br/>FoundationParity 70/70<br/>IdRegistryCore 11/11<br/>ContentLifecycle 6/6<br/>ReferenceIntegrity 7/7<br/>DomainLoading 7/7<br/>DiagnosticSystem 7/7<br/>PlayerBoundary 11/11"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -111,7 +111,7 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成 (115 Stories) |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
-| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002/003/004/005/006 Done; Story-007 next) |
+| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001~006/008 Complete; Story-007 并行中) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
 | [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8 Stories) |
 | [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
