@@ -413,3 +413,31 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Code review: Complete — reference-chain status annotation gap fixed before closure
 - Tech debt logged: None
 - Next recommended: `production/epics/content-registry/story-005-domain-loading-decision-gating.md` — Story 005: Domain Loading & Decision UI Gating
+
+## Session Extract — /dev-story 2026-05-11
+- Story: `production/epics/content-registry/story-005-domain-loading-decision-gating.md` — Story 005: Domain Loading & Decision UI Gating
+- Files changed: `src/core/content/Registry.cs`, `tests/integration/registry/DomainLoadingTest.csproj`, `tests/integration/registry/Program.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/content-registry/story-005-domain-loading-decision-gating.md`
+- Test written: `tests/integration/registry/DomainLoadingTest.csproj` — 7 Story 005 acceptance/signal checks
+- Blockers: None
+- Next: /code-review `src/core/content/Registry.cs` `tests/integration/registry/Program.cs` then /story-done `production/epics/content-registry/story-005-domain-loading-decision-gating.md`
+
+## Session Extract — /story-done 2026-05-11
+- Verdict: COMPLETE
+- Story: `production/epics/content-registry/story-005-domain-loading-decision-gating.md` — Story 005: Domain Loading & Decision UI Gating
+- Code review: Complete — stale loaded-domain reload failure gap fixed before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/content-registry/story-006-diagnostic-system.md` — Story 006: Diagnostic System
+
+## Session Extract — /dev-story 2026-05-11
+- Story: `production/epics/content-registry/story-006-diagnostic-system.md` — Story 006: Diagnostic System
+- Files changed: `src/core/content/Registry.cs`, `tests/unit/registry/DiagnosticSystemTest.csproj`, `tests/unit/registry/DiagnosticSystemProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/content-registry/story-006-diagnostic-system.md`
+- Test written: `tests/unit/registry/DiagnosticSystemTest.csproj` — 7 Story 006 acceptance/regression checks
+- Blockers: None
+- Next: /code-review `src/core/content/Registry.cs` `tests/unit/registry/DiagnosticSystemProgram.cs` then /story-done `production/epics/content-registry/story-006-diagnostic-system.md`
+
+## Session Extract — /story-done 2026-05-11
+- Verdict: COMPLETE
+- Story: `production/epics/content-registry/story-006-diagnostic-system.md` — Story 006: Diagnostic System
+- Code review: Complete — deprecated-reference severity context tightened before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools

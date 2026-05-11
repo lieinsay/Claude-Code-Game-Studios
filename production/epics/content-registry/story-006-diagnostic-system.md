@@ -1,7 +1,7 @@
 # Story 006: Diagnostic System
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -31,11 +31,11 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN 同一内容项同时存在多个定义或引用错误，WHEN 生成诊断，THEN 按 Validation Diagnostic Precedence 选择主错误，并把其他错误列入 `related_errors`
-- [ ] **AC-2**: GIVEN 所有诊断事件，WHEN 输出，THEN 必须包含: event_id, timestamp, severity, error_code, content_id, kind, status, schema_version, owner_domain, content_package, source_ref, field_path, reference_chain, query_context, blocking_scope, suggested_action
-- [ ] **AC-3**: GIVEN severity 为 info/warning/error/fatal，WHEN 诊断，THEN info=不影响注册查询；warning=兼容允许但不应继续依赖；error=单项/单包不能进入可查询集合；fatal=整个注册表不可用
-- [ ] **AC-4**: GIVEN 同 severity 同 priority 内的多条错误，WHEN 排序，THEN 按 `error_code ASC, content_id ASC, field_path ASC` 稳定排序
-- [ ] **AC-5**: GIVEN 诊断生成完成，WHEN 返回结果，THEN 主错误按 8 级优先级选择：(1) 内容包不可用→(2) ID 身份错误→(3) Schema 错误→(4) 静态/运行时边界破坏→(5) 引用缺失→(6) 引用生命周期非法→(7) 引用图结构非法→(8) 查询不稳定
+- [x] **AC-1**: GIVEN 同一内容项同时存在多个定义或引用错误，WHEN 生成诊断，THEN 按 Validation Diagnostic Precedence 选择主错误，并把其他错误列入 `related_errors`
+- [x] **AC-2**: GIVEN 所有诊断事件，WHEN 输出，THEN 必须包含: event_id, timestamp, severity, error_code, content_id, kind, status, schema_version, owner_domain, content_package, source_ref, field_path, reference_chain, query_context, blocking_scope, suggested_action
+- [x] **AC-3**: GIVEN severity 为 info/warning/error/fatal，WHEN 诊断，THEN info=不影响注册查询；warning=兼容允许但不应继续依赖；error=单项/单包不能进入可查询集合；fatal=整个注册表不可用
+- [x] **AC-4**: GIVEN 同 severity 同 priority 内的多条错误，WHEN 排序，THEN 按 `error_code ASC, content_id ASC, field_path ASC` 稳定排序
+- [x] **AC-5**: GIVEN 诊断生成完成，WHEN 返回结果，THEN 主错误按 8 级优先级选择：(1) 内容包不可用→(2) ID 身份错误→(3) Schema 错误→(4) 静态/运行时边界破坏→(5) 引用缺失→(6) 引用生命周期非法→(7) 引用图结构非法→(8) 查询不稳定
 
 ---
 
@@ -96,7 +96,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/registry/DiagnosticSystemTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -104,3 +104,11 @@
 
 - Depends on: Story 001-004 (诊断系统消费所有校验器的输出)
 - Unlocks: Story 007 (Diagnostic UI 消费诊断事件)
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 5/5 passing
+**Deviations**: None.
+**Test Evidence**: Logic test at `tests/unit/registry/DiagnosticSystemTest.csproj` — 7 acceptance/regression checks passing.
+**Code Review**: Complete — deprecated-reference severity context was tightened so compatibility paths remain warning while new Active references are error.

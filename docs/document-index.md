@@ -111,7 +111,7 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成 (115 Stories) |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
-| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002/003/004 Done; Story-005 next) |
+| [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8 Stories; Story-001/002/003/004/005/006 Done; Story-007 next) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
 | [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8 Stories) |
 | [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
@@ -581,8 +581,8 @@ graph TB
 
 ## 五、C# Foundation 实现进度
 
-> **当前状态**: Content Registry Story-001/002/003/004 完成；下一步 Story-005 Domain Loading & Decision UI Gating；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.csproj --no-restore` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS；`dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` → 6/6 PASS；`dotnet run --project tests/unit/registry/ReferenceIntegrityTest.csproj` → 7/7 PASS。
+> **当前状态**: Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS；`dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` → 6/6 PASS；`dotnet run --project tests/unit/registry/ReferenceIntegrityTest.csproj` → 7/7 PASS；`dotnet run --project tests/integration/registry/DomainLoadingTest.csproj` → 8/8 PASS；`dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj` → 7/7 PASS。
 
 ### Content Registry 完成项
 
@@ -592,6 +592,8 @@ graph TB
 | [Story-002: Schema Validation](../production/epics/content-registry/story-002-schema-validation.md) | Done | `src/core/content/Registry.cs` — definition_validity U/K/R/S、受控词表、必填字段、运行时字段拒绝、只读边界 | `tests/unit/registry/IdRegistryCoreTest.csproj` — 11/11 PASS |
 | [Story-003: Content Lifecycle](../production/epics/content-registry/story-003-content-lifecycle.md) | Done | `src/core/content/Registry.cs` — Draft/Active/Deprecated/Retired 生命周期、Retired ID 防复用、fantasy-critical 改义拦截、migration hint、emit-after-mutation 事件 | `tests/unit/registry/ContentLifecycleTest.csproj` — 6/6 PASS |
 | [Story-004: Reference Integrity](../production/epics/content-registry/story-004-reference-integrity.md) | Done | `src/core/content/Registry.cs` — references 解析、Active 注册前引用门禁、生命周期引用错误、循环链诊断、AMBIGUOUS_QUERY | `tests/unit/registry/ReferenceIntegrityTest.csproj` — 7/7 PASS |
+| [Story-005: Domain Loading & Decision UI Gating](../production/epics/content-registry/story-005-domain-loading-decision-gating.md) | Done | `src/core/content/Registry.cs` — 7 域加载状态、decision surface ready gate、domain_ready、snapshot isolation、VERSION_INCOMPATIBLE 边界诊断 | `tests/integration/registry/DomainLoadingTest.csproj` — 8/8 PASS |
+| [Story-006: Diagnostic System](../production/epics/content-registry/story-006-diagnostic-system.md) | Done | `src/core/content/Registry.cs` — RegistryDiagnosticEvent、8 级 precedence、related_errors、severity/blocking_scope/suggested_action、稳定排序 | `tests/unit/registry/DiagnosticSystemTest.csproj` — 7/7 PASS |
 
 ### Story Readiness 元数据收口
 
@@ -620,14 +622,16 @@ graph TB
 | **Tests** | `tests/unit/registry/Program.cs` | Content Registry Story-001/002 acceptance checks |
 | **Tests** | `tests/unit/registry/ContentLifecycleProgram.cs` | Content Registry Story-003 lifecycle acceptance checks |
 | **Tests** | `tests/unit/registry/ReferenceIntegrityProgram.cs` | Content Registry Story-004 reference integrity acceptance checks |
+| **Tests** | `tests/integration/registry/Program.cs` | Content Registry Story-005 domain loading integration checks |
+| **Tests** | `tests/unit/registry/DiagnosticSystemProgram.cs` | Content Registry Story-006 diagnostic system acceptance checks |
 
 ### 下一开发入口
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P1 | [Story-005: Domain Loading & Decision UI Gating](../production/epics/content-registry/story-005-domain-loading-decision-gating.md) | 继续 Content Registry，补域加载状态、domain_ready 信号与失败决策门控 |
-| P2 | `dotnet run --project tests/unit/registry/ReferenceIntegrityTest.csproj` + `dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` | Story-005 实现前保持 Story-003/004 回归 |
-| P3 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-005 前后跑 Foundation parity，防止基础层回退 |
+| P1 | [Story-007: Diagnostic UI — Dev Tools](../production/epics/content-registry/story-007-diagnostic-ui.md) | 继续 Content Registry，消费 Story-006 诊断事件并提供 Registry Overview / Error List / Reference Graph / Copyable Report |
+| P2 | `dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj` + `dotnet run --project tests/integration/registry/DomainLoadingTest.csproj` | Story-007 实现前保持诊断事件和域加载门控回归 |
+| P3 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-007 前后跑 Foundation parity，防止基础层回退 |
 
 ---
 
@@ -1273,7 +1277,7 @@ graph TB
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-11 — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004 完成；下一步 Story-005 Domain Loading & Decision UI Gating；115 个 Story readiness 元数据完成 ADR-0019 收口。
+> 更新于 2026-05-11 — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个 Story readiness 元数据完成 ADR-0019 收口。
 
 ### 已全部完成 ✅
 
@@ -1298,7 +1302,7 @@ graph TB
 - [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器)
 - [x] **源代码架构文档** — `docs/document-index.md` §五/§六 (C# Foundation 进度 + P3 原型架构)
 - [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS
-- [x] **Content Registry Story-001/002/003/004** — C# Registry ID/query + Schema Validation + Content Lifecycle + Reference Integrity；`IdRegistryCoreTest.csproj` 11/11 PASS；`ContentLifecycleTest.csproj` 6/6 PASS；`ReferenceIntegrityTest.csproj` 7/7 PASS
+- [x] **Content Registry Story-001/002/003/004/005/006** — C# Registry ID/query + Schema Validation + Content Lifecycle + Reference Integrity + Domain Loading/Decision Gating + Diagnostic System；`IdRegistryCoreTest.csproj` 11/11 PASS；`ContentLifecycleTest.csproj` 6/6 PASS；`ReferenceIntegrityTest.csproj` 7/7 PASS；`DomainLoadingTest.csproj` 8/8 PASS；`DiagnosticSystemTest.csproj` 7/7 PASS
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成
@@ -1311,7 +1315,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-11** — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004 完成；下一步 Story-005 Domain Loading & Decision UI Gating；115 个 Story readiness 元数据完成 ADR-0019 收口。
+> **更新于 2026-05-11** — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个 Story readiness 元数据完成 ADR-0019 收口。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

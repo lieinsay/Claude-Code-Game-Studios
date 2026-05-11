@@ -34,6 +34,38 @@ public enum RegistryQueryStatus
 }
 
 /// <summary>
+/// Loading state for player-facing static content domains.
+/// </summary>
+public enum DomainStatus
+{
+    Unloaded = 0,
+    Loading = 1,
+    Partial = 2,
+    Complete = 3,
+    Failed = 4,
+}
+
+/// <summary>
+/// Player-facing decision surfaces guarded by content domain completeness.
+/// </summary>
+public enum DecisionSurface
+{
+    Chart = 0,
+    Hub = 1,
+    RepairMarket = 2,
+}
+
+/// <summary>
+/// Result status for content package load attempts.
+/// </summary>
+public enum ContentPackageLoadStatus
+{
+    Loaded = 0,
+    VersionIncompatible = 1,
+    ValidationFailed = 2,
+}
+
+/// <summary>
 /// Result returned by a single registry entity lookup.
 /// </summary>
 public sealed record RegistryQueryResult(
@@ -48,6 +80,37 @@ public sealed record RegistryRegistrationResult(
     bool Success,
     string? ErrorCode,
     string? EntityId);
+
+/// <summary>
+/// Result returned when checking whether domains can safely back a decision UI.
+/// </summary>
+public sealed record DomainReadinessResult(
+    bool Ready,
+    IReadOnlyList<string> BlockedDomains,
+    IReadOnlyDictionary<string, DomainStatus> DomainStatuses);
+
+/// <summary>
+/// Opaque handle for a frozen content snapshot owned by the registry.
+/// </summary>
+public readonly record struct RegistrySnapshotHandle(Guid Id);
+
+/// <summary>
+/// Static content package submitted to the registry boundary.
+/// </summary>
+public sealed record RegistryContentPackage(
+    string Domain,
+    int SchemaVersion,
+    IReadOnlyList<IReadOnlyDictionary<string, object?>> Definitions);
+
+/// <summary>
+/// Result returned by content package loading with copyable diagnostics for shell error surfaces.
+/// </summary>
+public sealed record ContentPackageLoadResult(
+    ContentPackageLoadStatus Status,
+    bool Success,
+    string? ErrorCode,
+    string? Domain,
+    string Diagnostic);
 
 /// <summary>
 /// Structured migration hint for deprecated or retired content IDs.
@@ -97,6 +160,51 @@ public sealed record RegistryDiagnostic(
     string Field,
     string Message,
     IReadOnlyDictionary<string, object?> Details);
+
+/// <summary>
+/// Minimal normalized finding consumed by the diagnostic event aggregator.
+/// </summary>
+public sealed record RegistryDiagnosticFinding(
+    string ErrorCode,
+    string ContentId,
+    string FieldPath,
+    string Message,
+    IReadOnlyList<string> ReferenceChain,
+    IReadOnlyDictionary<string, object?> Details);
+
+/// <summary>
+/// Secondary error attached to a primary registry diagnostic event.
+/// </summary>
+public sealed record RegistryRelatedDiagnostic(
+    string Severity,
+    string ErrorCode,
+    string ContentId,
+    string FieldPath,
+    IReadOnlyList<string> ReferenceChain,
+    string BlockingScope,
+    string SuggestedAction);
+
+/// <summary>
+/// Copyable registry diagnostic event with the full GDD-required field set.
+/// </summary>
+public sealed record RegistryDiagnosticEvent(
+    string EventId,
+    DateTimeOffset Timestamp,
+    string Severity,
+    string ErrorCode,
+    string ContentId,
+    string Kind,
+    string Status,
+    int SchemaVersion,
+    string OwnerDomain,
+    string ContentPackage,
+    string SourceRef,
+    string FieldPath,
+    IReadOnlyList<string> ReferenceChain,
+    string QueryContext,
+    string BlockingScope,
+    string SuggestedAction,
+    IReadOnlyList<RegistryRelatedDiagnostic> RelatedErrors);
 
 /// <summary>
 /// Definition validity result using the GDD U/K/R/S terms.
@@ -244,11 +352,51 @@ public sealed class Registry
     private readonly HashSet<string> loadedDomains = new(StringComparer.Ordinal);
     private readonly HashSet<string> loadedKinds = new(StringComparer.Ordinal);
     private readonly Dictionary<string, HashSet<string>> domainKindMap = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, DomainStatus> domainStatuses = new(StringComparer.Ordinal);
+    private readonly Dictionary<Guid, RegistrySnapshot> snapshots = new();
+
+    private static readonly Dictionary<string, int> DiagnosticPriorities = new(StringComparer.Ordinal)
+    {
+        ["ERR_CONTENT_PACKAGE_VERSION"] = 1,
+        ["VERSION_INCOMPATIBLE"] = 1,
+        ["ERR_DEFINITION_VALIDITY_U"] = 2,
+        ["ERR_DUPLICATE_ID"] = 2,
+        ["ERR_ID_REUSE"] = 2,
+        ["ERR_INVALID_ID_FORMAT"] = 2,
+        ["ERR_ID_NORMALIZATION_COLLISION"] = 2,
+        ["ERR_SCHEMA_INVALID"] = 3,
+        ["ERR_SCHEMA_MISSING_REQUIRED_FIELD"] = 3,
+        ["ERR_RUNTIME_FIELD_IN_STATIC_DATA"] = 4,
+        ["ERR_READONLY_REGISTRY"] = 4,
+        ["ERR_MISSING_REFERENCE"] = 5,
+        ["UNLOADED_REFERENCE"] = 5,
+        ["ERR_REFERENCE_TO_DRAFT"] = 6,
+        ["ERR_REFERENCE_TO_DEPRECATED"] = 6,
+        ["ERR_REFERENCE_TO_RETIRED"] = 6,
+        ["ERR_REFERENCE_CYCLE"] = 7,
+        ["ERR_REFERENCE_DEPTH_EXCEEDED"] = 7,
+        ["ERR_INVALID_SORT_KEY"] = 8,
+        ["AMBIGUOUS_QUERY"] = 8,
+        ["ERR_UNSTABLE_IDENTIFIER"] = 8,
+    };
+
+    private static readonly IReadOnlyDictionary<DecisionSurface, string[]> DecisionSurfaceDomains =
+        new Dictionary<DecisionSurface, string[]>
+        {
+            [DecisionSurface.Chart] = ["routes", "world", "intel", "threats"],
+            [DecisionSurface.Hub] = ["airship", "resources", "companions"],
+            [DecisionSurface.RepairMarket] = ["world", "resources", "intel"],
+        };
 
     /// <summary>
     /// Fires after a content ID changes lifecycle status and the registry state is already mutated.
     /// </summary>
     public event Action<ContentStatusChangedEvent>? ContentStatusChanged;
+
+    /// <summary>
+    /// Fires synchronously after a content domain changes loading state.
+    /// </summary>
+    public event Action<string, string>? DomainReady;
 
     /// <summary>
     /// Gets whether the registry has completed its initial content bootstrap.
@@ -344,6 +492,27 @@ public sealed class Registry
     {
         return ApplyResultLimit(
             content.Values
+                .Where(entity => string.Equals(ReadString(entity, "owner_domain"), domain, StringComparison.Ordinal))
+                .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
+                .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
+                .ThenBy(entity => ReadString(entity, "id"), StringComparer.Ordinal)
+                .Select(CloneEntity));
+    }
+
+    /// <summary>
+    /// Lists active or draft content definitions for an owner domain from a frozen snapshot.
+    /// </summary>
+    public IReadOnlyList<IReadOnlyDictionary<string, object?>> ListByDomain(
+        string domain,
+        RegistrySnapshotHandle handle)
+    {
+        if (!snapshots.TryGetValue(handle.Id, out var snapshot))
+        {
+            return Array.Empty<IReadOnlyDictionary<string, object?>>();
+        }
+
+        return ApplyResultLimit(
+            snapshot.Content.Values
                 .Where(entity => string.Equals(ReadString(entity, "owner_domain"), domain, StringComparison.Ordinal))
                 .Where(entity => ReadContentStatus(entity) <= ContentStatus.Active)
                 .OrderBy(entity => ReadInt(entity, "sort_order", int.MaxValue))
@@ -663,7 +832,7 @@ public sealed class Registry
     /// </summary>
     public bool IsDomainLoaded(string domain)
     {
-        return loadedDomains.Contains(domain);
+        return loadedDomains.Contains(domain) || GetDomainStatus(domain) == DomainStatus.Complete;
     }
 
     /// <summary>
@@ -672,6 +841,385 @@ public sealed class Registry
     public void SetDomainLoaded(string domain)
     {
         loadedDomains.Add(domain);
+        SetDomainStatus(domain, DomainStatus.Complete);
+    }
+
+    /// <summary>
+    /// Returns the latest loading state for a content domain.
+    /// </summary>
+    public DomainStatus GetDomainStatus(string domain)
+    {
+        return domainStatuses.TryGetValue(domain, out var status)
+            ? status
+            : DomainStatus.Unloaded;
+    }
+
+    /// <summary>
+    /// Returns the frozen loading state for a content domain captured by a snapshot.
+    /// </summary>
+    public DomainStatus GetDomainStatus(string domain, RegistrySnapshotHandle handle)
+    {
+        return snapshots.TryGetValue(handle.Id, out var snapshot)
+            && snapshot.DomainStatuses.TryGetValue(domain, out var status)
+                ? status
+                : DomainStatus.Unloaded;
+    }
+
+    /// <summary>
+    /// Updates a domain loading state and synchronously notifies listeners.
+    /// </summary>
+    public void SetDomainStatus(string domain, DomainStatus status)
+    {
+        if (string.IsNullOrWhiteSpace(domain))
+        {
+            throw new ArgumentException("Domain must be a stable non-empty ID.", nameof(domain));
+        }
+
+        domainStatuses[domain] = status;
+        if (status == DomainStatus.Complete)
+        {
+            loadedDomains.Add(domain);
+        }
+        else
+        {
+            loadedDomains.Remove(domain);
+        }
+
+        DomainReady?.Invoke(domain, status.ToString().ToUpperInvariant());
+    }
+
+    /// <summary>
+    /// Checks whether all requested domains are COMPLETE for a decision surface.
+    /// </summary>
+    public DomainReadinessResult CheckDomainsReady(IEnumerable<string> domains)
+    {
+        return BuildReadiness(domains, domain => GetDomainStatus(domain));
+    }
+
+    /// <summary>
+    /// Checks whether all domains for a known decision surface are COMPLETE.
+    /// </summary>
+    public DomainReadinessResult CheckDecisionSurfaceReady(DecisionSurface surface)
+    {
+        return CheckDomainsReady(DecisionSurfaceDomains[surface]);
+    }
+
+    /// <summary>
+    /// Captures a frozen content and domain-state snapshot for an open decision UI.
+    /// </summary>
+    public RegistrySnapshotHandle TakeSnapshot(IEnumerable<string> domains)
+    {
+        var requestedDomains = domains
+            .Where(domain => !string.IsNullOrWhiteSpace(domain))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        var domainSet = requestedDomains.ToHashSet(StringComparer.Ordinal);
+        var snapshotContent = content
+            .Where(pair => domainSet.Contains(ReadString(pair.Value, "owner_domain")))
+            .ToDictionary(
+                pair => pair.Key,
+                pair => CloneMutable(pair.Value),
+                StringComparer.Ordinal);
+        var snapshotStatuses = requestedDomains.ToDictionary(
+            domain => domain,
+            GetDomainStatus,
+            StringComparer.Ordinal);
+        var handle = new RegistrySnapshotHandle(Guid.NewGuid());
+
+        snapshots[handle.Id] = new RegistrySnapshot(snapshotContent, snapshotStatuses);
+        return handle;
+    }
+
+    /// <summary>
+    /// Releases a previously captured decision UI snapshot.
+    /// </summary>
+    public bool ReleaseSnapshot(RegistrySnapshotHandle handle)
+    {
+        return snapshots.Remove(handle.Id);
+    }
+
+    /// <summary>
+    /// Loads a domain content package, failing at the registry boundary for incompatible schema versions.
+    /// </summary>
+    public ContentPackageLoadResult LoadContentPackage(RegistryContentPackage package)
+    {
+        if (package.SchemaVersion != CurrentSchemaVersion)
+        {
+            SetDomainStatus(package.Domain, DomainStatus.Failed);
+            var diagnostic = string.Join(
+                Environment.NewLine,
+                "VERSION_INCOMPATIBLE",
+                $"domain={package.Domain}",
+                $"package_schema_version={package.SchemaVersion}",
+                $"supported_schema_version={CurrentSchemaVersion}",
+                "content layer stopped before partial registration");
+            return new ContentPackageLoadResult(
+                ContentPackageLoadStatus.VersionIncompatible,
+                Success: false,
+                ErrorCode: "VERSION_INCOMPATIBLE",
+                package.Domain,
+                diagnostic);
+        }
+
+        SetDomainStatus(package.Domain, DomainStatus.Loading);
+        var result = RegisterBatch(package.Definitions);
+        if (!result.Success)
+        {
+            SetDomainStatus(package.Domain, DomainStatus.Failed);
+            return new ContentPackageLoadResult(
+                ContentPackageLoadStatus.ValidationFailed,
+                Success: false,
+                result.ErrorCode,
+                package.Domain,
+                $"VALIDATION_FAILED domain={package.Domain} entity={result.EntityId} error={result.ErrorCode}");
+        }
+
+        SetDomainLoaded(package.Domain);
+        return new ContentPackageLoadResult(
+            ContentPackageLoadStatus.Loaded,
+            Success: true,
+            ErrorCode: null,
+            package.Domain,
+            $"LOADED domain={package.Domain} schema_version={package.SchemaVersion}");
+    }
+
+    /// <summary>
+    /// Generates one primary diagnostic event from normalized findings, with lower-precedence errors attached.
+    /// </summary>
+    public RegistryDiagnosticEvent GenerateDiagnostic(
+        IReadOnlyDictionary<string, object?> definition,
+        IEnumerable<RegistryDiagnosticFinding> findings,
+        string contentPackage = "runtime",
+        string sourceRef = "",
+        string queryContext = "")
+    {
+        var orderedFindings = findings
+            .Where(finding => !string.IsNullOrWhiteSpace(finding.ErrorCode))
+            .OrderBy(DiagnosticPriority)
+            .ThenBy(finding => SeverityRank(SeverityFor(finding)))
+            .ThenBy(finding => finding.ErrorCode, StringComparer.Ordinal)
+            .ThenBy(finding => EffectiveContentId(finding, definition), StringComparer.Ordinal)
+            .ThenBy(finding => finding.FieldPath, StringComparer.Ordinal)
+            .ToArray();
+
+        if (orderedFindings.Length == 0)
+        {
+            orderedFindings = [new RegistryDiagnosticFinding(
+                "REGISTRY_DIAGNOSTIC_OK",
+                ReadString(definition, "id"),
+                string.Empty,
+                "Registry diagnostic completed without errors.",
+                Array.Empty<string>(),
+                new Dictionary<string, object?>())];
+        }
+
+        var primary = orderedFindings[0];
+        var primaryContentId = EffectiveContentId(primary, definition);
+        var timestamp = DateTimeOffset.UtcNow;
+        var related = orderedFindings
+            .Skip(1)
+            .Select(ToRelatedDiagnostic)
+            .ToArray();
+
+        return new RegistryDiagnosticEvent(
+            $"{timestamp.ToUnixTimeMilliseconds()}-{SanitizeEventIdPart(primaryContentId)}-{primary.ErrorCode}",
+            timestamp,
+            SeverityFor(primary),
+            primary.ErrorCode,
+            primaryContentId,
+            ReadString(definition, "kind"),
+            ReadString(definition, "status"),
+            ReadInt(definition, "schema_version", 0),
+            ReadString(definition, "owner_domain"),
+            contentPackage,
+            sourceRef,
+            primary.FieldPath,
+            primary.ReferenceChain,
+            queryContext,
+            BlockingScopeFor(primary.ErrorCode),
+            SuggestedActionFor(primary.ErrorCode),
+            related);
+    }
+
+    /// <summary>
+    /// Generates one primary diagnostic event from schema and reference validators.
+    /// </summary>
+    public RegistryDiagnosticEvent GenerateDiagnostic(
+        IReadOnlyDictionary<string, object?> definition,
+        IEnumerable<RegistryDiagnostic> definitionDiagnostics,
+        IEnumerable<RegistryReferenceDiagnostic> referenceDiagnostics,
+        string contentPackage = "runtime",
+        string sourceRef = "",
+        string queryContext = "")
+    {
+        var findings = definitionDiagnostics
+            .Select(diagnostic => new RegistryDiagnosticFinding(
+                diagnostic.ErrorCode,
+                diagnostic.ContentId,
+                diagnostic.Field,
+                diagnostic.Message,
+                Array.Empty<string>(),
+                diagnostic.Details))
+            .Concat(referenceDiagnostics.Select(diagnostic => new RegistryDiagnosticFinding(
+                diagnostic.ErrorCode,
+                diagnostic.SourceId,
+                "references",
+                diagnostic.Message,
+                diagnostic.ReferenceChain,
+                new Dictionary<string, object?>
+                {
+                    ["target_id"] = diagnostic.TargetId,
+                    ["new_active_reference"] = diagnostic.ErrorCode == "ERR_REFERENCE_TO_DEPRECATED",
+                })));
+
+        return GenerateDiagnostic(definition, findings, contentPackage, sourceRef, queryContext);
+    }
+
+    /// <summary>
+    /// Sorts diagnostic events by severity, precedence, and stable identity fields.
+    /// </summary>
+    public static IReadOnlyList<RegistryDiagnosticEvent> SortDiagnostics(
+        IEnumerable<RegistryDiagnosticEvent> diagnostics)
+    {
+        return diagnostics
+            .OrderBy(diagnostic => SeverityRank(diagnostic.Severity))
+            .ThenBy(diagnostic => DiagnosticPriority(diagnostic.ErrorCode))
+            .ThenBy(diagnostic => diagnostic.ErrorCode, StringComparer.Ordinal)
+            .ThenBy(diagnostic => diagnostic.ContentId, StringComparer.Ordinal)
+            .ThenBy(diagnostic => diagnostic.FieldPath, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static DomainReadinessResult BuildReadiness(
+        IEnumerable<string> domains,
+        Func<string, DomainStatus> statusForDomain)
+    {
+        var statuses = domains
+            .Where(domain => !string.IsNullOrWhiteSpace(domain))
+            .Distinct(StringComparer.Ordinal)
+            .ToDictionary(domain => domain, statusForDomain, StringComparer.Ordinal);
+        var blocked = statuses
+            .Where(pair => pair.Value != DomainStatus.Complete)
+            .Select(pair => pair.Key)
+            .ToArray();
+
+        return new DomainReadinessResult(
+            blocked.Length == 0,
+            blocked,
+            statuses);
+    }
+
+    private static RegistryRelatedDiagnostic ToRelatedDiagnostic(RegistryDiagnosticFinding finding)
+    {
+        return new RegistryRelatedDiagnostic(
+            SeverityFor(finding),
+            finding.ErrorCode,
+            finding.ContentId,
+            finding.FieldPath,
+            finding.ReferenceChain,
+            BlockingScopeFor(finding.ErrorCode),
+            SuggestedActionFor(finding.ErrorCode));
+    }
+
+    private static int DiagnosticPriority(RegistryDiagnosticFinding finding)
+    {
+        return DiagnosticPriority(finding.ErrorCode);
+    }
+
+    private static int DiagnosticPriority(string errorCode)
+    {
+        return DiagnosticPriorities.TryGetValue(errorCode, out var priority)
+            ? priority
+            : 99;
+    }
+
+    private static int SeverityRank(string severity)
+    {
+        return severity switch
+        {
+            "fatal" => 0,
+            "error" => 1,
+            "warning" => 2,
+            "info" => 3,
+            _ => 4,
+        };
+    }
+
+    private static string SeverityFor(string errorCode)
+    {
+        return errorCode switch
+        {
+            "REGISTRY_DIAGNOSTIC_OK" => "info",
+            "ERR_CONTENT_PACKAGE_VERSION" or "VERSION_INCOMPATIBLE" => "fatal",
+            "ERR_REFERENCE_TO_DEPRECATED" => "warning",
+            _ when DiagnosticPriorities.ContainsKey(errorCode) => "error",
+            _ => "warning",
+        };
+    }
+
+    private static string SeverityFor(RegistryDiagnosticFinding finding)
+    {
+        if (finding.ErrorCode == "ERR_REFERENCE_TO_DEPRECATED"
+            && finding.Details.TryGetValue("new_active_reference", out var value)
+            && value is bool newActiveReference
+            && newActiveReference)
+        {
+            return "error";
+        }
+
+        return SeverityFor(finding.ErrorCode);
+    }
+
+    private static string BlockingScopeFor(string errorCode)
+    {
+        return DiagnosticPriority(errorCode) switch
+        {
+            1 => "registry",
+            2 => "package",
+            3 or 4 or 5 or 6 or 7 => "item",
+            8 => "runtime-query",
+            _ => "item",
+        };
+    }
+
+    private static string SuggestedActionFor(string errorCode)
+    {
+        return errorCode switch
+        {
+            "ERR_CONTENT_PACKAGE_VERSION" or "VERSION_INCOMPATIBLE" => "Install a compatible content package for this build.",
+            "ERR_DUPLICATE_ID" => "Rename or remove the duplicate stable ID.",
+            "ERR_ID_REUSE" => "Use a new stable ID or restore the retired migration record.",
+            "ERR_INVALID_ID_FORMAT" or "ERR_DEFINITION_VALIDITY_U" => "Replace the value with a valid stable content ID.",
+            "ERR_ID_NORMALIZATION_COLLISION" => "Rename one colliding ID after Unicode normalization.",
+            "ERR_SCHEMA_INVALID" or "ERR_SCHEMA_MISSING_REQUIRED_FIELD" => "Update the definition to match its kind schema.",
+            "ERR_RUNTIME_FIELD_IN_STATIC_DATA" or "ERR_READONLY_REGISTRY" => "Move runtime state to the owning domain system.",
+            "ERR_MISSING_REFERENCE" => "Add the referenced content or correct the stable ID.",
+            "UNLOADED_REFERENCE" => "Load the referenced domain before resolving this content.",
+            "ERR_REFERENCE_TO_DRAFT" => "Promote the target content to Active or remove the reference.",
+            "ERR_REFERENCE_TO_DEPRECATED" => "Migrate the reference to an Active replacement.",
+            "ERR_REFERENCE_TO_RETIRED" => "Replace the retired reference with its migration target.",
+            "ERR_REFERENCE_CYCLE" or "ERR_REFERENCE_DEPTH_EXCEEDED" => "Break the reference graph cycle or reduce reference depth.",
+            "ERR_INVALID_SORT_KEY" => "Provide a non-negative integer sort_order.",
+            "AMBIGUOUS_QUERY" => "Add query constraints until exactly one content item matches.",
+            "ERR_UNSTABLE_IDENTIFIER" => "Use a stable content ID instead of display text, path, or index.",
+            _ => "Inspect the content definition and correct the reported field.",
+        };
+    }
+
+    private static string EffectiveContentId(
+        RegistryDiagnosticFinding finding,
+        IReadOnlyDictionary<string, object?> definition)
+    {
+        return string.IsNullOrWhiteSpace(finding.ContentId)
+            ? ReadString(definition, "id")
+            : finding.ContentId;
+    }
+
+    private static string SanitizeEventIdPart(string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "registry"
+            : Regex.Replace(value, "[^a-zA-Z0-9_.-]", "_");
     }
 
     private RegistryReferenceValidationResult ValidateReferences(
@@ -1459,6 +2007,10 @@ public sealed class Registry
 
         return results.ToList();
     }
+
+    private sealed record RegistrySnapshot(
+        Dictionary<string, Dictionary<string, object?>> Content,
+        Dictionary<string, DomainStatus> DomainStatuses);
 }
 
 /// <summary>

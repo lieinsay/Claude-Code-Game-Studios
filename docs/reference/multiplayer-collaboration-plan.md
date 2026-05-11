@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002/003/004 完成 | 下一步 Story-005 Domain Loading & Decision UI Gating | 115 Story readiness 元数据已对齐**
+> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002/003/004/005/006 完成 | 下一步 Story-007 Diagnostic UI — Dev Tools | 115 Story readiness 元数据已对齐**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -85,7 +85,7 @@ Week 0 (2-3 天) — ✅ 全部完成
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001 10/10 PASS ✅ + Story-002 11/11 PASS ✅ + Story-003 6/6 PASS ✅ + Story-004 7/7 PASS ✅
+**门禁**: `dotnet build` PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001 10/10 PASS ✅ + Story-002 11/11 PASS ✅ + Story-003 6/6 PASS ✅ + Story-004 7/7 PASS ✅ + Story-005 8/8 PASS ✅ + Story-006 7/7 PASS ✅
 
 ---
 
@@ -102,7 +102,9 @@ D-A ─────────────────────────�
   │   ↓ (001+002 完成后)                                  │
   │ Story 003 ☑ Content Lifecycle                 (L, 1d)│  ← ✅ 完成
   │ Story 004 ☑ Reference Integrity               (L, 1d)│  ← ✅ 完成
-  │ Story 005 □ Domain Loading & Decision Gating  (I, 1d)│  ← 下一步
+  │ Story 005 ☑ Domain Loading & Decision Gating  (I, 1d)│  ← ✅ 完成
+  │ Story 006 ☑ Diagnostic System                 (L, 1d)│  ← ✅ 完成
+  │ Story 007 □ Diagnostic UI (Dev Tools)         (U, 2d)│  ← 下一步
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
@@ -132,8 +134,8 @@ D-A ─────────────────────────�
   Epic #1 剩余 + Epic #3 Persistence
   ┌──────────────────────────────────────────────────────┐
   │ Epic #1:                                             │
-  │ Story 005 □ Domain Loading + UI Gating       (I, 2d)│  ← 等 001-004
-  │ Story 006 □ Diagnostic System                (L, 1d)│
+  │ Story 005 ☑ Domain Loading + UI Gating       (I, 2d)│  ← ✅ 完成
+  │ Story 006 ☑ Diagnostic System                (L, 1d)│  ← ✅ 完成
   │ Story 007 □ Diagnostic UI (Dev Tools)        (U, 2d)│  ← 等 006
   │ Story 008 □ Player-Facing Boundary           (I, 2d)│  ← 等 005
   │                                                       │

@@ -30,3 +30,9 @@ jobs:
 
       - name: Run registry unit tests
         run: dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
+
+      - name: Run registry diagnostic unit tests
+        run: dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj
+
+      - name: Run registry domain loading integration tests
+        run: dotnet run --project tests/integration/registry/DomainLoadingTest.csproj

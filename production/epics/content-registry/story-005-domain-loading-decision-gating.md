@@ -1,7 +1,7 @@
 # Story 005: Domain Loading & Decision UI Gating
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: Complete — 2026-05-11
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -31,12 +31,12 @@
 
 *From GDD `design/gdd/content-data-state-registry.md`:*
 
-- [ ] **AC-1**: GIVEN 玩家打开航图与航线规划界面，WHEN `routes`、`world`、`intel` 或相关 `threats` 内容域不是 COMPLETE，THEN 界面不得展示半完整航线选择，必须显示等待状态或安全错误
-- [ ] **AC-2**: GIVEN 玩家打开飞艇家园或整备界面，WHEN `airship`、`resources` 或相关 `companions` 内容域不是 COMPLETE，THEN 界面不得展示可安装模块、舱室锚点或伙伴功能选择
-- [ ] **AC-3**: GIVEN 玩家打开世界修复或市场界面，WHEN `world`、`resources` 或相关 `intel` 内容域不是 COMPLETE，THEN 界面不得展示可执行修复、摊位商品或材料用途
-- [ ] **AC-4**: GIVEN 玩家决策界面已经基于一组内容定义打开，WHEN 异步加载/缓存刷新/内容包重载发生，THEN 当前界面的可选项、排序和引用结果不得变化，除非界面关闭并用新的完整 snapshot 重建
-- [ ] **AC-5**: GIVEN 内容包或 Schema 版本不兼容，WHEN 查询/启动内容层，THEN 返回 `VERSION_INCOMPATIBLE`——不得静默降级或自动补字段
-- [ ] **AC-6**: GIVEN 内容包版本不兼容，WHEN 桌面构建启动内容层，THEN 必须失败在内容层边界并给出可复制诊断，不得进入半可用状态
+- [x] **AC-1**: GIVEN 玩家打开航图与航线规划界面，WHEN `routes`、`world`、`intel` 或相关 `threats` 内容域不是 COMPLETE，THEN 界面不得展示半完整航线选择，必须显示等待状态或安全错误
+- [x] **AC-2**: GIVEN 玩家打开飞艇家园或整备界面，WHEN `airship`、`resources` 或相关 `companions` 内容域不是 COMPLETE，THEN 界面不得展示可安装模块、舱室锚点或伙伴功能选择
+- [x] **AC-3**: GIVEN 玩家打开世界修复或市场界面，WHEN `world`、`resources` 或相关 `intel` 内容域不是 COMPLETE，THEN 界面不得展示可执行修复、摊位商品或材料用途
+- [x] **AC-4**: GIVEN 玩家决策界面已经基于一组内容定义打开，WHEN 异步加载/缓存刷新/内容包重载发生，THEN 当前界面的可选项、排序和引用结果不得变化，除非界面关闭并用新的完整 snapshot 重建
+- [x] **AC-5**: GIVEN 内容包或 Schema 版本不兼容，WHEN 查询/启动内容层，THEN 返回 `VERSION_INCOMPATIBLE`——不得静默降级或自动补字段
+- [x] **AC-6**: GIVEN 内容包版本不兼容，WHEN 桌面构建启动内容层，THEN 必须失败在内容层边界并给出可复制诊断，不得进入半可用状态
 
 ---
 
@@ -96,7 +96,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/registry/DomainLoadingTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-11
 
 ---
 
@@ -105,3 +105,11 @@
 - Depends on: Story 001-004 (域加载 COMPLETE 需要 ID/Schema/Lifecycle/Reference 全部校验通过)
 - Depends on: ADR-0002 (Signal 协议——`domain_ready` 信号定义)
 - Unlocks: Story 008 (Player-Facing Boundary——snapshot 和域门控保护玩家 UI)
+
+## Completion Notes
+
+**Completed**: 2026-05-11
+**Criteria**: 6/6 passing
+**Deviations**: None blocking. Scope note: CI/solution/session metadata were updated so the required integration evidence is discoverable and repeatable.
+**Test Evidence**: Integration test at `tests/integration/registry/DomainLoadingTest.csproj` — 8 acceptance/regression checks passing.
+**Code Review**: Complete — stale loaded-domain flag after reload failure was found, fixed, and covered by regression test.
