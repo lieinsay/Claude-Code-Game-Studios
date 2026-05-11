@@ -3,8 +3,14 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: Content Registry
-Task: ✅ Story-003 Content Lifecycle Done
+Task: 🚧 Story-007 Diagnostic UI — Dev Tools In Progress
 <!-- /STATUS -->
+
+## Session Marker — Story Start 2026-05-11
+
+- Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
+- Status: In Progress
+- Pre-development marker only; implementation starts after this marker is committed and pushed.
 
 ## Session Extract — /story-done 2026-05-10
 

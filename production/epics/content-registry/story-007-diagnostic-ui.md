@@ -1,7 +1,7 @@
 # Story 007: Diagnostic UI — Dev Tools
 
 > **Epic**: Content Registry
-> **Status**: Ready
+> **Status**: In Progress — 2026-05-11
 > **Layer**: Foundation
 > **Type**: UI
 > **Estimate**: M
