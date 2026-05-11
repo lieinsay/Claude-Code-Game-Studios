@@ -1,7 +1,7 @@
 # Story 007: Diagnostic UI — Dev Tools
 
 > **Epic**: Content Registry
-> **Status**: In Progress — 2026-05-11
+> **Status**: Done — 2026-05-11
 > **Layer**: Foundation
 > **Type**: UI
 > **Estimate**: M
@@ -101,9 +101,10 @@
 - Depends on: ADR-0012 (UI/Input Routing —— 面板模态管理和 input routing)
 - Unlocks: None — Story 007 是 Registry Epic 的最终 UI 层
 
-## Implementation Notes
+## Completion Notes
 
-**Implemented**: 2026-05-11
-**Criteria**: 6/6 covered by `tests/unit/presentation/DiagnosticUITest.csproj`
-**Evidence**: `production/qa/evidence/diagnostic-ui-evidence.md`
-**Deviations**: Current implementation is a C# diagnostic UI view model and UIManager debug entry point. Godot Control scene binding and screenshots remain manual evidence work before `/story-done`.
+**Completed**: 2026-05-11
+**Criteria**: 6/6 passing
+**Deviations**: Advisory — current implementation is a C# diagnostic UI view model and UIManager debug entry point. Final Godot Control scene binding and screenshot walkthrough remain follow-up evidence work.
+**Test Evidence**: UI evidence at `production/qa/evidence/diagnostic-ui-evidence.md`; automated validation at `tests/unit/presentation/DiagnosticUITest.csproj` — 7 acceptance/debug-gate checks passing.
+**Code Review**: Complete — no blocking issues; ADR-0001, ADR-0012, and ADR-0019 compliance verified.

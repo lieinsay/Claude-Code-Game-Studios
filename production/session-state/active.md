@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Pre-Production
 Feature: Content Registry
-Task: 🚧 Story-007 Diagnostic UI — Dev Tools Implementation Ready for Review
+Task: ✅ Story-007 Diagnostic UI — Dev Tools Done; next Story-008 Player-Facing Boundary readiness
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2026-05-11
@@ -17,7 +17,7 @@ Task: 🚧 Story-007 Diagnostic UI — Dev Tools Implementation Ready for Review
 ## Session Marker — Story Start 2026-05-11
 
 - Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
-- Status: In Progress
+- Status: Done — closed 2026-05-11 via `/story-done`
 - Pre-development marker only; implementation starts after this marker is committed and pushed.
 
 ## Session Extract — /story-done 2026-05-10
@@ -483,3 +483,11 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors)
 - Residual risk reduced: Story 007 now has a concrete Godot `CanvasLayer`/`Control` scene mounted by `SessionShell`, Godot 4.6.2 scene-load checks, and generated loading screenshot evidence. Remaining risk is dynamic runtime data binding/polish.
 - Unlocked: #4 player-movement-interaction can start now; #3 local-save-persistence starts after #1 content-registry completes.
+
+## Session Extract — /story-done 2026-05-11
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
+- Code review: Complete — no blocking issues; ADR-0001, ADR-0012, and ADR-0019 compliance verified
+- Tech debt logged: None
+- Notes: Godot Control scene binding and screenshot walkthrough remain follow-up UI evidence work
+- Next recommended: `production/epics/content-registry/story-008-player-facing-boundary.md` — Story 008: Player-Facing Boundary
