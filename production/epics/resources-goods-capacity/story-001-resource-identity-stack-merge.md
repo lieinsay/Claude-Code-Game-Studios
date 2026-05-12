@@ -1,7 +1,7 @@
 # Story 001: Resource Identity & Stack Merge
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: Ready
+> **Status**: In Progress — implementation ready for /code-review
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -29,29 +29,29 @@
 
 ### Resource Identity
 
-- [ ] **AC-1**: GIVEN 两个同 `resource_id` 的 stackable 资源，WHEN 添加到同一池，THEN 它们合并到同一堆，数量求和
-- [ ] **AC-2**: GIVEN 两个同 `resource_id` 的 unique 资源，WHEN 添加到同一池，THEN 它们各自占据独立槽位，不合并
-- [ ] **AC-3**: GIVEN 资源显示名被修改，WHEN 执行 `transfer()` 匹配，THEN 操作仅基于稳定 ID 匹配，不依赖显示名
+- [x] **AC-1**: GIVEN 两个同 `resource_id` 的 stackable 资源，WHEN 添加到同一池，THEN 它们合并到同一堆，数量求和
+- [x] **AC-2**: GIVEN 两个同 `resource_id` 的 unique 资源，WHEN 添加到同一池，THEN 它们各自占据独立槽位，不合并
+- [x] **AC-3**: GIVEN 资源显示名被修改，WHEN 执行 `transfer()` 匹配，THEN 操作仅基于稳定 ID 匹配，不依赖显示名
 
 ### Stack Merge Algorithm
 
-- [ ] **AC-4**: GIVEN 目标池有 basic 堆 E=80（max_stack=99），WHEN `add(basic, 30)`，THEN merge_qty=19 合并到已有堆（达 99），overflow_qty=11 创建新堆
-- [ ] **AC-5**: GIVEN 目标池有 basic 堆 E=80 和 E=60（两个匹配堆），WHEN `add(basic, 30)`，THEN 优先合并到 E=80 的堆（fill fullest first），merge_qty=19，overflow_qty=11
-- [ ] **AC-6**: GIVEN 目标池有两个相同数量（E=60 each）的匹配堆，WHEN `add(resource, 30)`，THEN 合并到较低槽位索引的堆
-- [ ] **AC-7**: GIVEN 目标池无该 resource_id 的匹配堆，WHEN `add(resource, Q)`，THEN merge_qty=0，overflow_qty=Q，创建新堆（检查容量）
+- [x] **AC-4**: GIVEN 目标池有 basic 堆 E=80（max_stack=99），WHEN `add(basic, 30)`，THEN merge_qty=19 合并到已有堆（达 99），overflow_qty=11 创建新堆
+- [x] **AC-5**: GIVEN 目标池有 basic 堆 E=80 和 E=60（两个匹配堆），WHEN `add(basic, 30)`，THEN 优先合并到 E=80 的堆（fill fullest first），merge_qty=19，overflow_qty=11
+- [x] **AC-6**: GIVEN 目标池有两个相同数量（E=60 each）的匹配堆，WHEN `add(resource, 30)`，THEN 合并到较低槽位索引的堆
+- [x] **AC-7**: GIVEN 目标池无该 resource_id 的匹配堆，WHEN `add(resource, Q)`，THEN merge_qty=0，overflow_qty=Q，创建新堆（检查容量）
 
 ### Supply Class Defaults
 
-- [ ] **AC-8**: GIVEN `supply_class=intel` 的资源，WHEN 查询其 max_stack，THEN 返回 1（unique，不可堆叠）
-- [ ] **AC-9**: GIVEN `supply_class=navigation` 的资源，WHEN `add(navigation_id, 25)` 到有空槽的池，THEN 生成一个 20 堆 + 一个 5 堆（不出现单堆 25）
-- [ ] **AC-10**: GIVEN `supply_class=basic` 的资源，WHEN `add(basic_id, 150)` 到有空槽的池，THEN 生成一个 99 堆 + 一个 51 堆
+- [x] **AC-8**: GIVEN `supply_class=intel` 的资源，WHEN 查询其 max_stack，THEN 返回 1（unique，不可堆叠）
+- [x] **AC-9**: GIVEN `supply_class=navigation` 的资源，WHEN `add(navigation_id, 25)` 到有空槽的池，THEN 生成一个 20 堆 + 一个 5 堆（不出现单堆 25）
+- [x] **AC-10**: GIVEN `supply_class=basic` 的资源，WHEN `add(basic_id, 150)` 到有空槽的池，THEN 生成一个 99 堆 + 一个 51 堆
 
 ### Edge Cases
 
-- [ ] **AC-11**: GIVEN `add(pool, id, 0)`，WHEN 调用零数量操作，THEN 返回 SUCCESS 且无状态变更
-- [ ] **AC-12**: GIVEN `add(pool, id, -5)`，WHEN 调用负数量操作，THEN 返回 `ERR_INVALID_QUANTITY`
-- [ ] **AC-13**: GIVEN 资源 ID 不在注册表中，WHEN `add(pool, unknown_id, 1)`，THEN 返回 `ERR_MISSING_REFERENCE`
-- [ ] **AC-14**: GIVEN 资源 ID 标记为 `deprecated`，WHEN `add(pool, deprecated_id, 1)`，THEN 返回 `ERR_DEPRECATED_ID`（已有库存可正常使用，但不可补充）
+- [x] **AC-11**: GIVEN `add(pool, id, 0)`，WHEN 调用零数量操作，THEN 返回 SUCCESS 且无状态变更
+- [x] **AC-12**: GIVEN `add(pool, id, -5)`，WHEN 调用负数量操作，THEN 返回 `ERR_INVALID_QUANTITY`
+- [x] **AC-13**: GIVEN 资源 ID 不在注册表中，WHEN `add(pool, unknown_id, 1)`，THEN 返回 `ERR_MISSING_REFERENCE`
+- [x] **AC-14**: GIVEN 资源 ID 标记为 `deprecated`，WHEN `add(pool, deprecated_id, 1)`，THEN 返回 `ERR_DEPRECATED_ID`（已有库存可正常使用，但不可补充）
 
 ---
 
@@ -142,7 +142,7 @@ algorithm stack_merge(pool_id, resource_id, quantity):
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/resources/StackMergeTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-12
 
 ---
 
@@ -150,3 +150,11 @@ algorithm stack_merge(pool_id, resource_id, quantity):
 
 - Depends on: content-registry Story 001 (Registry 提供 stack_rule/max_stack/supply_class)
 - Unlocks: Story 002 (容量检查需要 max_stack), Story 005 (原子操作需要 stack_merge)
+
+## Implementation Completion Notes
+
+**Implemented**: 2026-05-12
+**Criteria**: 14/14 passing
+**Files**: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/StackMergeProgram.cs`, `tests/unit/resources/StackMergeTest.csproj`
+**Verification**: `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS.
+**Ready for**: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/StackMergeProgram.cs`

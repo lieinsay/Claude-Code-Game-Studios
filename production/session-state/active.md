@@ -2,9 +2,17 @@
 
 <!-- STATUS -->
 Epic: Foundation Layer
-Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4)
-Task: Foundation #1/#2/#3/#4 complete — #5/#6/#7 prep next
+Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4) + Resources & Goods Capacity (#5)
+Task: Foundation #1/#2/#3/#4 complete — #5 Story 001 stack merge implemented; #6/#7 prep next
 <!-- /STATUS -->
+
+## Session Extract — /dev-story 2026-05-12
+
+- Story: `production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md` — Story 001: Resource Identity & Stack Merge
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/StackMergeTest.csproj`, `tests/unit/resources/StackMergeProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/unit/resources/StackMergeTest.csproj` — 14/14 Story 001 acceptance checks passing
+- Blockers: None
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/StackMergeProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md`
 
 ## Session Extract — Epic #4 Player Movement & Interaction complete — 2026-05-12
 

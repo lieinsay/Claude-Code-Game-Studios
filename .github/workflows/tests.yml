@@ -28,6 +28,9 @@ jobs:
       - name: Run foundation parity
         run: dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj
 
+      - name: Run resources stack merge unit tests
+        run: dotnet run --project tests/unit/resources/StackMergeTest.csproj
+
       - name: Run registry unit tests
         run: dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
 

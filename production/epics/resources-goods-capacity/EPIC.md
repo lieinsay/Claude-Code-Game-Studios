@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/resources-goods-capacity.md
 > **Architecture Module**: Autoload #5 — ResourcesManager
-> **Status**: Ready
-> **Stories**: 9 (001-009) — Ready for implementation
+> **Status**: In Progress
+> **Stories**: 9 (001-009) — Story 001 implemented; 002-009 Ready
 
 ## Overview
 
@@ -42,7 +42,7 @@ This epic is complete when:
 
 | # | Title | Type | TR | ADR | Status |
 |---|-------|------|----|-----|--------|
-| 001 | [Resource Identity & Stack Merge](story-001-resource-identity-stack-merge.md) | Logic | TR-resources-001 | ADR-0005 | Ready |
+| 001 | [Resource Identity & Stack Merge](story-001-resource-identity-stack-merge.md) | Logic | TR-resources-001 | ADR-0005 | In Progress — ready for /code-review |
 | 002 | [Dual Capacity System](story-002-dual-capacity-system.md) | Logic | TR-resources-002 | ADR-0005 | Ready |
 | 003 | [Cargo Model & Unpack](story-003-cargo-model-unpack.md) | Logic | TR-resources-003 | ADR-0005 | Ready |
 | 004 | [Weight & Mass Tracking](story-004-weight-mass-tracking.md) | Logic | TR-resources-004 | ADR-0005 | Ready |
@@ -54,4 +54,4 @@ This epic is complete when:
 
 ## Next Step
 
-All 9 stories are written and ready for implementation. Start with Story 001 (Resource Identity & Stack Merge) and Story 002 (Dual Capacity System) as they unblock all other stories.
+Story 001 has implementation and unit evidence ready for `/code-review`. Continue with Story 002 (Dual Capacity System), then Story 005 (Core Atomic Operations), as they build on the stack model.
