@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/airship-hub.md
 > **Architecture Module**: Autoload #7 — HubManager
-> **Status**: Complete
-> **Stories**: 8 (001-008) — Implemented and verified
+> **Status**: Complete — reviewed 2026-05-12
+> **Stories**: 8 (001-008) — Implemented, reviewed, and verified
 
 ## Overview
 
@@ -67,4 +67,5 @@ This epic is complete when:
 - `tests/integration/hub/LifeTraceAnchorsTest.csproj` — PASS
 - `tests/integration/hub/SignalContractTest.csproj` — PASS
 - `tests/integration/hub/PersistenceTransitionTest.csproj` — PASS
+- 2026-05-12 Codex review rerun — all 8 Hub runners PASS (38/38 checks)
 - `dotnet build CloudWeaverVoyage.sln` — PASS

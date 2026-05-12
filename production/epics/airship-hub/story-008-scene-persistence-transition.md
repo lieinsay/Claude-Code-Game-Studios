@@ -360,6 +360,7 @@ func register_domain_serializer() -> void:
 **Story Type**: Integration
 **Required evidence**: `tests/integration/hub/PersistenceTransitionTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/PersistenceTransitionTest.csproj` — PASS (6/6 checks)
 
 ---
 

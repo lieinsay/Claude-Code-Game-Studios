@@ -490,16 +490,16 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase 0      ████████████████████████ 100%
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
-🔵 Phase C      ████████░░░░░░░░░░░░░░░░  32% (#7 8/8 完成；#5/#6 待启动)
+🔵 Phase C      ████████░░░░░░░░░░░░░░░░  32% (#7 8/8 完成并复审；#5/#6 待启动)
 ```
 
 ### 本次生产状态检查 (2026-05-12)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
 - 活跃任务: `production/session-state/active.md` 指向 Foundation Layer 已完成 #1/#2/#3/#4，Airship Hub #7 已完成；下一步为 #5/#6 Core 前置
-- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（3 个既有未使用事件 warning，0 errors）
-- 测试验证: `tests/` 下 23 个 C# runner 全部 PASS
-- 本次确认: Player Movement & Interaction #4 Story 001-007 已落地；Airship Hub #7 Story 001-008 已落地，8 个 Hub C# runner 共 38/38 PASS；Epic #7 已 Complete
+- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS（0 warnings, 0 errors）
+- 测试验证: Epic #7 Hub 8 个 C# runner 顺序复跑 PASS（38/38 checks）
+- 本次确认: Player Movement & Interaction #4 Story 001-007 已落地；Airship Hub #7 Story 001-008 已落地并复审通过；Epic #7 已 Complete
 
 ### 下一步行动
 

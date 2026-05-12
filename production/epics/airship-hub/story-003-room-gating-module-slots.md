@@ -219,6 +219,7 @@ func _get_slot_indicator_shape(state: int) -> String:
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/RoomGatingTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/RoomGatingTest.csproj` — PASS (3/3 checks)
 
 ---
 

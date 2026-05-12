@@ -242,6 +242,7 @@ func _get_departure_penalties() -> Dictionary:
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/DepartureModesTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/DepartureModesTest.csproj` — PASS (5/5 checks)
 
 ---
 

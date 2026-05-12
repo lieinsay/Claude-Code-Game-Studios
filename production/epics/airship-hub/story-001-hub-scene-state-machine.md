@@ -209,6 +209,7 @@ func _validate_config() -> void:
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/DockingStateMachineTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/DockingStateMachineTest.csproj` — PASS (5/5 checks)
 
 ---
 

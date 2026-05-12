@@ -283,8 +283,9 @@ func _get_accumulated_items(tier: int) -> Array:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/integration/hub/TraceAnchorsTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/hub/LifeTraceAnchorsTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/LifeTraceAnchorsTest.csproj` — PASS (5/5 checks)
 
 ---
 

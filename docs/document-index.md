@@ -118,7 +118,7 @@ graph TB
 | [production/epics/resources-goods-capacity/EPIC.md](../production/epics/resources-goods-capacity/EPIC.md) | Epic #5: 资源货物容量 (9 Stories) |
 | **Core 层 (5 Epic / 40 Stories)** | |
 | [production/epics/intel-knowledge/EPIC.md](../production/epics/intel-knowledge/EPIC.md) | Epic #6: 情报知识 (8 Stories) |
-| [production/epics/airship-hub/EPIC.md](../production/epics/airship-hub/EPIC.md) | Epic #7: 飞艇家园 (8 Stories) |
+| [production/epics/airship-hub/EPIC.md](../production/epics/airship-hub/EPIC.md) | Epic #7: 飞艇家园 (8/8 Stories **Complete** — 2026-05-12 复审通过) |
 | [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8 Stories) |
 | [production/epics/chart-route-planning/EPIC.md](../production/epics/chart-route-planning/EPIC.md) | Epic #9: 航图规划 (8 Stories) |
 | [production/epics/navigation-route-risk/EPIC.md](../production/epics/navigation-route-risk/EPIC.md) | Epic #10: 航行路线风险 (8 Stories) |
@@ -539,7 +539,7 @@ graph TB
 | Epic | System # | Stories | 职责概括 | Autoload |
 |------|----------|---------|---------|----------|
 | [intel-knowledge](../production/epics/intel-knowledge/EPIC.md) | #6 | 8 | 玩家知识与情报——4 态知识状态机、能力解锁 3 路径、knowledge_advanced/ability_unlocked 信号 | IntelManager (#6) |
-| [airship-hub](../production/epics/airship-hub/EPIC.md) | #7 | 8 | 飞艇家园 Hub——10 站点 + 4 房间、玩家存在状态、站点间 WASD 移动、交互契约 | HubManager (#7) |
+| [airship-hub](../production/epics/airship-hub/EPIC.md) | #7 | 8 | 飞艇家园 Hub——10 站点 + 4 房间、玩家存在状态、站点间 WASD 移动、交互契约；2026-05-12 复审 38/38 PASS | HubManager (#7) |
 | [modules-hull-state](../production/epics/modules-hull-state/EPIC.md) | #8 | 8 | 飞艇模块与船体——双字段、2 槽位 + 船体 4 波段、eta_effective 乘数、出航就绪三维检查 | ModuleHullManager (#8) |
 | [chart-route-planning](../production/epics/chart-route-planning/EPIC.md) | #9 | 8 | 航图与航线规划——5 态状态机、route_committed 不可逆承诺、知识门控航线可见性、墨水扩散出航动画 | ChartManager (#9) |
 | [navigation-route-risk](../production/epics/navigation-route-risk/EPIC.md) | #10 | 8 | 航行与路线风险——6 态 Voyage FSM、5 公式、12 遭遇类型、EncounterContext 9-field 合约 | NavigationManager (#10) |
@@ -967,6 +967,7 @@ graph LR
 | 2026-05-08 | ADR-0014 Settlement/Market + 6 Stories (#14) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-08 | ADR-0015 Partner/Relationships + 6 Stories (#15) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-08 | #16 UI/HUD 6 Stories (3 Logic + 3 Integration) | 通过 | [active.md](../production/session-state/active.md) |
+| 2026-05-12 | Epic #7 Airship Hub Story 001-008 复审 + Hub runner 复跑 | 通过 (38/38 PASS) | [Epic #7](../production/epics/airship-hub/EPIC.md) |
 
 ### 平台转向复审 — 修正文件总览 (2026-05-09)
 

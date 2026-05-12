@@ -200,6 +200,7 @@ func _on_use() -> void:
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/StationRegistryTest.csproj` — must exist and pass
 **Status**: [x] Created and passing
+**Review evidence**: 2026-05-12 Codex review reran `dotnet run --no-build --project tests/integration/hub/StationRegistryTest.csproj` — PASS (5/5 checks)
 
 ---
 
