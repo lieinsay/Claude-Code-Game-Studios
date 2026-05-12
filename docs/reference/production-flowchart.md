@@ -1,6 +1,6 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-11 | 基于: systems-index.md + 16 Epic 115 Story
+> 生成日期: 2026-05-12 | 基于: systems-index.md + 16 Epic 115 Story
 > 当前状态: **Phase 0 ✅ 完成 | Phase A 🔵 进行中 — #1 已做完 7/8 Story（Story-007 并行中），#2 ✅ 完成**
 
 ---
@@ -220,7 +220,7 @@ Week 1-2
 
 | Epic | Stories | 做完解锁 | 当前进度 |
 |------|---------|----------|----------|
-| #1 内容注册表 | 001-008 (8S) | #3, #5, #6, #7, #9, #15 | ✅ 001-004, 🔵 005 进行中 |
+| #1 内容注册表 | 001-008 (8S) | #3, #5, #6, #7, #9, #15 | ✅ 001-006/008, 🔵 007 进行中 |
 | #2 会话壳 | 001-007 (7S) | #3, #4 | ✅ 001-007 完成 |
 
 ---
@@ -341,10 +341,10 @@ Week 13+
 [S003 Content Lifecycle]    ┤
 [S004 Reference Integrity] ─┘
                            
-[S005] → [S006 Content Gate 状态机] → [S007 Bootstrap 数据定义] → [S008 集成测试]
-         └─ 005-008 必须串行: 每个建立在前一个的基础上 ─┘
+[S005] → [S006 Diagnostic System] → [S007 Diagnostic UI] → [S008 Player-Facing Boundary]
+         └─ 005-008 已完成 005/006/008；007 是唯一剩余 UI 工具项 ─┘
 
-当前: ✅ 001-006 | 🔵 007 进行中 | ⏳ 008 Ready
+当前: ✅ 001-006/008 | 🔵 007 进行中
 ```
 
 ### #2 会话壳 (7 Stories)
@@ -477,31 +477,37 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 ## 七、当前进度与下一步
 
-### 当前位置 (2026-05-11)
+### 当前位置 (2026-05-12)
 
 ```
 ✅ Phase 0      ████████████████████████ 100%
-🔵 Phase A      █████████████████████░░░  87% (#1 6/8 完成 + 007 进行中, #2 7/7 完成)
+🔵 Phase A      ██████████████████████░░  93% (#1 7/8 完成 + 007 进行中, #2 7/7 完成)
 ⏳ Phase B-F    ░░░░░░░░░░░░░░░░░░░░░░░░   0%
 ```
+
+### 本次生产状态检查 (2026-05-12)
+
+- 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
+- 活跃任务: `production/session-state/active.md` 指向 Content Registry Story-007 Diagnostic UI — Dev Tools
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 errors；3 个既有 unused-event warnings）
+- 测试验证: `tests/` 下 19 个 C# runner 全部 PASS
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
 | **P0** | 完成 #1 Story 007 Diagnostic UI — Dev Tools | 等 006 | 2 天 |
-| **P1** | 完成 #1 Story 008 Player-Facing Boundary | 等 005 | 2 天 |
-| **P2** | 启动 #4 移动交互 Story 001 | #2 完成 | 可开工 |
-| **P3** | 启动 #3 持久化 Story 001 | 等 #1 #2 完成 | 等 #1 完成 |
-| **P4** | 完成 #1 Story 007-008 | #1 Story 006 完成 | 2-4 天 |
+| **P1** | 启动 #4 移动交互 Story 001 | #2 完成 | 可开工 |
+| **P2** | 启动 #3 持久化 Story 001 | 等 #1 #2 完成 | 等 #1 完成 |
+| **P3** | Phase A 收口后执行 Registry Schema Freeze | #1 完成 | 0.5 天 |
 
-> ⚡ **关键建议**: #2 会话壳已完成；当前最佳并行路线是继续收尾 #1 Story 007-008，同时启动 #4 Story 001。#3 仍等 #1 全部完成。
+> ⚡ **关键建议**: #2 会话壳已完成；#1 只剩 Story 007 诊断 UI。当前最佳并行路线是收尾 #1 Story 007，同时启动 #4 Story 001。#3 仍等 #1 全部完成。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #1 Story 007-008 (继续推进)
+  ┌─ #1 Story 007 (继续推进)
   └─ #4 Story 001 起步 (已由 #2 解锁)
 
 等 #1 #2 完成后:
