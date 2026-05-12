@@ -52,6 +52,27 @@ jobs:
       - name: Run session input gate integration tests
         run: dotnet run --project tests/integration/session/InputGateTest.csproj
 
+      - name: Run movement system unit tests
+        run: dotnet run --project tests/unit/movement/MovementSystemTest.csproj
+
+      - name: Run movement focus selection unit tests
+        run: dotnet run --project tests/unit/movement/FocusSelectionTest.csproj
+
+      - name: Run movement use gate unit tests
+        run: dotnet run --project tests/unit/movement/UseGateTest.csproj
+
+      - name: Run movement input gate integration tests
+        run: dotnet run --project tests/integration/movement/MovementInputGateTest.csproj
+
+      - name: Run movement interactable registry integration tests
+        run: dotnet run --project tests/integration/movement/MovementInteractableRegistryTest.csproj
+
+      - name: Run movement semantic events integration tests
+        run: dotnet run --project tests/integration/movement/MovementSemanticEventsTest.csproj
+
+      - name: Run movement boundary integration tests
+        run: dotnet run --project tests/integration/movement/MovementCrossSystemBoundariesTest.csproj
+
       - name: Run shell UI model tests
         run: dotnet run --project tests/integration/session/ShellUiTest.csproj
 

@@ -1,7 +1,7 @@
 # Story 002: Input Gate & Shell Integration
 
 > **Epic**: Player Movement & Interaction
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -90,8 +90,8 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/InputGateTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/movement/MovementInputGateTest.csproj` — must exist and pass
+**Status**: [x] Implemented and passing (2026-05-12)
 
 ---
 

@@ -1,7 +1,7 @@
 # Story 006: Semantic Events & UI Data Contract
 
 > **Epic**: Player Movement & Interaction
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -115,8 +115,8 @@ signal input_gate_changed(previous_gate: StringName, new_gate: StringName)
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/SemanticEventsTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/movement/MovementSemanticEventsTest.csproj` — must exist and pass
+**Status**: [x] Implemented and passing (2026-05-12)
 
 ---
 

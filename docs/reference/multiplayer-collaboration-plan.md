@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 8/8 Story 完成 | #4 移动交互已解锁 | #5/#6 可按 #1+#3 依赖启动准备**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | #5/#6/#7 已解锁**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -112,7 +112,7 @@ D-B ─────────────────────────�
   Epic #2 Session Shell
   ┌──────────────────────────────────────────────────────┐
   │ Story 001-007 ☑ Platform Session Shell        (Done)│  ← ✅ 完成
-  │ 解锁: #3 Persistence 与 #4 Movement 均可开工       │
+  │ 结果: #3 Persistence 与 #4 Movement 均已完成       │
   └──────────────────────────────────────────────────────┘
 
 D-C ───────────────────────────────────────────────────────
@@ -143,20 +143,19 @@ D-A ─────────────────────────�
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
-  Epic #2 已完成 + Epic #4 Movement 可开工
+  Epic #2 已完成 + Epic #4 Movement 已完成
   ┌──────────────────────────────────────────────────────┐
   │ Epic #2:                                             │
   │ Story 001-007 ☑ Platform Session Shell       (Done) │  ← ✅ 完成
   │                                                       │
-  │ Epic #4:  (等 #2 完成)                                │
-  │ Story 001 □ Movement System (WASD+Click)     (L, 2d)│  ← 核心！
-  │ Story 005 □ Interactable Base + Registry     (I, 2d)│  ← 与 001 并行
+  │ Epic #4:                                             │
+  │ Story 001-007 ☑ Player Movement & Interaction(Done) │  ← ✅ 完成
   └──────────────────────────────────────────────────────┘
 
 D-C ───────────────────────────────────────────────────────
   #1 已完成 → 可以开始阅读 Registry API 文档
   #3 已完成 → 可以开始写 #5 和 #6 的桩代码
-  #2 已完成 → 可以启动 #4 Movement，并为 #4 写集成测试桩
+  #2 已完成 → #4 Movement 已完成，#7 Hub 可接入移动/交互契约
 ```
 
 **Phase 1 门禁**:
@@ -165,7 +164,8 @@ D-C ─────────────────────────�
 - [x] Registry Content Lifecycle 测试 PASS (`tests/unit/registry/ContentLifecycleTest.csproj`: Story-003 6/6)
 - [x] Persistence Story-001~008 自动化测试 PASS (`SavePipeline`, `SnapshotPackage`, `StorageCapability`, `ContinueAvailability`, `Migration`, `BackupFailover`, `ArtifactIsolation`, `DesktopLifecycle`)
 - [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
-- [ ] Movement WASD + Click-to-Move 手动验证 PASS
+- [x] Movement C# 合同验证 PASS (`tests/unit/movement` + `tests/integration/movement`: 58/58)
+- [ ] Movement Godot 灰盒场景手动验证 PASS（随 #7 Hub 场景接入执行）
 
 ---
 
@@ -577,11 +577,11 @@ D-C: 性能分析 + 优化
 |------|-------------|----------|--------|
 | #1 Registry | 001 | 无 | Phase 0 完成即刻 |
 | #2 Shell | 001 | 无 | ✅ Complete — 2026-05-11 |
-| #3 Persistence | 008 | #3 Story 001-007 | 当前下一步 |
-| #4 Movement | 001 | #2 输入路由 | ✅ 已满足，可开工 |
-| #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |
-| #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |
-| #7 Hub | 001 | #1 ID + #3 快照 + #4 移动 | Week 4 |
+| #3 Persistence | 001-008 | #1 + #2 | ✅ Complete — 2026-05-12 |
+| #4 Movement | 001-007 | #2 输入路由 | ✅ Complete — 2026-05-12 |
+| #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
+| #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
+| #7 Hub | 001 | #1 ID + #3 快照 + #4 移动 | 当前可开工 |
 | #8 Modules | 001 | #3 快照 + #5 池定义 + #7 槽位注册 | Week 4-5 |
 | #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | Week 4-5 |
 | #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | Week 6-7 |

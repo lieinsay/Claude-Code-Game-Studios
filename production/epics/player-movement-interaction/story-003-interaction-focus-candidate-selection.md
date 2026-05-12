@@ -1,7 +1,7 @@
 # Story 003: Interaction Focus & Candidate Selection
 
 > **Epic**: Player Movement & Interaction
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -110,7 +110,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/movement/FocusSelectionTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Implemented and passing (2026-05-12)
 
 ---
 

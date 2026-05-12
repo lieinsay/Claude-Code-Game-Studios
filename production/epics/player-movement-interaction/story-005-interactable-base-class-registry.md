@@ -1,7 +1,7 @@
 # Story 005: Interactable Base Class & Registry
 
 > **Epic**: Player Movement & Interaction
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -110,8 +110,8 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/movement/InteractableRegistryTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/movement/MovementInteractableRegistryTest.csproj` — must exist and pass
+**Status**: [x] Implemented and passing (2026-05-12)
 
 ---
 

@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/player-movement-interaction.md
 > **Architecture Module**: Autoload #4 — InteractionRegistry
-> **Status**: Ready
-> **Stories**: 7 (001-007) — Ready for implementation
+> **Status**: Complete
+> **Stories**: 7 (001-007) — Complete
 
 ## Overview
 
@@ -41,14 +41,14 @@ This epic is complete when:
 
 | # | Title | Type | TR | ADR | Status |
 |---|-------|------|----|-----|--------|
-| 001 | [Movement System](story-001-movement-system.md) | Logic | TR-movement-001 | ADR-0004 | Ready |
-| 002 | [Input Gate & Shell Integration](story-002-input-gate-shell-integration.md) | Integration | TR-movement-002 | ADR-0001, ADR-0002, ADR-0006 | Ready |
-| 003 | [Interaction Focus & Candidate Selection](story-003-interaction-focus-candidate-selection.md) | Logic | TR-movement-003 | ADR-0004 | Ready |
-| 004 | [Use Gate & Dispatch](story-004-use-gate-dispatch.md) | Logic | TR-movement-004 | ADR-0004 | Ready |
-| 005 | [Interactable Base Class & Registry](story-005-interactable-base-class-registry.md) | Integration | TR-movement-005 | ADR-0004 | Ready |
-| 006 | [Semantic Events & UI Data Contract](story-006-semantic-events-ui-data.md) | Integration | TR-movement-006 | ADR-0002, ADR-0004 | Ready |
-| 007 | [Cross-System Boundaries & Web Constraints](story-007-cross-system-boundaries-web.md) | Integration | TR-movement-007 | ADR-0001, ADR-0006 | Ready |
+| 001 | [Movement System](story-001-movement-system.md) | Logic | TR-movement-001 | ADR-0004 | Done |
+| 002 | [Input Gate & Shell Integration](story-002-input-gate-shell-integration.md) | Integration | TR-movement-002 | ADR-0001, ADR-0002, ADR-0006 | Done |
+| 003 | [Interaction Focus & Candidate Selection](story-003-interaction-focus-candidate-selection.md) | Logic | TR-movement-003 | ADR-0004 | Done |
+| 004 | [Use Gate & Dispatch](story-004-use-gate-dispatch.md) | Logic | TR-movement-004 | ADR-0004 | Done |
+| 005 | [Interactable Base Class & Registry](story-005-interactable-base-class-registry.md) | Integration | TR-movement-005 | ADR-0004 | Done |
+| 006 | [Semantic Events & UI Data Contract](story-006-semantic-events-ui-data.md) | Integration | TR-movement-006 | ADR-0002, ADR-0004 | Done |
+| 007 | [Cross-System Boundaries & Desktop Lifecycle Constraints](story-007-cross-system-boundaries-web.md) | Integration | TR-movement-007 | ADR-0001, ADR-0006 | Done |
 
 ## Next Step
 
-All 7 stories are written and ready for implementation. Start with Story 001 (Movement System) and Story 005 (Interactable Base Class) as they unblock all other stories.
+Epic #4 is complete. Downstream Hub, exploration, settlement, repair, and UI systems can now consume the movement/input/focus/Use contract.

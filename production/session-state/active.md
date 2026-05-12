@@ -2,9 +2,20 @@
 
 <!-- STATUS -->
 Epic: Foundation Layer
-Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3)
-Task: Foundation #1/#2/#3 complete — Movement #4 and #5/#6 prep next
+Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4)
+Task: Foundation #1/#2/#3/#4 complete — #5/#6/#7 prep next
 <!-- /STATUS -->
+
+## Session Extract — Epic #4 Player Movement & Interaction complete — 2026-05-12
+
+- Verdict: COMPLETE WITH NOTES
+- Epic: `production/epics/player-movement-interaction/EPIC.md` — Player Movement & Interaction (#4)
+- Stories completed: Story 001 Movement System, Story 002 Input Gate & Shell Integration, Story 003 Interaction Focus & Candidate Selection, Story 004 Use Gate & Dispatch, Story 005 Interactable Base Class & Registry, Story 006 Semantic Events & UI Data Contract, Story 007 Cross-System Boundaries & Desktop Lifecycle
+- Files changed: `src/core/interaction/InteractionRegistry.cs`, `tests/unit/movement/*`, `tests/integration/movement/*`, `production/qa/evidence/movement-interaction-evidence.md`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/player-movement-interaction/*.md`, `production/epics/index.md`, `docs/reference/production-flowchart.md`
+- Test evidence: Movement 7/7, Input Gate 6/6, Focus Selection 10/10, Use Gate 11/11, Interactable Registry 7/7, Semantic Events 10/10, Cross-System Boundaries 7/7 — total 58/58 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (2 existing unused-event warnings, 0 errors)
+- Residual risk: Godot scene/runtime greybox verification is deferred to Hub/scene implementation; current evidence locks the desktop C# contract.
+- Unlocked: #7 Airship Hub can now start alongside #5 Resources and #6 Intel preparation.
 
 ## Session Extract — production check 2026-05-12
 
