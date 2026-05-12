@@ -1,49 +1,30 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Pre-Production
-Feature: Local Save / World State Persistence
-Task: ✅ Story-007 Artifact Isolation Done; next Story-008 Desktop Lifecycle readiness
+Epic: Foundation Layer
+Feature: Content Registry (#1) + Local Save Persistence (#3)
+Task: Content Registry Epic Complete — Local Save Story 007 Artifact Isolation next
 <!-- /STATUS -->
-
-## Session Extract — /dev-story 2026-05-12
-
-- Story: `production/epics/local-save-persistence/story-007-artifact-isolation.md` — Story 007: Artifact Isolation (settings / progress)
-- Files changed: `src/core/persistence/Persistence.cs`, `tests/integration/persistence/ArtifactIsolationTest.csproj`, `tests/integration/persistence/ArtifactIsolationProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `tests/README.md`, `production/epics/local-save-persistence/story-007-artifact-isolation.md`, `production/epics/local-save-persistence/EPIC.md`, `production/session-state/active.md`
-- Test written: `tests/integration/persistence/ArtifactIsolationTest.csproj` — 10/10 Story 007 acceptance/regression checks passing
-- Verification: `dotnet run --project tests/integration/persistence/ArtifactIsolationTest.csproj --no-restore` PASS; `FoundationParity` PASS 70/70; `SavePipelineTest` PASS 11/11; `BackupFailoverTest` PASS 13/13; `ContinueAvailabilityTest` PASS 10/10
-- Blockers: None
-- Next: `/code-review src/core/persistence/Persistence.cs tests/integration/persistence/ArtifactIsolationProgram.cs` then `/story-done production/epics/local-save-persistence/story-007-artifact-isolation.md`; next implementation target is `production/epics/local-save-persistence/story-008-web-lifecycle-integration.md`
-
-## Session Extract — /dev-story 2026-05-12
-
-- Story: `production/epics/local-save-persistence/story-006-backup-failover.md` — Story 006: Backup Failover
-- Files changed: `src/core/persistence/BackupFailover.cs`, `src/core/persistence/Persistence.cs`, `tests/unit/persistence/BackupFailoverTest.csproj`, `tests/unit/persistence/BackupFailoverProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `tests/README.md`, `docs/architecture/tr-registry.yaml`, `production/epics/local-save-persistence/story-006-backup-failover.md`, `production/epics/local-save-persistence/EPIC.md`, `production/session-state/active.md`
-- Test written: `tests/unit/persistence/BackupFailoverTest.csproj` — 13/13 Story 006 acceptance/regression checks passing
-- Verification: `dotnet run --project tests/unit/persistence/BackupFailoverTest.csproj` PASS; neighboring persistence tests PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
-- Blockers: None
-- Next: `/code-review src/core/persistence/BackupFailover.cs src/core/persistence/Persistence.cs tests/unit/persistence/BackupFailoverProgram.cs` then `/story-done production/epics/local-save-persistence/story-006-backup-failover.md`; next implementation target is `production/epics/local-save-persistence/story-007-artifact-isolation.md`
 
 ## Session Extract — /story-done 2026-05-12
 
-- Verdict: COMPLETE
+- Verdict: COMPLETE WITH NOTES
 - Story: `production/epics/local-save-persistence/story-006-backup-failover.md` — Story 006: Backup Failover
-- Code review: Complete — main migration-required boundary corrected before closure
-- Tech debt logged: None
-- Next recommended: `production/epics/local-save-persistence/story-007-artifact-isolation.md` — Story 007: Artifact Isolation (settings / progress)
+- Test: 13/13 PASS (3 advisory gaps补充后)
+- Tech debt logged: backup_promoted 独立事件、CommitBackupSnapshot 重复、CloneManifest 文档
+- Next recommended: `production/epics/local-save-persistence/story-007-artifact-isolation.md` — Story 007: Artifact Isolation
 
-## Session Extract — /dev-story 2026-05-11
-
+- Verdict: COMPLETE WITH NOTES
 - Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
-- Files changed: `src/presentation/RegistryDiagnosticDevTools.cs`, `src/presentation/UIManager.cs`, `tests/unit/presentation/DiagnosticUITest.csproj`, `tests/unit/presentation/DiagnosticUIProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `tests/README.md`, `production/qa/evidence/diagnostic-ui-evidence.md`, `production/epics/content-registry/story-007-diagnostic-ui.md`, `production/session-state/active.md`
-- Test written: `tests/unit/presentation/DiagnosticUITest.csproj` — 7/7 Story-007 acceptance/debug-gate checks passing
-- Blockers: None. Manual screenshot capture remains pending for final Godot Control binding before `/story-done`.
-- Next: `/code-review src/presentation/RegistryDiagnosticDevTools.cs src/presentation/UIManager.cs tests/unit/presentation/DiagnosticUIProgram.cs` then `/story-done production/epics/content-registry/story-007-diagnostic-ui.md`
+- Evidence: production/qa/evidence/diagnostic-ui-evidence.md — ADEQUATE，待 Godot 实机执行
+- Tech debt logged: None
+- **Content Registry Epic #1: 全部 8 个 Story Complete — Epic CLOSED**
+- Next recommended: `production/epics/local-save-persistence/story-007-artifact-isolation.md`
 
 ## Session Marker — Story Start 2026-05-11
 
 - Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
-- Status: Done — closed 2026-05-11 via `/story-done`
+- Status: In Progress
 - Pre-development marker only; implementation starts after this marker is committed and pushed.
 
 ## Session Extract — /story-done 2026-05-10
@@ -510,10 +491,12 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Residual risk reduced: Story 007 now has a concrete Godot `CanvasLayer`/`Control` scene mounted by `SessionShell`, Godot 4.6.2 scene-load checks, and generated loading screenshot evidence. Remaining risk is dynamic runtime data binding/polish.
 - Unlocked: #4 player-movement-interaction can start now; #3 local-save-persistence starts after #1 content-registry completes.
 
-## Session Extract — /story-done 2026-05-11
-- Verdict: COMPLETE WITH NOTES
-- Story: `production/epics/content-registry/story-007-diagnostic-ui.md` — Story 007: Diagnostic UI — Dev Tools
-- Code review: Complete — no blocking issues; ADR-0001, ADR-0012, and ADR-0019 compliance verified
-- Tech debt logged: None
-- Notes: Godot Control scene binding and screenshot walkthrough remain follow-up UI evidence work
-- Next recommended: `production/epics/content-registry/story-008-player-facing-boundary.md` — Story 008: Player-Facing Boundary
+## Session Extract — Epic #3 local-save-persistence start 2026-05-11
+- Epic: `production/epics/local-save-persistence/EPIC.md` — Local Save / World State Persistence (#3)
+- Stories completed: Story 001 Save Pipeline, Story 002 Snapshot Package Contract, Story 003 Storage Capability Detection
+- Files changed: `src/core/persistence/Persistence.cs` (ValidateDomainPackages added), `src/core/persistence/SnapshotPackage.cs` (ValidateContract + ValidatePayloadTypes + ValidateCanonicalKeys), `src/core/persistence/PersistenceCapabilityDetector.cs` (new), `tests/unit/persistence/SavePipelineTest.csproj`, `tests/unit/persistence/SnapshotPackageTest.csproj`, `tests/unit/persistence/StorageCapabilityTest.csproj`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`
+- Test evidence: Story 001 11/11 PASS; Story 002 18/18 PASS; Story 003 17/17 PASS
+- Build: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 errors)
+- Commit: 6388e42 pushed to develop
+- Unlocked: Story 004 Continue Availability (depends on 001+003); Story 005 Version Migration (depends on 001)
+- Next: Story 004 (Integration) and Story 005 (Logic) can run in parallel

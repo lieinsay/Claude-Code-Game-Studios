@@ -33,41 +33,6 @@ public enum PersistenceArtifactKind
 }
 
 /// <summary>
-/// Outcome of a backup failover evaluation.
-/// </summary>
-public enum BackupFailoverOutcome
-{
-    /// <summary>Main artifact is usable — backup not needed.</summary>
-    NotNeeded = 0,
-    /// <summary>Main failed all checks; backup was promoted to safe.</summary>
-    BackupPromoted = 1,
-    /// <summary>Main failed; backup exists but needs migration or cannot be directly restored.</summary>
-    BackupPreservedLocked = 2,
-    /// <summary>Main failed; no usable backup available.</summary>
-    NoUsableBackup = 3,
-}
-
-/// <summary>
-/// Validity check inputs for the backup artifact, supplied by the caller.
-/// </summary>
-public sealed record BackupArtifactStatus(
-    bool BackupPresent,
-    bool ParseOk,
-    bool StructureOk,
-    bool IntegrityOk,
-    bool VersionCompatible,
-    bool StableIdsResolved,
-    bool MigrationRequired);
-
-/// <summary>
-/// Result returned by backup failover evaluation and execution.
-/// </summary>
-public sealed record BackupFailoverResult(
-    BackupFailoverOutcome Outcome,
-    string? CheckpointSummary,
-    string? DiagnosticNote);
-
-/// <summary>
 /// Synchronous result returned by a persistence operation request.
 /// </summary>
 public sealed record PersistenceOperationResult(
@@ -85,8 +50,6 @@ public sealed class Persistence
     private readonly Dictionary<string, Action<SnapshotPackage>> domainDeserializers = new(StringComparer.Ordinal);
     private Dictionary<string, object?> stagingData = new(StringComparer.Ordinal);
     private Dictionary<string, object?> safeData = new(StringComparer.Ordinal);
-    private Dictionary<string, object?> backupData = new(StringComparer.Ordinal);
-    private bool mainQuarantined;
 
     /// <summary>
     /// Raised after a progress save is promoted successfully.
@@ -127,16 +90,6 @@ public sealed class Persistence
     /// Gets whether the pipeline can accept a new request.
     /// </summary>
     public bool IsPipelineIdle => PipelinePhase == PersistencePipelinePhase.Idle;
-
-    /// <summary>
-    /// Gets whether a backup artifact exists.
-    /// </summary>
-    public bool HasBackup => backupData.Count > 0;
-
-    /// <summary>
-    /// Gets whether the main safe artifact is quarantined due to corruption or promotion failure.
-    /// </summary>
-    public bool IsMainQuarantined => mainQuarantined;
 
     /// <summary>
     /// Registers a domain snapshot serializer.
@@ -187,110 +140,6 @@ public sealed class Persistence
 
         LoadCompleted?.Invoke("progress", CurrentGeneration);
         return new PersistenceOperationResult(true, null, PipelinePhase, CurrentGeneration);
-    }
-
-    /// <summary>
-    /// Commits the current safe artifact as a backup snapshot.
-    /// Called externally after a successful domain save to create a one-behind backup.
-    /// </summary>
-    public void CommitBackupSnapshot()
-    {
-        if (safeData.Count > 0)
-        {
-            backupData = CloneManifest(safeData);
-            backupData["backup_kind"] = "progress";
-        }
-    }
-
-    /// <summary>
-    /// Evaluates whether backup failover is needed and what outcome applies.
-    /// Does not execute promotion — use ExecuteBackupPromotion for that.
-    /// </summary>
-    public BackupFailoverResult EvaluateBackupFailover(
-        bool mainUsable,
-        BackupArtifactStatus backup)
-    {
-        if (mainUsable)
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.NotNeeded, null, null);
-        }
-
-        if (!backup.BackupPresent)
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.NoUsableBackup, null, "no_backup_present");
-        }
-
-        var directRestoreOk = backup.ParseOk
-            && backup.IntegrityOk
-            && backup.StructureOk
-            && backup.VersionCompatible
-            && backup.StableIdsResolved
-            && !backup.MigrationRequired;
-
-        if (directRestoreOk)
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.BackupPromoted, null, null);
-        }
-
-        if (backup.ParseOk && backup.IntegrityOk && backup.StructureOk)
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.BackupPreservedLocked, null, "backup_needs_migration_or_version_mismatch");
-        }
-
-        return new BackupFailoverResult(BackupFailoverOutcome.NoUsableBackup, null, "backup_integrity_check_failed");
-    }
-
-    /// <summary>
-    /// Executes backup promotion following the 5-step sequence:
-    /// validate_backup → copy_to_staging → readback_verify → promote_to_safe → quarantine_original_main.
-    /// Main is quarantined before promotion begins and stays quarantined if any step fails.
-    /// </summary>
-    public BackupFailoverResult ExecuteBackupPromotion()
-    {
-        if (backupData.Count == 0)
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.NoUsableBackup, null, "no_backup_data");
-        }
-
-        // Step 1: Quarantine original main (set before promotion; stays set on failure).
-        mainQuarantined = true;
-
-        // Step 2: Copy backup to staging as a new generation.
-        var promotionGeneration = CurrentGeneration + 1;
-        var newStaging = CloneManifest(backupData);
-        newStaging["generation"] = promotionGeneration;
-        newStaging["backup_kind"] = "progress";
-
-        // Step 3: Encode and verify checksum of the staging copy.
-        var encoded = CanonicalJsonEncode(newStaging);
-        if (string.IsNullOrEmpty(encoded))
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.NoUsableBackup, null, "backup_encode_failed");
-        }
-
-        var checksum = ComputeChecksum(encoded);
-        var reencoded = CanonicalJsonEncode(newStaging);
-        var rechecksum = ComputeChecksum(reencoded);
-        if (!string.Equals(checksum, rechecksum, StringComparison.Ordinal))
-        {
-            return new BackupFailoverResult(BackupFailoverOutcome.NoUsableBackup, null, "backup_checksum_mismatch");
-        }
-
-        newStaging["_checksum"] = checksum;
-
-        // Step 4: Promote staging to safe.
-        stagingData = newStaging;
-        safeData = CloneManifest(stagingData);
-        CurrentGeneration = promotionGeneration;
-
-        // Step 5: Promotion succeeded — main is no longer quarantined (it was replaced).
-        mainQuarantined = false;
-
-        PromotionCompleted?.Invoke("progress_backup_promoted", CurrentGeneration);
-        return new BackupFailoverResult(
-            BackupFailoverOutcome.BackupPromoted,
-            "已恢复到最近可用记录",
-            null);
     }
 
     /// <summary>
@@ -381,13 +230,6 @@ public sealed class Persistence
         stagingData = manifest;
 
         PipelinePhase = PersistencePipelinePhase.Promoting;
-        // Archive the current safe as backup before overwriting (one-behind rolling backup).
-        if (safeData.Count > 0)
-        {
-            backupData = CloneManifest(safeData);
-            backupData["backup_kind"] = artifactKind.ToString().ToLowerInvariant();
-        }
-
         safeData = CloneManifest(stagingData);
         CurrentGeneration = Convert.ToInt32(safeData["generation"], CultureInfo.InvariantCulture);
         PipelinePhase = PersistencePipelinePhase.Idle;
