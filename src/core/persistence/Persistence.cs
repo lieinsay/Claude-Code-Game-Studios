@@ -42,285 +42,393 @@ public sealed record PersistenceOperationResult(
     int Generation);
 
 /// <summary>
-/// Durable metadata tracked independently for one persistence artifact.
+/// 持久化 Artifact 的当前元数据快照，用于测试断言和诊断输出。
 /// </summary>
+/// <param name="CurrentGeneration">当前已提升的 generation 编号。</param>
+/// <param name="State">工件健康状态（Safe / Quarantined / Missing）。</param>
+/// <param name="ReasonCode">最近失败或状态转换的机读原因码；正常时为空。</param>
 public sealed record ArtifactMetadata(
-    PersistenceArtifactKind Kind,
-    ArtifactState State,
     int CurrentGeneration,
-    StorageCapability StorageCapability,
-    string ReasonCode,
-    string ManifestPointer,
-    string LastVerifiedCheckpoint,
-    string CheckpointSummary,
-    int BackupGeneration);
+    ArtifactState State,
+    string ReasonCode);
 
 /// <summary>
 /// C# Foundation persistence pipeline for deterministic snapshot save/load validation.
+/// 支持 settings 与 progress 两路独立工件槽，每路独立 staging/verify/promotion，
+/// 互不干扰（ADR-0003 非干扰规则）。
 /// </summary>
 public sealed class Persistence
 {
-    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, Func<SnapshotPackage>>> domainSerializers = new()
+    // ---------------------------------------------------------------------------
+    // 内部工件槽
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 单个工件类型（progress 或 settings）的独立存储槽，
+    /// 持有序列化器、反序列化器、暂存/安全数据、generation 和恢复状态。
+    /// </summary>
+    private sealed class ArtifactSlot
     {
-        [PersistenceArtifactKind.Progress] = new Dictionary<string, Func<SnapshotPackage>>(StringComparer.Ordinal),
-        [PersistenceArtifactKind.Settings] = new Dictionary<string, Func<SnapshotPackage>>(StringComparer.Ordinal),
-    };
+        /// <summary>该槽的领域序列化器，key 为 domain ID。</summary>
+        public Dictionary<string, Func<SnapshotPackage>> Serializers { get; } =
+            new(StringComparer.Ordinal);
 
-    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, Action<SnapshotPackage>>> domainDeserializers = new()
-    {
-        [PersistenceArtifactKind.Progress] = new Dictionary<string, Action<SnapshotPackage>>(StringComparer.Ordinal),
-        [PersistenceArtifactKind.Settings] = new Dictionary<string, Action<SnapshotPackage>>(StringComparer.Ordinal),
-    };
+        /// <summary>该槽的领域反序列化器，key 为 domain ID。</summary>
+        public Dictionary<string, Action<SnapshotPackage>> Deserializers { get; } =
+            new(StringComparer.Ordinal);
 
-    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, object?>> stagingData = new()
-    {
-        [PersistenceArtifactKind.Progress] = new Dictionary<string, object?>(StringComparer.Ordinal),
-        [PersistenceArtifactKind.Settings] = new Dictionary<string, object?>(StringComparer.Ordinal),
-    };
+        /// <summary>最近成功提升的安全数据 manifest。</summary>
+        public Dictionary<string, object?> SafeData { get; set; } =
+            new(StringComparer.Ordinal);
 
-    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, object?>> safeData = new()
-    {
-        [PersistenceArtifactKind.Progress] = new Dictionary<string, object?>(StringComparer.Ordinal),
-        [PersistenceArtifactKind.Settings] = new Dictionary<string, object?>(StringComparer.Ordinal),
-    };
+        /// <summary>当前暂存阶段的 manifest（尚未提升）。</summary>
+        public Dictionary<string, object?> StagingData { get; set; } =
+            new(StringComparer.Ordinal);
 
-    private readonly Dictionary<PersistenceArtifactKind, ArtifactMetadata> artifactMetadata = new()
-    {
-        [PersistenceArtifactKind.Progress] = CreateInitialMetadata(PersistenceArtifactKind.Progress),
-        [PersistenceArtifactKind.Settings] = CreateInitialMetadata(PersistenceArtifactKind.Settings),
-    };
+        /// <summary>当前已提升的 generation 编号。</summary>
+        public int CurrentGeneration { get; set; }
 
-    /// <summary>
-    /// Raised after a progress save is promoted successfully.
-    /// </summary>
-    public event Action<int>? SaveCompleted;
+        /// <summary>工件健康状态。</summary>
+        public ArtifactState State { get; set; } = ArtifactState.Missing;
 
-    /// <summary>
-    /// Raised when a save request fails.
-    /// </summary>
-    public event Action<string, string>? SaveFailed;
+        /// <summary>当前存储能力；默认 PersistentAvailable，可由外部注入设置。</summary>
+        public StorageCapability StorageCapability { get; set; } =
+            StorageCapability.PersistentAvailable;
 
-    /// <summary>
-    /// Raised after a staged artifact becomes the safe artifact.
-    /// </summary>
-    public event Action<string, int>? PromotionCompleted;
+        /// <summary>最近状态变化的机读原因码。</summary>
+        public string ReasonCode { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Raised after a progress load restores registered domains.
-    /// </summary>
-    public event Action<string, int>? LoadCompleted;
+        /// <summary>最近已验证检查点的摘要，用于 checkpoint_summary 元数据导出。</summary>
+        public string CheckpointSummary { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Raised when a load request fails.
-    /// </summary>
-    public event Action<string, string>? LoadFailed;
+        /// <summary>最近已验证检查点的逻辑时间戳（Unix 秒）。</summary>
+        public long LastVerifiedCheckpoint { get; set; }
 
-    /// <summary>
-    /// Gets the current save pipeline phase.
-    /// </summary>
-    public PersistencePipelinePhase PipelinePhase { get; private set; } = PersistencePipelinePhase.Idle;
+        /// <summary>当前备份 generation 编号（0 = 尚无备份）。</summary>
+        public int BackupGeneration { get; set; }
+
+        /// <summary>manifest pointer，即最近提升的 manifest 路径或占位符。</summary>
+        public string ManifestPointer { get; set; } = string.Empty;
+    }
+
+    // ---------------------------------------------------------------------------
+    // 字段
+    // ---------------------------------------------------------------------------
+
+    private readonly ArtifactSlot _progressSlot = new();
+    private readonly ArtifactSlot _settingsSlot = new();
+
+    // ---------------------------------------------------------------------------
+    // 向后兼容：无 artifact kind 的旧注册接口仍路由到 progress 槽
+    // ---------------------------------------------------------------------------
 
     /// <summary>
-    /// Gets the current promoted generation.
+    /// 注册 progress 领域的快照序列化器（旧接口，向后兼容）。
     /// </summary>
-    public int CurrentGeneration { get; private set; }
-
-    /// <summary>
-    /// Gets whether the pipeline can accept a new request.
-    /// </summary>
-    public bool IsPipelineIdle => PipelinePhase == PersistencePipelinePhase.Idle;
-
-    /// <summary>
-    /// Registers a domain snapshot serializer.
-    /// </summary>
+    /// <param name="domainId">领域 ID，必须与反序列化器匹配。</param>
+    /// <param name="serializer">快照序列化工厂。</param>
+    /// <example>
+    /// <code>
+    /// persistence.RegisterDomainSerializer("progress.resources", () => new SnapshotPackage { … });
+    /// </code>
+    /// </example>
     public void RegisterDomainSerializer(string domainId, Func<SnapshotPackage> serializer)
     {
-        RegisterDomainSerializer(PersistenceArtifactKind.Progress, domainId, serializer);
+        _progressSlot.Serializers[domainId] = serializer;
     }
 
     /// <summary>
-    /// Registers a domain snapshot serializer for a specific artifact kind.
+    /// 注册 progress 领域的快照反序列化器（旧接口，向后兼容）。
     /// </summary>
+    /// <param name="domainId">领域 ID，必须与序列化器匹配。</param>
+    /// <param name="deserializer">接收恢复快照的处理程序。</param>
+    public void RegisterDomainDeserializer(string domainId, Action<SnapshotPackage> deserializer)
+    {
+        _progressSlot.Deserializers[domainId] = deserializer;
+    }
+
+    // ---------------------------------------------------------------------------
+    // 新接口：按 artifact kind 路由序列化器/反序列化器
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 按工件类型注册领域快照序列化器。
+    /// </summary>
+    /// <param name="artifactKind">目标工件类型（Progress 或 Settings）。</param>
+    /// <param name="domainId">领域 ID。</param>
+    /// <param name="serializer">快照序列化工厂。</param>
+    /// <example>
+    /// <code>
+    /// persistence.RegisterDomainSerializer(PersistenceArtifactKind.Settings,
+    ///     "settings.profile", () => new SnapshotPackage { … });
+    /// </code>
+    /// </example>
     public void RegisterDomainSerializer(
         PersistenceArtifactKind artifactKind,
         string domainId,
         Func<SnapshotPackage> serializer)
     {
-        domainSerializers[artifactKind][domainId] = serializer;
+        GetSlot(artifactKind).Serializers[domainId] = serializer;
     }
 
     /// <summary>
-    /// Registers a domain snapshot deserializer.
+    /// 按工件类型注册领域快照反序列化器。
     /// </summary>
-    public void RegisterDomainDeserializer(string domainId, Action<SnapshotPackage> deserializer)
-    {
-        RegisterDomainDeserializer(PersistenceArtifactKind.Progress, domainId, deserializer);
-    }
-
-    /// <summary>
-    /// Registers a domain snapshot deserializer for a specific artifact kind.
-    /// </summary>
+    /// <param name="artifactKind">目标工件类型（Progress 或 Settings）。</param>
+    /// <param name="domainId">领域 ID。</param>
+    /// <param name="deserializer">接收恢复快照的处理程序。</param>
     public void RegisterDomainDeserializer(
         PersistenceArtifactKind artifactKind,
         string domainId,
         Action<SnapshotPackage> deserializer)
     {
-        domainDeserializers[artifactKind][domainId] = deserializer;
+        GetSlot(artifactKind).Deserializers[domainId] = deserializer;
     }
 
+    // ---------------------------------------------------------------------------
+    // 事件
+    // ---------------------------------------------------------------------------
+
     /// <summary>
-    /// Requests a synchronous progress save through staging, verify, and promotion.
+    /// 仅在 progress 工件提升成功后触发；settings 提升不触发此事件（非干扰规则）。
     /// </summary>
+    public event Action<int>? SaveCompleted;
+
+    /// <summary>
+    /// 任意工件保存请求失败时触发。
+    /// </summary>
+    public event Action<string, string>? SaveFailed;
+
+    /// <summary>
+    /// 任意工件提升成功后触发。
+    /// </summary>
+    public event Action<string, int>? PromotionCompleted;
+
+    /// <summary>
+    /// 进度加载恢复所有已注册领域后触发。
+    /// </summary>
+    public event Action<string, int>? LoadCompleted;
+
+    /// <summary>
+    /// 加载请求失败时触发。
+    /// </summary>
+    public event Action<string, string>? LoadFailed;
+
+    // ---------------------------------------------------------------------------
+    // 属性
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 当前 save pipeline 阶段。
+    /// </summary>
+    public PersistencePipelinePhase PipelinePhase { get; private set; } =
+        PersistencePipelinePhase.Idle;
+
+    /// <summary>
+    /// 当前已提升的 progress generation（向后兼容）。
+    /// </summary>
+    public int CurrentGeneration => _progressSlot.CurrentGeneration;
+
+    /// <summary>
+    /// Pipeline 是否处于 Idle 状态，可接受新请求。
+    /// </summary>
+    public bool IsPipelineIdle => PipelinePhase == PersistencePipelinePhase.Idle;
+
+    // ---------------------------------------------------------------------------
+    // 保存 / 加载 — progress
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 请求同步 progress 工件保存（staging → verify → promotion）。
+    /// </summary>
+    /// <returns>操作结果；Success=false 时含 Reason 说明。</returns>
+    /// <example>
+    /// <code>
+    /// var result = persistence.RequestSaveProgress();
+    /// if (!result.Success) Log(result.Reason);
+    /// </code>
+    /// </example>
     public PersistenceOperationResult RequestSaveProgress()
     {
         if (PipelinePhase != PersistencePipelinePhase.Idle)
         {
             SaveFailed?.Invoke("pipeline_busy", "request_save");
-            return new PersistenceOperationResult(false, "pipeline_busy", PipelinePhase, CurrentGeneration);
+            return new PersistenceOperationResult(false, "pipeline_busy", PipelinePhase, _progressSlot.CurrentGeneration);
         }
 
         return CollectAndSave(PersistenceArtifactKind.Progress);
     }
 
     /// <summary>
-    /// Requests a synchronous settings save through the independent settings artifact lane.
+    /// 请求从当前安全 progress 工件同步恢复所有已注册领域。
     /// </summary>
+    /// <returns>操作结果。</returns>
+    public PersistenceOperationResult RequestLoadProgress()
+    {
+        return LoadFromSlot(_progressSlot, "progress");
+    }
+
+    // ---------------------------------------------------------------------------
+    // 保存 / 加载 — settings
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 请求同步 settings 工件保存（staging → verify → promotion）。
+    /// settings 失败不影响 progress 状态；SaveCompleted 不会因此触发。
+    /// </summary>
+    /// <returns>操作结果；Success=false 时含 Reason 说明。</returns>
+    /// <example>
+    /// <code>
+    /// var result = persistence.RequestSaveSettings();
+    /// if (!result.Success) Log(result.Reason);
+    /// </code>
+    /// </example>
     public PersistenceOperationResult RequestSaveSettings()
     {
         if (PipelinePhase != PersistencePipelinePhase.Idle)
         {
             SaveFailed?.Invoke("pipeline_busy", "request_save_settings");
-            return new PersistenceOperationResult(false, "pipeline_busy", PipelinePhase, GetArtifactGeneration(PersistenceArtifactKind.Settings));
+            return new PersistenceOperationResult(false, "pipeline_busy", PipelinePhase, _settingsSlot.CurrentGeneration);
         }
 
         return CollectAndSave(PersistenceArtifactKind.Settings);
     }
 
     /// <summary>
-    /// Requests a synchronous progress load from the current safe artifact.
+    /// 请求从当前安全 settings 工件同步恢复所有已注册设置领域。
     /// </summary>
-    public PersistenceOperationResult RequestLoadProgress()
-    {
-        return LoadArtifact(PersistenceArtifactKind.Progress);
-    }
-
-    /// <summary>
-    /// Requests a synchronous settings load from the current safe settings artifact.
-    /// </summary>
+    /// <returns>操作结果。</returns>
     public PersistenceOperationResult RequestLoadSettings()
     {
-        return LoadArtifact(PersistenceArtifactKind.Settings);
+        return LoadFromSlot(_settingsSlot, "settings");
     }
 
+    // ---------------------------------------------------------------------------
+    // 工件元数据 / 状态注入
+    // ---------------------------------------------------------------------------
+
     /// <summary>
-    /// Returns the current durable metadata for an artifact kind.
+    /// 返回指定工件类型的当前元数据快照。
     /// </summary>
+    /// <param name="artifactKind">目标工件类型。</param>
+    /// <returns>包含 generation、状态和 reason code 的元数据记录。</returns>
+    /// <example>
+    /// <code>
+    /// var meta = persistence.GetArtifactMetadata(PersistenceArtifactKind.Progress);
+    /// Console.WriteLine($"gen={meta.CurrentGeneration} state={meta.State}");
+    /// </code>
+    /// </example>
     public ArtifactMetadata GetArtifactMetadata(PersistenceArtifactKind artifactKind)
     {
-        return artifactMetadata[artifactKind];
+        var slot = GetSlot(artifactKind);
+        return new ArtifactMetadata(slot.CurrentGeneration, slot.State, slot.ReasonCode);
     }
 
     /// <summary>
-    /// Sets storage capability for one artifact without mutating other artifact metadata.
+    /// 由测试或备份故障转移注入工件恢复状态，覆盖内部 ArtifactState 与 reason code。
+    /// 不修改另一侧工件的任何状态（非干扰规则）。
     /// </summary>
-    public void SetArtifactStorageCapability(
-        PersistenceArtifactKind artifactKind,
-        StorageCapability storageCapability)
-    {
-        var metadata = artifactMetadata[artifactKind];
-        artifactMetadata[artifactKind] = metadata with
-        {
-            StorageCapability = storageCapability,
-            ReasonCode = storageCapability == StorageCapability.PersistentAvailable
-                ? metadata.ReasonCode
-                : "storage_not_writable",
-        };
-    }
-
-    /// <summary>
-    /// Sets artifact recovery status for one artifact after integrity or recovery checks.
-    /// </summary>
+    /// <param name="artifactKind">目标工件类型。</param>
+    /// <param name="status">新的恢复状态。</param>
+    /// <param name="reasonCode">机读原因码。</param>
+    /// <example>
+    /// <code>
+    /// persistence.SetArtifactRecoveryStatus(
+    ///     PersistenceArtifactKind.Settings,
+    ///     new ArtifactStatus(ArtifactState.Quarantined, false, true, true, false),
+    ///     "settings_corrupt");
+    /// </code>
+    /// </example>
     public void SetArtifactRecoveryStatus(
         PersistenceArtifactKind artifactKind,
         ArtifactStatus status,
         string reasonCode)
     {
-        var metadata = artifactMetadata[artifactKind];
-        artifactMetadata[artifactKind] = metadata with
-        {
-            State = status.State,
-            ReasonCode = reasonCode,
-        };
+        var slot = GetSlot(artifactKind);
+        slot.State = status.State;
+        slot.ReasonCode = reasonCode;
     }
 
     /// <summary>
-    /// Computes Continue availability from the progress artifact while preserving settings isolation.
+    /// 注入指定工件类型的存储能力，供测试和平台 shell 使用。
+    /// 不影响另一侧工件的存储能力（AC-8 非干扰规则）。
     /// </summary>
+    /// <param name="artifactKind">目标工件类型。</param>
+    /// <param name="capability">新的存储能力值。</param>
+    /// <example>
+    /// <code>
+    /// persistence.SetArtifactStorageCapability(
+    ///     PersistenceArtifactKind.Progress,
+    ///     StorageCapability.WriteLocked);
+    /// </code>
+    /// </example>
+    public void SetArtifactStorageCapability(
+        PersistenceArtifactKind artifactKind,
+        StorageCapability capability)
+    {
+        GetSlot(artifactKind).StorageCapability = capability;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Continue 状态查询
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// 计算 Continue 可用性，完全由 progress 工件状态和 progress 存储能力决定。
+    /// settings 工件状态不影响 Continue 结果（AC-5 / AC-8 非干扰规则）。
+    /// </summary>
+    /// <returns>包含 Availability、WriteBarrier、StorageCapability 的完整结果。</returns>
+    /// <example>
+    /// <code>
+    /// var result = persistence.QueryContinueState();
+    /// if (result.Availability == ContinueAvailability.Enabled) ShowContinueButton();
+    /// </code>
+    /// </example>
     public ContinueStateResult QueryContinueState()
     {
-        var progress = artifactMetadata[PersistenceArtifactKind.Progress];
-        var settings = artifactMetadata[PersistenceArtifactKind.Settings];
+        var progressStatus = BuildArtifactStatus(_progressSlot);
+        var settingsStatus = BuildArtifactStatus(_settingsSlot);
+
         return ContinueStateQuery.QueryContinueState(
-            progress.StorageCapability,
-            ToArtifactStatus(progress),
-            ToArtifactStatus(settings),
-            progress.CurrentGeneration);
+            _progressSlot.StorageCapability,
+            progressStatus,
+            settingsStatus,
+            _progressSlot.CurrentGeneration);
     }
 
+    // ---------------------------------------------------------------------------
+    // 持久化元数据导出（AC-7）
+    // ---------------------------------------------------------------------------
+
     /// <summary>
-    /// Exports artifact metadata using durable artifact-kind prefixes.
+    /// 导出所有工件的持久化元数据，以 "progress." 和 "settings." 为 key 前缀，
+    /// 两侧 generation 独立存储，互不共用（AC-7）。
     /// </summary>
+    /// <returns>包含全部 durable metadata 字段的字典。</returns>
+    /// <example>
+    /// <code>
+    /// var meta = persistence.ExportDurableMetadata();
+    /// var gen = (int)meta["progress.current_generation"]!;
+    /// </code>
+    /// </example>
     public Dictionary<string, object?> ExportDurableMetadata()
     {
         var result = new Dictionary<string, object?>(StringComparer.Ordinal);
-        foreach (var kind in new[] { PersistenceArtifactKind.Progress, PersistenceArtifactKind.Settings })
-        {
-            var metadata = artifactMetadata[kind];
-            var prefix = ArtifactKindToKey(kind);
-            result[$"{prefix}.current_generation"] = metadata.CurrentGeneration;
-            result[$"{prefix}.manifest_pointer"] = metadata.ManifestPointer;
-            result[$"{prefix}.last_verified_checkpoint"] = metadata.LastVerifiedCheckpoint;
-            result[$"{prefix}.checkpoint_summary"] = metadata.CheckpointSummary;
-            result[$"{prefix}.reason_code"] = metadata.ReasonCode;
-            result[$"{prefix}.backup_generation"] = metadata.BackupGeneration;
-        }
-
+        ExportSlotMetadata(result, "progress", _progressSlot);
+        ExportSlotMetadata(result, "settings", _settingsSlot);
         return result;
     }
 
-    private PersistenceOperationResult LoadArtifact(PersistenceArtifactKind artifactKind)
-    {
-        if (safeData[artifactKind].Count == 0)
-        {
-            var kindKey = ArtifactKindToKey(artifactKind);
-            LoadFailed?.Invoke("no_safe_data", kindKey);
-            return new PersistenceOperationResult(false, "no_safe_data", PipelinePhase, GetArtifactGeneration(artifactKind));
-        }
-
-        if (safeData[artifactKind].TryGetValue("domains", out var domainsValue)
-            && domainsValue is IReadOnlyDictionary<string, object?> domains)
-        {
-            RestoreDomains(artifactKind, domains);
-        }
-
-        LoadCompleted?.Invoke(ArtifactKindToKey(artifactKind), GetArtifactGeneration(artifactKind));
-        return new PersistenceOperationResult(true, null, PipelinePhase, GetArtifactGeneration(artifactKind));
-    }
+    // ---------------------------------------------------------------------------
+    // 静态工具
+    // ---------------------------------------------------------------------------
 
     /// <summary>
-    /// Encodes supported save data to compact canonical JSON.
+    /// 验证一组领域包集合的契约合规性和 ID 唯一性。
+    /// 返回第一个失败结果，全部通过时返回 Ok。
     /// </summary>
-    public static string CanonicalJsonEncode(object? data)
-    {
-        var builder = new StringBuilder();
-        WriteCanonicalJson(builder, data);
-        return builder.ToString();
-    }
-
-    /// <summary>
-    /// Validates all domain packages in a collection for contract compliance and duplicate IDs.
-    /// Returns the first failing result, or Ok when all pass.
-    /// </summary>
+    /// <param name="packages">待验证的快照包序列。</param>
+    /// <returns>首个失败的验证结果，或 <see cref="SnapshotValidationResult.Ok"/>。</returns>
     public static SnapshotValidationResult ValidateDomainPackages(IEnumerable<SnapshotPackage> packages)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -342,28 +450,50 @@ public sealed class Persistence
     }
 
     /// <summary>
-    /// Computes a lower-case SHA-256 checksum for text.
+    /// 将支持的存档数据编码为压缩规范 JSON（key 按 Unicode 序排序，NFC 归一化）。
     /// </summary>
+    /// <param name="data">待编码的对象图。</param>
+    /// <returns>规范 JSON 字符串。</returns>
+    public static string CanonicalJsonEncode(object? data)
+    {
+        var builder = new StringBuilder();
+        WriteCanonicalJson(builder, data);
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// 计算文本的 SHA-256 校验和（小写十六进制）。
+    /// </summary>
+    /// <param name="data">待摘要的 UTF-8 文本。</param>
+    /// <returns>64 字符小写十六进制字符串。</returns>
     public static string ComputeChecksum(string data)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(data));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
+    // ---------------------------------------------------------------------------
+    // 私有 — pipeline 核心
+    // ---------------------------------------------------------------------------
+
     private PersistenceOperationResult CollectAndSave(PersistenceArtifactKind artifactKind)
     {
-        var metadata = artifactMetadata[artifactKind];
-        if (metadata.StorageCapability != StorageCapability.PersistentAvailable)
+        var slot = GetSlot(artifactKind);
+        var kindLabel = artifactKind == PersistenceArtifactKind.Progress ? "progress" : "settings";
+
+        // AC-8: 检查该工件的存储能力
+        if (slot.StorageCapability == StorageCapability.WriteLocked
+            || slot.StorageCapability == StorageCapability.EphemeralOnly)
         {
-            artifactMetadata[artifactKind] = metadata with { ReasonCode = "storage_not_writable" };
-            SaveFailed?.Invoke("storage_not_writable", ArtifactKindToKey(artifactKind));
-            return new PersistenceOperationResult(false, "storage_not_writable", PipelinePhase, metadata.CurrentGeneration);
+            slot.ReasonCode = "storage_not_writable";
+            SaveFailed?.Invoke("storage_not_writable", kindLabel);
+            return new PersistenceOperationResult(false, "storage_not_writable", PipelinePhase, slot.CurrentGeneration);
         }
 
         PipelinePhase = PersistencePipelinePhase.Collecting;
         var manifest = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
-            ["generation"] = metadata.CurrentGeneration + 1,
+            ["generation"] = slot.CurrentGeneration + 1,
             ["artifact"] = (int)artifactKind,
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             ["schema_version"] = 1,
@@ -371,15 +501,16 @@ public sealed class Persistence
         };
 
         var domains = (Dictionary<string, object?>)manifest["domains"]!;
-        foreach (var (domainId, serializer) in domainSerializers[artifactKind])
+        foreach (var (domainId, serializer) in slot.Serializers)
         {
             var snapshot = serializer();
             if (!snapshot.IsValid())
             {
                 PipelinePhase = PersistencePipelinePhase.Idle;
-                SaveFailed?.Invoke($"invalid_snapshot:{domainId}", "collect");
-                artifactMetadata[artifactKind] = metadata with { ReasonCode = $"invalid_snapshot:{domainId}" };
-                return new PersistenceOperationResult(false, $"invalid_snapshot:{domainId}", PipelinePhase, metadata.CurrentGeneration);
+                var failReason = $"invalid_snapshot:{domainId}";
+                slot.ReasonCode = failReason;
+                SaveFailed?.Invoke(failReason, "collect");
+                return new PersistenceOperationResult(false, failReason, PipelinePhase, slot.CurrentGeneration);
             }
 
             domains[domainId] = snapshot.ToDictionary();
@@ -395,49 +526,98 @@ public sealed class Persistence
         if (!string.Equals(checksum, rechecksum, StringComparison.Ordinal))
         {
             PipelinePhase = PersistencePipelinePhase.Aborting;
+            slot.ReasonCode = "checksum_mismatch";
             SaveFailed?.Invoke("checksum_mismatch", "verify");
             PipelinePhase = PersistencePipelinePhase.Idle;
-            artifactMetadata[artifactKind] = metadata with { ReasonCode = "checksum_mismatch" };
-            return new PersistenceOperationResult(false, "checksum_mismatch", PipelinePhase, metadata.CurrentGeneration);
+            return new PersistenceOperationResult(false, "checksum_mismatch", PipelinePhase, slot.CurrentGeneration);
         }
 
         manifest["_checksum"] = checksum;
-        stagingData[artifactKind] = manifest;
+        slot.StagingData = manifest;
 
         PipelinePhase = PersistencePipelinePhase.Promoting;
-        safeData[artifactKind] = CloneManifest(stagingData[artifactKind]);
-        var generation = Convert.ToInt32(safeData[artifactKind]["generation"], CultureInfo.InvariantCulture);
-        if (artifactKind == PersistenceArtifactKind.Progress)
-        {
-            CurrentGeneration = generation;
-        }
-
-        artifactMetadata[artifactKind] = metadata with
-        {
-            State = ArtifactState.Safe,
-            CurrentGeneration = generation,
-            ReasonCode = string.Empty,
-            ManifestPointer = $"{ArtifactKindToKey(artifactKind)}:{generation}",
-            LastVerifiedCheckpoint = checksum,
-            CheckpointSummary = $"generation:{generation}",
-        };
+        slot.SafeData = CloneManifest(slot.StagingData);
+        slot.CurrentGeneration = Convert.ToInt32(slot.SafeData["generation"], CultureInfo.InvariantCulture);
+        slot.State = ArtifactState.Safe;
+        slot.ReasonCode = string.Empty;
+        slot.LastVerifiedCheckpoint = Convert.ToInt64(slot.SafeData["timestamp"], CultureInfo.InvariantCulture);
+        slot.ManifestPointer = $"{kindLabel}:gen{slot.CurrentGeneration}";
+        slot.CheckpointSummary = $"gen{slot.CurrentGeneration}";
 
         PipelinePhase = PersistencePipelinePhase.Idle;
 
+        // SaveCompleted 仅在 progress 提升成功时触发（非干扰规则）
         if (artifactKind == PersistenceArtifactKind.Progress)
         {
-            SaveCompleted?.Invoke(generation);
+            SaveCompleted?.Invoke(slot.CurrentGeneration);
         }
 
-        PromotionCompleted?.Invoke(ArtifactKindToKey(artifactKind), generation);
-        return new PersistenceOperationResult(true, null, PipelinePhase, generation);
+        PromotionCompleted?.Invoke(kindLabel, slot.CurrentGeneration);
+        return new PersistenceOperationResult(true, null, PipelinePhase, slot.CurrentGeneration);
     }
 
-    private void RestoreDomains(PersistenceArtifactKind artifactKind, IReadOnlyDictionary<string, object?> domains)
+    private PersistenceOperationResult LoadFromSlot(ArtifactSlot slot, string kindLabel)
+    {
+        if (slot.SafeData.Count == 0)
+        {
+            LoadFailed?.Invoke("no_safe_data", kindLabel);
+            return new PersistenceOperationResult(false, "no_safe_data", PipelinePhase, slot.CurrentGeneration);
+        }
+
+        if (slot.SafeData.TryGetValue("domains", out var domainsValue)
+            && domainsValue is IReadOnlyDictionary<string, object?> domains)
+        {
+            RestoreDomains(slot.Deserializers, domains);
+        }
+
+        LoadCompleted?.Invoke(kindLabel, slot.CurrentGeneration);
+        return new PersistenceOperationResult(true, null, PipelinePhase, slot.CurrentGeneration);
+    }
+
+    // ---------------------------------------------------------------------------
+    // 私有 — 工具
+    // ---------------------------------------------------------------------------
+
+    private ArtifactSlot GetSlot(PersistenceArtifactKind artifactKind)
+    {
+        return artifactKind == PersistenceArtifactKind.Progress ? _progressSlot : _settingsSlot;
+    }
+
+    private static ArtifactStatus BuildArtifactStatus(ArtifactSlot slot)
+    {
+        // 没有安全数据且状态为 Missing 时，工件不可用
+        var effectiveState = slot.SafeData.Count == 0 && slot.State == ArtifactState.Missing
+            ? ArtifactState.Missing
+            : slot.State;
+
+        return new ArtifactStatus(
+            effectiveState,
+            IntegrityOk: effectiveState == ArtifactState.Safe,
+            VersionCompatible: true,
+            StableIdsResolved: true,
+            MigrationRequired: false);
+    }
+
+    private static void ExportSlotMetadata(
+        Dictionary<string, object?> result,
+        string prefix,
+        ArtifactSlot slot)
+    {
+        result[$"{prefix}.current_generation"] = slot.CurrentGeneration;
+        result[$"{prefix}.manifest_pointer"] = (object?)slot.ManifestPointer;
+        result[$"{prefix}.last_verified_checkpoint"] = slot.LastVerifiedCheckpoint;
+        result[$"{prefix}.checkpoint_summary"] = (object?)slot.CheckpointSummary;
+        result[$"{prefix}.reason_code"] = (object?)slot.ReasonCode;
+        result[$"{prefix}.backup_generation"] = slot.BackupGeneration;
+    }
+
+    private static void RestoreDomains(
+        Dictionary<string, Action<SnapshotPackage>> deserializers,
+        IReadOnlyDictionary<string, object?> domains)
     {
         foreach (var (domainId, snapshotData) in domains)
         {
-            if (!domainDeserializers[artifactKind].TryGetValue(domainId, out var deserializer)
+            if (!deserializers.TryGetValue(domainId, out var deserializer)
                 || snapshotData is not IReadOnlyDictionary<string, object?> snapshotMap)
             {
                 continue;
@@ -450,40 +630,6 @@ public sealed class Persistence
     private static Dictionary<string, object?> CloneManifest(IReadOnlyDictionary<string, object?> manifest)
     {
         return manifest.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
-    }
-
-    private int GetArtifactGeneration(PersistenceArtifactKind artifactKind)
-    {
-        return artifactMetadata[artifactKind].CurrentGeneration;
-    }
-
-    private static ArtifactMetadata CreateInitialMetadata(PersistenceArtifactKind kind)
-    {
-        return new ArtifactMetadata(
-            kind,
-            ArtifactState.Missing,
-            CurrentGeneration: 0,
-            StorageCapability.PersistentAvailable,
-            ReasonCode: string.Empty,
-            ManifestPointer: string.Empty,
-            LastVerifiedCheckpoint: string.Empty,
-            CheckpointSummary: string.Empty,
-            BackupGeneration: 0);
-    }
-
-    private static ArtifactStatus ToArtifactStatus(ArtifactMetadata metadata)
-    {
-        return metadata.State switch
-        {
-            ArtifactState.Safe => new ArtifactStatus(ArtifactState.Safe, true, true, true, false),
-            ArtifactState.Quarantined => new ArtifactStatus(ArtifactState.Quarantined, false, true, true, false),
-            _ => new ArtifactStatus(ArtifactState.Missing, false, false, false, false),
-        };
-    }
-
-    private static string ArtifactKindToKey(PersistenceArtifactKind artifactKind)
-    {
-        return artifactKind == PersistenceArtifactKind.Settings ? "settings" : "progress";
     }
 
     private static void WriteCanonicalJson(StringBuilder builder, object? data)

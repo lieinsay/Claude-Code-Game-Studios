@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-12
-> **项目阶段**: Pre-Production — Desktop C# Foundation Ready | Epic #1 内容注册表 **Complete** | Epic #3 Local Save 6/8 Complete
+> **项目阶段**: Pre-Production — Desktop C# Foundation Layer 核心 Epic 完成 | Epic #1 内容注册表 **Complete** | Epic #3 本地存档持久化 **Complete**
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Foundation: 2 Epic Complete (#1 #2), 3 In Progress (#3 #4 #5)
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (13 个 C# 源文件 + debug 层 2 文件 + Godot 节点脚本 2 文件 + 6 个 C# 测试项目)；GDScript P3 原型保留为迁移参考
+> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Foundation: 3 Epic Complete (#1 #2 #3), 2 In Progress (#4 #5)
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (14 个 C# 源文件 + debug 层 2 文件 + Godot 节点脚本 2 文件 + 7 个集成测试项目 + 5 个单元测试项目)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -50,7 +50,7 @@ graph TB
         CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>FoundationParity 70/70<br/>IdRegistryCore 11/11<br/>ContentLifecycle 6/6<br/>ReferenceIntegrity 7/7<br/>DomainLoading 7/7<br/>DiagnosticSystem 7/7<br/>PlayerBoundary 11/11<br/>SavePipeline 11/11<br/>SnapshotPackage 18/18<br/>StorageCapability 17/17<br/>Migration 9/9<br/>ContinueAvailability 10/10<br/>BackupFailover 13/13"]
+        TEST["tests/<br/>FoundationParity 70/70<br/>IdRegistryCore 11/11<br/>ContentLifecycle 6/6<br/>ReferenceIntegrity 7/7<br/>DomainLoading 7/7<br/>DiagnosticSystem 7/7<br/>PlayerBoundary 11/11<br/>SavePipeline 11/11<br/>SnapshotPackage 18/18<br/>StorageCapability 17/17<br/>Migration 9/9<br/>ContinueAvailability 10/10<br/>BackupFailover 13/13<br/>ArtifactIsolation 10/10<br/>DesktopLifecycle 22/22"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -113,7 +113,7 @@ graph TB
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
-| [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (6/8 Stories Complete; Story-007~008 Ready) |
+| [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
 | [production/epics/resources-goods-capacity/EPIC.md](../production/epics/resources-goods-capacity/EPIC.md) | Epic #5: 资源货物容量 (9 Stories) |
 | **Core 层 (5 Epic / 40 Stories)** | |
