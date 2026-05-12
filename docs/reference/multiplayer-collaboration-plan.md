@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | #5/#6/#7 已解锁**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Airship Hub #7 完成 | #5/#6 继续 Core 前置**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -155,7 +155,7 @@ D-B ─────────────────────────�
 D-C ───────────────────────────────────────────────────────
   #1 已完成 → 可以开始阅读 Registry API 文档
   #3 已完成 → 可以开始写 #5 和 #6 的桩代码
-  #2 已完成 → #4 Movement 已完成，#7 Hub 可接入移动/交互契约
+  #2 已完成 → #4 Movement 已完成，#7 Hub 已接入移动/交互契约
 ```
 
 **Phase 1 门禁**:
@@ -165,7 +165,7 @@ D-C ─────────────────────────�
 - [x] Persistence Story-001~008 自动化测试 PASS (`SavePipeline`, `SnapshotPackage`, `StorageCapability`, `ContinueAvailability`, `Migration`, `BackupFailover`, `ArtifactIsolation`, `DesktopLifecycle`)
 - [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
 - [x] Movement C# 合同验证 PASS (`tests/unit/movement` + `tests/integration/movement`: 58/58)
-- [ ] Movement Godot 灰盒场景手动验证 PASS（随 #7 Hub 场景接入执行）
+- [ ] Movement + Hub Godot 灰盒场景手动验证 PASS（C# 合同已完成，实机场景证据随 UI/场景接入执行）
 
 ---
 
@@ -189,8 +189,8 @@ Phase 1 完成时刻，解锁关系:
   │ #5 资源货物   │ #6 玩家情报   │ #8 飞艇模块   │
   │   (等 #1+#3)  │   (等 #1+#3)  │   (等 #3+#5+#7)│
   │              │              │              │
-  │ #13 世界修复  │ #7 飞艇 Hub   │ #9 航图航线   │
-  │   (等 #3+#5)  │   (等 #1+#3+#4)│   (等 #1+#3+#6)│
+  │ #13 世界修复  │ #7 飞艇 Hub ✅ │ #9 航图航线   │
+  │   (等 #3+#5)  │   (已完成)     │   (等 #1+#3+#6)│
   └──────────────┴──────────────┴──────────────┘
 ```
 
@@ -214,8 +214,8 @@ D-B: Epic #6 Intel + Epic #7 Hub (各前 2 个)
   Story 002 □ Location Knowledge + Rumor System   (L, 2d)  ← 与 001 并行
 
   Epic #7:
-  Story 001 □ Hub Scene Foundation + State Machine (L, 2d)  ← 等 #4
-  Story 002 □ Station Registration + Routing       (L, 2d)  ← 等 001
+  Story 001 ✅ Hub Scene Foundation + State Machine (L)
+  Story 002 ✅ Station Registration + Routing       (L)
 
 
 D-C: Epic #8 Modules + Epic #9 Chart (各前 2 个)
@@ -252,8 +252,8 @@ D-B: Epic #6 剩余 + Epic #7 剩余
   Story 004 □ IntelConsumeResult Algorithm        (L, 2d)  ← 等 001-002
 
   Epic #7:
-  Story 003 □ Room Gating + Module Slot Display   (L, 2d)  ← 等 001-002 + #8 Story 001
-  Story 004 □ Departure Modes + Confirmation Gate (L, 2d)  ← 等 001-002 + #9 Story 001
+  Story 003 ✅ Room Gating + Module Slot Display   (L)
+  Story 004 ✅ Departure Modes + Confirmation Gate (L)
 
 
 D-C: Epic #8 剩余 + Epic #9 剩余
@@ -291,10 +291,10 @@ D-B: Epic #6+#7 收尾
   Story 008 □ Persistence + MVP Bootstrap        (I, 2d)  ← 等 007
 
   Epic #7:
-  Story 005 □ Arrival Flow + State Continuity    (L, 2d)  ← 等 001-004
-  Story 006 □ Life Trace Anchors                 (L, 1d)  ← 与 005 并行
-  Story 007 □ Signal Contract + HUD Integration  (I, 2d)  ← 等 005-006
-  Story 008 □ Scene Persistence + Transition     (I, 2d)  ← 等 007
+  Story 005 ✅ Arrival Flow + State Continuity    (L)
+  Story 006 ✅ Life Trace Anchors                 (L)
+  Story 007 ✅ Signal Contract + HUD Integration  (I)
+  Story 008 ✅ Scene Persistence + Transition     (I)
 
 
 D-C: Epic #8+#9 收尾 → 启动 Epic #10
@@ -581,8 +581,8 @@ D-C: 性能分析 + 优化
 | #4 Movement | 001-007 | #2 输入路由 | ✅ Complete — 2026-05-12 |
 | #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
 | #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
-| #7 Hub | 001 | #1 ID + #3 快照 + #4 移动 | 当前可开工 |
-| #8 Modules | 001 | #3 快照 + #5 池定义 + #7 槽位注册 | Week 4-5 |
+| #7 Hub | 001-008 | #1 ID + #3 快照 + #4 移动 | ✅ Complete — 2026-05-12 |
+| #8 Modules | 001 | #3 快照 + #5 池定义 + #7 槽位注册 | #7 已满足；等待 #5 池定义 |
 | #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | Week 4-5 |
 | #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | Week 6-7 |
 | #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Week 8 |

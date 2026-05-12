@@ -1,7 +1,7 @@
 # Story 007: Signal Contract & HUD Integration
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -284,7 +284,7 @@ func is_enabled() -> bool:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/hub/SignalContractTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

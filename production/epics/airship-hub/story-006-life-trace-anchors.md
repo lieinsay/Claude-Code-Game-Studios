@@ -1,7 +1,7 @@
 # Story 006: Life Trace Anchors
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -284,7 +284,7 @@ func _get_accumulated_items(tier: int) -> Array:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/TraceAnchorsTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

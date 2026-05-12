@@ -1,7 +1,7 @@
 # Story 004: Departure Modes & Confirmation Gate
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -241,7 +241,7 @@ func _get_departure_penalties() -> Dictionary:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/DepartureModesTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

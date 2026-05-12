@@ -1,7 +1,7 @@
 # Story 002: Station Registration & Interaction Routing
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -199,7 +199,7 @@ func _on_use() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/StationRegistryTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

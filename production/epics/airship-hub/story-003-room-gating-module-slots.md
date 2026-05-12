@@ -1,7 +1,7 @@
 # Story 003: Room Gating & Module Slot Display
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -218,7 +218,7 @@ func _get_slot_indicator_shape(state: int) -> String:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/RoomGatingTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

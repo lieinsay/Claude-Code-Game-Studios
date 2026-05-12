@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/airship-hub.md
 > **Architecture Module**: Autoload #7 — HubManager
-> **Status**: In Progress
-> **Stories**: 8 (001-008) — Ready for implementation
+> **Status**: Complete
+> **Stories**: 8 (001-008) — Implemented and verified
 
 ## Overview
 
@@ -54,8 +54,17 @@ This epic is complete when:
 | 007 | [Signal Contract & HUD Integration](story-007-signal-contract-hud-integration.md) | Integration | TR-hub-001 | ADR-0002, ADR-0001, ADR-0012 |
 | 008 | [Scene Persistence & Transition Lifecycle](story-008-scene-persistence-transition.md) | Integration | TR-hub-001 | ADR-0001, ADR-0003, ADR-0006 |
 
-**Summary**: 6 Logic + 2 Integration stories
+**Summary**: 6 Logic + 2 Integration stories — all complete
 
-## Next Step
+## Completion Evidence
 
-Run `/story-readiness airship-hub` to validate all stories, then begin implementation with Story 001.
+- `src/core/hub/AirshipHub.cs` implements HubManager, HubStation, docking state, room gating, departure confirmation, arrival continuity, trace anchors, typed signal contracts, and `progress.airship` snapshot lifecycle.
+- `tests/integration/hub/DockingStateMachineTest.csproj` — PASS
+- `tests/integration/hub/StationRegistryTest.csproj` — PASS
+- `tests/integration/hub/RoomGatingTest.csproj` — PASS
+- `tests/integration/hub/DepartureModesTest.csproj` — PASS
+- `tests/integration/hub/ArrivalFlowTest.csproj` — PASS
+- `tests/integration/hub/LifeTraceAnchorsTest.csproj` — PASS
+- `tests/integration/hub/SignalContractTest.csproj` — PASS
+- `tests/integration/hub/PersistenceTransitionTest.csproj` — PASS
+- `dotnet build CloudWeaverVoyage.sln` — PASS

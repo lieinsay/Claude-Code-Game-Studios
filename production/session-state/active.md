@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Foundation Layer
-Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4) + Resources & Goods Capacity (#5)
-Task: Foundation #1/#2/#3/#4 complete — #5 Story 001 stack merge implemented; #6/#7 prep next
+Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4) + Resources & Goods Capacity (#5) + Airship Hub (#7)
+Task: Foundation #1/#2/#3/#4 complete — #5 Story 001 stack merge implemented; Airship Hub #7 complete; #6 and remaining #5 prep next
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2026-05-12
@@ -13,6 +13,17 @@ Task: Foundation #1/#2/#3/#4 complete — #5 Story 001 stack merge implemented; 
 - Test written: `tests/unit/resources/StackMergeTest.csproj` — 14/14 Story 001 acceptance checks passing
 - Blockers: None
 - Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/StackMergeProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md`
+
+## Session Extract — Epic #7 Airship Hub complete — 2026-05-12
+
+- Verdict: COMPLETE WITH NOTES
+- Epic: `production/epics/airship-hub/EPIC.md` — Airship Hub (#7)
+- Stories completed: Story 001 Hub Scene Foundation & Docking State Machine, Story 002 Station Registration & Interaction Routing, Story 003 Room Gating & Module Slot Display, Story 004 Departure Modes & Confirmation Gate, Story 005 Arrival Flow & State Continuity, Story 006 Life Trace Anchors, Story 007 Signal Contract & HUD Integration, Story 008 Scene Persistence & Transition Lifecycle
+- Files changed: `src/core/hub/AirshipHub.cs`, `tests/integration/hub/*`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/airship-hub/*.md`, `production/epics/index.md`, `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md`
+- Test evidence: Docking 5/5, Station Registry 5/5, Room Gating 3/3, Departure Modes 5/5, Arrival Flow 5/5, Life Trace Anchors 5/5, Signal Contract 4/4, Persistence Transition 6/6 — total 38/38 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln` PASS (2 existing unused-event warnings, 0 errors)
+- Residual risk: Godot visual scene greybox, screenshot evidence, and UI polish remain deferred to downstream scene/UI implementation; C# desktop logic and integration contracts are locked.
+- Unlocked: #8 Modules/Hull can consume Hub slot/room contracts after #5 Resources work lands; #10/#15/#18 now have Hub-side contracts available.
 
 ## Session Extract — Epic #4 Player Movement & Interaction complete — 2026-05-12
 

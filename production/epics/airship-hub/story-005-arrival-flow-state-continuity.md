@@ -1,7 +1,7 @@
 # Story 005: Arrival Flow & State Continuity
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -248,7 +248,7 @@ func _apply_safe_defaults() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/ArrivalFlowTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

@@ -76,6 +76,30 @@ jobs:
       - name: Run movement boundary integration tests
         run: dotnet run --project tests/integration/movement/MovementCrossSystemBoundariesTest.csproj
 
+      - name: Run hub docking state machine integration tests
+        run: dotnet run --project tests/integration/hub/DockingStateMachineTest.csproj
+
+      - name: Run hub station registry integration tests
+        run: dotnet run --project tests/integration/hub/StationRegistryTest.csproj
+
+      - name: Run hub room gating integration tests
+        run: dotnet run --project tests/integration/hub/RoomGatingTest.csproj
+
+      - name: Run hub departure modes integration tests
+        run: dotnet run --project tests/integration/hub/DepartureModesTest.csproj
+
+      - name: Run hub arrival flow integration tests
+        run: dotnet run --project tests/integration/hub/ArrivalFlowTest.csproj
+
+      - name: Run hub life trace anchor integration tests
+        run: dotnet run --project tests/integration/hub/LifeTraceAnchorsTest.csproj
+
+      - name: Run hub signal contract integration tests
+        run: dotnet run --project tests/integration/hub/SignalContractTest.csproj
+
+      - name: Run hub persistence transition integration tests
+        run: dotnet run --project tests/integration/hub/PersistenceTransitionTest.csproj
+
       - name: Run shell UI model tests
         run: dotnet run --project tests/integration/session/ShellUiTest.csproj
 

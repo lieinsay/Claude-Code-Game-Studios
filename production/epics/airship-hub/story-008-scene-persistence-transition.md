@@ -1,7 +1,7 @@
 # Story 008: Scene Persistence & Transition Lifecycle
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -359,7 +359,7 @@ func register_domain_serializer() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/hub/PersistenceTransitionTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 

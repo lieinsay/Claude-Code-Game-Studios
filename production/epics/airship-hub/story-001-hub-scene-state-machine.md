@@ -1,7 +1,7 @@
 # Story 001: Hub Scene Foundation & Docking State Machine
 
 > **Epic**: Airship Hub
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -208,7 +208,7 @@ func _validate_config() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/integration/hub/DockingStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
 
 ---
 
