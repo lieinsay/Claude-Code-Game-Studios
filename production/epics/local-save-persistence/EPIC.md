@@ -23,6 +23,11 @@
 | TR-persistence-001 | Staging → Verify → Promotion save workflow | ADR-0003 ✅ |
 | TR-persistence-002 | 8 snapshot packages: progress.*, state.*, settings.* | ADR-0003 ✅ |
 | TR-persistence-003 | Version migration: save_version field + migration path registry | ADR-0003 ✅ |
+| TR-persistence-004 | Continue availability and restore readiness | ADR-0003 ✅ |
+| TR-persistence-005 | Version migration outcome and migration record | ADR-0003 ✅ |
+| TR-persistence-006 | Backup failover with independent backup artifact | ADR-0003 ✅ |
+| TR-persistence-007 | Settings / progress artifact isolation | ADR-0003 ✅ |
+| TR-persistence-008 | Desktop lifecycle persistence boundaries | ADR-0003, ADR-0006 ✅ |
 
 ## Definition of Done
 
@@ -46,10 +51,10 @@ This epic is complete when:
 | 003 | [Storage Capability Detection](story-003-storage-capability-detection.md) | Logic | TR-persistence-003 | ADR-0003, ADR-0006 | Complete |
 | 004 | [Continue Availability & Restore Readiness](story-004-continue-availability-restore-readiness.md) | Integration | TR-persistence-004 | ADR-0003 | Complete |
 | 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Complete |
-| 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Ready |
-| 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Ready |
+| 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Complete |
+| 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Complete |
 | 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Ready |
 
 ## Next Step
 
-All 8 stories are written and ready for implementation. Start with Story 001 (pipeline core) as it unblocks all other stories.
+Story 008 (Desktop Lifecycle Integration) is the next ready implementation target.

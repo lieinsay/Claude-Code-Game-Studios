@@ -1,7 +1,7 @@
 # Story 007: Artifact Isolation (settings / progress)
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -27,14 +27,14 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 仅 settings artifact 变化且 progress artifact 未变化，WHEN 设置保存与恢复完成，THEN settings 值恢复为新值，progress artifact 保持最近已验证版本不变
-- [ ] **AC-2**: GIVEN 仅 progress artifact 变化且 settings artifact 未变化，WHEN 进度保存与恢复完成，THEN progress 值恢复为新值，settings artifact 保持最近已验证版本不变
-- [ ] **AC-3**: GIVEN settings 写入失败但 progress promotion 成功，WHEN 恢复会话，THEN progress 使用最近已验证值，settings 回退到最近已验证设置值，二者不得互相删除或覆盖
-- [ ] **AC-4**: GIVEN progress 写入失败但 settings promotion 成功，WHEN 恢复会话，THEN settings 使用最近已验证设置值，progress 回退到最近已验证进度值，二者不得互相删除或覆盖
-- [ ] **AC-5**: GIVEN settings artifact 进入 Quarantined 且 progress artifact 仍为可恢复 Safe，WHEN 计算 `continue_availability`，THEN Continue 仍按 progress 输出，不得因 settings 损坏变为 Hidden 或 PreservedLocked
-- [ ] **AC-6**: GIVEN progress artifact 进入 Quarantined 且 settings artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 不得为 Enabled，但 settings 不得被删除或覆盖
-- [ ] **AC-7**: GIVEN `current_generation`、manifest pointer、`last_verified_checkpoint`、`checkpoint_summary`、reason code 和 backup promotion result，WHEN 持久化，THEN 所有 metadata 字段以 `artifact_kind` 作为 key 前缀分别存储；settings 和 progress 的 generation 不共用同一记录
-- [ ] **AC-8**: GIVEN `storage_capability` 对 settings 和 progress 不同步计算，WHEN 计算正式进度提交的 capability，THEN 以 `progress.storage_capability` 为准；settings 可写而 progress 不可写时，不得把游戏进度显示为已保存；progress 可写而 settings 不可写时，设置回滚不得影响进度继续点
+- [x] **AC-1**: GIVEN 仅 settings artifact 变化且 progress artifact 未变化，WHEN 设置保存与恢复完成，THEN settings 值恢复为新值，progress artifact 保持最近已验证版本不变
+- [x] **AC-2**: GIVEN 仅 progress artifact 变化且 settings artifact 未变化，WHEN 进度保存与恢复完成，THEN progress 值恢复为新值，settings artifact 保持最近已验证版本不变
+- [x] **AC-3**: GIVEN settings 写入失败但 progress promotion 成功，WHEN 恢复会话，THEN progress 使用最近已验证值，settings 回退到最近已验证设置值，二者不得互相删除或覆盖
+- [x] **AC-4**: GIVEN progress 写入失败但 settings promotion 成功，WHEN 恢复会话，THEN settings 使用最近已验证设置值，progress 回退到最近已验证进度值，二者不得互相删除或覆盖
+- [x] **AC-5**: GIVEN settings artifact 进入 Quarantined 且 progress artifact 仍为可恢复 Safe，WHEN 计算 `continue_availability`，THEN Continue 仍按 progress 输出，不得因 settings 损坏变为 Hidden 或 PreservedLocked
+- [x] **AC-6**: GIVEN progress artifact 进入 Quarantined 且 settings artifact 仍为 Safe，WHEN 计算 `continue_availability`，THEN Continue 不得为 Enabled，但 settings 不得被删除或覆盖
+- [x] **AC-7**: GIVEN `current_generation`、manifest pointer、`last_verified_checkpoint`、`checkpoint_summary`、reason code 和 backup promotion result，WHEN 持久化，THEN 所有 metadata 字段以 `artifact_kind` 作为 key 前缀分别存储；settings 和 progress 的 generation 不共用同一记录
+- [x] **AC-8**: GIVEN `storage_capability` 对 settings 和 progress 不同步计算，WHEN 计算正式进度提交的 capability，THEN 以 `progress.storage_capability` 为准；settings 可写而 progress 不可写时，不得把游戏进度显示为已保存；progress 可写而 settings 不可写时，设置回滚不得影响进度继续点
 
 ---
 
@@ -95,7 +95,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/persistence/ArtifactIsolationTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 10/10 — 2026-05-12
 
 ---
 
@@ -103,3 +103,11 @@
 
 - Depends on: Story 001 (promotion 流程)；Story 002 (snapshot_package_validity)；Story 004 (continue_availability——本 Story 实现非干扰规则)
 - Unlocks: Story 008 (Desktop Lifecycle——suspend_requested 时需判断两侧 artifact 各自是否需要 best-effort flush)
+
+## Completion Notes
+
+**Completed**: 2026-05-12
+**Criteria**: 8/8 acceptance criteria covered by 10 automated checks
+**Implementation**: Extended `Persistence` to keep separate settings/progress artifact slots, serializers, safe/staging/backup payloads, metadata, recovery status, and storage capability. Added `RequestSaveSettings`, `RequestLoadSettings`, `QueryContinueState`, artifact metadata export, and per-artifact capability/status setters.
+**Test Evidence**: Integration test at `tests/integration/persistence/ArtifactIsolationTest.csproj` — 10 acceptance/regression checks passing.
+**Deviations**: None.

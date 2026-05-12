@@ -23,6 +23,8 @@ dotnet build CloudWeaverVoyage.sln
 dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj
 dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
 dotnet run --project tests/unit/presentation/DiagnosticUITest.csproj
+dotnet run --project tests/unit/persistence/BackupFailoverTest.csproj
+dotnet run --project tests/integration/persistence/ArtifactIsolationTest.csproj
 ```
 
 ## Test Naming

@@ -2,9 +2,35 @@
 
 <!-- STATUS -->
 Epic: Pre-Production
-Feature: Content Registry
-Task: ✅ Story-007 Diagnostic UI — Dev Tools Done; next Story-008 Player-Facing Boundary readiness
+Feature: Local Save / World State Persistence
+Task: ✅ Story-007 Artifact Isolation Done; next Story-008 Desktop Lifecycle readiness
 <!-- /STATUS -->
+
+## Session Extract — /dev-story 2026-05-12
+
+- Story: `production/epics/local-save-persistence/story-007-artifact-isolation.md` — Story 007: Artifact Isolation (settings / progress)
+- Files changed: `src/core/persistence/Persistence.cs`, `tests/integration/persistence/ArtifactIsolationTest.csproj`, `tests/integration/persistence/ArtifactIsolationProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `tests/README.md`, `production/epics/local-save-persistence/story-007-artifact-isolation.md`, `production/epics/local-save-persistence/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/integration/persistence/ArtifactIsolationTest.csproj` — 10/10 Story 007 acceptance/regression checks passing
+- Verification: `dotnet run --project tests/integration/persistence/ArtifactIsolationTest.csproj --no-restore` PASS; `FoundationParity` PASS 70/70; `SavePipelineTest` PASS 11/11; `BackupFailoverTest` PASS 13/13; `ContinueAvailabilityTest` PASS 10/10
+- Blockers: None
+- Next: `/code-review src/core/persistence/Persistence.cs tests/integration/persistence/ArtifactIsolationProgram.cs` then `/story-done production/epics/local-save-persistence/story-007-artifact-isolation.md`; next implementation target is `production/epics/local-save-persistence/story-008-web-lifecycle-integration.md`
+
+## Session Extract — /dev-story 2026-05-12
+
+- Story: `production/epics/local-save-persistence/story-006-backup-failover.md` — Story 006: Backup Failover
+- Files changed: `src/core/persistence/BackupFailover.cs`, `src/core/persistence/Persistence.cs`, `tests/unit/persistence/BackupFailoverTest.csproj`, `tests/unit/persistence/BackupFailoverProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `tests/README.md`, `docs/architecture/tr-registry.yaml`, `production/epics/local-save-persistence/story-006-backup-failover.md`, `production/epics/local-save-persistence/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/unit/persistence/BackupFailoverTest.csproj` — 13/13 Story 006 acceptance/regression checks passing
+- Verification: `dotnet run --project tests/unit/persistence/BackupFailoverTest.csproj` PASS; neighboring persistence tests PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Blockers: None
+- Next: `/code-review src/core/persistence/BackupFailover.cs src/core/persistence/Persistence.cs tests/unit/persistence/BackupFailoverProgram.cs` then `/story-done production/epics/local-save-persistence/story-006-backup-failover.md`; next implementation target is `production/epics/local-save-persistence/story-007-artifact-isolation.md`
+
+## Session Extract — /story-done 2026-05-12
+
+- Verdict: COMPLETE
+- Story: `production/epics/local-save-persistence/story-006-backup-failover.md` — Story 006: Backup Failover
+- Code review: Complete — main migration-required boundary corrected before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/local-save-persistence/story-007-artifact-isolation.md` — Story 007: Artifact Isolation (settings / progress)
 
 ## Session Extract — /dev-story 2026-05-11
 

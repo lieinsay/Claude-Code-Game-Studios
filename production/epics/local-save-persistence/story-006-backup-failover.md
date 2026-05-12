@@ -1,7 +1,7 @@
 # Story 006: Backup Failover
 
 > **Epic**: Local Save / World State Persistence
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -27,13 +27,13 @@
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: GIVEN 主继续点 parse/structure/integrity/version/stable ID 任一检查失败，且 `backup_present=true`、`backup_parse_ok=true`、`backup_integrity_ok=true`、`backup_structure_ok=true`、`backup_version_compatible=true`、`backup_stable_ids_resolved=true`，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `BackupPromoted`，旧主档进入 Quarantined
-- [ ] **AC-2**: GIVEN 主继续点不可用，备份 parse/structure/integrity 通过但 `backup_migration_required=true` 或备份版本/稳定 ID 不能直接恢复，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `BackupPreservedLocked`，Continue 必须是 `PreservedLocked` 而非 Enabled
-- [ ] **AC-3**: GIVEN 主继续点不可用，且没有备份或备份 parse/structure/integrity/version/stable ID 任一检查失败，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `NoUsableBackup`，Continue 不得为 Enabled
-- [ ] **AC-4**: GIVEN `main_usable=true`，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `NotNeeded`，现有主 Safe 继续作为当前可用继续点
-- [ ] **AC-5**: GIVEN `backup_failover_outcome=BackupPromoted`，WHEN 执行备份提升，THEN 顺序为: 验证备份 → 写入 promoted staging/new generation → 读回 verify → 切换 current pointer → 标记旧主档 Quarantined；任一步失败保持旧主档隔离、备份保留
-- [ ] **AC-6**: GIVEN 备份提升成功，WHEN 成为唯一可用 Safe，THEN `continue_availability` 重新计算为 Enabled，checkpoint_summary 标注"已恢复到最近可用记录"
-- [ ] **AC-7**: GIVEN 备份提升失败，WHEN 恢复失败，THEN 备份保留不被删除，旧主档保持 Quarantined，Continue 不得为 Enabled
+- [x] **AC-1**: GIVEN 主继续点 parse/structure/integrity/version/stable ID 任一检查失败，且 `backup_present=true`、`backup_parse_ok=true`、`backup_integrity_ok=true`、`backup_structure_ok=true`、`backup_version_compatible=true`、`backup_stable_ids_resolved=true`，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `BackupPromoted`，旧主档进入 Quarantined
+- [x] **AC-2**: GIVEN 主继续点不可用，备份 parse/structure/integrity 通过但 `backup_migration_required=true` 或备份版本/稳定 ID 不能直接恢复，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `BackupPreservedLocked`，Continue 必须是 `PreservedLocked` 而非 Enabled
+- [x] **AC-3**: GIVEN 主继续点不可用，且没有备份或备份 parse/structure/integrity/version/stable ID 任一检查失败，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `NoUsableBackup`，Continue 不得为 Enabled
+- [x] **AC-4**: GIVEN `main_usable=true`，WHEN 计算 `backup_failover_outcome`，THEN 结果为 `NotNeeded`，现有主 Safe 继续作为当前可用继续点
+- [x] **AC-5**: GIVEN `backup_failover_outcome=BackupPromoted`，WHEN 执行备份提升，THEN 顺序为: 验证备份 → 写入 promoted staging/new generation → 读回 verify → 切换 current pointer → 标记旧主档 Quarantined；任一步失败保持旧主档隔离、备份保留
+- [x] **AC-6**: GIVEN 备份提升成功，WHEN 成为唯一可用 Safe，THEN `continue_availability` 重新计算为 Enabled，checkpoint_summary 标注"已恢复到最近可用记录"
+- [x] **AC-7**: GIVEN 备份提升失败，WHEN 恢复失败，THEN 备份保留不被删除，旧主档保持 Quarantined，Continue 不得为 Enabled
 
 ---
 
@@ -87,7 +87,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/persistence/BackupFailoverTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS 13/13 — 2026-05-12
 
 ---
 
@@ -95,3 +95,11 @@
 
 - Depends on: Story 001 (promotion 流程——备份提升复用)；Story 004 (continue_availability 在备份提升后重算)；Story 005 (备份可能需要迁移)
 - Unlocks: Story 007 (artifact isolation——主档 Quarantined 触发备份 failover)
+
+## Completion Notes
+
+**Completed**: 2026-05-12
+**Criteria**: 7/7 acceptance criteria covered by 13 automated checks
+**Implementation**: Added `BackupFailoverPolicy`, `SaveArtifactProbe`, promotion step result modeling, and Persistence backup state / `RequestBackupFailover` integration.
+**Test Evidence**: Logic test at `tests/unit/persistence/BackupFailoverTest.csproj` — 13 acceptance/regression checks passing.
+**Deviations**: The TR registry was missing `TR-persistence-004` through `TR-persistence-008`; those active IDs were added from the accepted GDD/story contract before closeout.

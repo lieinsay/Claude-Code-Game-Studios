@@ -25,7 +25,7 @@
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
 version: 1
-last_updated: "2026-05-05"
+last_updated: "2026-05-12"
 
 requirements:
   # === System #1 — content-data-state-registry ===
@@ -100,6 +100,46 @@ requirements:
     gdd: design/gdd/local-save-world-state-persistence.md
     requirement: "Version migration: save_version field + migration path registry"
     created: 2026-05-05
+    revised: ""
+    status: active
+
+  - id: TR-persistence-004
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Continue availability and restore readiness are computed only from persistence-owned artifact state"
+    created: 2026-05-12
+    revised: ""
+    status: active
+
+  - id: TR-persistence-005
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Version migration must run on staging copies, verify before promotion, and preserve originals on failure"
+    created: 2026-05-12
+    revised: ""
+    status: active
+
+  - id: TR-persistence-006
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Backup failover promotes only directly restorable independent backups and quarantines corrupt main artifacts"
+    created: 2026-05-12
+    revised: ""
+    status: active
+
+  - id: TR-persistence-007
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Settings and progress artifacts maintain independent state, generation, backup, and failure handling"
+    created: 2026-05-12
+    revised: ""
+    status: active
+
+  - id: TR-persistence-008
+    system: local-save-world-state-persistence
+    gdd: design/gdd/local-save-world-state-persistence.md
+    requirement: "Desktop lifecycle boundaries must not promote unverified staging data or start full persistence work from lifecycle markers"
+    created: 2026-05-12
     revised: ""
     status: active
 
