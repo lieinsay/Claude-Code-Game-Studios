@@ -149,3 +149,4 @@ bash.exe.stackdump
 *.msp
 *.lnk
 bash.exe.stackdump
+/addons
