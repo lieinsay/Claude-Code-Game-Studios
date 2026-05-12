@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry Story-001/002/003/004/005/006/008 完成 | 剩余 Story-007 Diagnostic UI — Dev Tools | 115 Story readiness 元数据已对齐**
+> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 Story-001~007 完成，剩余 Story-008 Desktop Lifecycle Integration | 115 Story readiness 元数据已对齐**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -85,7 +85,7 @@ Week 0 (2-3 天) — ✅ 全部完成
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS ✅ + 19 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Story-001/002/003/004/005/006/008 Registry evidence PASS ✅
+**门禁**: `dotnet build` PASS ✅ + 22 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Registry #1 全部 Story evidence PASS ✅ + Persistence #3 Story-001~007 evidence PASS ✅
 
 ---
 
@@ -104,7 +104,7 @@ D-A ─────────────────────────�
   │ Story 004 ☑ Reference Integrity               (L, 1d)│  ← ✅ 完成
   │ Story 005 ☑ Domain Loading & Decision Gating  (I, 1d)│  ← ✅ 完成
   │ Story 006 ☑ Diagnostic System                 (L, 1d)│  ← ✅ 完成
-  │ Story 007 🚧 Diagnostic UI (Dev Tools)        (U, 2d)│  ← 进行中
+  │ Story 007 ☑ Diagnostic UI (Dev Tools)        (U, 2d)│  ← ✅ 完成
   │ Story 008 ☑ Player-Facing Boundary            (I, 1d)│  ← ✅ 完成
   └──────────────────────────────────────────────────────┘
 
@@ -112,11 +112,11 @@ D-B ─────────────────────────�
   Epic #2 Session Shell
   ┌──────────────────────────────────────────────────────┐
   │ Story 001-007 ☑ Platform Session Shell        (Done)│  ← ✅ 完成
-  │ 解锁: #4 Movement 可开工；#3 Persistence 等 #1 完成 │
+  │ 解锁: #3 Persistence 与 #4 Movement 均可开工       │
   └──────────────────────────────────────────────────────┘
 
 D-C ───────────────────────────────────────────────────────
-  等待 #1 完成（D-C 的 Core 系统依赖 Registry）
+  等待 #3 完成（D-C 的 Core 系统依赖 Persistence）
   ┌──────────────────────────────────────────────────────┐
   │ □ 阅读 GDD + ADR 全集                                │
   │ □ 搭建本地开发/测试环境                                │
@@ -127,21 +127,19 @@ D-C ─────────────────────────�
 ### 第 2-3 周: Registry 解锁下游
 
 ```
-#1 完成 (D-A 交出 Registry API) 之后:
+#1 已完成 (D-A 已交出 Registry API) 之后:
 
 D-A ───────────────────────────────────────────────────────
-  Epic #1 剩余 + Epic #3 Persistence
+  Epic #3 Persistence
   ┌──────────────────────────────────────────────────────┐
-  │ Epic #1:                                             │
-  │ Story 005 ☑ Domain Loading + UI Gating       (I, 2d)│  ← ✅ 完成
-  │ Story 006 ☑ Diagnostic System                (L, 1d)│  ← ✅ 完成
-  │ Story 007 🚧 Diagnostic UI (Dev Tools)       (U, 2d)│  ← 进行中
-  │ Story 008 ☑ Player-Facing Boundary           (I, 1d)│  ← ✅ 完成
-  │                                                       │
-  │ Epic #3:  (等 #1+#2 完成)                             │
-  │ Story 001 □ Staging→Verify→Promotion 管道    (L, 2d)│  ← 核心！
-  │ Story 002 □ Snapshot Package Contract         (L, 1d)│  ← 与 001 并行
-  │ Story 003 □ Storage Capability Detection      (L, 1d)│  ← 与 001 并行
+  │ Story 001 ☑ Staging→Verify→Promotion 管道    (L, 2d)│  ← ✅ 完成
+  │ Story 002 ☑ Snapshot Package Contract         (L, 1d)│  ← ✅ 完成
+  │ Story 003 ☑ Storage Capability Detection      (L, 1d)│  ← ✅ 完成
+  │ Story 004 ☑ Continue Availability             (I, 1d)│  ← ✅ 完成
+  │ Story 005 ☑ Version Migration                 (L, 1d)│  ← ✅ 完成
+  │ Story 006 ☑ Backup Failover                   (L, 1d)│  ← ✅ 完成
+  │ Story 007 ☑ Artifact Isolation                (I, 1d)│  ← ✅ 完成
+  │ Story 008 □ Desktop Lifecycle Integration     (I, 1d)│  ← 下一步
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
@@ -156,8 +154,8 @@ D-B ─────────────────────────�
   └──────────────────────────────────────────────────────┘
 
 D-C ───────────────────────────────────────────────────────
-  等 #1 完成 → 可以开始阅读 Registry API 文档
-  等 #3 Story 001 完成 → 可以开始写 #5 和 #6 的桩代码
+  #1 已完成 → 可以开始阅读 Registry API 文档
+  等 #3 Story 008 完成 → 可以开始写 #5 和 #6 的桩代码
   #2 已完成 → 可以启动 #4 Movement，并为 #3/#4 写集成测试桩
 ```
 
@@ -165,7 +163,7 @@ D-C ─────────────────────────�
 - [x] `dotnet build` PASS
 - [x] Registry 查询/API + Schema Validation 测试 PASS (`tests/unit/registry`: Story-002 11/11)
 - [x] Registry Content Lifecycle 测试 PASS (`tests/unit/registry/ContentLifecycleTest.csproj`: Story-003 6/6)
-- [ ] Persistence 往返测试 8 项 PASS
+- [x] Persistence Story-001~007 自动化测试 PASS (`SavePipeline`, `SnapshotPackage`, `StorageCapability`, `ContinueAvailability`, `Migration`, `BackupFailover`, `ArtifactIsolation`)
 - [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
 - [ ] Movement WASD + Click-to-Move 手动验证 PASS
 
@@ -579,7 +577,7 @@ D-C: 性能分析 + 优化
 |------|-------------|----------|--------|
 | #1 Registry | 001 | 无 | Phase 0 完成即刻 |
 | #2 Shell | 001 | 无 | ✅ Complete — 2026-05-11 |
-| #3 Persistence | 001 | #1 查询 API + #2 生命周期 | 等 #1 完成 |
+| #3 Persistence | 008 | #3 Story 001-007 | 当前下一步 |
 | #4 Movement | 001 | #2 输入路由 | ✅ 已满足，可开工 |
 | #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |
 | #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | Week 4 |

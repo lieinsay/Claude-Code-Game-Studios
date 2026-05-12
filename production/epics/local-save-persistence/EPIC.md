@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/local-save-world-state-persistence.md
 > **Architecture Module**: Autoload #3 — Persistence
-> **Status**: Ready
-> **Stories**: 8 (001-008) — Ready for implementation
+> **Status**: In Progress
+> **Stories**: 8 (001-008) — 7 Complete, 1 Ready
 
 ## Overview
 
@@ -47,9 +47,9 @@ This epic is complete when:
 | 004 | [Continue Availability & Restore Readiness](story-004-continue-availability-restore-readiness.md) | Integration | TR-persistence-004 | ADR-0003 | Complete |
 | 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Complete |
 | 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Complete |
-| 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Ready |
+| 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Complete |
 | 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Ready |
 
 ## Next Step
 
-All 8 stories are written and ready for implementation. Start with Story 001 (pipeline core) as it unblocks all other stories.
+Story 001-007 are implemented and verified. Start Story 008 (Desktop Lifecycle Integration; legacy title still says Web Lifecycle) to finish the persistence epic.

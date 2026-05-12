@@ -42,14 +42,53 @@ public sealed record PersistenceOperationResult(
     int Generation);
 
 /// <summary>
+/// Durable metadata tracked independently for one persistence artifact.
+/// </summary>
+public sealed record ArtifactMetadata(
+    PersistenceArtifactKind Kind,
+    ArtifactState State,
+    int CurrentGeneration,
+    StorageCapability StorageCapability,
+    string ReasonCode,
+    string ManifestPointer,
+    string LastVerifiedCheckpoint,
+    string CheckpointSummary,
+    int BackupGeneration);
+
+/// <summary>
 /// C# Foundation persistence pipeline for deterministic snapshot save/load validation.
 /// </summary>
 public sealed class Persistence
 {
-    private readonly Dictionary<string, Func<SnapshotPackage>> domainSerializers = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, Action<SnapshotPackage>> domainDeserializers = new(StringComparer.Ordinal);
-    private Dictionary<string, object?> stagingData = new(StringComparer.Ordinal);
-    private Dictionary<string, object?> safeData = new(StringComparer.Ordinal);
+    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, Func<SnapshotPackage>>> domainSerializers = new()
+    {
+        [PersistenceArtifactKind.Progress] = new Dictionary<string, Func<SnapshotPackage>>(StringComparer.Ordinal),
+        [PersistenceArtifactKind.Settings] = new Dictionary<string, Func<SnapshotPackage>>(StringComparer.Ordinal),
+    };
+
+    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, Action<SnapshotPackage>>> domainDeserializers = new()
+    {
+        [PersistenceArtifactKind.Progress] = new Dictionary<string, Action<SnapshotPackage>>(StringComparer.Ordinal),
+        [PersistenceArtifactKind.Settings] = new Dictionary<string, Action<SnapshotPackage>>(StringComparer.Ordinal),
+    };
+
+    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, object?>> stagingData = new()
+    {
+        [PersistenceArtifactKind.Progress] = new Dictionary<string, object?>(StringComparer.Ordinal),
+        [PersistenceArtifactKind.Settings] = new Dictionary<string, object?>(StringComparer.Ordinal),
+    };
+
+    private readonly Dictionary<PersistenceArtifactKind, Dictionary<string, object?>> safeData = new()
+    {
+        [PersistenceArtifactKind.Progress] = new Dictionary<string, object?>(StringComparer.Ordinal),
+        [PersistenceArtifactKind.Settings] = new Dictionary<string, object?>(StringComparer.Ordinal),
+    };
+
+    private readonly Dictionary<PersistenceArtifactKind, ArtifactMetadata> artifactMetadata = new()
+    {
+        [PersistenceArtifactKind.Progress] = CreateInitialMetadata(PersistenceArtifactKind.Progress),
+        [PersistenceArtifactKind.Settings] = CreateInitialMetadata(PersistenceArtifactKind.Settings),
+    };
 
     /// <summary>
     /// Raised after a progress save is promoted successfully.
@@ -96,7 +135,18 @@ public sealed class Persistence
     /// </summary>
     public void RegisterDomainSerializer(string domainId, Func<SnapshotPackage> serializer)
     {
-        domainSerializers[domainId] = serializer;
+        RegisterDomainSerializer(PersistenceArtifactKind.Progress, domainId, serializer);
+    }
+
+    /// <summary>
+    /// Registers a domain snapshot serializer for a specific artifact kind.
+    /// </summary>
+    public void RegisterDomainSerializer(
+        PersistenceArtifactKind artifactKind,
+        string domainId,
+        Func<SnapshotPackage> serializer)
+    {
+        domainSerializers[artifactKind][domainId] = serializer;
     }
 
     /// <summary>
@@ -104,7 +154,18 @@ public sealed class Persistence
     /// </summary>
     public void RegisterDomainDeserializer(string domainId, Action<SnapshotPackage> deserializer)
     {
-        domainDeserializers[domainId] = deserializer;
+        RegisterDomainDeserializer(PersistenceArtifactKind.Progress, domainId, deserializer);
+    }
+
+    /// <summary>
+    /// Registers a domain snapshot deserializer for a specific artifact kind.
+    /// </summary>
+    public void RegisterDomainDeserializer(
+        PersistenceArtifactKind artifactKind,
+        string domainId,
+        Action<SnapshotPackage> deserializer)
+    {
+        domainDeserializers[artifactKind][domainId] = deserializer;
     }
 
     /// <summary>
@@ -122,24 +183,128 @@ public sealed class Persistence
     }
 
     /// <summary>
+    /// Requests a synchronous settings save through the independent settings artifact lane.
+    /// </summary>
+    public PersistenceOperationResult RequestSaveSettings()
+    {
+        if (PipelinePhase != PersistencePipelinePhase.Idle)
+        {
+            SaveFailed?.Invoke("pipeline_busy", "request_save_settings");
+            return new PersistenceOperationResult(false, "pipeline_busy", PipelinePhase, GetArtifactGeneration(PersistenceArtifactKind.Settings));
+        }
+
+        return CollectAndSave(PersistenceArtifactKind.Settings);
+    }
+
+    /// <summary>
     /// Requests a synchronous progress load from the current safe artifact.
     /// </summary>
     public PersistenceOperationResult RequestLoadProgress()
     {
-        if (safeData.Count == 0)
+        return LoadArtifact(PersistenceArtifactKind.Progress);
+    }
+
+    /// <summary>
+    /// Requests a synchronous settings load from the current safe settings artifact.
+    /// </summary>
+    public PersistenceOperationResult RequestLoadSettings()
+    {
+        return LoadArtifact(PersistenceArtifactKind.Settings);
+    }
+
+    /// <summary>
+    /// Returns the current durable metadata for an artifact kind.
+    /// </summary>
+    public ArtifactMetadata GetArtifactMetadata(PersistenceArtifactKind artifactKind)
+    {
+        return artifactMetadata[artifactKind];
+    }
+
+    /// <summary>
+    /// Sets storage capability for one artifact without mutating other artifact metadata.
+    /// </summary>
+    public void SetArtifactStorageCapability(
+        PersistenceArtifactKind artifactKind,
+        StorageCapability storageCapability)
+    {
+        var metadata = artifactMetadata[artifactKind];
+        artifactMetadata[artifactKind] = metadata with
         {
-            LoadFailed?.Invoke("no_safe_data", "progress");
-            return new PersistenceOperationResult(false, "no_safe_data", PipelinePhase, CurrentGeneration);
+            StorageCapability = storageCapability,
+            ReasonCode = storageCapability == StorageCapability.PersistentAvailable
+                ? metadata.ReasonCode
+                : "storage_not_writable",
+        };
+    }
+
+    /// <summary>
+    /// Sets artifact recovery status for one artifact after integrity or recovery checks.
+    /// </summary>
+    public void SetArtifactRecoveryStatus(
+        PersistenceArtifactKind artifactKind,
+        ArtifactStatus status,
+        string reasonCode)
+    {
+        var metadata = artifactMetadata[artifactKind];
+        artifactMetadata[artifactKind] = metadata with
+        {
+            State = status.State,
+            ReasonCode = reasonCode,
+        };
+    }
+
+    /// <summary>
+    /// Computes Continue availability from the progress artifact while preserving settings isolation.
+    /// </summary>
+    public ContinueStateResult QueryContinueState()
+    {
+        var progress = artifactMetadata[PersistenceArtifactKind.Progress];
+        var settings = artifactMetadata[PersistenceArtifactKind.Settings];
+        return ContinueStateQuery.QueryContinueState(
+            progress.StorageCapability,
+            ToArtifactStatus(progress),
+            ToArtifactStatus(settings),
+            progress.CurrentGeneration);
+    }
+
+    /// <summary>
+    /// Exports artifact metadata using durable artifact-kind prefixes.
+    /// </summary>
+    public Dictionary<string, object?> ExportDurableMetadata()
+    {
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var kind in new[] { PersistenceArtifactKind.Progress, PersistenceArtifactKind.Settings })
+        {
+            var metadata = artifactMetadata[kind];
+            var prefix = ArtifactKindToKey(kind);
+            result[$"{prefix}.current_generation"] = metadata.CurrentGeneration;
+            result[$"{prefix}.manifest_pointer"] = metadata.ManifestPointer;
+            result[$"{prefix}.last_verified_checkpoint"] = metadata.LastVerifiedCheckpoint;
+            result[$"{prefix}.checkpoint_summary"] = metadata.CheckpointSummary;
+            result[$"{prefix}.reason_code"] = metadata.ReasonCode;
+            result[$"{prefix}.backup_generation"] = metadata.BackupGeneration;
         }
 
-        if (safeData.TryGetValue("domains", out var domainsValue)
+        return result;
+    }
+
+    private PersistenceOperationResult LoadArtifact(PersistenceArtifactKind artifactKind)
+    {
+        if (safeData[artifactKind].Count == 0)
+        {
+            var kindKey = ArtifactKindToKey(artifactKind);
+            LoadFailed?.Invoke("no_safe_data", kindKey);
+            return new PersistenceOperationResult(false, "no_safe_data", PipelinePhase, GetArtifactGeneration(artifactKind));
+        }
+
+        if (safeData[artifactKind].TryGetValue("domains", out var domainsValue)
             && domainsValue is IReadOnlyDictionary<string, object?> domains)
         {
-            RestoreDomains(domains);
+            RestoreDomains(artifactKind, domains);
         }
 
-        LoadCompleted?.Invoke("progress", CurrentGeneration);
-        return new PersistenceOperationResult(true, null, PipelinePhase, CurrentGeneration);
+        LoadCompleted?.Invoke(ArtifactKindToKey(artifactKind), GetArtifactGeneration(artifactKind));
+        return new PersistenceOperationResult(true, null, PipelinePhase, GetArtifactGeneration(artifactKind));
     }
 
     /// <summary>
@@ -187,10 +352,18 @@ public sealed class Persistence
 
     private PersistenceOperationResult CollectAndSave(PersistenceArtifactKind artifactKind)
     {
+        var metadata = artifactMetadata[artifactKind];
+        if (metadata.StorageCapability != StorageCapability.PersistentAvailable)
+        {
+            artifactMetadata[artifactKind] = metadata with { ReasonCode = "storage_not_writable" };
+            SaveFailed?.Invoke("storage_not_writable", ArtifactKindToKey(artifactKind));
+            return new PersistenceOperationResult(false, "storage_not_writable", PipelinePhase, metadata.CurrentGeneration);
+        }
+
         PipelinePhase = PersistencePipelinePhase.Collecting;
         var manifest = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
-            ["generation"] = CurrentGeneration + 1,
+            ["generation"] = metadata.CurrentGeneration + 1,
             ["artifact"] = (int)artifactKind,
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             ["schema_version"] = 1,
@@ -198,14 +371,15 @@ public sealed class Persistence
         };
 
         var domains = (Dictionary<string, object?>)manifest["domains"]!;
-        foreach (var (domainId, serializer) in domainSerializers)
+        foreach (var (domainId, serializer) in domainSerializers[artifactKind])
         {
             var snapshot = serializer();
             if (!snapshot.IsValid())
             {
                 PipelinePhase = PersistencePipelinePhase.Idle;
                 SaveFailed?.Invoke($"invalid_snapshot:{domainId}", "collect");
-                return new PersistenceOperationResult(false, $"invalid_snapshot:{domainId}", PipelinePhase, CurrentGeneration);
+                artifactMetadata[artifactKind] = metadata with { ReasonCode = $"invalid_snapshot:{domainId}" };
+                return new PersistenceOperationResult(false, $"invalid_snapshot:{domainId}", PipelinePhase, metadata.CurrentGeneration);
             }
 
             domains[domainId] = snapshot.ToDictionary();
@@ -223,27 +397,47 @@ public sealed class Persistence
             PipelinePhase = PersistencePipelinePhase.Aborting;
             SaveFailed?.Invoke("checksum_mismatch", "verify");
             PipelinePhase = PersistencePipelinePhase.Idle;
-            return new PersistenceOperationResult(false, "checksum_mismatch", PipelinePhase, CurrentGeneration);
+            artifactMetadata[artifactKind] = metadata with { ReasonCode = "checksum_mismatch" };
+            return new PersistenceOperationResult(false, "checksum_mismatch", PipelinePhase, metadata.CurrentGeneration);
         }
 
         manifest["_checksum"] = checksum;
-        stagingData = manifest;
+        stagingData[artifactKind] = manifest;
 
         PipelinePhase = PersistencePipelinePhase.Promoting;
-        safeData = CloneManifest(stagingData);
-        CurrentGeneration = Convert.ToInt32(safeData["generation"], CultureInfo.InvariantCulture);
+        safeData[artifactKind] = CloneManifest(stagingData[artifactKind]);
+        var generation = Convert.ToInt32(safeData[artifactKind]["generation"], CultureInfo.InvariantCulture);
+        if (artifactKind == PersistenceArtifactKind.Progress)
+        {
+            CurrentGeneration = generation;
+        }
+
+        artifactMetadata[artifactKind] = metadata with
+        {
+            State = ArtifactState.Safe,
+            CurrentGeneration = generation,
+            ReasonCode = string.Empty,
+            ManifestPointer = $"{ArtifactKindToKey(artifactKind)}:{generation}",
+            LastVerifiedCheckpoint = checksum,
+            CheckpointSummary = $"generation:{generation}",
+        };
+
         PipelinePhase = PersistencePipelinePhase.Idle;
 
-        SaveCompleted?.Invoke(CurrentGeneration);
-        PromotionCompleted?.Invoke("progress", CurrentGeneration);
-        return new PersistenceOperationResult(true, null, PipelinePhase, CurrentGeneration);
+        if (artifactKind == PersistenceArtifactKind.Progress)
+        {
+            SaveCompleted?.Invoke(generation);
+        }
+
+        PromotionCompleted?.Invoke(ArtifactKindToKey(artifactKind), generation);
+        return new PersistenceOperationResult(true, null, PipelinePhase, generation);
     }
 
-    private void RestoreDomains(IReadOnlyDictionary<string, object?> domains)
+    private void RestoreDomains(PersistenceArtifactKind artifactKind, IReadOnlyDictionary<string, object?> domains)
     {
         foreach (var (domainId, snapshotData) in domains)
         {
-            if (!domainDeserializers.TryGetValue(domainId, out var deserializer)
+            if (!domainDeserializers[artifactKind].TryGetValue(domainId, out var deserializer)
                 || snapshotData is not IReadOnlyDictionary<string, object?> snapshotMap)
             {
                 continue;
@@ -256,6 +450,40 @@ public sealed class Persistence
     private static Dictionary<string, object?> CloneManifest(IReadOnlyDictionary<string, object?> manifest)
     {
         return manifest.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+    }
+
+    private int GetArtifactGeneration(PersistenceArtifactKind artifactKind)
+    {
+        return artifactMetadata[artifactKind].CurrentGeneration;
+    }
+
+    private static ArtifactMetadata CreateInitialMetadata(PersistenceArtifactKind kind)
+    {
+        return new ArtifactMetadata(
+            kind,
+            ArtifactState.Missing,
+            CurrentGeneration: 0,
+            StorageCapability.PersistentAvailable,
+            ReasonCode: string.Empty,
+            ManifestPointer: string.Empty,
+            LastVerifiedCheckpoint: string.Empty,
+            CheckpointSummary: string.Empty,
+            BackupGeneration: 0);
+    }
+
+    private static ArtifactStatus ToArtifactStatus(ArtifactMetadata metadata)
+    {
+        return metadata.State switch
+        {
+            ArtifactState.Safe => new ArtifactStatus(ArtifactState.Safe, true, true, true, false),
+            ArtifactState.Quarantined => new ArtifactStatus(ArtifactState.Quarantined, false, true, true, false),
+            _ => new ArtifactStatus(ArtifactState.Missing, false, false, false, false),
+        };
+    }
+
+    private static string ArtifactKindToKey(PersistenceArtifactKind artifactKind)
+    {
+        return artifactKind == PersistenceArtifactKind.Settings ? "settings" : "progress";
     }
 
     private static void WriteCanonicalJson(StringBuilder builder, object? data)

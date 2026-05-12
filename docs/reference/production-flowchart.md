@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-12 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A 🔵 进行中 — #1 已做完 7/8 Story（Story-007 并行中），#2 ✅ 完成**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B 🔵 进行中 — #3 已完成 7/8 Story，Story-008 下一步；#4 已解锁**
 
 ---
 
@@ -19,12 +19,12 @@ gantt
     section ✅ Phase 0 环境
     Godot .NET 搭建 + C# 迁移   :done,    p0, 2026-04-26, 2026-05-09
 
-    section 🔵 Phase A 零依赖
-    #1 内容注册表 (8 Stories)    :active,  p1a, 2026-05-09, 2026-05-24
+    section ✅ Phase A 零依赖
+    #1 内容注册表 (8 Stories)    :done,    p1a, 2026-05-09, 2026-05-12
     #2 会话壳     (7 Stories)    :done,    p1b, 2026-05-09, 2026-05-11
 
-    section 🟡 Phase B 等 #1 #2
-    #3 持久化     (8 Stories)    :         p2a, after p1a, 14d
+    section 🔵 Phase B 等 #1 #2
+    #3 持久化     (8 Stories)    :active,  p2a, 2026-05-11, 2026-05-14
     #4 移动交互   (7 Stories)    :         p2b, after p1b, 10d
 
     section 🟢 Phase C 等 #1 #3
@@ -67,10 +67,10 @@ graph TD
 
     P0["✅ Phase 0: 环境准备"]:::done
 
-    S1["🔵 #1 内容注册表 8S"]:::active
+    S1["✅ #1 内容注册表 8S"]:::done
     S2["✅ #2 会话壳 7S"]:::done
 
-    S3["🟡 #3 持久化 8S"]:::next
+    S3["🔵 #3 持久化 8S"]:::active
     S4["🟡 #4 移动交互 7S"]:::next
 
     S5["🟢 #5 资源货物 9S"]:::future
@@ -220,7 +220,7 @@ Week 1-2
 
 | Epic | Stories | 做完解锁 | 当前进度 |
 |------|---------|----------|----------|
-| #1 内容注册表 | 001-008 (8S) | #3, #5, #6, #7, #9, #15 | ✅ 001-006/008, 🔵 007 进行中 |
+| #1 内容注册表 | 001-008 (8S) | #3, #5, #6, #7, #9, #15 | ✅ 001-008 完成 |
 | #2 会话壳 | 001-007 (7S) | #3, #4 | ✅ 001-007 完成 |
 
 ---
@@ -344,7 +344,7 @@ Week 13+
 [S005] → [S006 Diagnostic System] → [S007 Diagnostic UI] → [S008 Player-Facing Boundary]
          └─ 005-008 已完成 005/006/008；007 是唯一剩余 UI 工具项 ─┘
 
-当前: ✅ 001-006/008 | 🔵 007 进行中
+当前: ✅ 001-008 全部完成；#3 已解锁并推进中。
 ```
 
 ### #2 会话壳 (7 Stories)
@@ -358,18 +358,20 @@ Week 13+
 [S005] → [S006 Input Gate] → [S007 Shell UI + Screenshot Evidence]
           └─ 005-007 已完成 ─┘
 
-当前: ✅ 001-007 全部完成；#4 已解锁，#3 仍等待 #1 收尾。
+当前: ✅ 001-007 全部完成；#3 与 #4 均已解锁。
 ```
 
 ### #3 持久化 (8 Stories)
 
 ```
-[S001 存档数据模型]         ─┬─→ [S005 版本迁移]
-[S002 JSON 序列化器]        ┤      (等 001-004 全部完成)
-[S003 自动存档触发]         ┤
-[S004 存档完整性校验]       ─┘
+[S001 Save Pipeline]        ─┬─→ [S005 Version Migration]
+[S002 Snapshot Contract]     ┤      (等 001-004 全部完成)
+[S003 Storage Capability]    ┤
+[S004 Continue Readiness]    ─┘
 
-[S005] → [S006 多槽位管理] → [S007 存档恢复] → [S008 集成测试]
+[S005] → [S006 Backup Failover] → [S007 Artifact Isolation] → [S008 Desktop Lifecycle Integration]
+
+当前: ✅ 001-007 完成；🔵 008 下一步。
 ```
 
 ### #4 移动交互 (7 Stories)
@@ -481,36 +483,38 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 ```
 ✅ Phase 0      ████████████████████████ 100%
-🔵 Phase A      ██████████████████████░░  93% (#1 7/8 完成 + 007 进行中, #2 7/7 完成)
-⏳ Phase B-F    ░░░░░░░░░░░░░░░░░░░░░░░░   0%
+✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
+🔵 Phase B      ███████████░░░░░░░░░░░░░  47% (#3 7/8 完成, #4 0/7 已解锁)
+⏳ Phase C-F    ░░░░░░░░░░░░░░░░░░░░░░░░   0%
 ```
 
 ### 本次生产状态检查 (2026-05-12)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: `production/session-state/active.md` 指向 Content Registry Story-007 Diagnostic UI — Dev Tools
-- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 errors；3 个既有 unused-event warnings）
-- 测试验证: `tests/` 下 19 个 C# runner 全部 PASS
+- 活跃任务: `production/session-state/active.md` 指向 Local Save Story-008 Desktop Lifecycle Integration
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 warnings, 0 errors）
+- 测试验证: `tests/` 下 22 个 C# runner 全部 PASS
+- 本次修复: Story-007 Artifact Isolation 的 progress/settings 独立 artifact API 已落地，`tests/integration/persistence/ArtifactIsolationTest.csproj` 10/10 PASS
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | 完成 #1 Story 007 Diagnostic UI — Dev Tools | 等 006 | 2 天 |
+| **P0** | 完成 #3 Story 008 Desktop Lifecycle Integration | #3 Story 001-007 | 1-2 天 |
 | **P1** | 启动 #4 移动交互 Story 001 | #2 完成 | 可开工 |
-| **P2** | 启动 #3 持久化 Story 001 | 等 #1 #2 完成 | 等 #1 完成 |
-| **P3** | Phase A 收口后执行 Registry Schema Freeze | #1 完成 | 0.5 天 |
+| **P2** | Phase B 收口后执行 Persistence format freeze | #3 完成 | 0.5 天 |
+| **P3** | 准备 #5/#6/#7 的快照契约消费检查 | #1 + #3 | 等 #3 完成 |
 
-> ⚡ **关键建议**: #2 会话壳已完成；#1 只剩 Story 007 诊断 UI。当前最佳并行路线是收尾 #1 Story 007，同时启动 #4 Story 001。#3 仍等 #1 全部完成。
+> 关键建议: #1/#2 已完成，#3 只剩 Story 008。当前最佳并行路线是收尾 #3 Story 008，同时启动 #4 Story 001。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #1 Story 007 (继续推进)
+  ┌─ #3 Story 008 (持久化桌面生命周期集成)
   └─ #4 Story 001 起步 (已由 #2 解锁)
 
-等 #1 #2 完成后:
+当前已满足 #1 #2 完成:
   ┌─ #3 持久化     ─┐
   └─ #4 移动交互   ─┘ 二人并行；#4 可先行
 

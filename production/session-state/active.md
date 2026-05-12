@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Foundation Layer
 Feature: Content Registry (#1) + Local Save Persistence (#3)
-Task: Content Registry Epic Complete — Local Save Story 007 Artifact Isolation next
+Task: Content Registry Epic Complete — Local Save Story 008 Desktop Lifecycle Integration next
 <!-- /STATUS -->
+
+## Session Extract — production check 2026-05-12
+
+- Verdict: PASS
+- Production status: `production/stage.txt` remains `Pre-Production — Desktop C# Foundation Ready`
+- Epic status: Content Registry #1 complete; Platform Session Shell #2 complete; Local Save Persistence #3 has Story 001-007 complete, Story 008 next
+- Implementation: `src/core/persistence/Persistence.cs` now keeps progress/settings artifact lanes independent, with per-artifact serializers, safe/staging manifests, generation metadata, recovery status, and storage capability
+- Test evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors); 22/22 C# runners PASS
+- Reference docs updated: `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md`
+- Next recommended: `production/epics/local-save-persistence/story-008-web-lifecycle-integration.md` — translate legacy Web Lifecycle wording to desktop lifecycle integration under ADR-0019
 
 ## Session Extract — /story-done 2026-05-12
 
