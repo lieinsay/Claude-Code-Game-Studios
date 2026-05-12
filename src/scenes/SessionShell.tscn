@@ -1,7 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://src/scenes/ShellUi.tscn" id="1_shellui"]
+[ext_resource type="PackedScene" path="res://src/debug/RegistryDiagnosticPanel.tscn" id="2_diagpanel"]
 
 [node name="SessionShell" type="Node2D"]
 
 [node name="ShellUiLayer" parent="." instance=ExtResource("1_shellui")]
+
+[node name="RegistryDiagnosticPanel" parent="." instance=ExtResource("2_diagpanel")]

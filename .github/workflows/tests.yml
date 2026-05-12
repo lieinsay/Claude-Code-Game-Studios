@@ -81,3 +81,6 @@ jobs:
 
       - name: Run persistence continue availability integration tests
         run: dotnet run --project tests/integration/persistence/ContinueAvailabilityTest.csproj
+
+      - name: Run persistence backup failover unit tests
+        run: dotnet run --project tests/unit/persistence/BackupFailoverTest.csproj

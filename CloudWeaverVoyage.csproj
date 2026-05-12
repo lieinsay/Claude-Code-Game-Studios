@@ -11,5 +11,8 @@
 
   <ItemGroup>
     <Compile Include="src/**/*.cs" />
+    <!-- Godot node scripts: compiled by Godot editor project only, not dotnet build -->
+    <Compile Remove="src/debug/RegistryDiagnosticPanel.cs" />
+    <Compile Remove="src/scenes/SessionShell.cs" />
   </ItemGroup>
 </Project>
