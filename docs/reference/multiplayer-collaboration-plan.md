@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 Story-001~007 完成，剩余 Story-008 Desktop Lifecycle Integration | 115 Story readiness 元数据已对齐**
+> 当前状态: **Phase 0 完成 | Phase 1 进行中 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 8/8 Story 完成 | #4 移动交互已解锁 | #5/#6 可按 #1+#3 依赖启动准备**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -79,13 +79,13 @@ Week 0 (2-3 天) — ✅ 全部完成
 │      ☑ 70/70 parity checks 通过 (从 20 扩展到 70)         │
 │      ☑ LEGACY_GDSCRIPT.md 审查                           │
 │      ☑ Story-001 10/10 AC PASS                           │
-│      ☑ Story-002 Schema Validation 9/9 AC PASS            │
+│      ☑ Story-002 Schema Validation 11/11 AC PASS          │
 │      ☑ Story-003 Content Lifecycle 6/6 AC PASS            │
 │      ☑ Story-004 Reference Integrity 7/7 AC PASS          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS ✅ + 22 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Registry #1 全部 Story evidence PASS ✅ + Persistence #3 Story-001~007 evidence PASS ✅
+**门禁**: `dotnet build` PASS ✅ + 23 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Registry #1 全部 Story evidence PASS ✅ + Persistence #3 全部 8 个 Story evidence PASS ✅
 
 ---
 
@@ -139,7 +139,7 @@ D-A ─────────────────────────�
   │ Story 005 ☑ Version Migration                 (L, 1d)│  ← ✅ 完成
   │ Story 006 ☑ Backup Failover                   (L, 1d)│  ← ✅ 完成
   │ Story 007 ☑ Artifact Isolation                (I, 1d)│  ← ✅ 完成
-  │ Story 008 □ Desktop Lifecycle Integration     (I, 1d)│  ← 下一步
+  │ Story 008 ☑ Desktop Lifecycle Integration     (I, 1d)│  ← ✅ 完成
   └──────────────────────────────────────────────────────┘
 
 D-B ───────────────────────────────────────────────────────
@@ -155,15 +155,15 @@ D-B ─────────────────────────�
 
 D-C ───────────────────────────────────────────────────────
   #1 已完成 → 可以开始阅读 Registry API 文档
-  等 #3 Story 008 完成 → 可以开始写 #5 和 #6 的桩代码
-  #2 已完成 → 可以启动 #4 Movement，并为 #3/#4 写集成测试桩
+  #3 已完成 → 可以开始写 #5 和 #6 的桩代码
+  #2 已完成 → 可以启动 #4 Movement，并为 #4 写集成测试桩
 ```
 
 **Phase 1 门禁**:
 - [x] `dotnet build` PASS
 - [x] Registry 查询/API + Schema Validation 测试 PASS (`tests/unit/registry`: Story-002 11/11)
 - [x] Registry Content Lifecycle 测试 PASS (`tests/unit/registry/ContentLifecycleTest.csproj`: Story-003 6/6)
-- [x] Persistence Story-001~007 自动化测试 PASS (`SavePipeline`, `SnapshotPackage`, `StorageCapability`, `ContinueAvailability`, `Migration`, `BackupFailover`, `ArtifactIsolation`)
+- [x] Persistence Story-001~008 自动化测试 PASS (`SavePipeline`, `SnapshotPackage`, `StorageCapability`, `ContinueAvailability`, `Migration`, `BackupFailover`, `ArtifactIsolation`, `DesktopLifecycle`)
 - [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
 - [ ] Movement WASD + Click-to-Move 手动验证 PASS
 

@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-12 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B 🔵 进行中 — #3 已完成 7/8 Story，Story-008 下一步；#4 已解锁**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B 🔵 进行中 — #3 已完成 8/8 Story；#4 已解锁；#5/#6 可按 #1+#3 依赖启动**
 
 ---
 
@@ -24,8 +24,8 @@ gantt
     #2 会话壳     (7 Stories)    :done,    p1b, 2026-05-09, 2026-05-11
 
     section 🔵 Phase B 等 #1 #2
-    #3 持久化     (8 Stories)    :active,  p2a, 2026-05-11, 2026-05-14
-    #4 移动交互   (7 Stories)    :         p2b, after p1b, 10d
+    #3 持久化     (8 Stories)    :done,    p2a, 2026-05-11, 2026-05-12
+    #4 移动交互   (7 Stories)    :active,  p2b, after p1b, 10d
 
     section 🟢 Phase C 等 #1 #3
     #5 资源货物   (9 Stories)    :         p3a, after p2a, 14d
@@ -70,8 +70,8 @@ graph TD
     S1["✅ #1 内容注册表 8S"]:::done
     S2["✅ #2 会话壳 7S"]:::done
 
-    S3["🔵 #3 持久化 8S"]:::active
-    S4["🟡 #4 移动交互 7S"]:::next
+    S3["✅ #3 持久化 8S"]:::done
+    S4["🔵 #4 移动交互 7S"]:::active
 
     S5["🟢 #5 资源货物 9S"]:::future
     S6["🟢 #6 知识情报 8S"]:::future
@@ -484,44 +484,45 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ```
 ✅ Phase 0      ████████████████████████ 100%
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
-🔵 Phase B      ███████████░░░░░░░░░░░░░  47% (#3 7/8 完成, #4 0/7 已解锁)
+🔵 Phase B      █████████████░░░░░░░░░░░  53% (#3 8/8 完成, #4 0/7 已解锁)
 ⏳ Phase C-F    ░░░░░░░░░░░░░░░░░░░░░░░░   0%
 ```
 
 ### 本次生产状态检查 (2026-05-12)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: `production/session-state/active.md` 指向 Local Save Story-008 Desktop Lifecycle Integration
-- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 warnings, 0 errors）
-- 测试验证: `tests/` 下 22 个 C# runner 全部 PASS
-- 本次修复: Story-007 Artifact Isolation 的 progress/settings 独立 artifact API 已落地，`tests/integration/persistence/ArtifactIsolationTest.csproj` 10/10 PASS
+- 活跃任务: `production/session-state/active.md` 指向 Foundation Layer 已完成 #1/#2/#3，下一步为 #4 移动交互与 #5/#6 解锁后的并行准备
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（3 个既有未使用事件 warning，0 errors）
+- 测试验证: `tests/` 下 23 个 C# runner 全部 PASS
+- 本次确认: Local Save Persistence #3 Story-008 Desktop Lifecycle Integration 已落地，`tests/integration/persistence/DesktopLifecycleTest.csproj` 22/22 PASS；Epic #3 已 Complete
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | 完成 #3 Story 008 Desktop Lifecycle Integration | #3 Story 001-007 | 1-2 天 |
-| **P1** | 启动 #4 移动交互 Story 001 | #2 完成 | 可开工 |
-| **P2** | Phase B 收口后执行 Persistence format freeze | #3 完成 | 0.5 天 |
-| **P3** | 准备 #5/#6/#7 的快照契约消费检查 | #1 + #3 | 等 #3 完成 |
+| **P0** | 启动 #4 移动交互 Story 001 | #2 完成 | 可开工 |
+| **P1** | 对 #3 执行 Persistence format freeze / smoke-check | #3 完成 | 0.5 天 |
+| **P2** | 准备 #5/#6 的快照契约消费检查 | #1 + #3 | 可开工 |
+| **P3** | 准备 #7 Hub 的移动交互接入检查 | #1 + #3 + #4 | 等 #4 |
 
-> 关键建议: #1/#2 已完成，#3 只剩 Story 008。当前最佳并行路线是收尾 #3 Story 008，同时启动 #4 Story 001。
+> 关键建议: #1/#2/#3 已完成。当前最佳并行路线是启动 #4 Story 001，同时让 #5/#6 做接口消费准备与测试桩设计。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #3 Story 008 (持久化桌面生命周期集成)
-  └─ #4 Story 001 起步 (已由 #2 解锁)
+  ┌─ #4 Story 001 起步 (已由 #2 解锁)
+  ├─ #5 资源货物接口消费准备 (已由 #1+#3 解锁)
+  └─ #6 知识情报接口消费准备 (已由 #1+#3 解锁)
 
-当前已满足 #1 #2 完成:
-  ┌─ #3 持久化     ─┐
-  └─ #4 移动交互   ─┘ 二人并行；#4 可先行
+当前已满足 #1 #2 #3 完成:
+  ┌─ #4 移动交互   ─┐ 已解锁，可进入实现
+  ├─ #5 资源货物   ─┤ 可进入接口消费准备
+  └─ #6 知识情报   ─┘ 可进入接口消费准备
 
-等 #1 #3 完成后:
-  ┌─ #5 资源货物   ─┐
-  ├─ #6 知识情报   ─┤ 三人并行 (最大并行窗口!)
-  └─ #7 飞艇 Hub   ─┘
+等 #4 完成后:
+  ┌─ #7 飞艇 Hub   ─┐ 与 #5/#6 下游工作汇合
+  └─ #8/#9 前置消费检查继续推进
 ```
 
 ---
