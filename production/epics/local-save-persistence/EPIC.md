@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/local-save-world-state-persistence.md
 > **Architecture Module**: Autoload #3 — Persistence
-> **Status**: In Progress
-> **Stories**: 8 (001-008) — 7 Complete, 1 Ready
+> **Status**: Complete
+> **Stories**: 8 (001-008) — All Complete
 
 ## Overview
 
@@ -48,8 +48,8 @@ This epic is complete when:
 | 005 | [Version Migration](story-005-version-migration.md) | Logic | TR-persistence-005 | ADR-0003 | Complete |
 | 006 | [Backup Failover](story-006-backup-failover.md) | Logic | TR-persistence-006 | ADR-0003 | Complete |
 | 007 | [Artifact Isolation (settings / progress)](story-007-artifact-isolation.md) | Integration | TR-persistence-007 | ADR-0003 | Complete |
-| 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Ready |
+| 008 | [Web Lifecycle Integration](story-008-web-lifecycle-integration.md) | Integration | TR-persistence-008 | ADR-0003, ADR-0006 | Complete |
 
 ## Next Step
 
-Story 001-007 are implemented and verified. Start Story 008 (Desktop Lifecycle Integration; legacy title still says Web Lifecycle) to finish the persistence epic.
+All 8 stories are Complete. Epic closed 2026-05-12. Proceed to `/smoke-check sprint` → `/team-qa sprint` → `/gate-check`.
