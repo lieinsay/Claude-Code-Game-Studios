@@ -105,6 +105,34 @@ public sealed record RouteEnhancementPayload(
     bool Unlock);
 
 /// <summary>
+/// MVP visual contract consumed by feedback/UI tests until scene assets exist.
+/// </summary>
+public sealed record RepairVisualSnapshot(
+    string NodeId,
+    string SpriteState,
+    bool HaloVisible,
+    bool BeamVisible,
+    string BeamColorRgba,
+    int ParticleCount,
+    double ParticleSpawnRadiusPx,
+    double ParticleMinLifetimeSec,
+    double ParticleMaxLifetimeSec,
+    double ModulateAlpha,
+    bool CeremonyActive,
+    double CeremonyElapsedSec,
+    double CeremonyDurationSec,
+    bool UiCloseInteractable);
+
+/// <summary>
+/// MVP audio cue contract. Concrete resources are supplied by audio/feedback later.
+/// </summary>
+public sealed record RepairAudioCue(
+    string NodeId,
+    string CueId,
+    double DurationSec,
+    string Description);
+
+/// <summary>
 /// Sole Feature-layer owner of world repair node lifecycle state.
 /// </summary>
 public sealed class WorldRepair
@@ -112,6 +140,11 @@ public sealed class WorldRepair
     public const string MvpNodeId = "repair_node.starlight_dock";
     public const string VisualStateKnown = "known";
     public const string VisualStateRepaired = "repaired";
+    public const double DefaultRepairCeremonyDurationSec = 5.0d;
+    public const double MinRepairCeremonyDurationSec = 0.5d;
+    public const double BreathingPeriodSec = 3.0d;
+    public const string RepairedBeamColorRgba = "1.0,0.9,0.6,0.3";
+    public const string CommitFailedPlayerMessage = "提交失败，材料未消耗";
 
     private readonly Registry? _registry;
     private readonly Dictionary<string, RepairNodeDefinition> _definitions = new(StringComparer.Ordinal);
@@ -120,8 +153,11 @@ public sealed class WorldRepair
     private readonly List<string> _errors = [];
     private readonly List<string> _downstreamErrors = [];
     private readonly List<string> _completedNodeIds = [];
+    private readonly List<RepairAudioCue> _audioCues = [];
+    private readonly Dictionary<string, RepairCeremonyRuntime> _ceremonies = new(StringComparer.Ordinal);
     private Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult>? _commitDeposit;
     private Func<string, IReadOnlyDictionary<string, int>>? _pool6DepositQuery;
+    private double _repairCeremonyDurationSec = DefaultRepairCeremonyDurationSec;
 
     /// <summary>Raised when a repair node visual state changes.</summary>
     public event Action<string, string>? VisualStateChanged;
@@ -149,6 +185,12 @@ public sealed class WorldRepair
 
     /// <summary>Consumer callback errors captured while continuing fan-out.</summary>
     public IReadOnlyList<string> DownstreamErrors => _downstreamErrors;
+
+    /// <summary>Audio cue log for MVP contract tests and adapters.</summary>
+    public IReadOnlyList<RepairAudioCue> AudioCues => _audioCues;
+
+    /// <summary>Current clamped repair ceremony duration.</summary>
+    public double RepairCeremonyDurationSec => _repairCeremonyDurationSec;
 
     public WorldRepair(Registry? registry = null)
     {
@@ -188,6 +230,8 @@ public sealed class WorldRepair
         _definitions.Clear();
         _repairNodes.Clear();
         _completedNodeIds.Clear();
+        _audioCues.Clear();
+        _ceremonies.Clear();
 
         foreach (var definition in LoadDefinitionsFromRegistry())
         {
@@ -429,6 +473,15 @@ public sealed class WorldRepair
             && node.RepairState != RepairState.Repaired;
     }
 
+    /// <summary>Returns whether #11 should expose the repair interaction at the current location.</summary>
+    public bool IsRepairInteractionAvailableAtLocation(string nodeId, string currentLocationId)
+    {
+        return IsRepairInteractionAvailable(nodeId)
+            && _definitions.TryGetValue(nodeId, out var definition)
+            && !string.IsNullOrWhiteSpace(currentLocationId)
+            && string.Equals(definition.LinkedLocationId, currentLocationId, StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// Builds UI-facing repair info. Low intel hides exact material labels but never blocks interaction.
     /// </summary>
@@ -467,13 +520,26 @@ public sealed class WorldRepair
             && node.RepairState != RepairState.Repaired;
     }
 
+    /// <summary>Returns the UI quantity selector max for a resource at a repair node.</summary>
+    public int GetMaxOfferQuantity(string nodeId, string resourceId)
+    {
+        if (!_definitions.TryGetValue(nodeId, out var definition)
+            || !_repairNodes.TryGetValue(nodeId, out var node)
+            || !definition.RequiredResources.TryGetValue(resourceId, out var required))
+        {
+            return 0;
+        }
+
+        return Math.Max(0, required - node.Deposited.GetValueOrDefault(resourceId, 0));
+    }
+
     /// <summary>
     /// Validates a proposed batch against node existence, lifecycle state, required materials, and remaining gaps.
     /// </summary>
     public DepositValidationResult ValidateDeposit(string nodeId, IReadOnlyDictionary<string, int>? offer)
     {
         var violations = new List<RepairDepositViolation>();
-        if (!_repairNodes.ContainsKey(nodeId) || !_definitions.ContainsKey(nodeId))
+        if (string.IsNullOrWhiteSpace(nodeId) || !_repairNodes.ContainsKey(nodeId) || !_definitions.ContainsKey(nodeId))
         {
             violations.Add(RepairDepositViolation.InvalidNode);
             return new DepositValidationResult(false, violations);
@@ -513,6 +579,12 @@ public sealed class WorldRepair
         }
 
         return new DepositValidationResult(violations.Count == 0, violations.Distinct().ToArray());
+    }
+
+    /// <summary>Defensive validation overload for untyped script/UI payloads.</summary>
+    public DepositValidationResult ValidateDeposit(string nodeId, IReadOnlyDictionary<string, object?>? offer)
+    {
+        return ValidateDeposit(nodeId, NormalizeOffer(offer));
     }
 
     /// <summary>
@@ -561,6 +633,8 @@ public sealed class WorldRepair
             DepositCommitted?.Invoke(nodeId, resourceId, quantity);
         }
 
+        PlayDepositConfirmAudio(nodeId);
+
         node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
         var deposited = GetDeposited(nodeId);
         EmitRepairProgressChanged(nodeId, node.RepairProgress, deposited);
@@ -569,6 +643,7 @@ public sealed class WorldRepair
         if (completed)
         {
             TryTransitionState(nodeId, RepairState.Repaired);
+            TriggerRepairCeremony(nodeId);
             EmitRepairCompleted(nodeId);
             EmitVisualStateChanged(nodeId, VisualStateRepaired);
         }
@@ -605,6 +680,7 @@ public sealed class WorldRepair
             }
 
             TryTransitionState(nodeId, RepairState.Repaired);
+            TriggerRepairCeremony(nodeId);
             EmitRepairCompleted(nodeId);
             EmitVisualStateChanged(nodeId, VisualStateRepaired);
         }
@@ -622,6 +698,85 @@ public sealed class WorldRepair
     public IReadOnlyList<string> GetRepairNodeIds()
     {
         return _repairNodes.Keys.OrderBy(id => id, StringComparer.Ordinal).ToArray();
+    }
+
+    /// <summary>Returns the player-facing message for a submit result.</summary>
+    public static string GetSubmitFailureMessage(RepairSubmitResult result)
+    {
+        return result == RepairSubmitResult.ErrCommitFailed ? CommitFailedPlayerMessage : string.Empty;
+    }
+
+    /// <summary>Clamps the configurable repair ceremony duration.</summary>
+    public void SetRepairCeremonyDurationSec(double durationSec)
+    {
+        _repairCeremonyDurationSec = durationSec <= 0.0d
+            ? MinRepairCeremonyDurationSec
+            : Math.Max(MinRepairCeremonyDurationSec, durationSec);
+    }
+
+    /// <summary>Advances active repair ceremonies by gameplay delta, never wall-clock time.</summary>
+    public void TickCeremony(double deltaSec)
+    {
+        if (deltaSec <= 0.0d)
+        {
+            return;
+        }
+
+        foreach (var ceremony in _ceremonies.Values)
+        {
+            if (!ceremony.Active)
+            {
+                continue;
+            }
+
+            ceremony.ElapsedSec = Math.Min(ceremony.ElapsedSec + deltaSec, ceremony.DurationSec);
+            if (ceremony.ElapsedSec >= ceremony.DurationSec)
+            {
+                ceremony.Active = false;
+            }
+        }
+    }
+
+    /// <summary>Returns the MVP visual state contract for one repair node.</summary>
+    public RepairVisualSnapshot GetVisualSnapshot(string nodeId)
+    {
+        if (!_repairNodes.TryGetValue(nodeId, out var node))
+        {
+            return new RepairVisualSnapshot(
+                nodeId,
+                VisualStateKnown,
+                false,
+                false,
+                RepairedBeamColorRgba,
+                0,
+                0.0d,
+                0.0d,
+                0.0d,
+                1.0d,
+                false,
+                0.0d,
+                _repairCeremonyDurationSec,
+                true);
+        }
+
+        _ceremonies.TryGetValue(nodeId, out var ceremony);
+        var repaired = node.RepairState == RepairState.Repaired;
+        var elapsed = ceremony?.ElapsedSec ?? 0.0d;
+        return new RepairVisualSnapshot(
+            nodeId,
+            repaired ? VisualStateRepaired : VisualStateKnown,
+            repaired,
+            repaired,
+            RepairedBeamColorRgba,
+            repaired ? 7 : 0,
+            repaired ? 48.0d : 0.0d,
+            repaired ? 2.0d : 0.0d,
+            repaired ? 4.0d : 0.0d,
+            repaired ? ComputeBreathingAlpha(elapsed) : 1.0d,
+            ceremony?.Active ?? false,
+            elapsed,
+            ceremony?.DurationSec ?? _repairCeremonyDurationSec,
+            true);
     }
 
     /// <summary>Builds the progress.world-repair payload. Derived progress is intentionally omitted.</summary>
@@ -761,6 +916,31 @@ public sealed class WorldRepair
         }
 
         return count == 0 ? 0.0d : Math.Clamp(total / count, 0.0d, 1.0d);
+    }
+
+    private void PlayDepositConfirmAudio(string nodeId)
+    {
+        _audioCues.Add(new RepairAudioCue(
+            nodeId,
+            "repair.deposit_confirm",
+            0.35d,
+            "short metal-and-stone confirmation"));
+    }
+
+    private void TriggerRepairCeremony(string nodeId)
+    {
+        _ceremonies[nodeId] = new RepairCeremonyRuntime(_repairCeremonyDurationSec);
+        _audioCues.Add(new RepairAudioCue(
+            nodeId,
+            "repair.ceremony_hum_chime",
+            2.5d,
+            "rising hum into clear chime"));
+    }
+
+    private static double ComputeBreathingAlpha(double elapsedSec)
+    {
+        var breath = Math.Sin(elapsedSec * Math.Tau / BreathingPeriodSec);
+        return Math.Clamp(0.95d + (breath * 0.05d), 0.9d, 1.0d);
     }
 
     private void CrossValidateWithPool6()
@@ -930,21 +1110,71 @@ public sealed class WorldRepair
 
         if (value is IReadOnlyDictionary<string, object?> objectMap)
         {
-            return objectMap.ToDictionary(
-                pair => pair.Key,
-                pair => Convert.ToInt32(pair.Value),
-                StringComparer.Ordinal);
+            return NormalizeOffer(objectMap);
         }
 
         if (value is IDictionary<string, object?> mutableMap)
         {
-            return mutableMap.ToDictionary(
-                pair => pair.Key,
-                pair => Convert.ToInt32(pair.Value),
-                StringComparer.Ordinal);
+            return NormalizeOffer(new Dictionary<string, object?>(mutableMap, StringComparer.Ordinal));
         }
 
         return new Dictionary<string, int>(StringComparer.Ordinal);
+    }
+
+    private static IReadOnlyDictionary<string, int> NormalizeOffer(IReadOnlyDictionary<string, object?>? offer)
+    {
+        var normalized = new Dictionary<string, int>(StringComparer.Ordinal);
+        if (offer is null)
+        {
+            return normalized;
+        }
+
+        foreach (var (resourceId, rawQuantity) in offer)
+        {
+            if (string.IsNullOrWhiteSpace(resourceId))
+            {
+                continue;
+            }
+
+            if (TryReadQuantity(rawQuantity, out var quantity))
+            {
+                normalized[resourceId] = quantity;
+            }
+            else
+            {
+                normalized[resourceId] = 0;
+            }
+        }
+
+        return normalized;
+    }
+
+    private static bool TryReadQuantity(object? value, out int quantity)
+    {
+        quantity = 0;
+        switch (value)
+        {
+            case int intValue:
+                quantity = intValue;
+                return true;
+            case long longValue:
+                quantity = checked((int)longValue);
+                return true;
+            case double doubleValue:
+                quantity = (int)Math.Floor(doubleValue);
+                return true;
+            case float floatValue:
+                quantity = (int)Math.Floor(floatValue);
+                return true;
+            case decimal decimalValue:
+                quantity = (int)Math.Floor(decimalValue);
+                return true;
+            case string stringValue when double.TryParse(stringValue, out var parsed):
+                quantity = (int)Math.Floor(parsed);
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static IReadOnlyList<string> ReadStringList(
@@ -1104,5 +1334,17 @@ public sealed class WorldRepair
         public Dictionary<string, int> Deposited { get; } = new(StringComparer.Ordinal);
         public double RepairProgress { get; set; }
         public string VisualState { get; set; } = VisualStateKnown;
+    }
+
+    private sealed class RepairCeremonyRuntime
+    {
+        public RepairCeremonyRuntime(double durationSec)
+        {
+            DurationSec = durationSec;
+        }
+
+        public bool Active { get; set; } = true;
+        public double ElapsedSec { get; set; }
+        public double DurationSec { get; }
     }
 }

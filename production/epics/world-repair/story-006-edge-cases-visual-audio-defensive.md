@@ -1,7 +1,7 @@
 # Story 006: Edge Cases, MVP Visual/Audio & Defensive Handling
 
 > **Epic**: World Repair & Unlock
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -255,7 +255,7 @@ func _validate_ceremony_config() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/world-repair/EdgeCasesTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/EdgeCasesTest.csproj --no-restore` PASS 23/23; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 
