@@ -804,6 +804,6 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Verdict: NOT APPROVED FOR FULL RUNTIME ADVANCEMENT; Resources & Goods Capacity #5 contract approved for downstream code consumption.
 - QA artifacts: `production/qa/qa-plan-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-cases-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-signoff-resources-goods-capacity-2026-05-13.md`
 - Automated evidence: 47/47 C# test projects PASS, 511/511 reported checks PASS, Godot headless project/main scene/shell UI loads PASS.
-- Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003/004 now have automated Hub reachability/resource presentation evidence; TC-RGC-005 through TC-RGC-009 remain blocked by downstream interaction/UI wiring.
+- Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003/004 visible Godot retest PASS with screenshot evidence; TC-RGC-005 through TC-RGC-009 remain blocked by downstream interaction/UI wiring.
 - Bugs: BUG-001/002/003/004 verified fixed; BUG-005 `Downstream gameplay scene is not mounted after audio activation` resolved by HubRuntime scene mount.
-- Next recommended: Manually retest TC-RGC-003/004 in visible Godot, then continue #9 Chart Route Planning and downstream runtime UI paths.
+- Next recommended: Continue #9 Chart Route Planning and downstream runtime UI paths; re-run TC-RGC-005 through TC-RGC-009 after relevant controls land.

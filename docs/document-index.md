@@ -656,7 +656,7 @@ graph TB
 |--------|--------|------|
 | P0 | [#9 Chart Route Planning Story 001](../production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md) | #6 情报合同已完成；航图可开始消费知识状态与路线可见性 |
 | P0 | [#9 Chart Route Planning Story 001](../production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md) | #6 情报合同完成；#8 模块船体合同完成 |
-| P1 | TC-RGC-003/004 visible Godot retest | BUG-005 自动化修复已落地；可手动确认 Hub 与初始资源呈现 |
+| P1 | TC-RGC-005~009 downstream runtime UI wiring | TC-RGC-003/004 visible Godot 复测已通过；后续剩余资源操作、修复、航线、存档 UI 路径 |
 
 ---
 

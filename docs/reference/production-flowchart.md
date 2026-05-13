@@ -507,7 +507,6 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
 | **P0** | #9 Chart Route Planning Story 001 | #6 情报合同完成 ✅ | 可开工 |
-| **P1** | TC-RGC-003/004 visible Godot retest | BUG-005 自动化修复 ✅ | 可复测 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
 > 关键建议: #5/#6/#7/#8 已完成，下一段优先推进 #9 航图规划；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
@@ -518,7 +517,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 现在就可以同时做:
   ┌─ #9 航图规划 Story 001 Chart State Machine + Content Gate (依赖 #6 ✅)
   ├─ #8 模块船体 Epic 已复审通过，可作为 #10/#11/#12/#16 上游合同输入
-  └─ TC-RGC-003/004 visible Godot 复测 + TC-RGC-005~009 下游交互/UI 接线
+  └─ TC-RGC-005~009 下游交互/UI 接线（TC-RGC-003/004 visible Godot 复测已通过）
 ```
 
 ---

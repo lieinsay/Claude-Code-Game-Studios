@@ -27,6 +27,7 @@
 - Godot project headless startup - PASS
 - `res://src/scenes/SessionShell.tscn` headless load - PASS
 - `res://src/scenes/ShellUi.tscn` headless load - PASS
+- TC-RGC-003/004 visible Godot retest screenshot - PASS (`production/qa/evidence/tc-rgc-003-004-visible-godot-retest.md`)
 - `git diff --check` - PASS, LF/CRLF advisory warnings only
 
 ### Manual QA Results
@@ -35,8 +36,8 @@
 |------|--------|-------|
 | TC-RGC-001 | PASS | BUG-001 verified fixed; visible Entry screen reached |
 | TC-RGC-002 | PASS | BUG-002, BUG-003, and BUG-004 verified fixed by user retest |
-| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; manual visual retest recommended |
-| TC-RGC-004 | PASS | Initial Hub/resource presentation visible in `HubRuntime.tscn` |
+| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; visible Godot retest PASS |
+| TC-RGC-004 | PASS | Initial Hub/resource presentation visible in Godot screenshot evidence |
 | TC-RGC-005 | BLOCKED | Runtime transfer/pickup controls not wired yet |
 | TC-RGC-006 | BLOCKED | Repair deposit UI not wired yet |
 | TC-RGC-007 | BLOCKED | Route/exploration loop not wired yet |
@@ -58,14 +59,13 @@
 
 Epic #5 resource logic, capacity rules, atomic operations, signal contract, and persistence integration are approved for downstream code consumption. All nine #5 story acceptance suites pass.
 
-BUG-005 no longer blocks Hub reachability: audio confirmation now mounts the Hub runtime scene. The full runtime build is not yet approved as a playable resource loop because transfer/pickup controls, repair deposit UI, route/exploration, runtime save/load UI, and mutation-driven UI refresh observation remain downstream wiring work.
+BUG-005 no longer blocks Hub reachability: audio confirmation now mounts the Hub runtime scene, and TC-RGC-003/004 visible Godot retest confirms the Hub/resource presentation path. The full runtime build is not yet approved as a playable resource loop because transfer/pickup controls, repair deposit UI, route/exploration, runtime save/load UI, and mutation-driven UI refresh observation remain downstream wiring work.
 
 ### Conditions
 
-- Manually retest TC-RGC-003 and TC-RGC-004 in a visible Godot run.
 - Re-run TC-RGC-005 through TC-RGC-009 after the relevant downstream interaction/UI paths are wired.
 - Keep TC-RGC-010 as a targeted stability recheck after the Hub path is available.
 
 ### Next Step
 
-Proceed with #9 Chart Route Planning and downstream interaction/UI wiring; re-run targeted manual QA for TC-RGC-003 through TC-RGC-010 after visible Godot retest and new runtime controls land. The #5 `ResourcesManager` contract does not require additional implementation before dependent systems consume it.
+Proceed with #9 Chart Route Planning and downstream interaction/UI wiring; re-run targeted manual QA for TC-RGC-005 through TC-RGC-010 after new runtime controls land. The #5 `ResourcesManager` contract does not require additional implementation before dependent systems consume it.

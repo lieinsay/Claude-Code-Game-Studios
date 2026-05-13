@@ -115,9 +115,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - If Hub runtime is wired, the Hub appears and remains stable.
 - If Hub runtime is not wired, QA records BLOCKED - downstream Hub scene not connected, not a #5 resource failure.
 
-**Actual Result**: Fixed 2026-05-13. `SessionShellRuntime.gd` mounts `HubRuntime.tscn` after audio confirmation; `ShellUiTest` verifies the old placeholder recovery message is absent, and Godot headless loads the project.
+**Actual Result**: Fixed 2026-05-13. `SessionShellRuntime.gd` mounts `HubRuntime.tscn` after audio confirmation; `ShellUiTest` verifies the old placeholder recovery message is absent, Godot headless loads the project, and the visible Godot retest confirms the Hub screen is reachable.
 
-**Pass/Fail**: PASS by automated scene-contract verification; manual visual retest recommended.
+**Pass/Fail**: PASS by automated scene-contract verification and visible Godot retest. Evidence: `production/qa/evidence/tc-rgc-003-004-visible-godot-retest.md`.
 
 ---
 
@@ -145,9 +145,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - No stale or negative quantities appear.
 - If UI is not wired, the case is BLOCKED, not FAIL.
 
-**Actual Result**: Fixed 2026-05-13. The mounted Hub runtime exposes initial storage (`basic_supply x10 / repair_kit x4`), cargo (`used 0 / effective 500 / trapped 0`), module, and hull status labels.
+**Actual Result**: Fixed 2026-05-13. The visible Godot retest shows the mounted Hub runtime exposes initial storage (`基础补给 x10 / 修理包 x4`), cargo (`已用 0 / 有效容量 500 / 受困货物 0`), module, and hull status labels.
 
-**Pass/Fail**: PASS for initial Hub/resource presentation; richer inventory interaction remains downstream UI scope.
+**Pass/Fail**: PASS for initial Hub/resource presentation; richer inventory interaction remains downstream UI scope. Evidence: `production/qa/evidence/tc-rgc-003-004-visible-godot-retest.md`.
 
 ---
 
@@ -332,8 +332,8 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 |------|--------|-------|
 | TC-RGC-001 | PASS | BUG-001 verified fixed by visible Entry screenshot |
 | TC-RGC-002 | PASS | BUG-002/BUG-003/BUG-004 verified fixed by manual retest |
-| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; manual visual retest recommended |
-| TC-RGC-004 | PASS | Initial Hub/resource presentation is visible |
+| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; visible Godot retest PASS |
+| TC-RGC-004 | PASS | Initial Hub/resource presentation visible in Godot screenshot evidence |
 | TC-RGC-005 | BLOCKED | Runtime transfer/pickup controls not wired yet |
 | TC-RGC-006 | BLOCKED | Repair deposit UI not wired yet |
 | TC-RGC-007 | BLOCKED | Route/exploration loop not wired yet |
