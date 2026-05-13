@@ -28,48 +28,48 @@
 
 ### Encounter Table Lookup
 
-- [ ] **AC-1**: GIVEN visible tag=`safe` + encounter table loaded，WHEN draw_encounter_entry("safe")，THEN 从 safe 表的 4 个条目中等概率抽取一个。概率分布：calm_passage 40%, gentle_crosswind 35%, minor_debris 20%, scenic_discovery 5%
-- [ ] **AC-2**: GIVEN visible tag=`storm` + encounter table loaded，WHEN draw，THEN 从 storm 表的 5 个条目中等概率抽取：storm_cell_edge 30%, turbulence_zone 25%, lightning_proximity 20%, wind_shear 15%, storm_eye_passage 10%
-- [ ] **AC-3**: GIVEN visible tag=`low-visibility` + 已揭示，WHEN draw，THEN 从 low-visibility 表的 3 个条目中等概率抽取：dense_fog_bank 40%, hidden_reef_proximity 35%, false_horizon 25%
+- [x] **AC-1**: GIVEN visible tag=`safe` + encounter table loaded，WHEN draw_encounter_entry("safe")，THEN 从 safe 表的 4 个条目中等概率抽取一个。概率分布：calm_passage 40%, gentle_crosswind 35%, minor_debris 20%, scenic_discovery 5%
+- [x] **AC-2**: GIVEN visible tag=`storm` + encounter table loaded，WHEN draw，THEN 从 storm 表的 5 个条目中等概率抽取：storm_cell_edge 30%, turbulence_zone 25%, lightning_proximity 20%, wind_shear 15%, storm_eye_passage 10%
+- [x] **AC-3**: GIVEN visible tag=`low-visibility` + 已揭示，WHEN draw，THEN 从 low-visibility 表的 3 个条目中等概率抽取：dense_fog_bank 40%, hidden_reef_proximity 35%, false_horizon 25%
 
 ### Multi-Tag Resolution (max rule)
 
-- [ ] **AC-4**: GIVEN 一次检查命中 storm→turbulence_zone(d=3) + low-visibility→hidden_reef_proximity(d=4)，WHEN _resolve_encounter_check()，THEN d_check = max(3, 4) = 4。resolved_encounters 追加 2 个条目——每条命中标签独立记录
-- [ ] **AC-5**: GIVEN 一次检查命中 3 个标签 d={2, 0, 5}，WHEN d_check，THEN = max(2, 0, 5) = 5
-- [ ] **AC-6**: GIVEN 所有命中条目的 d_entry 均为 0（如 calm_passage(0) + storm_eye_passage(0)），WHEN d_check，THEN = 0。非伤害效果（揭示标签、减速）仍然应用
+- [x] **AC-4**: GIVEN 一次检查命中 storm→turbulence_zone(d=3) + low-visibility→hidden_reef_proximity(d=4)，WHEN _resolve_encounter_check()，THEN d_check = max(3, 4) = 4。resolved_encounters 追加 2 个条目——每条命中标签独立记录
+- [x] **AC-5**: GIVEN 一次检查命中 3 个标签 d={2, 0, 5}，WHEN d_check，THEN = max(2, 0, 5) = 5
+- [x] **AC-6**: GIVEN 所有命中条目的 d_entry 均为 0（如 calm_passage(0) + storm_eye_passage(0)），WHEN d_check，THEN = 0。非伤害效果（揭示标签、减速）仍然应用
 
 ### Special Effects Application
 
-- [ ] **AC-7**: GIVEN 抽取到 gentle_crosswind（effect=`voyage_duration_penalty_5s`），WHEN 应用效果，THEN ΣT_flat += 5。T_voyage 增加 5s
-- [ ] **AC-8**: GIVEN 抽取到 turbulence_zone（effect=`speed_penalty_15pct`），WHEN 应用效果，THEN _temp_time_penalties 增加等效值（约 +3s 对 12s 周期）。效果在下一检查结算后过期
-- [ ] **AC-9**: GIVEN 抽取到 wind_shear（effect=`next_check_early_5s`），WHEN 应用效果，THEN _next_check_offset -= 5s。若多次叠加，受 T_check_min=4s 硬下限约束
-- [ ] **AC-10**: GIVEN 抽取到 lightning_proximity（effect=`module_damage_20pct_scout`），WHEN 应用效果 + 20% randf() 命中，THEN ModuleHullManager.apply_module_damage(scout_slot, "lightning_strike")。η_scout 立即更新——预览窗口重算
-- [ ] **AC-11**: GIVEN 抽取到 storm_eye_passage（effect=`reveal_all_hidden_tags`），WHEN 应用效果，THEN 调用 reveal_all_hidden_tags()——所有隐藏标签 P_reveal=1.0 强制揭露
-- [ ] **AC-12**: GIVEN 抽取到 dense_fog_bank（effect=`scout_window_halved_next`），WHEN 应用效果，THEN 下一次遭遇检查的 T_preview 减半。效果在下一检查后恢复
-- [ ] **AC-13**: GIVEN 抽取到 hidden_reef_proximity（effect=`bypass_scout`），WHEN 应用，THEN 本遭遇不出现在侦察预览中——即使 η_scout>0，该遭遇也仅在触发时才显示
-- [ ] **AC-14**: GIVEN 抽取到 false_horizon（effect=`time_estimate_bias_15pct`），WHEN 应用效果，THEN UI 显示的剩余时间估算偏离 ±15%。实际 T_voyage 和遭遇计时不受影响
+- [x] **AC-7**: GIVEN 抽取到 gentle_crosswind（effect=`voyage_duration_penalty_5s`），WHEN 应用效果，THEN ΣT_flat += 5。T_voyage 增加 5s
+- [x] **AC-8**: GIVEN 抽取到 turbulence_zone（effect=`speed_penalty_15pct`），WHEN 应用效果，THEN _temp_time_penalties 增加等效值（约 +3s 对 12s 周期）。效果在下一检查结算后过期
+- [x] **AC-9**: GIVEN 抽取到 wind_shear（effect=`next_check_early_5s`），WHEN 应用效果，THEN _next_check_offset -= 5s。若多次叠加，受 T_check_min=4s 硬下限约束
+- [x] **AC-10**: GIVEN 抽取到 lightning_proximity（effect=`module_damage_20pct_scout`），WHEN 应用效果 + 20% randf() 命中，THEN ModuleHullManager.apply_module_damage(scout_slot, "lightning_strike")。η_scout 立即更新——预览窗口重算
+- [x] **AC-11**: GIVEN 抽取到 storm_eye_passage（effect=`reveal_all_hidden_tags`），WHEN 应用效果，THEN 调用 reveal_all_hidden_tags()——所有隐藏标签 P_reveal=1.0 强制揭露
+- [x] **AC-12**: GIVEN 抽取到 dense_fog_bank（effect=`scout_window_halved_next`），WHEN 应用效果，THEN 下一次遭遇检查的 T_preview 减半。效果在下一检查后恢复
+- [x] **AC-13**: GIVEN 抽取到 hidden_reef_proximity（effect=`bypass_scout`），WHEN 应用，THEN 本遭遇不出现在侦察预览中——即使 η_scout>0，该遭遇也仅在触发时才显示
+- [x] **AC-14**: GIVEN 抽取到 false_horizon（effect=`time_estimate_bias_15pct`），WHEN 应用效果，THEN UI 显示的剩余时间估算偏离 ±15%。实际 T_voyage 和遭遇计时不受影响
 
 ### Hidden Tag Reveal in Encounter Resolution
 
-- [ ] **AC-15**: GIVEN hidden_tag=`low-visibility` + P_reveal=0.30，WHEN 每次遭遇检查前判定，THEN 30% 概率揭露。揭露后该标签参与当次检查的遭遇抽取——reveal 判定在 encounter draw 之前
-- [ ] **AC-16**: GIVEN hidden_tag 已在前次检查中被揭露，WHEN 后续检查，THEN 不再重复判定。该标签此后作为 visible tag 参与抽取
-- [ ] **AC-17**: GIVEN storm_eye_passage 触发 + 存在未揭露的隐藏标签，WHEN _apply_special_effects()，THEN 所有 hidden_tags 立即揭露。已在 _revealed_hidden_tags 中的类不再重复处理
+- [x] **AC-15**: GIVEN hidden_tag=`low-visibility` + P_reveal=0.30，WHEN 每次遭遇检查前判定，THEN 30% 概率揭露。揭露后该标签参与当次检查的遭遇抽取——reveal 判定在 encounter draw 之前
+- [x] **AC-16**: GIVEN hidden_tag 已在前次检查中被揭露，WHEN 后续检查，THEN 不再重复判定。该标签此后作为 visible tag 参与抽取
+- [x] **AC-17**: GIVEN storm_eye_passage 触发 + 存在未揭露的隐藏标签，WHEN _apply_special_effects()，THEN 所有 hidden_tags 立即揭露。已在 _revealed_hidden_tags 中的类不再重复处理
 
 ### EncounterEntry Structure
 
-- [ ] **AC-18**: GIVEN 遭遇条目抽取完成，WHEN 构建 EncounterEntry Dictionary，THEN 包含 6 个字段：encounter_type, hazard_tag, damage_amount, special_effect_tags, was_hidden, time_offset
-- [ ] **AC-19**: GIVEN 条目来自 visible tag，WHEN was_hidden，THEN = false
-- [ ] **AC-20**: GIVEN 条目来自 hidden tag（经 reveal 判定后揭露），WHEN was_hidden，THEN = true。time_offset 记录航行开始至此遭遇的 elapsed_time
+- [x] **AC-18**: GIVEN 遭遇条目抽取完成，WHEN 构建 EncounterEntry Dictionary，THEN 包含 6 个字段：encounter_type, hazard_tag, damage_amount, special_effect_tags, was_hidden, time_offset
+- [x] **AC-19**: GIVEN 条目来自 visible tag，WHEN was_hidden，THEN = false
+- [x] **AC-20**: GIVEN 条目来自 hidden tag（经 reveal 判定后揭露），WHEN was_hidden，THEN = true。time_offset 记录航行开始至此遭遇的 elapsed_time
 
 ### Encounter Dispatch Signal
 
-- [ ] **AC-21**: GIVEN 遭遇条目构建完成，WHEN 发射信号，THEN encounter_triggered.emit(entry: Dictionary)——typed Dictionary。在遭遇结算完成、d_check 计算后、波段转换检查前发射
-- [ ] **AC-22**: GIVEN 同一次检查命中 2 个标签，WHEN 发射信号，THEN 每个 EncounterEntry 独立发射一次 encounter_triggered。共 2 次 emit
+- [x] **AC-21**: GIVEN 遭遇条目构建完成，WHEN 发射信号，THEN encounter_triggered.emit(entry: Dictionary)——typed Dictionary。在遭遇结算完成、d_check 计算后、波段转换检查前发射
+- [x] **AC-22**: GIVEN 同一次检查命中 2 个标签，WHEN 发射信号，THEN 每个 EncounterEntry 独立发射一次 encounter_triggered。共 2 次 emit
 
 ### Encounter Table Validation
 
-- [ ] **AC-23**: GIVEN 遭遇表加载完成，WHEN 验证，THEN 每个标签的条目概率总和 = 100%（1.0）。偏离超过 0.01 时记录警告并归一化
-- [ ] **AC-24**: GIVEN 请求的 hazard_tag 在遭遇表中不存在，WHEN draw_encounter_entry("unknown_tag")，THEN 返回空条目 {d_entry=0, no effects} 并记录警告。不崩溃
+- [x] **AC-23**: GIVEN 遭遇表加载完成，WHEN 验证，THEN 每个标签的条目概率总和 = 100%（1.0）。偏离超过 0.01 时记录警告并归一化
+- [x] **AC-24**: GIVEN 请求的 hazard_tag 在遭遇表中不存在，WHEN draw_encounter_entry("unknown_tag")，THEN 返回空条目 {d_entry=0, no effects} 并记录警告。不崩溃
 
 ---
 

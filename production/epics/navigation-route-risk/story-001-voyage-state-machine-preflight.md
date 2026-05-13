@@ -28,18 +28,18 @@
 
 ### State Machine
 
-- [ ] **AC-1**: GIVEN route_committed 信号到达 + can_depart=true + 所有上游查询成功，WHEN _preflight_check()，THEN voyage_state: VOYAGE_PREPARING → IN_PROGRESS。计时器开始
-- [ ] **AC-2**: GIVEN route_committed 信号到达 + can_depart=false，WHEN _preflight_check()，THEN voyage_state → ABORTED_PREFLIGHT。不出航
-- [ ] **AC-3**: GIVEN route_committed 信号到达 + Registry 查询 route_id 失败（route_id 不在注册表），WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。原因："route_id [id] not found in content registry"
-- [ ] **AC-4**: GIVEN route_committed 信号到达 + IntelManager.query_route_knowledge() 超时/失败，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。不缓存过期知识
-- [ ] **AC-5**: GIVEN IN_PROGRESS + elapsed_time ≥ T_voyage，WHEN 进度到达 100%，THEN voyage_state → ARRIVED（终态）
-- [ ] **AC-6**: GIVEN IN_PROGRESS + 玩家按 Esc/撤退按钮，WHEN 确认撤退，THEN voyage_state → RETREATED（终态）
-- [ ] **AC-7**: GIVEN IN_PROGRESS + hull_integrity_effective ≤ 0，WHEN 检测，THEN voyage_state → FORCED_LANDING（终态）
-- [ ] **AC-8**: GIVEN 终态（ARRIVED/RETREATED/FORCED_LANDING/ABORTED_PREFLIGHT），WHEN 任何触发到达，THEN 拒绝——所有终态不可逆
+- [x] **AC-1**: GIVEN route_committed 信号到达 + can_depart=true + 所有上游查询成功，WHEN _preflight_check()，THEN voyage_state: VOYAGE_PREPARING → IN_PROGRESS。计时器开始
+- [x] **AC-2**: GIVEN route_committed 信号到达 + can_depart=false，WHEN _preflight_check()，THEN voyage_state → ABORTED_PREFLIGHT。不出航
+- [x] **AC-3**: GIVEN route_committed 信号到达 + Registry 查询 route_id 失败（route_id 不在注册表），WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。原因："route_id [id] not found in content registry"
+- [x] **AC-4**: GIVEN route_committed 信号到达 + IntelManager.query_route_knowledge() 超时/失败，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。不缓存过期知识
+- [x] **AC-5**: GIVEN IN_PROGRESS + elapsed_time ≥ T_voyage，WHEN 进度到达 100%，THEN voyage_state → ARRIVED（终态）
+- [x] **AC-6**: GIVEN IN_PROGRESS + 玩家按 Esc/撤退按钮，WHEN 确认撤退，THEN voyage_state → RETREATED（终态）
+- [x] **AC-7**: GIVEN IN_PROGRESS + hull_integrity_effective ≤ 0，WHEN 检测，THEN voyage_state → FORCED_LANDING（终态）
+- [x] **AC-8**: GIVEN 终态（ARRIVED/RETREATED/FORCED_LANDING/ABORTED_PREFLIGHT），WHEN 任何触发到达，THEN 拒绝——所有终态不可逆
 
 ### VoyageContext Construction
 
-- [ ] **AC-9**: GIVEN route_committed(route_id, destination_id, hazard_tags)，WHEN _build_voyage_context()，THEN VoyageContext 包含：
+- [x] **AC-9**: GIVEN route_committed(route_id, destination_id, hazard_tags)，WHEN _build_voyage_context()，THEN VoyageContext 包含：
   - route_id, destination_id, hazard_tags（来自信号）
   - η_scout, hull_band, hull_integrity, M_max, M_loaded（来自 #8 ModuleHullManager）
   - knowledge_state, visible_hazard_tags, hidden_hazard_tags（来自 #6 IntelManager）
@@ -47,15 +47,15 @@
 
 ### TOCTOU Defense
 
-- [ ] **AC-10**: GIVEN #9 出航时 can_depart=true，WHEN #10 VOYAGE_PREPARING 结尾重新查询 can_depart() 返回 false，THEN → ABORTED_PREFLIGHT。防御 TOCTOU（#9 预检通过后到 #10 航行启动前状态可能变化）
+- [x] **AC-10**: GIVEN #9 出航时 can_depart=true，WHEN #10 VOYAGE_PREPARING 结尾重新查询 can_depart() 返回 false，THEN → ABORTED_PREFLIGHT。防御 TOCTOU（#9 预检通过后到 #10 航行启动前状态可能变化）
 
 ### Re-entrancy Guard
 
-- [ ] **AC-11**: GIVEN voyage_state=VOYAGE_PREPARING 或 IN_PROGRESS，WHEN 第二个 route_committed 信号到达，THEN 拒绝。记录警告。保持当前状态（航程不可重入）
+- [x] **AC-11**: GIVEN voyage_state=VOYAGE_PREPARING 或 IN_PROGRESS，WHEN 第二个 route_committed 信号到达，THEN 拒绝。记录警告。保持当前状态（航程不可重入）
 
 ### hazard_tags Consistency Check
 
-- [ ] **AC-12**: GIVEN route_committed 的 hazard_tags 与 Registry 的静态风险标签不一致，WHEN 构建 VoyageContext，THEN 以 Registry 为准。#9 漏掉的标签补入并警告；#9 多出的标签排除并警告
+- [x] **AC-12**: GIVEN route_committed 的 hazard_tags 与 Registry 的静态风险标签不一致，WHEN 构建 VoyageContext，THEN 以 Registry 为准。#9 漏掉的标签补入并警告；#9 多出的标签排除并警告
 
 ---
 

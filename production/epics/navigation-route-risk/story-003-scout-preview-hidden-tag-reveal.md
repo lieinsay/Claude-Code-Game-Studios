@@ -28,36 +28,36 @@
 
 ### Formula 3 — Scout Preview Window
 
-- [ ] **AC-1**: GIVEN η_scout=1.0 + T_check=12s，WHEN N_preview + T_preview，THEN N_preview = ⌊1.0×2⌋ = 2, T_preview = 2×12 = 24s
-- [ ] **AC-2**: GIVEN η_scout=0.95 + T_check=12s，WHEN N_preview，THEN N_preview = ⌊0.95×2⌋ = ⌊1.9⌋ = 1, T_preview = 12s
-- [ ] **AC-3**: GIVEN η_scout=0.6 + T_check=12s，WHEN N_preview，THEN N_preview = ⌊0.6×2⌋ = ⌊1.2⌋ = 1, T_preview = 12s
-- [ ] **AC-4**: GIVEN η_scout=0（无模块），WHEN N_preview，THEN = ⌊0×2⌋ = 0, T_preview = 0s。遭遇在发生时才知道
+- [x] **AC-1**: GIVEN η_scout=1.0 + T_check=12s，WHEN N_preview + T_preview，THEN N_preview = ⌊1.0×2⌋ = 2, T_preview = 2×12 = 24s
+- [x] **AC-2**: GIVEN η_scout=0.95 + T_check=12s，WHEN N_preview，THEN N_preview = ⌊0.95×2⌋ = ⌊1.9⌋ = 1, T_preview = 12s
+- [x] **AC-3**: GIVEN η_scout=0.6 + T_check=12s，WHEN N_preview，THEN N_preview = ⌊0.6×2⌋ = ⌊1.2⌋ = 1, T_preview = 12s
+- [x] **AC-4**: GIVEN η_scout=0（无模块），WHEN N_preview，THEN = ⌊0×2⌋ = 0, T_preview = 0s。遭遇在发生时才知道
 
 ### Preview Content
 
-- [ ] **AC-5**: GIVEN 可见风险标签 + η_scout>0，WHEN 侦察预览，THEN 进度条前方显示预警图标（对应标签的遭遇类型图标）
-- [ ] **AC-6**: GIVEN 隐藏风险标签 + η_scout>0，WHEN 侦察预览，THEN 仅显示 `?` 标记——知道前方有东西但不知道是什么
-- [ ] **AC-7**: GIVEN η_scout=0（无侦察模块），WHEN 航行中，THEN 进度条上不显示任何预警图标
+- [x] **AC-5**: GIVEN 可见风险标签 + η_scout>0，WHEN 侦察预览，THEN 进度条前方显示预警图标（对应标签的遭遇类型图标）
+- [x] **AC-6**: GIVEN 隐藏风险标签 + η_scout>0，WHEN 侦察预览，THEN 仅显示 `?` 标记——知道前方有东西但不知道是什么
+- [x] **AC-7**: GIVEN η_scout=0（无侦察模块），WHEN 航行中，THEN 进度条上不显示任何预警图标
 
 ### Dual Scout Module Redundancy
 
-- [ ] **AC-8**: GIVEN slot_a=scout(η=1.0) + slot_b=scout(η=0.6)，WHEN η_effective，THEN = max(1.0, 0.6) = 1.0。T_preview=24s
-- [ ] **AC-9**: GIVEN slot_a=scout(η=0.6) + slot_b=scout(η=0.6)，WHEN η_effective，THEN = max(0.6, 0.6) = 0.6。T_preview=12s
+- [x] **AC-8**: GIVEN slot_a=scout(η=1.0) + slot_b=scout(η=0.6)，WHEN η_effective，THEN = max(1.0, 0.6) = 1.0。T_preview=24s
+- [x] **AC-9**: GIVEN slot_a=scout(η=0.6) + slot_b=scout(η=0.6)，WHEN η_effective，THEN = max(0.6, 0.6) = 0.6。T_preview=12s
 
 ### Unchecked Module in Voyage
 
-- [ ] **AC-10**: GIVEN η_scout=0.95 (unchecked)，WHEN 航行中，THEN 始终使用 η=0.95——不"意外发现"真实状态。unchecked 是已知风险折扣，非航行中的突袭
+- [x] **AC-10**: GIVEN η_scout=0.95 (unchecked)，WHEN 航行中，THEN 始终使用 η=0.95——不"意外发现"真实状态。unchecked 是已知风险折扣，非航行中的突袭
 
 ### Formula 5 — Hidden Tag Reveal
 
-- [ ] **AC-11**: GIVEN hidden_tag + P_reveal=0.30，WHEN 每次遭遇检查独立判定，THEN 每次独立 30% 概率揭露。揭露后转为可见标签——使用可见遭遇表抽取
-- [ ] **AC-12**: GIVEN storm_eye_passage 遭遇触发，WHEN 效果，THEN P_reveal=1.0——该次检查立即揭露所有仍隐藏的标签
-- [ ] **AC-13**: GIVEN 隐藏标签已在此前检查中被揭露，WHEN 后续检查，THEN 不再重复判定——该标签已转为可见
+- [x] **AC-11**: GIVEN hidden_tag + P_reveal=0.30，WHEN 每次遭遇检查独立判定，THEN 每次独立 30% 概率揭露。揭露后转为可见标签——使用可见遭遇表抽取
+- [x] **AC-12**: GIVEN storm_eye_passage 遭遇触发，WHEN 效果，THEN P_reveal=1.0——该次检查立即揭露所有仍隐藏的标签
+- [x] **AC-13**: GIVEN 隐藏标签已在此前检查中被揭露，WHEN 后续检查，THEN 不再重复判定——该标签已转为可见
 
 ### Reveal Lifecycle
 
-- [ ] **AC-14**: GIVEN 隐藏标签在航行中被揭露，WHEN 航行结束（任何终态），THEN revealed_hidden_tags 包含该标签。向 #6 发射更新事件——下次航图刷新时该标签从隐藏变为可见
-- [ ] **AC-15**: GIVEN 隐藏标签全程未被揭露（所有判定均失败），WHEN 航行结束，THEN 标签保持隐藏状态。航线知识不推进
+- [x] **AC-14**: GIVEN 隐藏标签在航行中被揭露，WHEN 航行结束（任何终态），THEN revealed_hidden_tags 包含该标签。向 #6 发射更新事件——下次航图刷新时该标签从隐藏变为可见
+- [x] **AC-15**: GIVEN 隐藏标签全程未被揭露（所有判定均失败），WHEN 航行结束，THEN 标签保持隐藏状态。航线知识不推进
 
 ---
 

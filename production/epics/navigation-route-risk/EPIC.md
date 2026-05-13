@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: design/gdd/navigation-route-risk.md
 > **Architecture Module**: Autoload #10 — NavigationManager
-> **Status**: Complete
+> **Status**: Complete — reviewed 2026-05-13
 > **Stories**: 8 (001-008)
 
 ## Overview
@@ -52,6 +52,13 @@ This epic is complete when:
 
 **Summary**: 5 Logic + 3 Integration stories
 
+## Review Evidence
+
+- Story 001-008 acceptance criteria reviewed and closed.
+- Navigation runner evidence: 281/281 checks PASS across 8 C# runners.
+- Full C# runner sweep: 85/85 `tests/**/*.csproj` PASS on 2026-05-13.
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS with 4 existing warnings and 0 errors.
+
 ## Next Step
 
-All stories created. Core Layer 5/5 complete. Ready for Feature Layer epic decomposition.
+Core Layer 5/5 complete. Epic #11 Exploration / Scavenge is unblocked by the #10 EncounterContext and voyage_completed contract.

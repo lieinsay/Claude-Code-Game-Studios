@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #13 WorldRepair 完成，#10 Navigation In Progress；BUG-005 已修复**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10 Navigation 与 #13 WorldRepair 完成；BUG-005 已修复**
 
 ---
 
@@ -35,7 +35,7 @@ gantt
     #9 航图规划   (8 Stories)    :done,    p3e, 2026-05-13, 1d
 
     section 🟠 Phase D 等 Core 层
-    #10 航行风险  (8 Stories)    :         p4a, after p3e, 14d
+    #10 航行风险  (8 Stories)    :done,    p4a, 2026-05-13, 1d
     #13 世界修复  (6 Stories)    :done,    p4b, 2026-05-13, 1d
     #15 伙伴关系  (6 Stories)    :         p4c, after p3e, 10d
     #11 探索搜撤  (6 Stories)    :         p4d, after p4a, 12d
@@ -80,7 +80,7 @@ graph TD
     S8["✅ #8 模块船体 8S"]:::done
     S9["✅ #9 航图规划 8S"]:::done
 
-    S10["🟢 #10 航行风险 8S"]:::active
+    S10["✅ #10 航行风险 8S"]:::done
     S13["✅ #13 世界修复 6S"]:::done
     S15["🟠 #15 伙伴关系 6S"]:::future
 
@@ -289,8 +289,8 @@ Week 8-10
   #12 战斗威胁 ────────────────────────▶▶▶ 解锁 #17
     (等 #11 完成)
 
-阻塞关卡: ⛔ #10 是 Phase D 的最大关卡 — 依赖 5 个 Core 系统
-          ⛔ #11 必须等 #10 (探索由航行触发)
+阻塞关卡: ✅ #10 Phase D 最大汇合点已完成 — 5 个 Core 上游已验证
+          🟠 #11 现在是下一段关键入口 (探索由航行触发)
           ⛔ #12 必须等 #11 (战斗在探索中发生)
           ⛔ #14 必须等 #13 (集市状态由世界修复驱动)
 
@@ -491,32 +491,32 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
 ✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
-🔵 Phase D      ██████░░░░░░░░░░░░░░░░░░  进行中 (#13 WorldRepair Complete；#10 Navigation In Progress；#15/#16 已满足 #9 上游)
+🔵 Phase D      ██████████░░░░░░░░░░░░░░  进行中 (#10 Navigation + #13 WorldRepair Complete；#11 Exploration 已满足 #10 上游)
 ```
 
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #13 World Repair 全部 6/6 Story 完成；#10 Navigation Route Risk 已解锁并进入 In Progress；BUG-005 scene reachability 已修复
-- 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（1 个既存 nullable warning，0 错误）
-- 测试验证: Epic #13 Story 001-006 runner 91/91 checks PASS；`tests/**/*.csproj` 全量 C# runner 77/77 PASS，0 FAIL
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#13 Complete、#10 In Progress、77 个 C# runner 的当前基线
-- 本次完成: Epic #13 WorldRepair C# 合同、三态修复状态机、分批提交、公式、6 路下游 fan-out、progress.world-repair 持久化、MVP 视觉/音频与防御边界已锁定
+- 活跃任务: Epic #10 Navigation Route Risk 全部 8/8 Story 完成并复审通过；Epic #13 World Repair 全部 6/6 Story 完成；BUG-005 scene reachability 已修复
+- 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 错误）
+- 测试验证: Epic #10 Story 001-008 runner 281/281 checks PASS；Epic #13 Story 001-006 runner 91/91 checks PASS；`tests/**/*.csproj` 全量 C# runner 85/85 PASS，0 FAIL
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#13 Complete、85 个 C# runner 的当前基线
+- 本次完成: Epic #10 Navigation C# 合同、6 态 Voyage FSM、5 公式、EncounterContext 9-field、progress.voyage 持久化和 38 个边缘案例已锁定；Epic #13 WorldRepair 已完成
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #10 Navigation Route Risk Story 001 | #5/#6/#7/#8/#9 上游合同完成 ✅ | In Progress |
+| **P0** | #11 Exploration Scavenge Story 001 | #10 EncounterContext/voyage_completed 合同完成 ✅ | Next |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #5/#6/#7/#8/#9 已完成，下一段优先推进 #10 航行风险；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
+> 关键建议: #10 航行风险已完成，下一段优先推进 #11 探索搜撤；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #10 航行风险 Story 001 Voyage State Machine + Preflight (依赖 #5/#6/#7/#8/#9 ✅)
+  ┌─ #11 探索搜撤 Story 001 State Machine + Phase Transitions (依赖 #10 ✅)
   ├─ #13 世界修复 Epic 已完成，可作为 #14/#16/#17 下游合同输入
   └─ TC-RGC-005~009 下游交互/UI 接线（TC-RGC-003/004 visible Godot 复测已通过）
 ```
@@ -527,7 +527,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 1. **瓶颈 #1 (内容注册表)**: 15 个系统中 10 个直接依赖它。如果 Schema 设计出错，后续大面积返工。建议 Phase A 结束后做一次 **Schema Freeze**。
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
-3. **最大汇合点 #10 (航行风险)**: 依赖 5 个 Core 系统。任何一个上游延迟都会卡住 #10，进而卡住 #11 → #12 → #16 整条链。
+3. **最大汇合点 #10 (航行风险)**: 已完成并解锁 #11；后续关键风险转移到 #11 → #12 → #16 整条链的集成质量。
 4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16，这条链上的任何延迟都会推迟 MVP。
 5. **#17 #18 阻塞**: ADR-0016 和 ADR-0017 未创建。如果 Vertical Slice 需要它们，最晚在 Phase D 结束前完成 ADR。
 

@@ -28,13 +28,13 @@
 
 ### EncounterContext Construction
 
-- [ ] **AC-1**: GIVEN voyage_state→ARRIVED + 航程中有 5 次已结算遭遇，WHEN _build_encounter_context()，THEN 返回 Dictionary 包含全部 9 个字段。voyage_result="arrived", forced_landing_position=""
-- [ ] **AC-2**: GIVEN voyage_state→RETREATED + 撤退前 3 次已结算遭遇，WHEN _build_encounter_context()，THEN resolved_encounters 为截至撤退点的 3 个条目。accumulated_damage 为 3 次伤害之和。voyage_result="retreated"
-- [ ] **AC-3**: GIVEN voyage_state→FORCED_LANDING + hull≤0，WHEN _build_encounter_context()，THEN voyage_result="forced_landing", forced_landing_position 非空（迫降位置 ID），hull_band_arrival="destroyed"
+- [x] **AC-1**: GIVEN voyage_state→ARRIVED + 航程中有 5 次已结算遭遇，WHEN _build_encounter_context()，THEN 返回 Dictionary 包含全部 9 个字段。voyage_result="arrived", forced_landing_position=""
+- [x] **AC-2**: GIVEN voyage_state→RETREATED + 撤退前 3 次已结算遭遇，WHEN _build_encounter_context()，THEN resolved_encounters 为截至撤退点的 3 个条目。accumulated_damage 为 3 次伤害之和。voyage_result="retreated"
+- [x] **AC-3**: GIVEN voyage_state→FORCED_LANDING + hull≤0，WHEN _build_encounter_context()，THEN voyage_result="forced_landing", forced_landing_position 非空（迫降位置 ID），hull_band_arrival="destroyed"
 
 ### EncounterContext 9 Fields
 
-- [ ] **AC-4**: GIVEN _build_encounter_context() 调用，WHEN 返回 ctx，THEN 包含且类型正确：
+- [x] **AC-4**: GIVEN _build_encounter_context() 调用，WHEN 返回 ctx，THEN 包含且类型正确：
   - `route_id`: StringName（航线 ID）
   - `destination_id`: StringName（目的地 ID）
   - `voyage_result`: StringName（"arrived"/"retreated"/"forced_landing"）
@@ -47,28 +47,28 @@
 
 ### voyage_completed Signal
 
-- [ ] **AC-5**: GIVEN 航程进入终态 + EncounterContext 构建完成，WHEN _finalize_voyage()，THEN voyage_completed.emit(ctx: Dictionary)。遵循 ADR-0002：typed params, sync emit, emit-after-mutation
-- [ ] **AC-6**: GIVEN voyage_completed 已发射，WHEN Navigation 后续操作，THEN Navigation 不再参与下游逻辑——信号发射后本系统关闭。Exploration 恢复场景控制权
-- [ ] **AC-7**: GIVEN 消费方接收 voyage_completed(ctx)，WHEN 读取 ctx 字段，THEN 不修改 ctx 内容。深拷贝保障：_build_encounter_context() 中所有 Array 已 .duplicate(true)
+- [x] **AC-5**: GIVEN 航程进入终态 + EncounterContext 构建完成，WHEN _finalize_voyage()，THEN voyage_completed.emit(ctx: Dictionary)。遵循 ADR-0002：typed params, sync emit, emit-after-mutation
+- [x] **AC-6**: GIVEN voyage_completed 已发射，WHEN Navigation 后续操作，THEN Navigation 不再参与下游逻辑——信号发射后本系统关闭。Exploration 恢复场景控制权
+- [x] **AC-7**: GIVEN 消费方接收 voyage_completed(ctx)，WHEN 读取 ctx 字段，THEN 不修改 ctx 内容。深拷贝保障：_build_encounter_context() 中所有 Array 已 .duplicate(true)
 
 ### Writing Order Enforcement
 
-- [ ] **AC-8**: GIVEN 航程到达终态，WHEN _finalize_voyage() 执行，THEN 按顺序写入：(1) #8 船体伤害 → (2) #6 路线知识更新 → (3) voyage_completed 信号 → (4) #17 状态变更事件 → (5) #3 存档快照。顺序不可打乱
-- [ ] **AC-9**: GIVEN 步骤 (1) #8 写入失败（ModuleHullManager 不可用），WHEN _finalize_voyage()，THEN 记录错误日志，继续执行后续步骤。不因单一系统写入失败而阻塞整套写入流程
-- [ ] **AC-10**: GIVEN 步骤 (2) #6 更新时 route_id 无效（极端边缘），WHEN query_route_knowledge 无法找到该 route，THEN 跳过知识更新步骤——无操作。记录警告
+- [x] **AC-8**: GIVEN 航程到达终态，WHEN _finalize_voyage() 执行，THEN 按顺序写入：(1) #8 船体伤害 → (2) #6 路线知识更新 → (3) voyage_completed 信号 → (4) #17 状态变更事件 → (5) #3 存档快照。顺序不可打乱
+- [x] **AC-9**: GIVEN 步骤 (1) #8 写入失败（ModuleHullManager 不可用），WHEN _finalize_voyage()，THEN 记录错误日志，继续执行后续步骤。不因单一系统写入失败而阻塞整套写入流程
+- [x] **AC-10**: GIVEN 步骤 (2) #6 更新时 route_id 无效（极端边缘），WHEN query_route_knowledge 无法找到该 route，THEN 跳过知识更新步骤——无操作。记录警告
 
 ### Fallback Context
 
-- [ ] **AC-11**: GIVEN ctx 为 null 或非 Dictionary 类型，WHEN _validate_encounter_context(ctx)，THEN 返回 fallback context。9 字段全为默认安全值，voyage_result="arrived"
-- [ ] **AC-12**: GIVEN ctx.route_id 缺失或为空 StringName，WHEN 校验，THEN 返回 fallback context。不尝试修复——降级处理
-- [ ] **AC-13**: GIVEN ctx.voyage_result 不是 ["arrived", "retreated", "forced_landing"] 之一，WHEN 校验，THEN 返回 fallback context。无效枚举值不通过
-- [ ] **AC-14**: GIVEN ctx.resolved_encounters 不是 Array 类型，WHEN 校验，THEN 返回 fallback context。类型不匹配不通过
-- [ ] **AC-15**: GIVEN fallback context 被构建，WHEN 触发原因，THEN internal_error_log 记录具体触发条件和原始 ctx 摘要（不记录完整 ctx——避免日志膨胀）
+- [x] **AC-11**: GIVEN ctx 为 null 或非 Dictionary 类型，WHEN _validate_encounter_context(ctx)，THEN 返回 fallback context。9 字段全为默认安全值，voyage_result="arrived"
+- [x] **AC-12**: GIVEN ctx.route_id 缺失或为空 StringName，WHEN 校验，THEN 返回 fallback context。不尝试修复——降级处理
+- [x] **AC-13**: GIVEN ctx.voyage_result 不是 ["arrived", "retreated", "forced_landing"] 之一，WHEN 校验，THEN 返回 fallback context。无效枚举值不通过
+- [x] **AC-14**: GIVEN ctx.resolved_encounters 不是 Array 类型，WHEN 校验，THEN 返回 fallback context。类型不匹配不通过
+- [x] **AC-15**: GIVEN fallback context 被构建，WHEN 触发原因，THEN internal_error_log 记录具体触发条件和原始 ctx 摘要（不记录完整 ctx——避免日志膨胀）
 
 ### Downstream Consumption Interface
 
-- [ ] **AC-16**: GIVEN Exploration (#11) 接收 voyage_completed(ctx)，WHEN _on_voyage_completed()，THEN 调用 _validate_encounter_context(ctx) 校验 → 进入 ARRIVING 阶段。voyage_result="arrived"→正常入口，"forced_landing"→坠机点入口
-- [ ] **AC-17**: GIVEN voyage_result="retreated"，WHEN Exploration 消费，THEN 不进入探索阶段——Exploration 将控制权返回 AirshipHub。retreated 航程不生成探索场景
+- [x] **AC-16**: GIVEN Exploration (#11) 接收 voyage_completed(ctx)，WHEN _on_voyage_completed()，THEN 调用 _validate_encounter_context(ctx) 校验 → 进入 ARRIVING 阶段。voyage_result="arrived"→正常入口，"forced_landing"→坠机点入口
+- [x] **AC-17**: GIVEN voyage_result="retreated"，WHEN Exploration 消费，THEN 不进入探索阶段——Exploration 将控制权返回 AirshipHub。retreated 航程不生成探索场景
 
 ---
 

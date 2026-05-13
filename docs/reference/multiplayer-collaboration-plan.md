@@ -4,10 +4,10 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 已解锁并进入 In Progress | BUG-005 已修复**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | BUG-005 已修复**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-13 同步到 #5/#6/#7/#8/#9 Complete、#10 In Progress、71 个 C# runner PASS 的当前基线。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-13 同步到 #5/#6/#7/#8/#9/#10 Complete、85 个 C# runner PASS 的当前基线。
 
 ---
 
@@ -315,8 +315,8 @@ D-C: Epic #8+#9 收尾 → 启动 Epic #10
   Story 008 ☑ Edge Cases + Error Recovery       (I, 1d)  ← ✅ 43/43 PASS
 
   Epic #10 Navigation (等 #5+#6+#7+#8+#9 全部完成):
-  Story 001 □ Voyage State Machine + Preflight   (L, 2d)  ← 已解锁 / In Progress
-  Story 002 □ Voyage Duration + Check Timing     (L, 2d)  ← 与 001 并行
+  Story 001 ☑ Voyage State Machine + Preflight   (L, 2d)  ← ✅ 33/33 PASS
+  Story 002 ☑ Voyage Duration + Check Timing     (L, 2d)  ← ✅ 19/19 PASS
 ```
 
 ### 第 7 周: Core 收尾 + Feature 启动
@@ -344,16 +344,19 @@ D-B: Epic #15 Partner + 启动 UI
   Story 001 □ Screen State Machine + Flow        (L, 3d)
 
 
-D-C: Epic #10 继续
+D-C: Epic #10 收尾
 ────────────────────────────────────────
   Epic #10:
-  Story 003 □ Scout Preview + Hidden Tag Reveal  (L, 2d)  ← 等 001-002
-  Story 004 □ Damage Accumulation + Hull Band    (L, 2d)  ← 等 002
-  Story 005 □ Encounter Resolution + Dispatch    (L, 2d)  ← 等 003-004
+  Story 003 ☑ Scout Preview + Hidden Tag Reveal  (L, 2d)  ← ✅ 29/29 PASS
+  Story 004 ☑ Damage Accumulation + Hull Band    (L, 2d)  ← ✅ 22/22 PASS
+  Story 005 ☑ Encounter Resolution + Dispatch    (L, 2d)  ← ✅ 46/46 PASS
+  Story 006 ☑ EncounterContext + Voyage Signal   (I, 2d)  ← ✅ 47/47 PASS
+  Story 007 ☑ Voyage Snapshot Persistence        (I, 2d)  ← ✅ 34/34 PASS
+  Story 008 ☑ Edge Cases + Defensive Handling    (I, 1d)  ← ✅ 51/51 PASS
 ```
 
 **Phase 2 门禁**:
-- [ ] 5 Core Epic 全部 Story 单元测试 PASS
+- [x] 5 Core Epic 全部 Story 单元测试 PASS（#10 Navigation 281/281 PASS）
 - [ ] Hub → Chart → Navigation 集成流程手动走通
 - [ ] Resources 6-pool 运算全部 PASS
 - [ ] Intel 4 态知识状态机 PASS
@@ -587,8 +590,8 @@ D-C: 性能分析 + 优化
 | #7 Hub | 001-008 | #1 ID + #3 快照 + #4 移动 | ✅ Complete + reviewed — 2026-05-12 |
 | #8 Modules | 001-008 | #3 快照 + #5 池定义 + #7 槽位注册 | ✅ Complete + reviewed — 2026-05-13 |
 | #9 Chart | 001-008 | #1 ID + #3 快照 + #6 知识状态 | ✅ Complete + reviewed — 2026-05-13 |
-| #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | In Progress |
-| #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Week 8 |
+| #10 Navigation | 001-008 | #5+#6+#7+#8+#9 全部 | ✅ Complete + reviewed — 2026-05-13 (281/281 PASS) |
+| #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Next / Week 8 |
 | #12 Combat | 001 | #5+#8+#11 全部 | Week 9 |
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
 | #14 Settlement | 001 | #3+#4+#5+#13 Story 003 | Week 7-8 |

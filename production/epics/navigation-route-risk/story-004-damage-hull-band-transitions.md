@@ -28,45 +28,45 @@
 
 ### Formula 4 — Single Check Damage (max rule)
 
-- [ ] **AC-1**: GIVEN 同一次检查命中 storm→turbulence_zone(d=3) + low-visibility→hidden_reef(d=4)，WHEN d_check，THEN = max(3, 4) = 4。非 3+4=7
-- [ ] **AC-2**: GIVEN 同一次检查命中 3 个标签 d={2, 0, 5}，WHEN d_check，THEN = max(2, 0, 5) = 5
-- [ ] **AC-3**: GIVEN 一次检查零命中（所有标签隐藏未揭示/标签集为空），WHEN d_check = max(空集)，THEN = 0——显式定义
+- [x] **AC-1**: GIVEN 同一次检查命中 storm→turbulence_zone(d=3) + low-visibility→hidden_reef(d=4)，WHEN d_check，THEN = max(3, 4) = 4。非 3+4=7
+- [x] **AC-2**: GIVEN 同一次检查命中 3 个标签 d={2, 0, 5}，WHEN d_check，THEN = max(2, 0, 5) = 5
+- [x] **AC-3**: GIVEN 一次检查零命中（所有标签隐藏未揭示/标签集为空），WHEN d_check = max(空集)，THEN = 0——显式定义
 
 ### Formula 4 — D_accumulated and hull_integrity_effective
 
-- [ ] **AC-4**: GIVEN hull_departure=85 + D_accumulated=18，WHEN hull_effective，THEN = max(0, 85-18) = 67。仍在 damaged 波段 (26-75)
-- [ ] **AC-5**: GIVEN hull_departure=3 + d_check=6，WHEN hull_effective，THEN = max(0, 3-6) = 0。超量伤害 3 点丢弃——不产生负值
-- [ ] **AC-6**: GIVEN hull_effective reach 0，WHEN 检测，THEN voyage_state → FORCED_LANDING。FORCED_LANDING 优先于 ARRIVED
+- [x] **AC-4**: GIVEN hull_departure=85 + D_accumulated=18，WHEN hull_effective，THEN = max(0, 85-18) = 67。仍在 damaged 波段 (26-75)
+- [x] **AC-5**: GIVEN hull_departure=3 + d_check=6，WHEN hull_effective，THEN = max(0, 3-6) = 0。超量伤害 3 点丢弃——不产生负值
+- [x] **AC-6**: GIVEN hull_effective reach 0，WHEN 检测，THEN voyage_state → FORCED_LANDING。FORCED_LANDING 优先于 ARRIVED
 
 ### Option B — Dynamic Hull Band Transitions
 
-- [ ] **AC-7**: GIVEN intact (hull≥76) + D_accumulated 使 hull_effective→75，WHEN 波段跨越，THEN:
+- [x] **AC-7**: GIVEN intact (hull≥76) + D_accumulated 使 hull_effective→75，WHEN 波段跨越，THEN:
   - s_hull 从 1.0→0.9, Δ_hull 从 0→-0.10
   - T_voyage 重算: T_distance/0.9 + ΣT_flat + ΣT_temp（基准变长）
   - T_check 重算: 12×(1-0.10)=10.8s
   - 进度条不跳回——当前%保持，到达 100% 时间变长
   - 波段变更事件发射
-- [ ] **AC-8**: GIVEN damaged (hull≤75) + D_accumulated 使 hull_effective→25，WHEN 波段跨越，THEN:
+- [x] **AC-8**: GIVEN damaged (hull≤75) + D_accumulated 使 hull_effective→25，WHEN 波段跨越，THEN:
   - s_hull 从 0.9→0.75, Δ_hull 从 -0.10→-0.20
   - T_check 从 10.8s→9.6s
-- [ ] **AC-9**: GIVEN hull_effective 跨越多波段（一次检查），WHEN 处理，THEN 逐波段触发——每个阈值跨越时发出独立事件。当前最大单次伤害 6 点，一次检查不可能跨两个波段
+- [x] **AC-9**: GIVEN hull_effective 跨越多波段（一次检查），WHEN 处理，THEN 逐波段触发——每个阈值跨越时发出独立事件。当前最大单次伤害 6 点，一次检查不可能跨两个波段
 
 ### Band Boundary Values
 
-- [ ] **AC-10**: GIVEN hull=76，WHEN _get_hull_band(76)，THEN → intact (≥76)
-- [ ] **AC-11**: GIVEN hull=75，WHEN _get_hull_band(75)，THEN → damaged (26-75)
-- [ ] **AC-12**: GIVEN hull=25，WHEN _get_hull_band(25)，THEN → critical (1-25)
-- [ ] **AC-13**: GIVEN hull=0，WHEN _get_hull_band(0)，THEN → destroyed (≤0)
+- [x] **AC-10**: GIVEN hull=76，WHEN _get_hull_band(76)，THEN → intact (≥76)
+- [x] **AC-11**: GIVEN hull=75，WHEN _get_hull_band(75)，THEN → damaged (26-75)
+- [x] **AC-12**: GIVEN hull=25，WHEN _get_hull_band(25)，THEN → critical (1-25)
+- [x] **AC-13**: GIVEN hull=0，WHEN _get_hull_band(0)，THEN → destroyed (≤0)
 
 ### Module Damage During Voyage
 
-- [ ] **AC-14**: GIVEN lightning_proximity 遭遇 + 20% 概率击中侦察模块，WHEN 命中，THEN 调用 ModuleHullManager.apply_module_damage("slot_a"/"slot_b", "lightning_strike")。η_scout 立即更新
-- [ ] **AC-15**: GIVEN 侦察槽为空（无模块安装），WHEN lightning_proximity 触发，THEN 跳过模块伤害检定。不崩溃
+- [x] **AC-14**: GIVEN lightning_proximity 遭遇 + 20% 概率击中侦察模块，WHEN 命中，THEN 调用 ModuleHullManager.apply_module_damage("slot_a"/"slot_b", "lightning_strike")。η_scout 立即更新
+- [x] **AC-15**: GIVEN 侦察槽为空（无模块安装），WHEN lightning_proximity 触发，THEN 跳过模块伤害检定。不崩溃
 
 ### Damage Writing at Voyage End
 
-- [ ] **AC-16**: GIVEN voyage_state→ARRIVED + D_accumulated=18，WHEN _finalize_voyage()，THEN 调用 ModuleHullManager.apply_hull_damage(18)
-- [ ] **AC-17**: GIVEN voyage_state→RETREATED + D_accumulated=5，WHEN _finalize_voyage()，THEN 调用 ModuleHullManager.apply_hull_damage(5)。撤退不减免伤害
+- [x] **AC-16**: GIVEN voyage_state→ARRIVED + D_accumulated=18，WHEN _finalize_voyage()，THEN 调用 ModuleHullManager.apply_hull_damage(18)
+- [x] **AC-17**: GIVEN voyage_state→RETREATED + D_accumulated=5，WHEN _finalize_voyage()，THEN 调用 ModuleHullManager.apply_hull_damage(5)。撤退不减免伤害
 
 ---
 

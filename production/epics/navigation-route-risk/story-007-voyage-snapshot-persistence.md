@@ -28,56 +28,56 @@
 
 ### Mid-Voyage Save (IN_PROGRESS)
 
-- [ ] **AC-1**: GIVEN voyage_state=IN_PROGRESS + elapsed_time=45s + D_accumulated=8 + 3 次已结算遭遇，WHEN _capture_voyage_snapshot()，THEN snapshot 包含：
+- [x] **AC-1**: GIVEN voyage_state=IN_PROGRESS + elapsed_time=45s + D_accumulated=8 + 3 次已结算遭遇，WHEN _capture_voyage_snapshot()，THEN snapshot 包含：
   - route_id, D_accumulated, elapsed_time, N_checks_total
   - resolved_encounters (完整 Array), pending_encounters (完整 Array)
   - revealed_hidden_tags, hull_integrity_departure
   - scout_efficiency_snapshot, hull_band_snapshot, voyage_state
-- [ ] **AC-2**: GIVEN 存档时 StringName 字段（route_id, encounter_type, hazard_tag 等），WHEN 序列化为 Canonical JSON，THEN StringName → String。反序列化时 String → StringName。往返无损
+- [x] **AC-2**: GIVEN 存档时 StringName 字段（route_id, encounter_type, hazard_tag 等），WHEN 序列化为 Canonical JSON，THEN StringName → String。反序列化时 String → StringName。往返无损
 
 ### Mid-Voyage Load (IN_PROGRESS)
 
-- [ ] **AC-3**: GIVEN 存档中 voyage_state=IN_PROGRESS + elapsed_time=45s，WHEN 读档，THEN:
+- [x] **AC-3**: GIVEN 存档中 voyage_state=IN_PROGRESS + elapsed_time=45s，WHEN 读档，THEN:
   - 航行从 elapsed_time=45s 恢复计时（不是 0）
   - 进度条显示 45/T_voyage × 100%
   - 所有内部状态恢复：_resolved_encounters, _pending_encounters, _revealed_hidden_tags, _accumulated_damage, _damaged_slots
   - 已触发的遭遇检查不重复——_last_check_time 恢复正确
-- [ ] **AC-4**: GIVEN 读档恢复 + IN_PROGRESS，WHEN 后续遭遇检查触发，THEN 使用当前版本的遭遇表——不从存档中恢复旧的表定义。T_voyage 和 T_check 基于当前配置重算
+- [x] **AC-4**: GIVEN 读档恢复 + IN_PROGRESS，WHEN 后续遭遇检查触发，THEN 使用当前版本的遭遇表——不从存档中恢复旧的表定义。T_voyage 和 T_check 基于当前配置重算
 
 ### Terminal State Save & Load
 
-- [ ] **AC-5**: GIVEN voyage_state=ARRIVED + EncounterContext 已构建，WHEN 步骤 (5) 持久化，THEN progress.voyage snapshot 包含完整 encounter_context Dictionary
-- [ ] **AC-6**: GIVEN 读档时 voyage_state=ARRIVED + encounter_context 存在，WHEN Exploration 启动，THEN 直接消费存档中的 encounter_context——不重复触发 Navigation。Navigation 保持 IDLE 状态
-- [ ] **AC-7**: GIVEN 读档时 voyage_state=ARRIVED 但 #6 知识状态未更新（崩溃发生在步骤 (2) 前），WHEN 检测，THEN 重新发送 route_travel_completed 事件给 #6。re-send 幂等——不会重复推进已更新的知识状态
+- [x] **AC-5**: GIVEN voyage_state=ARRIVED + EncounterContext 已构建，WHEN 步骤 (5) 持久化，THEN progress.voyage snapshot 包含完整 encounter_context Dictionary
+- [x] **AC-6**: GIVEN 读档时 voyage_state=ARRIVED + encounter_context 存在，WHEN Exploration 启动，THEN 直接消费存档中的 encounter_context——不重复触发 Navigation。Navigation 保持 IDLE 状态
+- [x] **AC-7**: GIVEN 读档时 voyage_state=ARRIVED 但 #6 知识状态未更新（崩溃发生在步骤 (2) 前），WHEN 检测，THEN 重新发送 route_travel_completed 事件给 #6。re-send 幂等——不会重复推进已更新的知识状态
 
 ### Crash Recovery
 
-- [ ] **AC-8**: GIVEN 航行结束写入中途崩溃（步骤 (1) #8 完成，步骤 (2) #6 未完成），WHEN 读档恢复，THEN:
+- [x] **AC-8**: GIVEN 航行结束写入中途崩溃（步骤 (1) #8 完成，步骤 (2) #6 未完成），WHEN 读档恢复，THEN:
   - voyage_state=ARRIVED（来自步骤 (5) 存档的 encounter_context）
   - 检测到 #6 知识状态与 voyage_result 不一致 → 重发 route_travel_completed
   - 检测到 #8 hull_integrity 与存档中的 accumulated_damage 不一致 → #8 已写入，不重复
-- [ ] **AC-9**: GIVEN 崩溃发生在步骤 (1) 前（#8 船体伤害未写入），WHEN 读档恢复，THEN:
+- [x] **AC-9**: GIVEN 崩溃发生在步骤 (1) 前（#8 船体伤害未写入），WHEN 读档恢复，THEN:
   - voyage_state=ARRIVED（来自快照）
   - detected_damage_not_applied → 重写 apply_hull_damage(accumulated_damage) 到 #8
-- [ ] **AC-10**: GIVEN 崩溃发生在步骤 (3) 前（voyage_completed 未发射），WHEN 读档恢复，THEN:
+- [x] **AC-10**: GIVEN 崩溃发生在步骤 (3) 前（voyage_completed 未发射），WHEN 读档恢复，THEN:
   - Exploration 从存档中读取 encounter_context 直接进入 ARRIVING
   - 不依赖 Navigation 重发 voyage_completed——存档路径绕过信号
 
 ### Cross-Version Save Compatibility
 
-- [ ] **AC-11**: GIVEN 旧版本存档中包含 10 个已结算遭遇（含旧版 encounter_type），WHEN 读档，THEN 已结算遭遇保留为不可变历史——不因新版本遭遇表变更而丢失/修改
-- [ ] **AC-12**: GIVEN 旧版本存档 + mid-voyage（IN_PROGRESS）+ 仍有 3 个未触发检查，WHEN 读档恢复 + 后续检查，THEN 未触发的检查使用当前版本的遭遇表——可能抽取到新版本的遭遇条目
-- [ ] **AC-13**: GIVEN 存档中的 encounter_type 在当前版本遭遇表中不存在（已移除的旧条目），WHEN 显示已结算遭遇历史，THEN 保留原始 encounter_type 字符串——不映射到新类型。标记为 "legacy" 来源
+- [x] **AC-11**: GIVEN 旧版本存档中包含 10 个已结算遭遇（含旧版 encounter_type），WHEN 读档，THEN 已结算遭遇保留为不可变历史——不因新版本遭遇表变更而丢失/修改
+- [x] **AC-12**: GIVEN 旧版本存档 + mid-voyage（IN_PROGRESS）+ 仍有 3 个未触发检查，WHEN 读档恢复 + 后续检查，THEN 未触发的检查使用当前版本的遭遇表——可能抽取到新版本的遭遇条目
+- [x] **AC-13**: GIVEN 存档中的 encounter_type 在当前版本遭遇表中不存在（已移除的旧条目），WHEN 显示已结算遭遇历史，THEN 保留原始 encounter_type 字符串——不映射到新类型。标记为 "legacy" 来源
 
 ### Snapshot Format
 
-- [ ] **AC-14**: GIVEN progress.voyage snapshot，WHEN 序列化为 JSON，THEN 顶层字段顺序：route_id, voyage_result, elapsed_time, resolved_encounters, accumulated_damage, revealed_hidden_tags, hull_band_arrival, damaged_slots, encounter_context。缺失字段在反序列化时填充安全默认值
-- [ ] **AC-15**: GIVEN snapshot 在反序列化后，WHEN 所有 StringName 字段验证，THEN 所有 &"..." 字面量正确还原。无 String 残留
+- [x] **AC-14**: GIVEN progress.voyage snapshot，WHEN 序列化为 JSON，THEN 顶层字段顺序：route_id, voyage_result, elapsed_time, resolved_encounters, accumulated_damage, revealed_hidden_tags, hull_band_arrival, damaged_slots, encounter_context。缺失字段在反序列化时填充安全默认值
+- [x] **AC-15**: GIVEN snapshot 在反序列化后，WHEN 所有 StringName 字段验证，THEN 所有 &"..." 字面量正确还原。无 String 残留
 
 ### Snapshot Build & Write
 
-- [ ] **AC-16**: GIVEN _persist_voyage_snapshot(ctx) 调用，WHEN 执行，THEN 调用 Persistence.capture_snapshot("progress.voyage", snapshot)。不直接操作文件 I/O——通过 Persistence #3 Autoload
-- [ ] **AC-17**: GIVEN Persistence.capture_snapshot 返回失败（如存储满），WHEN 处理，THEN 记录错误日志 + 尝试降级保存（仅存 route_id + voyage_result）。不阻塞航程终态流程——玩家不应因存档失败而卡住
+- [x] **AC-16**: GIVEN _persist_voyage_snapshot(ctx) 调用，WHEN 执行，THEN 调用 Persistence.capture_snapshot("progress.voyage", snapshot)。不直接操作文件 I/O——通过 Persistence #3 Autoload
+- [x] **AC-17**: GIVEN Persistence.capture_snapshot 返回失败（如存储满），WHEN 处理，THEN 记录错误日志 + 尝试降级保存（仅存 route_id + voyage_result）。不阻塞航程终态流程——玩家不应因存档失败而卡住
 
 ---
 

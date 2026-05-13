@@ -31,7 +31,7 @@ technical preferences and control manifest.
 | [airship-hub](airship-hub/EPIC.md) | #7 | airship-hub.md | ADR-0001, ADR-0002, ADR-0003, ADR-0004 | 3 | 8 (001-008) | **Complete — reviewed 2026-05-12** |
 | [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | 8 (001-008) | **Complete — reviewed 2026-05-13** |
 | [chart-route-planning](chart-route-planning/EPIC.md) | #9 | chart-route-planning.md | ADR-0008 | 3 | 8 (001-008) | **Complete** |
-| [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | 8 (001-008) | **Complete** |
+| [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | 8 (001-008) | **Complete — reviewed 2026-05-13** |
 
 ## Feature Layer
 

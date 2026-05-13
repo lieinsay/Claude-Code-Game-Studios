@@ -28,80 +28,80 @@
 
 ### State Transition Edge Cases
 
-- [ ] **AC-1**: GIVEN FORCED_LANDING（hull≤0）与 ARRIVED（progress≥100%）同时触发，WHEN 同一帧判定，THEN FORCED_LANDING 优先。航程以 FORCED_LANDING 结束——不抵达
-- [ ] **AC-2**: GIVEN 玩家在 99.9% 进度时触发撤退，WHEN 确认，THEN → RETREATED。玩家的显式决定优先于逼近的抵达
-- [ ] **AC-3**: GIVEN 出航锁结束后立即撤退（进度 0%），WHEN 确认，THEN → RETREATED。D_accumulated=0，无遭遇结算。合法操作——不惩罚
-- [ ] **AC-4**: GIVEN 终态下 UI 继续发送操作事件，WHEN 终态守卫检查，THEN 所有操作返回 {allowed: false}。终态不可逆——拒绝所有后续操作
+- [x] **AC-1**: GIVEN FORCED_LANDING（hull≤0）与 ARRIVED（progress≥100%）同时触发，WHEN 同一帧判定，THEN FORCED_LANDING 优先。航程以 FORCED_LANDING 结束——不抵达
+- [x] **AC-2**: GIVEN 玩家在 99.9% 进度时触发撤退，WHEN 确认，THEN → RETREATED。玩家的显式决定优先于逼近的抵达
+- [x] **AC-3**: GIVEN 出航锁结束后立即撤退（进度 0%），WHEN 确认，THEN → RETREATED。D_accumulated=0，无遭遇结算。合法操作——不惩罚
+- [x] **AC-4**: GIVEN 终态下 UI 继续发送操作事件，WHEN 终态守卫检查，THEN 所有操作返回 {allowed: false}。终态不可逆——拒绝所有后续操作
 
 ### Numeric Boundary Edge Cases
 
-- [ ] **AC-5**: GIVEN hull_integrity_departure=3 + d_check=6，WHEN hull_effective，THEN = max(0, 3-6) = 0。超量 3 点伤害丢弃——不产生负值
-- [ ] **AC-6**: GIVEN hull_integrity_departure=100 + 17 次连续 max d=6 检查（总伤害 102），WHEN 第 17 次检查后，THEN hull_effective=0。FORCED_LANDING 触发。无负值产生
-- [ ] **AC-7**: GIVEN N_checks=0（T_voyage_base < T_check），WHEN 航行执行，THEN 零遭遇，正常抵达 ARRIVED。合法行为
-- [ ] **AC-8**: GIVEN 空遭遇条目集（所有标签隐藏未揭示 + 标签集为空），WHEN d_check = max(∅)，THEN = 0——显式定义。检查仍然计数为"已结算"
-- [ ] **AC-9**: GIVEN 所有命中条目的 d_entry 均为 0（如 calm_passage + storm_eye_passage），WHEN d_check，THEN = 0。非伤害效果照常应用
-- [ ] **AC-10**: GIVEN 航线零风险标签（hazard_tags=[]），WHEN 每次检查，THEN d_check=0。航程正常完成
+- [x] **AC-5**: GIVEN hull_integrity_departure=3 + d_check=6，WHEN hull_effective，THEN = max(0, 3-6) = 0。超量 3 点伤害丢弃——不产生负值
+- [x] **AC-6**: GIVEN hull_integrity_departure=100 + 17 次连续 max d=6 检查（总伤害 102），WHEN 第 17 次检查后，THEN hull_effective=0。FORCED_LANDING 触发。无负值产生
+- [x] **AC-7**: GIVEN N_checks=0（T_voyage_base < T_check），WHEN 航行执行，THEN 零遭遇，正常抵达 ARRIVED。合法行为
+- [x] **AC-8**: GIVEN 空遭遇条目集（所有标签隐藏未揭示 + 标签集为空），WHEN d_check = max(∅)，THEN = 0——显式定义。检查仍然计数为"已结算"
+- [x] **AC-9**: GIVEN 所有命中条目的 d_entry 均为 0（如 calm_passage + storm_eye_passage），WHEN d_check，THEN = 0。非伤害效果照常应用
+- [x] **AC-10**: GIVEN 航线零风险标签（hazard_tags=[]），WHEN 每次检查，THEN d_check=0。航程正常完成
 
 ### Hull Band Boundary Values
 
-- [ ] **AC-11**: GIVEN hull=76，WHEN _get_hull_band(76)，THEN → intact (≥76)
-- [ ] **AC-12**: GIVEN hull=75，WHEN _get_hull_band(75)，THEN → damaged (26-75)
-- [ ] **AC-13**: GIVEN hull=26，WHEN _get_hull_band(26)，THEN → damaged (≥26)
-- [ ] **AC-14**: GIVEN hull=25，WHEN _get_hull_band(25)，THEN → critical (1-25)
-- [ ] **AC-15**: GIVEN hull=0，WHEN _get_hull_band(0)，THEN → destroyed (≤0)
+- [x] **AC-11**: GIVEN hull=76，WHEN _get_hull_band(76)，THEN → intact (≥76)
+- [x] **AC-12**: GIVEN hull=75，WHEN _get_hull_band(75)，THEN → damaged (26-75)
+- [x] **AC-13**: GIVEN hull=26，WHEN _get_hull_band(26)，THEN → damaged (≥26)
+- [x] **AC-14**: GIVEN hull=25，WHEN _get_hull_band(25)，THEN → critical (1-25)
+- [x] **AC-15**: GIVEN hull=0，WHEN _get_hull_band(0)，THEN → destroyed (≤0)
 
 ### Dynamic Hull Band Transitions
 
-- [ ] **AC-16**: GIVEN intact→damaged 波段跨越，WHEN _check_hull_band_transition()，THEN s_hull: 1.0→0.9, Δ_hull: 0→-0.10。T_voyage 重算。进度不跳回。波段变更事件发射
-- [ ] **AC-17**: GIVEN damaged→critical 波段跨越，WHEN 处理，THEN s_hull: 0.9→0.75, Δ_hull: -0.10→-0.20。T_check: 10.8s→9.6s。已调度检查不回溯
-- [ ] **AC-18**: GIVEN 单次检查 max 伤害 6 点，WHEN 检查结算，THEN 不可能一次跨越两个波段。AC-18 验证系统约束：intact→damaged 需 -25 点，单次上限 6 点
+- [x] **AC-16**: GIVEN intact→damaged 波段跨越，WHEN _check_hull_band_transition()，THEN s_hull: 1.0→0.9, Δ_hull: 0→-0.10。T_voyage 重算。进度不跳回。波段变更事件发射
+- [x] **AC-17**: GIVEN damaged→critical 波段跨越，WHEN 处理，THEN s_hull: 0.9→0.75, Δ_hull: -0.10→-0.20。T_check: 10.8s→9.6s。已调度检查不回溯
+- [x] **AC-18**: GIVEN 单次检查 max 伤害 6 点，WHEN 检查结算，THEN 不可能一次跨越两个波段。AC-18 验证系统约束：intact→damaged 需 -25 点，单次上限 6 点
 
 ### Hidden Tag Edge Cases
 
-- [ ] **AC-19**: GIVEN 所有隐藏标签全程未被揭示（概率 0.7^N_checks），WHEN 航程结束，THEN 标签保持隐藏。N=5 时约 16.8%，N=10 时约 2.8%。这是设计意图——不是 bug
-- [ ] **AC-20**: GIVEN storm_eye_passage 触发 + 所有隐藏标签已揭示，WHEN 效果，THEN 仅对当前仍隐藏的标签生效——不重复更新
-- [ ] **AC-21**: GIVEN 注册表有标签但 #6 无该标签条目，WHEN 查询，THEN 默认 hidden=true（悲观策略）。记录警告
+- [x] **AC-19**: GIVEN 所有隐藏标签全程未被揭示（概率 0.7^N_checks），WHEN 航程结束，THEN 标签保持隐藏。N=5 时约 16.8%，N=10 时约 2.8%。这是设计意图——不是 bug
+- [x] **AC-20**: GIVEN storm_eye_passage 触发 + 所有隐藏标签已揭示，WHEN 效果，THEN 仅对当前仍隐藏的标签生效——不重复更新
+- [x] **AC-21**: GIVEN 注册表有标签但 #6 无该标签条目，WHEN 查询，THEN 默认 hidden=true（悲观策略）。记录警告
 
 ### Module State Edge Cases
 
-- [ ] **AC-22**: GIVEN lightning_proximity 击中侦察模块 + η_scout 1.0→0.6，WHEN 重算预览窗口，THEN N_preview: 2→1。超出新预览范围的图标移除。已在队列中的保留
-- [ ] **AC-23**: GIVEN 侦察槽为空（无模块安装），WHEN lightning_proximity 触发 20% 概率，THEN 跳过模块伤害检定。不崩溃
+- [x] **AC-22**: GIVEN lightning_proximity 击中侦察模块 + η_scout 1.0→0.6，WHEN 重算预览窗口，THEN N_preview: 2→1。超出新预览范围的图标移除。已在队列中的保留
+- [x] **AC-23**: GIVEN 侦察槽为空（无模块安装），WHEN lightning_proximity 触发 20% 概率，THEN 跳过模块伤害检定。不崩溃
 
 ### Encounter Effect Edge Cases
 
-- [ ] **AC-24**: GIVEN wind_shear 连续命中导致检查间隔缩短，WHEN 多次叠加，THEN T_check = max(4s, T_calculated)。硬下限 4s——防止遭遇触发过快
-- [ ] **AC-25**: GIVEN turbulence_zone 惩罚在两次检查之间，WHEN 新检查触发 + 惩罚过期，THEN 效果在新检查结算后清除。无"惩罚在结算中途过期"的模糊窗口
+- [x] **AC-24**: GIVEN wind_shear 连续命中导致检查间隔缩短，WHEN 多次叠加，THEN T_check = max(4s, T_calculated)。硬下限 4s——防止遭遇触发过快
+- [x] **AC-25**: GIVEN turbulence_zone 惩罚在两次检查之间，WHEN 新检查触发 + 惩罚过期，THEN 效果在新检查结算后清除。无"惩罚在结算中途过期"的模糊窗口
 
 ### Upstream Data Consistency
 
-- [ ] **AC-26**: GIVEN route_id 在注册表中不存在，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。原因："route_id [id] not found in content registry"
-- [ ] **AC-27**: GIVEN #9 的 hazard_tags 与 Registry 不一致，WHEN _resolve_hazard_tags()，THEN 以 Registry 为准。补入缺失标签 + 排除多余标签——均记录警告
-- [ ] **AC-28**: GIVEN #6 query_route_knowledge 超时/失败，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。不缓存过期知识
-- [ ] **AC-29**: GIVEN #9 允许出航但 #10 VOYAGE_PREPARING 结尾 can_depart() 返回 false，WHEN TOCTOU 重检，THEN → ABORTED_PREFLIGHT。不信任 #9 的预检结果
+- [x] **AC-26**: GIVEN route_id 在注册表中不存在，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。原因："route_id [id] not found in content registry"
+- [x] **AC-27**: GIVEN #9 的 hazard_tags 与 Registry 不一致，WHEN _resolve_hazard_tags()，THEN 以 Registry 为准。补入缺失标签 + 排除多余标签——均记录警告
+- [x] **AC-28**: GIVEN #6 query_route_knowledge 超时/失败，WHEN _preflight_check()，THEN → ABORTED_PREFLIGHT。不缓存过期知识
+- [x] **AC-29**: GIVEN #9 允许出航但 #10 VOYAGE_PREPARING 结尾 can_depart() 返回 false，WHEN TOCTOU 重检，THEN → ABORTED_PREFLIGHT。不信任 #9 的预检结果
 
 ### Platform & Timing Edge Cases
 
-- [ ] **AC-30**: GIVEN 桌面窗口切出 + Δt=30s（窗口暂停），WHEN 恢复，THEN elapsed_time 仅累加实际 delta——不按挂钟时间跳跃。遭遇按 elapsed_time 排队结算——不丢失
-- [ ] **AC-31**: GIVEN 浮点累积导致 elapsed_time ≈ T_voyage + 0.001s，WHEN 抵达判定，THEN ε=0.01s 容差——正确触发 ARRIVED。防止浮点误差跳过抵达
+- [x] **AC-30**: GIVEN 桌面窗口切出 + Δt=30s（窗口暂停），WHEN 恢复，THEN elapsed_time 仅累加实际 delta——不按挂钟时间跳跃。遭遇按 elapsed_time 排队结算——不丢失
+- [x] **AC-31**: GIVEN 浮点累积导致 elapsed_time ≈ T_voyage + 0.001s，WHEN 抵达判定，THEN ε=0.01s 容差——正确触发 ARRIVED。防止浮点误差跳过抵达
 
 ### Config Validation
 
-- [ ] **AC-32**: GIVEN Δ_hull 配置为 -0.80（超出范围），WHEN 启动验证，THEN clamp 到 -0.50 并记录告警。验证失败时回退到 T_base=12s, Δ_hull=0
-- [ ] **AC-33**: GIVEN T_voyage_base < T_check（配置错误或极短航线），WHEN 计算 N_checks，THEN N_checks=0。零遭遇航行。记录警告
+- [x] **AC-32**: GIVEN Δ_hull 配置为 -0.80（超出范围），WHEN 启动验证，THEN clamp 到 -0.50 并记录告警。验证失败时回退到 T_base=12s, Δ_hull=0
+- [x] **AC-33**: GIVEN T_voyage_base < T_check（配置错误或极短航线），WHEN 计算 N_checks，THEN N_checks=0。零遭遇航行。记录警告
 
 ### Re-entrancy & Duplicate Signal Guards
 
-- [ ] **AC-34**: GIVEN voyage_state=VOYAGE_PREPARING，WHEN 第二个 route_committed 到达，THEN 拒绝。记录警告。保持当前 PREPARING 状态
-- [ ] **AC-35**: GIVEN voyage_state=IN_PROGRESS，WHEN route_committed 到达，THEN 拒绝。航程不可重入
+- [x] **AC-34**: GIVEN voyage_state=VOYAGE_PREPARING，WHEN 第二个 route_committed 到达，THEN 拒绝。记录警告。保持当前 PREPARING 状态
+- [x] **AC-35**: GIVEN voyage_state=IN_PROGRESS，WHEN route_committed 到达，THEN 拒绝。航程不可重入
 
 ### Complete Passive Voyage
 
-- [ ] **AC-36**: GIVEN 玩家完全不操作（不撤退、不交互），WHEN 航程推进至 100%，THEN 终态为 ARRIVED（若 hull>0）或 FORCED_LANDING（若 hull≤0）。航程是"观察并决策"的体验——被动完成合法
+- [x] **AC-36**: GIVEN 玩家完全不操作（不撤退、不交互），WHEN 航程推进至 100%，THEN 终态为 ARRIVED（若 hull>0）或 FORCED_LANDING（若 hull≤0）。航程是"观察并决策"的体验——被动完成合法
 
 ### Multi-System Write Consistency
 
-- [ ] **AC-37**: GIVEN 航行结束 5 步写入顺序，WHEN 任一步骤失败，THEN 后续步骤仍执行。不因单一写入失败阻塞整套流程。每步失败记录错误日志
-- [ ] **AC-38**: GIVEN IN_PROGRESS → IN_PROGRESS 转换被触发（无意调用），WHEN 状态机处理，THEN 无操作——不重置计时器，不重复调度检查
+- [x] **AC-37**: GIVEN 航行结束 5 步写入顺序，WHEN 任一步骤失败，THEN 后续步骤仍执行。不因单一写入失败阻塞整套流程。每步失败记录错误日志
+- [x] **AC-38**: GIVEN IN_PROGRESS → IN_PROGRESS 转换被触发（无意调用），WHEN 状态机处理，THEN 无操作——不重置计时器，不重复调度检查
 
 ---
 
