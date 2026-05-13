@@ -1,7 +1,7 @@
 # Story 005: Extraction, Settlement & State Variant Transition
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -236,3 +236,10 @@ func _attempt_settlement_retry(settlement: Dictionary, damage_summary: Dictionar
 
 - Depends on: Story 001 (状态机), Story 002 (Pool 5 容量), Story 003 (retreat_flagged 标记), resources-goods-capacity Epic (extract_carried_to_storage, Pool 5), intel-knowledge Epic (reveal_from_exploration), persistence Epic (ADR-0003 snapshot)
 - Unlocks: Story 006 (DEPARTED 持久化边界情况)
+
+## Completion Notes
+**Completed**: 2026-05-14
+**Criteria**: 22/22 passing (AC-22 Hub 场景跳转由 playtest 验证)
+**Deviations**: B_inner 品质权重与 ADR 表格互换（存量于 Story 003，不阻塞）；FinalizeExtraction 先结算再转相（有益偏离，已注释）
+**Test Evidence**: Integration — `tests/integration/exploration/extraction-settlement/ExtractionSettlementTest.csproj` 68 PASS
+**Code Review**: Complete — APPROVED（修复 transferBatch 死代码、_retryCount 死字段、AC-10 批量原子转移断言、AC-21 delay 序列断言）

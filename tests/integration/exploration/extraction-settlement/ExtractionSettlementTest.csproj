@@ -6,10 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\CloudWeaverVoyage.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="**\extraction-settlement\**" />
-    <Compile Remove="**\persistence-recovery\**" />
+    <ProjectReference Include="..\..\..\..\CloudWeaverVoyage.csproj" />
   </ItemGroup>
 </Project>

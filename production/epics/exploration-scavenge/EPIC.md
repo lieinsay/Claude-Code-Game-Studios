@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: design/gdd/exploration-scavenge-scenario.md
 > **Architecture Module**: Autoload #11 — ExplorationManager
-> **Status**: In Progress
+> **Status**: Complete
 > **Stories**: 6 (001-006)
 
 ## Overview

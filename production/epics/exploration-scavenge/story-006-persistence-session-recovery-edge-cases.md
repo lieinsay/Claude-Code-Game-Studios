@@ -1,7 +1,7 @@
 # Story 006: Persistence, Session Recovery & Edge Cases
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -279,3 +279,10 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 
 - Depends on: Story 001–005 (all exploration stories), local-save-persistence Epic (capture_snapshot, restore_snapshot, ADR-0003), platform-session-shell Epic (window_focus_changed, user:// storage 配额), resources-goods-capacity Epic (reconcile_pool_5)
 - Unlocks: N/A — 这是探索 Epic 的最后一个 Story
+
+## Completion Notes
+**Completed**: 2026-05-14
+**Criteria**: 20/20 passing (AC-6/7 hull=0 验证为不崩溃；AC-22 Hub 跳转由 playtest 验证)
+**Deviations**: Dictionary<string, string> 序列化与 ADR-0003 Canonical JSON 原生类型有偏差（Persistence 层负责最终编码，记录为 INFO）
+**Test Evidence**: Integration — `tests/integration/exploration/persistence-recovery/PersistenceRecoveryTest.csproj` 64 PASS
+**Code Review**: APPROVED WITH SUGGESTIONS（修复 OnPageHidden/OnPageVisible 未实现、phase=DEPARTED 未拦截两个 BLOCKING）

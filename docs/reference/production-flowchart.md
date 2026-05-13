@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10 Navigation 与 #13 WorldRepair 完成；BUG-005 已修复**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11 完成；BUG-005 已修复**
 
 ---
 
@@ -38,7 +38,7 @@ gantt
     #10 航行风险  (8 Stories)    :done,    p4a, 2026-05-13, 1d
     #13 世界修复  (6 Stories)    :done,    p4b, 2026-05-13, 1d
     #15 伙伴关系  (6 Stories)    :         p4c, after p3e, 10d
-    #11 探索搜撤  (6 Stories)    :         p4d, after p4a, 12d
+    #11 探索搜撤  (6 Stories)    :done,    p4d, 2026-05-14, 1d
     #14 空港集市  (6 Stories)    :         p4e, after p4b, 10d
     #12 战斗威胁  (6 Stories)    :         p4f, after p4d, 10d
 

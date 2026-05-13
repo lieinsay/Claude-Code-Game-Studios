@@ -42,6 +42,55 @@ public enum SearchPointState
 	DangerChanged = 2,
 }
 
+/// <summary>携带物品堆（Pool 5 内容，F-11-04 损耗结算输入）。</summary>
+public sealed class CarriedStack
+{
+	/// <summary>资源 ID。</summary>
+	public string ResourceId { get; }
+	/// <summary>数量。</summary>
+	public int Quantity { get; }
+	/// <summary>是否为 Unique 物品（Q=1, MaxStack=1 的特殊物品）。</summary>
+	public bool IsUnique { get; }
+	/// <summary>最大堆叠数。</summary>
+	public int MaxStack { get; }
+
+	/// <param name="resourceId">资源 ID。</param>
+	/// <param name="quantity">数量。</param>
+	/// <param name="isUnique">是否为 Unique 物品。</param>
+	/// <param name="maxStack">最大堆叠数。</param>
+	public CarriedStack(string resourceId, int quantity, bool isUnique, int maxStack)
+	{
+		ResourceId = resourceId;
+		Quantity = quantity;
+		IsUnique = isUnique;
+		MaxStack = maxStack;
+	}
+}
+
+/// <summary>F-11-04 撤离损耗结算输出。</summary>
+public sealed class ExtractionSettlementResult
+{
+	/// <summary>已转移物品列表：(ResourceId, 保留数量, 损耗数量)。</summary>
+	public IReadOnlyList<(string ResourceId, int Quantity, int Lost)> Transferred { get; }
+	/// <summary>损耗物品列表：(ResourceId, 损耗数量)。</summary>
+	public IReadOnlyList<(string ResourceId, int Quantity)> Lost { get; }
+	/// <summary>总损耗数量。</summary>
+	public int TotalLostQty { get; }
+
+	/// <param name="transferred">已转移物品列表。</param>
+	/// <param name="lost">损耗物品列表。</param>
+	/// <param name="totalLostQty">总损耗数量。</param>
+	public ExtractionSettlementResult(
+		IReadOnlyList<(string, int, int)> transferred,
+		IReadOnlyList<(string, int)> lost,
+		int totalLostQty)
+	{
+		Transferred = transferred;
+		Lost = lost;
+		TotalLostQty = totalLostQty;
+	}
+}
+
 /// <summary>搜索产出结果。</summary>
 public sealed class SearchYieldResult
 {
@@ -108,6 +157,11 @@ public sealed class ExplorationManager
 	/// <summary>撤离读条时长（秒）。</summary>
 	public const double ExtractionDuration = 2.5;
 
+	/// <summary>正常撤离损耗系数（F-11-04）。</summary>
+	public const double LambdaSuccess = 0.08;
+	/// <summary>强制撤离损耗系数（F-11-04，retreat_flagged=true 时使用）。</summary>
+	public const double LambdaForced = 0.25;
+
 	private static readonly IReadOnlyDictionary<string, double> EmptyChanceUnlooted =
 		new Dictionary<string, double>(StringComparer.Ordinal)
 		{
@@ -164,6 +218,52 @@ public sealed class ExplorationManager
 	private Func<string, bool>? _hasRelevantIntelFn;      // #6 intel 门控
 	private Func<string, string>? _getIntelIdForPointFn;  // 情报点→情报 ID
 
+	// Story 005 — Extraction & Settlement 委托
+	/// <summary>Pool 5 获取已携带物品委托（#5 ResourcesManager）。</summary>
+	private Func<IReadOnlyList<CarriedStack>>? _getCarriedStacksFn;
+	/// <summary>批量原子转移至飞艇仓库委托（#5 ResourcesManager.extract_carried_to_storage）。</summary>
+	private Func<IReadOnlyList<CarriedStack>, bool>? _extractCarriedToStorageFn;
+	/// <summary>情报揭示委托（#6 IntelManager.reveal_from_exploration）。</summary>
+	private Action<string>? _revealIntelFn;
+	/// <summary>结算快照写入委托（#3 Persistence）。</summary>
+	private Func<ExtractionSettlementResult, bool>? _triggerSettlementSnapshotFn;
+	/// <summary>重试调度委托（秒 + 回调）。</summary>
+	private Action<double, Action>? _scheduleRetryCallbackFn;
+	/// <summary>显示结算失败 UI 委托。</summary>
+	private Action? _emitSettlementFailedUiFn;
+
+	// 环境威胁活跃状态（HandleTriggeredThreat 中 Environmental 分支设置）
+	private bool _envThreatActive;
+
+	// MVP：注册的搜索点总数（由场景层/测试注入，默认 6）
+	private int _registeredSearchPointCount = 6;
+
+	// EC-11-03 重试相关
+	private static readonly double[] RetryDelays = [1.0, 2.0, 4.0, 8.0];
+	private ExtractionSettlementResult? _pendingSettlement;
+
+	// Story 006 — 持久化快照与会话恢复
+	/// <summary>上次存储配额警告时间戳（秒）。用于 30s 防抖。</summary>
+	private double _lastSnapshotWarningTime = double.NegativeInfinity;
+	/// <summary>配额警告冷却时长（秒）。</summary>
+	private const double QuotaWarningCooldown = 30.0;
+
+	// 页面可见性中断标志（由 Platform #2 通过 OnPageHidden/OnPageVisible 控制）
+	private bool _markArrivingInterrupted;
+	private bool _markExtractionInterrupted;
+
+	// 依赖注入委托（Story 006）
+	/// <summary>当前挂钟时间（秒）。供快照防抖使用；默认 Environment.TickCount64。</summary>
+	private Func<double>? _wallClockFn;
+	/// <summary>Pool 5 一致性修复委托（EC-11-09）。</summary>
+	private Action? _poolReconcileFn;
+	/// <summary>触发通用探索快照写入委托（#3 Persistence，搜索成功/撤离触发时调用）。</summary>
+	private Func<bool>? _captureSnapshotFn;
+	/// <summary>获取 Pool 5 实际已占用槽数委托（#5 ResourcesManager）。</summary>
+	private Func<int>? _getPoolActualOccupiedFn;
+	/// <summary>获取 Pool 5 追踪已占用槽数委托（#5 ResourcesManager）。</summary>
+	private Func<int>? _getPoolTrackedOccupiedFn;
+
 	// loot_pool 注入：searchPointId → tier → [(resourceId, quantity_min, quantity_max)]
 	private Dictionary<string, Dictionary<string, List<(string ResourceId, int QMin, int QMax)>>>
 		_lootPools = new(StringComparer.Ordinal);
@@ -195,6 +295,9 @@ public sealed class ExplorationManager
 
 	/// <summary>容量警告，参数为 (poolId, usedSlots)。</summary>
 	public event Action<int, int>? CapacityWarning;
+
+	/// <summary>撤离结算完成，参数为 (transferredCount, intelCount)。</summary>
+	public event Action<int, int>? ExtractionCompleted;
 
 	// ── 属性 ─────────────────────────────────────────────────────────
 	/// <summary>当前会话阶段。</summary>
@@ -233,6 +336,48 @@ public sealed class ExplorationManager
 	public void SetLootPools(Dictionary<string, Dictionary<string, List<(string, int, int)>>> pools) =>
 		_lootPools = pools;
 
+	/// <summary>注入 Pool 5 获取已携带物品委托（#5 ResourcesManager）。</summary>
+	public void SetGetCarriedStacksDelegate(Func<IReadOnlyList<CarriedStack>> fn) =>
+		_getCarriedStacksFn = fn;
+
+	/// <summary>注入批量原子转移至飞艇仓库委托（#5 ResourcesManager.extract_carried_to_storage）。</summary>
+	public void SetExtractCarriedToStorageDelegate(Func<IReadOnlyList<CarriedStack>, bool> fn) =>
+		_extractCarriedToStorageFn = fn;
+
+	/// <summary>注入情报揭示委托（#6 IntelManager.reveal_from_exploration）。</summary>
+	public void SetRevealIntelDelegate(Action<string> fn) => _revealIntelFn = fn;
+
+	/// <summary>注入结算快照写入委托（#3 Persistence）。</summary>
+	public void SetTriggerSettlementSnapshotDelegate(Func<ExtractionSettlementResult, bool> fn) =>
+		_triggerSettlementSnapshotFn = fn;
+
+	/// <summary>注入重试调度委托（定时回调：秒 + 回调函数）。</summary>
+	public void SetScheduleRetryCallbackDelegate(Action<double, Action> fn) =>
+		_scheduleRetryCallbackFn = fn;
+
+	/// <summary>注入显示结算失败 UI 委托。</summary>
+	public void SetEmitSettlementFailedUiDelegate(Action fn) =>
+		_emitSettlementFailedUiFn = fn;
+
+	/// <summary>注入当前探索点注册的搜索点总数（场景层/测试调用，MVP 默认 6）。</summary>
+	public void SetRegisteredSearchPointCount(int count) =>
+		_registeredSearchPointCount = count;
+
+	/// <summary>注入挂钟时间委托（返回秒；供快照防抖使用）。</summary>
+	public void SetWallClockDelegate(Func<double> fn) => _wallClockFn = fn;
+
+	/// <summary>注入 Pool 5 一致性修复委托（EC-11-09，#5 ResourcesManager）。</summary>
+	public void SetPoolReconcileDelegate(Action fn) => _poolReconcileFn = fn;
+
+	/// <summary>注入通用探索快照写入委托（#3 Persistence，搜索成功与撤离触发时调用）。</summary>
+	public void SetCaptureSnapshotDelegate(Func<bool> fn) => _captureSnapshotFn = fn;
+
+	/// <summary>注入 Pool 5 实际占用槽数获取委托（#5 ResourcesManager）。</summary>
+	public void SetGetPoolActualOccupiedDelegate(Func<int> fn) => _getPoolActualOccupiedFn = fn;
+
+	/// <summary>注入 Pool 5 追踪占用槽数获取委托（#5 ResourcesManager）。</summary>
+	public void SetGetPoolTrackedOccupiedDelegate(Func<int> fn) => _getPoolTrackedOccupiedFn = fn;
+
 	// ── Story 001 — 状态机 ────────────────────────────────────────────
 
 	/// <summary>
@@ -268,6 +413,7 @@ public sealed class ExplorationManager
 		_extractionElapsed = 0;
 		_extractionActive = true;
 		ExtractionStarted?.Invoke("player_initiated");
+		TriggerSnapshot();
 		return true;
 	}
 
@@ -283,6 +429,7 @@ public sealed class ExplorationManager
 		_extractionElapsed = 0;
 		_extractionActive = true;
 		ExtractionStarted?.Invoke(reason);
+		TriggerSnapshot();
 		return true;
 	}
 
@@ -423,6 +570,7 @@ public sealed class ExplorationManager
 
 		_searchedPoints.Add(spId);
 		SearchPerformed?.Invoke(spId, result);
+		TriggerSnapshot();
 		return result;
 	}
 
@@ -552,6 +700,14 @@ public sealed class ExplorationManager
 	/// <summary>威胁清除时发出，参数为 threatId。</summary>
 	public event Action<string>? ThreatCleared;
 
+	// Story 006 事件
+	/// <summary>存储配额不足时发出（30s 防抖）。场景层订阅并显示非阻塞 HUD 警告。</summary>
+	public event Action? QuotaWarningEmitted;
+	/// <summary>会话从快照恢复至 EXPLORING 时发出。场景层订阅并显示"你在探索中中断了"提示。</summary>
+	public event Action? SessionRestoredNotice;
+	/// <summary>会话从 EXTRACTING 快照恢复至 EXPLORING 时发出。场景层将玩家放置在撤离锚点旁。</summary>
+	public event Action? ExtractionInterruptedOnRestore;
+
 	/// <summary>注入 #8 船体伤害写入委托（探索中环境威胁造成伤害）。</summary>
 	public void SetApplyExplorationHullDamageDelegate(Action<int> fn) =>
 		_applyExplorationHullDamageFn = fn;
@@ -652,6 +808,7 @@ public sealed class ExplorationManager
 		if (tp.Category == ThreatCategory.Environmental)
 		{
 			// 环境威胁：自行处理（施加伤害或封锁路径）
+			_envThreatActive = true;
 			try { _applyExplorationHullDamageFn?.Invoke(2); } // MVP 固定 2 点
 			catch { /* 不崩溃 */ }
 		}
@@ -802,6 +959,309 @@ public sealed class ExplorationManager
 
 	private void LogInternalError(string message) => _internalErrorLog.Add(message);
 
+	// ── Story 005 — Extraction Loss Settlement & State Variant Transition ──
+
+	/// <summary>
+	/// F-11-04 计算单堆物品损耗量。
+	/// qty≤1 或 lambda≤0 时损耗为 0；结果取 min(qty-1, ceil(qty×λ))。
+	/// </summary>
+	/// <param name="qty">物品数量。</param>
+	/// <param name="lambda">损耗系数。</param>
+	/// <returns>损耗数量。</returns>
+	public static int ComputeLoss(int qty, double lambda)
+	{
+		if (qty <= 1) return 0;
+		if (lambda <= 0.0) return 0;
+		int raw = (int)Math.Ceiling(qty * lambda);
+		return Math.Min(qty - 1, Math.Max(0, raw));
+	}
+
+	/// <summary>
+	/// F-11-04 撤离损耗结算。
+	/// Unique 物品（IsUnique=true AND MaxStack=1）永不损耗；每堆至少保留 1（qty≤1 则不损）。
+	/// retreat_flagged=true 使用 λ_forced=0.25，否则 λ_success=0.08。
+	/// </summary>
+	/// <param name="carriedStacks">携带物品堆列表。</param>
+	/// <param name="retreatFlagged">是否为强制撤退。</param>
+	/// <returns>损耗结算结果。</returns>
+	public ExtractionSettlementResult ExtractionLossSettlement(
+		IReadOnlyList<CarriedStack> carriedStacks, bool retreatFlagged)
+	{
+		var transferred = new List<(string, int, int)>();
+		var lost = new List<(string, int)>();
+		int totalLost = 0;
+
+		foreach (var stack in carriedStacks)
+		{
+			if (stack.IsUnique && stack.MaxStack == 1)
+			{
+				// Unique 物品：永不损耗，全量转移
+				transferred.Add((stack.ResourceId, stack.Quantity, 0));
+				continue;
+			}
+
+			double lambda = retreatFlagged ? LambdaForced : LambdaSuccess;
+			int lossQty = ComputeLoss(stack.Quantity, lambda);
+			int retainedQty = stack.Quantity - lossQty;
+
+			if (lossQty > 0)
+			{
+				lost.Add((stack.ResourceId, lossQty));
+				totalLost += lossQty;
+			}
+			transferred.Add((stack.ResourceId, retainedQty, lossQty));
+		}
+
+		return new ExtractionSettlementResult(transferred, lost, totalLost);
+	}
+
+	/// <summary>
+	/// F-11-05 状态变体转换（8 种规则，env_threat_active 优先）。
+	/// </summary>
+	/// <param name="currentState">当前搜索点状态。</param>
+	/// <param name="allSearched">是否所有搜索点已消耗。</param>
+	/// <param name="envThreatActive">环境威胁是否活跃。</param>
+	/// <returns>转换后的搜索点状态。</returns>
+	public static SearchPointState StateVariantTransition(
+		SearchPointState currentState, bool allSearched, bool envThreatActive)
+	{
+		// 环境威胁活跃时优先 → DangerChanged
+		if (envThreatActive) return SearchPointState.DangerChanged;
+
+		return currentState switch
+		{
+			SearchPointState.Unlooted => allSearched
+				? SearchPointState.Looted
+				: SearchPointState.Unlooted,
+			SearchPointState.Looted => SearchPointState.Looted,
+			SearchPointState.DangerChanged => allSearched
+				? SearchPointState.Looted
+				: SearchPointState.Unlooted,
+			_ => currentState,
+		};
+	}
+
+	// ── Story 006 — 持久化快照、会话恢复与 Pool 一致性 ────────────────
+
+	/// <summary>
+	/// 触发通用探索快照（搜索成功路径与撤离触发时调用）。
+	/// 内部调用 _captureSnapshotFn；失败时经 HandleSnapshotFailure 处理（30s 防抖配额警告）。
+	/// </summary>
+	private void TriggerSnapshot()
+	{
+		if (_captureSnapshotFn == null) return;
+		bool ok = _captureSnapshotFn.Invoke();
+		if (!ok)
+			HandleSnapshotFailure();
+	}
+
+	/// <summary>
+	/// 快照写入失败处理（AC-14/15）。
+	/// 30s 防抖：两次失败间隔不足 30s 时不重复发射 QuotaWarningEmitted。
+	/// </summary>
+	private void HandleSnapshotFailure()
+	{
+		double now = _wallClockFn?.Invoke() ?? (Environment.TickCount64 / 1000.0);
+		if (now - _lastSnapshotWarningTime >= QuotaWarningCooldown)
+		{
+			_lastSnapshotWarningTime = now;
+			QuotaWarningEmitted?.Invoke();
+		}
+	}
+
+	/// <summary>
+	/// EC-11-09 Pool 5 一致性修复。
+	/// 无参数——直接读 _getPoolActualOccupiedFn 与 _getPoolTrackedOccupiedFn 委托获取值；
+	/// 若不一致则调用 _poolReconcileFn。
+	/// </summary>
+	public void ReconcilePool5()
+	{
+		if (_getPoolActualOccupiedFn == null || _getPoolTrackedOccupiedFn == null) return;
+		int actual = _getPoolActualOccupiedFn.Invoke();
+		int tracked = _getPoolTrackedOccupiedFn.Invoke();
+		if (actual != tracked)
+			_poolReconcileFn?.Invoke();
+	}
+
+	/// <summary>
+	/// 序列化当前探索会话状态（供 #3 Persistence 写入快照）。
+	/// 返回 key→value 字典，所有集合均为逗号分隔字符串。
+	/// </summary>
+	/// <returns>状态字典（空阶段时返回 null）。</returns>
+	public Dictionary<string, string>? SerializeExploration()
+	{
+		if (_phase == ExplorationPhase.Idle) return null;
+
+		var d = new Dictionary<string, string>(StringComparer.Ordinal)
+		{
+			["phase"] = _phase.ToString(),
+			["substate"] = _substate.ToString(),
+			["current_point_id"] = _currentPointId,
+			["extraction_elapsed"] = _extractionElapsed.ToString("R"),
+			["extraction_active"] = _extractionActive.ToString(),
+			["retreat_flagged"] = _retreatFlagged.ToString(),
+			["env_threat_active"] = _envThreatActive.ToString(),
+			["arrival_mode"] = _arrivalMode,
+			["searched_points"] = string.Join(",", _searchedPoints),
+			["interacted_intel_points"] = string.Join(",", _interactedIntelPoints),
+			["mark_arriving_interrupted"] = _markArrivingInterrupted.ToString(),
+			["mark_extraction_interrupted"] = _markExtractionInterrupted.ToString(),
+		};
+
+		// 搜索点状态变体
+		var spStateEntries = _searchPointStates
+			.Select(kv => $"{kv.Key}:{(int)kv.Value}");
+		d["search_point_states"] = string.Join(";", spStateEntries);
+
+		return d;
+	}
+
+	/// <summary>
+	/// 从快照字典恢复探索会话（供 #3 Persistence 在崩溃恢复时调用）。
+	/// 先清除现有状态再写入，最后发射相应恢复信号。
+	/// </summary>
+	/// <param name="data">SerializeExploration 输出的字典。</param>
+	/// <returns>是否恢复成功。</returns>
+	public bool DeserializeExploration(IReadOnlyDictionary<string, string> data)
+	{
+		if (data == null || !data.TryGetValue("phase", out var phaseStr)) return false;
+		if (!Enum.TryParse<ExplorationPhase>(phaseStr, out var phase)) return false;
+		// AC-20: DEPARTED 不应持久化为活跃会话——忽略并记录 warning
+		if (phase == ExplorationPhase.Departed)
+		{
+			LogInternalError("Exploration: cannot restore DEPARTED phase — ignoring active session");
+			return false;
+		}
+
+		// 清除当前会话状态
+		_searchPointStates.Clear();
+		_searchedPoints.Clear();
+		_interactedIntelPoints.Clear();
+		_sessionThreatPoints.Clear();
+		_pendingSettlement = null;
+		_extractionElapsed = 0;
+		_extractionActive = false;
+		_retreatFlagged = false;
+		_envThreatActive = false;
+		_markArrivingInterrupted = false;
+		_markExtractionInterrupted = false;
+
+		// 恢复基本字段
+		_currentPointId = data.TryGetValue("current_point_id", out var pid) ? pid : "";
+		_arrivalMode = data.TryGetValue("arrival_mode", out var am) ? am : "";
+
+		if (data.TryGetValue("retreat_flagged", out var rf))
+			_retreatFlagged = bool.TryParse(rf, out var rfBool) && rfBool;
+
+		if (data.TryGetValue("env_threat_active", out var eta))
+			_envThreatActive = bool.TryParse(eta, out var etaBool) && etaBool;
+
+		if (data.TryGetValue("mark_arriving_interrupted", out var mai))
+			_markArrivingInterrupted = bool.TryParse(mai, out var maiBool) && maiBool;
+
+		if (data.TryGetValue("mark_extraction_interrupted", out var mei))
+			_markExtractionInterrupted = bool.TryParse(mei, out var meiBool) && meiBool;
+
+		// 恢复搜索过的点集合
+		if (data.TryGetValue("searched_points", out var sp) && !string.IsNullOrEmpty(sp))
+		{
+			foreach (var s in sp.Split(',', StringSplitOptions.RemoveEmptyEntries))
+				_searchedPoints.Add(s);
+		}
+
+		// 恢复已交互情报点集合
+		if (data.TryGetValue("interacted_intel_points", out var iip) && !string.IsNullOrEmpty(iip))
+		{
+			foreach (var s in iip.Split(',', StringSplitOptions.RemoveEmptyEntries))
+				_interactedIntelPoints.Add(s);
+		}
+
+		// 恢复搜索点状态变体
+		if (data.TryGetValue("search_point_states", out var sps) && !string.IsNullOrEmpty(sps))
+		{
+			foreach (var entry in sps.Split(';', StringSplitOptions.RemoveEmptyEntries))
+			{
+				var parts = entry.Split(':');
+				if (parts.Length == 2 && int.TryParse(parts[1], out var stateVal))
+					_searchPointStates[parts[0]] = (SearchPointState)stateVal;
+			}
+		}
+
+		// 判断恢复阶段：EXTRACTING → 回到 EXPLORING（会话曾在撤离中断，放置玩家在撤离锚点旁）
+		bool wasExtracting = phase == ExplorationPhase.Extracting;
+		ExplorationPhase restorePhase = wasExtracting ? ExplorationPhase.Exploring : phase;
+
+		// 直接设置阶段（绕过 TransitionPhase 以恢复任意合法阶段），再发射信号
+		var prevPhase = _phase;
+		_phase = restorePhase;
+		if (restorePhase == ExplorationPhase.Exploring)
+			_substate = ExplorationSubstate.Idle;
+
+		ExplorationPhaseChanged?.Invoke(prevPhase, _phase, _currentPointId);
+
+		// 发射恢复提示信号
+		if (restorePhase == ExplorationPhase.Exploring)
+		{
+			SessionRestoredNotice?.Invoke();
+			if (wasExtracting)
+				ExtractionInterruptedOnRestore?.Invoke();
+		}
+
+		// EC-11-09：恢复后立即做 Pool 5 一致性检查
+		ReconcilePool5();
+
+		return true;
+	}
+
+	/// <summary>
+	/// 恢复活跃探索会话（崩溃后的入口点）。
+	/// 直接设置 _phase = Exploring 并发射 ExplorationPhaseChanged（Idle → Exploring）。
+	/// </summary>
+	/// <param name="destinationId">恢复会话的目的地探索点 ID。</param>
+	public void RestoreActiveSession(string destinationId)
+	{
+		_currentPointId = destinationId;
+		var prev = _phase;
+		_phase = ExplorationPhase.Exploring;
+		_substate = ExplorationSubstate.Idle;
+		ExplorationPhaseChanged?.Invoke(prev, ExplorationPhase.Exploring, _currentPointId);
+		SessionRestoredNotice?.Invoke();
+	}
+
+	/// <summary>
+	/// 页面隐藏/窗口失焦时由 Platform #2 调用（EC-11-20）。
+	/// ARRIVING 时标记中断；EXTRACTING 时标记读条需要中断。
+	/// </summary>
+	public void OnPageHidden()
+	{
+		if (_phase == ExplorationPhase.Arriving)
+			_markArrivingInterrupted = true;
+		else if (_phase == ExplorationPhase.Extracting)
+			_markExtractionInterrupted = true;
+	}
+
+	/// <summary>
+	/// 页面恢复可见/窗口获得焦点时由 Platform #2 调用（EC-11-20）。
+	/// ARRIVING 中断 → 自动跳过至 EXPLORING；EXTRACTING 中断 → 读条中止并回 EXPLORING。
+	/// </summary>
+	public void OnPageVisible()
+	{
+		if (_markArrivingInterrupted && _phase == ExplorationPhase.Arriving)
+		{
+			_markArrivingInterrupted = false;
+			SkipArriving();
+		}
+		else if (_markExtractionInterrupted && _phase == ExplorationPhase.Extracting)
+		{
+			_markExtractionInterrupted = false;
+			InterruptExtraction("page_visibility");
+		}
+		else if (_phase == ExplorationPhase.Exploring)
+		{
+			SetSubstate(ExplorationSubstate.Idle);
+		}
+	}
+
 	// ── 私有辅助 ──────────────────────────────────────────────────────
 
 	private bool TransitionPhase(ExplorationPhase target)
@@ -834,8 +1294,90 @@ public sealed class ExplorationManager
 
 	private void FinalizeExtraction()
 	{
+		// (1) 损耗结算 + 批量转移
+		var carried = _getCarriedStacksFn?.Invoke()
+			?? Array.Empty<CarriedStack>();
+		var settlement = ExtractionLossSettlement(carried, _retreatFlagged);
+
+		bool transferOk = _extractCarriedToStorageFn?.Invoke(
+			settlement.Transferred
+				.Select(t => new CarriedStack(t.ResourceId, t.Quantity, false, 99))
+				.ToList()) ?? true;
+
+		// (2) 情报结算：intelPointId → intelId 转换后揭示
+		foreach (var intelPointId in _interactedIntelPoints)
+		{
+			string intelId = _getIntelIdForPointFn?.Invoke(intelPointId) ?? intelPointId;
+			_revealIntelFn?.Invoke(intelId);
+		}
+
+		// (3) 状态变体转换（_envThreatActive 已在 Story 003 逻辑中追踪）
+		bool allSearched = AllSearchPointsConsumed();
+		var newVariant = StateVariantTransition(
+			_searchPointStates.TryGetValue(_currentPointId, out var sv) ? sv : SearchPointState.Unlooted,
+			allSearched,
+			_envThreatActive);
+		_searchPointStates[_currentPointId] = newVariant;
+
+		// (4) 阶段 → DEPARTED
 		TransitionPhase(ExplorationPhase.Departed);
+
+		// (5) 持久化快照
+		bool snapshotOk = transferOk && (_triggerSettlementSnapshotFn?.Invoke(settlement) ?? true);
+
+		if (!snapshotOk)
+		{
+			// EC-11-03 重试
+			AttemptSettlementRetry(settlement, 0);
+			return;
+		}
+
+		// (6) 发射 extraction_completed
+		ExtractionCompleted?.Invoke(settlement.Transferred.Count, _interactedIntelPoints.Count);
 	}
+
+	private void AttemptSettlementRetry(ExtractionSettlementResult settlement, int attempt)
+	{
+		if (attempt >= RetryDelays.Length)
+		{
+			_pendingSettlement = settlement;
+			_emitSettlementFailedUiFn?.Invoke();
+			return;
+		}
+		_pendingSettlement = settlement;
+		_scheduleRetryCallbackFn?.Invoke(RetryDelays[attempt], () =>
+		{
+			bool ok = _triggerSettlementSnapshotFn?.Invoke(_pendingSettlement ?? settlement) ?? true;
+			if (!ok)
+			{
+				AttemptSettlementRetry(settlement, attempt + 1);
+			}
+			else
+			{
+				_pendingSettlement = null;
+				ExtractionCompleted?.Invoke(settlement.Transferred.Count, _interactedIntelPoints.Count);
+			}
+		});
+	}
+
+	/// <summary>手动重试结算（结算失败 UI 点击"重试"按钮后调用）。</summary>
+	/// <returns>重试是否成功；无待处理结算时返回 false。</returns>
+	public bool RetrySettlement()
+	{
+		if (_pendingSettlement == null) return false;
+		bool ok = _triggerSettlementSnapshotFn?.Invoke(_pendingSettlement) ?? true;
+		if (ok)
+		{
+			var s = _pendingSettlement;
+			_pendingSettlement = null;
+			ExtractionCompleted?.Invoke(s.Transferred.Count, _interactedIntelPoints.Count);
+		}
+		return ok;
+	}
+
+	/// <summary>判断本次会话所有注册的搜索点是否已全部消耗。</summary>
+	private bool AllSearchPointsConsumed() =>
+		_registeredSearchPointCount > 0 && _searchedPoints.Count >= _registeredSearchPointCount;
 
 	private void ClearSessionState()
 	{
@@ -843,8 +1385,11 @@ public sealed class ExplorationManager
 		_substate = ExplorationSubstate.Idle;
 		_extractionElapsed = 0;
 		_extractionActive = false;
+		_retreatFlagged = false;
+		_envThreatActive = false;
 		_searchedPoints.Clear();
 		_interactedIntelPoints.Clear();
+		_pendingSettlement = null;
 	}
 
 	private double Roll() => _randomFn?.Invoke() ?? Random.Shared.NextDouble();

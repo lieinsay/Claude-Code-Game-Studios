@@ -37,7 +37,7 @@ technical preferences and control manifest.
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| exploration-scavenge | #11 | exploration-scavenge-scenario.md | ADR-0013 | 3 | 6 (001-006) | In Progress |
+| exploration-scavenge | #11 | exploration-scavenge-scenario.md | ADR-0013 | 3 | 6 (001-006) | **Complete** |
 | combat-threat | #12 | combat-threat-handling.md | ADR-0018 | 3 | 6 (001-006) | In Progress |
 | world-repair | #13 | world-repair-unlock.md | ADR-0011 | 3 | 6 (001-006) | **Complete** |
 | [settlement-market](settlement-market/EPIC.md) | #14 | port-village-market.md | ADR-0014 | 3 | 6 (001-006) | In Progress |

@@ -3,8 +3,26 @@
 <!-- STATUS -->
 Epic: Feature Layer
 Feature: Exploration / Scavenge (#11)
-Task: Story 001-004 完成（52+35+31+37 PASS）；Story 005~006 Integration 待实现
+Task: Story 005+006 Complete（68+64 PASS）；Epic #11 全部完成
 <!-- /STATUS -->
+
+## Session Extract — /story-done 2026-05-14 (Story 006)
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/exploration-scavenge/story-006-persistence-session-recovery-edge-cases.md` — Story 006: Persistence, Session Recovery & Edge Cases
+- Criteria: 20/20 passing
+- Test evidence: `tests/integration/exploration/persistence-recovery/PersistenceRecoveryTest.csproj` 64 PASS
+- Code review: APPROVED WITH SUGGESTIONS（修复 OnPageHidden/OnPageVisible 未实现 + phase=DEPARTED 未拦截两个 BLOCKING）
+- Tech debt logged: Dictionary<string, string> 序列化与 ADR-0003 Canonical JSON 偏差（INFO 级，Persistence 层负责最终编码）
+- Next recommended: Epic #11 探索搜撤全部完成；更新 reference 文档并推送
+
+## Session Extract — /story-done 2026-05-14 (Story 005)
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/exploration-scavenge/story-005-extraction-settlement-state-variant.md` — Story 005: Extraction, Settlement & State Variant Transition
+- Criteria: 22/22 passing; AC-22 Hub 跳转由 playtest 验证
+- Test evidence: `tests/integration/exploration/extraction-settlement/ExtractionSettlementTest.csproj` 68 PASS
+- Code review: APPROVED（修复 transferBatch 死代码、_retryCount 死字段、AC-10 原子断言、AC-21 delay 序列）
+- Tech debt logged: None（B_inner 权重偏差为存量问题）
+- Next recommended: `production/epics/exploration-scavenge/story-006-persistence-session-recovery-edge-cases.md`
 
 ## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13
 
