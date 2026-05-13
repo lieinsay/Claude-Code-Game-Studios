@@ -13,6 +13,8 @@ Run("AC-5: RecoveryRequired exposes retry new session return title", Ac5Recovery
 Run("AC-6: shell UI states are keyboard navigable", Ac6KeyboardNavigation);
 Run("AC-7: loading screen includes phase and progress", Ac7LoadingProgress);
 Run("Scene: Godot Control scene covers presenter panels and action nodes", SceneContractMatchesPresenter);
+Run("Regression: scene default does not strand visible runtime on loading panel", SceneDefaultAvoidsLoadingStrand);
+Run("Regression: visible runtime scene has runtime script and button handlers", RuntimeSceneHasScriptAndButtonHandlers);
 
 if (failed > 0)
 {
@@ -201,9 +203,70 @@ static bool SceneContractMatchesPresenter()
 	return true;
 }
 
+static bool SceneDefaultAvoidsLoadingStrand()
+{
+	var repoRoot = FindRepoRoot();
+	var scenePath = Path.Combine(repoRoot, "src", "scenes", "ShellUi.tscn");
+	var scene = File.ReadAllText(scenePath);
+	var loadingBlock = GetNodeBlock(scene, "LoadingPanel");
+	var entryBlock = GetNodeBlock(scene, "EntryPanel");
+	var startBlock = GetNodeBlock(scene, "StartButton");
+	var continueBlock = GetNodeBlock(scene, "ContinueButton");
+	var lockedBlock = GetNodeBlock(scene, "ContinueLockedButton");
+	var lockReasonBlock = GetNodeBlock(scene, "ContinueLockReasonLabel");
+
+	return loadingBlock.Contains("visible = false", StringComparison.Ordinal)
+		&& !entryBlock.Contains("visible = false", StringComparison.Ordinal)
+		&& !startBlock.Contains("visible = false", StringComparison.Ordinal)
+		&& continueBlock.Contains("visible = false", StringComparison.Ordinal)
+		&& lockedBlock.Contains("visible = false", StringComparison.Ordinal)
+		&& lockReasonBlock.Contains("visible = false", StringComparison.Ordinal);
+}
+
+static bool RuntimeSceneHasScriptAndButtonHandlers()
+{
+	var repoRoot = FindRepoRoot();
+	var sessionShellPath = Path.Combine(repoRoot, "src", "scenes", "SessionShell.tscn");
+	var sessionShell = File.ReadAllText(sessionShellPath);
+
+	return sessionShell.Contains("path=\"res://src/scenes/SessionShellRuntime.gd\"", StringComparison.Ordinal)
+		&& sessionShell.Contains("script = ExtResource(\"3_session_runtime\")", StringComparison.Ordinal)
+		&& RuntimeScriptWiresButtons(repoRoot);
+}
+
+static bool RuntimeScriptWiresButtons(string repoRoot)
+{
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "SessionShellRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("_wire_button(\"StartButton\", _on_start_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"SettingsButton\", _on_settings_pressed)", StringComparison.Ordinal)
+		&& script.Contains("button.mouse_entered.connect(_on_button_mouse_entered.bind(button))", StringComparison.Ordinal)
+		&& script.Contains("button.grab_focus()", StringComparison.Ordinal)
+		&& script.Contains("KEY_M", StringComparison.Ordinal)
+		&& script.Contains("KEY_R", StringComparison.Ordinal)
+		&& script.Contains("KEY_N", StringComparison.Ordinal)
+		&& script.Contains("KEY_D", StringComparison.Ordinal)
+		&& script.Contains("_show_only(_audio_panel)", StringComparison.Ordinal)
+		&& script.Contains("Audio accepted. Gameplay scene wiring is not mounted yet.", StringComparison.Ordinal);
+}
+
 static bool HasNode(string scene, string nodeName, string nodeType)
 {
 	return scene.Contains($"[node name=\"{nodeName}\" type=\"{nodeType}\"", StringComparison.Ordinal);
+}
+
+static string GetNodeBlock(string scene, string nodeName)
+{
+	var marker = $"[node name=\"{nodeName}\"";
+	var start = scene.IndexOf(marker, StringComparison.Ordinal);
+	if (start < 0)
+	{
+		return string.Empty;
+	}
+
+	var next = scene.IndexOf("\n[node ", start + marker.Length, StringComparison.Ordinal);
+	return next < 0 ? scene[start..] : scene[start..next];
 }
 
 static string FindRepoRoot()

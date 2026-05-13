@@ -1,16 +1,18 @@
 # Story 008: Signal Contract & Reentry Guard
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
+> **Estimate**: M
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/resources-goods-capacity.md`
-**Requirement**: `TR-resources-008`
+**Requirement**: `TR-resources-001`
+**GDD Acceptance Criteria**: `AC-RES-012.1` through `AC-RES-012.12` (resource signal contract, emit-after-mutation, and reentry guard)
 
 **ADR Governing Implementation**: ADR-0005 (7 typed signals), ADR-0002 (Signal Communication Protocol)
 **ADR Decision Summary**: 7 个 typed signal（pool_changed、resource_added、resource_removed、transfer_completed、cargo_unpacked、deposit_committed、mass_changed）+ 1 个 pairing failed signal（deposit_failed）。所有信号在状态变更完成后触发（emit-after-mutation），不在操作中途触发。信号处理器不得在回调中调用变更方法——返回 `ERR_BUSY`；可安全调用查询方法。Godot 4.6 信号默认同步派发（`emit()` 立即执行回调后返回）。pool_changed 在所有其他操作信号之后 emit（聚合通知）。信号参数使用 typed params（禁止 Dictionary payload）。
@@ -29,39 +31,39 @@
 
 ### Signal Emission on Success
 
-- [ ] **AC-1**: GIVEN `add(in_storage, basic_id, 5)` 成功，WHEN 信号触发，THEN `resource_added(in_storage, basic_id, 5)` 和 `pool_changed(in_storage)` 各触发 1 次
-- [ ] **AC-2**: GIVEN `remove(in_storage, basic_id, 3)` 成功，WHEN 信号触发，THEN `resource_removed(in_storage, basic_id, 3)` 和 `pool_changed(in_storage)` 各触发 1 次
-- [ ] **AC-3**: GIVEN `transfer(in_storage, on_person, basic_id, 5)` 成功，WHEN 信号触发，THEN `transfer_completed(in_storage, on_person, basic_id, 5)` + `pool_changed(in_storage)` + `pool_changed(on_person)`
-- [ ] **AC-4**: GIVEN `unpack_cargo(cargo_slot)` 成功（cargo_id="cargo.iron", linked="resource.iron", Q=30），WHEN 信号触发，THEN `cargo_unpacked("cargo.iron", "resource.iron", 30)` + `pool_changed(loaded)` + `pool_changed(in_storage)`
-- [ ] **AC-5**: GIVEN `commit_deposit(repair_node_id, costs)` 成功，WHEN 信号触发，THEN `deposit_committed(repair_node_id)` 触发
-- [ ] **AC-6**: GIVEN 货舱 `add(loaded, heavy_cargo, 1)` 成功（weight=6），WHEN 信号触发，THEN `mass_changed(6)` 触发
+- [x] **AC-1**: GIVEN `add(in_storage, basic_id, 5)` 成功，WHEN 信号触发，THEN `resource_added(in_storage, basic_id, 5)` 和 `pool_changed(in_storage)` 各触发 1 次
+- [x] **AC-2**: GIVEN `remove(in_storage, basic_id, 3)` 成功，WHEN 信号触发，THEN `resource_removed(in_storage, basic_id, 3)` 和 `pool_changed(in_storage)` 各触发 1 次
+- [x] **AC-3**: GIVEN `transfer(in_storage, on_person, basic_id, 5)` 成功，WHEN 信号触发，THEN `transfer_completed(in_storage, on_person, basic_id, 5)` + `pool_changed(in_storage)` + `pool_changed(on_person)`
+- [x] **AC-4**: GIVEN `unpack_cargo(cargo_slot)` 成功（cargo_id="cargo.iron", linked="resource.iron", Q=30），WHEN 信号触发，THEN `cargo_unpacked("cargo.iron", "resource.iron", 30)` + `pool_changed(loaded)` + `pool_changed(in_storage)`
+- [x] **AC-5**: GIVEN `commit_deposit(repair_node_id, costs)` 成功，WHEN 信号触发，THEN `deposit_committed(repair_node_id)` 触发
+- [x] **AC-6**: GIVEN 货舱 `add(loaded, heavy_cargo, 1)` 成功（weight=6），WHEN 信号触发，THEN `mass_changed(6)` 触发
 
 ### Signal NOT Emitted on Failure
 
-- [ ] **AC-7**: GIVEN `add(carry, unknown_id, 5)` 失败（随便满），WHEN 操作完成，THEN 所有 7 个信号触发 0 次
-- [ ] **AC-8**: GIVEN `transfer(...)` 因源不足失败，WHEN 操作完成，THEN `transfer_completed` 触发 0 次, `pool_changed` 触发 0 次
+- [x] **AC-7**: GIVEN `add(carry, unknown_id, 5)` 失败（随便满），WHEN 操作完成，THEN 所有 7 个信号触发 0 次
+- [x] **AC-8**: GIVEN `transfer(...)` 因源不足失败，WHEN 操作完成，THEN `transfer_completed` 触发 0 次, `pool_changed` 触发 0 次
 
 ### Signal Emission Order
 
-- [ ] **AC-9**: GIVEN `transfer(in_storage, on_person, basic_id, 5)` 成功，WHEN 记录信号触发顺序，THEN `transfer_completed` 在 `pool_changed(in_storage)` 和 `pool_changed(on_person)` 之前触发
+- [x] **AC-9**: GIVEN `transfer(in_storage, on_person, basic_id, 5)` 成功，WHEN 记录信号触发顺序，THEN `transfer_completed` 在 `pool_changed(in_storage)` 和 `pool_changed(on_person)` 之前触发
 
 ### Emit-After-Mutation
 
-- [ ] **AC-10**: GIVEN `pool_changed` 的回调中调用 `get_storage_summary()`，WHEN 查询返回数据，THEN 数据反映已完成的变更（新资源已出现——非操作前旧状态）
-- [ ] **AC-11**: GIVEN `resource_added` 的回调中调用 `get_storage_summary()`，WHEN 查询返回数据，THEN 新增资源已包含在摘要中
+- [x] **AC-10**: GIVEN `pool_changed` 的回调中调用 `get_storage_summary()`，WHEN 查询返回数据，THEN 数据反映已完成的变更（新资源已出现——非操作前旧状态）
+- [x] **AC-11**: GIVEN `resource_added` 的回调中调用 `get_storage_summary()`，WHEN 查询返回数据，THEN 新增资源已包含在摘要中
 
 ### Reentry Guard (ERR_BUSY)
 
-- [ ] **AC-12**: GIVEN `resource_added` 信号回调中调用 `add(in_storage, basic_id, 5)`，WHEN 回调执行，THEN 返回 `ERR_BUSY`，原操作不受影响
-- [ ] **AC-13**: GIVEN `pool_changed` 信号回调中调用 `get_storage_summary()`，WHEN 查询执行，THEN 正常返回数据（查询方法不受 BUSY 限制）
+- [x] **AC-12**: GIVEN `resource_added` 信号回调中调用 `add(in_storage, basic_id, 5)`，WHEN 回调执行，THEN 返回 `ERR_BUSY`，原操作不受影响
+- [x] **AC-13**: GIVEN `pool_changed` 信号回调中调用 `get_storage_summary()`，WHEN 查询执行，THEN 正常返回数据（查询方法不受 BUSY 限制）
 
 ### deposit_failed Signal
 
-- [ ] **AC-14**: GIVEN `commit_deposit(node, costs)` 因资源不足失败，WHEN 操作完成，THEN `deposit_failed(node, "ERR_SOURCE_INSUFFICIENT")` 触发（非调用方消费者如 UIManager 可响应）
+- [x] **AC-14**: GIVEN `commit_deposit(node, costs)` 因资源不足失败，WHEN 操作完成，THEN `deposit_failed(node, "ERR_SOURCE_INSUFFICIENT")` 触发（非调用方消费者如 UIManager 可响应）
 
 ### Signal for discard()
 
-- [ ] **AC-15**: GIVEN `discard(carry, basic_id, 3)` 成功，WHEN 信号触发，THEN `resource_removed(carry, basic_id, 3)` 和 `pool_changed(carry)` 触发
+- [x] **AC-15**: GIVEN `discard(carry, basic_id, 3)` 成功，WHEN 信号触发，THEN `resource_removed(carry, basic_id, 3)` 和 `pool_changed(carry)` 触发
 
 ---
 
@@ -168,7 +170,17 @@ func add(...) -> ResourceResult:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/resources/SignalContractTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-13 (15/15 checks)
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Criteria**: 15/15 passing
+**Deviations**: None. Readiness metadata was corrected from nonexistent `TR-resources-008` to active `TR-resources-001`; the direct GDD anchor is `AC-RES-012.1` through `AC-RES-012.12`.
+**Test Evidence**: Integration — `tests/integration/resources/SignalContractTest.csproj` passes 15/15 checks.
+**Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues; review-mode subagents were not spawned because Codex delegation requires an explicit user request.
 
 ---
 

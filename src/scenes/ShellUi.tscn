@@ -13,6 +13,7 @@ grow_vertical = 2
 mouse_filter = 1
 
 [node name="LoadingPanel" type="PanelContainer" parent="ShellUiRoot"]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -52,7 +53,6 @@ focus_mode = 2
 text = "Cancel  Esc"
 
 [node name="EntryPanel" type="PanelContainer" parent="ShellUiRoot"]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -76,6 +76,7 @@ text = "Cloud Weaver Voyage"
 horizontal_alignment = 1
 
 [node name="ContinueLockReasonLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
+visible = false
 layout_mode = 2
 text = "Continue point locked: content domain mismatch"
 horizontal_alignment = 1
@@ -88,6 +89,7 @@ text = "Start  Enter"
 focus_neighbor_bottom = NodePath("../ContinueButton")
 
 [node name="ContinueButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+visible = false
 layout_mode = 2
 focus_mode = 2
 text = "Continue  C"
@@ -95,17 +97,20 @@ focus_neighbor_top = NodePath("../StartButton")
 focus_neighbor_bottom = NodePath("../SettingsButton")
 
 [node name="ContinueLockedButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+visible = false
 layout_mode = 2
 focus_mode = 2
 disabled = true
 text = "Continue Locked  C"
 
 [node name="NewSessionButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+visible = false
 layout_mode = 2
 focus_mode = 2
 text = "New Session  N"
 
 [node name="ReturnTitleButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
+visible = false
 layout_mode = 2
 focus_mode = 2
 text = "Return Title  Esc"

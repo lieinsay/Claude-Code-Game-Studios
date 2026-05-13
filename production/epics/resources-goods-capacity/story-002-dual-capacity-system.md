@@ -1,7 +1,7 @@
 # Story 002: Dual Capacity System
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -10,7 +10,7 @@
 ## Context
 
 **GDD**: `design/gdd/resources-goods-capacity.md`
-**Requirement**: `TR-resources-002`
+**Requirement**: `TR-resources-003`
 
 **ADR Governing Implementation**: ADR-0005: Resource Pool System
 **ADR Decision Summary**: 双容量制——槽位制（随身物品栏/探索局内池）和容积制（飞艇仓库/货舱）。槽位制：每堆占 1 槽，total_slots 基础 5。容积制：mass_class → volume 映射（light=50, medium=120, heavy=200），total_volume 仓库=1000、货舱基础=0+模块500。容量检查由 `stack_merge` 统一调用 `_slot_available()` / `_volume_available()`。mass_class 表硬编码为 const Dictionary。
@@ -29,27 +29,27 @@
 
 ### Slot-Based Capacity (随身/局内)
 
-- [ ] **AC-1**: GIVEN 随身 5/5 槽已满且无匹配堆，WHEN `add(on_person, new_resource, 1)`，THEN 返回 `ERR_CARRY_SLOTS_FULL`
-- [ ] **AC-2**: GIVEN 随身 5/5 槽已满但有 basic 匹配堆 E=90（max_stack=99），WHEN `add(on_person, basic, 5)`，THEN merge 成功（不占新槽），basic 堆变为 95
-- [ ] **AC-3**: GIVEN 随身 4/5 槽，WHEN `add(on_person, basic, 200)` (max_stack=99)，THEN overflow_qty=200, new_stacks=ceil(200/99)=3, 4+3=7>5 → `ERR_CARRY_SLOTS_FULL`
-- [ ] **AC-4**: GIVEN 随身有匹配堆但已达 max_stack (E=99)，WHEN `add(on_person, basic, 10)`，THEN merge_qty=0, overflow_qty=10, 需 1 新槽 → 若无空槽则 `ERR_CARRY_STACK_FULL`
+- [x] **AC-1**: GIVEN 随身 5/5 槽已满且无匹配堆，WHEN `add(on_person, new_resource, 1)`，THEN 返回 `ERR_CARRY_SLOTS_FULL`
+- [x] **AC-2**: GIVEN 随身 5/5 槽已满但有 basic 匹配堆 E=90（max_stack=99），WHEN `add(on_person, basic, 5)`，THEN merge 成功（不占新槽），basic 堆变为 95
+- [x] **AC-3**: GIVEN 随身 4/5 槽，WHEN `add(on_person, basic, 200)` (max_stack=99)，THEN overflow_qty=200, new_stacks=ceil(200/99)=3, 4+3=7>5 → `ERR_CARRY_SLOTS_FULL`
+- [x] **AC-4**: GIVEN 随身有匹配堆但已达 max_stack (E=99)，WHEN `add(on_person, basic, 10)`，THEN merge_qty=0, overflow_qty=10, 需 1 新槽 → 若无空槽则 `ERR_CARRY_STACK_FULL`
 
 ### Volume-Based Capacity (仓库/货舱)
 
-- [ ] **AC-5**: GIVEN 仓库已用 920/1000，WHEN `add(in_storage, medium_resource, 1)`(volume=120)，THEN 920+120=1040>1000 → `ERR_TARGET_FULL`
-- [ ] **AC-6**: GIVEN 仓库已用 920/1000，WHEN `add(in_storage, light_resource, 1)`(volume=50)，THEN 920+50=970≤1000 → SUCCESS
-- [ ] **AC-7**: GIVEN 货舱基础容积为 0（无模块），WHEN `add(loaded, any_cargo, 1)`，THEN 返回 `ERR_CAPACITY_ZERO`
-- [ ] **AC-8**: GIVEN 货舱模块安装后容积=500，已用 380，WHEN `add(loaded, heavy_cargo, 1)`(volume=200)，THEN 380+200=580>500 → `ERR_TARGET_FULL`
+- [x] **AC-5**: GIVEN 仓库已用 920/1000，WHEN `add(in_storage, medium_resource, 1)`(volume=120)，THEN 920+120=1040>1000 → `ERR_TARGET_FULL`
+- [x] **AC-6**: GIVEN 仓库已用 920/1000，WHEN `add(in_storage, light_resource, 1)`(volume=50)，THEN 920+50=970≤1000 → SUCCESS
+- [x] **AC-7**: GIVEN 货舱基础容积为 0（无模块），WHEN `add(loaded, any_cargo, 1)`，THEN 返回 `ERR_CAPACITY_ZERO`
+- [x] **AC-8**: GIVEN 货舱模块安装后容积=500，已用 380，WHEN `add(loaded, heavy_cargo, 1)`(volume=200)，THEN 380+200=580>500 → `ERR_TARGET_FULL`
 
 ### mass_class Table
 
-- [ ] **AC-9**: GIVEN light 资源，WHEN 查询 mass_class，THEN volume=50, weight=1
-- [ ] **AC-10**: GIVEN medium 资源，WHEN 查询 mass_class，THEN volume=120, weight=3
-- [ ] **AC-11**: GIVEN heavy 资源，WHEN 查询 mass_class，THEN volume=200, weight=6
+- [x] **AC-9**: GIVEN light 资源，WHEN 查询 mass_class，THEN volume=50, weight=1
+- [x] **AC-10**: GIVEN medium 资源，WHEN 查询 mass_class，THEN volume=120, weight=3
+- [x] **AC-11**: GIVEN heavy 资源，WHEN 查询 mass_class，THEN volume=200, weight=6
 
 ### Volume Calculation with Stack Overflow
 
-- [ ] **AC-12**: GIVEN 仓库已用 800/1000，WHEN `add(in_storage, heavy_resource, 1)` 且该资源 overflow_qty=200、max_stack=99、volume=200，THEN new_stacks=ceil(200/99)=3, 需 3×200=600 容积, 800+600=1400>1000 → `ERR_TARGET_FULL`
+- [x] **AC-12**: GIVEN 仓库已用 800/1000，WHEN `add(in_storage, heavy_resource, 1)` 且该资源 overflow_qty=200、max_stack=99、volume=200，THEN new_stacks=ceil(200/99)=3, 需 3×200=600 容积, 800+600=1400>1000 → `ERR_TARGET_FULL`
 
 ---
 
@@ -145,7 +145,7 @@ func set_cargo_module_volume_bonus(bonus: int) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/resources/CapacitySystemTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-12
 
 ---
 
@@ -153,3 +153,23 @@ func set_cargo_module_volume_bonus(bonus: int) -> void:
 
 - Depends on: Story 001 (stack_merge 算法, max_stack), content-registry (mass_class 字段)
 - Unlocks: Story 003 (cargo bay capacity), Story 005 (add/transfer 容量校验)
+
+## Implementation Completion Notes
+
+**Implemented**: 2026-05-12
+**Criteria**: 12/12 acceptance criteria passing; 2/2 regression checks passing; 14/14 validation checks passing
+**Files**: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/CapacitySystemProgram.cs`, `tests/unit/resources/CapacitySystemTest.csproj`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`
+**Verification**: `dotnet run --project tests/unit/resources/CapacitySystemTest.csproj` PASS; `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS.
+**Notes**: AC-8 test uses a reachable `370/500 + heavy(200)` overflow setup because the declared mass table (`50/120/200`) cannot produce exactly 380 used volume with whole stacks. The overflow behavior and `ERR_TARGET_FULL` branch are the same.
+**Metadata**: Requirement corrected to `TR-resources-003` because the current TR registry maps `TR-resources-002` to `commit_deposit`; `TR-resources-003` is the dual-capacity requirement.
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS on 2026-05-13; blocking Pool 1/Pool 5 alias issue fixed before closure.
+**Ready for**: Story 003 — Cargo Model & Unpack.
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Criteria**: 12/12 acceptance criteria passing; 2/2 regression checks passing; 14/14 validation checks passing.
+**Deviations**: Advisory only — AC-8 uses a reachable `370/500 + heavy(200)` setup because the declared mass table cannot compose exactly 380 used volume from whole stacks; overflow behavior and `ERR_TARGET_FULL` branch are equivalent. Full QA/lead subagent gates were not spawned because the active Codex contract only allows subagents when explicitly requested.
+**Test Evidence**: Logic unit test `tests/unit/resources/CapacitySystemTest.csproj` exists and passes; `dotnet run --project tests/unit/resources/StackMergeTest.csproj`, `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj`, and `dotnet build CloudWeaverVoyage.sln --no-restore` also pass.
+**Code Review**: Complete — `/code-review` verdict APPROVED WITH SUGGESTIONS.
+**Next Recommended**: `production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md` — Story 003: Cargo Model & Unpack.

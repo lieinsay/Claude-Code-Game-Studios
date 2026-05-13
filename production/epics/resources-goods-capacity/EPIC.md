@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/resources-goods-capacity.md
 > **Architecture Module**: Autoload #5 — ResourcesManager
-> **Status**: In Progress
-> **Stories**: 9 (001-009) — Story 001 implemented; 002-009 Ready
+> **Status**: Complete
+> **Stories**: 9 (001-009) — Story 001-009 Complete
 
 ## Overview
 
@@ -42,16 +42,16 @@ This epic is complete when:
 
 | # | Title | Type | TR | ADR | Status |
 |---|-------|------|----|-----|--------|
-| 001 | [Resource Identity & Stack Merge](story-001-resource-identity-stack-merge.md) | Logic | TR-resources-001 | ADR-0005 | In Progress — ready for /code-review |
-| 002 | [Dual Capacity System](story-002-dual-capacity-system.md) | Logic | TR-resources-002 | ADR-0005 | Ready |
-| 003 | [Cargo Model & Unpack](story-003-cargo-model-unpack.md) | Logic | TR-resources-003 | ADR-0005 | Ready |
-| 004 | [Weight & Mass Tracking](story-004-weight-mass-tracking.md) | Logic | TR-resources-004 | ADR-0005 | Ready |
-| 005 | [Core Atomic Operations](story-005-core-atomic-operations.md) | Logic | TR-resources-005 | ADR-0005 | Ready |
-| 006 | [State Machine & Pool Transitions](story-006-state-machine-pool-transitions.md) | Logic | TR-resources-006 | ADR-0005 | Ready |
-| 007 | [Specialized Operations](story-007-specialized-operations.md) | Integration | TR-resources-007 | ADR-0004, ADR-0005 | Ready |
-| 008 | [Signal Contract & Reentry Guard](story-008-signal-contract-reentry-guard.md) | Integration | TR-resources-008 | ADR-0002, ADR-0005 | Ready |
-| 009 | [Persistence & External Integration](story-009-persistence-external-integration.md) | Integration | TR-resources-009 | ADR-0001, ADR-0003, ADR-0005 | Ready |
+| 001 | [Resource Identity & Stack Merge](story-001-resource-identity-stack-merge.md) | Logic | TR-resources-001 | ADR-0005 | Complete |
+| 002 | [Dual Capacity System](story-002-dual-capacity-system.md) | Logic | TR-resources-003 | ADR-0005 | Complete |
+| 003 | [Cargo Model & Unpack](story-003-cargo-model-unpack.md) | Logic | TR-resources-003 | ADR-0005 | Complete |
+| 004 | [Weight & Mass Tracking](story-004-weight-mass-tracking.md) | Logic | TR-resources-003 | ADR-0005 | Complete |
+| 005 | [Core Atomic Operations](story-005-core-atomic-operations.md) | Logic | TR-resources-001 | ADR-0005 | Complete |
+| 006 | [State Machine & Pool Transitions](story-006-state-machine-pool-transitions.md) | Logic | TR-resources-001 | ADR-0005 | Complete |
+| 007 | [Specialized Operations](story-007-specialized-operations.md) | Integration | TR-resources-002 | ADR-0004, ADR-0005 | Complete |
+| 008 | [Signal Contract & Reentry Guard](story-008-signal-contract-reentry-guard.md) | Integration | TR-resources-001 | ADR-0002, ADR-0005 | Complete |
+| 009 | [Persistence & External Integration](story-009-persistence-external-integration.md) | Integration | TR-resources-001/003 | ADR-0001, ADR-0003, ADR-0005 | Complete |
 
 ## Next Step
 
-Story 001 has implementation and unit evidence ready for `/code-review`. Continue with Story 002 (Dual Capacity System), then Story 005 (Core Atomic Operations), as they build on the stack model.
+All Resources, Goods & Capacity stories are complete. Run the sprint close-out sequence next: `/smoke-check sprint`, then `/team-qa sprint`, then `/gate-check` once QA approves.

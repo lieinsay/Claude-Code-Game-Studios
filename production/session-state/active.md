@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Core Layer
-Feature: Intel / Knowledge System (#6) — COMPLETE
-Task: Epic #6 全部 8 个 Story 完成；#9 Chart Route Planning 现已解锁（等 #6 完成）；#8 Modules/Hull 等 #5 完成后解锁
+Feature: Resources & Goods Capacity (#5) contract complete + Intel / Knowledge System (#6) complete
+Task: #5 ResourcesManager contract merged for downstream use; full runtime advancement still blocked by BUG-005. #6 all 8 Stories complete; #9 Chart Route Planning and #8 Modules/Hull are unblocked by their contract dependencies.
 <!-- /STATUS -->
 
 ## Session Extract — Epic #6 全部完成 — 2026-05-13
@@ -52,6 +52,75 @@ Task: Epic #6 全部 8 个 Story 完成；#9 Chart Route Planning 现已解锁�
 - Test written: `tests/unit/resources/StackMergeTest.csproj` — 14/14 Story 001 acceptance checks passing
 - Blockers: None
 - Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/StackMergeProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md`
+
+## Session Extract — /story-done 2026-05-12
+
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/resources-goods-capacity/story-001-resource-identity-stack-merge.md` — Story 001: Resource Identity & Stack Merge
+- Criteria: 14/14 passing
+- Test evidence: `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Code review: Complete — APPROVED WITH SUGGESTIONS; no blocking findings
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-002-dual-capacity-system.md` — Story 002: Dual Capacity System
+
+## Session Extract — /dev-story 2026-05-12
+
+- Story: `production/epics/resources-goods-capacity/story-002-dual-capacity-system.md` — Story 002: Dual Capacity System
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/CapacitySystemTest.csproj`, `tests/unit/resources/CapacitySystemProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-002-dual-capacity-system.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/unit/resources/CapacitySystemTest.csproj` — 12/12 Story 002 acceptance checks passing
+- Blockers: None
+- Notes: AC-8 evidence uses `370/500 + heavy(200)` because the mass table cannot construct exactly 380 used volume from whole stacks; Story 002 requirement metadata corrected to `TR-resources-003` to match the current TR registry capacity requirement.
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/CapacitySystemProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-002-dual-capacity-system.md`
+
+## Session Extract — /story-done 2026-05-13
+
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/resources-goods-capacity/story-002-dual-capacity-system.md` — Story 002: Dual Capacity System
+- Criteria: 12/12 acceptance criteria passing; 2/2 regression checks passing; 14/14 validation checks passing
+- Test evidence: `dotnet run --project tests/unit/resources/CapacitySystemTest.csproj` PASS; `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Code review: Complete — APPROVED WITH SUGGESTIONS; blocking Pool 1/Pool 5 alias issue fixed before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md` — Story 003: Cargo Model & Unpack
+
+## Session Extract — /dev-story 2026-05-13
+
+- Story: `production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md` — Story 003: Cargo Model & Unpack
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/CargoUnpackTest.csproj`, `tests/unit/resources/CargoUnpackProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md`, `production/session-state/active.md`
+- Test written: `tests/unit/resources/CargoUnpackTest.csproj` — 12/12 Story 003 acceptance checks passing
+- Verification: `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/unit/resources/CapacitySystemTest.csproj` PASS; `dotnet run --project tests/unit/resources/CargoUnpackTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Blockers: None
+- Notes: AC-9 uses full storage (1000/1000) rather than 980/1000 because the current mass table cannot compose exactly 980 used volume from whole-stack light/medium/heavy volumes; it still verifies the required no-new-volume merge branch.
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/CargoUnpackProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md`
+
+## Session Extract — /story-done 2026-05-13
+
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/resources-goods-capacity/story-003-cargo-model-unpack.md` — Story 003: Cargo Model & Unpack
+- Criteria: 12/12 acceptance checks passing; resource regression checks passing
+- Test evidence: `dotnet run --project tests/unit/resources/CargoUnpackTest.csproj` PASS; `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/unit/resources/CapacitySystemTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Code review: Complete — APPROVED WITH SUGGESTIONS; public API XML comment language note fixed before closure; full signal/reentry guard remains Story 008 scope
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-004-weight-mass-tracking.md` — Story 004: Weight & Mass Tracking
+
+## Session Extract — /dev-story 2026-05-13
+
+- Story: `production/epics/resources-goods-capacity/story-004-weight-mass-tracking.md` — Story 004: Weight & Mass Tracking
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/WeightMassTest.csproj`, `tests/unit/resources/WeightMassProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-004-weight-mass-tracking.md`, `production/session-state/active.md`
+- Test written: `tests/unit/resources/WeightMassTest.csproj` — 9/9 Story 004 acceptance checks passing
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `dotnet run --no-build --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --no-build --project tests/unit/resources/CapacitySystemTest.csproj` PASS; `dotnet run --no-build --project tests/unit/resources/CargoUnpackTest.csproj` PASS; `dotnet run --no-build --project tests/unit/resources/WeightMassTest.csproj` PASS; `dotnet run --no-build --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS
+- Blockers: None
+- Notes: Story metadata aligned before implementation: `TR-resources-004` was not present in the current TR registry, so Story 004 now references active `TR-resources-003` plus `AC-RES-004` for traceability.
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/WeightMassProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-004-weight-mass-tracking.md`
+
+## Session Extract — /story-done 2026-05-13
+
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-004-weight-mass-tracking.md` — Story 004: Weight & Mass Tracking
+- Criteria: 9/9 acceptance checks passing
+- Test evidence: `dotnet run --project tests/unit/resources/WeightMassTest.csproj` PASS; resource regression checks PASS; FoundationParity PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Code review: Complete — APPROVED; no blocking findings; `mass_changed(new_mass)` remains Story 008 scope
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-005-core-atomic-operations.md` — Story 005: Core Atomic Operations
 
 ## Session Extract — Epic #7 Airship Hub complete — 2026-05-12
 
@@ -579,3 +648,151 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Commit: 6388e42 pushed to develop
 - Unlocked: Story 004 Continue Availability (depends on 001+003); Story 005 Version Migration (depends on 001)
 - Next: Story 004 (Integration) and Story 005 (Logic) can run in parallel
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/resources-goods-capacity/story-005-core-atomic-operations.md` — Story 005: Core Atomic Operations
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/CoreOperationsTest.csproj`, `tests/unit/resources/CoreOperationsProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-005-core-atomic-operations.md`, `production/epics/resources-goods-capacity/EPIC.md`
+- Test written: `tests/unit/resources/CoreOperationsTest.csproj` — 15 Story 005 acceptance checks plus 1 cargo consume boundary regression
+- Verification: Story 005 16/16 PASS; Story 001 14/14 PASS; Story 002 14/14 PASS; Story 003 12/12 PASS; Story 004 9/9 PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Story metadata aligned to active registry trace `TR-resources-001`; `AC-RES-005` preserved as the GDD acceptance anchor.
+- Blockers: None
+- Next: /code-review `src/core/resources/ResourcesManager.cs` `tests/unit/resources/CoreOperationsProgram.cs` then /story-done `production/epics/resources-goods-capacity/story-005-core-atomic-operations.md`
+
+## Session Extract — /code-review 2026-05-13
+- Verdict: APPROVED
+- Scope: `src/core/resources/ResourcesManager.cs`; `tests/unit/resources/CoreOperationsProgram.cs`; Story 005 acceptance contract
+- Engine specialist view: Godot C# logic only; no scene/node lifecycle, shader, or UI concerns introduced.
+- ADR compliance: ADR-0005 compliant — `add`, `remove`, `transfer`, and `consume` remain synchronous, typed-result, all-or-nothing operations.
+- Testability: TESTABLE — all 15 acceptance criteria are covered by `CoreOperationsTest`, with an additional cargo consume boundary regression.
+- Required changes handled before approval: `Consume()` now performs initialization, negative quantity, and zero quantity checks before Registry lookup to match `Add()`/`Remove()` failure priority.
+- Residual notes: Story 008 signal/reentry guard and Story 007 domain-specific operations remain intentionally out of scope.
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-005-core-atomic-operations.md` — Story 005: Core Atomic Operations
+- Criteria: 15/15 acceptance criteria covered by `tests/unit/resources/CoreOperationsTest.csproj`; 16/16 checks passing including cargo consume boundary regression
+- Code review: Complete — APPROVED; no blocking findings after validation-order fix
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md` — Story 006: State Machine & Pool Transitions
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md` — Story 006: State Machine & Pool Transitions
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/StateMachineTest.csproj`, `tests/unit/resources/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md`, `production/epics/resources-goods-capacity/EPIC.md`
+- Test written: `tests/unit/resources/StateMachineTest.csproj` — 12 Story 006 acceptance checks
+- Verification: Story 006 12/12 PASS; Story 001 14/14 PASS; Story 002 14/14 PASS; Story 003 12/12 PASS; Story 004 9/9 PASS; Story 005 16/16 PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Notes: Story metadata aligned to active registry trace `TR-resources-001`; `AC-RES-006` preserved as the GDD acceptance anchor. `commit_deposit()` implementation and UI confirmation remain Story 007/UI scope.
+- Blockers: None
+- Next: /code-review `src/core/resources/ResourcesManager.cs` `tests/unit/resources/StateMachineProgram.cs` then /story-done `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md`
+
+## Session Extract — /code-review 2026-05-13
+- Verdict: APPROVED
+- Scope: `src/core/resources/ResourcesManager.cs`; `tests/unit/resources/StateMachineProgram.cs`; Story 006 acceptance contract
+- Engine specialist view: Godot C# logic only; no scene/node lifecycle, shader, or UI concerns introduced. Review-mode file says `full`, but Codex subagent delegation was skipped because the user did not explicitly request delegated agents.
+- ADR compliance: ADR-0005 and ADR-0019 compliant — resource state remains owned by `ResourcesManager`, `_pools` stays private, transitions are typed-result and atomic, and new implementation is C#.
+- Testability: TESTABLE — all 12 acceptance criteria are covered by `StateMachineTest`.
+- Required changes handled before approval: extraction settlement methods were split into focused helpers so public methods remain under the local method-size standard.
+- Residual notes: Story 007 `commit_deposit()`/specialized operations and Story 008 signal/reentry guard remain intentionally out of scope.
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md` — Story 006: State Machine & Pool Transitions
+- Criteria: 12/12 acceptance criteria covered by `tests/unit/resources/StateMachineTest.csproj`; 12/12 checks passing
+- Code review: Complete — APPROVED; no blocking findings
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-007-specialized-operations.md` — Story 007: Specialized Operations
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/resources-goods-capacity/story-007-specialized-operations.md` — Story 007: Specialized Operations
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/SpecializedOpsTest.csproj`, `tests/integration/resources/SpecializedOpsProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-007-specialized-operations.md`, `production/epics/resources-goods-capacity/EPIC.md`
+- Test written: `tests/integration/resources/SpecializedOpsTest.csproj` — 13 Story 007 acceptance checks
+- Verification: Story 007 13/13 PASS; Story 005 16/16 PASS; Story 006 12/12 PASS; Story 001 14/14 PASS; Story 002 14/14 PASS; Story 003 12/12 PASS; Story 004 9/9 PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Story metadata aligned to active registry trace `TR-resources-002`; non-registered specialized operation rows remain anchored to the GDD operation contract and ADR-0005. `commit_deposit()` excludes loaded cargo because Story 003 keeps loaded as cargo-only and unpacking is required before repair use. Signal emission/reentry guards remain Story 008 scope.
+- Blockers: None
+- Next: /code-review `src/core/resources/ResourcesManager.cs` `tests/integration/resources/SpecializedOpsProgram.cs` then /story-done `production/epics/resources-goods-capacity/story-007-specialized-operations.md`
+
+## Session Extract — /code-review 2026-05-13
+- Verdict: APPROVED
+- Scope: `src/core/resources/ResourcesManager.cs`; `tests/integration/resources/SpecializedOpsProgram.cs`; Story 007 acceptance contract
+- Engine specialist view: Godot C# logic only; no scene/node lifecycle, shader, UI, or async concerns introduced. Review-mode file says `full`, but Codex subagent delegation was skipped because the user did not explicitly request delegated agents.
+- ADR compliance: ADR-0005, ADR-0004, and ADR-0019 compliant — specialized operations remain synchronous typed-result wrappers over core resource movement, `ResourcesManager` keeps resource state ownership, and the implementation stays in C#.
+- Testability: TESTABLE — all 13 acceptance criteria are covered by `SpecializedOpsTest`.
+- Required changes handled before approval: `CloudWeaverVoyage.sln` was cleaned after `dotnet sln add` introduced unwanted x64/x86 solution configurations and a duplicate resources solution folder.
+- Residual notes: Story 008 signal/reentry guard remains intentionally out of scope; market pricing/inventory, combat timing, exploration loot generation, and UI confirmation remain downstream responsibilities.
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-007-specialized-operations.md` — Story 007: Specialized Operations
+- Criteria: 13/13 acceptance criteria covered by `tests/integration/resources/SpecializedOpsTest.csproj`; 13/13 checks passing
+- Code review: Complete — APPROVED; no blocking ADR, architecture, standards, or testability findings
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md` — Story 008: Signal Contract & Reentry Guard
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md` — Story 008: Signal Contract & Reentry Guard
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/SignalContractTest.csproj`, `tests/integration/resources/SignalContractProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/integration/resources/SignalContractTest.csproj` — 15 Story 008 acceptance checks
+- Verification: Story 008 15/15 PASS; Story 001-007 resource regressions PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Notes: Story metadata aligned to active registry trace `TR-resources-001`; `AC-RES-012.*` preserved as the GDD signal/reentry acceptance anchor. Review-mode file says `full`, but Codex subagent delegation was skipped because the user did not explicitly request delegated agents.
+- Blockers: None
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/integration/resources/SignalContractProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md`
+
+## Session Extract — /code-review 2026-05-13
+- Verdict: APPROVED
+- Scope: `src/core/resources/ResourcesManager.cs`; `tests/integration/resources/SignalContractProgram.cs`; Story 008 acceptance contract
+- Engine specialist view: Godot C# logic only; no scene/node lifecycle, shader, UI, or async concerns introduced.
+- ADR compliance: ADR-0002, ADR-0005, and ADR-0019 compliant — resource notifications use typed C# events at the Autoload contract boundary, state mutates before notification, and synchronous callback reentry is rejected with `ErrBusy`.
+- Testability: TESTABLE — all 15 acceptance criteria are covered by `SignalContractTest`.
+- Required changes handled before approval: transfer/cargo/deposit/mass signal ordering was covered by integration checks, and mutating calls inside callbacks now fail without corrupting resource state.
+- Residual notes: Persistence snapshot ownership and external cargo-module destruction are Story 009 scope.
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md` — Story 008: Signal Contract & Reentry Guard
+- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/SignalContractTest.csproj`; 15/15 checks passing
+- Code review: Complete — APPROVED; no blocking ADR, architecture, standards, or testability findings
+- Tech debt logged: None
+- Next recommended: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/PersistenceIntegrationTest.csproj`, `tests/integration/resources/PersistenceIntegrationProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/integration/resources/PersistenceIntegrationTest.csproj` — 15 Story 009 acceptance checks
+- Verification: Story 009 15/15 PASS; Story 001-008 resource regressions PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Notes: Snapshot integration uses the existing ADR-0003 `SnapshotPackage` C# boundary while preserving the `progress.resources` domain payload; carried pools are excluded from persisted progress, restore splits stacks by current registry limits, and migration overflow is logged/emitted.
+- Blockers: None
+- Next: `/code-review src/core/resources/ResourcesManager.cs tests/integration/resources/PersistenceIntegrationProgram.cs` then `/story-done production/epics/resources-goods-capacity/story-009-persistence-external-integration.md`
+
+## Session Extract — /code-review 2026-05-13
+- Verdict: APPROVED
+- Scope: `src/core/resources/ResourcesManager.cs`; `tests/integration/resources/PersistenceIntegrationProgram.cs`; Story 009 acceptance contract
+- Engine specialist view: Godot C# logic only; no scene/node lifecycle, shader, UI, or async concerns introduced.
+- ADR compliance: ADR-0001, ADR-0003, ADR-0005, and ADR-0019 compliant — persisted payloads use stable IDs and primitive/list/dictionary data only, Pools 1-3 are restored through `SnapshotPackage`, and transient carried/extraction pools remain out of progress saves.
+- Testability: TESTABLE — all 15 acceptance criteria are covered by `PersistenceIntegrationTest`.
+- Required changes handled before approval: cargo-bay destruction now emits loss/mass/pool notices only when loaded stacks actually change, and persistence restore records capacity/mass overflow through the migration log.
+- Residual notes: UI consumption of the new notices remains downstream HUD/shell scope.
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
+- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/PersistenceIntegrationTest.csproj`; 15/15 checks passing
+- Code review: Complete — APPROVED; no blocking ADR, architecture, standards, or testability findings
+- Tech debt logged: None
+- Next recommended: Resources, Goods & Capacity Epic #5 is complete; run `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA sign-off.
+
+## Session Extract — Epic #5 Resources, Goods & Capacity complete — 2026-05-13
+- Verdict: COMPLETE
+- Epic: `production/epics/resources-goods-capacity/EPIC.md` — Resources, Goods & Capacity (#5)
+- Stories completed: Story 001 Resource Identity & Stack Merge, Story 002 Dual Capacity System, Story 003 Cargo Model & Unpack, Story 004 Weight & Mass Tracking, Story 005 Core Atomic Operations, Story 006 State Machine & Pool Transitions, Story 007 Specialized Operations, Story 008 Signal Contract & Reentry Guard, Story 009 Persistence & External Integration
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/*`, `tests/integration/resources/*`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/*.md`, `production/session-state/active.md`
+- Test evidence: Story 001 14/14, Story 002 14/14, Story 003 12/12, Story 004 9/9, Story 005 16/16, Story 006 12/12, Story 007 13/13, Story 008 15/15, Story 009 15/15, FoundationParity 70/70 — all PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Residual risk: Godot scene/HUD visualization and UX evidence remain downstream UI work; C# resource contract, persistence handoff, and integration signals are locked.
+- Unlocked: #6 Intel can consume carried-intel/resource query boundaries; #8 Modules/Hull can consume cargo-bay capacity and destruction contracts; sprint close-out QA can start.
+
+## Session Extract — /team-qa sprint sign-off — 2026-05-13
+- Verdict: NOT APPROVED FOR FULL RUNTIME ADVANCEMENT; Resources & Goods Capacity #5 contract approved for downstream code consumption.
+- QA artifacts: `production/qa/qa-plan-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-cases-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-signoff-resources-goods-capacity-2026-05-13.md`
+- Automated evidence: 47/47 C# test projects PASS, 511/511 reported checks PASS, Godot headless project/main scene/shell UI loads PASS.
+- Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003 through TC-RGC-009 BLOCKED by downstream gameplay scene wiring not mounted.
+- Bugs: BUG-001/002/003/004 verified fixed; BUG-005 `Downstream gameplay scene is not mounted after audio activation` remains Open - Deferred, S2-Major.
+- Next recommended: Resolve BUG-005 in SessionShell/Hub scene flow, then re-run targeted TC-RGC-003 through TC-RGC-010 before `/gate-check`.
