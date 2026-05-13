@@ -1,7 +1,7 @@
 # Story 002: Route Visibility & Selectability Formulas
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -203,8 +203,8 @@ func _reevaluate_routes_for_location(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/VisibilitySelectabilityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/chart/visibility/VisibilitySelectabilityTest.csproj` — must exist and pass
+**Status**: [x] 32/32 PASS — 2026-05-13
 
 ---
 

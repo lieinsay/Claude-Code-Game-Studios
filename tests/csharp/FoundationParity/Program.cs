@@ -642,15 +642,21 @@ static bool IntelReportObservationTriggersEvent()
 static ChartManager MakeChartWithRoute()
 {
     var chart = new ChartManager();
-    chart.Initialize();
-    chart.RegisterRoute("route.sky-reef-arc-01", new Dictionary<string, object?>
-    {
-        ["destination_id"] = "location.sky-reef-outpost",
-        ["origin_id"] = "location.glass-harbor",
-        ["traversable"] = true,
-        ["hazard_tags"] = new[] { "safe" },
-        ["distance_band"] = "short",
-    });
+    chart.RegisterRoute(new RouteStaticData(
+        "route.sky-reef-arc-01",
+        "location.glass-harbor",
+        "location.sky-reef-outpost",
+        "short",
+        new[] { "safe" }));
+    // 全域 COMPLETE，知识状态 Identified(2)，停靠地匹配，可通行
+    chart.SetDomainState("routes", DomainState.Complete);
+    chart.SetDomainState("world", DomainState.Complete);
+    chart.SetDomainState("intel", DomainState.Complete);
+    chart.SetDomainState("threats", DomainState.Complete);
+    chart.SetKnowledgeQueryDelegate(_ => 2); // Identified
+    chart.SetTraversableQueryDelegate(_ => true);
+    chart.SetDockedLocationDelegate(() => "location.glass-harbor");
+    chart.OpenChart(); // → Browsing
     return chart;
 }
 
@@ -667,9 +673,14 @@ static bool ChartSelectRouteEmitsEvent()
 static bool ChartSelectUnknownRouteReturnsFalse()
 {
     var chart = new ChartManager();
-    chart.Initialize();
+    chart.SetDomainState("routes", DomainState.Complete);
+    chart.SetDomainState("world", DomainState.Complete);
+    chart.SetDomainState("intel", DomainState.Complete);
+    chart.SetDomainState("threats", DomainState.Complete);
+    chart.SetKnowledgeQueryDelegate(_ => 0); // Unknown
+    chart.OpenChart(); // → Browsing (no visible routes)
     return !chart.SelectRoute("route.nonexistent")
-        && chart.CurrentState == ChartState.Idle;
+        && chart.CurrentState == ChartState.Browsing;
 }
 
 static bool ChartCommitDepartureLocksState()
@@ -677,48 +688,53 @@ static bool ChartCommitDepartureLocksState()
     var chart = MakeChartWithRoute();
     chart.SelectRoute("route.sky-reef-arc-01");
     var committed = false;
-    var locked = false;
     chart.RouteCommitted += (routeId, destId, hazards) =>
         committed = routeId == "route.sky-reef-arc-01" && hazards.SequenceEqual(["safe"]);
-    chart.DepartureLocked += routeId => locked = routeId == "route.sky-reef-arc-01";
-    var result = chart.CommitDeparture();
-    return result && committed && locked && chart.CurrentState == ChartState.DepartureLocked;
+    var result = chart.ConfirmDeparture();
+    return result && committed && chart.CurrentState == ChartState.DepartureConfirmed;
 }
 
 static bool ChartCommitFromIdleReturnsFalse()
 {
     var chart = new ChartManager();
-    chart.Initialize();
-    return !chart.CommitDeparture();
+    // Browsing 状态但未选择航线
+    chart.SetDomainState("routes", DomainState.Complete);
+    chart.SetDomainState("world", DomainState.Complete);
+    chart.SetDomainState("intel", DomainState.Complete);
+    chart.SetDomainState("threats", DomainState.Complete);
+    chart.SetKnowledgeQueryDelegate(_ => 0);
+    chart.OpenChart();
+    return !chart.ConfirmDeparture(); // 无已选航线 → false
 }
 
 static bool ChartSelectabilityBlocksNonTraversable()
 {
     var chart = new ChartManager();
-    chart.Initialize();
-    chart.RegisterRoute("route.blocked", new Dictionary<string, object?>
-    {
-        ["destination_id"] = "location.nowhere",
-        ["traversable"] = false,
-    });
-    var result = chart.CheckRouteSelectability("route.blocked");
-    return !result.Selectable && result.Reason == "route_not_traversable";
+    chart.RegisterRoute(new RouteStaticData("route.blocked", "location.harbor", "location.nowhere", "short", Array.Empty<string>()));
+    chart.SetDomainState("routes", DomainState.Complete);
+    chart.SetDomainState("world", DomainState.Complete);
+    chart.SetDomainState("intel", DomainState.Complete);
+    chart.SetDomainState("threats", DomainState.Complete);
+    chart.SetKnowledgeQueryDelegate(_ => 2); // Identified
+    chart.SetTraversableQueryDelegate(_ => false); // 不可通行
+    chart.SetDockedLocationDelegate(() => "location.harbor");
+    chart.OpenChart();
+    return chart.RouteSelectability("route.blocked") == "unavailable";
 }
 
 static bool ChartSelectabilityBlocksDepartureLocked()
 {
     var chart = MakeChartWithRoute();
     chart.SelectRoute("route.sky-reef-arc-01");
-    chart.CommitDeparture();
-    var result = chart.CheckRouteSelectability("route.sky-reef-arc-01");
-    return !result.Selectable && result.Reason == "departure_locked";
+    chart.ConfirmDeparture(); // → DepartureConfirmed
+    return chart.RouteSelectability("route.sky-reef-arc-01") == "locked";
 }
 
 static bool ChartSelectabilityBlocksBeforeInit()
 {
     var chart = new ChartManager();
-    var result = chart.CheckRouteSelectability("route.anything");
-    return !result.Selectable && result.Reason == "chart_not_initialized";
+    // Loading 状态，无知识委托 → unknown → hidden
+    return chart.RouteSelectability("route.anything") == "hidden";
 }
 
 // ========================================================================

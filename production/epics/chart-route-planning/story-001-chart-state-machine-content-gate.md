@@ -1,7 +1,7 @@
 # Story 001: Chart State Machine & Content Domain Gate
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -288,8 +288,8 @@ func retry_open_chart() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/chart/statemachine/ChartStateMachineTest.csproj` — must exist and pass
+**Status**: [x] 43/43 PASS — 2026-05-13
 
 ---
 

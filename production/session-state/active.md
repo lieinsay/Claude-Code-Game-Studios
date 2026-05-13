@@ -2,9 +2,18 @@
 
 <!-- STATUS -->
 Epic: Core Layer
-Feature: Modules & Hull State (#8) complete
-Task: #8 ModuleHullManager contract merged for downstream use; BUG-005 scene wiring fixed; #9 Chart Route Planning remains the next unlocked production epic.
+Feature: Chart / Route Planning (#9)
+Task: Story 001 State Machine + Story 002 Visibility/Selectability 完成（43+32 PASS）；Story 003~008 待实现
 <!-- /STATUS -->
+
+## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13
+
+- Verdict: COMPLETE
+- Stories: Story 001 Chart State Machine & Content Domain Gate (43/43 PASS), Story 002 Route Visibility & Selectability Formulas (32/32 PASS)
+- Files changed: `src/core/chart/ChartManager.cs`（全面重写，占位桩替换为 ADR-0008 完整实现：5 态状态机 + 域门控 + 两步确认 + 航线子状态机 + Formula 1/2 + 依赖注入委托），`tests/unit/chart/statemachine/ChartStateMachineTest.csproj`, `tests/unit/chart/visibility/VisibilitySelectabilityTest.csproj`, `tests/csharp/FoundationParity/Program.cs`（ChartManager API 迁移），`CloudWeaverVoyage.sln`
+- Build: 0 errors, 0 warnings; FoundationParity 70/70 PASS
+- Key design: 委托注入替代直接 Autoload 调用（SetKnowledgeQueryDelegate / SetTraversableQueryDelegate / SetDockedLocationDelegate），测试无需 Godot 运行时
+- Unlocked: Story 003 Departure Confirmation，Story 004 Display Ordering（均依赖 001+002）
 
 ## Session Extract — Epic #8 Modules & Hull State complete — 2026-05-13
 
