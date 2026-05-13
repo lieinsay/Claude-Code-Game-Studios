@@ -121,6 +121,7 @@ public sealed class WorldRepair
     private readonly List<string> _downstreamErrors = [];
     private readonly List<string> _completedNodeIds = [];
     private Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult>? _commitDeposit;
+    private Func<string, IReadOnlyDictionary<string, int>>? _pool6DepositQuery;
 
     /// <summary>Raised when a repair node visual state changes.</summary>
     public event Action<string, string>? VisualStateChanged;
@@ -164,6 +165,12 @@ public sealed class WorldRepair
     public void SetCommitDepositHandler(Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult> handler)
     {
         _commitDeposit = handler;
+    }
+
+    /// <summary>Injects a Pool 6 deposited-record query used during crash recovery.</summary>
+    public void SetPool6DepositQuery(Func<string, IReadOnlyDictionary<string, int>> query)
+    {
+        _pool6DepositQuery = query;
     }
 
     /// <summary>Marks the repair system as ready and loads new-game state.</summary>
@@ -617,6 +624,98 @@ public sealed class WorldRepair
         return _repairNodes.Keys.OrderBy(id => id, StringComparer.Ordinal).ToArray();
     }
 
+    /// <summary>Builds the progress.world-repair payload. Derived progress is intentionally omitted.</summary>
+    public Dictionary<string, object?> SerializeWorldRepair()
+    {
+        var nodes = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var (nodeId, node) in _repairNodes)
+        {
+            nodes[nodeId] = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["repair_state"] = (int)node.RepairState,
+                ["deposited"] = node.Deposited.ToDictionary(
+                    pair => pair.Key,
+                    pair => (object?)pair.Value,
+                    StringComparer.Ordinal),
+            };
+        }
+
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["domain_id"] = "progress.world-repair",
+            ["nodes"] = nodes,
+        };
+    }
+
+    /// <summary>Builds the ADR-0003 SnapshotPackage for world repair progress.</summary>
+    public SnapshotPackage BuildSnapshotPackage()
+    {
+        var package = new SnapshotPackage
+        {
+            DomainId = "progress.world-repair",
+            SnapshotSchemaVersion = 1,
+            DomainState = SnapshotDomainState.Ready,
+        };
+        package.ContentDomainVersions["world-repair"] = "2026-05-13";
+        package.StableIdRefs.AddRange(_repairNodes.Keys.OrderBy(id => id, StringComparer.Ordinal));
+        foreach (var (key, value) in SerializeWorldRepair())
+        {
+            package.Payload[key] = value;
+        }
+
+        return package;
+    }
+
+    /// <summary>Registers world repair with the persistence pipeline.</summary>
+    public void RegisterPersistence(Persistence persistence)
+    {
+        persistence.RegisterDomainSerializer("progress.world-repair", BuildSnapshotPackage);
+        persistence.RegisterDomainDeserializer("progress.world-repair", RestoreFromSnapshotPackage);
+    }
+
+    /// <summary>Restores world repair from an ADR-0003 SnapshotPackage.</summary>
+    public void RestoreFromSnapshotPackage(SnapshotPackage package)
+    {
+        if (package.DomainId != "progress.world-repair")
+        {
+            return;
+        }
+
+        DeserializeWorldRepair(package.Payload);
+    }
+
+    /// <summary>Restores world repair state and recomputes all derived progress values.</summary>
+    public void DeserializeWorldRepair(IReadOnlyDictionary<string, object?> snapshot)
+    {
+        _repairNodes.Clear();
+        _completedNodeIds.Clear();
+
+        foreach (var (nodeId, rawNode) in ReadObjectMap(snapshot, "nodes"))
+        {
+            var nodeData = ToObjectMap(rawNode);
+            var state = (RepairState)ReadInt(nodeData, "repair_state", (int)RepairState.Unrevealed);
+            var deposited = ReadIntMap(nodeData, "deposited");
+            _repairNodes[nodeId] = new RepairNodeState
+            {
+                RepairState = state,
+                RepairProgress = ComputeRepairProgress(nodeId, deposited),
+                VisualState = state == RepairState.Repaired ? VisualStateRepaired : VisualStateKnown,
+            };
+
+            foreach (var (resourceId, quantity) in deposited)
+            {
+                _repairNodes[nodeId].Deposited[resourceId] = quantity;
+            }
+
+            if (state == RepairState.Repaired)
+            {
+                _completedNodeIds.Add(nodeId);
+            }
+        }
+
+        CrossValidateWithPool6();
+    }
+
     private bool CheckRepairCompletion(string nodeId, IReadOnlyDictionary<string, int> deposited)
     {
         if (!_definitions.TryGetValue(nodeId, out var definition) || definition.RequiredResources.Count == 0)
@@ -662,6 +761,39 @@ public sealed class WorldRepair
         }
 
         return count == 0 ? 0.0d : Math.Clamp(total / count, 0.0d, 1.0d);
+    }
+
+    private void CrossValidateWithPool6()
+    {
+        if (_pool6DepositQuery is null)
+        {
+            return;
+        }
+
+        foreach (var (nodeId, node) in _repairNodes)
+        {
+            var pool6Deposits = _pool6DepositQuery(nodeId);
+            foreach (var (resourceId, poolQty) in pool6Deposits)
+            {
+                var localQty = node.Deposited.GetValueOrDefault(resourceId, 0);
+                if (poolQty > localQty)
+                {
+                    _warnings.Add($"WorldRepair: deposited mismatch for {nodeId}/{resourceId}; pool6={poolQty}, local={localQty}");
+                    node.Deposited[resourceId] = poolQty;
+                }
+            }
+
+            node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
+            if (node.RepairState != RepairState.Repaired && CheckRepairCompletion(nodeId, node.Deposited))
+            {
+                node.RepairState = RepairState.Repaired;
+                node.VisualState = VisualStateRepaired;
+                if (!_completedNodeIds.Contains(nodeId, StringComparer.Ordinal))
+                {
+                    _completedNodeIds.Add(nodeId);
+                }
+            }
+        }
     }
 
     private void EmitRepairProgressChanged(
@@ -922,6 +1054,48 @@ public sealed class WorldRepair
         }
 
         return fallback;
+    }
+
+    private static IEnumerable<KeyValuePair<string, object?>> ReadObjectMap(
+        IReadOnlyDictionary<string, object?> data,
+        string key)
+    {
+        if (!data.TryGetValue(key, out var value) || value is null)
+        {
+            return [];
+        }
+
+        return value is IReadOnlyDictionary<string, object?> objectMap
+            ? objectMap
+            : [];
+    }
+
+    private static IReadOnlyDictionary<string, object?> ToObjectMap(object? value)
+    {
+        return value switch
+        {
+            IReadOnlyDictionary<string, object?> readOnly => readOnly,
+            IDictionary<string, object?> mutable => new Dictionary<string, object?>(mutable, StringComparer.Ordinal),
+            _ => new Dictionary<string, object?>(StringComparer.Ordinal),
+        };
+    }
+
+    private static int ReadInt(IReadOnlyDictionary<string, object?> data, string key, int fallback = 0)
+    {
+        if (!data.TryGetValue(key, out var value) || value is null)
+        {
+            return fallback;
+        }
+
+        return value switch
+        {
+            int intValue => intValue,
+            long longValue => checked((int)longValue),
+            double doubleValue => checked((int)doubleValue),
+            float floatValue => checked((int)floatValue),
+            string stringValue when int.TryParse(stringValue, out var parsed) => parsed,
+            _ => fallback,
+        };
     }
 
     private sealed class RepairNodeState
