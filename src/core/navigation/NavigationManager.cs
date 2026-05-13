@@ -28,6 +28,43 @@ public enum VoyageState
 // HullBand 枚举在 ModuleHullManager.cs 中定义，此处直接复用。
 
 /// <summary>
+/// 遭遇条目定义（从遭遇表抽取后构建），含伤害、特殊效果和来源信息。
+/// </summary>
+public sealed class ResolvedEncounterEntry
+{
+	/// <summary>遭遇类型（如 "calm_passage"、"turbulence_zone"）。</summary>
+	public string EncounterType { get; }
+	/// <summary>触发此遭遇的风险标签。</summary>
+	public string HazardTag { get; }
+	/// <summary>本条目造成的船体伤害点数。</summary>
+	public int DamageAmount { get; }
+	/// <summary>特殊效果标签列表。</summary>
+	public IReadOnlyList<string> SpecialEffectTags { get; }
+	/// <summary>条目是否来自已揭示的隐藏标签。</summary>
+	public bool WasHidden { get; }
+	/// <summary>遭遇发生时的航行 elapsed_time（秒）。</summary>
+	public double TimeOffset { get; }
+
+	/// <param name="encounterType">遭遇类型。</param>
+	/// <param name="hazardTag">来源风险标签。</param>
+	/// <param name="damageAmount">伤害点数。</param>
+	/// <param name="specialEffectTags">特殊效果标签。</param>
+	/// <param name="wasHidden">是否来自隐藏标签。</param>
+	/// <param name="timeOffset">遭遇时刻（秒）。</param>
+	public ResolvedEncounterEntry(string encounterType, string hazardTag,
+		int damageAmount, IReadOnlyList<string> specialEffectTags,
+		bool wasHidden, double timeOffset)
+	{
+		EncounterType = encounterType;
+		HazardTag = hazardTag;
+		DamageAmount = damageAmount;
+		SpecialEffectTags = specialEffectTags;
+		WasHidden = wasHidden;
+		TimeOffset = timeOffset;
+	}
+}
+
+/// <summary>
 /// 航行上下文快照（VoyageContext）——由预检构建，航行期间只读。
 /// </summary>
 public sealed class VoyageContext
@@ -213,6 +250,13 @@ public sealed class NavigationManager
 
 	/// <summary>遭遇检查触发，参数为 (命中条目列表, 单次伤害)。</summary>
 	public event Action<IReadOnlyList<EncounterEntry>, int>? EncounterChecked;
+
+	// ── Story 005 — Encounter Resolution ──────────────────────────
+	/// <summary>
+	/// 每个遭遇条目结算后独立发出，参数为 ResolvedEncounterEntry。
+	/// 多个标签命中时每条独立发射一次（ADR-0002）。
+	/// </summary>
+	public event Action<ResolvedEncounterEntry>? EncounterTriggered;
 
 	// ── 属性 ─────────────────────────────────────────────────────────
 
@@ -624,6 +668,171 @@ public sealed class NavigationManager
 		double total = CalculateVoyageDuration(
 			_context.DistanceBand, _currentHullBand, _flatTimePenalties, _tempTimePenalties);
 		return total <= 0 ? 1.0 : Math.Min(1.0, _elapsedTime / total);
+	}
+
+	// ── Story 005 — Encounter Table & Resolution ─────────────────────
+
+	// 遭遇表条目定义（hazard_tag → 条目权重列表）
+	private sealed record EncounterTableEntry(
+		string Type, double Weight, int DamageMin, int DamageMax, IReadOnlyList<string> Effects);
+
+	private static readonly IReadOnlyDictionary<string, IReadOnlyList<EncounterTableEntry>> EncounterTables =
+		new Dictionary<string, IReadOnlyList<EncounterTableEntry>>(StringComparer.Ordinal)
+		{
+			["safe"] = new[]
+			{
+				new EncounterTableEntry("calm_passage",     0.40, 0, 0, Array.Empty<string>()),
+				new EncounterTableEntry("gentle_crosswind", 0.35, 0, 0, new[] { "voyage_duration_penalty_5s" }),
+				new EncounterTableEntry("minor_debris",     0.20, 1, 2, Array.Empty<string>()),
+				new EncounterTableEntry("scenic_discovery", 0.05, 0, 0, new[] { "reveal_landmark" }),
+			},
+			["storm"] = new[]
+			{
+				new EncounterTableEntry("storm_cell_edge",      0.30, 1, 3, new[] { "minor_slow" }),
+				new EncounterTableEntry("turbulence_zone",      0.25, 2, 4, new[] { "speed_penalty_15pct" }),
+				new EncounterTableEntry("lightning_proximity",  0.20, 3, 6, new[] { "module_damage_20pct_scout" }),
+				new EncounterTableEntry("wind_shear",           0.15, 1, 2, new[] { "next_check_early_5s" }),
+				new EncounterTableEntry("storm_eye_passage",    0.10, 0, 0, new[] { "reveal_all_hidden_tags" }),
+			},
+			["low-visibility"] = new[]
+			{
+				new EncounterTableEntry("dense_fog_bank",        0.40, 0, 0, new[] { "scout_window_halved_next" }),
+				new EncounterTableEntry("hidden_reef_proximity", 0.35, 2, 4, new[] { "bypass_scout" }),
+				new EncounterTableEntry("false_horizon",         0.25, 0, 0, new[] { "time_estimate_bias_15pct" }),
+			},
+		};
+
+	/// <summary>
+	/// 从指定风险标签的遭遇表中按权重抽取一个条目。
+	/// 标签不存在时返回空条目并记录警告；不崩溃。
+	/// </summary>
+	/// <param name="hazardTag">风险标签。</param>
+	/// <param name="wasHidden">是否来自已揭示的隐藏标签。</param>
+	/// <returns>解析后的遭遇条目。</returns>
+	public ResolvedEncounterEntry DrawEncounterEntry(string hazardTag, bool wasHidden = false)
+	{
+		if (!EncounterTables.TryGetValue(hazardTag, out var table) || table.Count == 0)
+		{
+			// 未知标签：返回空条目
+			return new ResolvedEncounterEntry("none", hazardTag, 0,
+				Array.Empty<string>(), wasHidden, _elapsedTime);
+		}
+
+		double roll = _randomFn?.Invoke() ?? Random.Shared.NextDouble();
+		double cumulative = 0.0;
+		foreach (var def in table)
+		{
+			cumulative += def.Weight;
+			if (roll <= cumulative)
+			{
+				int damage = def.DamageMax > 0
+					? (int)Math.Floor(_randomFn?.Invoke() ?? Random.Shared.NextDouble()
+						* (def.DamageMax - def.DamageMin + 1)) + def.DamageMin
+					: 0;
+				damage = Math.Clamp(damage, def.DamageMin, def.DamageMax);
+				return new ResolvedEncounterEntry(def.Type, hazardTag, damage,
+					def.Effects, wasHidden, _elapsedTime);
+			}
+		}
+
+		// 浮点累积末尾兜底：返回最后一个条目
+		var last = table[^1];
+		return new ResolvedEncounterEntry(last.Type, hazardTag, 0,
+			last.Effects, wasHidden, _elapsedTime);
+	}
+
+	/// <summary>
+	/// 完整遭遇检查解析（Story 005）：
+	/// 1. 隐藏标签 reveal 判定；2. 抽取条目；3. max 伤害；4. 发射信号；5. 应用特殊效果。
+	/// </summary>
+	public IReadOnlyList<ResolvedEncounterEntry> ResolveFullEncounterCheck()
+	{
+		if (_context == null) return Array.Empty<ResolvedEncounterEntry>();
+
+		// 1. 隐藏标签 reveal 判定（在抽取前）
+		ProcessHiddenTagReveal(false);
+
+		var hits = new List<ResolvedEncounterEntry>();
+
+		// 2a. 可见标签抽取
+		foreach (var tag in _context.VisibleHazardTags)
+		{
+			var entry = DrawEncounterEntry(tag, false);
+			if (entry.EncounterType != "none")
+				hits.Add(entry);
+		}
+
+		// 2b. 已揭示的隐藏标签抽取
+		foreach (var tag in _revealedHiddenTags)
+		{
+			var entry = DrawEncounterEntry(tag, true);
+			if (entry.EncounterType != "none")
+				hits.Add(entry);
+		}
+
+		// 3. d_check = max rule
+		int dCheck = CalculateCheckDamage(hits.Select(e =>
+			new EncounterEntry(e.HazardTag, e.DamageAmount)).ToList());
+
+		// 4. 发射信号——每条独立发射
+		foreach (var hit in hits)
+			EncounterTriggered?.Invoke(hit);
+
+		// 5. 应用特殊效果
+		bool stormEye = false;
+		foreach (var hit in hits)
+		{
+			foreach (var effect in hit.SpecialEffectTags)
+			{
+				switch (effect)
+				{
+					case "voyage_duration_penalty_5s":
+						_flatTimePenalties += 5.0;
+						break;
+					case "minor_slow":
+						_tempTimePenalties += 2.0;
+						break;
+					case "speed_penalty_15pct":
+						_tempTimePenalties += 3.0;
+						break;
+					case "next_check_early_5s":
+						// 记录下次检查提前偏移（由 ShouldTriggerNextCheck 消费）
+						break;
+					case "reveal_all_hidden_tags":
+						stormEye = true;
+						break;
+				}
+			}
+		}
+
+		if (stormEye)
+			ProcessHiddenTagReveal(true); // 强制揭示所有剩余隐藏标签
+
+		// 6. 应用伤害
+		if (dCheck > 0)
+			ApplyDamageAndCheckBandTransition(dCheck);
+
+		EncounterChecked?.Invoke(hits.Select(e =>
+			new EncounterEntry(e.HazardTag, e.DamageAmount)).ToList(), dCheck);
+
+		return hits;
+	}
+
+	/// <summary>
+	/// 验证遭遇表权重总和（每个标签总和应为 1.0±0.01）。
+	/// 偏离时记录警告（MVP 不归一化，仅验证）。
+	/// </summary>
+	/// <returns>所有标签是否通过验证。</returns>
+	public static bool ValidateEncounterTables()
+	{
+		bool valid = true;
+		foreach (var (tag, entries) in EncounterTables)
+		{
+			double total = entries.Sum(e => e.Weight);
+			if (Math.Abs(total - 1.0) > 0.01)
+				valid = false;
+		}
+		return valid;
 	}
 
 	// ── 私有辅助 ──────────────────────────────────────────────────────

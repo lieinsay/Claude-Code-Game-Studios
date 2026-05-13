@@ -163,6 +163,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutPreviewTest", "tests\u
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DamageHullBandTest", "tests\unit\navigation\damage\DamageHullBandTest.csproj", "{A2ED414F-4AC2-4C2E-89B9-8DFE9523D6F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncounterResolutionTest", "tests\unit\navigation\encounter\EncounterResolutionTest.csproj", "{D583DB0B-305D-4359-8CB5-728E290CC2CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -453,6 +455,10 @@ Global
 		{A2ED414F-4AC2-4C2E-89B9-8DFE9523D6F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2ED414F-4AC2-4C2E-89B9-8DFE9523D6F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2ED414F-4AC2-4C2E-89B9-8DFE9523D6F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D583DB0B-305D-4359-8CB5-728E290CC2CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D583DB0B-305D-4359-8CB5-728E290CC2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D583DB0B-305D-4359-8CB5-728E290CC2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D583DB0B-305D-4359-8CB5-728E290CC2CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -535,5 +541,6 @@ Global
 		{B4A850DA-EAC0-48B6-B3C2-2EB8CB4146A1} = {0CF4C299-8406-45A1-9655-BF00E0A07845}
 		{7D0B42D9-6A57-4FC2-A253-E9DDC049FFBE} = {0CF4C299-8406-45A1-9655-BF00E0A07845}
 		{A2ED414F-4AC2-4C2E-89B9-8DFE9523D6F2} = {0CF4C299-8406-45A1-9655-BF00E0A07845}
+		{D583DB0B-305D-4359-8CB5-728E290CC2CF} = {0CF4C299-8406-45A1-9655-BF00E0A07845}
 	EndGlobalSection
 EndGlobal
