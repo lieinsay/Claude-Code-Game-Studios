@@ -1,7 +1,7 @@
 # Story 004: Furnace Capacity & Departure Readiness
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -237,7 +237,7 @@ func get_departure_block_messages() -> Array[String]:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/DepartureReadinessTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 3/3 checks in `tests/unit/modules/DepartureReadinessTest.csproj`
 
 ---
 

@@ -2,9 +2,20 @@
 
 <!-- STATUS -->
 Epic: Core Layer
-Feature: Resources & Goods Capacity (#5) contract complete + Intel / Knowledge System (#6) complete
-Task: #5 ResourcesManager contract merged for downstream use; full runtime advancement still blocked by BUG-005. #6 all 8 Stories complete; #9 Chart Route Planning and #8 Modules/Hull are unblocked by their contract dependencies.
+Feature: Modules & Hull State (#8) complete
+Task: #8 ModuleHullManager contract merged for downstream use; full runtime advancement still blocked by BUG-005. #9 Chart Route Planning remains the next unlocked production epic.
 <!-- /STATUS -->
+
+## Session Extract — Epic #8 Modules & Hull State complete — 2026-05-13
+
+- Verdict: COMPLETE
+- Epic: `production/epics/modules-hull-state/EPIC.md` — Modules & Hull State (#8)
+- Stories completed: Story 001 Module Slot State Machine & Dual-Field Model, Story 002 Module Swap Two-Phase Operation, Story 003 Hull Integrity/Bands/Scars, Story 004 Furnace Capacity & Departure Readiness, Story 005 Cargo Bay Effective Volume & Trapped Goods, Story 006 Module Signal Contract, Story 007 Module Snapshot Persistence, Story 008 Scout Acquisition & Combat Damage Interfaces
+- Files changed: `src/core/modules/ModuleHullManager.cs`, `src/core/resources/ResourcesManager.cs`, `tests/unit/modules/*`, `tests/integration/modules/*`, `CloudWeaverVoyage.sln`, `production/epics/modules-hull-state/*.md`, `production/epics/index.md`, `docs/reference/production-flowchart.md`
+- Test evidence: Story 001 7/7, Story 002 6/6, Story 003 4/4, Story 004 3/3, Story 005 3/3, Story 006 4/4, Story 007 5/5, Story 008 4/4 — total 36/36 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors); full C# runner sweep `tests/**/*.csproj` 63/63 PASS
+- Residual risk: Godot scene/HUD visualization and player-facing UI for trapped goods remain downstream UI/HUD work; BUG-005 still blocks full runtime advancement.
+- Unlocked: #10 Navigation can consume module/hull departure readiness after #9 Chart Route Planning completes; #11/#12/#16 can consume damage, cargo capacity, and signal contracts.
 
 ## Session Extract — Epic #6 全部完成 — 2026-05-13
 

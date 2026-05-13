@@ -1,7 +1,7 @@
 # Story 005: Cargo Bay Effective Volume & Trapped Goods
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -186,7 +186,7 @@ func get_slot_cargo_volume_contribution(slot_id: StringName) -> int:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/CargoVolumeTrappedTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 3/3 checks in `tests/integration/modules/CargoVolumeTrappedTest.csproj`
 
 ---
 

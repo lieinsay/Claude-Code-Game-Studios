@@ -1,7 +1,7 @@
 # Story 007: Module Snapshot Persistence
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -256,7 +256,7 @@ func _module_type_from_int(value: int) -> int:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/SnapshotPersistenceTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 5/5 checks in `tests/integration/modules/SnapshotPersistenceTest.csproj`
 
 ---
 

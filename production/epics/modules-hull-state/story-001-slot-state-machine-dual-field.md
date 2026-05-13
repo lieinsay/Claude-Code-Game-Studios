@@ -1,7 +1,7 @@
 # Story 001: Module Slot State Machine & Dual-Field Model
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -308,7 +308,7 @@ func is_slot_interactable(slot_id: StringName) -> bool:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/SlotStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 7/7 checks in `tests/unit/modules/SlotStateMachineTest.csproj`
 
 ---
 

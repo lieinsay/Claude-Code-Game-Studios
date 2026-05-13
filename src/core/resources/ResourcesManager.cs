@@ -234,6 +234,7 @@ public sealed class ResourcesManager
     private int _carrySlotBonus;
     private int _storageVolumeBonus;
     private int _cargoModuleVolumeBonus;
+    private int _cargoBayTrappedVolume;
     private bool _isMutating;
 
     /// <summary>
@@ -355,7 +356,7 @@ public sealed class ResourcesManager
     /// </summary>
     public void SetCargoModuleVolumeBonus(int bonus)
     {
-        _cargoModuleVolumeBonus = Math.Max(0, bonus);
+        UpdateCargoBayEffectiveVolume(bonus);
     }
 
     /// <summary>
@@ -1169,6 +1170,25 @@ public sealed class ResourcesManager
     }
 
     /// <summary>
+    /// Updates the effective cargo bay volume provided by installed cargo modules.
+    /// Loaded goods beyond the new volume become trapped but are not destroyed.
+    /// </summary>
+    public void UpdateCargoBayEffectiveVolume(int newVolume)
+    {
+        _cargoModuleVolumeBonus = Math.Max(0, newVolume);
+        _cargoBayTrappedVolume = Math.Max(0, GetUsedVolume(ResourcePool.Loaded) - GetCargoBayCapacity());
+    }
+
+    /// <summary>
+    /// Current loaded cargo volume that is present but inaccessible because module capacity fell.
+    /// </summary>
+    public int GetCargoBayTrappedVolume()
+    {
+        _cargoBayTrappedVolume = Math.Max(0, GetUsedVolume(ResourcePool.Loaded) - GetCargoBayCapacity());
+        return _cargoBayTrappedVolume;
+    }
+
+    /// <summary>
     /// 返回货舱占用快照，供模块系统判断模块是否可移除。
     /// </summary>
     public Dictionary<string, object?> GetCargoBayUsage()
@@ -1188,6 +1208,8 @@ public sealed class ResourcesManager
         return new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["used_volume"] = GetUsedVolume(ResourcePool.Loaded),
+            ["effective_volume"] = GetCargoBayCapacity(),
+            ["trapped_volume"] = GetCargoBayTrappedVolume(),
             ["stacks"] = stacks,
         };
     }

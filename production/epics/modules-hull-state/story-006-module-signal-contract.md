@@ -1,7 +1,7 @@
 # Story 006: Module Signal Contract
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -247,7 +247,7 @@ func _on_departure_readiness_changed(can_depart: bool, reasons: Array[StringName
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/SignalContractTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 4/4 checks in `tests/integration/modules/SignalContractTest.csproj`
 
 ---
 

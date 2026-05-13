@@ -1,7 +1,7 @@
 # Story 002: Module Swap Two-Phase Operation
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -216,8 +216,8 @@ enum SwapError {
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/modules/SwapModuleTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/modules/ModuleSwapTest.csproj` — must exist and pass
+**Status**: [x] PASS — 6/6 checks in `tests/unit/modules/ModuleSwapTest.csproj`
 
 ---
 

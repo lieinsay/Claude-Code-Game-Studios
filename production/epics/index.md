@@ -1,6 +1,6 @@
 # Epics Index
 
-> **Last Updated**: 2026-05-12
+> **Last Updated**: 2026-05-13
 > **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
 > **ADR Coverage**: 17 Accepted + 2 Deferred (ADR-0019 platform pivot active)
 
@@ -21,7 +21,7 @@ technical preferences and control manifest.
 | [platform-session-shell](platform-session-shell/EPIC.md) | #2 | platform-session-shell.md | ADR-0001, ADR-0006 | 3 | 7 (001-007) | Complete |
 | [local-save-persistence](local-save-persistence/EPIC.md) | #3 | local-save-world-state-persistence.md | ADR-0003, ADR-0006 | 3 | 8 (001-008) | **Complete** |
 | [player-movement-interaction](player-movement-interaction/EPIC.md) | #4 | player-movement-interaction.md | ADR-0004 | 3 | 7 (001-007) | **Complete** |
-| [resources-goods-capacity](resources-goods-capacity/EPIC.md) | #5 | resources-goods-capacity.md | ADR-0005 | 3 | 9 (001-009) | In Progress |
+| [resources-goods-capacity](resources-goods-capacity/EPIC.md) | #5 | resources-goods-capacity.md | ADR-0005 | 3 | 9 (001-009) | **Complete** |
 
 ## Core Layer
 
@@ -29,7 +29,7 @@ technical preferences and control manifest.
 |------|----------|-----|----------------|-----|---------|--------|
 | [intel-knowledge](intel-knowledge/EPIC.md) | #6 | player-knowledge-intel.md | ADR-0007 | 3 | 8 (001-008) | **Complete** |
 | [airship-hub](airship-hub/EPIC.md) | #7 | airship-hub.md | ADR-0001, ADR-0002, ADR-0003, ADR-0004 | 3 | 8 (001-008) | **Complete — reviewed 2026-05-12** |
-| [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | 8 (001-008) | In Progress |
+| [modules-hull-state](modules-hull-state/EPIC.md) | #8 | airship-modules-hull-state.md | ADR-0009 | 3 | 8 (001-008) | **Complete** |
 | [chart-route-planning](chart-route-planning/EPIC.md) | #9 | chart-route-planning.md | ADR-0008 | 3 | 8 (001-008) | In Progress |
 | [navigation-route-risk](navigation-route-risk/EPIC.md) | #10 | navigation-route-risk.md | ADR-0010 | 3 | 8 (001-008) | In Progress |
 

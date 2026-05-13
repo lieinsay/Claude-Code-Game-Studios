@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-13
-> **项目阶段**: Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7 **Complete** | Epic #8/#9 已解锁 | BUG-005 阻塞完整运行时推进
+> **项目阶段**: Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7/#8 **Complete** | Epic #9 已解锁 | BUG-005 阻塞完整运行时推进
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 | Active/Next: #8 Modules, #9 Chart, BUG-005
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 29 个 C# 源文件 + 55 个 C# test runner: unit 27 / integration 27 / parity 1)；GDScript P3 原型保留为迁移参考
+> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 | Active/Next: #9 Chart, BUG-005
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 30 个 C# 源文件 + 63 个 C# test runner: unit 31 / integration 31 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -50,7 +50,7 @@ graph TB
         CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>55/55 C# runners PASS<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS"]
+        TEST["tests/<br/>63/63 C# runners PASS<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS<br/>Modules/Hull Story 001-008 PASS"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -109,7 +109,7 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
-| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7 已完成，#8/#9 已解锁 |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7/#8 已完成，#9 已解锁 |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
@@ -119,7 +119,7 @@ graph TB
 | **Core 层 (5 Epic / 40 Stories)** | |
 | [production/epics/intel-knowledge/EPIC.md](../production/epics/intel-knowledge/EPIC.md) | Epic #6: 情报知识 (8/8 Stories **Complete** — 2026-05-13，解锁 #9) |
 | [production/epics/airship-hub/EPIC.md](../production/epics/airship-hub/EPIC.md) | Epic #7: 飞艇家园 (8/8 Stories **Complete** — 2026-05-12 复审通过) |
-| [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8 Stories) |
+| [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8/8 Stories **Complete** — 36/36 PASS) |
 | [production/epics/chart-route-planning/EPIC.md](../production/epics/chart-route-planning/EPIC.md) | Epic #9: 航图规划 (8 Stories — 已由 #6 解锁，可开工) |
 | [production/epics/navigation-route-risk/EPIC.md](../production/epics/navigation-route-risk/EPIC.md) | Epic #10: 航行路线风险 (8 Stories) |
 | **Feature 层 (5 Epic / 30 Stories)** | |
@@ -581,8 +581,8 @@ graph TB
 
 ## 五、C# 实现进度
 
-> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core 前置 #6 Intel / Knowledge 8/8 Story 完成并解锁 #9 Chart；#8 Modules/Hull 已由 #5/#7 解锁；BUG-005 仍阻塞完整运行时推进；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.sln` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS；`tests/**/*.csproj` 全量 C# runner 55/55 PASS；FoundationParity 70/70 PASS。
+> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core 前置 #6 Intel、#7 Hub、#8 Modules/Hull 完成并解锁 #9 Chart；BUG-005 仍阻塞完整运行时推进；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误）；`tests/**/*.csproj` 全量 C# runner 63/63 PASS；Epic #8 Story runners 36/36 PASS。
 
 ### Content Registry 完成项
 
@@ -649,7 +649,7 @@ graph TB
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
 | P0 | [#9 Chart Route Planning Story 001](../production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md) | #6 情报合同已完成；航图可开始消费知识状态与路线可见性 |
-| P0 | [#8 Modules/Hull Story 001](../production/epics/modules-hull-state/story-001-slot-state-machine-dual-field.md) | #5 资源合同与 #7 Hub 槽位/舱室合同均已完成，可消费 cargo-bay capacity 与 destruction contracts |
+| P0 | [#9 Chart Route Planning Story 001](../production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md) | #6 情报合同完成；#8 模块船体合同完成 |
 | P1 | BUG-005 SessionShell/Hub scene flow | Downstream gameplay scene 未在 audio activation 后挂载；修复后重跑 TC-RGC-003 至 TC-RGC-010 |
 
 ---
@@ -1283,21 +1283,21 @@ graph TB
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
   src/             ███████████████░░░░░  29 C# 文件  (Core + Feature + Presentation + Godot 节点脚本)
-  tests/           ████████████████████  55 C# runner  (Unit 27 + Integration 27 + Parity 1)
+  tests/           ████████████████████  63 C# runner  (Unit 31 + Integration 31 + Parity 1)
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
   📊 总计: ~384+ 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
-  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7 Complete | #8/#9 已解锁
-  💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 29 C# + 55 C# test runners)
-  ✅ Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #5/#6 complete
+  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7/#8 Complete | #9 已解锁
+  💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 30 C# + 63 C# test runners)
+  ✅ Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #5/#6/#8 complete
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-13 — Desktop C# Foundation/Core 前置推进；Resources #5 与 Intel #6 全部完成并解锁 #8/#9；全量 C# runner 55/55 PASS；BUG-005 阻塞完整运行时推进。
+> 更新于 2026-05-13 — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 阻塞完整运行时推进。
 
 ### 已全部完成 ✅
 
@@ -1325,7 +1325,8 @@ graph TB
 - [x] **Content Registry Story-001/002/003/004/005/006** — C# Registry ID/query + Schema Validation + Content Lifecycle + Reference Integrity + Domain Loading/Decision Gating + Diagnostic System；`IdRegistryCoreTest.csproj` 11/11 PASS；`ContentLifecycleTest.csproj` 6/6 PASS；`ReferenceIntegrityTest.csproj` 7/7 PASS；`DomainLoadingTest.csproj` 8/8 PASS；`DiagnosticSystemTest.csproj` 7/7 PASS
 - [x] **Intel / Knowledge Epic #6** — 8/8 Story Complete；Pattern 24/24、Location 47/47、Ability 23/23、Consume 46/46、Events 21/21、Query 44/44、Signal 39/39、Persistence 43/43 PASS；#9 Chart Route Planning 已解锁
 - [x] **Resources / Goods Epic #5** — 9/9 Story Complete；Story 001-009 全部 PASS；#8 Modules/Hull 已解锁；BUG-005 仍阻塞完整运行时推进
-- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 55/55 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- [x] **Modules / Hull Epic #8** — 8/8 Story Complete；Story 001-008 自动化证据 36/36 PASS；#10/#11/#12/#16 可消费模块、船体、货舱容量与损伤合同
+- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 63/63 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误）
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成
@@ -1338,7 +1339,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5 与 Intel #6 全部完成并解锁 #8/#9；全量 C# runner 55/55 PASS；BUG-005 阻塞完整运行时推进。
+> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 阻塞完整运行时推进。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

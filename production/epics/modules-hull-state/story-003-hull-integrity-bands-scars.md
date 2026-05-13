@@ -1,7 +1,7 @@
 # Story 003: Hull Integrity, Bands & Scars
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -279,7 +279,7 @@ func repair_hull(kit_count: int) -> int:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/HullIntegrityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 4/4 checks in `tests/unit/modules/HullIntegrityTest.csproj`
 
 ---
 

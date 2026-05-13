@@ -1,7 +1,7 @@
 # Story 008: Scout Module Acquisition & Combat Damage Interfaces
 
 > **Epic**: Modules & Hull State
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -243,7 +243,7 @@ func get_installed_slots() -> Array[StringName]:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/CombatDamageInterfaceTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] PASS — 4/4 checks in `tests/integration/modules/CombatDamageInterfaceTest.csproj`
 
 ---
 
