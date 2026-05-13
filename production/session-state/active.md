@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Chart / Route Planning (#9)
-Task: Epic #10 Navigation Route Risk 进行中；Story 001+002 完成（33+19 PASS）；Story 003~008 待实现
+Task: Epic #10 Navigation Route Risk 进行中；Story 001-004 完成（33+19+29+22 PASS）；Story 005~008 待实现
 <!-- /STATUS -->
 
 ## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13
