@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；#6/#7 全部完成；#5 并行推进；#9 已解锁**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；#5/#6/#7 全部完成；#8/#9 已解锁；BUG-005 阻塞完整运行时推进**
 
 ---
 
@@ -490,38 +490,36 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase 0      ████████████████████████ 100%
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
-🔵 Phase C      ███████████████░░░░░░░░░  57% (#7 8/8 完成；#6 8/8 完成；#5 并行)
+🔵 Phase C      ████████████████░░░░░░░░  61% (#5/#6/#7 完成；#8/#9 已解锁)
 ```
 
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #6 Intel / Knowledge System 8/8 Story 已完成；#9 Chart Route Planning 已由 #6 解锁；Epic #5 继续并行推进
-- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS（1 个 CS0219 测试警告，0 错误；首次 `--no-restore` 仅因新增 Intel 测试项目缺少 NuGet assets 失败，restore 后通过）
-- 测试验证: `tests/**/*.csproj` 全量 runner 47/47 PASS；FoundationParity 70/70 PASS；Intel Story 001-008 均有自动化证据（Story 007 39/39，Story 008 43/43）
-- 本次完成: 生产状态复核与全量 C# runner 回归；Epic #6 全部情报合同、信号契约与持久化集成证据已锁定
+- 活跃任务: Epic #5 Resources/Goods 与 Epic #6 Intel 均已完成；#8 Modules/Hull 与 #9 Chart Route Planning 已解锁；BUG-005 仍阻塞完整运行时推进
+- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误；首次 `--no-restore` 仅因新增 Resources 测试项目缺少 NuGet assets 失败，restore 后通过）
+- 测试验证: `tests/**/*.csproj` 全量 runner 55/55 PASS；FoundationParity 70/70 PASS；Resources Story 001-009 与 Intel Story 001-008 均有自动化证据
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6 Complete、#8/#9 已解锁、55 个 C# runner 的当前基线
+- 本次完成: 生产状态复核与全量 C# runner 回归；#5 资源合同、#6 情报合同、信号契约与持久化集成证据已锁定
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
 | **P0** | #9 Chart Route Planning Story 001 | #6 情报合同完成 ✅ | 可开工 |
-| **P1** | #5 资源货物其余 Story（并行团队） | Story 001 完成 | 进行中 |
-| **P1** | #8 模块船体 Story 001 | #7 完成；仍等 #5 池定义 | 等 #5 |
+| **P0** | #8 Modules/Hull Story 001 | #5 资源合同 + #7 Hub 合同完成 ✅ | 可开工 |
+| **P1** | BUG-005 SessionShell/Hub scene flow | QA 阻塞 TC-RGC-003~010 | 修复后复测 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #6 已完成并解锁 #9；下一段应把 #9 航图规划与 #5 资源货物并行推进，#8 继续等待 #5 池定义补齐。
+> 关键建议: #5/#6/#7 已完成，下一段可并行推进 #8 模块船体与 #9 航图规划；BUG-005 需要在完整运行时验收前优先修复。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
   ┌─ #9 航图规划 Story 001 Chart State Machine + Content Gate (依赖 #6 ✅)
-  └─ #5 资源货物（并行团队继续推进）
-
-等 #5 完成后:
-  ┌─ #8 模块船体   ─┐ 消费 #7 槽位/舱室合同 + #5 资源池
-  └─ #9 航图规划   ─┘ 消费 #6 情报合同
+  ├─ #8 模块船体 Story 001 Slot State Machine + Dual-Field (依赖 #5/#7 ✅)
+  └─ BUG-005 SessionShell/Hub scene flow 修复与 TC-RGC-003~010 复测
 ```
 
 ---

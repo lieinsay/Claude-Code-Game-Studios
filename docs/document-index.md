@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-12
-> **项目阶段**: Pre-Production — Desktop C# Foundation Layer 核心 Epic 完成 | Epic #1 内容注册表 **Complete** | Epic #3 本地存档持久化 **Complete**
+> **最后更新**: 2026-05-13
+> **项目阶段**: Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7 **Complete** | Epic #8/#9 已解锁 | BUG-005 阻塞完整运行时推进
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Foundation: 3 Epic Complete (#1 #2 #3), 2 In Progress (#4 #5)
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (14 个 C# 源文件 + debug 层 2 文件 + Godot 节点脚本 2 文件 + 7 个集成测试项目 + 5 个单元测试项目)；GDScript P3 原型保留为迁移参考
+> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 | Active/Next: #8 Modules, #9 Chart, BUG-005
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 29 个 C# 源文件 + 55 个 C# test runner: unit 27 / integration 27 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -50,7 +50,7 @@ graph TB
         CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
         FEATURE["feature/ (1)<br/>WorldRepair"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>FoundationParity 70/70<br/>IdRegistryCore 11/11<br/>ContentLifecycle 6/6<br/>ReferenceIntegrity 7/7<br/>DomainLoading 7/7<br/>DiagnosticSystem 7/7<br/>PlayerBoundary 11/11<br/>SavePipeline 11/11<br/>SnapshotPackage 18/18<br/>StorageCapability 17/17<br/>Migration 9/9<br/>ContinueAvailability 10/10<br/>BackupFailover 13/13<br/>ArtifactIsolation 10/10<br/>DesktopLifecycle 22/22"]
+        TEST["tests/<br/>55/55 C# runners PASS<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -109,18 +109,18 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
-| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成 (115 Stories) |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7 已完成，#8/#9 已解锁 |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
 | [production/epics/local-save-persistence/EPIC.md](../production/epics/local-save-persistence/EPIC.md) | Epic #3: 持久化 (8/8 Stories **Complete** — Epic 已关闭) |
-| [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7 Stories) |
-| [production/epics/resources-goods-capacity/EPIC.md](../production/epics/resources-goods-capacity/EPIC.md) | Epic #5: 资源货物容量 (9 Stories) |
+| [production/epics/player-movement-interaction/EPIC.md](../production/epics/player-movement-interaction/EPIC.md) | Epic #4: 移动交互 (7/7 Stories **Complete**) |
+| [production/epics/resources-goods-capacity/EPIC.md](../production/epics/resources-goods-capacity/EPIC.md) | Epic #5: 资源货物容量 (9/9 Stories **Complete** — contract approved; BUG-005 blocks full runtime advancement) |
 | **Core 层 (5 Epic / 40 Stories)** | |
-| [production/epics/intel-knowledge/EPIC.md](../production/epics/intel-knowledge/EPIC.md) | Epic #6: 情报知识 (8 Stories) |
+| [production/epics/intel-knowledge/EPIC.md](../production/epics/intel-knowledge/EPIC.md) | Epic #6: 情报知识 (8/8 Stories **Complete** — 2026-05-13，解锁 #9) |
 | [production/epics/airship-hub/EPIC.md](../production/epics/airship-hub/EPIC.md) | Epic #7: 飞艇家园 (8/8 Stories **Complete** — 2026-05-12 复审通过) |
 | [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8 Stories) |
-| [production/epics/chart-route-planning/EPIC.md](../production/epics/chart-route-planning/EPIC.md) | Epic #9: 航图规划 (8 Stories) |
+| [production/epics/chart-route-planning/EPIC.md](../production/epics/chart-route-planning/EPIC.md) | Epic #9: 航图规划 (8 Stories — 已由 #6 解锁，可开工) |
 | [production/epics/navigation-route-risk/EPIC.md](../production/epics/navigation-route-risk/EPIC.md) | Epic #10: 航行路线风险 (8 Stories) |
 | **Feature 层 (5 Epic / 30 Stories)** | |
 | [production/epics/exploration-scavenge/EPIC.md](../production/epics/exploration-scavenge/EPIC.md) | Epic #11: 探索搜撤 (6 Stories) |
@@ -579,10 +579,10 @@ graph TB
 
 ---
 
-## 五、C# Foundation 实现进度
+## 五、C# 实现进度
 
-> **当前状态**: Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；C# Autoload 迁移主体完成；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.sln` → 0 errors；`dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj` → 11/11 PASS；`dotnet run --project tests/unit/registry/ContentLifecycleTest.csproj` → 6/6 PASS；`dotnet run --project tests/unit/registry/ReferenceIntegrityTest.csproj` → 7/7 PASS；`dotnet run --project tests/integration/registry/DomainLoadingTest.csproj` → 8/8 PASS；`dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj` → 7/7 PASS。
+> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core 前置 #6 Intel / Knowledge 8/8 Story 完成并解锁 #9 Chart；#8 Modules/Hull 已由 #5/#7 解锁；BUG-005 仍阻塞完整运行时推进；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS；`tests/**/*.csproj` 全量 C# runner 55/55 PASS；FoundationParity 70/70 PASS。
 
 ### Content Registry 完成项
 
@@ -595,6 +595,25 @@ graph TB
 | [Story-005: Domain Loading & Decision UI Gating](../production/epics/content-registry/story-005-domain-loading-decision-gating.md) | Done | `src/core/content/Registry.cs` — 7 域加载状态、decision surface ready gate、domain_ready、snapshot isolation、VERSION_INCOMPATIBLE 边界诊断 | `tests/integration/registry/DomainLoadingTest.csproj` — 8/8 PASS |
 | [Story-006: Diagnostic System](../production/epics/content-registry/story-006-diagnostic-system.md) | Done | `src/core/content/Registry.cs` — RegistryDiagnosticEvent、8 级 precedence、related_errors、severity/blocking_scope/suggested_action、稳定排序 | `tests/unit/registry/DiagnosticSystemTest.csproj` — 7/7 PASS |
 
+### Intel / Knowledge 完成项
+
+| Story | 状态 | 实现 | 验证 |
+|-------|------|------|------|
+| Story-001 Pattern Knowledge State Machine | Done | `src/core/intel/IntelManager.cs` — 规律 4 态状态机、观测事件累分、confirmed+ | `tests/unit/intel/pattern/PatternStateMachineTest.csproj` — 24/24 PASS |
+| Story-002 Location Knowledge + Rumor System | Done | `src/core/intel/IntelManager.cs` — 地点 4 态知识、传闻来源、置信度分层、非降级保护 | `tests/unit/intel/location/LocationKnowledgeStateMachineTest.csproj` — 47/47 PASS |
+| Story-003 Ability Multi-Path Unlock | Done | `src/core/intel/IntelManager.cs` — 多路径能力解锁、数据驱动条件求值 | `tests/unit/intel/ability/AbilityUnlockTest.csproj` — 23/23 PASS |
+| Story-004 IntelConsumeResult Algorithm | Done | `src/core/intel/IntelManager.cs` — Intel 消费 5 条规则、消费后能力自洽检查 | `tests/unit/intel/consume/IntelConsumeAlgorithmTest.csproj` — 46/46 PASS |
+| Story-005 Upstream Event Receivers | Done | `src/core/intel/IntelManager.cs` — navigation/repair/rumor/pattern/crew 事件接收与能力重评估 | `tests/unit/intel/events/EventReceiversTest.csproj` — 21/21 PASS |
+| Story-006 Downstream Query Interface | Done | `src/core/intel/IntelManager.cs` — 地点、航线、规律、能力、日志查询接口 | `tests/unit/intel/query/QueryInterfaceTest.csproj` — 44/44 PASS |
+| Story-007 Signal Contract + Non-Degradation | Done | `src/core/intel/IntelManager.cs` — 9 个信号、emit-after-mutation、非降级守卫 | `tests/integration/intel/signal/IntelSignalContractTest.csproj` — 39/39 PASS |
+| Story-008 Persistence + MVP Bootstrap | Done | `src/core/intel/IntelManager.cs` — 7 字段持久化往返、MVP 起始状态、迁移警告、ClearAllState | `tests/integration/intel/persistence/PersistenceIntegrationTest.csproj` — 43/43 PASS |
+
+### Resources / Goods 完成项
+
+| Epic | 状态 | 实现 | 验证 |
+|------|------|------|------|
+| Epic #5 Resources, Goods & Capacity | Done | `src/core/resources/ResourcesManager.cs` — 9 个 Story 合同：堆叠、双容量、货物拆包、重量质量、原子操作、池状态机、专用操作、信号重入守卫、持久化集成 | Story 001-009 全部 PASS；FoundationParity 70/70；资源测试 9 个 runner PASS |
+
 ### Story Readiness 元数据收口
 
 | 范围 | 状态 | 说明 |
@@ -603,7 +622,7 @@ graph TB
 | Legacy platform wording | Cleared | Story 文本不再要求 Web/GDScript/ADR-0006 路径；实现入口按 Desktop Godot .NET/C# 翻译 |
 | Story-004 Reference Integrity | Done | 引用完整性 Story 消费 Story-003 生命周期信息；Deprecated/Retired/Draft/Unloaded/Missing/Cycle/Ambiguous 查询路径均有 C# 单元证据 |
 
-### C# Foundation 文件清单
+### C# 主线文件清单
 
 | 层级 | 文件 | 职责 |
 |------|------|------|
@@ -629,9 +648,9 @@ graph TB
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P1 | [Story-007: Diagnostic UI — Dev Tools](../production/epics/content-registry/story-007-diagnostic-ui.md) | 继续 Content Registry，消费 Story-006 诊断事件并提供 Registry Overview / Error List / Reference Graph / Copyable Report |
-| P2 | `dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj` + `dotnet run --project tests/integration/registry/DomainLoadingTest.csproj` | Story-007 实现前保持诊断事件和域加载门控回归 |
-| P3 | `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` | Story-007 前后跑 Foundation parity，防止基础层回退 |
+| P0 | [#9 Chart Route Planning Story 001](../production/epics/chart-route-planning/story-001-chart-state-machine-content-gate.md) | #6 情报合同已完成；航图可开始消费知识状态与路线可见性 |
+| P0 | [#8 Modules/Hull Story 001](../production/epics/modules-hull-state/story-001-slot-state-machine-dual-field.md) | #5 资源合同与 #7 Hub 槽位/舱室合同均已完成，可消费 cargo-bay capacity 与 destruction contracts |
+| P1 | BUG-005 SessionShell/Hub scene flow | Downstream gameplay scene 未在 audio activation 后挂载；修复后重跑 TC-RGC-003 至 TC-RGC-010 |
 
 ---
 
@@ -1263,22 +1282,22 @@ graph TB
   production/      ████████████████░░░░  130+ 文件  (Epics/Stories + 会话状态 + 日志)
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
-  src/             ████████░░░░░░░░░░░░  16 文件  (9 Autoload .gd + Bootstrap + DataClass + Abstract + Shell + .tscn)
-  tests/           ██████░░░░░░░░░░░░░░   7 文件  (Unit ×3 + Integration ×3 + Verification ×1, 39 cases + 49 checks)
+  src/             ███████████████░░░░░  29 C# 文件  (Core + Feature + Presentation + Godot 节点脚本)
+  tests/           ████████████████████  55 C# runner  (Unit 27 + Integration 27 + Parity 1)
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
-  📊 总计: ~384 个文档/源代码/测试文件 + 12 个配置/数据文件
+  📊 总计: ~384+ 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
-  📋 Epic/Story: 16/18 Epic 完成 (115 Stories) | Feature 层 5/5 ✅ | Presentation 层 1/3
-  💻 源代码: 15 .gd + 1 .tscn + 1 project.godot (P3 原型) | 目标: C# via ADR-0019
-  ✅ Pre-Production P3 — 架构原型完成 | 平台转向复审: CONCERNS (0 blockers, 6 warnings 已修复)
+  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7 Complete | #8/#9 已解锁
+  💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 29 C# + 55 C# test runners)
+  ✅ Pre-Production — Desktop C# Foundation/Core 前置推进 | Epic #5/#6 complete
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-11 — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个 Story readiness 元数据完成 ADR-0019 收口。
+> 更新于 2026-05-13 — Desktop C# Foundation/Core 前置推进；Resources #5 与 Intel #6 全部完成并解锁 #8/#9；全量 C# runner 55/55 PASS；BUG-005 阻塞完整运行时推进。
 
 ### 已全部完成 ✅
 
@@ -1304,6 +1323,9 @@ graph TB
 - [x] **源代码架构文档** — `docs/document-index.md` §五/§六 (C# Foundation 进度 + P3 原型架构)
 - [x] **P3 全场景验证** — `tests/p3_verification.gd` 场景 A (122ms boot) + 场景 B (存档往返 16/16) + 场景 C (信号扇出 33/33) — 49/49 PASS
 - [x] **Content Registry Story-001/002/003/004/005/006** — C# Registry ID/query + Schema Validation + Content Lifecycle + Reference Integrity + Domain Loading/Decision Gating + Diagnostic System；`IdRegistryCoreTest.csproj` 11/11 PASS；`ContentLifecycleTest.csproj` 6/6 PASS；`ReferenceIntegrityTest.csproj` 7/7 PASS；`DomainLoadingTest.csproj` 8/8 PASS；`DiagnosticSystemTest.csproj` 7/7 PASS
+- [x] **Intel / Knowledge Epic #6** — 8/8 Story Complete；Pattern 24/24、Location 47/47、Ability 23/23、Consume 46/46、Events 21/21、Query 44/44、Signal 39/39、Persistence 43/43 PASS；#9 Chart Route Planning 已解锁
+- [x] **Resources / Goods Epic #5** — 9/9 Story Complete；Story 001-009 全部 PASS；#8 Modules/Hull 已解锁；BUG-005 仍阻塞完整运行时推进
+- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 55/55 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成
@@ -1316,7 +1338,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-11** — Desktop C# Foundation Ready；Content Registry Story-001/002/003/004/005/006 完成；下一步 Story-007 Diagnostic UI — Dev Tools；115 个 Story readiness 元数据完成 ADR-0019 收口。
+> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5 与 Intel #6 全部完成并解锁 #8/#9；全量 C# runner 55/55 PASS；BUG-005 阻塞完整运行时推进。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。
