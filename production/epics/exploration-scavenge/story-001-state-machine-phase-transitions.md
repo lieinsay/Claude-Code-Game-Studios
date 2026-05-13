@@ -1,7 +1,7 @@
 # Story 001: Exploration State Machine & Phase Transitions
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -214,8 +214,8 @@ func _interrupt_extraction(reason: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/exploration/statemachine/ExplStateMachineTest.csproj` — must exist and pass
+**Status**: [x] 52/52 PASS — 2026-05-13
 
 ---
 

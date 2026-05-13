@@ -1,7 +1,7 @@
 # Story 002: Search, Scavenge & Intel Formulas
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -206,8 +206,8 @@ func get_search_point_description(sp_id: StringName) -> String:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/SearchScavengeTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/exploration/search/SearchScavengeTest.csproj` — must exist and pass
+**Status**: [x] 35/35 PASS — 2026-05-13
 
 ---
 
