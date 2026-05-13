@@ -1,7 +1,7 @@
 # Story 001: Voyage State Machine & Preflight Checks
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -230,8 +230,8 @@ func is_retreat_allowed() -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/navigation/statemachine/NavStateMachineTest.csproj` — must exist and pass
+**Status**: [x] 33/33 PASS — 2026-05-13
 
 ---
 

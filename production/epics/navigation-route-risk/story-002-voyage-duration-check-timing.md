@@ -1,7 +1,7 @@
 # Story 002: Voyage Duration & Encounter Check Timing
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -212,8 +212,8 @@ func _should_trigger_next_check() -> bool:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/TimingFormulasTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/navigation/timing/TimingFormulasTest.csproj` — must exist and pass
+**Status**: [x] 19/19 PASS — 2026-05-13
 
 ---
 
