@@ -57,6 +57,45 @@ public sealed record RepairInteractionInfo(
     string VisualState);
 
 /// <summary>
+/// Machine-readable deposit validation violation.
+/// </summary>
+public enum RepairDepositViolation
+{
+    InvalidNode,
+    EmptyOffer,
+    InvalidMaterial,
+    ExcessQuantity,
+    AlreadyRepaired,
+}
+
+/// <summary>
+/// submit_deposit result code.
+/// </summary>
+public enum RepairSubmitResult
+{
+    Success,
+    ErrValidationFailed,
+    ErrCommitFailed,
+}
+
+/// <summary>
+/// Validation result for one offered repair deposit batch.
+/// </summary>
+public sealed record DepositValidationResult(
+    bool Valid,
+    IReadOnlyList<RepairDepositViolation> Violations);
+
+/// <summary>
+/// Result returned by submit_deposit.
+/// </summary>
+public sealed record RepairDepositResult(
+    RepairSubmitResult Result,
+    IReadOnlyList<RepairDepositViolation> Violations,
+    IReadOnlyDictionary<string, int> Deposited,
+    double Progress,
+    bool Completed);
+
+/// <summary>
 /// Sole Feature-layer owner of world repair node lifecycle state.
 /// </summary>
 public sealed class WorldRepair
@@ -71,9 +110,13 @@ public sealed class WorldRepair
     private readonly List<string> _warnings = [];
     private readonly List<string> _errors = [];
     private readonly List<string> _completedNodeIds = [];
+    private Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult>? _commitDeposit;
 
     /// <summary>Raised when a repair node visual state changes.</summary>
     public event Action<string, string>? VisualStateChanged;
+
+    /// <summary>Raised after deposited counters and progress are updated.</summary>
+    public event Action<string, double, IReadOnlyDictionary<string, int>>? RepairProgressChanged;
 
     /// <summary>Raised when a repair node is completed.</summary>
     public event Action<string>? RepairCompleted;
@@ -96,6 +139,18 @@ public sealed class WorldRepair
     public WorldRepair(Registry? registry = null)
     {
         _registry = registry;
+    }
+
+    /// <summary>Injects the ResourcesManager commit_deposit implementation.</summary>
+    public void SetResourcesManager(ResourcesManager resources)
+    {
+        _commitDeposit = resources.CommitDeposit;
+    }
+
+    /// <summary>Injects a test or adapter commit_deposit handler.</summary>
+    public void SetCommitDepositHandler(Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult> handler)
+    {
+        _commitDeposit = handler;
     }
 
     /// <summary>Marks the repair system as ready and loads new-game state.</summary>
@@ -341,6 +396,120 @@ public sealed class WorldRepair
     }
 
     /// <summary>
+    /// Validates a proposed batch against node existence, lifecycle state, required materials, and remaining gaps.
+    /// </summary>
+    public DepositValidationResult ValidateDeposit(string nodeId, IReadOnlyDictionary<string, int>? offer)
+    {
+        var violations = new List<RepairDepositViolation>();
+        if (!_repairNodes.ContainsKey(nodeId) || !_definitions.ContainsKey(nodeId))
+        {
+            violations.Add(RepairDepositViolation.InvalidNode);
+            return new DepositValidationResult(false, violations);
+        }
+
+        if (GetRepairState(nodeId) == RepairState.Repaired)
+        {
+            violations.Add(RepairDepositViolation.AlreadyRepaired);
+        }
+
+        if (offer is null || !offer.Any(pair => pair.Value > 0))
+        {
+            violations.Add(RepairDepositViolation.EmptyOffer);
+            return new DepositValidationResult(false, violations);
+        }
+
+        var required = _definitions[nodeId].RequiredResources;
+        var deposited = _repairNodes[nodeId].Deposited;
+        foreach (var (resourceId, quantity) in offer)
+        {
+            if (quantity <= 0)
+            {
+                continue;
+            }
+
+            if (!required.ContainsKey(resourceId))
+            {
+                violations.Add(RepairDepositViolation.InvalidMaterial);
+                continue;
+            }
+
+            var remaining = Math.Max(0, required[resourceId] - deposited.GetValueOrDefault(resourceId, 0));
+            if (quantity > remaining)
+            {
+                violations.Add(RepairDepositViolation.ExcessQuantity);
+            }
+        }
+
+        return new DepositValidationResult(violations.Count == 0, violations.Distinct().ToArray());
+    }
+
+    /// <summary>
+    /// Submits one repair batch: validate, commit to Resources, update counters, recompute progress, then complete if ready.
+    /// </summary>
+    public RepairDepositResult SubmitDeposit(string nodeId, IReadOnlyDictionary<string, int>? offer)
+    {
+        var validation = ValidateDeposit(nodeId, offer);
+        if (!validation.Valid)
+        {
+            RepairFailed?.Invoke(nodeId, "validation_failed");
+            return new RepairDepositResult(
+                RepairSubmitResult.ErrValidationFailed,
+                validation.Violations,
+                GetDeposited(nodeId),
+                GetRepairProgress(nodeId),
+                false);
+        }
+
+        var positiveOffer = offer!
+            .Where(pair => pair.Value > 0)
+            .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+
+        var commitResult = _commitDeposit?.Invoke(nodeId, positiveOffer)
+            ?? ResourceOperationResult.Ok(positiveOffer.Values.Sum());
+        if (!commitResult.Success)
+        {
+            RepairFailed?.Invoke(nodeId, "commit_failed");
+            return new RepairDepositResult(
+                RepairSubmitResult.ErrCommitFailed,
+                Array.Empty<RepairDepositViolation>(),
+                GetDeposited(nodeId),
+                GetRepairProgress(nodeId),
+                false);
+        }
+
+        if (GetRepairState(nodeId) == RepairState.Unrevealed)
+        {
+            TryTransitionState(nodeId, RepairState.Known);
+        }
+
+        var node = _repairNodes[nodeId];
+        foreach (var (resourceId, quantity) in positiveOffer)
+        {
+            node.Deposited[resourceId] = node.Deposited.GetValueOrDefault(resourceId, 0) + quantity;
+            DepositCommitted?.Invoke(nodeId, resourceId, quantity);
+        }
+
+        node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
+        var deposited = GetDeposited(nodeId);
+        RepairProgressChanged?.Invoke(nodeId, node.RepairProgress, deposited);
+
+        var completed = CheckRepairCompletion(nodeId, node.Deposited);
+        if (completed)
+        {
+            TryTransitionState(nodeId, RepairState.Repaired);
+            RepairCompleted?.Invoke(nodeId);
+            VisualStateChanged?.Invoke(nodeId, VisualStateRepaired);
+        }
+
+        return new RepairDepositResult(
+            RepairSubmitResult.Success,
+            Array.Empty<RepairDepositViolation>(),
+            GetDeposited(nodeId),
+            GetRepairProgress(nodeId),
+            completed);
+    }
+
+    /// <summary>
     /// Compatibility single-material commit used by the existing foundation parity runner.
     /// </summary>
     public bool CommitDeposit(string nodeId, string resourceId, int quantity)
@@ -355,7 +524,8 @@ public sealed class WorldRepair
         node.Deposited[resourceId] = node.Deposited.GetValueOrDefault(resourceId, 0) + quantity;
         DepositCommitted?.Invoke(nodeId, resourceId, quantity);
 
-        if (IsCompletionSatisfied(nodeId))
+        node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
+        if (CheckRepairCompletion(nodeId, node.Deposited))
         {
             if (GetRepairState(nodeId) == RepairState.Unrevealed)
             {
@@ -382,14 +552,13 @@ public sealed class WorldRepair
         return _repairNodes.Keys.OrderBy(id => id, StringComparer.Ordinal).ToArray();
     }
 
-    private bool IsCompletionSatisfied(string nodeId)
+    private bool CheckRepairCompletion(string nodeId, IReadOnlyDictionary<string, int> deposited)
     {
         if (!_definitions.TryGetValue(nodeId, out var definition) || definition.RequiredResources.Count == 0)
         {
             return false;
         }
 
-        var node = _repairNodes[nodeId];
         foreach (var (resourceId, required) in definition.RequiredResources)
         {
             if (required <= 0)
@@ -397,14 +566,37 @@ public sealed class WorldRepair
                 continue;
             }
 
-            if (node.Deposited.GetValueOrDefault(resourceId, 0) < required)
+            if (deposited.GetValueOrDefault(resourceId, 0) < required)
             {
                 return false;
             }
         }
 
-        node.RepairProgress = 1.0d;
         return true;
+    }
+
+    private double ComputeRepairProgress(string nodeId, IReadOnlyDictionary<string, int> deposited)
+    {
+        if (!_definitions.TryGetValue(nodeId, out var definition) || definition.RequiredResources.Count == 0)
+        {
+            return 0.0d;
+        }
+
+        var total = 0.0d;
+        var count = 0;
+        foreach (var (resourceId, required) in definition.RequiredResources)
+        {
+            count++;
+            if (required <= 0)
+            {
+                total += 1.0d;
+                continue;
+            }
+
+            total += Math.Min((double)deposited.GetValueOrDefault(resourceId, 0) / required, 1.0d);
+        }
+
+        return count == 0 ? 0.0d : Math.Clamp(total / count, 0.0d, 1.0d);
     }
 
     private IEnumerable<RepairNodeDefinition> LoadDefinitionsFromRegistry()
