@@ -279,7 +279,7 @@ func repair_hull(kit_count: int) -> int:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/HullIntegrityTest.csproj` — must exist and pass
-**Status**: [x] PASS — 4/4 checks in `tests/unit/modules/HullIntegrityTest.csproj`
+**Status**: [x] PASS — 4/4 checks in `tests/unit/modules/HullIntegrityTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

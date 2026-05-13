@@ -256,7 +256,7 @@ func _module_type_from_int(value: int) -> int:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/SnapshotPersistenceTest.csproj` — must exist and pass
-**Status**: [x] PASS — 5/5 checks in `tests/integration/modules/SnapshotPersistenceTest.csproj`
+**Status**: [x] PASS — 5/5 checks in `tests/integration/modules/SnapshotPersistenceTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

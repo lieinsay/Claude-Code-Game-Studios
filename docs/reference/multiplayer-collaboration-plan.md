@@ -167,6 +167,7 @@ D-C ─────────────────────────�
 - [x] Platform Session Shell 测试 PASS (`tests/unit/session` + `tests/integration/session`: 55/55)
 - [x] Movement C# 合同验证 PASS (`tests/unit/movement` + `tests/integration/movement`: 58/58)
 - [x] Airship Hub #7 C# 合同复审 PASS (`tests/integration/hub`: 38/38)
+- [x] Modules/Hull #8 C# 合同复审 PASS (`tests/unit/modules` + `tests/integration/modules`: 36/36)
 - [ ] Movement + Hub Godot 灰盒场景手动验证 PASS（C# 合同已完成，实机场景证据随 UI/场景接入执行）
 
 ---
@@ -584,7 +585,7 @@ D-C: 性能分析 + 优化
 | #5 Resources | 001-009 | #1 稳定 ID + #3 快照契约 | ✅ Complete — 2026-05-13 |
 | #6 Intel | 001-008 | #1 稳定 ID + #3 快照契约 | ✅ Complete — 2026-05-13 |
 | #7 Hub | 001-008 | #1 ID + #3 快照 + #4 移动 | ✅ Complete + reviewed — 2026-05-12 |
-| #8 Modules | 001 | #3 快照 + #5 池定义 + #7 槽位注册 | 当前可开工 |
+| #8 Modules | 001-008 | #3 快照 + #5 池定义 + #7 槽位注册 | ✅ Complete + reviewed — 2026-05-13 |
 | #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | 当前可开工 |
 | #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | Week 6-7 |
 | #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Week 8 |

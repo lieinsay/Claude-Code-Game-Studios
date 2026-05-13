@@ -186,7 +186,7 @@ func get_slot_cargo_volume_contribution(slot_id: StringName) -> int:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/CargoVolumeTrappedTest.csproj` — must exist and pass
-**Status**: [x] PASS — 3/3 checks in `tests/integration/modules/CargoVolumeTrappedTest.csproj`
+**Status**: [x] PASS — 3/3 checks in `tests/integration/modules/CargoVolumeTrappedTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

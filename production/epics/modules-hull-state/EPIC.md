@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/airship-modules-hull-state.md
 > **Architecture Module**: Autoload #8 — ModuleHullManager
-> **Status**: **Complete**
-> **Stories**: 8 (001-008) — Complete
+> **Status**: **Complete — reviewed 2026-05-13**
+> **Stories**: 8 (001-008) — Complete; 36/36 runner checks PASS
 
 ## Overview
 
@@ -51,8 +51,8 @@ This epic is complete when:
 | 007 | [Module Snapshot Persistence](story-007-module-snapshot-persistence.md) | Integration | TR-modules-001, TR-modules-003 | ADR-0009, ADR-0003 |
 | 008 | [Scout Module Acquisition & Combat Damage Interfaces](story-008-scout-acquisition-combat-damage.md) | Integration | TR-modules-001 | ADR-0009, ADR-0018 |
 
-**Summary**: 4 Logic + 4 Integration stories
+**Summary**: 4 Logic + 4 Integration stories; Epic #8 复审于 2026-05-13 通过（8/8 runners, 36/36 checks, full C# runner sweep 63/63 PASS）
 
 ## Next Step
 
-Epic #8 complete. Next production step from `docs/reference/production-flowchart.md`: continue #9 Chart Route Planning; BUG-005 scene reachability has been fixed, while richer downstream runtime UI remains later scope.
+Epic #8 complete and reviewed. Next production step from `docs/reference/production-flowchart.md`: continue #9 Chart Route Planning; BUG-005 scene reachability has been fixed, while richer downstream runtime UI remains later scope.

@@ -237,7 +237,7 @@ func get_departure_block_messages() -> Array[String]:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/DepartureReadinessTest.csproj` — must exist and pass
-**Status**: [x] PASS — 3/3 checks in `tests/unit/modules/DepartureReadinessTest.csproj`
+**Status**: [x] PASS — 3/3 checks in `tests/unit/modules/DepartureReadinessTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

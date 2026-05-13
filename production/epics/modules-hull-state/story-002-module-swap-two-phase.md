@@ -217,7 +217,7 @@ enum SwapError {
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/ModuleSwapTest.csproj` — must exist and pass
-**Status**: [x] PASS — 6/6 checks in `tests/unit/modules/ModuleSwapTest.csproj`
+**Status**: [x] PASS — 6/6 checks in `tests/unit/modules/ModuleSwapTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

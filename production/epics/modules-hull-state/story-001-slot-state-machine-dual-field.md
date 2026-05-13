@@ -308,7 +308,7 @@ func is_slot_interactable(slot_id: StringName) -> bool:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/modules/SlotStateMachineTest.csproj` — must exist and pass
-**Status**: [x] PASS — 7/7 checks in `tests/unit/modules/SlotStateMachineTest.csproj`
+**Status**: [x] PASS — 7/7 checks in `tests/unit/modules/SlotStateMachineTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 

@@ -119,7 +119,7 @@ graph TB
 | **Core 层 (5 Epic / 40 Stories)** | |
 | [production/epics/intel-knowledge/EPIC.md](../production/epics/intel-knowledge/EPIC.md) | Epic #6: 情报知识 (8/8 Stories **Complete** — 2026-05-13，解锁 #9) |
 | [production/epics/airship-hub/EPIC.md](../production/epics/airship-hub/EPIC.md) | Epic #7: 飞艇家园 (8/8 Stories **Complete** — 2026-05-12 复审通过) |
-| [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8/8 Stories **Complete** — 36/36 PASS) |
+| [production/epics/modules-hull-state/EPIC.md](../production/epics/modules-hull-state/EPIC.md) | Epic #8: 模块船体 (8/8 Stories **Complete** — 2026-05-13 复审通过，36/36 PASS) |
 | [production/epics/chart-route-planning/EPIC.md](../production/epics/chart-route-planning/EPIC.md) | Epic #9: 航图规划 (8 Stories — 已由 #6 解锁，可开工) |
 | [production/epics/navigation-route-risk/EPIC.md](../production/epics/navigation-route-risk/EPIC.md) | Epic #10: 航行路线风险 (8 Stories) |
 | **Feature 层 (5 Epic / 30 Stories)** | |
@@ -540,7 +540,7 @@ graph TB
 |------|----------|---------|---------|----------|
 | [intel-knowledge](../production/epics/intel-knowledge/EPIC.md) | #6 | 8 | 玩家知识与情报——4 态知识状态机、能力解锁 3 路径、knowledge_advanced/ability_unlocked 信号 | IntelManager (#6) |
 | [airship-hub](../production/epics/airship-hub/EPIC.md) | #7 | 8 | 飞艇家园 Hub——10 站点 + 4 房间、玩家存在状态、站点间 WASD 移动、交互契约；2026-05-12 复审 38/38 PASS | HubManager (#7) |
-| [modules-hull-state](../production/epics/modules-hull-state/EPIC.md) | #8 | 8 | 飞艇模块与船体——双字段、2 槽位 + 船体 4 波段、eta_effective 乘数、出航就绪三维检查 | ModuleHullManager (#8) |
+| [modules-hull-state](../production/epics/modules-hull-state/EPIC.md) | #8 | 8 | 飞艇模块与船体——双字段、2 槽位 + 船体 4 波段、eta_effective 乘数、出航就绪三维检查；2026-05-13 复审 36/36 PASS | ModuleHullManager (#8) |
 | [chart-route-planning](../production/epics/chart-route-planning/EPIC.md) | #9 | 8 | 航图与航线规划——5 态状态机、route_committed 不可逆承诺、知识门控航线可见性、墨水扩散出航动画 | ChartManager (#9) |
 | [navigation-route-risk](../production/epics/navigation-route-risk/EPIC.md) | #10 | 8 | 航行与路线风险——6 态 Voyage FSM、5 公式、12 遭遇类型、EncounterContext 9-field 合约 | NavigationManager (#10) |
 
@@ -613,6 +613,12 @@ graph TB
 | Epic | 状态 | 实现 | 验证 |
 |------|------|------|------|
 | Epic #5 Resources, Goods & Capacity | Done | `src/core/resources/ResourcesManager.cs` — 9 个 Story 合同：堆叠、双容量、货物拆包、重量质量、原子操作、池状态机、专用操作、信号重入守卫、持久化集成 | Story 001-009 全部 PASS；FoundationParity 70/70；资源测试 9 个 runner PASS |
+
+### Modules / Hull 完成项
+
+| Epic | 状态 | 实现 | 验证 |
+|------|------|------|------|
+| Epic #8 Modules & Hull State | Done + reviewed | `src/core/modules/ModuleHullManager.cs` — 8 个 Story 合同：双字段槽位状态机、两阶段 swap、船体 4 波段、出航适航门、货舱容积联动、信号契约、快照持久化、侦察解锁与战斗损伤接口 | Story 001-008 复审 PASS；`tests/unit/modules` + `tests/integration/modules` 8 个 runner，36/36 checks PASS；全量 C# runner 63/63 PASS |
 
 ### Story Readiness 元数据收口
 
@@ -987,6 +993,7 @@ graph LR
 | 2026-05-08 | ADR-0015 Partner/Relationships + 6 Stories (#15) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-08 | #16 UI/HUD 6 Stories (3 Logic + 3 Integration) | 通过 | [active.md](../production/session-state/active.md) |
 | 2026-05-12 | Epic #7 Airship Hub Story 001-008 复审 + Hub runner 复跑 | 通过 (38/38 PASS) | [Epic #7](../production/epics/airship-hub/EPIC.md) |
+| 2026-05-13 | Epic #8 Modules/Hull Story 001-008 复审 + module runner 复跑 | 通过 (36/36 PASS；全量 C# runner 63/63 PASS) | [Epic #8](../production/epics/modules-hull-state/EPIC.md) |
 
 ### 平台转向复审 — 修正文件总览 (2026-05-09)
 
@@ -1297,7 +1304,7 @@ graph TB
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-13 — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 已修复。
+> 更新于 2026-05-13 — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成，#8 复审通过并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 已修复。
 
 ### 已全部完成 ✅
 
@@ -1339,7 +1346,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 已修复。
+> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8 全部完成，#8 复审通过并解锁 #9；全量 C# runner 63/63 PASS；BUG-005 已修复。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

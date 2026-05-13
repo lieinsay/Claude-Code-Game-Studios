@@ -243,7 +243,7 @@ func get_installed_slots() -> Array[StringName]:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/modules/CombatDamageInterfaceTest.csproj` — must exist and pass
-**Status**: [x] PASS — 4/4 checks in `tests/integration/modules/CombatDamageInterfaceTest.csproj`
+**Status**: [x] PASS — 4/4 checks in `tests/integration/modules/CombatDamageInterfaceTest.csproj`; 2026-05-13 Epic #8 复审复跑通过
 
 ---
 
