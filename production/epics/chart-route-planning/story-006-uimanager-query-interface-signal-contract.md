@@ -1,7 +1,7 @@
 # Story 006: UIManager Query Interface & Signal Contract
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -199,8 +199,8 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/UimanagerContractTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/chart/uicontract/UimanagerContractTest.csproj` — must exist and pass
+**Status**: [x] 56/56 PASS — 2026-05-13
 
 ---
 

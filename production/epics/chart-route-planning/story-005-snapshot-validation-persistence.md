@@ -1,7 +1,7 @@
 # Story 005: Snapshot Validation & Persistence
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -246,8 +246,8 @@ func _resume_departure_sequence() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/SnapshotPersistenceTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/chart/snapshot/ChartSnapshotPersistenceTest.csproj` — must exist and pass
+**Status**: [x] 42/42 PASS — 2026-05-13
 
 ---
 

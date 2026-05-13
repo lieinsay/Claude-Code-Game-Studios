@@ -183,6 +183,12 @@ public sealed class ChartManager
 	/// </summary>
 	public event Action<bool>? FilterChanged;
 
+	// ── 事件（Story 006 — UIManager Signal Contract）──────────────────
+	/// <summary>
+	/// 航线因世界修复等事件获得增强时发出，参数为 (routeId, enhancementId)。
+	/// </summary>
+	public event Action<string, string>? RouteEnhanced;
+
 	// ── 属性 ─────────────────────────────────────────────────────────
 	/// <summary>当前航图顶层状态。</summary>
 	public ChartState CurrentState => _chartState;
@@ -432,9 +438,9 @@ public sealed class ChartManager
 		bool traversable = SafeQueryTraversable(routeId);
 		if (!traversable)
 		{
-			// 强制取消选择，回到 BROWSING
-			ForceDeselect(routeId);
+			// ADR-0002：fail 信号在状态回退之前发射
 			RouteSelectionFailed?.Invoke(routeId, "route_not_traversable");
+			ForceDeselect(routeId);
 			return false;
 		}
 
@@ -664,6 +670,163 @@ public sealed class ChartManager
 			["origin_id"] = data?.OriginId ?? "",
 			["destination_id"] = data?.DestinationId ?? "",
 		};
+	}
+
+	// ── Story 005 — Snapshot Validation & Persistence ────────────────
+
+	/// <summary>
+	/// 构建出航快照 payload（仅含独立状态变量，不含派生值）。
+	/// 应在 DEPARTURE_CONFIRMED 进入后调用。
+	/// </summary>
+	/// <param name="routeId">已提交的航线 ID。</param>
+	/// <param name="timestamp">出航确认时间戳（Unix 时间）。</param>
+	/// <returns>快照 payload 字典（纯基础类型，可序列化为 Canonical JSON）。</returns>
+	public Dictionary<string, object?> BuildSnapshotPayload(string routeId, double timestamp)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["last_committed_route_id"] = routeId,
+			["departure_state"] = "DEPARTURE_CONFIRMED",
+			["active_filter"] = _hideRumored ? "hide_rumored" : "show_all",
+			["last_departure_timestamp"] = timestamp,
+			["hide_rumored"] = _hideRumored,
+		};
+	}
+
+	/// <summary>
+	/// Formula 4：快照包有效性校验纯函数。
+	/// 返回校验结果，violations 列表为空时 valid=true。
+	/// </summary>
+	/// <param name="payload">待校验的快照 payload 字典（null 视为格式错误）。</param>
+	/// <param name="currentTime">当前 Unix 时间（用于时间戳校验）。</param>
+	/// <param name="timestampTolerance">允许的未来时间戳容差（秒），默认 300s。</param>
+	/// <param name="routeRegistry">当前注册表中所有航线 ID 集合（用于 stale ID 校验）。</param>
+	/// <returns>校验结果：{Valid, Violations}。</returns>
+	public static (bool Valid, IReadOnlyList<string> Violations) ValidateSnapshotPackage(
+		IReadOnlyDictionary<string, object?>? payload,
+		double currentTime,
+		double timestampTolerance,
+		IReadOnlySet<string> routeRegistry)
+	{
+		var violations = new List<string>();
+
+		if (payload == null)
+		{
+			violations.Add("malformed snapshot package");
+			return (false, violations);
+		}
+
+		// domain_id 校验
+		if (!payload.TryGetValue("domain_id", out var domainIdRaw)
+			|| domainIdRaw?.ToString() != "progress.routes")
+		{
+			if (payload.TryGetValue("domain_id", out _))
+				violations.Add("wrong domain_id");
+			// 若字段缺失，后续 required 字段检查会覆盖
+		}
+
+		// 必需字段检查
+		string[] required = { "last_committed_route_id", "departure_state", "active_filter", "last_departure_timestamp" };
+		foreach (var field in required)
+		{
+			if (!payload.ContainsKey(field))
+				violations.Add($"missing field: {field}");
+		}
+
+		// departure_state 必须为 DEPARTURE_CONFIRMED
+		if (payload.TryGetValue("departure_state", out var dsRaw)
+			&& dsRaw?.ToString() != "DEPARTURE_CONFIRMED")
+		{
+			violations.Add("invalid departure_state");
+		}
+
+		// 时间戳校验
+		if (payload.TryGetValue("last_departure_timestamp", out var tsRaw))
+		{
+			double ts = Convert.ToDouble(tsRaw);
+			if (double.IsNaN(ts) || double.IsInfinity(ts))
+				violations.Add("non-finite timestamp");
+			else if (ts <= 0.0)
+				violations.Add("timestamp is epoch or uninitialized");
+			else if (ts > currentTime + timestampTolerance)
+				violations.Add("timestamp in future");
+		}
+
+		// stale route_id 校验
+		if (payload.TryGetValue("last_committed_route_id", out var routeIdRaw))
+		{
+			var routeId = routeIdRaw?.ToString() ?? "";
+			if (string.IsNullOrEmpty(routeId) || !routeRegistry.Contains(routeId))
+				violations.Add($"route_id not found in registry: {routeId}");
+		}
+
+		return (violations.Count == 0, violations);
+	}
+
+	/// <summary>
+	/// 从快照 payload 恢复 ChartManager 状态。
+	/// 若 departure_state=DEPARTURE_CONFIRMED，直接进入终端状态并重发 RouteCommitted 信号。
+	/// </summary>
+	/// <param name="payload">序列化的快照 payload 字典。</param>
+	public void RestoreFromSnapshot(IReadOnlyDictionary<string, object?> payload)
+	{
+		var lastRouteId = payload.TryGetValue("last_committed_route_id", out var r)
+			? r?.ToString() ?? "" : "";
+		var departureState = payload.TryGetValue("departure_state", out var ds)
+			? ds?.ToString() ?? "" : "";
+		_hideRumored = payload.TryGetValue("hide_rumored", out var hr) && hr is bool b && b;
+
+		if (departureState == "DEPARTURE_CONFIRMED")
+		{
+			// 直接进入终端状态（lock_remaining=0，立即移交 Navigation）
+			_chartState = ChartState.DepartureConfirmed;
+			_selectedRouteId = "";
+			// 重发 route_committed 以触发 Navigation 上下文构建
+			_routeStaticData.TryGetValue(lastRouteId, out var data);
+			RouteCommitted?.Invoke(lastRouteId, data?.DestinationId ?? "", data?.HazardTags ?? Array.Empty<string>());
+		}
+		else
+		{
+			_chartState = ChartState.Loading;
+		}
+	}
+
+	// ── Story 006 — UIManager Query Interface ─────────────────────────
+
+	/// <summary>
+	/// 返回航图当前顶层状态的字符串表示（供 UIManager 读取）。
+	/// </summary>
+	/// <returns>状态字符串："LOADING"/"BROWSING"/"ROUTE_SELECTED"/"DEPARTURE_CONFIRMED"/"ERROR"。</returns>
+	public string GetChartStateString() => _chartState switch
+	{
+		ChartState.Loading => "LOADING",
+		ChartState.Browsing => "BROWSING",
+		ChartState.RouteSelected => "ROUTE_SELECTED",
+		ChartState.DepartureConfirmed => "DEPARTURE_CONFIRMED",
+		ChartState.Error => "ERROR",
+		_ => "LOADING",
+	};
+
+	/// <summary>
+	/// 返回当前选中的航线 ID。未选中时返回空字符串（非 null）。
+	/// </summary>
+	public string GetSelectedRoute() => _selectedRouteId;
+
+	/// <summary>
+	/// 返回筛选器状态字典，供 UIManager 读取。
+	/// </summary>
+	/// <returns>含 "hide_rumored" bool 字段的字典。</returns>
+	public Dictionary<string, object> GetFilterState() =>
+		new(StringComparer.Ordinal) { ["hide_rumored"] = _hideRumored };
+
+	/// <summary>
+	/// 发出 RouteEnhanced 信号（由世界修复等外部系统触发）。
+	/// </summary>
+	/// <param name="routeId">被增强的航线 ID。</param>
+	/// <param name="enhancementId">增强事件 ID。</param>
+	public void NotifyRouteEnhanced(string routeId, string enhancementId)
+	{
+		RouteEnhanced?.Invoke(routeId, enhancementId);
 	}
 
 	// ── 私有辅助 ─────────────────────────────────────────────────────
