@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；#7 完成；#6 Story 001+002 完成；#5 并行推进**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；#6/#7 全部完成；#5 并行推进；#9 已解锁**
 
 ---
 
@@ -496,34 +496,30 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #6 Story 001+002 已实现并代码审查通过；Epic #5 Story 001 由并行团队推进
-- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS（1 个既存警告，0 错误）
-- 测试验证: Story 001 Pattern State Machine 24/24 PASS；Story 002 Location Knowledge 47/47 PASS；FoundationParity 70/70 PASS
-- 本次完成: Epic #6 `IntelManager.cs` 全面重写（Pattern 4 级状态机 + Location 4 级状态机 + 非降级保护 + 信号契约），代码审查通过（3 项提示已修复）
+- 活跃任务: Epic #6 Intel / Knowledge System 8/8 Story 已完成；#9 Chart Route Planning 已由 #6 解锁；Epic #5 继续并行推进
+- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS（1 个 CS0219 测试警告，0 错误；首次 `--no-restore` 仅因新增 Intel 测试项目缺少 NuGet assets 失败，restore 后通过）
+- 测试验证: `tests/**/*.csproj` 全量 runner 47/47 PASS；FoundationParity 70/70 PASS；Intel Story 001-008 均有自动化证据（Story 007 39/39，Story 008 43/43）
+- 本次完成: 生产状态复核与全量 C# runner 回归；Epic #6 全部情报合同、信号契约与持久化集成证据已锁定
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #6 Story 003 Ability Multi-Path Unlock | Story 001+002 完成 ✅ | 可开工 |
-| **P0** | #6 Story 004 IntelConsumeResult Algorithm | Story 002 完成 ✅ | 可并行 |
+| **P0** | #9 Chart Route Planning Story 001 | #6 情报合同完成 ✅ | 可开工 |
 | **P1** | #5 资源货物其余 Story（并行团队） | Story 001 完成 | 进行中 |
+| **P1** | #8 模块船体 Story 001 | #7 完成；仍等 #5 池定义 | 等 #5 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #6 Story 003 和 004 可以从 Story 001+002 并行开工。Story 005~006 需要 001~004 全部完成。Story 007~008 是 Integration 层，等 001~006 完成后启动。
+> 关键建议: #6 已完成并解锁 #9；下一段应把 #9 航图规划与 #5 资源货物并行推进，#8 继续等待 #5 池定义补齐。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #6 知识情报 Story 003 Ability Unlock (依赖 001 Pattern ✅)
-  ├─ #6 知识情报 Story 004 IntelConsumeResult (依赖 002 Location ✅)
+  ┌─ #9 航图规划 Story 001 Chart State Machine + Content Gate (依赖 #6 ✅)
   └─ #5 资源货物（并行团队继续推进）
 
-等 #6 Story 001-006 完成后:
-  └─ #9 航图规划 可以正式启动（依赖 #6 情报合同）
-
-等 #5/#6 完成后:
+等 #5 完成后:
   ┌─ #8 模块船体   ─┐ 消费 #7 槽位/舱室合同 + #5 资源池
   └─ #9 航图规划   ─┘ 消费 #6 情报合同
 ```
