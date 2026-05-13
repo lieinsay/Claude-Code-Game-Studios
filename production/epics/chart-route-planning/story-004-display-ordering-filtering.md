@@ -1,7 +1,7 @@
 # Story 004: Route Display Ordering & Filtering
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -228,8 +228,8 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/DisplayOrderTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/chart/display/DisplayOrderTest.csproj` — must exist and pass
+**Status**: [x] 31/31 PASS — 2026-05-13
 
 ---
 

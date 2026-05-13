@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Chart / Route Planning (#9)
-Task: Story 001 State Machine + Story 002 Visibility/Selectability 完成（43+32 PASS）；Story 003~008 待实现
+Task: Story 001-004 全部完成（43+32+34+31 PASS）；Story 005 Persistence + 006 UIManager Query 待实现
 <!-- /STATUS -->
 
 ## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13

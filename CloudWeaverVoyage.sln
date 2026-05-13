@@ -139,6 +139,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisibilitySelectabilityTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartStateMachineTest", "tests\unit\chart\statemachine\ChartStateMachineTest.csproj", "{7F60E0DF-B20F-4415-AA3B-03DF2013B8AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartureConfirmationTest", "tests\unit\chart\departure\DepartureConfirmationTest.csproj", "{8A22976B-A313-47EB-807E-4F866508F18A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayOrderTest", "tests\unit\chart\display\DisplayOrderTest.csproj", "{9D455451-DC1E-4FB2-8854-43D56E72FF58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -389,6 +393,14 @@ Global
 		{7F60E0DF-B20F-4415-AA3B-03DF2013B8AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F60E0DF-B20F-4415-AA3B-03DF2013B8AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F60E0DF-B20F-4415-AA3B-03DF2013B8AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A22976B-A313-47EB-807E-4F866508F18A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A22976B-A313-47EB-807E-4F866508F18A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A22976B-A313-47EB-807E-4F866508F18A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A22976B-A313-47EB-807E-4F866508F18A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D455451-DC1E-4FB2-8854-43D56E72FF58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D455451-DC1E-4FB2-8854-43D56E72FF58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D455451-DC1E-4FB2-8854-43D56E72FF58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D455451-DC1E-4FB2-8854-43D56E72FF58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -459,5 +471,7 @@ Global
 		{50090D7B-402E-43A8-AE3D-C3D8436E6862} = {5CF80B4D-0EE7-4ACA-8CF1-8CB696A9FA87}
 		{5F9272ED-2DB6-4097-A153-644EFB442B81} = {50090D7B-402E-43A8-AE3D-C3D8436E6862}
 		{7F60E0DF-B20F-4415-AA3B-03DF2013B8AB} = {50090D7B-402E-43A8-AE3D-C3D8436E6862}
+		{8A22976B-A313-47EB-807E-4F866508F18A} = {50090D7B-402E-43A8-AE3D-C3D8436E6862}
+		{9D455451-DC1E-4FB2-8854-43D56E72FF58} = {50090D7B-402E-43A8-AE3D-C3D8436E6862}
 	EndGlobalSection
 EndGlobal

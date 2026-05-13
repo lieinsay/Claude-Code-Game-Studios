@@ -170,6 +170,19 @@ public sealed class ChartManager
 	/// </summary>
 	public event Action<string, RouteSubState, RouteSubState>? RouteSubStateChanged;
 
+	// ── 事件（Story 003 — Departure Confirmation）────────────────────
+	/// <summary>
+	/// 出航因 traversable 变更或快照校验失败而中止，参数为 (routeId, reason)。
+	/// reason: "route_not_traversable" | "snapshot_invalid"。
+	/// </summary>
+	public event Action<string, string>? RouteSelectionFailed;
+
+	// ── 事件（Story 004 — Display Ordering）─────────────────────────
+	/// <summary>
+	/// hide_rumored 筛选器状态切换时发出，参数为新的 hide_rumored 值。
+	/// </summary>
+	public event Action<bool>? FilterChanged;
+
 	// ── 属性 ─────────────────────────────────────────────────────────
 	/// <summary>当前航图顶层状态。</summary>
 	public ChartState CurrentState => _chartState;
@@ -373,7 +386,35 @@ public sealed class ChartManager
 	}
 
 	/// <summary>
-	/// 第二步出航确认——发出 route_committed 信号，进入 DepartureConfirmed 终端状态。
+	/// 第一步出航确认请求——刷新可通行性，返回最新摘要数据供 UI 显示浮层。
+	/// 不修改状态，不发出 route_committed 信号。
+	/// </summary>
+	/// <param name="routeId">要确认的航线 ID。</param>
+	/// <returns>最新摘要 Dictionary（含 traversable / hazard_tags / distance_band），或 null 表示请求无效。</returns>
+	public Dictionary<string, object>? RequestConfirmDeparture(string routeId)
+	{
+		if (_chartState != ChartState.RouteSelected)
+			return null;
+		if (_selectedRouteId != routeId)
+			return null;
+
+		// 刷新最新可通行性数据
+		bool traversable = SafeQueryTraversable(routeId);
+		_routeStaticData.TryGetValue(routeId, out var data);
+
+		return new Dictionary<string, object>(StringComparer.Ordinal)
+		{
+			["route_id"] = routeId,
+			["traversable"] = traversable,
+			["hazard_tags"] = (object)(data?.HazardTags.ToList() ?? new List<string>()),
+			["distance_band"] = data?.DistanceBand ?? "medium",
+			["destination_id"] = data?.DestinationId ?? "",
+		};
+	}
+
+	/// <summary>
+	/// 第二步出航确认——先刷新可通行性检查，通过后发出 route_committed 信号并进入 DepartureConfirmed 终端状态。
+	/// traversable=false 时强制取消选择并发出 RouteSelectionFailed。
 	/// </summary>
 	/// <returns>是否成功确认。</returns>
 	public bool ConfirmDeparture()
@@ -386,10 +427,43 @@ public sealed class ChartManager
 			return false;
 
 		var routeId = _selectedRouteId;
-		ApplyTransition(result); // 进入 DepartureConfirmed，所有子状态 → LOCKED
+
+		// Step 1 刷新：重新查询可通行性（获取最新风险状态）
+		bool traversable = SafeQueryTraversable(routeId);
+		if (!traversable)
+		{
+			// 强制取消选择，回到 BROWSING
+			ForceDeselect(routeId);
+			RouteSelectionFailed?.Invoke(routeId, "route_not_traversable");
+			return false;
+		}
+
 		_routeStaticData.TryGetValue(routeId, out var data);
+		ApplyTransition(result); // 进入 DepartureConfirmed，所有子状态 → LOCKED
+		// 使用刷新后的最新风险标签
 		RouteCommitted?.Invoke(routeId, data?.DestinationId ?? "", data?.HazardTags ?? Array.Empty<string>());
 		return true;
+	}
+
+	/// <summary>
+	/// 强制取消选择当前航线，回到 Browsing 状态（由刷新失败或筛选器变更触发）。
+	/// </summary>
+	/// <param name="routeId">被强制取消的航线 ID（可为空）。</param>
+	public void ForceDeselect(string? routeId = null)
+	{
+		if (_chartState != ChartState.RouteSelected)
+			return;
+
+		var deselectedId = routeId ?? _selectedRouteId;
+		_selectedRouteId = "";
+		var oldState = _chartState;
+		_chartState = ChartState.Browsing;
+
+		if (!string.IsNullOrEmpty(deselectedId))
+			SetRouteSubState(deselectedId, RouteSubState.Browsable);
+
+		if (oldState != _chartState)
+			ChartStateChanged?.Invoke(oldState, _chartState);
 	}
 
 	/// <summary>
@@ -492,6 +566,104 @@ public sealed class ChartManager
 			var newSubState = SelectabilityToSubState(selectability);
 			SetRouteSubState(routeId, newSubState);
 		}
+	}
+
+	// ── Story 004 — Display Ordering & Filtering ──────────────────────
+
+	/// <summary>
+	/// Formula 5：航线显示优先级纯函数。
+	/// rank = knowledge_rank×100 + distance_rank，值越小排越前。
+	/// 未知知识状态返回 999（防御性默认值）。
+	/// </summary>
+	/// <param name="routeId">航线 ID。</param>
+	/// <returns>显示优先级整数 [101, 303] 或 999。</returns>
+	public int RouteDisplayOrder(string routeId)
+	{
+		int knowledge = SafeQueryKnowledgeState(routeId);
+
+		int rankByKnowledge = knowledge switch
+		{
+			3 => 1, // Verified
+			2 => 2, // Identified
+			1 => 3, // Rumored
+			_ => 0, // Unknown 或查询失败 → 999
+		};
+
+		if (rankByKnowledge == 0)
+			return 999;
+
+		_routeStaticData.TryGetValue(routeId, out var data);
+		int rankByDistance = (data?.DistanceBand ?? "") switch
+		{
+			"short" => 1,
+			"medium" => 2,
+			"long" => 3,
+			_ => 2, // 未知距离带视为 medium
+		};
+
+		return rankByKnowledge * 100 + rankByDistance;
+	}
+
+	/// <summary>
+	/// 返回当前可见航线列表，按 display_order 排序，相同 order 按 routeId 字典序打破平局。
+	/// 已应用 hide_rumored 筛选器。
+	/// </summary>
+	/// <returns>排序后的可见航线 ID 只读列表。</returns>
+	public IReadOnlyList<string> GetVisibleRoutes()
+	{
+		var visible = _visibleRoutes
+			.Where(routeId => RouteVisibility(routeId, _hideRumored))
+			.OrderBy(routeId => RouteDisplayOrder(routeId))
+			.ThenBy(routeId => routeId, StringComparer.Ordinal)
+			.ToList();
+		return visible;
+	}
+
+	/// <summary>
+	/// 切换 hide_rumored 筛选器。若当前已选航线因筛选被隐藏，强制取消选择。
+	/// 发出 FilterChanged 信号。
+	/// </summary>
+	/// <param name="hide">true = 隐藏传闻航线。</param>
+	public void ToggleHideRumored(bool hide)
+	{
+		if (_hideRumored == hide)
+			return;
+
+		_hideRumored = hide;
+
+		// 若已选航线被筛选隐藏，强制取消选择
+		if (!string.IsNullOrEmpty(_selectedRouteId)
+			&& !RouteVisibility(_selectedRouteId, _hideRumored))
+		{
+			ForceDeselect(_selectedRouteId);
+		}
+
+		FilterChanged?.Invoke(_hideRumored);
+	}
+
+	/// <summary>
+	/// 返回指定航线用于 UI 展示的全部数据（不含视觉属性）。
+	/// </summary>
+	/// <param name="routeId">航线 ID。</param>
+	/// <returns>展示数据字典。</returns>
+	public Dictionary<string, object?> GetRouteDisplayData(string routeId)
+	{
+		int knowledge = SafeQueryKnowledgeState(routeId);
+		bool traversable = SafeQueryTraversable(routeId);
+		_routeStaticData.TryGetValue(routeId, out var data);
+
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["route_id"] = routeId,
+			["display_order"] = RouteDisplayOrder(routeId),
+			["knowledge_state"] = knowledge,
+			["selectability"] = RouteSelectability(routeId),
+			["traversable"] = traversable,
+			["hazard_tags"] = data?.HazardTags,
+			["distance_band"] = data?.DistanceBand ?? "medium",
+			["origin_id"] = data?.OriginId ?? "",
+			["destination_id"] = data?.DestinationId ?? "",
+		};
 	}
 
 	// ── 私有辅助 ─────────────────────────────────────────────────────

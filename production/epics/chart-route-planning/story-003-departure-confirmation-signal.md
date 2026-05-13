@@ -1,7 +1,7 @@
 # Story 003: Two-Step Departure Confirmation & route_committed Signal
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -216,8 +216,8 @@ func _enter_error_state(violations: Array) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/chart/DepartureConfirmationTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/chart/departure/DepartureConfirmationTest.csproj` — must exist and pass
+**Status**: [x] 34/34 PASS — 2026-05-13
 
 ---
 
