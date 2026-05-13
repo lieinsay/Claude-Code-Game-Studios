@@ -1,10 +1,10 @@
 # 多人协作生产计划 — 云海织航 MVP
 
-> 生成: 2026-05-10 | 最后更新: 2026-05-12
+> 生成: 2026-05-10 | 最后更新: 2026-05-13
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Airship Hub #7 完成 | #5/#6 继续 Core 前置**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Airship Hub #7 完成 | Intel #6 全部完成并解锁 #9 | #5 继续 Core 前置**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 
@@ -85,7 +85,7 @@ Week 0 (2-3 天) — ✅ 全部完成
 └─────────────────────────────────────────────────────────┘
 ```
 
-**门禁**: `dotnet build` PASS ✅ + 23 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Registry #1 全部 Story evidence PASS ✅ + Persistence #3 全部 8 个 Story evidence PASS ✅
+**门禁**: `dotnet build CloudWeaverVoyage.sln` PASS ✅ + 47 个 C# test runner PASS ✅ + Foundation Parity 70/70 PASS ✅ + Registry #1 全部 Story evidence PASS ✅ + Persistence #3 全部 8 个 Story evidence PASS ✅ + Intel #6 全部 8 个 Story evidence PASS ✅
 
 ---
 
@@ -249,8 +249,8 @@ D-A: Epic #5 剩余 + 开始 Epic #13
 D-B: Epic #6 剩余 + Epic #7 剩余
 ────────────────────────────────────────
   Epic #6:
-  Story 003 □ Ability Multi-Path Unlock           (L, 2d)  ← 等 001-002
-  Story 004 □ IntelConsumeResult Algorithm        (L, 2d)  ← 等 001-002
+  Story 003 ☑ Ability Multi-Path Unlock           (L, 2d)  ← ✅ 完成
+  Story 004 ☑ IntelConsumeResult Algorithm        (L, 2d)  ← ✅ 完成
 
   Epic #7:
   Story 003 ✅ Room Gating + Module Slot Display   (L)
@@ -286,10 +286,10 @@ D-A: Epic #5+#13 收尾
 D-B: Epic #6+#7 收尾
 ────────────────────────────────────────
   Epic #6:
-  Story 005 □ Upstream Event Receivers           (L, 1d)  ← 等 001-004
-  Story 006 □ Downstream Query Interface         (L, 1d)  ← 与 005 并行
-  Story 007 □ Signal Contract + Non-Degradation  (I, 2d)  ← 等 005-006
-  Story 008 □ Persistence + MVP Bootstrap        (I, 2d)  ← 等 007
+  Story 005 ☑ Upstream Event Receivers           (L, 1d)  ← ✅ 完成
+  Story 006 ☑ Downstream Query Interface         (L, 1d)  ← ✅ 完成
+  Story 007 ☑ Signal Contract + Non-Degradation  (I, 2d)  ← ✅ 完成
+  Story 008 ☑ Persistence + MVP Bootstrap        (I, 2d)  ← ✅ 完成
 
   Epic #7:
   Story 005 ✅ Arrival Flow + State Continuity    (L)
@@ -580,11 +580,11 @@ D-C: 性能分析 + 优化
 | #2 Shell | 001 | 无 | ✅ Complete — 2026-05-11 |
 | #3 Persistence | 001-008 | #1 + #2 | ✅ Complete — 2026-05-12 |
 | #4 Movement | 001-007 | #2 输入路由 | ✅ Complete — 2026-05-12 |
-| #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
-| #6 Intel | 001 | #1 稳定 ID + #3 快照契约 | 当前可开工 |
+| #5 Resources | 001 | #1 稳定 ID + #3 快照契约 | 当前并行推进 |
+| #6 Intel | 001-008 | #1 稳定 ID + #3 快照契约 | ✅ Complete — 2026-05-13 |
 | #7 Hub | 001-008 | #1 ID + #3 快照 + #4 移动 | ✅ Complete + reviewed — 2026-05-12 |
 | #8 Modules | 001 | #3 快照 + #5 池定义 + #7 槽位注册 | #7 已满足；等待 #5 池定义 |
-| #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | Week 4-5 |
+| #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | 当前可开工 |
 | #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | Week 6-7 |
 | #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Week 8 |
 | #12 Combat | 001 | #5+#8+#11 全部 | Week 9 |
