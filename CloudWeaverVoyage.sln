@@ -84,6 +84,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatternStateMachineTest", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocationKnowledgeStateMachineTest", "tests\unit\intel\location\LocationKnowledgeStateMachineTest.csproj", "{29C7C45C-9683-4B88-B401-47E2A318273B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbilityUnlockTest", "tests\unit\intel\ability\AbilityUnlockTest.csproj", "{661FA404-BD8B-4E45-AD34-76F57B87C5A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelConsumeAlgorithmTest", "tests\unit\intel\consume\IntelConsumeAlgorithmTest.csproj", "{3667739C-19A0-4812-8236-16CE7FAF488D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -238,6 +242,14 @@ Global
 		{29C7C45C-9683-4B88-B401-47E2A318273B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29C7C45C-9683-4B88-B401-47E2A318273B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29C7C45C-9683-4B88-B401-47E2A318273B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661FA404-BD8B-4E45-AD34-76F57B87C5A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661FA404-BD8B-4E45-AD34-76F57B87C5A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661FA404-BD8B-4E45-AD34-76F57B87C5A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661FA404-BD8B-4E45-AD34-76F57B87C5A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3667739C-19A0-4812-8236-16CE7FAF488D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3667739C-19A0-4812-8236-16CE7FAF488D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3667739C-19A0-4812-8236-16CE7FAF488D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3667739C-19A0-4812-8236-16CE7FAF488D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -281,5 +293,7 @@ Global
 		{E02F275D-18C6-408A-B991-2FD87889C6FD} = {5CF80B4D-0EE7-4ACA-8CF1-8CB696A9FA87}
 		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 		{29C7C45C-9683-4B88-B401-47E2A318273B} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
+		{661FA404-BD8B-4E45-AD34-76F57B87C5A4} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
+		{3667739C-19A0-4812-8236-16CE7FAF488D} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 # Story 004: IntelConsumeResult Algorithm
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -229,8 +229,8 @@ func _cache_intel_defs() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/IntelConsumeAlgorithmTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/intel/consume/IntelConsumeAlgorithmTest.csproj` — must exist and pass
+**Status**: [x] 46/46 PASS — 2026-05-13
 
 ---
 

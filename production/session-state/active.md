@@ -3,8 +3,17 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Intel / Knowledge System (#6)
-Task: Story 001 Pattern State Machine + Story 002 Location Knowledge 实现完成，代码审查通过；Story 003+004 可并行开工
+Task: Story 001-004 全部完成；Story 005 Upstream Event Receivers + Story 006 Downstream Query Interface 可并行开工
 <!-- /STATUS -->
+
+## Session Extract — Epic #6 Story 003+004 完成 — 2026-05-13
+
+- Verdict: COMPLETE
+- Stories: Story 003 Ability Multi-Path Unlock (23/23 PASS), Story 004 IntelConsumeResult Algorithm (46/46 PASS)
+- Files changed: `src/core/intel/IntelManager.cs`（扩展：能力状态机 + 数据驱动路径求值器 + IntelConsumeResult 5 条规则算法），`tests/unit/intel/ability/AbilityUnlockTest.csproj`, `tests/unit/intel/ability/AbilityUnlockProgram.cs`, `tests/unit/intel/consume/IntelConsumeAlgorithmTest.csproj`, `tests/unit/intel/consume/IntelConsumeAlgorithmProgram.cs`, `CloudWeaverVoyage.sln`, `production/epics/intel-knowledge/*.md`, `docs/reference/production-flowchart.md`
+- Key fixes: Rule 4/5 执行顺序调整（ConsumeIntel 先标记已消耗再检查能力，保证 intel_consumed 条件自洽）
+- Build: 0 errors, 1 既存 warning; FoundationParity 70/70 PASS
+- Unlocked: Story 005 Upstream Event Receivers, Story 006 Downstream Query Interface（可并行）
 
 ## Session Extract — Epic #6 Story 001+002 完成 — 2026-05-13
 

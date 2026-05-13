@@ -105,7 +105,7 @@ Console.WriteLine("=== Story 002: Location Knowledge State Machine & Rumor Syste
 // ── AC-9: ConsumeIntel Unknown → Identified ──
 {
 	var mgr = BuildManager();
-	var result = mgr.ConsumeIntel("location.new-isle");
+	var result = mgr.AdvanceLocationFromIntel("location.new-isle");
 	Assert(result.HasValue, "AC-9: ConsumeIntel 返回有效变化");
 	Assert(result!.Value.OldState == LocationKnowledgeState.Unknown, "AC-9: 旧状态 Unknown");
 	Assert(result!.Value.NewState == LocationKnowledgeState.Identified, "AC-9: 新状态 Identified");
@@ -117,7 +117,7 @@ Console.WriteLine("=== Story 002: Location Knowledge State Machine & Rumor Syste
 {
 	var mgr = BuildManager();
 	mgr.RevealRumor("location.rumored-place", "src", Array.Empty<string>(), 40); // → Rumored
-	var result = mgr.ConsumeIntel("location.rumored-place");
+	var result = mgr.AdvanceLocationFromIntel("location.rumored-place");
 	Assert(result.HasValue, "AC-10: Rumored ConsumeIntel 返回有效变化");
 	Assert(mgr.QueryKnowledgeState("location.rumored-place") == LocationKnowledgeState.Identified,
 		"AC-10: Rumored → Identified");
@@ -127,7 +127,7 @@ Console.WriteLine("=== Story 002: Location Knowledge State Machine & Rumor Syste
 {
 	var mgr = BuildManager();
 	mgr.RevealRumor("location.auth-place", "navy", Array.Empty<string>(), 80); // → Identified
-	var result = mgr.ConsumeIntel("location.auth-place");
+	var result = mgr.AdvanceLocationFromIntel("location.auth-place");
 	Assert(!result.HasValue, "AC-11: Identified ConsumeIntel 返回 null");
 	Assert(mgr.QueryKnowledgeState("location.auth-place") == LocationKnowledgeState.Identified,
 		"AC-11: 状态保持 Identified");
@@ -137,7 +137,7 @@ Console.WriteLine("=== Story 002: Location Knowledge State Machine & Rumor Syste
 {
 	var mgr = BuildManager();
 	mgr.PlayerArrivedAt("location.visited-place"); // → Verified
-	var result = mgr.ConsumeIntel("location.visited-place");
+	var result = mgr.AdvanceLocationFromIntel("location.visited-place");
 	Assert(!result.HasValue, "AC-12: Verified ConsumeIntel 返回 null");
 	Assert(mgr.QueryKnowledgeState("location.visited-place") == LocationKnowledgeState.Verified,
 		"AC-12: 状态保持 Verified");
