@@ -229,7 +229,7 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/chart/display/DisplayOrderTest.csproj` — must exist and pass
-**Status**: [x] 31/31 PASS — 2026-05-13
+**Status**: [x] 31/31 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 

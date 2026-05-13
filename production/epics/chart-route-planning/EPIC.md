@@ -53,6 +53,10 @@ This epic is complete when:
 
 **Summary**: 4 Logic + 4 Integration stories
 
+## Completion Review
+
+Epic #9 is closed as of 2026-05-13. Stories 001-008 are Done, and the C# evidence runners for Chart state, visibility/selectability, departure confirmation, display ordering, snapshot persistence, UI query contract, external state response, and edge cases all pass. Current review verification: `dotnet restore CloudWeaverVoyage.sln`; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS with 1 existing nullable warning in `tests/integration/chart/snapshot/ChartSnapshotPersistenceProgram.cs`; full `tests/**/*.csproj` runner sweep 71/71 PASS, 0 FAIL.
+
 ## Next Step
 
-Run `/story-readiness chart-route-planning` to validate all stories, then begin implementation with Story 001.
+Use Epic #9 as an upstream-complete contract for #10 Navigation Route Risk, #13 World Repair, #15 Partner Relationships, #16 UI/HUD, and #18 Onboarding. Do not reopen Chart unless a downstream consumer finds a contract mismatch.

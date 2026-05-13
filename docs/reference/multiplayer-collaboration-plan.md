@@ -4,10 +4,10 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | #9 已解锁 | BUG-005 已修复**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 已解锁并进入 In Progress | BUG-005 已修复**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-13 同步到 #5/#6/#7/#8 Complete、#9 解锁、63 个 C# runner PASS 的当前基线。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-13 同步到 #5/#6/#7/#8/#9 Complete、#10 In Progress、71 个 C# runner PASS 的当前基线。
 
 ---
 
@@ -230,8 +230,8 @@ D-C: Epic #8 Modules + Epic #9 Chart (各前 2 个)
 
   等 D-B #6 Story 001-002 完成 →
   Epic #9:
-  Story 001 □ Chart State Machine + Content Gate  (L, 2d)
-  Story 002 □ Route Visibility + Selectability    (L, 2d)  ← 等 001
+  Story 001 ☑ Chart State Machine + Content Gate  (L, 2d)  ← ✅ 43/43 PASS
+  Story 002 ☑ Route Visibility + Selectability    (L, 2d)  ← ✅ 32/32 PASS
 ```
 
 ### 第 5 周: 三方并行 — 第二批
@@ -266,8 +266,8 @@ D-C: Epic #8 剩余 + Epic #9 剩余
   Story 004 □ Furnace Capacity + Departure Readiness(L, 1d) ← 等 001+003
 
   Epic #9:
-  Story 003 □ Two-Step Departure Confirmation     (L, 2d)  ← 等 001-002
-  Story 004 □ Route Display Ordering + Filtering  (L, 1d)  ← 等 002
+  Story 003 ☑ Two-Step Departure Confirmation     (L, 2d)  ← ✅ 34/34 PASS
+  Story 004 ☑ Route Display Ordering + Filtering  (L, 1d)  ← ✅ 31/31 PASS
 ```
 
 ### 第 6 周: 三方并行 — 第三批
@@ -309,13 +309,13 @@ D-C: Epic #8+#9 收尾 → 启动 Epic #10
   Story 008 □ Scout Acquisition + Combat Damage (I, 2d)  ← 等 007
 
   Epic #9:
-  Story 005 □ Snapshot Validation + Persistence (I, 2d)  ← 等 001-004
-  Story 006 □ UIManager Query + Signal Contract (I, 2d)  ← 与 005 并行
-  Story 007 □ External State Change Response    (I, 2d)  ← 等 005-006
-  Story 008 □ Edge Cases + Error Recovery       (I, 1d)  ← 等 007
+  Story 005 ☑ Snapshot Validation + Persistence (I, 2d)  ← ✅ 42/42 PASS
+  Story 006 ☑ UIManager Query + Signal Contract (I, 2d)  ← ✅ 56/56 PASS
+  Story 007 ☑ External State Change Response    (I, 2d)  ← ✅ 22/22 PASS
+  Story 008 ☑ Edge Cases + Error Recovery       (I, 1d)  ← ✅ 43/43 PASS
 
   Epic #10 Navigation (等 #5+#6+#7+#8+#9 全部完成):
-  Story 001 □ Voyage State Machine + Preflight   (L, 2d)
+  Story 001 □ Voyage State Machine + Preflight   (L, 2d)  ← 已解锁 / In Progress
   Story 002 □ Voyage Duration + Check Timing     (L, 2d)  ← 与 001 并行
 ```
 
@@ -586,8 +586,8 @@ D-C: 性能分析 + 优化
 | #6 Intel | 001-008 | #1 稳定 ID + #3 快照契约 | ✅ Complete — 2026-05-13 |
 | #7 Hub | 001-008 | #1 ID + #3 快照 + #4 移动 | ✅ Complete + reviewed — 2026-05-12 |
 | #8 Modules | 001-008 | #3 快照 + #5 池定义 + #7 槽位注册 | ✅ Complete + reviewed — 2026-05-13 |
-| #9 Chart | 001 | #1 ID + #3 快照 + #6 知识状态 | 当前可开工 |
-| #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | Week 6-7 |
+| #9 Chart | 001-008 | #1 ID + #3 快照 + #6 知识状态 | ✅ Complete + reviewed — 2026-05-13 |
+| #10 Navigation | 001 | #5+#6+#7+#8+#9 全部 | In Progress |
 | #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Week 8 |
 | #12 Combat | 001 | #5+#8+#11 全部 | Week 9 |
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |

@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8 完成；#9 已解锁；BUG-005 已修复**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；#10 Navigation 已解锁并进入 In Progress；BUG-005 已修复**
 
 ---
 
@@ -28,11 +28,11 @@ gantt
     #4 移动交互   (7 Stories)    :done,    p2b, after p1b, 10d
 
     section 🟢 Phase C 等 #1 #3
-    #5 资源货物   (9 Stories)    :         p3a, after p2a, 14d
-    #6 知识情报   (8 Stories)    :         p3b, after p2a, 14d
+    #5 资源货物   (9 Stories)    :done,    p3a, 2026-05-13, 1d
+    #6 知识情报   (8 Stories)    :done,    p3b, 2026-05-13, 1d
     #7 飞艇 Hub   (8 Stories)    :done,    p3c, 2026-05-12, 1d
     #8 模块船体   (8 Stories)    :done,    p3d, 2026-05-13, 1d
-    #9 航图规划   (8 Stories)    :         p3e, after p3b, 12d
+    #9 航图规划   (8 Stories)    :done,    p3e, 2026-05-13, 1d
 
     section 🟠 Phase D 等 Core 层
     #10 航行风险  (8 Stories)    :         p4a, after p3e, 14d
@@ -73,14 +73,14 @@ graph TD
     S3["✅ #3 持久化 8S"]:::done
     S4["✅ #4 移动交互 7S"]:::done
 
-    S5["🟢 #5 资源货物 9S (进行中)"]:::active
+    S5["✅ #5 资源货物 9S"]:::done
     S6["✅ #6 知识情报 8S"]:::done
     S7["✅ #7 飞艇 Hub 8S"]:::done
 
     S8["✅ #8 模块船体 8S"]:::done
-    S9["🟢 #9 航图规划 8S"]:::future
+    S9["✅ #9 航图规划 8S"]:::done
 
-    S10["🟠 #10 航行风险 8S"]:::future
+    S10["🟢 #10 航行风险 8S"]:::active
     S13["🟠 #13 世界修复 6S"]:::future
     S15["🟠 #15 伙伴关系 6S"]:::future
 
@@ -490,33 +490,34 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase 0      ████████████████████████ 100%
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
-🔵 Phase C      ████████████████████░░░░  77% (#5/#6/#7/#8 完成；#9 已解锁)
+✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
+🔵 Phase D      ████░░░░░░░░░░░░░░░░░░░░  开始 (#10 Navigation In Progress；#13/#15/#16 已满足 #9 上游)
 ```
 
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #5 Resources/Goods、#6 Intel、#8 Modules/Hull 均已完成；#8 于 2026-05-13 复审通过；#9 Chart Route Planning 已解锁；BUG-005 scene reachability 已修复
-- 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误；首次 `--no-restore` 仅因新增 Resources 测试项目缺少 NuGet assets 失败，restore 后通过）
-- 测试验证: Epic #8 Story 001-008 runner 36/36 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误）；`tests/**/*.csproj` 全量 C# runner 63/63 PASS
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8 Complete、#9 已解锁、63 个 C# runner 的当前基线
-- 本次完成: Epic #8 Modules/Hull C# 合同、资源容积联动、信号契约、快照持久化与战斗损伤接口已锁定并复审通过
+- 活跃任务: Epic #9 Chart Route Planning 全部 8/8 Story 完成并复审通过；#10 Navigation Route Risk 已解锁并进入 In Progress；BUG-005 scene reachability 已修复
+- 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（1 个既存 nullable warning，0 错误）
+- 测试验证: Epic #9 Story 001-008 runner 273/273 checks PASS；`tests/**/*.csproj` 全量 C# runner 71/71 PASS，0 FAIL
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9 Complete、#10 In Progress、71 个 C# runner 的当前基线
+- 本次完成: Epic #9 ChartManager C# 合同、航图状态机、航线可见性/可选择性、两步出航确认、快照持久化、UI 查询契约、外部状态响应与边界恢复已锁定并复审通过
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #9 Chart Route Planning Story 001 | #6 情报合同完成 ✅ | 可开工 |
+| **P0** | #10 Navigation Route Risk Story 001 | #5/#6/#7/#8/#9 上游合同完成 ✅ | In Progress |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #5/#6/#7/#8 已完成，下一段优先推进 #9 航图规划；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
+> 关键建议: #5/#6/#7/#8/#9 已完成，下一段优先推进 #10 航行风险；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #9 航图规划 Story 001 Chart State Machine + Content Gate (依赖 #6 ✅)
-  ├─ #8 模块船体 Epic 已复审通过，可作为 #10/#11/#12/#16 上游合同输入
+  ┌─ #10 航行风险 Story 001 Voyage State Machine + Preflight (依赖 #5/#6/#7/#8/#9 ✅)
+  ├─ #9 航图规划 Epic 已复审通过，可作为 #10/#13/#15/#16/#18 上游合同输入
   └─ TC-RGC-005~009 下游交互/UI 接线（TC-RGC-003/004 visible Godot 复测已通过）
 ```
 

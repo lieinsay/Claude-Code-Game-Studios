@@ -247,7 +247,7 @@ func _resume_departure_sequence() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/chart/snapshot/ChartSnapshotPersistenceTest.csproj` — must exist and pass
-**Status**: [x] 42/42 PASS — 2026-05-13
+**Status**: [x] 42/42 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 

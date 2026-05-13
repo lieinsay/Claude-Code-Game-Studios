@@ -200,7 +200,7 @@ func get_route_display_data(route_id: StringName) -> Dictionary:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/chart/uicontract/UimanagerContractTest.csproj` — must exist and pass
-**Status**: [x] 56/56 PASS — 2026-05-13
+**Status**: [x] 56/56 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 

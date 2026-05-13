@@ -289,7 +289,7 @@ func retry_open_chart() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/chart/statemachine/ChartStateMachineTest.csproj` — must exist and pass
-**Status**: [x] 43/43 PASS — 2026-05-13
+**Status**: [x] 43/43 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 

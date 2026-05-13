@@ -216,7 +216,7 @@ func _check_docked_location_changed() -> bool:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/chart/external/ExternalStateResponseTest.csproj` — must exist and pass
-**Status**: [x] 22/22 PASS — 2026-05-13
+**Status**: [x] 22/22 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 

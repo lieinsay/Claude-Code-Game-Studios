@@ -217,7 +217,7 @@ func _enter_error_state(violations: Array) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/chart/departure/DepartureConfirmationTest.csproj` — must exist and pass
-**Status**: [x] 34/34 PASS — 2026-05-13
+**Status**: [x] 34/34 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---
 
