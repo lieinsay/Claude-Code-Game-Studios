@@ -1,7 +1,7 @@
 # Story 006: EncounterContext Production & voyage_completed Signal
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -237,8 +237,8 @@ const VOYAGE_RESULT_FORCED_LANDING: StringName = &"forced_landing"
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/EncounterContextSignalTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/navigation/context/EncounterContextSignalTest.csproj` — must exist and pass
+**Status**: [x] 47/47 PASS — 2026-05-13
 
 ---
 

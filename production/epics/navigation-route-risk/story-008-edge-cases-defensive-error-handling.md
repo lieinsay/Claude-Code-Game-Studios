@@ -1,7 +1,7 @@
 # Story 008: Edge Cases & Defensive Error Handling
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -287,8 +287,8 @@ func is_retreat_allowed() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/EdgeCasesTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/navigation/edgecases/NavEdgeCasesTest.csproj` — must exist and pass
+**Status**: [x] 51/51 PASS — 2026-05-13
 
 ---
 

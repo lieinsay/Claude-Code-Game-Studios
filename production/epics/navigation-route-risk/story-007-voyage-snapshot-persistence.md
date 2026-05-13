@@ -1,7 +1,7 @@
 # Story 007: Voyage Snapshot Persistence
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -285,8 +285,8 @@ func restore_from_snapshot(snapshot: Dictionary) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/navigation/VoyageSnapshotPersistenceTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/navigation/snapshot/VoyageSnapshotPersistenceTest.csproj` — must exist and pass
+**Status**: [x] 34/34 PASS — 2026-05-13
 
 ---
 

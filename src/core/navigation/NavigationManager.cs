@@ -65,6 +65,57 @@ public sealed class ResolvedEncounterEntry
 }
 
 /// <summary>
+/// EncounterContext——航程终态时由 NavigationManager 构建，通过 voyage_completed 信号传递给下游系统。
+/// 9 个顶层字段，所有列表均为深拷贝，消费方不应修改。
+/// </summary>
+public sealed class EncounterContext
+{
+	/// <summary>航线 ID。</summary>
+	public string RouteId { get; }
+	/// <summary>目的地地点 ID。</summary>
+	public string DestinationId { get; }
+	/// <summary>航行结果："arrived" / "retreated" / "forced_landing"。</summary>
+	public string VoyageResult { get; }
+	/// <summary>航程中所有已结算遭遇条目（深拷贝）。</summary>
+	public IReadOnlyList<ResolvedEncounterEntry> ResolvedEncounters { get; }
+	/// <summary>累计伤害（已写入 #8，此处仅供参考）。</summary>
+	public int AccumulatedDamage { get; }
+	/// <summary>航程中新揭示的隐藏标签列表（深拷贝）。</summary>
+	public IReadOnlyList<string> RevealedHiddenTags { get; }
+	/// <summary>终态船体波段。</summary>
+	public HullBand HullBandArrival { get; }
+	/// <summary>迫降位置 ID（仅 forced_landing 时非空）。</summary>
+	public string ForcedLandingPosition { get; }
+	/// <summary>受损模块槽位列表（深拷贝）。</summary>
+	public IReadOnlyList<string> DamagedSlots { get; }
+
+	/// <param name="routeId">航线 ID。</param>
+	/// <param name="destinationId">目的地 ID。</param>
+	/// <param name="voyageResult">航行结果。</param>
+	/// <param name="resolvedEncounters">已结算遭遇列表。</param>
+	/// <param name="accumulatedDamage">累计伤害。</param>
+	/// <param name="revealedHiddenTags">揭示的隐藏标签。</param>
+	/// <param name="hullBandArrival">终态波段。</param>
+	/// <param name="forcedLandingPosition">迫降位置。</param>
+	/// <param name="damagedSlots">受损槽位。</param>
+	public EncounterContext(string routeId, string destinationId, string voyageResult,
+		IReadOnlyList<ResolvedEncounterEntry> resolvedEncounters, int accumulatedDamage,
+		IReadOnlyList<string> revealedHiddenTags, HullBand hullBandArrival,
+		string forcedLandingPosition, IReadOnlyList<string> damagedSlots)
+	{
+		RouteId = routeId;
+		DestinationId = destinationId;
+		VoyageResult = voyageResult;
+		ResolvedEncounters = resolvedEncounters;
+		AccumulatedDamage = accumulatedDamage;
+		RevealedHiddenTags = revealedHiddenTags;
+		HullBandArrival = hullBandArrival;
+		ForcedLandingPosition = forcedLandingPosition;
+		DamagedSlots = damagedSlots;
+	}
+}
+
+/// <summary>
 /// 航行上下文快照（VoyageContext）——由预检构建，航行期间只读。
 /// </summary>
 public sealed class VoyageContext
@@ -213,6 +264,8 @@ public sealed class NavigationManager
 	private double _flatTimePenalties;   // ΣT_flat
 	private double _tempTimePenalties;   // ΣT_temp
 	private readonly List<string> _revealedHiddenTags = new();
+	// Story 006: 已结算遭遇列表（深拷贝传入 EncounterContext）
+	private readonly List<ResolvedEncounterEntry> _resolvedEntries = new();
 	private string _abortReason = "";
 
 	// 外部依赖注入（测试友好）
@@ -670,6 +723,180 @@ public sealed class NavigationManager
 		return total <= 0 ? 1.0 : Math.Min(1.0, _elapsedTime / total);
 	}
 
+	// ── Story 006 — EncounterContext Production & voyage_completed Signal ──
+
+	/// <summary>
+	/// voyage_completed 信号：航程终态时携带 EncounterContext 发射。
+	/// 消费方：Exploration (#11)，Persistence (#3)。
+	/// 遵循 ADR-0002：typed param, sync emit, emit-after-mutation。
+	/// </summary>
+	public event Action<EncounterContext>? VoyageCompleted;
+
+	// Story 007 写入顺序委托（可测试）
+	private Action<int>? _applyHullDamageFn;           // #8 apply_hull_damage
+	private Action<string, string>? _updateRouteKnowledgeFn; // #6 route_travel_completed
+	private Action<EncounterContext>? _persistSnapshotFn;     // #3 capture_snapshot
+
+	/// <summary>注入 #8 船体伤害写入委托（步骤 1）。</summary>
+	public void SetApplyHullDamageDelegate(Action<int> fn) => _applyHullDamageFn = fn;
+
+	/// <summary>注入 #6 路线知识更新委托（步骤 2）。</summary>
+	public void SetUpdateRouteKnowledgeDelegate(Action<string, string> fn) =>
+		_updateRouteKnowledgeFn = fn;
+
+	/// <summary>注入 #3 快照持久化委托（步骤 5）。</summary>
+	public void SetPersistSnapshotDelegate(Action<EncounterContext> fn) =>
+		_persistSnapshotFn = fn;
+
+	/// <summary>
+	/// 构建 EncounterContext（9 字段，航程终态时调用）。
+	/// resolved_encounters 和 revealed_hidden_tags 深拷贝——防止回调中修改原始数据。
+	/// </summary>
+	/// <returns>完整的 EncounterContext 实例。</returns>
+	public EncounterContext BuildEncounterContext()
+	{
+		string voyageResult = _voyageState switch
+		{
+			VoyageState.Arrived => "arrived",
+			VoyageState.Retreated => "retreated",
+			VoyageState.ForcedLanding => "forced_landing",
+			_ => "arrived",
+		};
+
+		int effectiveHull = _context != null
+			? CalculateEffectiveHullIntegrity(_context.HullIntegrityAtDeparture, _accumulatedDamage)
+			: 100;
+		var hullBandArrival = GetHullBand(effectiveHull);
+
+		string forcedLandingPosition = _voyageState == VoyageState.ForcedLanding
+			? (_context?.DestinationId ?? "unknown_position")
+			: "";
+
+		return new EncounterContext(
+			_context?.RouteId ?? "",
+			_context?.DestinationId ?? "",
+			voyageResult,
+			_resolvedEntries.ToList(),        // 深拷贝
+			_accumulatedDamage,
+			_revealedHiddenTags.ToList(),     // 深拷贝
+			hullBandArrival,
+			forcedLandingPosition,
+			new List<string>()                // damaged_slots（MVP 暂为空）
+		);
+	}
+
+	/// <summary>
+	/// 验证 EncounterContext 完整性（消费端——Exploration #11 调用）。
+	/// 校验失败时返回 fallback context。
+	/// </summary>
+	/// <param name="ctx">待校验的 EncounterContext。</param>
+	/// <returns>有效的 EncounterContext 或 fallback。</returns>
+	public static EncounterContext ValidateEncounterContext(EncounterContext? ctx)
+	{
+		if (ctx == null)
+			return BuildFallbackContext("ctx is null");
+		if (string.IsNullOrEmpty(ctx.RouteId))
+			return BuildFallbackContext("route_id is empty");
+		if (string.IsNullOrEmpty(ctx.DestinationId))
+			return BuildFallbackContext("destination_id is empty");
+		if (ctx.VoyageResult != "arrived" && ctx.VoyageResult != "retreated"
+			&& ctx.VoyageResult != "forced_landing")
+			return BuildFallbackContext($"invalid voyage_result: '{ctx.VoyageResult}'");
+		return ctx;
+	}
+
+	private static EncounterContext BuildFallbackContext(string reason)
+	{
+		return new EncounterContext(
+			"unknown", "cloudwatch-ruins-fallback", "arrived",
+			new List<ResolvedEncounterEntry>(), 0,
+			new List<string>(), HullBand.Intact, "", new List<string>());
+	}
+
+	// ── Story 007 — Snapshot Persistence ─────────────────────────────
+
+	/// <summary>
+	/// 捕获当前航行状态快照（mid-voyage 或终态均可）。
+	/// 序列化为纯数据结构，不含 Object/Node/Callable 引用。
+	/// </summary>
+	/// <returns>快照数据字典。</returns>
+	public Dictionary<string, object?> CaptureVoyageSnapshot()
+	{
+		string voyageState = _voyageState switch
+		{
+			VoyageState.Idle => "IDLE",
+			VoyageState.InProgress => "IN_PROGRESS",
+			VoyageState.Arrived => "ARRIVED",
+			VoyageState.Retreated => "RETREATED",
+			VoyageState.ForcedLanding => "FORCED_LANDING",
+			VoyageState.AbortedPreflight => "ABORTED_PREFLIGHT",
+			_ => "IDLE",
+		};
+
+		var resolvedList = _resolvedEntries.Select(e => (object?)new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["encounter_type"] = e.EncounterType,
+			["hazard_tag"] = e.HazardTag,
+			["damage_amount"] = (object?)e.DamageAmount,
+			["special_effect_tags"] = (object?)e.SpecialEffectTags.Cast<object?>().ToList(),
+			["was_hidden"] = (object?)e.WasHidden,
+			["time_offset"] = (object?)e.TimeOffset,
+		}).ToList();
+
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["route_id"] = _context?.RouteId ?? "",
+			["voyage_state"] = voyageState,
+			["elapsed_time"] = (object?)_elapsedTime,
+			["accumulated_damage"] = (object?)_accumulatedDamage,
+			["hull_integrity_departure"] = (object?)(_context?.HullIntegrityAtDeparture ?? 100),
+			["scout_efficiency_snapshot"] = (object?)(_context?.ScoutEfficiency ?? 0.0),
+			["revealed_hidden_tags"] = (object?)_revealedHiddenTags.Cast<object?>().ToList(),
+			["resolved_encounters"] = (object?)resolvedList,
+			["last_check_time"] = (object?)_lastCheckTime,
+			["flat_time_penalties"] = (object?)_flatTimePenalties,
+			["temp_time_penalties"] = (object?)_tempTimePenalties,
+			["_snapshot_version"] = (object?)1,
+		};
+	}
+
+	/// <summary>
+	/// 从快照恢复 mid-voyage 状态（IN_PROGRESS 路径）。
+	/// 重算 T_voyage/T_check 基于当前配置，不使用存档中的旧值。
+	/// </summary>
+	/// <param name="snapshot">CaptureVoyageSnapshot() 生成的快照字典。</param>
+	public void RestoreFromVoyageSnapshot(IReadOnlyDictionary<string, object?> snapshot)
+	{
+		string stateStr = snapshot.TryGetValue("voyage_state", out var vs) ? vs?.ToString() ?? "" : "";
+		if (stateStr != "IN_PROGRESS") return;
+
+		_voyageState = VoyageState.InProgress;
+		_elapsedTime = snapshot.TryGetValue("elapsed_time", out var et) ? Convert.ToDouble(et) : 0.0;
+		_accumulatedDamage = snapshot.TryGetValue("accumulated_damage", out var ad) ? Convert.ToInt32(ad) : 0;
+		_lastCheckTime = snapshot.TryGetValue("last_check_time", out var lct) ? Convert.ToDouble(lct) : 0.0;
+		_flatTimePenalties = snapshot.TryGetValue("flat_time_penalties", out var fp) ? Convert.ToDouble(fp) : 0.0;
+		_tempTimePenalties = snapshot.TryGetValue("temp_time_penalties", out var tp) ? Convert.ToDouble(tp) : 0.0;
+
+		if (snapshot.TryGetValue("revealed_hidden_tags", out var rht) && rht is List<object?> rhtList)
+			foreach (var item in rhtList)
+				if (item?.ToString() is string tag)
+					_revealedHiddenTags.Add(tag);
+
+		// 恢复已结算遭遇
+		if (snapshot.TryGetValue("resolved_encounters", out var re) && re is List<object?> reList)
+			foreach (var entryRaw in reList)
+				if (entryRaw is Dictionary<string, object?> entryDict)
+					_resolvedEntries.Add(new ResolvedEncounterEntry(
+						entryDict.TryGetValue("encounter_type", out var et2) ? et2?.ToString() ?? "" : "",
+						entryDict.TryGetValue("hazard_tag", out var ht) ? ht?.ToString() ?? "" : "",
+						entryDict.TryGetValue("damage_amount", out var da) ? Convert.ToInt32(da) : 0,
+						entryDict.TryGetValue("special_effect_tags", out var se) && se is List<object?> sel
+							? sel.Select(s => s?.ToString() ?? "").ToList()
+							: Array.Empty<string>(),
+						entryDict.TryGetValue("was_hidden", out var wh) && wh is bool b && b,
+						entryDict.TryGetValue("time_offset", out var to) ? Convert.ToDouble(to) : 0.0));
+	}
+
 	// ── Story 005 — Encounter Table & Resolution ─────────────────────
 
 	// 遭遇表条目定义（hazard_tag → 条目权重列表）
@@ -774,9 +1001,12 @@ public sealed class NavigationManager
 		int dCheck = CalculateCheckDamage(hits.Select(e =>
 			new EncounterEntry(e.HazardTag, e.DamageAmount)).ToList());
 
-		// 4. 发射信号——每条独立发射
+		// 4. 发射信号——每条独立发射，并追加到已结算列表
 		foreach (var hit in hits)
+		{
 			EncounterTriggered?.Invoke(hit);
+			_resolvedEntries.Add(hit);
+		}
 
 		// 5. 应用特殊效果
 		bool stormEye = false;
@@ -846,6 +1076,7 @@ public sealed class NavigationManager
 		_flatTimePenalties = 0;
 		_tempTimePenalties = 0;
 		_revealedHiddenTags.Clear();
+		_resolvedEntries.Clear();
 		_abortReason = "";
 		_currentHullBand = HullBand.Intact;
 	}
@@ -858,6 +1089,35 @@ public sealed class NavigationManager
 
 	private void FinalizeVoyage()
 	{
+		// 步骤 1: #8 船体伤害写入
+		if (_accumulatedDamage > 0)
+		{
+			try { _applyHullDamageFn?.Invoke(_accumulatedDamage); }
+			catch { /* 写入失败不阻塞后续步骤 */ }
+		}
+
+		// 步骤 2: #6 路线知识更新
+		if (_context != null && !string.IsNullOrEmpty(_context.RouteId))
+		{
+			try
+			{
+				string voyageResult = _voyageState switch
+				{
+					VoyageState.Arrived => "arrived",
+					VoyageState.Retreated => "retreated",
+					VoyageState.ForcedLanding => "forced_landing",
+					_ => "arrived",
+				};
+				_updateRouteKnowledgeFn?.Invoke(_context.RouteId, voyageResult);
+			}
+			catch { /* 写入失败不阻塞后续步骤 */ }
+		}
+
+		// 步骤 3: 构建 EncounterContext 并发射 voyage_completed 信号
+		var ctx = BuildEncounterContext();
+		VoyageCompleted?.Invoke(ctx);
+
+		// 步骤 4: 终态事件（旧接口，向后兼容）
 		switch (_voyageState)
 		{
 			case VoyageState.Arrived:
@@ -871,6 +1131,10 @@ public sealed class NavigationManager
 					CalculateEffectiveHullIntegrity(_context!.HullIntegrityAtDeparture, _accumulatedDamage));
 				break;
 		}
+
+		// 步骤 5: 持久化快照
+		try { _persistSnapshotFn?.Invoke(ctx); }
+		catch { /* 存档失败不阻塞航程终态 */ }
 	}
 
 	private bool ShouldTriggerNextCheck(double totalDuration)
