@@ -88,6 +88,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbilityUnlockTest", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelConsumeAlgorithmTest", "tests\unit\intel\consume\IntelConsumeAlgorithmTest.csproj", "{3667739C-19A0-4812-8236-16CE7FAF488D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventReceiversTest", "tests\unit\intel\events\EventReceiversTest.csproj", "{CF600EA3-847F-4F50-9513-1AF8139F0263}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryInterfaceTest", "tests\unit\intel\query\QueryInterfaceTest.csproj", "{6494EE01-5672-4597-BE51-628B2B4B3A5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -250,6 +254,14 @@ Global
 		{3667739C-19A0-4812-8236-16CE7FAF488D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3667739C-19A0-4812-8236-16CE7FAF488D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3667739C-19A0-4812-8236-16CE7FAF488D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF600EA3-847F-4F50-9513-1AF8139F0263}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF600EA3-847F-4F50-9513-1AF8139F0263}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF600EA3-847F-4F50-9513-1AF8139F0263}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF600EA3-847F-4F50-9513-1AF8139F0263}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6494EE01-5672-4597-BE51-628B2B4B3A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6494EE01-5672-4597-BE51-628B2B4B3A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6494EE01-5672-4597-BE51-628B2B4B3A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6494EE01-5672-4597-BE51-628B2B4B3A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -295,5 +307,7 @@ Global
 		{29C7C45C-9683-4B88-B401-47E2A318273B} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 		{661FA404-BD8B-4E45-AD34-76F57B87C5A4} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 		{3667739C-19A0-4812-8236-16CE7FAF488D} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
+		{CF600EA3-847F-4F50-9513-1AF8139F0263} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
+		{6494EE01-5672-4597-BE51-628B2B4B3A5A} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 # Story 006: Downstream Query Interface
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -275,8 +275,8 @@ func _collect_sources(entity_id: StringName) -> Array:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/QueryInterfaceTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/intel/query/QueryInterfaceTest.csproj` — must exist and pass
+**Status**: [x] 44/44 PASS — 2026-05-13
 
 ---
 

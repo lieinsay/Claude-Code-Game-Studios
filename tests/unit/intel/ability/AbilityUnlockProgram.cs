@@ -214,17 +214,18 @@ Console.WriteLine("=== Story 003: Ability Multi-Path Unlock System ===\n");
 // ── AC-3 (Path A): pattern.bird-flight-direction confirmed → 解锁 ──
 {
 	var mgr = BuildManager();
-	// 达到 Confirmed: score ≥ 10
-	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-active-study");   // +7
-	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-passive-island"); // +4 → 11
 	string? sigAbility = null; string? sigPath = null;
 	mgr.AbilityUnlocked += (a, p) => { sigAbility = a; sigPath = p; };
-	bool result = mgr.CheckUnlockConditions("ability.bird-flight-understanding");
-	Assert(result, "AC-3: Path A pattern confirmed → 解锁");
+	// 达到 Confirmed: score ≥ 10 — ReevaluateAbilityUnlocks 在 ReportObservationEvent 末尾触发
+	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-active-study");   // +7
+	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-passive-island"); // +4 → 11 → Confirmed → 解锁
+	Assert(mgr.QueryAbilityState("ability.bird-flight-understanding") == AbilityState.Unlocked,
+		"AC-3: Path A pattern confirmed → 解锁");
 	Assert(sigAbility == "ability.bird-flight-understanding", "AC-3: AbilityUnlocked 信号触发");
 	Assert(sigPath == "path_a_pattern_confirmed", "AC-3: 信号 pathId=path_a_pattern_confirmed");
-	Assert(mgr.QueryAbilityState("ability.bird-flight-understanding") == AbilityState.Unlocked,
-		"AC-3: 能力状态变为 Unlocked");
+	// 再次调用 CheckUnlockConditions — 短路，不重发信号
+	bool result = mgr.CheckUnlockConditions("ability.bird-flight-understanding");
+	Assert(result, "AC-3: CheckUnlockConditions 返回 true");
 }
 
 // ── AC-4 (Path B): intel_consumed + observation_event_count ≥ 1 → 解锁 ──
@@ -301,9 +302,7 @@ Console.WriteLine("=== Story 003: Ability Multi-Path Unlock System ===\n");
 	mgr.ReportObservationEvent("pattern.fog-navigation", "fog-narrative-hint"); // 1 事件
 	Assert(mgr.QueryAbilityState("ability.fog-navigation") == AbilityState.Locked,
 		"AC-10: partner + 1 事件 < 2 → 未解锁");
-	mgr.ReportObservationEvent("pattern.fog-navigation", "fog-log-fragment"); // 2 事件
-	// ReportObservationEvent 后触发 ReevaluateAbilityUnlocks（需要直接调用 CheckUnlock）
-	mgr.CheckUnlockConditions("ability.fog-navigation");
+	mgr.ReportObservationEvent("pattern.fog-navigation", "fog-log-fragment"); // 2 事件 → ReevaluateAbilityUnlocks 自动触发
 	Assert(mgr.QueryAbilityState("ability.fog-navigation") == AbilityState.Unlocked,
 		"AC-10: partner + 2 事件 → fog-navigation 解锁");
 }
@@ -333,21 +332,23 @@ Console.WriteLine("=== Story 003: Ability Multi-Path Unlock System ===\n");
 }
 
 // ── AC-13: 两条路径同时满足，解锁一次，pathId 为第一条 ──
+// 注意：Story 005 后 ReportObservationEvent 末尾调用 ReevaluateAbilityUnlocks，
+//       Path A 在 score=11 时自动触发解锁并发出信号。测试验证信号只发一次、路径正确。
 {
 	var mgr = BuildManager();
-	// Path A 满足（pattern confirmed）+ Path B 也满足（intel + observation）
+	int sigCount = 0; string? firstPath = null;
+	mgr.AbilityUnlocked += (_, p) => { sigCount++; firstPath = p; };
+	// Path A 满足（pattern confirmed）— 触发 ReevaluateAbilityUnlocks → 解锁
 	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-active-study");   // +7
-	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-passive-island"); // +4 → 11 Confirmed
+	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-passive-island"); // +4 → 11 Confirmed → 解锁
+	// Path B 也满足（intel + observation 已有）— 但能力已锁，后续操作不重发信号
 	mgr.RegisterIntelDefinition(new IntelDefinition(
 		"intel.bird-migration-notes", "鸟类迁徙笔记",
 		Array.Empty<string>(), Array.Empty<string>(), "",
 		Array.Empty<string>()));
 	mgr.ConsumeIntel("intel.bird-migration-notes");
-	// 此时 Path A 和 Path B 都满足
-	int sigCount = 0; string? firstPath = null;
-	mgr.AbilityUnlocked += (_, p) => { sigCount++; firstPath = p; };
-	bool result = mgr.CheckUnlockConditions("ability.bird-flight-understanding");
-	Assert(result, "AC-13: 两条路径满足时能力解锁");
+	Assert(mgr.QueryAbilityState("ability.bird-flight-understanding") == AbilityState.Unlocked,
+		"AC-13: 两条路径满足时能力解锁");
 	Assert(sigCount == 1, "AC-13: 仅发出一次 AbilityUnlocked 信号");
 	Assert(firstPath == "path_a_pattern_confirmed", "AC-13: unlock_path 为第一条路径 path_a");
 }

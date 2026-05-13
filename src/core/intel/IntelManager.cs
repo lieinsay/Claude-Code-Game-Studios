@@ -356,6 +356,208 @@ public sealed class PatternObservationRecord
 }
 
 /// <summary>
+/// 路线/地点静态定义（由 Registry 提供，供下游查询使用）。
+/// </summary>
+public sealed class RouteDefinition
+{
+	/// <summary>路线 ID。</summary>
+	public string RouteId { get; }
+	/// <summary>所有静态风险标签。</summary>
+	public IReadOnlyList<string> HazardTags { get; }
+	/// <summary>通行所需能力 ID（空字符串表示无要求）。</summary>
+	public string RequiredAbility { get; }
+
+	/// <param name="routeId">路线 ID。</param>
+	/// <param name="hazardTags">风险标签。</param>
+	/// <param name="requiredAbility">所需能力 ID。</param>
+	public RouteDefinition(string routeId, IReadOnlyList<string> hazardTags, string requiredAbility = "")
+	{
+		RouteId = routeId;
+		HazardTags = hazardTags.ToArray();
+		RequiredAbility = requiredAbility;
+	}
+}
+
+/// <summary>
+/// 地点静态定义（由 Registry 提供，供下游查询使用）。
+/// </summary>
+public sealed class LocationDefinition
+{
+	/// <summary>地点 ID。</summary>
+	public string LocationId { get; }
+	/// <summary>所有静态风险标签。</summary>
+	public IReadOnlyList<string> HazardTags { get; }
+
+	/// <param name="locationId">地点 ID。</param>
+	/// <param name="hazardTags">风险标签。</param>
+	public LocationDefinition(string locationId, IReadOnlyList<string> hazardTags)
+	{
+		LocationId = locationId;
+		HazardTags = hazardTags.ToArray();
+	}
+}
+
+/// <summary>
+/// 能力静态定义（由 Registry 提供，供下游查询使用）。
+/// </summary>
+public sealed class AbilityDefinition
+{
+	/// <summary>能力 ID。</summary>
+	public string AbilityId { get; }
+	/// <summary>能力显示名称。</summary>
+	public string DisplayName { get; }
+	/// <summary>能力详细描述（解锁后显示）。</summary>
+	public string Description { get; }
+	/// <summary>解锁提示文本（锁定时显示）。</summary>
+	public string UnlockHint { get; }
+
+	/// <param name="abilityId">能力 ID。</param>
+	/// <param name="displayName">显示名称。</param>
+	/// <param name="description">详细描述。</param>
+	/// <param name="unlockHint">锁定时的提示。</param>
+	public AbilityDefinition(string abilityId, string displayName,
+		string description = "", string unlockHint = "")
+	{
+		AbilityId = abilityId;
+		DisplayName = displayName;
+		Description = description;
+		UnlockHint = unlockHint;
+	}
+}
+
+/// <summary>
+/// query_route_knowledge() 的返回结果（Story 006）。
+/// </summary>
+public sealed class RouteKnowledgeResult
+{
+	/// <summary>地点知识状态。</summary>
+	public LocationKnowledgeState State { get; }
+	/// <summary>当前可见的风险标签。</summary>
+	public IReadOnlyList<string> VisibleHazards { get; }
+	/// <summary>尚未揭示的风险标签数量。</summary>
+	public int HiddenHazardCount { get; }
+	/// <summary>来源汇总列表。</summary>
+	public IReadOnlyList<RumorSource> Sources { get; }
+
+	/// <param name="state">知识状态。</param>
+	/// <param name="visibleHazards">可见风险标签。</param>
+	/// <param name="hiddenHazardCount">隐藏风险数量。</param>
+	/// <param name="sources">来源列表。</param>
+	public RouteKnowledgeResult(LocationKnowledgeState state,
+		IReadOnlyList<string> visibleHazards, int hiddenHazardCount,
+		IReadOnlyList<RumorSource> sources)
+	{
+		State = state;
+		VisibleHazards = visibleHazards;
+		HiddenHazardCount = hiddenHazardCount;
+		Sources = sources;
+	}
+}
+
+/// <summary>
+/// query_route_accessibility() 的返回结果（Story 006）。
+/// </summary>
+public sealed class RouteAccessibilityResult
+{
+	/// <summary>是否可通行。</summary>
+	public bool Traversable { get; }
+	/// <summary>阻塞该路线所需的能力 ID（空字符串表示无能力阻塞）。</summary>
+	public string BlockedByAbility { get; }
+	/// <summary>是否因地点知识不足而阻塞。</summary>
+	public bool BlockedByKnowledge { get; }
+
+	/// <param name="traversable">是否可通行。</param>
+	/// <param name="blockedByAbility">所需能力 ID。</param>
+	/// <param name="blockedByKnowledge">是否因知识不足阻塞。</param>
+	public RouteAccessibilityResult(bool traversable, string blockedByAbility, bool blockedByKnowledge)
+	{
+		Traversable = traversable;
+		BlockedByAbility = blockedByAbility;
+		BlockedByKnowledge = blockedByKnowledge;
+	}
+}
+
+/// <summary>
+/// get_ability_list() 返回的单条能力列表项（Story 006）。
+/// </summary>
+public sealed class AbilityListItem
+{
+	/// <summary>能力 ID。</summary>
+	public string AbilityId { get; }
+	/// <summary>显示名称。</summary>
+	public string DisplayName { get; }
+	/// <summary>当前状态。</summary>
+	public AbilityState State { get; }
+	/// <summary>锁定时的解锁提示文本；已解锁时为空字符串。</summary>
+	public string UnlockHint { get; }
+	/// <summary>已解锁时的详细描述；锁定时为空字符串。</summary>
+	public string Description { get; }
+
+	/// <param name="abilityId">能力 ID。</param>
+	/// <param name="displayName">显示名称。</param>
+	/// <param name="state">当前状态。</param>
+	/// <param name="unlockHint">解锁提示。</param>
+	/// <param name="description">详细描述。</param>
+	public AbilityListItem(string abilityId, string displayName, AbilityState state,
+		string unlockHint, string description)
+	{
+		AbilityId = abilityId;
+		DisplayName = displayName;
+		State = state;
+		UnlockHint = unlockHint;
+		Description = description;
+	}
+}
+
+/// <summary>
+/// query_location_discovery() 中单条风险标签的可见性记录（Story 006）。
+/// </summary>
+public sealed class HazardVisibility
+{
+	/// <summary>风险标签。</summary>
+	public string Tag { get; }
+	/// <summary>当前是否对玩家可见。</summary>
+	public bool Visible { get; }
+
+	/// <param name="tag">风险标签。</param>
+	/// <param name="visible">是否可见。</param>
+	public HazardVisibility(string tag, bool visible)
+	{
+		Tag = tag;
+		Visible = visible;
+	}
+}
+
+/// <summary>
+/// query_location_discovery() 的返回结果（Story 006）。
+/// </summary>
+public sealed class LocationDiscoveryResult
+{
+	/// <summary>地点知识状态。</summary>
+	public LocationKnowledgeState State { get; }
+	/// <summary>风险标签可见性列表（Unknown 时为空）。</summary>
+	public IReadOnlyList<HazardVisibility> HazardVisibility { get; }
+	/// <summary>来源列表。</summary>
+	public IReadOnlyList<RumorSource> Sources { get; }
+	/// <summary>个人标注文本。</summary>
+	public string PersonalNotes { get; }
+
+	/// <param name="state">知识状态。</param>
+	/// <param name="hazardVisibility">可见性列表。</param>
+	/// <param name="sources">来源列表。</param>
+	/// <param name="personalNotes">个人标注。</param>
+	public LocationDiscoveryResult(LocationKnowledgeState state,
+		IReadOnlyList<HazardVisibility> hazardVisibility,
+		IReadOnlyList<RumorSource> sources, string personalNotes)
+	{
+		State = state;
+		HazardVisibility = hazardVisibility;
+		Sources = sources;
+		PersonalNotes = personalNotes;
+	}
+}
+
+/// <summary>
 /// Intel / Knowledge System Autoload #6。
 /// 追踪玩家对空海世界的规律知识（Story 001）和地点知识（Story 002）。
 /// 唯一真相源——下游系统只读查询，不得自行缓存状态。
@@ -425,6 +627,23 @@ public sealed class IntelManager
 
 	// intel 定义缓存: intelId → IntelDefinition
 	private readonly Dictionary<string, IntelDefinition> _intelDefCache =
+		new(StringComparer.Ordinal);
+
+	// ── Story 006 — Downstream Query Interface ─────────────────────
+	// 路线静态定义: routeId → RouteDefinition
+	private readonly Dictionary<string, RouteDefinition> _routeDefs =
+		new(StringComparer.Ordinal);
+
+	// 地点静态定义: locationId → LocationDefinition
+	private readonly Dictionary<string, LocationDefinition> _locationDefs =
+		new(StringComparer.Ordinal);
+
+	// 能力静态定义: abilityId → AbilityDefinition
+	private readonly Dictionary<string, AbilityDefinition> _abilityDefs =
+		new(StringComparer.Ordinal);
+
+	// 个人标注: locationId → 标注文本
+	private readonly Dictionary<string, string> _personalNotes =
 		new(StringComparer.Ordinal);
 
 	// ── 事件（Story 001 — Pattern）──────────────────────────────
@@ -590,6 +809,43 @@ public sealed class IntelManager
 	}
 
 	/// <summary>
+	/// 注册路线静态定义（由 Registry 提供，供 query_route_knowledge/accessibility 使用）。
+	/// </summary>
+	/// <param name="def">路线定义。</param>
+	public void RegisterRouteDefinition(RouteDefinition def)
+	{
+		_routeDefs[def.RouteId] = def;
+	}
+
+	/// <summary>
+	/// 注册地点静态定义（由 Registry 提供，供 query_location_discovery 使用）。
+	/// </summary>
+	/// <param name="def">地点定义。</param>
+	public void RegisterLocationDefinition(LocationDefinition def)
+	{
+		_locationDefs[def.LocationId] = def;
+	}
+
+	/// <summary>
+	/// 注册能力静态定义（由 Registry 提供，供 get_ability_list 使用）。
+	/// </summary>
+	/// <param name="def">能力定义。</param>
+	public void RegisterAbilityDefinition(AbilityDefinition def)
+	{
+		_abilityDefs[def.AbilityId] = def;
+	}
+
+	/// <summary>
+	/// 设置地点的个人标注文本（由玩家操作触发）。
+	/// </summary>
+	/// <param name="locationId">地点 ID。</param>
+	/// <param name="note">标注文本。</param>
+	public void SetPersonalNote(string locationId, string note)
+	{
+		_personalNotes[locationId] = note;
+	}
+
+	/// <summary>
 	/// 完成初始化，验证阈值配置并注册条件求值器。
 	/// </summary>
 	public void Initialize()
@@ -638,6 +894,8 @@ public sealed class IntelManager
 			if (newState == PatternState.Confirmed && entry.PatternUsageSuccess)
 				PatternUsageConfirmed?.Invoke(patternId);
 		}
+
+		ReevaluateAbilityUnlocks(); // Story 005: 观测事件后重评能力
 	}
 
 	/// <summary>
@@ -652,6 +910,8 @@ public sealed class IntelManager
 
 		if (!wasConfirmedPlus && IsConfirmedPlus(patternId))
 			PatternUsageConfirmed?.Invoke(patternId);
+
+		ReevaluateAbilityUnlocks(); // Story 005: 使用成功后重评能力
 	}
 
 	/// <summary>
@@ -763,6 +1023,7 @@ public sealed class IntelManager
 			: LocationKnowledgeState.Rumored;
 
 		TryAdvanceLocation(entry, locationId, targetState);
+		ReevaluateAbilityUnlocks(); // Story 005: 传闻后重评能力
 	}
 
 	/// <summary>
@@ -799,6 +1060,34 @@ public sealed class IntelManager
 		entry.State = LocationKnowledgeState.Verified;
 		entry.AddRumorSource(new RumorSource("亲身探索", Array.Empty<string>(), 100));
 		KnowledgeAdvanced?.Invoke(locationId, oldState, LocationKnowledgeState.Verified);
+		ReevaluateAbilityUnlocks(); // Story 005: 到达地点后重评能力（触发 location_visit_count 路径）
+	}
+
+	// ── Story 005 — Upstream Event Receivers ──────────────────────
+
+	/// <summary>
+	/// 上报航行事件。目前处理 fog_traversal_completed；其他类型为扩展预留点。
+	/// 方法完成后触发能力重新评估。
+	/// </summary>
+	/// <param name="eventType">事件类型，如 "fog_traversal_completed"。</param>
+	/// <param name="payload">事件附加数据（可为空字典）。</param>
+	public void ReportNavigationEvent(string eventType, IReadOnlyDictionary<string, object>? payload = null)
+	{
+		switch (eventType)
+		{
+			case "fog_traversal_completed":
+				_fogTraversalCount++;
+				break;
+			case "route_travel_completed":
+			case "player_entered_zone":
+			case "player_hit_obstacle":
+				// 预留扩展点，暂不处理
+				break;
+			default:
+				// 未知事件类型记录警告但不崩溃
+				break;
+		}
+		ReevaluateAbilityUnlocks();
 	}
 
 	// ── Story 003 — Ability Multi-Path Unlock ─────────────────────
@@ -910,6 +1199,144 @@ public sealed class IntelManager
 	/// <returns>是否已消耗。</returns>
 	public bool IsIntelConsumed(string intelId) =>
 		_consumedIntelIds.Contains(intelId);
+
+	// ── Story 006 — Downstream Query Interface ─────────────────────
+
+	/// <summary>
+	/// 查询地点知识状态（含来源和个人标注）。未初始化 ID 返回安全默认值。
+	/// </summary>
+	/// <param name="locationId">地点 ID。</param>
+	/// <returns>地点知识快照，含传闻来源和个人标注。</returns>
+	public LocationSnapshot QueryKnowledgeStateFull(string locationId)
+	{
+		var snap = QueryLocationSnapshot(locationId);
+		return snap;
+	}
+
+	/// <summary>
+	/// 查询路线知识（可见风险标签 + 隐藏风险数量 + 来源）。
+	/// 未注册路线返回 Unknown 安全默认值。
+	/// </summary>
+	/// <param name="routeId">路线 ID。</param>
+	/// <returns>路线知识查询结果。</returns>
+	public RouteKnowledgeResult QueryRouteKnowledge(string routeId)
+	{
+		var state = QueryKnowledgeState(routeId);
+		_routeDefs.TryGetValue(routeId, out var routeDef);
+		var allHazards = routeDef?.HazardTags ?? Array.Empty<string>();
+		var sources = QueryLocationSnapshot(routeId).RumorSources;
+
+		List<string> visibleHazards;
+		int hiddenCount;
+
+		if (state >= LocationKnowledgeState.Identified)
+		{
+			visibleHazards = allHazards.ToList();
+			hiddenCount = 0;
+		}
+		else if (state == LocationKnowledgeState.Rumored)
+		{
+			var revealedTags = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var src in sources)
+				foreach (var tag in src.HazardTags)
+					revealedTags.Add(tag);
+			visibleHazards = revealedTags.ToList();
+			hiddenCount = Math.Max(0, allHazards.Count - visibleHazards.Count);
+		}
+		else
+		{
+			visibleHazards = new List<string>();
+			hiddenCount = allHazards.Count;
+		}
+
+		return new RouteKnowledgeResult(state, visibleHazards, hiddenCount, sources);
+	}
+
+	/// <summary>
+	/// 查询路线可通行性（能力阻塞 + 知识阻塞）。未注册路线视为知识阻塞。
+	/// </summary>
+	/// <param name="routeId">路线 ID。</param>
+	/// <returns>可通行性查询结果。</returns>
+	public RouteAccessibilityResult QueryRouteAccessibility(string routeId)
+	{
+		if (_routeDefs.TryGetValue(routeId, out var def)
+			&& !string.IsNullOrEmpty(def.RequiredAbility))
+		{
+			if (QueryAbilityState(def.RequiredAbility) == AbilityState.Locked)
+				return new RouteAccessibilityResult(false, def.RequiredAbility, false);
+		}
+
+		var blocked = QueryKnowledgeState(routeId) == LocationKnowledgeState.Unknown;
+		return new RouteAccessibilityResult(!blocked, "", blocked);
+	}
+
+	/// <summary>
+	/// 查询规律状态（观测分数 + confirmed+ 标志 + 已触发事件集合）。
+	/// 未初始化 ID 返回安全默认值（Undiscovered, score=0）。
+	/// </summary>
+	/// <param name="patternId">规律 ID。</param>
+	/// <returns>规律快照，不存在时返回 Undiscovered 默认快照。</returns>
+	public PatternSnapshot QueryPatternState(string patternId) =>
+		GetPatternSnapshot(patternId)
+		?? new PatternSnapshot(patternId, PatternState.Undiscovered, 0,
+			new HashSet<string>(), false);
+
+	/// <summary>
+	/// 返回所有已注册能力的列表项（含状态、提示文本、描述）。
+	/// </summary>
+	/// <returns>能力列表，顺序与注册顺序一致。</returns>
+	public IReadOnlyList<AbilityListItem> GetAbilityList()
+	{
+		var result = new List<AbilityListItem>();
+		foreach (var abilityId in _abilityPaths.Keys)
+		{
+			var state = QueryAbilityState(abilityId);
+			_abilityDefs.TryGetValue(abilityId, out var def);
+			result.Add(new AbilityListItem(
+				abilityId,
+				def?.DisplayName ?? abilityId,
+				state,
+				state == AbilityState.Locked ? (def?.UnlockHint ?? "") : "",
+				state == AbilityState.Unlocked ? (def?.Description ?? "") : ""));
+		}
+		return result;
+	}
+
+	/// <summary>
+	/// 查询地点发现状态（风险标签可见性 + 来源 + 个人标注）。
+	/// Unknown 状态时 HazardVisibility 为空，不报错。
+	/// </summary>
+	/// <param name="locationId">地点 ID。</param>
+	/// <returns>地点发现状态结果。</returns>
+	public LocationDiscoveryResult QueryLocationDiscovery(string locationId)
+	{
+		var state = QueryKnowledgeState(locationId);
+		_locationDefs.TryGetValue(locationId, out var locDef);
+		var allHazards = locDef?.HazardTags ?? Array.Empty<string>();
+		var sources = QueryLocationSnapshot(locationId).RumorSources;
+		var notes = _personalNotes.TryGetValue(locationId, out var n) ? n : "";
+
+		List<HazardVisibility> hazardVisibility;
+
+		if (state >= LocationKnowledgeState.Identified)
+		{
+			hazardVisibility = allHazards.Select(t => new HazardVisibility(t, true)).ToList();
+		}
+		else if (state == LocationKnowledgeState.Rumored)
+		{
+			var revealedTags = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var src in sources)
+				foreach (var tag in src.HazardTags)
+					revealedTags.Add(tag);
+			hazardVisibility = allHazards.Select(t => new HazardVisibility(t, revealedTags.Contains(t))).ToList();
+		}
+		else
+		{
+			hazardVisibility = new List<HazardVisibility>();
+		}
+
+		return new LocationDiscoveryResult(state, hazardVisibility, sources, notes);
+	}
 
 	// ── 私有辅助 ──────────────────────────────────────────────────
 

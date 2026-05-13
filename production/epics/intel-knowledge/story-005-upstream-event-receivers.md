@@ -1,7 +1,7 @@
 # Story 005: Upstream Event Receivers
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -199,8 +199,8 @@ func _validate_location_id(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/EventReceiversTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/intel/events/EventReceiversTest.csproj` — must exist and pass
+**Status**: [x] 21/21 PASS — 2026-05-13
 
 ---
 

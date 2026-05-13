@@ -3,8 +3,17 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Intel / Knowledge System (#6)
-Task: Story 001-004 全部完成；Story 005 Upstream Event Receivers + Story 006 Downstream Query Interface 可并行开工
+Task: Story 001-006 全部完成；Story 007 Signal Contract + Story 008 Persistence 是最后两个 Integration Story
 <!-- /STATUS -->
+
+## Session Extract — Epic #6 Story 005+006 完成 — 2026-05-13
+
+- Verdict: COMPLETE
+- Stories: Story 005 Upstream Event Receivers (21/21 PASS), Story 006 Downstream Query Interface (44/44 PASS)
+- Files changed: `src/core/intel/IntelManager.cs`（扩展：ReportNavigationEvent + 4 个方法末尾加 ReevaluateAbilityUnlocks + 9 个下游查询方法 + RouteDefinition/LocationDefinition/AbilityDefinition 支撑类型），`tests/unit/intel/events/`, `tests/unit/intel/query/`, `CloudWeaverVoyage.sln`, `production/epics/intel-knowledge/*.md`, `docs/reference/production-flowchart.md`
+- Story 003 回归修复：信号订阅必须在 ReportObservationEvent 之前，因为 Story 005 为该方法加了 ReevaluateAbilityUnlocks()
+- Build: 0 errors, 0 warnings; 全套 7 组 275 PASS 0 FAIL
+- Unlocked: Story 007 Signal Contract Integration（依赖 001-006）、Story 008 Persistence（依赖 001-007）
 
 ## Session Extract — Epic #6 Story 003+004 完成 — 2026-05-13
 
