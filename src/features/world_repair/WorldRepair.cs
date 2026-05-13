@@ -1,28 +1,79 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using CloudWeaverVoyage.Core;
 
 namespace CloudWeaverVoyage.Feature;
 
 /// <summary>
-/// Repair node lifecycle state.
+/// Repair node lifecycle state for WorldRepair Autoload #13.
 /// </summary>
 public enum RepairState
 {
-    Unknown = 0,
+    Unknown = -1,
+    Unrevealed = 0,
     Known = 1,
-    MaterialsCommitted = 2,
-    Repairing = 3,
-    Repaired = 4,
+    Repaired = 2,
 }
 
 /// <summary>
-/// Sole Feature-layer Autoload. Owns repair conditions, state changes,
-/// and unlock results. repair_completed consumed by 4 cross-layer systems.
+/// Static repair node definition read from Registry.
+/// </summary>
+public sealed record RepairNodeDefinition(
+    string NodeId,
+    string Name,
+    string LinkedLocationId,
+    IReadOnlyDictionary<string, int> RequiredResources,
+    IReadOnlyList<string> UnlockedRoutes,
+    string RouteEnhancementEffect,
+    double RouteEnhancementMagnitude,
+    bool PreRepairRouteTraversable,
+    string VisualStateAnchor);
+
+/// <summary>
+/// Runtime snapshot for one repair node.
+/// </summary>
+public sealed record RepairNodeSnapshot(
+    string NodeId,
+    RepairState RepairState,
+    IReadOnlyDictionary<string, int> Deposited,
+    double RepairProgress,
+    string VisualState);
+
+/// <summary>
+/// Result returned by state transition attempts.
+/// </summary>
+public sealed record RepairStateTransitionResult(RepairState NewState, bool Allowed, string Reason);
+
+/// <summary>
+/// Interaction contract for repair UI without blocking physical arrival.
+/// </summary>
+public sealed record RepairInteractionInfo(
+    bool NodeExists,
+    bool InteractionAvailable,
+    bool MaterialsRevealed,
+    IReadOnlyDictionary<string, string> MaterialLabels,
+    string UnlockPreview,
+    string VisualState);
+
+/// <summary>
+/// Sole Feature-layer owner of world repair node lifecycle state.
 /// </summary>
 public sealed class WorldRepair
 {
-    private readonly Dictionary<string, RepairNodeState> repairNodes = new(StringComparer.Ordinal);
-    private readonly List<string> completedNodeIds = new();
+    public const string MvpNodeId = "repair_node.starlight_dock";
+    public const string VisualStateKnown = "known";
+    public const string VisualStateRepaired = "repaired";
+
+    private readonly Registry? _registry;
+    private readonly Dictionary<string, RepairNodeDefinition> _definitions = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, RepairNodeState> _repairNodes = new(StringComparer.Ordinal);
+    private readonly List<string> _warnings = [];
+    private readonly List<string> _errors = [];
+    private readonly List<string> _completedNodeIds = [];
+
+    /// <summary>Raised when a repair node visual state changes.</summary>
+    public event Action<string, string>? VisualStateChanged;
 
     /// <summary>Raised when a repair node is completed.</summary>
     public event Action<string>? RepairCompleted;
@@ -36,63 +87,284 @@ public sealed class WorldRepair
     /// <summary>Whether the system has been initialized.</summary>
     public bool IsInitialized { get; private set; }
 
-    /// <summary>Marks the repair system as ready.</summary>
+    /// <summary>Non-fatal diagnostics collected for tests and debug panels.</summary>
+    public IReadOnlyList<string> Warnings => _warnings;
+
+    /// <summary>Fatal or configuration diagnostics collected for tests and debug panels.</summary>
+    public IReadOnlyList<string> Errors => _errors;
+
+    public WorldRepair(Registry? registry = null)
+    {
+        _registry = registry;
+    }
+
+    /// <summary>Marks the repair system as ready and loads new-game state.</summary>
     public void Initialize()
     {
         IsInitialized = true;
+        InitNewGameState();
     }
 
-    /// <summary>Registers a repair node with required materials.</summary>
+    /// <summary>
+    /// Initializes a new game from Registry repair-node definitions.
+    /// </summary>
+    public void InitNewGameState()
+    {
+        _definitions.Clear();
+        _repairNodes.Clear();
+        _completedNodeIds.Clear();
+
+        foreach (var definition in LoadDefinitionsFromRegistry())
+        {
+            _definitions[definition.NodeId] = definition;
+            _repairNodes[definition.NodeId] = new RepairNodeState
+            {
+                RepairState = RepairState.Unrevealed,
+                VisualState = VisualStateKnown,
+            };
+        }
+
+        if (!_repairNodes.ContainsKey(MvpNodeId))
+        {
+            _errors.Add($"WorldRepair: MVP node '{MvpNodeId}' not found in Registry");
+        }
+    }
+
+    /// <summary>
+    /// Registers a repair node directly. Kept for existing parity runners and focused tests.
+    /// </summary>
     public void RegisterRepairNode(string nodeId, Dictionary<string, int> requirements)
     {
-        repairNodes[nodeId] = new RepairNodeState
+        RegisterRepairNodeDefinition(new RepairNodeDefinition(
+            nodeId,
+            nodeId,
+            "",
+            new Dictionary<string, int>(requirements, StringComparer.Ordinal),
+            Array.Empty<string>(),
+            "",
+            0.0d,
+            true,
+            ""));
+    }
+
+    /// <summary>
+    /// Registers a full repair node definition directly.
+    /// </summary>
+    public void RegisterRepairNodeDefinition(RepairNodeDefinition definition)
+    {
+        if (string.IsNullOrWhiteSpace(definition.NodeId))
         {
-            State = RepairState.Known,
-            Requirements = requirements,
-            Deposited = new Dictionary<string, int>(StringComparer.Ordinal),
+            _errors.Add("WorldRepair: repair node definition missing node_id");
+            return;
+        }
+
+        _definitions[definition.NodeId] = definition;
+        _repairNodes[definition.NodeId] = new RepairNodeState
+        {
+            RepairState = RepairState.Unrevealed,
+            VisualState = VisualStateKnown,
         };
+    }
+
+    /// <summary>
+    /// Player physically arrived at a repair node. This always reveals the node if it exists.
+    /// </summary>
+    public void OnPlayerArrivedAtRepairNode(string nodeId)
+    {
+        if (!_repairNodes.ContainsKey(nodeId))
+        {
+            _warnings.Add($"WorldRepair: unknown repair node '{nodeId}'");
+            return;
+        }
+
+        if (GetRepairState(nodeId) != RepairState.Unrevealed)
+        {
+            return;
+        }
+
+        if (TryTransitionState(nodeId, RepairState.Known).Allowed)
+        {
+            _repairNodes[nodeId].VisualState = VisualStateKnown;
+            VisualStateChanged?.Invoke(nodeId, VisualStateKnown);
+        }
+    }
+
+    /// <summary>
+    /// Intel reveal can also promote an unrevealed node to known.
+    /// </summary>
+    public void OnIntelRevealedRepairNode(string nodeId)
+    {
+        if (!_repairNodes.ContainsKey(nodeId))
+        {
+            _warnings.Add($"WorldRepair: unknown repair node '{nodeId}'");
+            return;
+        }
+
+        TryTransitionState(nodeId, RepairState.Known);
+    }
+
+    /// <summary>
+    /// Attempts the only valid lifecycle transitions.
+    /// </summary>
+    public RepairStateTransitionResult TryTransitionState(string nodeId, RepairState targetState)
+    {
+        if (!_repairNodes.TryGetValue(nodeId, out var node))
+        {
+            _warnings.Add($"WorldRepair: unknown repair node '{nodeId}'");
+            return new RepairStateTransitionResult(RepairState.Unknown, false, "invalid_node");
+        }
+
+        var current = node.RepairState;
+        if (targetState == RepairState.Known)
+        {
+            if (current == RepairState.Unrevealed)
+            {
+                node.RepairState = RepairState.Known;
+                return new RepairStateTransitionResult(RepairState.Known, true, "revealed");
+            }
+
+            return new RepairStateTransitionResult(current, false, "no_op");
+        }
+
+        if (targetState == RepairState.Repaired)
+        {
+            if (current == RepairState.Known)
+            {
+                node.RepairState = RepairState.Repaired;
+                node.VisualState = VisualStateRepaired;
+                if (!_completedNodeIds.Contains(nodeId, StringComparer.Ordinal))
+                {
+                    _completedNodeIds.Add(nodeId);
+                }
+
+                return new RepairStateTransitionResult(RepairState.Repaired, true, "completed");
+            }
+
+            _warnings.Add($"WorldRepair: invalid transition {current} -> {targetState} for '{nodeId}'");
+            return new RepairStateTransitionResult(current, false, "invalid_transition");
+        }
+
+        _warnings.Add($"WorldRepair: invalid target state '{targetState}' for '{nodeId}'");
+        return new RepairStateTransitionResult(current, false, "invalid_transition");
+    }
+
+    /// <summary>Returns the current state of a repair node.</summary>
+    public RepairState GetRepairState(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            ? node.RepairState
+            : RepairState.Unknown;
+    }
+
+    /// <summary>Returns the current state of a repair node. Compatibility alias.</summary>
+    public RepairState GetNodeState(string nodeId) => GetRepairState(nodeId);
+
+    /// <summary>Returns deposited materials for the node.</summary>
+    public IReadOnlyDictionary<string, int> GetDeposited(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            ? new Dictionary<string, int>(node.Deposited, StringComparer.Ordinal)
+            : new Dictionary<string, int>(StringComparer.Ordinal);
+    }
+
+    /// <summary>Returns repair progress for the node.</summary>
+    public double GetRepairProgress(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node) ? node.RepairProgress : 0.0d;
+    }
+
+    /// <summary>Returns the definition read for a node.</summary>
+    public RepairNodeDefinition? GetRepairNodeDefinition(string nodeId)
+    {
+        return _definitions.TryGetValue(nodeId, out var definition) ? definition : null;
+    }
+
+    /// <summary>Returns a node snapshot for tests, UI, and persistence.</summary>
+    public RepairNodeSnapshot? GetNodeSnapshot(string nodeId)
+    {
+        if (!_repairNodes.TryGetValue(nodeId, out var node))
+        {
+            return null;
+        }
+
+        return new RepairNodeSnapshot(
+            nodeId,
+            node.RepairState,
+            new Dictionary<string, int>(node.Deposited, StringComparer.Ordinal),
+            node.RepairProgress,
+            node.VisualState);
+    }
+
+    /// <summary>Returns whether the repair UI can be opened for a node.</summary>
+    public bool IsRepairInteractionAvailable(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            && node.RepairState != RepairState.Repaired;
+    }
+
+    /// <summary>
+    /// Builds UI-facing repair info. Low intel hides exact material labels but never blocks interaction.
+    /// </summary>
+    public RepairInteractionInfo GetRepairInteractionInfo(string nodeId, bool intelIdentified)
+    {
+        if (!_repairNodes.TryGetValue(nodeId, out var node) || !_definitions.TryGetValue(nodeId, out var definition))
+        {
+            return new RepairInteractionInfo(
+                false,
+                false,
+                false,
+                new Dictionary<string, string>(StringComparer.Ordinal),
+                "unknown_effect",
+                VisualStateKnown);
+        }
+
+        var materialLabels = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (resourceId, quantity) in definition.RequiredResources)
+        {
+            materialLabels[resourceId] = intelIdentified ? $"{resourceId}:{quantity}" : "?";
+        }
+
+        return new RepairInteractionInfo(
+            true,
+            node.RepairState != RepairState.Repaired,
+            intelIdentified,
+            materialLabels,
+            intelIdentified ? string.Join(",", definition.UnlockedRoutes) : "unknown_effect",
+            node.VisualState);
     }
 
     /// <summary>Checks whether a repair node can accept deposits.</summary>
     public bool CanDeposit(string nodeId)
     {
-        return repairNodes.TryGetValue(nodeId, out var node)
-            && node.State < RepairState.Repaired;
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            && node.RepairState != RepairState.Repaired;
     }
 
     /// <summary>
-    /// Commits a material deposit to a repair node.
-    /// If all requirements are met, the node transitions to Repaired.
+    /// Compatibility single-material commit used by the existing foundation parity runner.
     /// </summary>
     public bool CommitDeposit(string nodeId, string resourceId, int quantity)
     {
-        if (!CanDeposit(nodeId))
+        if (!CanDeposit(nodeId) || quantity <= 0)
         {
             RepairFailed?.Invoke(nodeId, "cannot_deposit");
             return false;
         }
 
-        var node = repairNodes[nodeId];
-        node.Deposited.TryGetValue(resourceId, out var current);
-        node.Deposited[resourceId] = current + quantity;
+        var node = _repairNodes[nodeId];
+        node.Deposited[resourceId] = node.Deposited.GetValueOrDefault(resourceId, 0) + quantity;
         DepositCommitted?.Invoke(nodeId, resourceId, quantity);
 
-        var allMet = true;
-        foreach (var (reqId, required) in node.Requirements)
+        if (IsCompletionSatisfied(nodeId))
         {
-            var deposited = node.Deposited.GetValueOrDefault(reqId, 0);
-            if (deposited < required)
+            if (GetRepairState(nodeId) == RepairState.Unrevealed)
             {
-                allMet = false;
-                break;
+                TryTransitionState(nodeId, RepairState.Known);
             }
-        }
 
-        if (allMet)
-        {
-            node.State = RepairState.Repaired;
-            completedNodeIds.Add(nodeId);
+            TryTransitionState(nodeId, RepairState.Repaired);
             RepairCompleted?.Invoke(nodeId);
+            VisualStateChanged?.Invoke(nodeId, VisualStateRepaired);
         }
 
         return true;
@@ -101,21 +373,251 @@ public sealed class WorldRepair
     /// <summary>Returns the list of completed repair node IDs.</summary>
     public IReadOnlyList<string> GetCompletedNodes()
     {
-        return completedNodeIds;
+        return _completedNodeIds.ToArray();
     }
 
-    /// <summary>Returns the current state of a repair node.</summary>
-    public RepairState GetNodeState(string nodeId)
+    /// <summary>Returns all runtime node IDs.</summary>
+    public IReadOnlyList<string> GetRepairNodeIds()
     {
-        return repairNodes.TryGetValue(nodeId, out var node)
-            ? node.State
-            : RepairState.Unknown;
+        return _repairNodes.Keys.OrderBy(id => id, StringComparer.Ordinal).ToArray();
+    }
+
+    private bool IsCompletionSatisfied(string nodeId)
+    {
+        if (!_definitions.TryGetValue(nodeId, out var definition) || definition.RequiredResources.Count == 0)
+        {
+            return false;
+        }
+
+        var node = _repairNodes[nodeId];
+        foreach (var (resourceId, required) in definition.RequiredResources)
+        {
+            if (required <= 0)
+            {
+                continue;
+            }
+
+            if (node.Deposited.GetValueOrDefault(resourceId, 0) < required)
+            {
+                return false;
+            }
+        }
+
+        node.RepairProgress = 1.0d;
+        return true;
+    }
+
+    private IEnumerable<RepairNodeDefinition> LoadDefinitionsFromRegistry()
+    {
+        if (_registry is null)
+        {
+            yield break;
+        }
+
+        foreach (var entity in _registry.ListByKind("repair-node"))
+        {
+            var definition = DefinitionFromEntity(entity);
+            if (definition is null)
+            {
+                _errors.Add("WorldRepair: malformed repair-node entry skipped");
+                continue;
+            }
+
+            yield return definition;
+        }
+    }
+
+    private static RepairNodeDefinition? DefinitionFromEntity(IReadOnlyDictionary<string, object?> entity)
+    {
+        var nodeId = ReadString(entity, "node_id");
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            nodeId = ReadString(entity, "id");
+        }
+
+        if (string.IsNullOrWhiteSpace(nodeId))
+        {
+            return null;
+        }
+
+        var required = ReadIntMap(entity, "required_resources");
+        if (required.Count == 0)
+        {
+            required = ReadIntMap(entity, "required_materials");
+        }
+
+        return new RepairNodeDefinition(
+            nodeId,
+            ReadString(entity, "display_name", ReadString(entity, "name", nodeId)),
+            ReadString(entity, "linked_location_id", ReadString(entity, "location_id")),
+            required,
+            ReadStringList(entity, "unlocked_routes", ReadNestedStringList(entity, "unlocks", "routes")),
+            ReadNestedString(entity, "route_enhancement", "effect", ReadString(entity, "route_enhancement_effect")),
+            ReadNestedDouble(entity, "route_enhancement", "magnitude", ReadDouble(entity, "route_enhancement_magnitude")),
+            ReadNestedBool(entity, "pre_repair_route_state", "traversable", true),
+            ReadString(entity, "visual_state_anchor"));
+    }
+
+    private static string ReadString(IReadOnlyDictionary<string, object?> entity, string key, string fallback = "")
+    {
+        return entity.TryGetValue(key, out var value) ? value?.ToString() ?? fallback : fallback;
+    }
+
+    private static double ReadDouble(IReadOnlyDictionary<string, object?> entity, string key, double fallback = 0.0d)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return fallback;
+        }
+
+        return Convert.ToDouble(value);
+    }
+
+    private static IReadOnlyDictionary<string, int> ReadIntMap(IReadOnlyDictionary<string, object?> entity, string key)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return new Dictionary<string, int>(StringComparer.Ordinal);
+        }
+
+        if (value is IReadOnlyDictionary<string, int> typed)
+        {
+            return new Dictionary<string, int>(typed, StringComparer.Ordinal);
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> objectMap)
+        {
+            return objectMap.ToDictionary(
+                pair => pair.Key,
+                pair => Convert.ToInt32(pair.Value),
+                StringComparer.Ordinal);
+        }
+
+        if (value is IDictionary<string, object?> mutableMap)
+        {
+            return mutableMap.ToDictionary(
+                pair => pair.Key,
+                pair => Convert.ToInt32(pair.Value),
+                StringComparer.Ordinal);
+        }
+
+        return new Dictionary<string, int>(StringComparer.Ordinal);
+    }
+
+    private static IReadOnlyList<string> ReadStringList(
+        IReadOnlyDictionary<string, object?> entity,
+        string key,
+        IReadOnlyList<string>? fallback = null)
+    {
+        if (!entity.TryGetValue(key, out var value) || value is null)
+        {
+            return fallback ?? Array.Empty<string>();
+        }
+
+        if (value is string text)
+        {
+            return string.IsNullOrWhiteSpace(text) ? Array.Empty<string>() : [text];
+        }
+
+        if (value is System.Collections.IEnumerable items)
+        {
+            return items
+                .Cast<object?>()
+                .Select(item => item?.ToString() ?? string.Empty)
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .ToArray();
+        }
+
+        return fallback ?? Array.Empty<string>();
+    }
+
+    private static IReadOnlyList<string> ReadNestedStringList(
+        IReadOnlyDictionary<string, object?> entity,
+        string mapKey,
+        string nestedKey)
+    {
+        if (!entity.TryGetValue(mapKey, out var value) || value is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        if (value is IReadOnlyDictionary<string, string[]> typed && typed.TryGetValue(nestedKey, out var typedList))
+        {
+            return typedList;
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> objectMap && objectMap.TryGetValue(nestedKey, out var nested))
+        {
+            return nested is System.Collections.IEnumerable list
+                ? list.Cast<object?>().Select(item => item?.ToString() ?? "").Where(item => item.Length > 0).ToArray()
+                : Array.Empty<string>();
+        }
+
+        return Array.Empty<string>();
+    }
+
+    private static string ReadNestedString(
+        IReadOnlyDictionary<string, object?> entity,
+        string mapKey,
+        string nestedKey,
+        string fallback = "")
+    {
+        if (!entity.TryGetValue(mapKey, out var value) || value is null)
+        {
+            return fallback;
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> objectMap && objectMap.TryGetValue(nestedKey, out var nested))
+        {
+            return nested?.ToString() ?? fallback;
+        }
+
+        return fallback;
+    }
+
+    private static double ReadNestedDouble(
+        IReadOnlyDictionary<string, object?> entity,
+        string mapKey,
+        string nestedKey,
+        double fallback = 0.0d)
+    {
+        if (!entity.TryGetValue(mapKey, out var value) || value is null)
+        {
+            return fallback;
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> objectMap && objectMap.TryGetValue(nestedKey, out var nested))
+        {
+            return Convert.ToDouble(nested);
+        }
+
+        return fallback;
+    }
+
+    private static bool ReadNestedBool(
+        IReadOnlyDictionary<string, object?> entity,
+        string mapKey,
+        string nestedKey,
+        bool fallback)
+    {
+        if (!entity.TryGetValue(mapKey, out var value) || value is null)
+        {
+            return fallback;
+        }
+
+        if (value is IReadOnlyDictionary<string, object?> objectMap && objectMap.TryGetValue(nestedKey, out var nested))
+        {
+            return nested is bool boolValue ? boolValue : fallback;
+        }
+
+        return fallback;
     }
 
     private sealed class RepairNodeState
     {
-        public RepairState State { get; set; } = RepairState.Unknown;
-        public Dictionary<string, int> Requirements { get; set; } = new(StringComparer.Ordinal);
-        public Dictionary<string, int> Deposited { get; set; } = new(StringComparer.Ordinal);
+        public RepairState RepairState { get; set; } = RepairState.Unrevealed;
+        public Dictionary<string, int> Deposited { get; } = new(StringComparer.Ordinal);
+        public double RepairProgress { get; set; }
+        public string VisualState { get; set; } = VisualStateKnown;
     }
 }

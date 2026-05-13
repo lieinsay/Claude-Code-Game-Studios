@@ -2278,7 +2278,9 @@ public static class RegistryBootstrap
 
         yield return Entity("repair_node.starlight_dock", "repair-node", "星光灯塔", 1, new()
         {
+            ["node_id"] = "repair_node.starlight_dock",
             ["location_id"] = "location.glass-harbor-outskirts",
+            ["linked_location_id"] = "location.glass-harbor-outskirts",
             ["node_kind"] = "beacon",
             ["restoration_theme"] = "lighthouse",
             ["settlement_need_tags"] = new[] { "navigation-aid", "safety" },
@@ -2286,13 +2288,29 @@ public static class RegistryBootstrap
             ["required_materials"] = new Dictionary<string, int>
             {
                 ["resource.repair_kit"] = 4,
-                ["resource.beacon_crystal"] = 2,
+                ["resource.basic_supply"] = 4,
             },
+            ["required_resources"] = new Dictionary<string, int>
+            {
+                ["resource.repair_kit"] = 4,
+                ["resource.basic_supply"] = 4,
+            },
+            ["unlocked_routes"] = new[] { "route.sky-reef-arc-01" },
+            ["route_enhancement"] = new Dictionary<string, object?>
+            {
+                ["effect"] = "hazard_reduction",
+                ["magnitude"] = 0.3,
+            },
+            ["pre_repair_route_state"] = new Dictionary<string, object?>
+            {
+                ["traversable"] = false,
+            },
+            ["visual_state_anchor"] = "anchor.starlight_dock_beacon",
             ["unlocks"] = new Dictionary<string, string[]>
             {
                 ["routes"] = ["route.sky-reef-arc-01"],
                 ["stalls"] = ["stall.navigator_supply"],
-                ["abilities"] = ["ability.lighthouse_signal"],
+                ["abilities"] = ["ability.lighthouse-signal-interpretation"],
             },
         });
 

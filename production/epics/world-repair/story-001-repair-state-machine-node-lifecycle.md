@@ -1,7 +1,7 @@
 # Story 001: Repair State Machine & Node Lifecycle
 
 > **Epic**: World Repair & Unlock
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -173,7 +173,7 @@ func _init_new_game_state() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/world-repair/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/unit/world-repair/StateMachineTest.csproj --no-restore` PASS 13/13; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 
