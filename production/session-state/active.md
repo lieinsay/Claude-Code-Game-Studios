@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Chart / Route Planning (#9)
-Task: Story 001-006 全部完成；Story 007 External State Change + Story 008 Edge Cases 待实现（最后两个 Integration）
+Task: Epic #9 Chart Route Planning 全部 8/8 Story 完成 — CLOSED；#10 Navigation Route Risk 已解锁
 <!-- /STATUS -->
 
 ## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13

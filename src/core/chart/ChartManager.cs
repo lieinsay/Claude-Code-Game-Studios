@@ -308,6 +308,9 @@ public sealed class ChartManager
 
 		_internalWarningCounter = failedCount;
 		ApplyTransition(ChartStateTransition("COMPLETE"));
+		// 进入 Browsing 后立即评估可选择性（traversable / origin 条件）
+		if (_chartState == ChartState.Browsing)
+			ReevaluateAllRoutes();
 	}
 
 	/// <summary>
@@ -828,6 +831,189 @@ public sealed class ChartManager
 	{
 		RouteEnhanced?.Invoke(routeId, enhancementId);
 	}
+
+	// ── Story 007 — External State Change Response ─────────────────────
+
+	/// <summary>
+	/// 知识状态变化响应（对应 IntelManager.KnowledgeAdvanced 信号）。
+	/// 重新评估所有涉及该地点的航线；knowledge→unknown 时从可见列表移除并强制取消选择。
+	/// 仅在 Browsing/RouteSelected 状态下响应。
+	/// </summary>
+	/// <param name="locationId">知识状态发生变化的地点 ID。</param>
+	/// <param name="newKnowledge">新的知识状态值（0=Unknown，1=Rumored，2=Identified，3=Verified）。</param>
+	public void OnKnowledgeChanged(string locationId, int newKnowledge)
+	{
+		if (_chartState != ChartState.Browsing && _chartState != ChartState.RouteSelected)
+			return;
+
+		// 找出涉及该地点的航线
+		var affected = _visibleRoutes
+			.Where(r => _routeStaticData.TryGetValue(r, out var d)
+				&& (d.OriginId == locationId || d.DestinationId == locationId))
+			.ToList();
+
+		foreach (var routeId in affected)
+		{
+			int knowledge = SafeQueryKnowledgeState(routeId);
+			if (knowledge == KnowledgeUnknown || knowledge < 0)
+			{
+				// 航线从可见列表移除
+				_visibleRoutes.Remove(routeId);
+				_routeStates.Remove(routeId);
+
+				if (_selectedRouteId == routeId)
+					ForceDeselect(routeId);
+			}
+			else
+			{
+				// 仍可见——更新子状态
+				var selectability = RouteSelectability(routeId);
+				SetRouteSubState(routeId, SelectabilityToSubState(selectability));
+			}
+		}
+	}
+
+	/// <summary>
+	/// 能力解锁响应（对应 IntelManager.AbilityUnlocked 信号）。
+	/// 重新评估所有可见航线的可选择性（traversable 条件可能改变）。
+	/// </summary>
+	/// <param name="abilityId">解锁的能力 ID。</param>
+	/// <param name="unlockPath">解锁路径（未使用，供签名对称）。</param>
+	public void OnAbilityChanged(string abilityId, string unlockPath)
+	{
+		if (_chartState != ChartState.Browsing && _chartState != ChartState.RouteSelected)
+			return;
+		ReevaluateAllRoutes();
+	}
+
+	/// <summary>
+	/// 世界修复完成响应（对应 WorldRepair.RepairCompleted 信号）。
+	/// 评估哪些航线受益并发出 RouteEnhanced 信号，然后重新评估可选择性。
+	/// </summary>
+	/// <param name="repairNodeId">完成修复的节点 ID。</param>
+	/// <param name="affectedRouteIds">受影响的航线 ID 集合（由外部传入，替代 Registry 查询）。</param>
+	public void OnRepairCompleted(string repairNodeId, IReadOnlySet<string>? affectedRouteIds = null)
+	{
+		if (_chartState != ChartState.Browsing && _chartState != ChartState.RouteSelected)
+			return;
+
+		// 评估哪些可见航线受益于本次修复
+		var enhanced = _visibleRoutes
+			.Where(r => affectedRouteIds == null || affectedRouteIds.Contains(r))
+			.ToList();
+
+		foreach (var routeId in enhanced)
+			RouteEnhanced?.Invoke(routeId, repairNodeId);
+
+		if (enhanced.Count > 0)
+			ReevaluateAllRoutes();
+	}
+
+	/// <summary>
+	/// 停靠地点变更响应（由 AirshipHub 触发）。
+	/// 重新评估所有航线可选择性；已选中航线变为 unavailable 时强制取消选择。
+	/// </summary>
+	/// <param name="newDockedLocation">新停靠地点 ID。</param>
+	public void OnDockedLocationChanged(string newDockedLocation)
+	{
+		if (_chartState != ChartState.Browsing && _chartState != ChartState.RouteSelected)
+			return;
+
+		ReevaluateAllRoutes();
+
+		// 若已选中航线因港口变更变为 unavailable，强制取消选择
+		if (!string.IsNullOrEmpty(_selectedRouteId)
+			&& RouteSelectability(_selectedRouteId) == "unavailable")
+		{
+			ForceDeselect(_selectedRouteId);
+		}
+	}
+
+	/// <summary>
+	/// 从可见列表中清除已不在注册表中的 stale 航线（EC-8 防御）。
+	/// </summary>
+	/// <param name="currentRegistryRouteIds">当前注册表中所有有效的航线 ID 集合。</param>
+	public void PurgeStaleRoutes(IReadOnlySet<string> currentRegistryRouteIds)
+	{
+		var stale = _visibleRoutes.Where(r => !currentRegistryRouteIds.Contains(r)).ToList();
+		foreach (var routeId in stale)
+		{
+			_visibleRoutes.Remove(routeId);
+			_routeStates.Remove(routeId);
+
+			if (_selectedRouteId == routeId)
+				ForceDeselect(routeId);
+		}
+	}
+
+	// ── Story 008 — Edge Cases, Empty State & Keyboard Navigation ──────
+
+	/// <summary>
+	/// 空航图原因枚举（EC-12/13/14）。
+	/// </summary>
+	public enum EmptyChartReason
+	{
+		/// <summary>非空状态（有可见且可选航线）。</summary>
+		NotEmpty = -1,
+		/// <summary>EC-12：所有航线均为 Unknown，从未有过已知航线。</summary>
+		NoKnownRoutes = 0,
+		/// <summary>EC-14：所有可见航线均为 Rumored 且筛选器隐藏。</summary>
+		AllRumoredHidden = 1,
+		/// <summary>EC-13：当前港口没有可出发的航线（均为 Unavailable）。</summary>
+		NoDepartableAtPort = 2,
+	}
+
+	/// <summary>
+	/// 返回当前空航图原因（仅在 Browsing 状态 + 可见列表为空时有意义）。
+	/// NotEmpty 表示航图非空。
+	/// </summary>
+	public EmptyChartReason GetEmptyChartReason()
+	{
+		if (_chartState != ChartState.Browsing)
+			return EmptyChartReason.NotEmpty;
+
+		bool hasAnyKnown = false;
+		bool hasAnyVisible = false;
+		bool hasAnyBrowsable = false;
+
+		foreach (var routeId in _routeStaticData.Keys)
+		{
+			int knowledge = SafeQueryKnowledgeState(routeId);
+			if (knowledge > KnowledgeUnknown && knowledge >= 0)
+				hasAnyKnown = true;
+
+			if (RouteVisibility(routeId, _hideRumored))
+			{
+				hasAnyVisible = true;
+				if (RouteSelectability(routeId) == "browsable")
+					hasAnyBrowsable = true;
+			}
+		}
+
+		if (!hasAnyKnown)
+			return EmptyChartReason.NoKnownRoutes;
+		if (!hasAnyVisible && _hideRumored)
+			return EmptyChartReason.AllRumoredHidden;
+		if (hasAnyVisible && !hasAnyBrowsable)
+			return EmptyChartReason.NoDepartableAtPort;
+
+		return EmptyChartReason.NotEmpty;
+	}
+
+	/// <summary>
+	/// 返回键盘 Tab 导航顺序（已按 display_order 排序，UIManager 据此分配焦点）。
+	/// </summary>
+	/// <returns>排序后的可见航线 ID 列表。</returns>
+	public IReadOnlyList<string> GetKeyboardNavOrder() => GetVisibleRoutes();
+
+	/// <summary>
+	/// 查询当前是否允许用户交互（键盘/鼠标）。
+	/// DEPARTURE_CONFIRMED 锁定期间返回 false。
+	/// </summary>
+	/// <returns>true = 允许交互。</returns>
+	public bool IsInteractionAllowed() =>
+		_chartState != ChartState.DepartureConfirmed
+		&& _chartState != ChartState.Error;
 
 	// ── 私有辅助 ─────────────────────────────────────────────────────
 

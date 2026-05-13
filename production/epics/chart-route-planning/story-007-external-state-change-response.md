@@ -1,7 +1,7 @@
 # Story 007: External State Change Response
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -215,8 +215,8 @@ func _check_docked_location_changed() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/ExternalStateResponseTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/chart/external/ExternalStateResponseTest.csproj` — must exist and pass
+**Status**: [x] 22/22 PASS — 2026-05-13
 
 ---
 

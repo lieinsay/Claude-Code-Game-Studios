@@ -92,14 +92,18 @@ Console.WriteLine("=== Story 002: Route Visibility & Selectability Formulas ===\
 	var mgr = BuildManager();
 	Assert(mgr.RouteSelectability("route.unknown-route") == "hidden",
 		"AC-6: unknown → 'hidden'（分支 1 短路）");
-	// 验证短路：不执行后续查询（blocking-route 如果短路则不调用 traversable）
+	// 验证短路：对 unknown 航线调用 RouteSelectability 时不触发 traversable 查询
+	// OpenChart() 末尾的 ReevaluateAllRoutes 会对可见航线查询（属于正常流程），
+	// 此处仅验证对 hidden 航线的手动查询不额外触发 traversable。
 	int traversableCallCount = 0;
 	var mgr2 = BuildManager(traversableFn: routeId =>
 	{
 		traversableCallCount++;
 		return true;
 	});
-	mgr2.RouteSelectability("route.unknown-route"); // hidden 分支短路
+	// 重置计数器（OpenChart 内部已对可见航线完成初始评估）
+	traversableCallCount = 0;
+	mgr2.RouteSelectability("route.unknown-route"); // hidden 分支短路——不调用 traversable
 	Assert(traversableCallCount == 0, "AC-6: hidden 分支不调用 traversable 查询（性能验证）");
 }
 

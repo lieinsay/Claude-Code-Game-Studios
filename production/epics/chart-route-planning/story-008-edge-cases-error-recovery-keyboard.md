@@ -1,7 +1,7 @@
 # Story 008: Edge Cases, Error Recovery & Keyboard Navigation
 
 > **Epic**: Chart / Route Planning
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -244,8 +244,8 @@ func _validate_cache_consistency() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/EdgeCasesTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/chart/edgecases/EdgeCasesTest.csproj` — must exist and pass
+**Status**: [x] 43/43 PASS — 2026-05-13
 
 ---
 

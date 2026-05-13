@@ -3,8 +3,8 @@
 > **Layer**: Core
 > **GDD**: design/gdd/chart-route-planning.md
 > **Architecture Module**: Autoload #9 — ChartManager
-> **Status**: In Progress
-> **Stories**: 8 (001-008) — Ready for implementation
+> **Status**: Complete
+> **Stories**: 8 (001-008) — All Done
 
 ## Overview
 
