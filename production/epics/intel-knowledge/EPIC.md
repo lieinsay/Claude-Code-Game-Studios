@@ -40,8 +40,8 @@ This epic is complete when:
 
 | # | Title | Type | TR | ADR | Status |
 |---|-------|------|----|-----|--------|
-| 001 | [Pattern Knowledge Observation & State Machine](story-001-pattern-knowledge-state-machine.md) | Logic | TR-intel-001 | ADR-0007 | Ready |
-| 002 | [Location Knowledge State Machine & Rumor System](story-002-location-knowledge-rumor-system.md) | Logic | TR-intel-001 | ADR-0007 | Ready |
+| 001 | [Pattern Knowledge Observation & State Machine](story-001-pattern-knowledge-state-machine.md) | Logic | TR-intel-001 | ADR-0007 | Done |
+| 002 | [Location Knowledge State Machine & Rumor System](story-002-location-knowledge-rumor-system.md) | Logic | TR-intel-001 | ADR-0007 | Done |
 | 003 | [Ability Multi-Path Unlock System](story-003-ability-multi-path-unlock.md) | Logic | TR-intel-003 | ADR-0007 | Ready |
 | 004 | [IntelConsumeResult Algorithm](story-004-intel-consume-algorithm.md) | Logic | TR-intel-002 | ADR-0007 | Ready |
 | 005 | [Upstream Event Receivers](story-005-upstream-event-receivers.md) | Logic | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0007 | Ready |

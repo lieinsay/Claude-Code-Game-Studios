@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -77,6 +77,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalContractTest", "tests\integration\hub\SignalContractTest.csproj", "{A34C7515-51BB-4684-A17F-D90F7B9D8BDC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersistenceTransitionTest", "tests\integration\hub\PersistenceTransitionTest.csproj", "{1CA2C4BC-304E-4745-AE37-8844637ADCAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "intel", "intel", "{E02F275D-18C6-408A-B991-2FD87889C6FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatternStateMachineTest", "tests\unit\intel\pattern\PatternStateMachineTest.csproj", "{2451D83B-FF02-4FF5-A503-4DF2C979D5A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocationKnowledgeStateMachineTest", "tests\unit\intel\location\LocationKnowledgeStateMachineTest.csproj", "{29C7C45C-9683-4B88-B401-47E2A318273B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -224,6 +230,14 @@ Global
 		{1CA2C4BC-304E-4745-AE37-8844637ADCAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CA2C4BC-304E-4745-AE37-8844637ADCAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CA2C4BC-304E-4745-AE37-8844637ADCAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29C7C45C-9683-4B88-B401-47E2A318273B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C7C45C-9683-4B88-B401-47E2A318273B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C7C45C-9683-4B88-B401-47E2A318273B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C7C45C-9683-4B88-B401-47E2A318273B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -264,5 +278,8 @@ Global
 		{9B2C395B-DC7A-431A-9E37-56EF633EAC48} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{A34C7515-51BB-4684-A17F-D90F7B9D8BDC} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{1CA2C4BC-304E-4745-AE37-8844637ADCAB} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
+		{E02F275D-18C6-408A-B991-2FD87889C6FD} = {5CF80B4D-0EE7-4ACA-8CF1-8CB696A9FA87}
+		{2451D83B-FF02-4FF5-A503-4DF2C979D5A2} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
+		{29C7C45C-9683-4B88-B401-47E2A318273B} = {E02F275D-18C6-408A-B991-2FD87889C6FD}
 	EndGlobalSection
 EndGlobal

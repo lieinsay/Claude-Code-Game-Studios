@@ -1,7 +1,7 @@
 # Story 002: Location Knowledge State Machine & Rumor System
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -237,8 +237,8 @@ func _ensure_location_initialized(location_id: StringName) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/LocationKnowledgeStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/intel/location/LocationKnowledgeStateMachineTest.csproj` — must exist and pass
+**Status**: [x] 47/47 PASS — 2026-05-13
 
 ---
 

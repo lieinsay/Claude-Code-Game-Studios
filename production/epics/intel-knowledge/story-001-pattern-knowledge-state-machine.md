@@ -1,7 +1,7 @@
 # Story 001: Pattern Knowledge Observation & State Machine
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -235,8 +235,8 @@ func _validate_thresholds() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/intel/PatternStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/intel/pattern/PatternStateMachineTest.csproj` — must exist and pass
+**Status**: [x] 24/24 PASS — 2026-05-13
 
 ---
 

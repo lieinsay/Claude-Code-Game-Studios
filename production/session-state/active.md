@@ -1,10 +1,22 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Foundation Layer
-Feature: Content Registry (#1) + Platform Session Shell (#2) + Local Save Persistence (#3) + Player Movement & Interaction (#4) + Resources & Goods Capacity (#5) + Airship Hub (#7)
-Task: Foundation #1/#2/#3/#4 complete — #5 Story 001 stack merge implemented; Airship Hub #7 complete; #6 and remaining #5 prep next
+Epic: Core Layer
+Feature: Intel / Knowledge System (#6)
+Task: Story 001 Pattern State Machine + Story 002 Location Knowledge 实现完成，代码审查通过；Story 003+004 可并行开工
 <!-- /STATUS -->
+
+## Session Extract — Epic #6 Story 001+002 完成 — 2026-05-13
+
+- Verdict: COMPLETE WITH NOTES
+- Epic: `production/epics/intel-knowledge/EPIC.md` — Intel / Knowledge System (#6)
+- Stories completed: Story 001 Pattern Knowledge State Machine, Story 002 Location Knowledge State Machine & Rumor System
+- Files changed: `src/core/intel/IntelManager.cs`（全面重写，占位桩替换为 ADR-0007 完整实现）, `tests/unit/intel/pattern/PatternStateMachineTest.csproj`, `tests/unit/intel/pattern/PatternStateMachineProgram.cs`, `tests/unit/intel/location/LocationKnowledgeStateMachineTest.csproj`, `tests/unit/intel/location/LocationKnowledgeStateMachineProgram.cs`, `tests/csharp/FoundationParity/Program.cs`（IntelManager API 迁移），`CloudWeaverVoyage.sln`, `production/epics/intel-knowledge/story-001-*.md`, `production/epics/intel-knowledge/story-002-*.md`, `production/epics/intel-knowledge/EPIC.md`, `docs/reference/production-flowchart.md`
+- Test evidence: Story 001 24/24 PASS; Story 002 47/47 PASS; FoundationParity 70/70 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (1 既存 warning, 0 errors)
+- Code review: 3 提示级问题已修复（GetPatternLog doc、RumorSource 防御性复制、AC-12 测试表达力）
+- Residual risk: Story 003-008 尚未实现；IntelManager 持久化快照接口待 Story 008 补全
+- Unlocked: Story 003 Ability Unlock（依赖 001）、Story 004 IntelConsumeResult（依赖 002）可并行开工
 
 ## Session Extract — /dev-story 2026-05-12
 

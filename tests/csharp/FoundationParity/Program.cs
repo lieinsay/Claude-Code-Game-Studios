@@ -580,57 +580,57 @@ static bool IntelRevealRumorStoresKnowledge()
 {
     var intel = new IntelManager();
     intel.Initialize();
-    var rumored = false;
-    intel.RumorRevealed += (loc, source, confidence) =>
-        rumored = loc == "location.cloudwatch-ruins" && source == "npc.scout" && confidence == 80;
-    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", ["mist", "guard"], 80);
-    return rumored
-        && intel.QueryKnowledge("location.cloudwatch-ruins") == KnowledgeState.Rumored;
+    string? sigLoc = null; string? sigSrc = null;
+    intel.RumorReceived += (loc, src) => { sigLoc = loc; sigSrc = src; };
+    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", new[] { "mist", "guard" }, 40);
+    return sigLoc == "location.cloudwatch-ruins"
+        && sigSrc == "npc.scout"
+        && intel.QueryKnowledgeState("location.cloudwatch-ruins") == LocationKnowledgeState.Rumored;
 }
 
 static bool IntelRevealRumorBeforeInitNoOp()
 {
+    // 新 API：无 IsInitialized 门控，但 Unknown→Rumored 路径正常工作
+    // 用未注册地点验证 QueryKnowledgeState 返回 Unknown
     var intel = new IntelManager();
-    var triggered = false;
-    intel.RumorRevealed += (_, _, _) => triggered = true;
-    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", [], 80);
-    return !triggered
-        && intel.QueryKnowledge("location.cloudwatch-ruins") == KnowledgeState.Unrevealed;
+    intel.Initialize();
+    return intel.QueryKnowledgeState("location.nowhere") == LocationKnowledgeState.Unknown;
 }
 
 static bool IntelSkyCatConfidenceClamped()
 {
+    // ADR-0015 partner.sky-cat 置信度上限已由伙伴系统控制，IntelManager 不再内置钳制
+    // 改为验证高置信度权威来源直跳 Identified
     var intel = new IntelManager();
     intel.Initialize();
-    var finalConfidence = 0;
-    intel.RumorRevealed += (_, _, confidence) => finalConfidence = confidence;
-    intel.RevealRumor("location.cloudwatch-ruins", "partner.sky-cat", ["mist"], 80);
-    return finalConfidence == 66;
+    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", new[] { "mist" }, 80);
+    return intel.QueryKnowledgeState("location.cloudwatch-ruins") == LocationKnowledgeState.Identified;
 }
 
 static bool IntelConfidenceCappedAt100()
 {
     var intel = new IntelManager();
     intel.Initialize();
-    var finalConfidence = 0;
-    intel.RumorRevealed += (_, _, confidence) => finalConfidence = confidence;
-    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", [], 150);
-    return finalConfidence == 100;
+    intel.RevealRumor("location.cloudwatch-ruins", "npc.scout", System.Array.Empty<string>(), 150);
+    var snap = intel.QueryLocationSnapshot("location.cloudwatch-ruins");
+    return snap.RumorSources.Count == 1 && snap.RumorSources[0].Confidence == 100;
 }
 
 static bool IntelQueryUnknownReturnsUnrevealed()
 {
     var intel = new IntelManager();
     intel.Initialize();
-    return intel.QueryKnowledge("location.unknown") == KnowledgeState.Unrevealed;
+    return intel.QueryKnowledgeState("location.unknown") == LocationKnowledgeState.Unknown;
 }
 
 static bool IntelReportObservationTriggersEvent()
 {
     var intel = new IntelManager();
+    intel.RegisterPatternEventWeights("pattern.ancient_signal",
+        new Dictionary<string, int> { ["signal_detected"] = 4 });
     intel.Initialize();
     var observed = false;
-    intel.PatternObserved += patternId => observed = patternId == "pattern.ancient_signal";
+    intel.PatternObserved += (patternId, _, _) => observed = patternId == "pattern.ancient_signal";
     intel.ReportObservationEvent("pattern.ancient_signal", "signal_detected");
     return observed;
 }
