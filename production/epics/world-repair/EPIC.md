@@ -3,8 +3,8 @@
 > **Layer**: Feature
 > **GDD**: design/gdd/world-repair-unlock.md
 > **Architecture Module**: Autoload #13 — WorldRepair
-> **Status**: In Progress
-> **Stories**: 6 (001-006)
+> **Status**: Complete
+> **Stories**: 6/6 All Done (001-006)
 
 ## Overview
 
@@ -26,16 +26,18 @@
 
 ## Stories
 
-| # | Story | Type | TRs | ADR |
-|---|-------|------|-----|-----|
-| 001 | [Repair State Machine & Node Lifecycle](story-001-repair-state-machine-node-lifecycle.md) | Logic | TR-repair-001 | ADR-0011 |
-| 002 | [Deposit Validation & Batch Commit](story-002-deposit-validation-batch-commit.md) | Logic | TR-repair-002 | ADR-0011 |
-| 003 | [Repair Progress, Completion & Route Enhancement Formulas](story-003-formulas-progress-completion-enhancement.md) | Logic | TR-repair-002, TR-repair-003 | ADR-0011 |
-| 004 | [Signal Events & Downstream Trigger Chain](story-004-signal-events-downstream-chain.md) | Integration | TR-repair-003 | ADR-0011 |
-| 005 | [Persistence & State Recovery](story-005-persistence-state-recovery.md) | Integration | TR-repair-001, TR-repair-002 | ADR-0011 |
-| 006 | [Edge Cases, MVP Visual/Audio & Defensive Handling](story-006-edge-cases-visual-audio-defensive.md) | Integration | TR-repair-001, TR-repair-002, TR-repair-003 | ADR-0011 |
+| # | Story | Type | TRs | ADR | Status |
+|---|-------|------|-----|-----|--------|
+| 001 | [Repair State Machine & Node Lifecycle](story-001-repair-state-machine-node-lifecycle.md) | Logic | TR-repair-001 | ADR-0011 | Done |
+| 002 | [Deposit Validation & Batch Commit](story-002-deposit-validation-batch-commit.md) | Logic | TR-repair-002 | ADR-0011 | Done |
+| 003 | [Repair Progress, Completion & Route Enhancement Formulas](story-003-formulas-progress-completion-enhancement.md) | Logic | TR-repair-002, TR-repair-003 | ADR-0011 | Done |
+| 004 | [Signal Events & Downstream Trigger Chain](story-004-signal-events-downstream-chain.md) | Integration | TR-repair-003 | ADR-0011 | Done |
+| 005 | [Persistence & State Recovery](story-005-persistence-state-recovery.md) | Integration | TR-repair-001, TR-repair-002 | ADR-0011 | Done |
+| 006 | [Edge Cases, MVP Visual/Audio & Defensive Handling](story-006-edge-cases-visual-audio-defensive.md) | Integration | TR-repair-001, TR-repair-002, TR-repair-003 | ADR-0011 | Done |
 
 **Summary**: 3 Logic + 3 Integration stories
+
+**Completion Evidence (2026-05-13)**: 6/6 Story runners PASS, 91/91 Epic #13 checks PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; all `tests/**/*.csproj` runners PASS in final sweep.
 
 ## Definition of Done
 
@@ -55,4 +57,4 @@ This epic is complete when:
 
 ## Next Step
 
-All stories created. Feature Layer 2/3 unblocked epics complete. Next: blocked epics — exploration-scavenge #11 (ADR-0013 deferred), settlement-market #14 (ADR-0014 deferred), partner-relationships #15 (ADR-0015 deferred).
+Epic #13 is complete and now unlocks downstream #14 settlement-market repair-driven state work plus #16/#17 UI/feedback consumers. Keep future changes compatible with the world-repair runner contracts before wiring real Godot scene assets.

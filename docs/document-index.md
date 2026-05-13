@@ -550,7 +550,7 @@ graph TB
 |------|----------|---------|---------|----------|
 | [exploration-scavenge](../production/epics/exploration-scavenge/EPIC.md) | #11 | 6 | 探索/搜撤——4 阶段状态机、6 搜索点、2 intel 点、scout η 威胁预览、撤离 λ 保护 | ExplorationManager (#11) |
 | [combat-threat](../production/epics/combat-threat/EPIC.md) | #12 | 6 | 战斗与威胁处理——4 态微状态机、3 种响应、C4 10 步结算序列、combat_result 6-field 契约 | CombatManager (#12) |
-| [world-repair](../production/epics/world-repair/EPIC.md) | #13 | 6 | 世界修复与解锁——3 态状态机、deposit_validation 5 种 violation、repair_completed 6 路 fan-out | WorldRepair (#13) |
+| [world-repair](../production/epics/world-repair/EPIC.md) | #13 | 6 | 世界修复与解锁——3 态状态机、deposit_validation 5 种 violation、repair_completed 6 路 fan-out；2026-05-13 完成 91/91 PASS | WorldRepair (#13) |
 | [settlement-market](../production/epics/settlement-market/EPIC.md) | #14 | 6 | 空港/集市交易——3 层状态机、repair 驱动摊位解锁、F.1 价格公式、validate_purchase 4 种拒绝 | SettlementManager (#14) |
 | [partner-relationships](../production/epics/partner-relationships/EPIC.md) | #15 | 6 | 伙伴功能与关系——6 态猫状态机、R15 6 硬禁止、scout_sniff 6 步算法、F.1 置信度截断 66、命名+小窝两套状态机 | PartnerManager (#15) |
 
@@ -582,7 +582,7 @@ graph TB
 ## 五、C# 实现进度
 
 > **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core 前置 #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart 完成并解锁 #10 Navigation；BUG-005 scene reachability 已修复；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（1 个既存 nullable warning，0 错误）；`tests/**/*.csproj` 全量 C# runner 71/71 PASS；Epic #9 Story runners 273/273 checks PASS。
+> **验证方式**: `dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 warning，0 error）；`tests/**/*.csproj` 全量 C# runner 77/77 PASS；Epic #13 Story runners 91/91 checks PASS。
 
 ### Content Registry 完成项
 
@@ -1340,7 +1340,8 @@ graph TB
 - [x] **Resources / Goods Epic #5** — 9/9 Story Complete；Story 001-009 全部 PASS；#8 Modules/Hull 已解锁；BUG-005 scene reachability 已修复
 - [x] **Modules / Hull Epic #8** — 8/8 Story Complete；Story 001-008 自动化证据 36/36 PASS；#10/#11/#12/#16 可消费模块、船体、货舱容量与损伤合同
 - [x] **Chart / Route Planning Epic #9** — 8/8 Story Complete；Story 001-008 自动化证据 273/273 PASS；#10/#13/#15/#16/#18 可消费航图、航线、route_committed 与 UI 查询合同
-- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 71/71 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（1 个既存 nullable warning，0 错误）
+- [x] **World Repair Epic #13** — 6/6 Story Complete；Story 001-006 自动化证据 91/91 PASS；#14/#16/#17 可消费 repair_completed、route enhancement、progress.world-repair 与 MVP feedback 合同
+- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 77/77 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 warning，0 error）
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成
@@ -1353,7 +1354,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9 全部完成，#10 Navigation 已解锁并进入 In Progress；全量 C# runner 71/71 PASS；BUG-005 已修复。
+> **更新于 2026-05-13** — Desktop C# Foundation/Core 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、WorldRepair #13 全部完成，#10 Navigation 已解锁并进入 In Progress；全量 C# runner 77/77 PASS；BUG-005 已修复。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

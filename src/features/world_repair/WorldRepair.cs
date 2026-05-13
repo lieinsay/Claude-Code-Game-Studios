@@ -264,6 +264,10 @@ public sealed class WorldRepair
             0.0d,
             true,
             ""));
+        if (_repairNodes.TryGetValue(nodeId, out var node))
+        {
+            node.RepairState = RepairState.Known;
+        }
     }
 
     /// <summary>

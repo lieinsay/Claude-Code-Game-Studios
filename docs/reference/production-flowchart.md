@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；#10 Navigation 已解锁并进入 In Progress；BUG-005 已修复**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #13 WorldRepair 完成，#10 Navigation In Progress；BUG-005 已修复**
 
 ---
 
@@ -36,7 +36,7 @@ gantt
 
     section 🟠 Phase D 等 Core 层
     #10 航行风险  (8 Stories)    :         p4a, after p3e, 14d
-    #13 世界修复  (6 Stories)    :         p4b, after p3e, 10d
+    #13 世界修复  (6 Stories)    :done,    p4b, 2026-05-13, 1d
     #15 伙伴关系  (6 Stories)    :         p4c, after p3e, 10d
     #11 探索搜撤  (6 Stories)    :         p4d, after p4a, 12d
     #14 空港集市  (6 Stories)    :         p4e, after p4b, 10d
@@ -81,7 +81,7 @@ graph TD
     S9["✅ #9 航图规划 8S"]:::done
 
     S10["🟢 #10 航行风险 8S"]:::active
-    S13["🟠 #13 世界修复 6S"]:::future
+    S13["✅ #13 世界修复 6S"]:::done
     S15["🟠 #15 伙伴关系 6S"]:::future
 
     S11["🟠 #11 探索搜撤 6S"]:::future
@@ -491,17 +491,17 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
 ✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
-🔵 Phase D      ████░░░░░░░░░░░░░░░░░░░░  开始 (#10 Navigation In Progress；#13/#15/#16 已满足 #9 上游)
+🔵 Phase D      ██████░░░░░░░░░░░░░░░░░░  进行中 (#13 WorldRepair Complete；#10 Navigation In Progress；#15/#16 已满足 #9 上游)
 ```
 
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #9 Chart Route Planning 全部 8/8 Story 完成并复审通过；#10 Navigation Route Risk 已解锁并进入 In Progress；BUG-005 scene reachability 已修复
+- 活跃任务: Epic #13 World Repair 全部 6/6 Story 完成；#10 Navigation Route Risk 已解锁并进入 In Progress；BUG-005 scene reachability 已修复
 - 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（1 个既存 nullable warning，0 错误）
-- 测试验证: Epic #9 Story 001-008 runner 273/273 checks PASS；`tests/**/*.csproj` 全量 C# runner 71/71 PASS，0 FAIL
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9 Complete、#10 In Progress、71 个 C# runner 的当前基线
-- 本次完成: Epic #9 ChartManager C# 合同、航图状态机、航线可见性/可选择性、两步出航确认、快照持久化、UI 查询契约、外部状态响应与边界恢复已锁定并复审通过
+- 测试验证: Epic #13 Story 001-006 runner 91/91 checks PASS；`tests/**/*.csproj` 全量 C# runner 77/77 PASS，0 FAIL
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#13 Complete、#10 In Progress、77 个 C# runner 的当前基线
+- 本次完成: Epic #13 WorldRepair C# 合同、三态修复状态机、分批提交、公式、6 路下游 fan-out、progress.world-repair 持久化、MVP 视觉/音频与防御边界已锁定
 
 ### 下一步行动
 
@@ -517,7 +517,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ```
 现在就可以同时做:
   ┌─ #10 航行风险 Story 001 Voyage State Machine + Preflight (依赖 #5/#6/#7/#8/#9 ✅)
-  ├─ #9 航图规划 Epic 已复审通过，可作为 #10/#13/#15/#16/#18 上游合同输入
+  ├─ #13 世界修复 Epic 已完成，可作为 #14/#16/#17 下游合同输入
   └─ TC-RGC-005~009 下游交互/UI 接线（TC-RGC-003/004 visible Godot 复测已通过）
 ```
 
