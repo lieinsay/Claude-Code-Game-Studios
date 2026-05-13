@@ -31,6 +31,30 @@ jobs:
       - name: Run resources stack merge unit tests
         run: dotnet run --project tests/unit/resources/StackMergeTest.csproj
 
+      - name: Run resources capacity unit tests
+        run: dotnet run --project tests/unit/resources/CapacitySystemTest.csproj
+
+      - name: Run resources cargo unpack unit tests
+        run: dotnet run --project tests/unit/resources/CargoUnpackTest.csproj
+
+      - name: Run resources weight mass unit tests
+        run: dotnet run --project tests/unit/resources/WeightMassTest.csproj
+
+      - name: Run resources core operations unit tests
+        run: dotnet run --project tests/unit/resources/CoreOperationsTest.csproj
+
+      - name: Run resources state machine unit tests
+        run: dotnet run --project tests/unit/resources/StateMachineTest.csproj
+
+      - name: Run resources specialized operations integration tests
+        run: dotnet run --project tests/integration/resources/SpecializedOpsTest.csproj
+
+      - name: Run resources signal contract integration tests
+        run: dotnet run --project tests/integration/resources/SignalContractTest.csproj
+
+      - name: Run resources persistence integration tests
+        run: dotnet run --project tests/integration/resources/PersistenceIntegrationTest.csproj
+
       - name: Run registry unit tests
         run: dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
 

@@ -1,16 +1,18 @@
 # Story 009: Persistence & External Integration
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
+> **Estimate**: L
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/resources-goods-capacity.md`
-**Requirement**: `TR-resources-009`
+**Requirement**: `TR-resources-001`, `TR-resources-003`
+**GDD Acceptance Criteria**: `AC-RES-008.1` through `AC-RES-008.3`, `AC-RES-009.3`, `AC-RES-010.1` through `AC-RES-010.3`, and the MVP Starting State table
 
 **ADR Governing Implementation**: ADR-0005 (持久化集成), ADR-0003 (Save System / JSON Serialization), ADR-0001 (Autoload Boot Order)
 **ADR Decision Summary**: 池 1-3（on_person、in_storage、loaded）通过 Canonical JSON 快照包持久化为 `progress.resources`。ResourcesManager 注册 domain serializer/de-serializer 到 Persistence。起始状态通过 `reset_for_new_game(starting_snapshot)` 注入。容量加成（carry_slot_bonus 等）也持久化。模块/货舱交互（EC-05 战斗摧毁货物损失）、供给类别查询（get_carried_intel、get_carried_contents_by_tag）、版本间迁移边界（EC-08/EC-09 mass_class/max_stack 变更）均由本系统处理。
@@ -29,39 +31,39 @@
 
 ### Snapshot Serialization (Save)
 
-- [ ] **AC-1**: GIVEN 仓库 basic × 10, 货舱 cargo.iron × 1 (linked=resource.iron, Q=30, mass_class=medium), 随身空，WHEN `_serialize_resources()`，THEN 返回 Dictionary 含 `domain="resources"`, pools 含 on_person/in_storage/loaded 完整堆结构
-- [ ] **AC-2**: GIVEN 快照 payload，WHEN 检查内容，THEN 不含显示名、文件路径、Object/Node/Resource 引用——仅有 resource_id (StringName/string)、quantity (int)、槽位索引
+- [x] **AC-1**: GIVEN 仓库 basic × 10, 货舱 cargo.iron × 1 (linked=resource.iron, Q=30, mass_class=medium), 随身空，WHEN `_serialize_resources()`，THEN 返回 Dictionary 含 `domain="resources"`, pools 含 on_person/in_storage/loaded 完整堆结构
+- [x] **AC-2**: GIVEN 快照 payload，WHEN 检查内容，THEN 不含显示名、文件路径、Object/Node/Resource 引用——仅有 resource_id (StringName/string)、quantity (int)、槽位索引
 
 ### Snapshot Deserialization (Load)
 
-- [ ] **AC-3**: GIVEN 有效快照（仓库 basic × 10, 货舱有 1 货物），WHEN `_deserialize_resources(snapshot)`，THEN `_pools` 恢复到保存时状态——所有 resource_id、quantity、槽位索引一致
-- [ ] **AC-4**: GIVEN 快照含容量加成（carry_slot_bonus=2），WHEN 反序列化，THEN `get_carry_capacity()` 返回 5+2=7
+- [x] **AC-3**: GIVEN 有效快照（仓库 basic × 10, 货舱有 1 货物），WHEN `_deserialize_resources(snapshot)`，THEN `_pools` 恢复到保存时状态——所有 resource_id、quantity、槽位索引一致
+- [x] **AC-4**: GIVEN 快照含容量加成（carry_slot_bonus=2），WHEN 反序列化，THEN `get_carry_capacity()` 返回 5+2=7
 
 ### Reset for New Game
 
-- [ ] **AC-5**: GIVEN `reset_for_new_game(starting_snapshot)`，WHEN 起始快照含 in_storage: basic×10 + repair×4，THEN 仓库初始化 basic×10 (1 堆) + repair×4 (1 堆), 随身空, 货舱空, 容量加成归零
-- [ ] **AC-6**: GIVEN `reset_for_new_game()` 被调用，WHEN 调用前有旧数据，THEN 所有旧池数据被清除（全新起始状态）
+- [x] **AC-5**: GIVEN `reset_for_new_game(starting_snapshot)`，WHEN 起始快照含 in_storage: basic×10 + repair×4，THEN 仓库初始化 basic×10 (1 堆) + repair×4 (1 堆), 随身空, 货舱空, 容量加成归零
+- [x] **AC-6**: GIVEN `reset_for_new_game()` 被调用，WHEN 调用前有旧数据，THEN 所有旧池数据被清除（全新起始状态）
 
 ### Module & Cargo Bay Interaction
 
-- [ ] **AC-7**: GIVEN 货舱有货物（used_volume > 0），WHEN 模块系统查询 `get_cargo_bay_usage()`，THEN 返回 `{used_volume: N, stacks: [...]}`，模块系统据此阻止模块移除
-- [ ] **AC-8**: GIVEN 模块被战斗摧毁（货舱中有 5 堆不同货物），WHEN 摧毁处理执行，THEN 约 40% 货物进入 destroyed（EC-05 公式：loss = min(Q-1, max(1, ceil(Q×0.4)))）, 保留部分生成 recoverable_crate 临时状态, 货舱容积归零, 玩家收到损失通知
-- [ ] **AC-9**: GIVEN 货舱清空（used_volume=0），WHEN 模块系统调用移除模块，THEN `get_cargo_bay_usage()` 返回 used_volume=0, 模块移除允许
+- [x] **AC-7**: GIVEN 货舱有货物（used_volume > 0），WHEN 模块系统查询 `get_cargo_bay_usage()`，THEN 返回 `{used_volume: N, stacks: [...]}`，模块系统据此阻止模块移除
+- [x] **AC-8**: GIVEN 模块被战斗摧毁（货舱中有 5 堆不同货物），WHEN 摧毁处理执行，THEN 约 40% 货物进入 destroyed（EC-05 公式：loss = min(Q-1, max(1, ceil(Q×0.4)))）, 保留部分生成 recoverable_crate 临时状态, 货舱容积归零, 玩家收到损失通知
+- [x] **AC-9**: GIVEN 货舱清空（used_volume=0），WHEN 模块系统调用移除模块，THEN `get_cargo_bay_usage()` 返回 used_volume=0, 模块移除允许
 
 ### Supply Class & Tag Queries
 
-- [ ] **AC-10**: GIVEN `get_carried_intel()`，WHEN 随身有 basic×5 + intel×1 + repair×3，THEN 仅返回 intel 物品（supply_class=intel）
-- [ ] **AC-11**: GIVEN `get_carried_contents_by_tag("repair-material")`，WHEN 随身有 repair_kit (material_tags=["repair-material"]) × 3 和 basic (material_tags=["basic-supply"]) × 5，THEN 仅返回 repair_kit 条目
-- [ ] **AC-12**: GIVEN `get_carried_contents_by_tag("nonexistent")`，WHEN 查询不存在的 tag，THEN 返回空 Dictionary（非错误）
+- [x] **AC-10**: GIVEN `get_carried_intel()`，WHEN 随身有 basic×5 + intel×1 + repair×3，THEN 仅返回 intel 物品（supply_class=intel）
+- [x] **AC-11**: GIVEN `get_carried_contents_by_tag("repair-material")`，WHEN 随身有 repair_kit (material_tags=["repair-material"]) × 3 和 basic (material_tags=["basic-supply"]) × 5，THEN 仅返回 repair_kit 条目
+- [x] **AC-12**: GIVEN `get_carried_contents_by_tag("nonexistent")`，WHEN 查询不存在的 tag，THEN 返回空 Dictionary（非错误）
 
 ### Starting State Bootstrap
 
-- [ ] **AC-13**: GIVEN 新游戏开始，WHEN 起始状态注入完成，THEN 仓库 basic×10 + repair×4, 货舱容积 500（模块预装）, 其他池空
+- [x] **AC-13**: GIVEN 新游戏开始，WHEN 起始状态注入完成，THEN 仓库 basic×10 + repair×4, 货舱容积 500（模块预装）, 其他池空
 
 ### Version Migration Boundaries
 
-- [ ] **AC-14**: GIVEN 存档中 max_stack 旧值=99, 新版本 basic max_stack=50，WHEN 加载时 basic 堆 E=80（超出新上限），THEN 拆分为 50+30（容量允许时），若无容量则余量进入 destroyed + 通知玩家
-- [ ] **AC-15**: GIVEN 存档中资源 mass_class=medium, 新版本 mass_class=heavy（volume=200），WHEN 加载时重新计算容积，THEN 若超出池容量则部分进入 destroyed + 迁移日志条目
+- [x] **AC-14**: GIVEN 存档中 max_stack 旧值=99, 新版本 basic max_stack=50，WHEN 加载时 basic 堆 E=80（超出新上限），THEN 拆分为 50+30（容量允许时），若无容量则余量进入 destroyed + 通知玩家
+- [x] **AC-15**: GIVEN 存档中资源 mass_class=medium, 新版本 mass_class=heavy（volume=200），WHEN 加载时重新计算容积，THEN 若超出池容量则部分进入 destroyed + 迁移日志条目
 
 ---
 
@@ -191,7 +193,17 @@ func get_carried_contents_by_tag(material_tag: StringName) -> Dictionary:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/resources/PersistenceIntegrationTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-13 (15/15 checks)
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Criteria**: 15/15 passing
+**Deviations**: None. Readiness metadata was corrected from nonexistent `TR-resources-009` to active `TR-resources-001` and `TR-resources-003`; direct GDD anchors are `AC-RES-008`, `AC-RES-009.3`, `AC-RES-010`, and the MVP Starting State table.
+**Test Evidence**: Integration — `tests/integration/resources/PersistenceIntegrationTest.csproj` passes 15/15 checks.
+**Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues; review-mode subagents were not spawned because Codex delegation requires an explicit user request.
 
 ---
 

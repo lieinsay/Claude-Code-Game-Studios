@@ -1,7 +1,7 @@
 # Story 001: Resource Identity & Stack Merge
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: In Progress — implementation ready for /code-review
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -157,4 +157,14 @@ algorithm stack_merge(pool_id, resource_id, quantity):
 **Criteria**: 14/14 passing
 **Files**: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/StackMergeProgram.cs`, `tests/unit/resources/StackMergeTest.csproj`
 **Verification**: `dotnet run --project tests/unit/resources/StackMergeTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS.
-**Ready for**: `/code-review src/core/resources/ResourcesManager.cs tests/unit/resources/StackMergeProgram.cs`
+**Code Review**: Complete — approved with suggestions on 2026-05-12
+
+## Completion Notes
+
+**Completed**: 2026-05-12
+**Criteria**: 14/14 passing
+**Deviations**: None blocking. Advisory notes: `ResourcesManager.AddCore`, `RemoveCore`, and `Transfer` exceed the 40-line method guideline; AC-3's test expresses display-name independence indirectly; `ResourcesManager` depends on concrete `Registry` for now, matching current codebase patterns.
+**Test Evidence**: Logic unit test `tests/unit/resources/StackMergeTest.csproj` exists and passes; `dotnet build CloudWeaverVoyage.sln --no-restore` passes after restore assets are present.
+**Code Review**: Complete — `/code-review` verdict APPROVED WITH SUGGESTIONS.
+**Gate Notes**: `production/review-mode.txt` is `full`, but Codex subagent gates were not spawned because the active Codex contract only allows subagents when the user explicitly asks for delegation/parallel agents. QA coverage and lead review were completed locally.
+**Next Recommended**: `production/epics/resources-goods-capacity/story-002-dual-capacity-system.md` — Story 002: Dual Capacity System.

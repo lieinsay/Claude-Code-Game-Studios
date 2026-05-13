@@ -1,16 +1,18 @@
 # Story 007: Specialized Operations
 
 > **Epic**: Resources, Goods & Capacity
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
+> **Estimate**: M
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/resources-goods-capacity.md`
-**Requirement**: `TR-resources-007`
+**Requirement**: `TR-resources-002`
+**GDD Acceptance Criteria**: `AC-RES-011.2` (`can_deposit()` 无副作用) plus the GDD operation contract rows for `discard()`, `consume_in_combat()`, `commit_deposit()`, `execute_purchase()`, `list_for_sale()`, and `add_loot()`
 
 **ADR Governing Implementation**: ADR-0005 (核心操作 API), ADR-0004 (Interactable 子类 Use 入口), ADR-0002 (Signal 通信)
 **ADR Decision Summary**: 在 4 个核心操作（add/remove/transfer/consume）之上，实现 5 个领域专属操作：`discard()`（玩家驱动丢弃，需二次确认）；`consume_in_combat()`（consume(Pool 5) 薄封装）；`commit_deposit()`（不可逆修复提交）；`execute_purchase()` / `list_for_sale()`（集市交易原子转移）；`add_loot()`（探索拾取入口）。这些操作封装核心操作并添加领域特定验证（确认门控、supply_class 过滤、repair_node_id 验证）。
@@ -29,31 +31,31 @@
 
 ### discard() Operation
 
-- [ ] **AC-1**: GIVEN 随身 basic × 5，WHEN `discard(on_person, basic_id, 3)`，THEN 随身 basic 变为 2, 丢弃的 3 进入 destroyed 终态, 返回 SUCCESS
-- [ ] **AC-2**: GIVEN `discard()` 被调用，WHEN 调用方在调用前已显示确认对话框，THEN 本操作直接执行（不再次弹出确认——确认由调用方处理）
-- [ ] **AC-3**: GIVEN `discard(deposited, id, 1)`，WHEN 尝试丢弃 deposited 池中的资源，THEN 返回错误（deposited 终态不可丢弃）
+- [x] **AC-1**: GIVEN 随身 basic × 5，WHEN `discard(on_person, basic_id, 3)`，THEN 随身 basic 变为 2, 丢弃的 3 进入 destroyed 终态, 返回 SUCCESS
+- [x] **AC-2**: GIVEN `discard()` 被调用，WHEN 调用方在调用前已显示确认对话框，THEN 本操作直接执行（不再次弹出确认——确认由调用方处理）
+- [x] **AC-3**: GIVEN `discard(deposited, id, 1)`，WHEN 尝试丢弃 deposited 池中的资源，THEN 返回错误（deposited 终态不可丢弃）
 
 ### consume_in_combat() Operation
 
-- [ ] **AC-4**: GIVEN `carried` (Pool 5) 有 repair_kit × 5，WHEN `consume_in_combat(repair_kit_id, 2)`，THEN carried repair_kit 变为 3, 消耗的 2 进入 destroyed 终态, 返回 SUCCESS
-- [ ] **AC-5**: GIVEN `carried` 有 repair_kit × 1，WHEN `consume_in_combat(repair_kit_id, 5)`，THEN 返回 `ERR_SOURCE_INSUFFICIENT`, carried 不变
-- [ ] **AC-6**: GIVEN 调用 `consume_in_combat(id, qty)`，WHEN 检查实现，THEN 内部调用 `consume(&"carried", id, qty)`——无其他逻辑
+- [x] **AC-4**: GIVEN `carried` (Pool 5) 有 repair_kit × 5，WHEN `consume_in_combat(repair_kit_id, 2)`，THEN carried repair_kit 变为 3, 消耗的 2 进入 destroyed 终态, 返回 SUCCESS
+- [x] **AC-5**: GIVEN `carried` 有 repair_kit × 1，WHEN `consume_in_combat(repair_kit_id, 5)`，THEN 返回 `ERR_SOURCE_INSUFFICIENT`, carried 不变
+- [x] **AC-6**: GIVEN 调用 `consume_in_combat(id, qty)`，WHEN 检查实现，THEN 内部调用 `consume(&"carried", id, qty)`——无其他逻辑
 
 ### commit_deposit() Operation
 
-- [ ] **AC-7**: GIVEN `commit_deposit(repair_node_id, {basic: 5, repair: 3})`，WHEN 各池有足够资源，THEN 所有指定资源移除, 进入 deposited 终态, 返回 SUCCESS
-- [ ] **AC-8**: GIVEN 任一资源不足，WHEN `commit_deposit(repair_node_id, {basic: 100})` 但仓库 basic × 10，THEN 返回 `ERR_SOURCE_INSUFFICIENT`, 所有资源保留在原池（原子失败）
-- [ ] **AC-9**: GIVEN `can_deposit(repair_node_id, costs)` 被调用，WHEN 检查资源可用性，THEN 返回 true/false, 不产生副作用
+- [x] **AC-7**: GIVEN `commit_deposit(repair_node_id, {basic: 5, repair: 3})`，WHEN 各池有足够资源，THEN 所有指定资源移除, 进入 deposited 终态, 返回 SUCCESS
+- [x] **AC-8**: GIVEN 任一资源不足，WHEN `commit_deposit(repair_node_id, {basic: 100})` 但仓库 basic × 10，THEN 返回 `ERR_SOURCE_INSUFFICIENT`, 所有资源保留在原池（原子失败）
+- [x] **AC-9**: GIVEN `can_deposit(repair_node_id, costs)` 被调用，WHEN 检查资源可用性，THEN 返回 true/false, 不产生副作用
 
 ### execute_purchase() & list_for_sale() Operations
 
-- [ ] **AC-10**: GIVEN `execute_purchase(good_id, 3)` 被执行，WHEN 购买完成，THEN 资源从 `listed` → `in_storage`, 返回 SUCCESS
-- [ ] **AC-11**: GIVEN `list_for_sale(resource_id, 5, 100)` 被调用，WHEN 上架完成，THEN 资源从 `in_storage` → `listed`, 返回 SUCCESS
+- [x] **AC-10**: GIVEN `execute_purchase(good_id, 3)` 被执行，WHEN 购买完成，THEN 资源从 `listed` → `in_storage`, 返回 SUCCESS
+- [x] **AC-11**: GIVEN `list_for_sale(resource_id, 5, 100)` 被调用，WHEN 上架完成，THEN 资源从 `in_storage` → `listed`, 返回 SUCCESS
 
 ### add_loot() Operation
 
-- [ ] **AC-12**: GIVEN `add_loot(resource_id, Q)`，WHEN carried (Pool 5) 有空槽且容量充足，THEN 资源添加到 carried, 返回 SUCCESS
-- [ ] **AC-13**: GIVEN carried 5/5 槽满且无匹配堆，WHEN `add_loot(new_id, 1)`，THEN 返回 `ERR_CARRY_SLOTS_FULL`, carried 不变
+- [x] **AC-12**: GIVEN `add_loot(resource_id, Q)`，WHEN carried (Pool 5) 有空槽且容量充足，THEN 资源添加到 carried, 返回 SUCCESS
+- [x] **AC-13**: GIVEN carried 5/5 槽满且无匹配堆，WHEN `add_loot(new_id, 1)`，THEN 返回 `ERR_CARRY_SLOTS_FULL`, carried 不变
 
 ---
 
@@ -145,7 +147,17 @@ func add_loot(resource_id: StringName, quantity: int) -> ResourceResult:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/resources/SpecializedOpsTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-13 (13/13 checks)
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Criteria**: 13/13 passing
+**Deviations**: None. Readiness metadata was corrected from nonexistent `TR-resources-007` to active `TR-resources-002`; non-registered specialized operation rows remain anchored to the GDD operation contract and ADR-0005. UI confirmation, signal/reentry behavior, combat/exploration call timing, and market pricing/inventory remain out of scope.
+**Test Evidence**: Integration — `tests/integration/resources/SpecializedOpsTest.csproj` passes 13/13 checks.
+**Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues.
 
 ---
 
