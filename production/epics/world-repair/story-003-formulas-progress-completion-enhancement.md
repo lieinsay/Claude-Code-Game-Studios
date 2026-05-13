@@ -1,7 +1,7 @@
 # Story 003: Repair Progress, Completion & Route Enhancement Formulas
 
 > **Epic**: World Repair & Unlock
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -170,7 +170,7 @@ func apply_hazard_reduction(current_hazard: float, reduction_magnitude: float) -
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/world-repair/FormulasTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/unit/world-repair/FormulasTest.csproj --no-restore` PASS 14/14; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 

@@ -96,6 +96,15 @@ public sealed record RepairDepositResult(
     bool Completed);
 
 /// <summary>
+/// Route enhancement payload produced when a repair node completes.
+/// </summary>
+public sealed record RouteEnhancementPayload(
+    string RouteId,
+    string EffectType,
+    double Magnitude,
+    bool Unlock);
+
+/// <summary>
 /// Sole Feature-layer owner of world repair node lifecycle state.
 /// </summary>
 public sealed class WorldRepair
@@ -328,10 +337,62 @@ public sealed class WorldRepair
         return _repairNodes.TryGetValue(nodeId, out var node) ? node.RepairProgress : 0.0d;
     }
 
+    /// <summary>Computes repair progress from the current deposited counters.</summary>
+    public double RepairProgress(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            ? ComputeRepairProgress(nodeId, node.Deposited)
+            : 0.0d;
+    }
+
+    /// <summary>Computes repair progress from an explicit deposited map.</summary>
+    public double RepairProgress(string nodeId, IReadOnlyDictionary<string, int> deposited)
+    {
+        return ComputeRepairProgress(nodeId, deposited);
+    }
+
+    /// <summary>Returns true when every required resource is fully deposited.</summary>
+    public bool RepairCompletion(string nodeId)
+    {
+        return _repairNodes.TryGetValue(nodeId, out var node)
+            && CheckRepairCompletion(nodeId, node.Deposited);
+    }
+
+    /// <summary>Returns true when every required resource is satisfied by an explicit deposited map.</summary>
+    public bool RepairCompletion(string nodeId, IReadOnlyDictionary<string, int> deposited)
+    {
+        return CheckRepairCompletion(nodeId, deposited);
+    }
+
     /// <summary>Returns the definition read for a node.</summary>
     public RepairNodeDefinition? GetRepairNodeDefinition(string nodeId)
     {
         return _definitions.TryGetValue(nodeId, out var definition) ? definition : null;
+    }
+
+    /// <summary>Returns the route enhancement payloads produced by a completed repair node.</summary>
+    public IReadOnlyList<RouteEnhancementPayload> GetRouteEnhancements(string nodeId)
+    {
+        if (!_definitions.TryGetValue(nodeId, out var definition))
+        {
+            return Array.Empty<RouteEnhancementPayload>();
+        }
+
+        return definition.UnlockedRoutes
+            .Select(routeId => new RouteEnhancementPayload(
+                routeId,
+                definition.RouteEnhancementEffect,
+                definition.RouteEnhancementMagnitude,
+                !definition.PreRepairRouteTraversable))
+            .ToArray();
+    }
+
+    /// <summary>Applies a proportional hazard reduction while flooring at zero.</summary>
+    public static double ApplyHazardReduction(double currentHazard, double reductionMagnitude)
+    {
+        var safeHazard = Math.Max(0.0d, currentHazard);
+        var safeMagnitude = Math.Max(0.0d, reductionMagnitude);
+        return Math.Max(0.0d, safeHazard - (safeHazard * safeMagnitude));
     }
 
     /// <summary>Returns a node snapshot for tests, UI, and persistence.</summary>
