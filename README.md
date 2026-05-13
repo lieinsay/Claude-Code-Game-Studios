@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">Claude Code Game Studios</h1>
+  <h1 align="center">Claude Code Game Studios </h1>
   <p align="center">
     Turn a single Claude Code session into a full game development studio.
     <br />
@@ -32,13 +32,22 @@ The result: you still make every decision, but now you have a team that asks the
 
 ## Table of Contents
 
+- [Why This Exists](#why-this-exists)
+- [Table of Contents](#table-of-contents)
 - [What's Included](#whats-included)
 - [Studio Hierarchy](#studio-hierarchy)
+  - [Engine Specialists](#engine-specialists)
 - [Slash Commands](#slash-commands)
 - [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
 - [Upgrading](#upgrading)
 - [Project Structure](#project-structure)
 - [How It Works](#how-it-works)
+  - [Agent Coordination](#agent-coordination)
+  - [Collaborative, Not Autonomous](#collaborative-not-autonomous)
+  - [Automated Safety](#automated-safety)
+  - [Path-Scoped Rules](#path-scoped-rules)
 - [Design Philosophy](#design-philosophy)
 - [Customization](#customization)
 - [Platform Support](#platform-support)
