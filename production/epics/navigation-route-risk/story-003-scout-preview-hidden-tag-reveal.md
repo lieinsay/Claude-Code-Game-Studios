@@ -1,7 +1,7 @@
 # Story 003: Scout Preview Window & Hidden Tag Reveal
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -206,8 +206,8 @@ func _on_scout_efficiency_changed(new_eff: float) -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/ScoutRevealTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/navigation/scout/ScoutPreviewTest.csproj` — must exist and pass
+**Status**: [x] 29/29 PASS — 2026-05-13
 
 ---
 

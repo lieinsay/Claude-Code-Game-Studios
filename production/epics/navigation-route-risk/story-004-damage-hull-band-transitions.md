@@ -1,7 +1,7 @@
 # Story 004: Damage Accumulation & Dynamic Hull Band Transitions
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -211,8 +211,8 @@ func _write_damage_to_hull() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/DamageBandsTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/navigation/damage/DamageHullBandTest.csproj` — must exist and pass
+**Status**: [x] 22/22 PASS — 2026-05-13
 
 ---
 

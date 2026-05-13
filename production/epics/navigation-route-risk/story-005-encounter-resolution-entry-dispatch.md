@@ -1,7 +1,7 @@
 # Story 005: Encounter Resolution & EncounterEntry Dispatch
 
 > **Epic**: Navigation / Route Risk Resolution
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -277,8 +277,8 @@ signal encounter_triggered(entry: Dictionary)
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/navigation/EncounterResolutionTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/navigation/encounter/EncounterResolutionTest.csproj` — must exist and pass
+**Status**: [x] 46/46 PASS — 2026-05-13
 
 ---
 
