@@ -18,6 +18,7 @@ Run("AC-9: completed checkpoint snapshot contains repaired state", Ac9Checkpoint
 Run("AC-10: unknown material in deposited is preserved", Ac10UnknownMaterialPreserved);
 Run("AC-11: orphan node state is retained but deposit rejects invalid_node", Ac11OrphanRetainedInvalidForSubmit);
 Run("AC-12: persistence serializer registers and saves progress.world-repair", Ac12PersistenceRegistration);
+Run("AC-13: restore keeps current registry nodes missing from old snapshots", Ac13RestoreSeedsMissingRegistryNodes);
 
 if (failed > 0)
 {
@@ -240,6 +241,19 @@ static bool Ac12PersistenceRegistration()
     var result = persistence.RequestSaveProgress();
 
     return result.Success && result.Generation == 1;
+}
+
+static bool Ac13RestoreSeedsMissingRegistryNodes()
+{
+    var repair = MakeRepair();
+    repair.RegisterRepairNode("repair_node.future", new Dictionary<string, int> { ["resource.basic_supply"] = 1 });
+
+    repair.DeserializeWorldRepair(Snapshot((WorldRepair.MvpNodeId, RepairState.Known, new() { ["resource.repair_kit"] = 2 })));
+
+    return repair.GetRepairNodeIds().Contains("repair_node.future")
+        && repair.GetRepairState("repair_node.future") == RepairState.Unrevealed
+        && repair.GetDeposited("repair_node.future").Count == 0
+        && repair.GetRepairState(WorldRepair.MvpNodeId) == RepairState.Known;
 }
 
 static void Complete(WorldRepair repair)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using CloudWeaverVoyage.Core;
 
@@ -671,25 +672,11 @@ public sealed class WorldRepair
             return false;
         }
 
-        var node = _repairNodes[nodeId];
-        node.Deposited[resourceId] = node.Deposited.GetValueOrDefault(resourceId, 0) + quantity;
-        DepositCommitted?.Invoke(nodeId, resourceId, quantity);
-
-        node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
-        if (CheckRepairCompletion(nodeId, node.Deposited))
+        var result = SubmitDeposit(nodeId, new Dictionary<string, int>(StringComparer.Ordinal)
         {
-            if (GetRepairState(nodeId) == RepairState.Unrevealed)
-            {
-                TryTransitionState(nodeId, RepairState.Known);
-            }
-
-            TryTransitionState(nodeId, RepairState.Repaired);
-            TriggerRepairCeremony(nodeId);
-            EmitRepairCompleted(nodeId);
-            EmitVisualStateChanged(nodeId, VisualStateRepaired);
-        }
-
-        return true;
+            [resourceId] = quantity,
+        });
+        return result.Result == RepairSubmitResult.Success;
     }
 
     /// <summary>Returns the list of completed repair node IDs.</summary>
@@ -848,6 +835,7 @@ public sealed class WorldRepair
     {
         _repairNodes.Clear();
         _completedNodeIds.Clear();
+        SeedRepairNodesFromDefinitions();
 
         foreach (var (nodeId, rawNode) in ReadObjectMap(snapshot, "nodes"))
         {
@@ -873,6 +861,18 @@ public sealed class WorldRepair
         }
 
         CrossValidateWithPool6();
+    }
+
+    private void SeedRepairNodesFromDefinitions()
+    {
+        foreach (var nodeId in _definitions.Keys.OrderBy(id => id, StringComparer.Ordinal))
+        {
+            _repairNodes[nodeId] = new RepairNodeState
+            {
+                RepairState = RepairState.Unrevealed,
+                VisualState = VisualStateKnown,
+            };
+        }
     }
 
     private bool CheckRepairCompletion(string nodeId, IReadOnlyDictionary<string, int> deposited)
@@ -1097,7 +1097,7 @@ public sealed class WorldRepair
             return fallback;
         }
 
-        return Convert.ToDouble(value);
+        return TryReadDouble(value, out var parsed) ? parsed : fallback;
     }
 
     private static IReadOnlyDictionary<string, int> ReadIntMap(IReadOnlyDictionary<string, object?> entity, string key)
@@ -1265,10 +1265,59 @@ public sealed class WorldRepair
 
         if (value is IReadOnlyDictionary<string, object?> objectMap && objectMap.TryGetValue(nestedKey, out var nested))
         {
-            return Convert.ToDouble(nested);
+            return TryReadDouble(nested, out var parsed) ? parsed : fallback;
         }
 
         return fallback;
+    }
+
+    private static bool TryReadDouble(object? value, out double parsed)
+    {
+        switch (value)
+        {
+            case null:
+                parsed = 0.0d;
+                return false;
+            case double number:
+                parsed = number;
+                return double.IsFinite(parsed);
+            case float number:
+                parsed = number;
+                return double.IsFinite(parsed);
+            case decimal number:
+                parsed = (double)number;
+                return double.IsFinite(parsed);
+            case int number:
+                parsed = number;
+                return true;
+            case long number:
+                parsed = number;
+                return true;
+            case string text:
+                return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
+                    && double.IsFinite(parsed);
+            default:
+                try
+                {
+                    parsed = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                    return double.IsFinite(parsed);
+                }
+                catch (FormatException)
+                {
+                    parsed = 0.0d;
+                    return false;
+                }
+                catch (InvalidCastException)
+                {
+                    parsed = 0.0d;
+                    return false;
+                }
+                catch (OverflowException)
+                {
+                    parsed = 0.0d;
+                    return false;
+                }
+        }
     }
 
     private static bool ReadNestedBool(

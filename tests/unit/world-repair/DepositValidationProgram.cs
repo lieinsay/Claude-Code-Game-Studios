@@ -20,6 +20,7 @@ Run("AC-11: validation failure does not call commit or mutate", Ac11ValidationFa
 Run("AC-12: resource commit failure leaves deposited unchanged", Ac12CommitFailIsAtomic);
 Run("AC-13: already satisfied material rejects any more", Ac13SatisfiedMaterialRejects);
 Run("AC-14: mixed valid and excess offer rejects whole batch", Ac14MixedValidAndExcessRejects);
+Run("AC-15: legacy single commit uses batch validation", Ac15LegacyCommitUsesValidation);
 
 if (failed > 0)
 {
@@ -263,4 +264,21 @@ static bool Ac14MixedValidAndExcessRejects()
         && result.Violations.Contains(RepairDepositViolation.ExcessQuantity)
         && repair.GetDeposited(WorldRepair.MvpNodeId)["resource.repair_kit"] == before
         && !repair.GetDeposited(WorldRepair.MvpNodeId).ContainsKey("resource.basic_supply");
+}
+
+static bool Ac15LegacyCommitUsesValidation()
+{
+    var repair = MakeRepair();
+    var progressEvents = 0;
+    repair.RepairProgressChanged += (_, _, _) => progressEvents++;
+
+    var invalid = repair.CommitDeposit(WorldRepair.MvpNodeId, "resource.invalid", 1);
+    repair.SubmitDeposit(WorldRepair.MvpNodeId, new Dictionary<string, int> { ["resource.repair_kit"] = 4 });
+    var excess = repair.CommitDeposit(WorldRepair.MvpNodeId, "resource.repair_kit", 1);
+
+    return !invalid
+        && !excess
+        && progressEvents == 1
+        && !repair.GetDeposited(WorldRepair.MvpNodeId).ContainsKey("resource.invalid")
+        && repair.GetDeposited(WorldRepair.MvpNodeId)["resource.repair_kit"] == 4;
 }

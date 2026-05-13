@@ -29,6 +29,7 @@ Run("AC-20: empty node id validates as invalid_node", Ac20EmptyNodeInvalid);
 Run("AC-21: untyped non-integer and negative quantities are defensive", Ac21UntypedQuantityDefensive);
 Run("AC-22: malformed required_resources behaves as empty requirements", Ac22MalformedRequirements);
 Run("AC-23: negative ceremony duration clamps to minimum", Ac23NegativeDurationClamp);
+Run("AC-24: malformed route enhancement magnitude falls back defensively", Ac24MalformedRouteEnhancementMagnitude);
 
 if (failed > 0)
 {
@@ -339,4 +340,45 @@ static bool Ac23NegativeDurationClamp()
     var visual = repair.GetVisualSnapshot(WorldRepair.MvpNodeId);
     return Math.Abs(visual.CeremonyDurationSec - WorldRepair.MinRepairCeremonyDurationSec) < 0.000001d
         && !visual.CeremonyActive;
+}
+
+static bool Ac24MalformedRouteEnhancementMagnitude()
+{
+    var registry = new Registry();
+    registry.RegisterContent("repair_node.bad_route_enhancement", new Dictionary<string, object?>(StringComparer.Ordinal)
+    {
+        ["id"] = "repair_node.bad_route_enhancement",
+        ["kind"] = "repair-node",
+        ["display_name"] = "Bad Route Enhancement",
+        ["name_key"] = "content.repair_node_bad_route_enhancement.name",
+        ["description_key"] = "content.repair_node_bad_route_enhancement.desc",
+        ["schema_version"] = 1,
+        ["tags"] = new[] { "repair-node" },
+        ["owner_domain"] = "world",
+        ["references"] = Array.Empty<string>(),
+        ["status"] = "Active",
+        ["content_status"] = 1,
+        ["sort_order"] = 1,
+        ["node_id"] = "repair_node.bad_route_enhancement",
+        ["location_id"] = "location.test",
+        ["linked_location_id"] = "location.test",
+        ["node_kind"] = "beacon",
+        ["restoration_theme"] = "test",
+        ["settlement_need_tags"] = new[] { "safety" },
+        ["repair_visible_state_tags"] = new[] { "dark", "lit" },
+        ["required_resources"] = new Dictionary<string, int> { ["resource.repair_kit"] = 1 },
+        ["unlocked_routes"] = new[] { "route.test" },
+        ["route_enhancement"] = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["effect"] = "hazard_reduction",
+            ["magnitude"] = "not-a-number",
+        },
+    });
+
+    var repair = new WorldRepair(registry);
+    repair.Initialize();
+    var payload = repair.GetRouteEnhancements("repair_node.bad_route_enhancement").Single();
+
+    return payload.EffectType == "hazard_reduction"
+        && Math.Abs(payload.Magnitude) < 0.000001d;
 }
