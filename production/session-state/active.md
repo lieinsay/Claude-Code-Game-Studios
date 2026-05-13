@@ -1,9 +1,9 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Core Layer
-Feature: Chart / Route Planning (#9)
-Task: Epic #11 探索搜撤 进行中；Story 001+002 完成（52+35 PASS）；Story 003~006 待实现
+Epic: Feature Layer
+Feature: Exploration / Scavenge (#11)
+Task: Story 001-004 完成（52+35+31+37 PASS）；Story 005~006 Integration 待实现
 <!-- /STATUS -->
 
 ## Session Extract — Epic #9 Story 001+002 完成 — 2026-05-13

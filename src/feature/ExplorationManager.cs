@@ -467,6 +467,341 @@ public sealed class ExplorationManager
 		return hasIntel ? enhancedDescription : defaultDescription;
 	}
 
+	// ── Story 003 — Threat Triggering & Scout Preview ────────────────
+
+	/// <summary>威胁类别枚举。</summary>
+	public enum ThreatCategory { Environmental = 0, Guard = 1 }
+	/// <summary>侦察预览等级枚举。</summary>
+	public enum ScoutPreviewLevel { None = 0, Presence = 1, Full = 2 }
+
+	/// <summary>威胁点定义（测试注入用）。</summary>
+	public sealed class ThreatPoint
+	{
+		/// <summary>威胁 ID。</summary>
+		public string ThreatId { get; }
+		/// <summary>威胁类别。</summary>
+		public ThreatCategory Category { get; }
+		/// <summary>触发半径。</summary>
+		public double TriggerRadius { get; }
+		/// <summary>位置（简化为一维距离）。</summary>
+		public double Position { get; }
+		/// <summary>是否活跃（false = 已清除）。</summary>
+		public bool IsActive { get; set; }
+
+		/// <param name="threatId">威胁 ID。</param>
+		/// <param name="category">威胁类别。</param>
+		/// <param name="triggerRadius">触发半径。</param>
+		/// <param name="position">位置坐标（简化）。</param>
+		public ThreatPoint(string threatId, ThreatCategory category,
+			double triggerRadius, double position)
+		{
+			ThreatId = threatId;
+			Category = category;
+			TriggerRadius = triggerRadius;
+			Position = position;
+			IsActive = true;
+		}
+	}
+
+	/// <summary>威胁触发结果。</summary>
+	public sealed class ThreatTriggerResult
+	{
+		/// <summary>是否触发。</summary>
+		public bool Triggered { get; }
+		/// <summary>触发的威胁 ID（未触发时为空）。</summary>
+		public string ThreatId { get; }
+		/// <summary>威胁类别。</summary>
+		public ThreatCategory Category { get; }
+
+		/// <param name="triggered">是否触发。</param>
+		/// <param name="threatId">威胁 ID。</param>
+		/// <param name="category">类别。</param>
+		public ThreatTriggerResult(bool triggered, string threatId = "", ThreatCategory category = ThreatCategory.Environmental)
+		{
+			Triggered = triggered;
+			ThreatId = threatId;
+			Category = category;
+		}
+	}
+
+	// 触发概率表
+	private const double TriggerProbEnvironmental = 1.0;
+	private const double TriggerProbGuard = 0.70;
+
+	// η_scout 快照（ARRIVING 时快照，探索中不变）
+	private double _etaScoutSnapshot;
+
+	// 委托：#8 ModulesManager 写入伤害
+	private Action<int>? _applyExplorationHullDamageFn;
+	// 委托：#12 CombatManager 可用性检查
+	private Func<bool>? _isCombatManagerAvailableFn;
+	// 委托：#12 CombatManager 发起战斗
+	private Action<string, ThreatCategory>? _initiateThreatFn;
+	// 委托：η_scout 快照获取
+	private Func<double>? _getScoutEfficiencyFn;
+
+	/// <summary>已触发的威胁列表（本次会话）。</summary>
+	private readonly List<ThreatPoint> _sessionThreatPoints = new();
+
+	// 战斗回调结果
+	private bool _retreatFlagged;
+
+	// 事件
+	/// <summary>威胁触发时发出，参数为 (threatId, category)。</summary>
+	public event Action<string, ThreatCategory>? ThreatTriggered;
+	/// <summary>威胁清除时发出，参数为 threatId。</summary>
+	public event Action<string>? ThreatCleared;
+
+	/// <summary>注入 #8 船体伤害写入委托（探索中环境威胁造成伤害）。</summary>
+	public void SetApplyExplorationHullDamageDelegate(Action<int> fn) =>
+		_applyExplorationHullDamageFn = fn;
+
+	/// <summary>注入 #12 CombatManager 可用性检查委托。</summary>
+	public void SetIsCombatManagerAvailableDelegate(Func<bool> fn) =>
+		_isCombatManagerAvailableFn = fn;
+
+	/// <summary>注入 #12 CombatManager 发起战斗委托。</summary>
+	public void SetInitiateThreatDelegate(Action<string, ThreatCategory> fn) =>
+		_initiateThreatFn = fn;
+
+	/// <summary>注入 η_scout 获取委托（ARRIVING 时快照）。</summary>
+	public void SetGetScoutEfficiencyDelegate(Func<double> fn) =>
+		_getScoutEfficiencyFn = fn;
+
+	/// <summary>注册威胁点（测试/场景层调用）。</summary>
+	/// <param name="tp">威胁点定义。</param>
+	public void RegisterThreatPoint(ThreatPoint tp) => _sessionThreatPoints.Add(tp);
+
+	/// <summary>
+	/// F-11-02 威胁触发判定。
+	/// 环境威胁靠近必触发（P=1.0）；守卫威胁靠近 P=0.70，交互 P=1.0；已清除威胁直接跳过。
+	/// </summary>
+	/// <param name="playerPosition">玩家位置（简化为一维距离）。</param>
+	/// <param name="triggerType">"proximity" 或 "interaction"。</param>
+	/// <returns>按优先级排序的触发结果列表。</returns>
+	public IReadOnlyList<ThreatTriggerResult> CheckThreatTrigger(double playerPosition, string triggerType)
+	{
+		var triggered = new List<(ThreatTriggerResult Result, ThreatPoint Point)>();
+
+		foreach (var tp in _sessionThreatPoints)
+		{
+			if (!tp.IsActive) continue;
+
+			var result = CheckSingleThreatTrigger(tp, triggerType, playerPosition);
+			if (result.Triggered)
+				triggered.Add((result, tp));
+		}
+
+		// 按优先级排序：环境 > 守卫，距离近 > 远，同距离按 ThreatId 字典序
+		triggered.Sort((a, b) =>
+		{
+			if (a.Point.Category != b.Point.Category)
+				return a.Point.Category == ThreatCategory.Environmental ? -1 : 1;
+			double distA = Math.Abs(playerPosition - a.Point.Position);
+			double distB = Math.Abs(playerPosition - b.Point.Position);
+			if (Math.Abs(distA - distB) > 0.01)
+				return distA.CompareTo(distB);
+			return string.Compare(a.Point.ThreatId, b.Point.ThreatId, StringComparison.Ordinal);
+		});
+
+		// 处理每个触发的威胁
+		foreach (var (result, tp) in triggered)
+		{
+			HandleTriggeredThreat(tp);
+			// 如果撤离被打断，停止处理后续威胁
+			if (_phase == ExplorationPhase.Extracting)
+			{
+				InterruptExtraction("threat");
+				break;
+			}
+		}
+
+		return triggered.Select(t => t.Result).ToList();
+	}
+
+	/// <summary>单个威胁触发判定。</summary>
+	public ThreatTriggerResult CheckSingleThreatTrigger(ThreatPoint tp,
+		string triggerType, double playerPosition)
+	{
+		if (!tp.IsActive)
+			return new ThreatTriggerResult(false);
+
+		if (triggerType == "interaction")
+			return new ThreatTriggerResult(true, tp.ThreatId, tp.Category);
+
+		if (triggerType == "proximity")
+		{
+			double dist = Math.Abs(playerPosition - tp.Position);
+			if (dist > tp.TriggerRadius)
+				return new ThreatTriggerResult(false);
+			double prob = tp.Category == ThreatCategory.Environmental
+				? TriggerProbEnvironmental : TriggerProbGuard;
+			if (Roll() < prob)
+				return new ThreatTriggerResult(true, tp.ThreatId, tp.Category);
+		}
+
+		return new ThreatTriggerResult(false);
+	}
+
+	/// <summary>处理已触发威胁（内部）。</summary>
+	private void HandleTriggeredThreat(ThreatPoint tp)
+	{
+		ThreatTriggered?.Invoke(tp.ThreatId, tp.Category);
+		SetSubstate(ExplorationSubstate.Threatened);
+
+		if (tp.Category == ThreatCategory.Environmental)
+		{
+			// 环境威胁：自行处理（施加伤害或封锁路径）
+			try { _applyExplorationHullDamageFn?.Invoke(2); } // MVP 固定 2 点
+			catch { /* 不崩溃 */ }
+		}
+		else if (tp.Category == ThreatCategory.Guard)
+		{
+			// 守卫威胁：传递至 CombatManager
+			bool combatAvailable = _isCombatManagerAvailableFn?.Invoke() ?? false;
+			if (!combatAvailable)
+			{
+				// #12 不可用 → 惰性降级（inert）
+				// 守卫保持活跃但不触发伤害
+				return;
+			}
+			try { _initiateThreatFn?.Invoke(tp.ThreatId, tp.Category); }
+			catch { /* 不崩溃 */ }
+		}
+	}
+
+	/// <summary>
+	/// 战斗结果回调（由 CombatManager #12 调用）。
+	/// </summary>
+	/// <param name="outcome">"suppressed"/"tanked"/"retreated"。</param>
+	/// <param name="threatId">对应的威胁 ID。</param>
+	public void OnCombatResult(string outcome, string threatId)
+	{
+		switch (outcome)
+		{
+			case "suppressed":
+				var tp = _sessionThreatPoints.FirstOrDefault(t => t.ThreatId == threatId);
+				if (tp != null) tp.IsActive = false;
+				ThreatCleared?.Invoke(threatId);
+				break;
+			case "tanked":
+				// 威胁保持活跃
+				break;
+			case "retreated":
+				_retreatFlagged = true;
+				ForceExtraction("retreat");
+				break;
+		}
+		SetSubstate(ExplorationSubstate.Idle);
+	}
+
+	/// <summary>
+	/// F-11-03 侦察预览等级映射。
+	/// 使用进入探索时快照的 η_scout——不反映实时变化。
+	/// </summary>
+	/// <returns>预览等级。</returns>
+	public ScoutPreviewLevel GetScoutPreviewLevel()
+	{
+		if (_etaScoutSnapshot <= 0.0) return ScoutPreviewLevel.None;
+		if (_etaScoutSnapshot >= 1.0) return ScoutPreviewLevel.Full;
+		return ScoutPreviewLevel.Presence;
+	}
+
+	/// <summary>快照当前 η_scout（ARRIVING 时调用）。</summary>
+	public void SnapshotEtaScout()
+	{
+		_etaScoutSnapshot = _getScoutEfficiencyFn?.Invoke() ?? 0.0;
+	}
+
+	// ── Story 004 — EncounterContext Consumption & ARRIVING Entry ─────
+
+	// 已记录的 internal error log（测试用）
+	private readonly List<string> _internalErrorLog = new();
+	// 当前会话的 EncounterContext
+	private EncounterContext? _encounterContext;
+	// 当前入场模式
+	private string _arrivalMode = "";
+
+	/// <summary>内部错误日志列表（测试可读取）。</summary>
+	public IReadOnlyList<string> InternalErrorLog => _internalErrorLog;
+	/// <summary>当前入场模式（"arrived"/"forced_landing"/"retreated"）。</summary>
+	public string ArrivalMode => _arrivalMode;
+	/// <summary>当前会话 EncounterContext。</summary>
+	public EncounterContext? CurrentEncounterContext => _encounterContext;
+
+	/// <summary>
+	/// 校验 EncounterContext，失败时返回 fallback context。
+	/// 5 种故障条件：null、缺 route_id、缺 destination_id、无效 voyage_result、resolved_encounters 非列表。
+	/// </summary>
+	/// <param name="ctx">待校验的 EncounterContext（可为 null）。</param>
+	/// <returns>有效 context 或 fallback context。</returns>
+	public EncounterContext ValidateEncounterContext(EncounterContext? ctx)
+	{
+		if (ctx == null)
+		{
+			LogInternalError("Exploration: null EncounterContext — using fallback");
+			return BuildFallbackContext();
+		}
+		if (string.IsNullOrEmpty(ctx.RouteId))
+		{
+			LogInternalError("Exploration: EncounterContext missing route_id");
+			return BuildFallbackContext();
+		}
+		if (string.IsNullOrEmpty(ctx.DestinationId))
+		{
+			LogInternalError("Exploration: EncounterContext missing destination_id");
+			return BuildFallbackContext();
+		}
+		if (ctx.VoyageResult != "arrived" && ctx.VoyageResult != "retreated"
+			&& ctx.VoyageResult != "forced_landing")
+		{
+			LogInternalError($"Exploration: invalid voyage_result '{ctx.VoyageResult}'");
+			return BuildFallbackContext();
+		}
+		// resolved_encounters 已是类型化列表，不需要 is Array 检查——类型安全保证
+		return ctx;
+	}
+
+	/// <summary>
+	/// 消费 EncounterContext 进入探索会话（校验 → 入场模式路由 → ARRIVING 阶段）。
+	/// </summary>
+	/// <param name="ctx">来自 Navigation #10 voyage_completed 信号的 EncounterContext。</param>
+	/// <returns>是否成功进入。</returns>
+	public bool EnterExplorationWithContext(EncounterContext? ctx)
+	{
+		if (_phase != ExplorationPhase.Idle) return false;
+
+		var validated = ValidateEncounterContext(ctx);
+		_encounterContext = validated;
+		_arrivalMode = validated.VoyageResult;
+
+		// 快照 η_scout
+		SnapshotEtaScout();
+
+		// 进入 ARRIVING
+		_currentPointId = validated.DestinationId;
+		if (!TransitionPhase(ExplorationPhase.Arriving)) return false;
+
+		// 按 voyage_result 路由入场模式
+		if (validated.VoyageResult == "forced_landing"
+			&& string.IsNullOrEmpty(validated.ForcedLandingPosition))
+		{
+			LogInternalError("Exploration: forced_landing without position — using normal entry");
+			_arrivalMode = "arrived"; // fallback 至正常入场
+		}
+
+		return true;
+	}
+
+	/// <summary>构建 fallback EncounterContext（9 字段全为安全默认值）。</summary>
+	public static EncounterContext BuildFallbackContext() =>
+		new EncounterContext(
+			"unknown", "cloudwatch-ruins-fallback", "arrived",
+			new List<ResolvedEncounterEntry>(), 0,
+			new List<string>(), HullBand.Intact, "", new List<string>());
+
+	private void LogInternalError(string message) => _internalErrorLog.Add(message);
+
 	// ── 私有辅助 ──────────────────────────────────────────────────────
 
 	private bool TransitionPhase(ExplorationPhase target)

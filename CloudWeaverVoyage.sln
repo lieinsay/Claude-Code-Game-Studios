@@ -193,6 +193,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplStateMachineTest", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchScavengeTest", "tests\unit\exploration\search\SearchScavengeTest.csproj", "{6A3A2169-EA10-4A67-8595-D959A7F73400}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreatTriggeringTest", "tests\unit\exploration\threat\ThreatTriggeringTest.csproj", "{D3214172-7A9D-4657-9A43-CABDE055B04E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncounterContextEntryTest", "tests\integration\exploration\EncounterContextEntryTest.csproj", "{A504F59F-069D-4CE9-A7E5-099DCA889C6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -531,6 +535,14 @@ Global
 		{6A3A2169-EA10-4A67-8595-D959A7F73400}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A3A2169-EA10-4A67-8595-D959A7F73400}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A3A2169-EA10-4A67-8595-D959A7F73400}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3214172-7A9D-4657-9A43-CABDE055B04E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3214172-7A9D-4657-9A43-CABDE055B04E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3214172-7A9D-4657-9A43-CABDE055B04E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3214172-7A9D-4657-9A43-CABDE055B04E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A504F59F-069D-4CE9-A7E5-099DCA889C6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A504F59F-069D-4CE9-A7E5-099DCA889C6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A504F59F-069D-4CE9-A7E5-099DCA889C6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A504F59F-069D-4CE9-A7E5-099DCA889C6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -628,5 +640,7 @@ Global
 		{DA23FE58-F69A-45F4-946F-FC372CFE966F} = {5CF80B4D-0EE7-4ACA-8CF1-8CB696A9FA87}
 		{03BF29A7-1CF3-4073-929B-6C5826221886} = {DA23FE58-F69A-45F4-946F-FC372CFE966F}
 		{6A3A2169-EA10-4A67-8595-D959A7F73400} = {DA23FE58-F69A-45F4-946F-FC372CFE966F}
+		{D3214172-7A9D-4657-9A43-CABDE055B04E} = {DA23FE58-F69A-45F4-946F-FC372CFE966F}
+		{A504F59F-069D-4CE9-A7E5-099DCA889C6D} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 	EndGlobalSection
 EndGlobal

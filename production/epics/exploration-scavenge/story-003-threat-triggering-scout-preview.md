@@ -1,7 +1,7 @@
 # Story 003: Threat Triggering, Scout Preview & Environmental Handling
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -202,8 +202,8 @@ const TRIGGER_PROB_TABLE := {
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/exploration/ThreatTriggeringTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/unit/exploration/threat/ThreatTriggeringTest.csproj` — must exist and pass
+**Status**: [x] 31/31 PASS — 2026-05-13
 
 ---
 
