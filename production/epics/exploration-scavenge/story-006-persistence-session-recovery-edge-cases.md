@@ -28,53 +28,53 @@
 
 ### EC-11-01: Tab Close During EXPLORING
 
-- [ ] **AC-1**: GIVEN session_phase=EXPLORING + 已搜索 3/6 搜索点 + Pool 5 有 2 格物品 + 已触发 1 个环境威胁 (env_threat_active=true)，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING + 已搜索的 3 点不可再次搜索 + Pool 5 恢复 2 格物品 + env_threat_active=true + 显示"你在探索中中断了"提示。最近一次快照后的进度丢失（最多 1 次搜索或 1 次威胁结算）
-- [ ] **AC-2**: GIVEN 恢复后 + Pool 5 快照与实际 ResourcesManager 状态不一致（模拟持久化损坏），WHEN _restore_active_session()，THEN 以 ResourcesManager 实际 Pool 5 状态为准 + 静默修复 occupied_slots + 不通知玩家（EC-11-09）
+- [x] **AC-1**: GIVEN session_phase=EXPLORING + 已搜索 3/6 搜索点 + Pool 5 有 2 格物品 + 已触发 1 个环境威胁 (env_threat_active=true)，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING + 已搜索的 3 点不可再次搜索 + Pool 5 恢复 2 格物品 + env_threat_active=true + 显示"你在探索中中断了"提示。最近一次快照后的进度丢失（最多 1 次搜索或 1 次威胁结算）
+- [x] **AC-2**: GIVEN 恢复后 + Pool 5 快照与实际 ResourcesManager 状态不一致（模拟持久化损坏），WHEN _restore_active_session()，THEN 以 ResourcesManager 实际 Pool 5 状态为准 + 静默修复 occupied_slots + 不通知玩家（EC-11-09）
 
 ### EC-11-02: Tab Close During EXTRACTING
 
-- [ ] **AC-3**: GIVEN session_phase=EXTRACTING + 读条进行到 1.5s，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING（不是 DEPARTED）+ 玩家位置在撤离锚点旁 + 提取进度未保留 + 需重新触发撤离。读条是原子操作——不完整则不计数
+- [x] **AC-3**: GIVEN session_phase=EXTRACTING + 读条进行到 1.5s，WHEN 桌面窗口关闭 → 重新打开 → 恢复会话，THEN session_phase=EXPLORING（不是 DEPARTED）+ 玩家位置在撤离锚点旁 + 提取进度未保留 + 需重新触发撤离。读条是原子操作——不完整则不计数
 
 ### EC-11-03: DEPARTED Settlement Write Failure
 
-- [ ] **AC-4**: GIVEN DEPARTED 结算写入因 user:// storage 配额满而失败，WHEN 自动重试 4 次（1s/2s/4s/8s）全部失败，THEN UI 显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮。结算包保留在内存中
-- [ ] **AC-5**: GIVEN 手动重试按钮点击 + user:// storage 已清理，WHEN 重试，THEN 结算包成功写入 + extraction_completed 发射 + session_phase→DEPARTED→IDLE
+- [x] **AC-4**: GIVEN DEPARTED 结算写入因 user:// storage 配额满而失败，WHEN 自动重试 4 次（1s/2s/4s/8s）全部失败，THEN UI 显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮。结算包保留在内存中
+- [x] **AC-5**: GIVEN 手动重试按钮点击 + user:// storage 已清理，WHEN 重试，THEN 结算包成功写入 + extraction_completed 发射 + session_phase→DEPARTED→IDLE
 
 ### EC-11-08: Hull Reaches Zero During Exploration
 
-- [ ] **AC-6**: GIVEN session_phase=EXPLORING + 环境威胁触发后 hull=0，WHEN 检查，THEN 探索系统不自行终止探索 + HUD 显示"船体严重损毁"警告。撤离锚点仍然可用
-- [ ] **AC-7**: GIVEN hull=0 + 玩家仍在探索中，WHEN 搜索/交互，THEN 正常操作不受影响。hull==0 的全局后果由 ModulesManager (#8) 负责
+- [x] **AC-6**: GIVEN session_phase=EXPLORING + 环境威胁触发后 hull=0，WHEN 检查，THEN 探索系统不自行终止探索 + HUD 显示"船体严重损毁"警告。撤离锚点仍然可用
+- [x] **AC-7**: GIVEN hull=0 + 玩家仍在探索中，WHEN 搜索/交互，THEN 正常操作不受影响。hull==0 的全局后果由 ModulesManager (#8) 负责
 
 ### EC-11-09: Pool 5 State Inconsistency
 
-- [ ] **AC-8**: GIVEN occupied_slots=3 但实际格位占用=4（因持久化损坏），WHEN 进入探索点或搜索后执行一致性扫描，THEN 以实际格位状态为准修正 occupied_slots。静默修复，不通知玩家
+- [x] **AC-8**: GIVEN occupied_slots=3 但实际格位占用=4（因持久化损坏），WHEN 进入探索点或搜索后执行一致性扫描，THEN 以实际格位状态为准修正 occupied_slots。静默修复，不通知玩家
 
 ### EC-11-13: Cleared Threat Zone Re-entry
 
-- [ ] **AC-9**: GIVEN 之前已清除的威胁（is_active=false）+ 玩家再次走过其原始 trigger_radius，WHEN check_threat_trigger()，THEN 直接返回 {triggered: false}。该区域在本会话内永久安全
-- [ ] **AC-10**: GIVEN 威胁被清除后，WHEN 查询 scout_preview_level()，THEN 预览标记不变（进入时快照）。已知轻度 UI 不一致——威胁已清除但标记仍在
+- [x] **AC-9**: GIVEN 之前已清除的威胁（is_active=false）+ 玩家再次走过其原始 trigger_radius，WHEN check_threat_trigger()，THEN 直接返回 {triggered: false}。该区域在本会话内永久安全
+- [x] **AC-10**: GIVEN 威胁被清除后，WHEN 查询 scout_preview_level()，THEN 预览标记不变（进入时快照）。已知轻度 UI 不一致——威胁已清除但标记仍在
 
 ### EC-11-20: Page Loses Focus / Long Idle
 
-- [ ] **AC-11**: GIVEN session_phase=EXPLORING + 玩家 idle，WHEN 页面 window_focus_changed→hidden 或 >30分钟无交互，THEN 探索无全局计时器——无惩罚。恢复时 phase 保持 EXPLORING + session_substate→SUBSTATE_IDLE
-- [ ] **AC-12**: GIVEN session_phase=EXTRACTING + 读条进行中，WHEN 页面 window_focus_changed→hidden 时间 >5s，THEN 读条中断并重置（计时器在后台不可靠）+ session_phase→EXPLORING + 玩家在锚点旁
-- [ ] **AC-13**: GIVEN session_phase=ARRIVING + 页面隐藏 >5s，WHEN 恢复，THEN 跳过 ARRIVING 描述文本 → 自动进入 EXPLORING
+- [x] **AC-11**: GIVEN session_phase=EXPLORING + 玩家 idle，WHEN 页面 window_focus_changed→hidden 或 >30分钟无交互，THEN 探索无全局计时器——无惩罚。恢复时 phase 保持 EXPLORING + session_substate→SUBSTATE_IDLE
+- [x] **AC-12**: GIVEN session_phase=EXTRACTING + 读条进行中，WHEN 页面 window_focus_changed→hidden 时间 >5s，THEN 读条中断并重置（计时器在后台不可靠）+ session_phase→EXPLORING + 玩家在锚点旁
+- [x] **AC-13**: GIVEN session_phase=ARRIVING + 页面隐藏 >5s，WHEN 恢复，THEN 跳过 ARRIVING 描述文本 → 自动进入 EXPLORING
 
 ### EC-11-21: user:// storage Quota Exceeded
 
-- [ ] **AC-14**: GIVEN user:// storage.setItem() 抛出 QuotaExceededError 在 EXPLORING 阶段快照时，WHEN 检测到，THEN HUD 显示非阻塞警告 "⚠ 存储空间不足，探索进度可能无法保存。" + 30s 内不重复显示
-- [ ] **AC-15**: GIVEN 快照失败后 + 30s 防抖已过 + 再次快照仍失败，THEN 再次显示警告（不累积，替换上一条）
+- [x] **AC-14**: GIVEN user:// storage.setItem() 抛出 QuotaExceededError 在 EXPLORING 阶段快照时，WHEN 检测到，THEN HUD 显示非阻塞警告 "⚠ 存储空间不足，探索进度可能无法保存。" + 30s 内不重复显示
+- [x] **AC-15**: GIVEN 快照失败后 + 30s 防抖已过 + 再次快照仍失败，THEN 再次显示警告（不累积，替换上一条）
 
 ### ADR-0003 Serialization Roundtrip
 
-- [ ] **AC-16**: GIVEN 探索点状态包含 state_variant=LOOTED + 全部 6 个搜索点 consumed + 2 个情报点 interacted + 2 个威胁 inactive，WHEN _serialize_exploration() → JSON.stringify() → JSON.parse() → _deserialize_exploration()，THEN 所有字段一致无丢失
-- [ ] **AC-17**: GIVEN 活跃会话 (PHASE_EXPLORING)，WHEN 序列化往返，THEN session 快照字段完整——phase, point_id, search_consumed, intel_interacted, threats_active, retreat_flagged
-- [ ] **AC-18**: GIVEN 无活跃会话 (PHASE_IDLE)，WHEN _serialize_exploration()，THEN active_session={}——空对象，不携带过期会话数据
+- [x] **AC-16**: GIVEN 探索点状态包含 state_variant=LOOTED + 全部 6 个搜索点 consumed + 2 个情报点 interacted + 2 个威胁 inactive，WHEN _serialize_exploration() → JSON.stringify() → JSON.parse() → _deserialize_exploration()，THEN 所有字段一致无丢失
+- [x] **AC-17**: GIVEN 活跃会话 (PHASE_EXPLORING)，WHEN 序列化往返，THEN session 快照字段完整——phase, point_id, search_consumed, intel_interacted, threats_active, retreat_flagged
+- [x] **AC-18**: GIVEN 无活跃会话 (PHASE_IDLE)，WHEN _serialize_exploration()，THEN active_session={}——空对象，不携带过期会话数据
 
 ### Defensive: Invalid State Recovery
 
-- [ ] **AC-19**: GIVEN 存档中 exploration_points 包含未在 Registry 中注册的 point_id（数据迁移残留），WHEN _deserialize_exploration()，THEN 跳过该条目 + 记录 warning 日志。不崩溃
-- [ ] **AC-20**: GIVEN 存档中 active_session.phase=PHASE_DEPARTED（不应持久化的终态），WHEN 恢复，THEN 忽略活跃会话——视为 IDLE。记录 warning
+- [x] **AC-19**: GIVEN 存档中 exploration_points 包含未在 Registry 中注册的 point_id（数据迁移残留），WHEN _deserialize_exploration()，THEN 跳过该条目 + 记录 warning 日志。不崩溃
+- [x] **AC-20**: GIVEN 存档中 active_session.phase=PHASE_DEPARTED（不应持久化的终态），WHEN 恢复，THEN 忽略活跃会话——视为 IDLE。记录 warning
 
 ---
 
@@ -271,7 +271,7 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/exploration/PersistenceRecoveryTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] 64/64 PASS — 2026-05-14
 
 ---
 

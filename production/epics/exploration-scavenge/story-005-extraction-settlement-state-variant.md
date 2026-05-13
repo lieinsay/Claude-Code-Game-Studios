@@ -28,37 +28,37 @@
 
 ### Extraction Channel
 
-- [ ] **AC-1**: GIVEN session_phase=EXPLORING + 玩家在撤离锚点按 E，WHEN trigger_extraction()，THEN session_phase→EXTRACTING + extraction_started 发射 + 2.5s 读条开始
-- [ ] **AC-2**: GIVEN session_phase=EXTRACTING + 读条进行中 (progress=0.5)，WHEN 威胁触发（check_threat_trigger 返回 triggered=true），THEN _interrupt_extraction() 调用 + extraction_interrupted 发射 + 进度重置为 0 + session_phase→EXPLORING (threatened)。EC-11-11 满足
-- [ ] **AC-3**: GIVEN 读条被打断 + 威胁处理完毕，WHEN 玩家再次按 E 在撤离锚点，THEN 可重新触发提取——读条重新开始，无额外惩罚
-- [ ] **AC-4**: GIVEN session_phase=EXTRACTING + 无威胁打断，WHEN 2.5s 到期，THEN extraction_completed 信号发射 + _finalize_extraction() 执行
+- [x] **AC-1**: GIVEN session_phase=EXPLORING + 玩家在撤离锚点按 E，WHEN trigger_extraction()，THEN session_phase→EXTRACTING + extraction_started 发射 + 2.5s 读条开始
+- [x] **AC-2**: GIVEN session_phase=EXTRACTING + 读条进行中 (progress=0.5)，WHEN 威胁触发（check_threat_trigger 返回 triggered=true），THEN _interrupt_extraction() 调用 + extraction_interrupted 发射 + 进度重置为 0 + session_phase→EXPLORING (threatened)。EC-11-11 满足
+- [x] **AC-3**: GIVEN 读条被打断 + 威胁处理完毕，WHEN 玩家再次按 E 在撤离锚点，THEN 可重新触发提取——读条重新开始，无额外惩罚
+- [x] **AC-4**: GIVEN session_phase=EXTRACTING + 无威胁打断，WHEN 2.5s 到期，THEN extraction_completed 信号发射 + _finalize_extraction() 执行
 
 ### F-11-04: Extraction Loss Settlement
 
-- [ ] **AC-5**: GIVEN carried_stacks=[{resource_id: "basic_supply", quantity: 20, is_unique: false, max_stack: 20}] + retreat_flagged=false, λ_success=0.08，WHEN extraction_loss_settlement()，THEN compute_loss(20, 0.08) = ceil(20×0.08)=2, 保留 18, 损耗 2
-- [ ] **AC-6**: GIVEN retreat_flagged=true + λ_forced=0.25 + basic_supply×20，WHEN extraction_loss_settlement()，THEN compute_loss(20, 0.25) = ceil(20×0.25)=5, 保留 15, 损耗 5
-- [ ] **AC-7**: GIVEN Unique 物品 (Q=1, max_stack=1, is_unique=true)，WHEN extraction_loss_settlement()，THEN 跳过损耗判定 + 全量转移 + lost=0。无论 retreat_flagged 为何值
-- [ ] **AC-8**: GIVEN non-Unique 物品 Q=1（如 cloud_crystal×1），WHEN compute_loss(1, 0.08)，THEN 返回 0——Q≤1 不损耗
-- [ ] **AC-9**: GIVEN non-Unique 物品 Q=3 + λ=0.08，WHEN compute_loss(3, 0.08)，THEN ceil(3×0.08)=1, min(3-1, 1)=1, 保留 2, 损耗 1
-- [ ] **AC-10**: GIVEN 多堆混合（Unique ×1, non-Unique ×2），WHEN extraction_loss_settlement()，THEN extract_carried_to_storage 收到完整 transfer_batch——原子全成功或全失败
-- [ ] **AC-11**: GIVEN λ=0.0（配置为无损），WHEN extraction_loss_settlement()，THEN compute_loss 对所有 Q 返回 0——零损耗
+- [x] **AC-5**: GIVEN carried_stacks=[{resource_id: "basic_supply", quantity: 20, is_unique: false, max_stack: 20}] + retreat_flagged=false, λ_success=0.08，WHEN extraction_loss_settlement()，THEN compute_loss(20, 0.08) = ceil(20×0.08)=2, 保留 18, 损耗 2
+- [x] **AC-6**: GIVEN retreat_flagged=true + λ_forced=0.25 + basic_supply×20，WHEN extraction_loss_settlement()，THEN compute_loss(20, 0.25) = ceil(20×0.25)=5, 保留 15, 损耗 5
+- [x] **AC-7**: GIVEN Unique 物品 (Q=1, max_stack=1, is_unique=true)，WHEN extraction_loss_settlement()，THEN 跳过损耗判定 + 全量转移 + lost=0。无论 retreat_flagged 为何值
+- [x] **AC-8**: GIVEN non-Unique 物品 Q=1（如 cloud_crystal×1），WHEN compute_loss(1, 0.08)，THEN 返回 0——Q≤1 不损耗
+- [x] **AC-9**: GIVEN non-Unique 物品 Q=3 + λ=0.08，WHEN compute_loss(3, 0.08)，THEN ceil(3×0.08)=1, min(3-1, 1)=1, 保留 2, 损耗 1
+- [x] **AC-10**: GIVEN 多堆混合（Unique ×1, non-Unique ×2），WHEN extraction_loss_settlement()，THEN extract_carried_to_storage 收到完整 transfer_batch——原子全成功或全失败
+- [x] **AC-11**: GIVEN λ=0.0（配置为无损），WHEN extraction_loss_settlement()，THEN compute_loss 对所有 Q 返回 0——零损耗
 
 ### F-11-05: State Variant Transition
 
-- [ ] **AC-12**: GIVEN current_state=UNLOOTED + all_searched=false + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 UNLOOTED
-- [ ] **AC-13**: GIVEN current_state=UNLOOTED + all_searched=true + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED
-- [ ] **AC-14**: GIVEN current_state=UNLOOTED + any all_searched + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED（优先规则）
-- [ ] **AC-15**: GIVEN current_state=LOOTED + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED
-- [ ] **AC-16**: GIVEN current_state=LOOTED + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED（保持）
-- [ ] **AC-17**: GIVEN current_state=DANGER_CHANGED + all_searched=false + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 UNLOOTED（威胁清除+未搜完→回退）
-- [ ] **AC-18**: GIVEN current_state=DANGER_CHANGED + all_searched=true + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED（威胁清除+全搜→终态）
-- [ ] **AC-19**: GIVEN current_state=DANGER_CHANGED + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED（保持）
+- [x] **AC-12**: GIVEN current_state=UNLOOTED + all_searched=false + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 UNLOOTED
+- [x] **AC-13**: GIVEN current_state=UNLOOTED + all_searched=true + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED
+- [x] **AC-14**: GIVEN current_state=UNLOOTED + any all_searched + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED（优先规则）
+- [x] **AC-15**: GIVEN current_state=LOOTED + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED
+- [x] **AC-16**: GIVEN current_state=LOOTED + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED（保持）
+- [x] **AC-17**: GIVEN current_state=DANGER_CHANGED + all_searched=false + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 UNLOOTED（威胁清除+未搜完→回退）
+- [x] **AC-18**: GIVEN current_state=DANGER_CHANGED + all_searched=true + env_threat_active=false，WHEN state_variant_transition()，THEN 返回 LOOTED（威胁清除+全搜→终态）
+- [x] **AC-19**: GIVEN current_state=DANGER_CHANGED + env_threat_active=true，WHEN state_variant_transition()，THEN 返回 DANGER_CHANGED（保持）
 
 ### DEPARTED Settlement
 
-- [ ] **AC-20**: GIVEN DEPARTED 阶段 + 结算执行，WHEN _finalize_extraction()，THEN 执行顺序：(1) F-11-04 损耗结算 + 批量转移，(2) 情报结算写入 IntelManager，(3) 船体后果汇总展示，(4) F-11-05 状态变体更新，(5) 持久化快照，(6) extraction_completed 信号发射
-- [ ] **AC-21**: GIVEN DEPARTED 结算写入失败（模拟 user:// storage 满），WHEN 触发 EC-11-03 重试逻辑，THEN 自动重试 1s→2s→4s→8s（最多 4 次）。全部失败后显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮
-- [ ] **AC-22**: GIVEN extraction_completed 发射后，WHEN Platform #2 收到信号，THEN 过渡回 Hub 场景。ExplorationManager session_phase→IDLE
+- [x] **AC-20**: GIVEN DEPARTED 阶段 + 结算执行，WHEN _finalize_extraction()，THEN 执行顺序：(1) F-11-04 损耗结算 + 批量转移，(2) 情报结算写入 IntelManager，(3) 船体后果汇总展示，(4) F-11-05 状态变体更新，(5) 持久化快照，(6) extraction_completed 信号发射
+- [x] **AC-21**: GIVEN DEPARTED 结算写入失败（模拟 user:// storage 满），WHEN 触发 EC-11-03 重试逻辑，THEN 自动重试 1s→2s→4s→8s（最多 4 次）。全部失败后显示"保存失败。你的探索收获暂时保留。请检查本地存储空间后点击重试。"+ 手动重试按钮
+- [x] **AC-22**: GIVEN extraction_completed 发射后，WHEN Platform #2 收到信号，THEN 过渡回 Hub 场景。ExplorationManager session_phase→IDLE
 
 ---
 
@@ -228,7 +228,7 @@ func _attempt_settlement_retry(settlement: Dictionary, damage_summary: Dictionar
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/exploration/ExtractionSettlementTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] 68/68 PASS — 2026-05-14
 
 ---
 
