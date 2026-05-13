@@ -33,12 +33,12 @@ theme_override_constants/separation = 14
 
 [node name="LoadingTitleLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
 layout_mode = 2
-text = "Loading Session Shell"
+text = "正在加载会话壳"
 horizontal_alignment = 1
 
 [node name="LoadingPhaseLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
 layout_mode = 2
-text = "Checking game data..."
+text = "正在检查游戏数据..."
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -50,7 +50,7 @@ show_percentage = false
 [node name="CancelLoadingButton" type="Button" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Cancel  Esc"
+text = "取消  Esc"
 
 [node name="EntryPanel" type="PanelContainer" parent="ShellUiRoot"]
 layout_mode = 1
@@ -72,27 +72,27 @@ theme_override_constants/separation = 10
 
 [node name="EntryTitleLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
 layout_mode = 2
-text = "Cloud Weaver Voyage"
+text = "云织航行"
 horizontal_alignment = 1
 
 [node name="ContinueLockReasonLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
 visible = false
 layout_mode = 2
-text = "Continue point locked: content domain mismatch"
+text = "续玩点已锁定：内容域不匹配"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="StartButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Start  Enter"
+text = "开始  Enter"
 focus_neighbor_bottom = NodePath("../ContinueButton")
 
 [node name="ContinueButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
 visible = false
 layout_mode = 2
 focus_mode = 2
-text = "Continue  C"
+text = "继续  C"
 focus_neighbor_top = NodePath("../StartButton")
 focus_neighbor_bottom = NodePath("../SettingsButton")
 
@@ -101,24 +101,24 @@ visible = false
 layout_mode = 2
 focus_mode = 2
 disabled = true
-text = "Continue Locked  C"
+text = "继续已锁定  C"
 
 [node name="NewSessionButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
 visible = false
 layout_mode = 2
 focus_mode = 2
-text = "New Session  N"
+text = "新会话  N"
 
 [node name="ReturnTitleButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
 visible = false
 layout_mode = 2
 focus_mode = 2
-text = "Return Title  Esc"
+text = "返回标题  Esc"
 
 [node name="SettingsButton" type="Button" parent="ShellUiRoot/EntryPanel/EntryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Settings  Tab"
+text = "设置  Tab"
 focus_neighbor_top = NodePath("../ContinueButton")
 
 [node name="AudioActivationPanel" type="PanelContainer" parent="ShellUiRoot"]
@@ -142,24 +142,24 @@ theme_override_constants/separation = 10
 
 [node name="AudioPromptLabel" type="Label" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
-text = "Activate audio to begin."
+text = "启用音频后开始。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="ConfirmAudioButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Activate Audio  Enter"
+text = "启用音频  Enter"
 
 [node name="ContinueMutedButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Continue Muted  M"
+text = "静音继续  M"
 
 [node name="AudioReturnTitleButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Return Title  Esc"
+text = "返回标题  Esc"
 
 [node name="EphemeralWarningPanel" type="PanelContainer" parent="ShellUiRoot"]
 visible = false
@@ -182,19 +182,19 @@ theme_override_constants/separation = 10
 
 [node name="EphemeralMessageLabel" type="Label" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2
-text = "Progress will not be saved because local storage is unavailable."
+text = "本地存储不可用，进度将不会保存。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="ContinueWithoutSavingButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Continue Without Saving  Enter"
+text = "不保存并继续  Enter"
 
 [node name="EphemeralReturnButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Return  Esc"
+text = "返回  Esc"
 
 [node name="ResumePanel" type="PanelContainer" parent="ShellUiRoot"]
 visible = false
@@ -217,19 +217,19 @@ theme_override_constants/separation = 10
 
 [node name="ResumeMessageLabel" type="Label" parent="ShellUiRoot/ResumePanel/ResumeStack"]
 layout_mode = 2
-text = "Session paused. Press any key to resume."
+text = "会话已暂停。按任意键继续。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="ReactivateButton" type="Button" parent="ShellUiRoot/ResumePanel/ResumeStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Reactivate  Any Key"
+text = "重新激活  任意键"
 
 [node name="ResumeReturnTitleButton" type="Button" parent="ShellUiRoot/ResumePanel/ResumeStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Return Title  Esc"
+text = "返回标题  Esc"
 
 [node name="RecoveryPanel" type="PanelContainer" parent="ShellUiRoot"]
 visible = false
@@ -252,29 +252,29 @@ theme_override_constants/separation = 10
 
 [node name="RecoveryMessageLabel" type="Label" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
 layout_mode = 2
-text = "The session could not be restored."
+text = "会话无法恢复。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="RetryButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Retry  R"
+text = "重试  R"
 
 [node name="RecoveryNewSessionButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "New Session  N"
+text = "新会话  N"
 
 [node name="RecoveryReturnTitleButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Return Title  Esc"
+text = "返回标题  Esc"
 
 [node name="RecoveryErrorDetailsButton" type="Button" parent="ShellUiRoot/RecoveryPanel/RecoveryStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Error Details  D"
+text = "错误详情  D"
 
 [node name="FatalPanel" type="PanelContainer" parent="ShellUiRoot"]
 visible = false
@@ -297,21 +297,21 @@ theme_override_constants/separation = 10
 
 [node name="FatalMessageLabel" type="Label" parent="ShellUiRoot/FatalPanel/FatalStack"]
 layout_mode = 2
-text = "A safe startup error blocked gameplay."
+text = "安全启动错误阻止了游戏继续。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="FatalRetryButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Retry  R"
+text = "重试  R"
 
 [node name="FatalReturnTitleButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Return Title  Esc"
+text = "返回标题  Esc"
 
 [node name="FatalErrorDetailsButton" type="Button" parent="ShellUiRoot/FatalPanel/FatalStack"]
 layout_mode = 2
 focus_mode = 2
-text = "Error Details  D"
+text = "错误详情  D"

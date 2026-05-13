@@ -124,7 +124,7 @@ func _handle_recovery_shortcut(keycode: Key) -> bool:
 func _on_start_pressed() -> void:
 	var prompt := find_child("AudioPromptLabel", true, false) as Label
 	if prompt != null:
-		prompt.text = "Activate audio to begin."
+		prompt.text = "启用音频后开始。"
 
 	_show_only(_audio_panel)
 	_grab_button("ConfirmAudioButton")
@@ -137,7 +137,7 @@ func _on_audio_confirmed() -> void:
 
 	var message := find_child("RecoveryMessageLabel", true, false) as Label
 	if message != null:
-		message.text = "Audio accepted. Hub scene failed to mount."
+		message.text = "音频已启用，但空艇中枢场景挂载失败。"
 
 	_show_only(_recovery_panel)
 	_grab_button("RetryButton")
@@ -150,7 +150,7 @@ func _on_settings_pressed() -> void:
 
 	var message := find_child("RecoveryMessageLabel", true, false) as Label
 	if message != null:
-		message.text = "Settings and diagnostics are not initialized yet."
+		message.text = "设置与诊断面板尚未初始化。"
 
 	_show_only(_recovery_panel)
 	_grab_button("RetryButton")
