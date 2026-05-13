@@ -118,6 +118,7 @@ public sealed class WorldRepair
     private readonly Dictionary<string, RepairNodeState> _repairNodes = new(StringComparer.Ordinal);
     private readonly List<string> _warnings = [];
     private readonly List<string> _errors = [];
+    private readonly List<string> _downstreamErrors = [];
     private readonly List<string> _completedNodeIds = [];
     private Func<string, IReadOnlyDictionary<string, int>, ResourceOperationResult>? _commitDeposit;
 
@@ -144,6 +145,9 @@ public sealed class WorldRepair
 
     /// <summary>Fatal or configuration diagnostics collected for tests and debug panels.</summary>
     public IReadOnlyList<string> Errors => _errors;
+
+    /// <summary>Consumer callback errors captured while continuing fan-out.</summary>
+    public IReadOnlyList<string> DownstreamErrors => _downstreamErrors;
 
     public WorldRepair(Registry? registry = null)
     {
@@ -249,7 +253,7 @@ public sealed class WorldRepair
         if (TryTransitionState(nodeId, RepairState.Known).Allowed)
         {
             _repairNodes[nodeId].VisualState = VisualStateKnown;
-            VisualStateChanged?.Invoke(nodeId, VisualStateKnown);
+            EmitVisualStateChanged(nodeId, VisualStateKnown);
         }
     }
 
@@ -552,14 +556,14 @@ public sealed class WorldRepair
 
         node.RepairProgress = ComputeRepairProgress(nodeId, node.Deposited);
         var deposited = GetDeposited(nodeId);
-        RepairProgressChanged?.Invoke(nodeId, node.RepairProgress, deposited);
+        EmitRepairProgressChanged(nodeId, node.RepairProgress, deposited);
 
         var completed = CheckRepairCompletion(nodeId, node.Deposited);
         if (completed)
         {
             TryTransitionState(nodeId, RepairState.Repaired);
-            RepairCompleted?.Invoke(nodeId);
-            VisualStateChanged?.Invoke(nodeId, VisualStateRepaired);
+            EmitRepairCompleted(nodeId);
+            EmitVisualStateChanged(nodeId, VisualStateRepaired);
         }
 
         return new RepairDepositResult(
@@ -594,8 +598,8 @@ public sealed class WorldRepair
             }
 
             TryTransitionState(nodeId, RepairState.Repaired);
-            RepairCompleted?.Invoke(nodeId);
-            VisualStateChanged?.Invoke(nodeId, VisualStateRepaired);
+            EmitRepairCompleted(nodeId);
+            EmitVisualStateChanged(nodeId, VisualStateRepaired);
         }
 
         return true;
@@ -658,6 +662,60 @@ public sealed class WorldRepair
         }
 
         return count == 0 ? 0.0d : Math.Clamp(total / count, 0.0d, 1.0d);
+    }
+
+    private void EmitRepairProgressChanged(
+        string nodeId,
+        double progress,
+        IReadOnlyDictionary<string, int> deposited)
+    {
+        if (RepairProgressChanged is null)
+        {
+            return;
+        }
+
+        foreach (Action<string, double, IReadOnlyDictionary<string, int>> handler in RepairProgressChanged.GetInvocationList())
+        {
+            TryInvoke(() => handler(nodeId, progress, deposited), "repair_progress_changed");
+        }
+    }
+
+    private void EmitRepairCompleted(string nodeId)
+    {
+        if (RepairCompleted is null)
+        {
+            return;
+        }
+
+        foreach (Action<string> handler in RepairCompleted.GetInvocationList())
+        {
+            TryInvoke(() => handler(nodeId), "repair_completed");
+        }
+    }
+
+    private void EmitVisualStateChanged(string nodeId, string visualState)
+    {
+        if (VisualStateChanged is null)
+        {
+            return;
+        }
+
+        foreach (Action<string, string> handler in VisualStateChanged.GetInvocationList())
+        {
+            TryInvoke(() => handler(nodeId, visualState), "visual_state_changed");
+        }
+    }
+
+    private void TryInvoke(Action action, string signalName)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            _downstreamErrors.Add($"{signalName}:{ex.GetType().Name}:{ex.Message}");
+        }
     }
 
     private IEnumerable<RepairNodeDefinition> LoadDefinitionsFromRegistry()

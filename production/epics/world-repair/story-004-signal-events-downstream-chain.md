@@ -1,7 +1,7 @@
 # Story 004: Signal Events & Downstream Trigger Chain
 
 > **Epic**: World Repair & Unlock
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -201,7 +201,7 @@ func _on_world_repair_completed(repair_node_id: StringName) -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/world-repair/SignalDownstreamTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/SignalDownstreamTest.csproj --no-restore` PASS 15/15; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 
