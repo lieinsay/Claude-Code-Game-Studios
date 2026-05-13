@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: design/gdd/player-knowledge-intel.md
 > **Architecture Module**: Autoload #6 — IntelManager
-> **Status**: In Progress
+> **Status**: Complete
 > **Stories**: 8 (001-008) — Ready for implementation
 
 ## Overview
@@ -46,8 +46,8 @@ This epic is complete when:
 | 004 | [IntelConsumeResult Algorithm](story-004-intel-consume-algorithm.md) | Logic | TR-intel-002 | ADR-0007 | Done |
 | 005 | [Upstream Event Receivers](story-005-upstream-event-receivers.md) | Logic | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0007 | Done |
 | 006 | [Downstream Query Interface](story-006-downstream-query-interface.md) | Logic | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0007 | Done |
-| 007 | [Signal Contract & Non-Degradation Guards](story-007-signal-contract-non-degradation.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0002, ADR-0007 | Ready |
-| 008 | [Persistence & MVP Bootstrap](story-008-persistence-mvp-bootstrap.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0001, ADR-0003, ADR-0007 | Ready |
+| 007 | [Signal Contract & Non-Degradation Guards](story-007-signal-contract-non-degradation.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0002, ADR-0007 | Done |
+| 008 | [Persistence & MVP Bootstrap](story-008-persistence-mvp-bootstrap.md) | Integration | TR-intel-001, TR-intel-002, TR-intel-003 | ADR-0001, ADR-0003, ADR-0007 | Done |
 
 ## Next Step
 

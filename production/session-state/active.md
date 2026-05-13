@@ -2,9 +2,18 @@
 
 <!-- STATUS -->
 Epic: Core Layer
-Feature: Intel / Knowledge System (#6)
-Task: Story 001-006 全部完成；Story 007 Signal Contract + Story 008 Persistence 是最后两个 Integration Story
+Feature: Intel / Knowledge System (#6) — COMPLETE
+Task: Epic #6 全部 8 个 Story 完成；#9 Chart Route Planning 现已解锁（等 #6 完成）；#8 Modules/Hull 等 #5 完成后解锁
 <!-- /STATUS -->
+
+## Session Extract — Epic #6 全部完成 — 2026-05-13
+
+- Verdict: COMPLETE
+- Epic: `production/epics/intel-knowledge/EPIC.md` — Intel / Knowledge System (#6) — 全部 8/8 Story 完成
+- Story 007 Signal Contract (39/39 PASS): 验证 9 个信号的 emit-after-mutation 契约；新增 IntelConsumeFailed + RumorConfidenceChanged 信号；AdjustRumorConfidence() 方法
+- Story 008 Persistence Integration (43/43 PASS): SerializeIntel/DeserializeIntel 7 字段往返；InitNewGameState MVP 起始状态；迁移校验（未知 ID 保留 + MigrationWarnings）；ClearAllState
+- Build: 0 errors, 1 既存 warning；全套 9 组 357 PASS 0 FAIL
+- Epic #6 解锁：#9 Chart Route Planning（依赖 #6 情报合同），可立即开始
 
 ## Session Extract — Epic #6 Story 005+006 完成 — 2026-05-13
 

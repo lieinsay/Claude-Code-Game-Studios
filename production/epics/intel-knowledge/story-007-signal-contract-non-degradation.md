@@ -1,7 +1,7 @@
 # Story 007: Signal Contract & Non-Degradation Guards
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -222,8 +222,8 @@ IntelManager 自身保证: 所有 signal emit 为同步 `.emit()`——不通过
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/intel/SignalContractTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/intel/signal/IntelSignalContractTest.csproj` — must exist and pass
+**Status**: [x] 39/39 PASS — 2026-05-13
 
 ---
 

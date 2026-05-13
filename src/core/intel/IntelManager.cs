@@ -685,6 +685,17 @@ public sealed class IntelManager
 	/// </summary>
 	public event Action<string>? IntelConsumed;
 
+	// ── 事件（Story 007 — Signal Contract）────────────────────────
+	/// <summary>
+	/// 情报消费因错误失败时发出，参数为 (intelId, errorCode)。
+	/// </summary>
+	public event Action<string, string>? IntelConsumeFailed;
+
+	/// <summary>
+	/// 传闻来源置信度调整时发出，参数为 (sourceTag, locationId, oldConfidence, newConfidence)。
+	/// </summary>
+	public event Action<string, string, int, int>? RumorConfidenceChanged;
+
 	// ── 初始化 ────────────────────────────────────────────────────
 	/// <summary>管理器是否已完成初始化。</summary>
 	public bool IsInitialized { get; private set; }
@@ -1142,11 +1153,17 @@ public sealed class IntelManager
 	{
 		// Rule 1: 已消耗检查
 		if (_consumedIntelIds.Contains(intelId))
+		{
+			IntelConsumeFailed?.Invoke(intelId, "ERR_INTEL_ALREADY_CONSUMED");
 			return IntelConsumeResult.Fail(intelId, "ERR_INTEL_ALREADY_CONSUMED");
+		}
 
 		// 验证 intel 存在
 		if (!_intelDefCache.TryGetValue(intelId, out var def))
+		{
+			IntelConsumeFailed?.Invoke(intelId, "ERR_INTEL_NOT_FOUND");
 			return IntelConsumeResult.Fail(intelId, "ERR_INTEL_NOT_FOUND");
+		}
 
 		var locationAdvancements = new List<LocationAdvancement>();
 		var patternObservations = new List<PatternObservationRecord>();
@@ -1199,6 +1216,217 @@ public sealed class IntelManager
 	/// <returns>是否已消耗。</returns>
 	public bool IsIntelConsumed(string intelId) =>
 		_consumedIntelIds.Contains(intelId);
+
+	// ── Story 007 — Signal Contract ───────────────────────────────
+
+	/// <summary>
+	/// 调整指定来源的传闻置信度，并发出 RumorConfidenceChanged 信号。
+	/// verification_matches=true 时 +25（上限 100），false 时 -30（下限 0）。
+	/// </summary>
+	/// <param name="locationId">地点 ID。</param>
+	/// <param name="sourceTag">来源标签。</param>
+	/// <param name="verificationMatches">验证结果是否与该来源一致。</param>
+	public void AdjustRumorConfidence(string locationId, string sourceTag, bool verificationMatches)
+	{
+		if (!_locations.TryGetValue(locationId, out var entry))
+			return;
+		entry.AdjustSourceConfidence(sourceTag, verificationMatches,
+			(oldConf, newConf) => RumorConfidenceChanged?.Invoke(sourceTag, locationId, oldConf, newConf));
+	}
+
+	// ── Story 008 — Persistence & MVP Bootstrap ────────────────────
+
+	/// <summary>
+	/// 序列化当前 intel 状态为快照 payload 字典（供 Persistence 域序列化器使用）。
+	/// 快照仅含基础类型：int, string, List, Dictionary——无 Object 引用。
+	/// </summary>
+	/// <returns>intel 领域快照 payload 字典。</returns>
+	public Dictionary<string, object?> SerializeIntel()
+	{
+		var knowledgeState = new Dictionary<string, object?>(StringComparer.Ordinal);
+		foreach (var (id, entry) in _locations)
+			knowledgeState[id] = (object?)(int)entry.State;
+
+		var rumorSources = new Dictionary<string, object?>(StringComparer.Ordinal);
+		foreach (var (id, entry) in _locations)
+		{
+			var srcs = entry.GetRumorSourcesCopy();
+			if (srcs.Count == 0) continue;
+			var srcList = srcs.Select(s => (object?)new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				["source_tag"] = (object?)s.SourceTag,
+				["hazard_tags"] = (object?)s.HazardTags.ToList<object?>(),
+				["confidence"] = (object?)s.Confidence,
+			}).ToList();
+			rumorSources[id] = (object?)srcList;
+		}
+
+		var patternState = new Dictionary<string, object?>(StringComparer.Ordinal);
+		foreach (var (id, entry) in _patterns)
+		{
+			patternState[id] = (object?)new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				["observation_score"] = (object?)entry.ObservationScore,
+				["triggered_events"] = (object?)entry.TriggeredEvents.Cast<object?>().ToList(),
+				["pattern_usage_success"] = (object?)entry.PatternUsageSuccess,
+			};
+		}
+
+		var abilityState = new Dictionary<string, object?>(StringComparer.Ordinal);
+		foreach (var (id, state) in _abilityStates)
+			abilityState[id] = (object?)(int)state;
+
+		var personalNotes = new Dictionary<string, object?>(StringComparer.Ordinal);
+		foreach (var (id, note) in _personalNotes)
+			personalNotes[id] = (object?)note;
+
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["domain_id"] = "intel",
+			["knowledge_state"] = (object?)knowledgeState,
+			["pattern_state"] = (object?)patternState,
+			["ability_state"] = (object?)abilityState,
+			["consumed_intel_ids"] = (object?)_consumedIntelIds.Cast<object?>().ToList(),
+			["rumor_sources"] = (object?)rumorSources,
+			["fog_traversal_count"] = (object?)_fogTraversalCount,
+			["active_crew"] = (object?)_activeCrewPartners.Cast<object?>().ToList(),
+			["personal_notes"] = (object?)personalNotes,
+		};
+	}
+
+	/// <summary>
+	/// 从快照 payload 恢复 intel 状态（供 Persistence 域反序列化器使用）。
+	/// 未知 intel_id 保留并记录到 MigrationWarnings，不静默删除。
+	/// </summary>
+	/// <param name="payload">SerializeIntel() 生成的 payload 字典。</param>
+	/// <param name="knownIntelIds">当前 Registry 中有效的 intel ID（可为 null 跳过迁移校验）。</param>
+	public void DeserializeIntel(IReadOnlyDictionary<string, object?> payload,
+		IReadOnlySet<string>? knownIntelIds = null)
+	{
+		ClearAllState();
+
+		// knowledge_state
+		if (payload.TryGetValue("knowledge_state", out var ksRaw)
+			&& ksRaw is Dictionary<string, object?> ksDict)
+		{
+			foreach (var (id, val) in ksDict)
+			{
+				var state = (LocationKnowledgeState)Convert.ToInt32(val);
+				var entry = GetOrInitLocation(id);
+				entry.State = state;
+			}
+		}
+
+		// rumor_sources
+		if (payload.TryGetValue("rumor_sources", out var rsRaw)
+			&& rsRaw is Dictionary<string, object?> rsDict)
+		{
+			foreach (var (locationId, srcListRaw) in rsDict)
+			{
+				if (srcListRaw is not List<object?> srcList) continue;
+				var entry = GetOrInitLocation(locationId);
+				foreach (var srcRaw in srcList)
+				{
+					if (srcRaw is not Dictionary<string, object?> srcDict) continue;
+					var sourceTag = srcDict.TryGetValue("source_tag", out var st) ? st?.ToString() ?? "" : "";
+					var confidence = srcDict.TryGetValue("confidence", out var cf) ? Convert.ToInt32(cf) : 0;
+					var hazardTags = new List<string>();
+					if (srcDict.TryGetValue("hazard_tags", out var htRaw) && htRaw is List<object?> htList)
+						hazardTags = htList.Select(h => h?.ToString() ?? "").ToList();
+					entry.AddRumorSource(new RumorSource(sourceTag, hazardTags, confidence));
+				}
+			}
+		}
+
+		// pattern_state
+		if (payload.TryGetValue("pattern_state", out var psRaw)
+			&& psRaw is Dictionary<string, object?> psDict)
+		{
+			foreach (var (patternId, entryRaw) in psDict)
+			{
+				if (entryRaw is not Dictionary<string, object?> entryDict) continue;
+				var pe = GetOrInitPattern(patternId);
+				pe.ObservationScore = entryDict.TryGetValue("observation_score", out var sc)
+					? Convert.ToInt32(sc) : 0;
+				pe.PatternUsageSuccess = entryDict.TryGetValue("pattern_usage_success", out var us)
+					&& us is bool b && b;
+				if (entryDict.TryGetValue("triggered_events", out var teRaw)
+					&& teRaw is List<object?> teList)
+					foreach (var ev in teList)
+						if (ev?.ToString() is string evStr)
+							pe.TriggeredEvents.Add(evStr);
+			}
+		}
+
+		// ability_state
+		if (payload.TryGetValue("ability_state", out var asRaw)
+			&& asRaw is Dictionary<string, object?> asDict)
+			foreach (var (abilityId, val) in asDict)
+				_abilityStates[abilityId] = (AbilityState)Convert.ToInt32(val);
+
+		// consumed_intel_ids（含迁移校验）
+		if (payload.TryGetValue("consumed_intel_ids", out var ciRaw)
+			&& ciRaw is List<object?> ciList)
+		{
+			foreach (var item in ciList)
+			{
+				if (item?.ToString() is not string intelId) continue;
+				_consumedIntelIds.Add(intelId);
+				if (knownIntelIds != null && !knownIntelIds.Contains(intelId))
+					MigrationWarnings.Add($"consumed intel_id '{intelId}' not in current Registry — retained");
+			}
+		}
+
+		// fog_traversal_count
+		if (payload.TryGetValue("fog_traversal_count", out var ftcRaw))
+			_fogTraversalCount = Convert.ToInt32(ftcRaw);
+
+		// active_crew
+		if (payload.TryGetValue("active_crew", out var acRaw)
+			&& acRaw is List<object?> acList)
+			foreach (var item in acList)
+				if (item?.ToString() is string partnerId)
+					_activeCrewPartners.Add(partnerId);
+
+		// personal_notes
+		if (payload.TryGetValue("personal_notes", out var pnRaw)
+			&& pnRaw is Dictionary<string, object?> pnDict)
+			foreach (var (id, note) in pnDict)
+				if (note?.ToString() is string noteStr)
+					_personalNotes[id] = noteStr;
+	}
+
+	/// <summary>
+	/// 初始化 MVP 新游戏起始状态（1 条已识别航线 + 1 条传闻航线 + 1 个已识别地点）。
+	/// </summary>
+	public void InitNewGameState()
+	{
+		ClearAllState();
+		SeedLocationKnowledge("route.sky-reef-arc-01", LocationKnowledgeState.Identified, "空港基础航图");
+		SeedLocationKnowledge("route.high-risk-mvp", LocationKnowledgeState.Rumored, "port-rumor");
+		SeedLocationKnowledge("location.glass-harbor", LocationKnowledgeState.Identified, "home-port-familiarity");
+	}
+
+	/// <summary>
+	/// 清空所有运行时 intel 状态。反序列化或新游戏初始化前调用。
+	/// </summary>
+	public void ClearAllState()
+	{
+		_locations.Clear();
+		_patterns.Clear();
+		_abilityStates.Clear();
+		_consumedIntelIds.Clear();
+		_activeCrewPartners.Clear();
+		_completedRepairs.Clear();
+		_fogTraversalCount = 0;
+		_personalNotes.Clear();
+		MigrationWarnings.Clear();
+	}
+
+	/// <summary>
+	/// 迁移警告列表：DeserializeIntel() 后填充，含未知 ID 的警告消息。
+	/// </summary>
+	public List<string> MigrationWarnings { get; } = new();
 
 	// ── Story 006 — Downstream Query Interface ─────────────────────
 
@@ -1579,5 +1807,26 @@ public sealed class IntelManager
 
 		public IReadOnlyList<RumorSource> GetRumorSourcesCopy() =>
 			_rumorSources.AsReadOnly();
+
+		/// <summary>
+		/// 调整指定来源的置信度并通过回调发出信号。
+		/// 找不到对应 sourceTag 时静默忽略。
+		/// </summary>
+		public void AdjustSourceConfidence(string sourceTag, bool verificationMatches,
+			Action<int, int> onChanged)
+		{
+			for (int i = 0; i < _rumorSources.Count; i++)
+			{
+				if (!string.Equals(_rumorSources[i].SourceTag, sourceTag, StringComparison.Ordinal))
+					continue;
+				var old = _rumorSources[i];
+				int newConf = verificationMatches
+					? Math.Min(old.Confidence + 25, 100)
+					: Math.Max(old.Confidence - 30, 0);
+				_rumorSources[i] = new RumorSource(old.SourceTag, old.HazardTags, newConf);
+				onChanged(old.Confidence, newConf);
+				return;
+			}
+		}
 	}
 }

@@ -1,7 +1,7 @@
 # Story 008: Persistence & MVP Bootstrap
 
 > **Epic**: Intel / Knowledge System
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -253,8 +253,8 @@ static func _array_to_stringname_array(arr: Array) -> Array:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/intel/PersistenceIntegrationTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Required evidence**: `tests/integration/intel/persistence/PersistenceIntegrationTest.csproj` — must exist and pass
+**Status**: [x] 43/43 PASS — 2026-05-13
 
 ---
 
