@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8 完成；#9 已解锁；BUG-005 阻塞完整运行时推进**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8 完成；#9 已解锁；BUG-005 已修复**
 
 ---
 
@@ -496,7 +496,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ### 本次生产状态检查 (2026-05-13)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #5 Resources/Goods、#6 Intel、#8 Modules/Hull 均已完成；#9 Chart Route Planning 已解锁；BUG-005 仍阻塞完整运行时推进
+- 活跃任务: Epic #5 Resources/Goods、#6 Intel、#8 Modules/Hull 均已完成；#9 Chart Route Planning 已解锁；BUG-005 scene reachability 已修复
 - 构建验证: `dotnet build CloudWeaverVoyage.sln` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误；首次 `--no-restore` 仅因新增 Resources 测试项目缺少 NuGet assets 失败，restore 后通过）
 - 测试验证: Epic #8 Story 001-008 runner 36/36 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（0 警告，0 错误）；`tests/**/*.csproj` 全量 C# runner 63/63 PASS
 - 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8 Complete、#9 已解锁、63 个 C# runner 的当前基线
@@ -508,10 +508,10 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 |--------|------|------|------|
 | **P0** | #9 Chart Route Planning Story 001 | #6 情报合同完成 ✅ | 可开工 |
 | **P0** | #8 Modules/Hull follow-up QA/signoff | #8 C# 合同完成 ✅ | 可复核 |
-| **P1** | BUG-005 SessionShell/Hub scene flow | QA 阻塞 TC-RGC-003~010 | 修复后复测 |
+| **P1** | TC-RGC-003/004 visible Godot retest | BUG-005 自动化修复 ✅ | 可复测 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #5/#6/#7/#8 已完成，下一段优先推进 #9 航图规划；BUG-005 需要在完整运行时验收前优先修复。
+> 关键建议: #5/#6/#7/#8 已完成，下一段优先推进 #9 航图规划；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
 
 ### 并行机会提醒
 
@@ -519,7 +519,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 现在就可以同时做:
   ┌─ #9 航图规划 Story 001 Chart State Machine + Content Gate (依赖 #6 ✅)
   ├─ #8 模块船体 Epic 完成，等待 QA/signoff 复核
-  └─ BUG-005 SessionShell/Hub scene flow 修复与 TC-RGC-003~010 复测
+  └─ TC-RGC-003/004 visible Godot 复测 + TC-RGC-005~009 下游交互/UI 接线
 ```
 
 ---

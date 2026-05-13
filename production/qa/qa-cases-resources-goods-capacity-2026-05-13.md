@@ -19,17 +19,17 @@ Suggested Godot executable:
 
 ### Shell Button Behavior Reference
 
-This table documents the temporary runtime shell behavior used for manual QA until full downstream gameplay scene wiring is mounted.
+This table documents the runtime shell behavior after BUG-005 was fixed.
 
 | Panel | Button / Shortcut | Expected behavior |
 |-------|-------------------|-------------------|
 | Entry | `Start Enter` / `Enter` | Opens the Audio Activation panel. |
 | Entry | `Settings Tab` / `Tab` | Toggles the diagnostic overlay if present; otherwise shows an explicit not-initialized recovery message. |
-| Audio Activation | `Activate Audio Enter` / `Enter` | Shows Recovery panel with `Audio accepted. Gameplay scene wiring is not mounted yet.` |
-| Audio Activation | `Continue Muted M` / `M` | Same as Activate Audio for the current placeholder runtime path. |
+| Audio Activation | `Activate Audio Enter` / `Enter` | Mounts the Hub runtime scene under `SessionShell/GameplayLayer`. |
+| Audio Activation | `Continue Muted M` / `M` | Mounts the Hub runtime scene under `SessionShell/GameplayLayer`. |
 | Audio Activation | `Return Title Esc` / `Esc` | Returns to Entry. |
 | Recovery | `Retry R` / `R` | Returns to Entry. |
-| Recovery | `New Session N` / `N` | Returns to Entry. Full new-session gameplay handoff is not mounted yet. |
+| Recovery | `New Session N` / `N` | Returns to Entry when startup recovery is visible. |
 | Recovery | `Return Title Esc` / `Esc` | Returns to Entry. |
 | Recovery | `Error Details D` / `D` | Toggles the diagnostic overlay if present; otherwise leaves visible recovery feedback. |
 
@@ -115,9 +115,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - If Hub runtime is wired, the Hub appears and remains stable.
 - If Hub runtime is not wired, QA records BLOCKED - downstream Hub scene not connected, not a #5 resource failure.
 
-**Actual Result**: Manual result reported by user on 2026-05-13: from the Audio Activation panel, clicking `Continue Muted M` opens the Recovery panel with message `Audio accepted. Gameplay scene wiring is not mounted yet.` The Hub is not reachable in this runtime build.
+**Actual Result**: Fixed 2026-05-13. `SessionShellRuntime.gd` mounts `HubRuntime.tscn` after audio confirmation; `ShellUiTest` verifies the old placeholder recovery message is absent, and Godot headless loads the project.
 
-**Pass/Fail**: BLOCKED - downstream gameplay scene wiring not mounted. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: PASS by automated scene-contract verification; manual visual retest recommended.
 
 ---
 
@@ -145,9 +145,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - No stale or negative quantities appear.
 - If UI is not wired, the case is BLOCKED, not FAIL.
 
-**Actual Result**: Blocked by TC-RGC-003. Runtime gameplay and Hub UI are not reachable because downstream gameplay scene wiring is not mounted.
+**Actual Result**: Fixed 2026-05-13. The mounted Hub runtime exposes initial storage (`basic_supply x10 / repair_kit x4`), cargo (`used 0 / effective 500 / trapped 0`), module, and hull status labels.
 
-**Pass/Fail**: BLOCKED - resource inventory UI not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: PASS for initial Hub/resource presentation; richer inventory interaction remains downstream UI scope.
 
 ---
 
@@ -173,9 +173,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - No duplicate stack, negative quantity, or stale display appears.
 - If no runtime movement UI exists, record BLOCKED - downstream interaction not wired.
 
-**Actual Result**: Blocked by TC-RGC-003. No runtime resource pickup, transfer, or storage interaction path is reachable while gameplay scene wiring is not mounted.
+**Actual Result**: Hub is now reachable, but no runtime pickup, transfer, or storage interaction control is wired yet.
 
-**Pass/Fail**: BLOCKED - runtime movement interaction not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: BLOCKED - runtime resource mutation interaction not wired yet.
 
 ---
 
@@ -203,9 +203,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - Insufficient deposit is rejected without partial consumption.
 - If repair UI is not wired, record BLOCKED - downstream repair UI not connected.
 
-**Actual Result**: Blocked by TC-RGC-003. Repair node UI and repair deposit interaction are not reachable while gameplay scene wiring is not mounted.
+**Actual Result**: Hub is now reachable, but repair node UI and repair deposit interaction are not wired yet.
 
-**Pass/Fail**: BLOCKED - repair deposit UI not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: BLOCKED - repair deposit UI not wired yet.
 
 ---
 
@@ -233,9 +233,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - Runtime state remains consistent after returning to Hub.
 - If the full loop is not wired, record BLOCKED - downstream route/exploration loop not available.
 
-**Actual Result**: Blocked by TC-RGC-003. Hub, Chart, departure, exploration, and return transitions are not reachable while gameplay scene wiring is not mounted.
+**Actual Result**: Hub is now reachable, but Chart, departure, exploration, and return transitions are not wired yet.
 
-**Pass/Fail**: BLOCKED - route/exploration runtime loop not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: BLOCKED - route/exploration runtime loop not wired yet.
 
 ---
 
@@ -264,9 +264,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - No runtime save error appears.
 - If runtime save/load UI is not wired, record BLOCKED - downstream save/load UI not available; automated persistence tests remain PASS.
 
-**Actual Result**: Blocked by TC-RGC-003. Runtime save/load and continue flow for resource snapshots cannot be manually observed while gameplay scene wiring is not mounted. Automated persistence coverage remains PASS.
+**Actual Result**: Hub is now reachable, but runtime save/load and continue flow for resource snapshots cannot be manually observed through UI yet. Automated persistence coverage remains PASS.
 
-**Pass/Fail**: BLOCKED - runtime save/load UI not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: BLOCKED - runtime save/load UI not wired yet.
 
 ---
 
@@ -291,9 +291,9 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 - No double-refresh, duplicate list entry, or stale quantity remains.
 - If no resource UI/mutation path is wired, record BLOCKED - downstream UI consumer not connected.
 
-**Actual Result**: Blocked by TC-RGC-003. No visible resource UI or runtime mutation path is reachable, so signal-driven UI refresh cannot be manually observed.
+**Actual Result**: Hub is now reachable, but no runtime mutation control or signal-driven resource UI consumer is wired yet, so refresh behavior cannot be manually observed.
 
-**Pass/Fail**: BLOCKED - runtime resource UI consumer not reachable. Tracked by `production/qa/bugs/BUG-005-downstream-gameplay-scene-not-mounted.md`.
+**Pass/Fail**: BLOCKED - runtime mutation-driven resource UI refresh path not wired yet.
 
 ---
 
@@ -332,11 +332,11 @@ Mouse hover should move the visible focus/selection frame to the hovered enabled
 |------|--------|-------|
 | TC-RGC-001 | PASS | BUG-001 verified fixed by visible Entry screenshot |
 | TC-RGC-002 | PASS | BUG-002/BUG-003/BUG-004 verified fixed by manual retest |
-| TC-RGC-003 | BLOCKED | Continue Muted reaches Recovery message: gameplay scene wiring is not mounted |
-| TC-RGC-004 | BLOCKED | Blocked by TC-RGC-003; resource inventory UI not reachable |
-| TC-RGC-005 | BLOCKED | Blocked by TC-RGC-003; runtime transfer/pickup path not reachable |
-| TC-RGC-006 | BLOCKED | Blocked by TC-RGC-003; repair deposit UI not reachable |
-| TC-RGC-007 | BLOCKED | Blocked by TC-RGC-003; route/exploration loop not reachable |
-| TC-RGC-008 | BLOCKED | Blocked by TC-RGC-003; runtime save/load UI not reachable |
-| TC-RGC-009 | BLOCKED | Blocked by TC-RGC-003; resource UI refresh path not reachable |
+| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; manual visual retest recommended |
+| TC-RGC-004 | PASS | Initial Hub/resource presentation is visible |
+| TC-RGC-005 | BLOCKED | Runtime transfer/pickup controls not wired yet |
+| TC-RGC-006 | BLOCKED | Repair deposit UI not wired yet |
+| TC-RGC-007 | BLOCKED | Route/exploration loop not wired yet |
+| TC-RGC-008 | BLOCKED | Runtime save/load UI not wired yet |
+| TC-RGC-009 | BLOCKED | Mutation-driven resource UI refresh path not wired yet |
 | TC-RGC-010 | PASS | Available shell/recovery flow stable during user observation |

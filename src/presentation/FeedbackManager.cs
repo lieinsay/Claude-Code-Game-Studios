@@ -44,6 +44,12 @@ public sealed class FeedbackManager
 		}
 	}
 
+	/// <summary>Notifies feedback consumers that a UI event has been consumed.</summary>
+	public void ConsumeUiEvent(string eventId)
+	{
+		UIEventConsumed?.Invoke(eventId);
+	}
+
 	/// <summary>Semantic event stub: route selected.</summary>
 	public void OnRouteSelected(string routeId, string destinationId)
 	{

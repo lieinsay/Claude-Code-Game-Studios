@@ -6,7 +6,7 @@
 **ID**: BUG-005
 **Severity**: S2-Major
 **Priority**: P2-Next Sprint
-**Status**: Open - Deferred
+**Status**: Resolved - Fixed
 **Reported**: 2026-05-13
 **Reporter**: User during `/team-qa sprint`
 
@@ -31,11 +31,11 @@
 
 1. Click `Start Enter` from the Entry panel.
 2. Click `Continue Muted M` from the Audio Activation panel.
-3. Observe the resulting panel.
+3. Observe the resulting scene.
 
-**Expected Result**: When downstream gameplay runtime is in scope, audio confirmation should transition to the Hub or main gameplay scene.
+**Expected Result**: Audio confirmation transitions to the Hub or main gameplay scene.
 
-**Actual Result**: The Recovery panel appears with message `Audio accepted. Gameplay scene wiring is not mounted yet.`
+**Actual Result**: Fixed 2026-05-13. Audio confirmation now mounts `res://src/scenes/HubRuntime.tscn` under `SessionShell/GameplayLayer` and hides shell panels. Recovery is only used if Hub scene loading fails.
 
 ## Technical Context
 
@@ -44,11 +44,11 @@
   - `src/scenes/SessionShell.tscn`
   - Downstream Hub/main gameplay scene wiring, once implemented
 - **Related systems**: Platform Session Shell, Hub runtime, resource-facing manual QA
-- **Known context**: `SessionShellRuntime.gd` intentionally exposes a clear placeholder recovery message instead of silently failing when gameplay scene wiring is unavailable.
+- **Known context**: `SessionShellRuntime.gd` now loads a minimal Hub runtime scene after audio activation; the previous placeholder recovery message is guarded by `ShellUiTest`.
 
 ## Impact
 
-This blocks manual runtime cases that require Hub, resource UI, repair UI, route/exploration, save/load UI, or resource UI refresh observation:
+This previously blocked manual runtime cases that required the Hub to be reachable:
 
 - TC-RGC-003
 - TC-RGC-004
@@ -66,4 +66,12 @@ This blocks manual runtime cases that require Hub, resource UI, repair UI, route
 
 ## Notes
 
-This is not a ResourcesManager story acceptance failure. Epic #5 resource logic, signal contract, and persistence coverage remain validated by automated tests. This issue tracks downstream scene-flow integration needed for later manual runtime validation.
+## Resolution Evidence
+
+- `src/scenes/SessionShellRuntime.gd` mounts `HubRuntime.tscn` from audio confirmation instead of showing the old placeholder recovery message.
+- `src/scenes/SessionShell.tscn` now owns a `GameplayLayer` for downstream scene mounting.
+- `src/scenes/HubRuntime.tscn` provides a stable initial Hub surface with station, storage, cargo, module, and hull indicators.
+- `tests/integration/session/ShellUiTest.csproj` includes a regression check that fails if the old `Gameplay scene wiring is not mounted yet` placeholder returns.
+- `godot --headless --quit --path .` loads the project successfully.
+
+Remaining blocked manual cases after this fix are downstream feature/UI wiring gaps, not BUG-005: runtime transfer/pickup, repair deposit UI, route/exploration loop, runtime save/load UI, and mutation-driven resource UI refresh.

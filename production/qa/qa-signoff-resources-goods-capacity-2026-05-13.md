@@ -15,9 +15,9 @@
 | Story 004 Weight & Mass Tracking | Logic | PASS | Not required | PASS |
 | Story 005 Core Atomic Operations | Logic | PASS | Not required | PASS |
 | Story 006 State Machine & Pool Transitions | Logic | PASS | Not required | PASS |
-| Story 007 Specialized Operations | Integration | PASS | Runtime consumer blocked by BUG-005 | PASS WITH RUNTIME CONDITION |
-| Story 008 Signal Contract & Reentry Guard | Integration | PASS | Runtime consumer blocked by BUG-005 | PASS WITH RUNTIME CONDITION |
-| Story 009 Persistence & External Integration | Integration | PASS | Runtime consumer blocked by BUG-005 | PASS WITH RUNTIME CONDITION |
+| Story 007 Specialized Operations | Integration | PASS | Hub reachable; runtime mutation UI still downstream | PASS WITH RUNTIME CONDITION |
+| Story 008 Signal Contract & Reentry Guard | Integration | PASS | Hub reachable; runtime signal UI still downstream | PASS WITH RUNTIME CONDITION |
+| Story 009 Persistence & External Integration | Integration | PASS | Hub reachable; runtime save/load UI still downstream | PASS WITH RUNTIME CONDITION |
 
 ### Automated Evidence
 
@@ -35,13 +35,13 @@
 |------|--------|-------|
 | TC-RGC-001 | PASS | BUG-001 verified fixed; visible Entry screen reached |
 | TC-RGC-002 | PASS | BUG-002, BUG-003, and BUG-004 verified fixed by user retest |
-| TC-RGC-003 | BLOCKED | Audio confirmation reaches Recovery message: gameplay scene wiring is not mounted |
-| TC-RGC-004 | BLOCKED | Blocked by BUG-005; resource inventory UI not reachable |
-| TC-RGC-005 | BLOCKED | Blocked by BUG-005; runtime transfer/pickup path not reachable |
-| TC-RGC-006 | BLOCKED | Blocked by BUG-005; repair deposit UI not reachable |
-| TC-RGC-007 | BLOCKED | Blocked by BUG-005; route/exploration loop not reachable |
-| TC-RGC-008 | BLOCKED | Blocked by BUG-005; runtime save/load UI not reachable |
-| TC-RGC-009 | BLOCKED | Blocked by BUG-005; resource UI refresh path not reachable |
+| TC-RGC-003 | PASS | Hub runtime mounts after audio confirmation; manual visual retest recommended |
+| TC-RGC-004 | PASS | Initial Hub/resource presentation visible in `HubRuntime.tscn` |
+| TC-RGC-005 | BLOCKED | Runtime transfer/pickup controls not wired yet |
+| TC-RGC-006 | BLOCKED | Repair deposit UI not wired yet |
+| TC-RGC-007 | BLOCKED | Route/exploration loop not wired yet |
+| TC-RGC-008 | BLOCKED | Runtime save/load UI not wired yet |
+| TC-RGC-009 | BLOCKED | Mutation-driven resource UI refresh path not wired yet |
 | TC-RGC-010 | PASS | Available shell/recovery flow stable during user observation |
 
 ### Bugs Found
@@ -52,20 +52,20 @@
 | BUG-002 | Shell Entry button click handling | S2-Major | Verified Fixed |
 | BUG-003 | Shell hover/focus feedback | S3-Minor | Verified Fixed |
 | BUG-004 | Shell labeled shortcut handling | S3-Minor | Verified Fixed |
-| BUG-005 | Downstream gameplay scene wiring | S2-Major | Open - Deferred |
+| BUG-005 | Downstream gameplay scene wiring | S2-Major | Resolved - Fixed |
 
-### Verdict: NOT APPROVED FOR FULL RUNTIME ADVANCEMENT
+### Verdict: APPROVED FOR HUB REACHABILITY; NOT YET FULL RESOURCE LOOP
 
 Epic #5 resource logic, capacity rules, atomic operations, signal contract, and persistence integration are approved for downstream code consumption. All nine #5 story acceptance suites pass.
 
-The full runtime build is not approved to advance as a playable Hub/resource loop while BUG-005 remains open. The current shell correctly exposes the missing downstream scene wiring instead of failing silently, but Hub, resource UI, repair UI, route/exploration, runtime save/load UI, and UI refresh observation cannot be manually verified yet.
+BUG-005 no longer blocks Hub reachability: audio confirmation now mounts the Hub runtime scene. The full runtime build is not yet approved as a playable resource loop because transfer/pickup controls, repair deposit UI, route/exploration, runtime save/load UI, and mutation-driven UI refresh observation remain downstream wiring work.
 
 ### Conditions
 
-- Mount or transition to the Hub/main gameplay scene after Audio Activation or Continue Muted.
-- Re-run TC-RGC-003 through TC-RGC-009 after the downstream scene path is wired.
+- Manually retest TC-RGC-003 and TC-RGC-004 in a visible Godot run.
+- Re-run TC-RGC-005 through TC-RGC-009 after the relevant downstream interaction/UI paths are wired.
 - Keep TC-RGC-010 as a targeted stability recheck after the Hub path is available.
 
 ### Next Step
 
-Resolve BUG-005 in the downstream SessionShell/Hub scene flow, then run targeted manual QA for TC-RGC-003 through TC-RGC-010. The #5 `ResourcesManager` contract does not require additional implementation before dependent systems consume it.
+Proceed with #9 Chart Route Planning and downstream interaction/UI wiring; re-run targeted manual QA for TC-RGC-003 through TC-RGC-010 after visible Godot retest and new runtime controls land. The #5 `ResourcesManager` contract does not require additional implementation before dependent systems consume it.

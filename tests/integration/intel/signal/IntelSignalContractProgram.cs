@@ -262,6 +262,7 @@ Console.WriteLine("=== Story 007: Signal Contract & Non-Degradation Guards ===\n
 	mgr.ReportObservationEvent("pattern.bird-flight-direction", "bird-passive-island"); // +4 → Confirmed
 	mgr.ReportPatternUsageSuccess("pattern.bird-flight-direction");
 	Assert(patternUsageConfirmed, "AC-13: pattern_usage_confirmed 信号触发");
+	_ = patternStateChanged;
 }
 
 // ── AdjustRumorConfidence 功能验证 ──

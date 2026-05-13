@@ -1,0 +1,123 @@
+[gd_scene format=3]
+
+[node name="HubRuntime" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.102, 0.145, 0.157, 1)
+
+[node name="HubRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="Label" parent="HubRoot"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 28.0
+offset_right = -40.0
+offset_bottom = 76.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 30
+text = "Airship Hub"
+horizontal_alignment = 1
+
+[node name="Deck" type="PanelContainer" parent="HubRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.08
+anchor_top = 0.18
+anchor_right = 0.92
+anchor_bottom = 0.82
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DeckStack" type="VBoxContainer" parent="HubRoot/Deck"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="StationRow" type="HBoxContainer" parent="HubRoot/Deck/DeckStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HelmStation" type="Label" parent="HubRoot/Deck/DeckStack/StationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Helm: Ready"
+horizontal_alignment = 1
+
+[node name="ChartStation" type="Label" parent="HubRoot/Deck/DeckStack/StationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Chart: Ready"
+horizontal_alignment = 1
+
+[node name="CargoStation" type="Label" parent="HubRoot/Deck/DeckStack/StationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cargo Bay: Accessible"
+horizontal_alignment = 1
+
+[node name="ModuleStation" type="Label" parent="HubRoot/Deck/DeckStack/StationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Module Bench: Ready"
+horizontal_alignment = 1
+
+[node name="StatusGrid" type="GridContainer" parent="HubRoot/Deck/DeckStack"]
+layout_mode = 2
+columns = 2
+
+[node name="StorageLabel" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "Storage"
+
+[node name="StorageValue" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "basic_supply x10 / repair_kit x4"
+
+[node name="CargoLabel" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "Cargo"
+
+[node name="CargoValue" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "used 0 / effective 500 / trapped 0"
+
+[node name="ModuleLabel" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "Modules"
+
+[node name="ModuleValue" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "slot_a empty / slot_b cargo installed"
+
+[node name="HullLabel" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "Hull"
+
+[node name="HullValue" type="Label" parent="HubRoot/Deck/DeckStack/StatusGrid"]
+layout_mode = 2
+text = "integrity 100 / band intact / can depart"
+
+[node name="Footer" type="Label" parent="HubRoot"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -72.0
+offset_right = -40.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "The deck is quiet. Cargo straps hold. The chart table waits under lamplight."
+horizontal_alignment = 1
+autowrap_mode = 3

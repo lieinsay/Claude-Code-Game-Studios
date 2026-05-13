@@ -55,4 +55,4 @@ This epic is complete when:
 
 ## Next Step
 
-Epic #8 complete. Next production step from `docs/reference/production-flowchart.md`: continue #9 Chart Route Planning or address BUG-005 before full runtime advancement.
+Epic #8 complete. Next production step from `docs/reference/production-flowchart.md`: continue #9 Chart Route Planning; BUG-005 scene reachability has been fixed, while richer downstream runtime UI remains later scope.

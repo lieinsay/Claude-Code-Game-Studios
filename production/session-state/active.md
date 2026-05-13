@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Core Layer
 Feature: Modules & Hull State (#8) complete
-Task: #8 ModuleHullManager contract merged for downstream use; full runtime advancement still blocked by BUG-005. #9 Chart Route Planning remains the next unlocked production epic.
+Task: #8 ModuleHullManager contract merged for downstream use; BUG-005 scene wiring fixed; #9 Chart Route Planning remains the next unlocked production epic.
 <!-- /STATUS -->
 
 ## Session Extract — Epic #8 Modules & Hull State complete — 2026-05-13
@@ -14,7 +14,7 @@ Task: #8 ModuleHullManager contract merged for downstream use; full runtime adva
 - Files changed: `src/core/modules/ModuleHullManager.cs`, `src/core/resources/ResourcesManager.cs`, `tests/unit/modules/*`, `tests/integration/modules/*`, `CloudWeaverVoyage.sln`, `production/epics/modules-hull-state/*.md`, `production/epics/index.md`, `docs/reference/production-flowchart.md`
 - Test evidence: Story 001 7/7, Story 002 6/6, Story 003 4/4, Story 004 3/3, Story 005 3/3, Story 006 4/4, Story 007 5/5, Story 008 4/4 — total 36/36 PASS
 - Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 warnings, 0 errors); full C# runner sweep `tests/**/*.csproj` 63/63 PASS
-- Residual risk: Godot scene/HUD visualization and player-facing UI for trapped goods remain downstream UI/HUD work; BUG-005 still blocks full runtime advancement.
+- Residual risk: Godot scene/HUD visualization and player-facing UI for trapped goods remain downstream UI/HUD work; BUG-005 scene reachability is fixed.
 - Unlocked: #10 Navigation can consume module/hull departure readiness after #9 Chart Route Planning completes; #11/#12/#16 can consume damage, cargo capacity, and signal contracts.
 
 ## Session Extract — Epic #6 全部完成 — 2026-05-13
@@ -804,6 +804,6 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Verdict: NOT APPROVED FOR FULL RUNTIME ADVANCEMENT; Resources & Goods Capacity #5 contract approved for downstream code consumption.
 - QA artifacts: `production/qa/qa-plan-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-cases-resources-goods-capacity-2026-05-13.md`, `production/qa/qa-signoff-resources-goods-capacity-2026-05-13.md`
 - Automated evidence: 47/47 C# test projects PASS, 511/511 reported checks PASS, Godot headless project/main scene/shell UI loads PASS.
-- Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003 through TC-RGC-009 BLOCKED by downstream gameplay scene wiring not mounted.
-- Bugs: BUG-001/002/003/004 verified fixed; BUG-005 `Downstream gameplay scene is not mounted after audio activation` remains Open - Deferred, S2-Major.
-- Next recommended: Resolve BUG-005 in SessionShell/Hub scene flow, then re-run targeted TC-RGC-003 through TC-RGC-010 before `/gate-check`.
+- Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003/004 now have automated Hub reachability/resource presentation evidence; TC-RGC-005 through TC-RGC-009 remain blocked by downstream interaction/UI wiring.
+- Bugs: BUG-001/002/003/004 verified fixed; BUG-005 `Downstream gameplay scene is not mounted after audio activation` resolved by HubRuntime scene mount.
+- Next recommended: Manually retest TC-RGC-003/004 in visible Godot, then continue #9 Chart Route Planning and downstream runtime UI paths.

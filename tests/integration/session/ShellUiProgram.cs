@@ -15,6 +15,7 @@ Run("AC-7: loading screen includes phase and progress", Ac7LoadingProgress);
 Run("Scene: Godot Control scene covers presenter panels and action nodes", SceneContractMatchesPresenter);
 Run("Regression: scene default does not strand visible runtime on loading panel", SceneDefaultAvoidsLoadingStrand);
 Run("Regression: visible runtime scene has runtime script and button handlers", RuntimeSceneHasScriptAndButtonHandlers);
+Run("Regression: audio confirmation mounts Hub runtime instead of recovery placeholder", AudioConfirmationMountsHubRuntime);
 
 if (failed > 0)
 {
@@ -248,7 +249,29 @@ static bool RuntimeScriptWiresButtons(string repoRoot)
 		&& script.Contains("KEY_N", StringComparison.Ordinal)
 		&& script.Contains("KEY_D", StringComparison.Ordinal)
 		&& script.Contains("_show_only(_audio_panel)", StringComparison.Ordinal)
-		&& script.Contains("Audio accepted. Gameplay scene wiring is not mounted yet.", StringComparison.Ordinal);
+		&& script.Contains("_mount_hub_runtime()", StringComparison.Ordinal)
+		&& script.Contains("res://src/scenes/HubRuntime.tscn", StringComparison.Ordinal);
+}
+
+static bool AudioConfirmationMountsHubRuntime()
+{
+	var repoRoot = FindRepoRoot();
+	var sessionShellPath = Path.Combine(repoRoot, "src", "scenes", "SessionShell.tscn");
+	var hubScenePath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.tscn");
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "SessionShellRuntime.gd");
+	var sessionShell = File.ReadAllText(sessionShellPath);
+	var hubScene = File.ReadAllText(hubScenePath);
+	var runtimeScript = File.ReadAllText(runtimeScriptPath);
+
+	return HasNode(sessionShell, "GameplayLayer", "Node2D")
+		&& HasNode(hubScene, "HubRuntime", "Node2D")
+		&& HasNode(hubScene, "CargoValue", "Label")
+		&& HasNode(hubScene, "ModuleValue", "Label")
+		&& HasNode(hubScene, "HullValue", "Label")
+		&& hubScene.Contains("trapped 0", StringComparison.Ordinal)
+		&& runtimeScript.Contains("_gameplay_layer.add_child(_active_gameplay)", StringComparison.Ordinal)
+		&& runtimeScript.Contains("_hide_shell_panels()", StringComparison.Ordinal)
+		&& !runtimeScript.Contains("Gameplay scene wiring is not mounted yet.", StringComparison.Ordinal);
 }
 
 static bool HasNode(string scene, string nodeName, string nodeType)
