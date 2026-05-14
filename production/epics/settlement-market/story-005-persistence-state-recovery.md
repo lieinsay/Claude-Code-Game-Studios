@@ -1,7 +1,7 @@
 # Story 005: Persistence & State Recovery
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -28,32 +28,32 @@
 
 ### New Game Initialization
 
-- [ ] **AC-1**: GIVEN 新游戏启动 + Persistence 中无 progress.settlement-market 快照，WHEN SettlementManager 初始化，THEN settlements.stall-state = DORMANT + completed_node_ids=[] + stall.gh-general=OPEN_BASIC + 其余 3 摊位 CLOSED + npc.atu=IDLE + 其余 3 NPC ABSENT
-- [ ] **AC-2**: GIVEN 新游戏，WHEN 初始化完成，THEN 触发首次快照 (progress.settlement-market) ——即使初始状态也需持久化
+- [x] **AC-1**: GIVEN 新游戏启动 + Persistence 中无 progress.settlement-market 快照，WHEN SettlementManager 初始化，THEN settlements.stall-state = DORMANT + completed_node_ids=[] + stall.gh-general=OPEN_BASIC + 其余 3 摊位 CLOSED + npc.atu=IDLE + 其余 3 NPC ABSENT
+- [x] **AC-2**: GIVEN 新游戏，WHEN 初始化完成，THEN 触发首次快照 (progress.settlement-market) ——即使初始状态也需持久化
 
 ### Serialization Roundtrip
 
-- [ ] **AC-3**: GIVEN settlement_state=RECOVERING + completed_node_ids=[&"repair_node.starlight_dock"] + 2 stalls OPEN_BASIC + 2 CLOSED + 2 NPCs IDLE + 2 ABSENT，WHEN _serialize_settlement() → JSON.stringify() → JSON.parse() → _deserialize_settlement()，THEN 所有字段一致无丢失
-- [ ] **AC-4**: GIVEN settlement_state=ACTIVE + completed_node_ids 含 3 个节点 + 全部 4 stalls OPEN_BASIC + 全部 4 NPCs IDLE，WHEN 序列化往返，THEN 所有 3 层状态完整恢复
-- [ ] **AC-5**: GIVEN completed_node_ids 包含重复项（如存档损坏），WHEN _deserialize_settlement()，THEN 反序列化时去重——仅保留唯一值
+- [x] **AC-3**: GIVEN settlement_state=RECOVERING + completed_node_ids=[&"repair_node.starlight_dock"] + 2 stalls OPEN_BASIC + 2 CLOSED + 2 NPCs IDLE + 2 ABSENT，WHEN _serialize_settlement() → JSON.stringify() → JSON.parse() → _deserialize_settlement()，THEN 所有字段一致无丢失
+- [x] **AC-4**: GIVEN settlement_state=ACTIVE + completed_node_ids 含 3 个节点 + 全部 4 stalls OPEN_BASIC + 全部 4 NPCs IDLE，WHEN 序列化往返，THEN 所有 3 层状态完整恢复
+- [x] **AC-5**: GIVEN completed_node_ids 包含重复项（如存档损坏），WHEN _deserialize_settlement()，THEN 反序列化时去重——仅保留唯一值
 
 ### Snapshot Triggers
 
-- [ ] **AC-6**: GIVEN execute_purchase() 成功后，WHEN 返回前，THEN _trigger_snapshot() 被调用。购买是状态变更——必须立即持久化
-- [ ] **AC-7**: GIVEN on_repair_completed() 处理后 + completed_node_ids 或 stall/NPC 状态变更，WHEN 返回前，THEN _trigger_snapshot() 被调用
-- [ ] **AC-8**: GIVEN 无状态变更的操作（如重复 repair 信号、use_requested on closed stall），WHEN 处理，THEN 不触发快照。避免无意义写入
+- [x] **AC-6**: GIVEN execute_purchase() 成功后，WHEN 返回前，THEN _trigger_snapshot() 被调用。购买是状态变更——必须立即持久化
+- [x] **AC-7**: GIVEN on_repair_completed() 处理后 + completed_node_ids 或 stall/NPC 状态变更，WHEN 返回前，THEN _trigger_snapshot() 被调用
+- [x] **AC-8**: GIVEN 无状态变更的操作（如重复 repair 信号、use_requested on closed stall），WHEN 处理，THEN 不触发快照。避免无意义写入
 
 ### Session Recovery
 
-- [ ] **AC-9**: GIVEN 存档中有 progress.settlement-market 快照 + settlement_state=RECOVERING + 2 stalls OPEN_BASIC + 2 NPCs IDLE，WHEN 读档后 SettlementManager._restore_from_snapshot()，THEN 状态与存档前完全一致 + completed_node_ids 完整恢复。后续 repair_completed 的 F.2 判定不受影响
-- [ ] **AC-10**: GIVEN 快照中 stall_state 与 NPC state 不一致（如 stall OPEN_BASIC 但 NPC 仍是 ABSENT——数据损坏），WHEN _restore_from_snapshot()，THEN 自动修正：以 stall_state 为准，强制对应 NPC→IDLE。记录 warning
+- [x] **AC-9**: GIVEN 存档中有 progress.settlement-market 快照 + settlement_state=RECOVERING + 2 stalls OPEN_BASIC + 2 NPCs IDLE，WHEN 读档后 SettlementManager._restore_from_snapshot()，THEN 状态与存档前完全一致 + completed_node_ids 完整恢复。后续 repair_completed 的 F.2 判定不受影响
+- [x] **AC-10**: GIVEN 快照中 stall_state 与 NPC state 不一致（如 stall OPEN_BASIC 但 NPC 仍是 ABSENT——数据损坏），WHEN _restore_from_snapshot()，THEN 自动修正：以 stall_state 为准，强制对应 NPC→IDLE。记录 warning
 
 ### Defensive Deserialization
 
-- [ ] **AC-11**: GIVEN 快照中包含未在 Registry 中注册的 stall_id（数据迁移残留），WHEN _deserialize_settlement()，THEN 跳过该条目 + 记录 warning。不崩溃
-- [ ] **AC-12**: GIVEN 快照中包含未在 Registry 中注册的 npc_id，WHEN _deserialize_settlement()，THEN 跳过该条目 + 记录 warning
-- [ ] **AC-13**: GIVEN 快照中 settlement 的 completed_node_ids 包含未在 Registry 中注册的 node_id，WHEN 反序列化，THEN 保留该 node_id（可能是未来内容的前向兼容）但记录 warning
-- [ ] **AC-14**: GIVEN 快照中 settlement_state 与根据 active_stall_count 计算的状态不一致（存档损坏），WHEN _restore_from_snapshot()，THEN 读档后立即执行 recalculate_settlement_activity() 修正 settlement_state。静默修复，不通知玩家
+- [x] **AC-11**: GIVEN 快照中包含未在 Registry 中注册的 stall_id（数据迁移残留），WHEN _deserialize_settlement()，THEN 跳过该条目 + 记录 warning。不崩溃
+- [x] **AC-12**: GIVEN 快照中包含未在 Registry 中注册的 npc_id，WHEN _deserialize_settlement()，THEN 跳过该条目 + 记录 warning
+- [x] **AC-13**: GIVEN 快照中 settlement 的 completed_node_ids 包含未在 Registry 中注册的 node_id，WHEN 反序列化，THEN 保留该 node_id（可能是未来内容的前向兼容）但记录 warning
+- [x] **AC-14**: GIVEN 快照中 settlement_state 与根据 active_stall_count 计算的状态不一致（存档损坏），WHEN _restore_from_snapshot()，THEN 读档后立即执行 recalculate_settlement_activity() 修正 settlement_state。静默修复，不通知玩家
 
 ---
 
@@ -209,7 +209,11 @@ func _reconcile_settlement_state() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/settlement-market/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/integration/settlement-market/PersistenceTest.csproj -p:UseSharedCompilation=false` — PASS (5/5 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 

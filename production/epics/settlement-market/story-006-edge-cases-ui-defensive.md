@@ -1,7 +1,7 @@
 # Story 006: Edge Cases, UI Integration & Defensive Handling
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -28,81 +28,81 @@
 
 ### E.1 — Interaction with Closed Stall
 
-- [ ] **AC-1**: GIVEN stall_state=CLOSED，WHEN 检查，#4 焦点系统不将该摊位注册为可交互目标。use_requested 不被分发
+- [x] **AC-1**: GIVEN stall_state=CLOSED，WHEN 检查，#4 焦点系统不将该摊位注册为可交互目标。use_requested 不被分发
 
 ### E.2 — Capacity Full Purchase
 
-- [ ] **AC-2**: GIVEN 目标资源池无剩余容量 + 玩家尝试购买补给品，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "capacity_full"}。购买被阻止，不扣货币
+- [x] **AC-2**: GIVEN 目标资源池无剩余容量 + 玩家尝试购买补给品，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "capacity_full"}。购买被阻止，不扣货币
 
 ### E.3 — Insufficient Funds
 
-- [ ] **AC-3**: GIVEN player_currency < price × 1，WHEN 检查，THEN 该商品在界面中灰显不可选。validate_purchase_request 返回 {valid: false, reason: "insufficient_funds"}
+- [x] **AC-3**: GIVEN player_currency < price × 1，WHEN 检查，THEN 该商品在界面中灰显不可选。validate_purchase_request 返回 {valid: false, reason: "insufficient_funds"}
 
 ### E.4 — Duplicate Repair Signal
 
-- [ ] **AC-4**: GIVEN 同一 node_id 的 repair_completed 已处理过一次，WHEN 再次收到，THEN completed_node_ids 不变 + 已 open 摊位不重复解锁。集合去重保证幂等
+- [x] **AC-4**: GIVEN 同一 node_id 的 repair_completed 已处理过一次，WHEN 再次收到，THEN completed_node_ids 不变 + 已 open 摊位不重复解锁。集合去重保证幂等
 
 ### E.5 — Save During Purchase UI Open
 
-- [ ] **AC-5**: GIVEN 玩家在购买界面打开时触发存档，WHEN Persistence 捕获快照，THEN progress.settlement-market 快照仅记录摊位/NPC 状态——不记录界面状态。购买为原子操作（validate→execute 同帧完成），不存在"购物车半满"的中间状态
-- [ ] **AC-6**: GIVEN 读档后，WHEN 恢复，THEN 摊位界面关闭——玩家回到摊位前。界面不跨会话保持
+- [x] **AC-5**: GIVEN 玩家在购买界面打开时触发存档，WHEN Persistence 捕获快照，THEN progress.settlement-market 快照仅记录摊位/NPC 状态——不记录界面状态。购买为原子操作（validate→execute 同帧完成），不存在"购物车半满"的中间状态
+- [x] **AC-6**: GIVEN 读档后，WHEN 恢复，THEN 摊位界面关闭——玩家回到摊位前。界面不跨会话保持
 
 ### E.6 — All Stalls Closed Settlement (Future)
 
-- [ ] **AC-7**: GIVEN 未来定居点不设默认开启摊位 + 所有摊位 CLOSED，WHEN get_interactive_stalls()，THEN 返回 []。F.3 判定 active_stall_count=0 → DORMANT。不阻塞游戏
+- [x] **AC-7**: GIVEN 未来定居点不设默认开启摊位 + 所有摊位 CLOSED，WHEN get_interactive_stalls()，THEN 返回 []。F.3 判定 active_stall_count=0 → DORMANT。不阻塞游戏
 
 ### E.7 — Missing Narrative File / npc_id
 
-- [ ] **AC-8**: GIVEN design/narrative/glass-harbor.md 不存在或 npc_id 在该文件中未定义，WHEN 读取 NPC 名字/对话，THEN 名字回退为 "摊主"，对话回退为空字符串。购买功能不受影响。日志输出 warning
+- [x] **AC-8**: GIVEN design/narrative/glass-harbor.md 不存在或 npc_id 在该文件中未定义，WHEN 读取 NPC 名字/对话，THEN 名字回退为 "摊主"，对话回退为空字符串。购买功能不受影响。日志输出 warning
 
 ### E.8 — All Stalls at MVP Max Unlock
 
-- [ ] **AC-9**: GIVEN 全部 4 个摊位均已 OPEN_BASIC（MVP 终态）+ 新的 repair_completed 到达，WHEN 处理，THEN 状态机无有效转换——信号安全忽略。不产生错误
+- [x] **AC-9**: GIVEN 全部 4 个摊位均已 OPEN_BASIC（MVP 终态）+ 新的 repair_completed 到达，WHEN 处理，THEN 状态机无有效转换——信号安全忽略。不产生错误
 
 ### E.9 — Repair Signal During Purchase UI Open
 
-- [ ] **AC-10**: GIVEN 玩家在购买界面打开时 + 该摊位因修复信号发生解锁等级变化，WHEN 检查，THEN 当前购买会话不受影响——界面继续显示打开时的商品列表。界面关闭并重新打开后，反映新的解锁等级商品列表
+- [x] **AC-10**: GIVEN 玩家在购买界面打开时 + 该摊位因修复信号发生解锁等级变化，WHEN 检查，THEN 当前购买会话不受影响——界面继续显示打开时的商品列表。界面关闭并重新打开后，反映新的解锁等级商品列表
 
 ### E.10 — Single Repair Matching Multiple Stalls
 
-- [ ] **AC-11**: GIVEN 单个 repair_completed(node_id) 的 node_id 匹配 2 个摊位的 required_node_ids，WHEN 处理，THEN 两个摊位各自独立 CLOSED→OPEN_BASIC + 对应 NPC 各自 ABSENT→IDLE。互不干扰
+- [x] **AC-11**: GIVEN 单个 repair_completed(node_id) 的 node_id 匹配 2 个摊位的 required_node_ids，WHEN 处理，THEN 两个摊位各自独立 CLOSED→OPEN_BASIC + 对应 NPC 各自 ABSENT→IDLE。互不干扰
 
 ### E.11 — Empty required_node_ids
 
-- [ ] **AC-12**: GIVEN 某摊位 (非默认杂货摊) 配置了空的 required_node_ids，WHEN F.2 判定，THEN 返回 false。该摊位永远无法从 CLOSED 自动解锁。初始化时记录 warning
+- [x] **AC-12**: GIVEN 某摊位 (非默认杂货摊) 配置了空的 required_node_ids，WHEN F.2 判定，THEN 返回 false。该摊位永远无法从 CLOSED 自动解锁。初始化时记录 warning
 
 ### E.12 — Repair Node Not Matching Any Stall
 
-- [ ] **AC-13**: GIVEN repair_completed(node_id) + node_id 不出现在任何摊位的 required_node_ids 中，WHEN 处理，THEN 信号被安全忽略——静默处理。不产生错误日志
+- [x] **AC-13**: GIVEN repair_completed(node_id) + node_id 不出现在任何摊位的 required_node_ids 中，WHEN 处理，THEN 信号被安全忽略——静默处理。不产生错误日志
 
 ### E.13 — Abnormal Quantity Input
 
-- [ ] **AC-14**: GIVEN 购买 UI 中 quantity 输入，WHEN 玩家输入 0、负值或非整数，THEN 0 和负值 clamp 为 1；非整数向下取整。减号按钮在 quantity=1 时灰显
-- [ ] **AC-15**: GIVEN quantity 输入值 > max_affordable，WHEN 失焦，THEN clamp 为 max_affordable
+- [x] **AC-14**: GIVEN 购买 UI 中 quantity 输入，WHEN 玩家输入 0、负值或非整数，THEN 0 和负值 clamp 为 1；非整数向下取整。减号按钮在 quantity=1 时灰显
+- [x] **AC-15**: GIVEN quantity 输入值 > max_affordable，WHEN 失焦，THEN clamp 为 max_affordable
 
 ### E.14 — Player Leaves Interaction Range with UI Open
 
-- [ ] **AC-16**: GIVEN 玩家在购买界面打开时步行离开摊位交互范围，WHEN 检查，THEN 界面保持打开直到手动关闭或再次按 Use。界面关闭后若仍在范围外，按 Use 无反应
+- [x] **AC-16**: GIVEN 玩家在购买界面打开时步行离开摊位交互范围，WHEN 检查，THEN 界面保持打开直到手动关闭或再次按 Use。界面关闭后若仍在范围外，按 Use 无反应
 
 ### E.15 — Price = 0 (Configuration Error)
 
-- [ ] **AC-17**: GIVEN 某商品 price=0 + 玩家购买 quantity=3，WHEN execute_purchase()，THEN total_cost=0 → 购买成功（不扣货币）。货物正确进入资源池。日志输出 error: "Settlement: good '%s' has price=0 — configuration error"
+- [x] **AC-17**: GIVEN 某商品 price=0 + 玩家购买 quantity=3，WHEN execute_purchase()，THEN total_cost=0 → 购买成功（不扣货币）。货物正确进入资源池。日志输出 error: "Settlement: good '%s' has price=0 — configuration error"
 
 ### E.16 — Player Currency Equals Total Cost
 
-- [ ] **AC-18**: GIVEN player_currency=150 + total_cost=150（恰好相等），WHEN validate_purchase_request()，THEN total_cost ≤ player_currency → 通过。购买成功后货币归零 + 界面刷新所有商品灰显（货币不足）
+- [x] **AC-18**: GIVEN player_currency=150 + total_cost=150（恰好相等），WHEN validate_purchase_request()，THEN total_cost ≤ player_currency → 通过。购买成功后货币归零 + 界面刷新所有商品灰显（货币不足）
 
 ### UI Integration Signals
 
-- [ ] **AC-19**: GIVEN stall_opened(stall_id, settlement_id) 发射，WHEN UI (#16) 消费，THEN 打开购买界面，显示该摊位当前解锁等级下所有可用商品及价格
-- [ ] **AC-20**: GIVEN purchase_completed(good_id, quantity, total_cost) 发射，WHEN UI 消费，THEN 更新货币显示 + 播放购买确认音效
-- [ ] **AC-21**: GIVEN purchase_failed(good_id, reason) 发射，WHEN UI 消费，THEN 显示对应错误提示（"货币不足" / "携带空间不足"）
-- [ ] **AC-22**: GIVEN settlement_activity_changed(settlement_id, active_stall_count) 发射，WHEN Feedback (#17) 消费，THEN 切换环境氛围——dormant 冷色调+安静，recovering 暖色调逐渐恢复，active 全暖色调+粒子效果
+- [x] **AC-19**: GIVEN stall_opened(stall_id, settlement_id) 发射，WHEN UI (#16) 消费，THEN 打开购买界面，显示该摊位当前解锁等级下所有可用商品及价格
+- [x] **AC-20**: GIVEN purchase_completed(good_id, quantity, total_cost) 发射，WHEN UI 消费，THEN 更新货币显示 + 播放购买确认音效
+- [x] **AC-21**: GIVEN purchase_failed(good_id, reason) 发射，WHEN UI 消费，THEN 显示对应错误提示（"货币不足" / "携带空间不足"）
+- [x] **AC-22**: GIVEN settlement_activity_changed(settlement_id, active_stall_count) 发射，WHEN Feedback (#17) 消费，THEN 切换环境氛围——dormant 冷色调+安静，recovering 暖色调逐渐恢复，active 全暖色调+粒子效果
 
 ### Defensive: Registry Entity Missing
 
-- [ ] **AC-23**: GIVEN Registry 中缺失 settlement.glass-harbor 实体定义，WHEN 初始化，THEN 记录 error + 跳过 settlement 初始化。stalls/npcs 仍正常初始化——不级联失败
-- [ ] **AC-24**: GIVEN Registry 中某 good_id 的 price 字段缺失，WHEN calculate_total_cost()，THEN price 默认为 0 + 记录 error 日志。不崩溃
+- [x] **AC-23**: GIVEN Registry 中缺失 settlement.glass-harbor 实体定义，WHEN 初始化，THEN 记录 error + 跳过 settlement 初始化。stalls/npcs 仍正常初始化——不级联失败
+- [x] **AC-24**: GIVEN Registry 中某 good_id 的 price 字段缺失，WHEN calculate_total_cost()，THEN price 默认为 0 + 记录 error 日志。不崩溃
 
 ---
 
@@ -218,7 +218,11 @@ func clamp_purchase_quantity(good_id: StringName, requested: int) -> int:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/settlement-market/EdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/integration/settlement-market/EdgeCasesTest.csproj -p:UseSharedCompilation=false` — PASS (5/5 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 
