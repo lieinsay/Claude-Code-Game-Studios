@@ -169,8 +169,8 @@ func _debug_verify_r15_guards() -> bool:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/partner-relationships/EdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] Created — `dotnet run --project tests/integration/partner-relationships/EdgeCasesTest.csproj` PASS (34/34); rerun PASS — 2026-05-14 Epic #11/#15 review
+**Required evidence**: `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
+**Status**: [x] Created — `dotnet run --project tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` PASS (34/34); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 
@@ -184,6 +184,6 @@ func _debug_verify_r15_guards() -> bool:
 **Completed**: 2026-05-14
 **Criteria**: 34/34 passing
 **Deviations**: None
-**Test Evidence**: Integration test at `tests/integration/partner-relationships/EdgeCasesTest.csproj` — 34/34 checks passing
-**Code Review**: Complete — `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/EdgeCasesTest.csproj` approved with suggestions; suggestion to add this project to the manually enumerated CI workflow remains follow-up scope
+**Test Evidence**: Integration test at `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` — 34/34 checks passing
+**Code Review**: Complete — `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` approved with suggestions; suggestion to add this project to the manually enumerated CI workflow remains follow-up scope
 **Review Gates**: QL-TEST-COVERAGE and LP-CODE-REVIEW subagent gates skipped under Codex adapter rules because subagent delegation was not explicitly requested; local coverage/review checks completed

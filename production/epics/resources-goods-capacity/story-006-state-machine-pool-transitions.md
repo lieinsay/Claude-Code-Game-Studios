@@ -152,7 +152,7 @@ func apply_extraction_loss(loss_ratio: float) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/resources/StateMachineTest.csproj` — must exist and pass
+**Required evidence**: `tests/unit/resources/ResourcesStateMachineTest.csproj` — must exist and pass
 **Status**: [x] Created and passing — 2026-05-13 (`12/12` checks)
 
 ---
@@ -167,5 +167,5 @@ func apply_extraction_loss(loss_ratio: float) -> Dictionary:
 **Completed**: 2026-05-13
 **Criteria**: 12/12 passing
 **Deviations**: None. `commit_deposit()`, specialized operations, UI confirmation, signal/reentry behavior, and exploration caller timing remain Story 007/008/UI/Exploration scope.
-**Test Evidence**: Logic — `tests/unit/resources/StateMachineTest.csproj` passes 12/12 checks.
+**Test Evidence**: Logic — `tests/unit/resources/ResourcesStateMachineTest.csproj` passes 12/12 checks.
 **Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues.

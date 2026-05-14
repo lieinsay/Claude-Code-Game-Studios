@@ -1,9 +1,10 @@
 # Story 004: Upstream Data Contracts & Domain Integration
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
+> **Estimate**: 6-8 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
@@ -108,6 +109,13 @@ const UPSTREAM_QUERIES: Dictionary = {
 }
 ```
 
+### Performance Budget
+
+- Panel data binding runs only on panel open, never per frame.
+- Typical bind path target: <0.5ms for mocked domain-query responses.
+- No new idle-frame `_process()` work is introduced; open-panel snapshots reuse Story 003 lifecycle triggers.
+- Open panels keep snapshot semantics until closed, so upstream data changes do not trigger automatic refresh work while a panel is visible.
+
 ---
 
 ## Out of Scope
@@ -133,7 +141,7 @@ const UPSTREAM_QUERIES: Dictionary = {
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj` — must exist and pass, OR documented playtest
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj -p:UseSharedCompilation=false` (16/16 PASS, 2026-05-14)
 
 ---
 
@@ -142,3 +150,20 @@ const UPSTREAM_QUERIES: Dictionary = {
 - Depends on: Story 001 (panel open flow), Story 002 (modal management), Story 003 (panel lifecycle triggers bind_data)
 - External: #5 Resources, #8 Modules, #9 Chart, #11 Exploration, #12 Combat, #13 WorldRepair, #14 Settlement, #15 Partner, #1 Registry (query interfaces)
 - Unlocks: Story 005 (semantic events after data binding), Story 006 (edge cases with missing data)
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Criteria**: 16/16 passing
+**Deviations**: None
+**Test Evidence**: Integration test at `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj` — 16/16 PASS
+**Code Review**: Complete — `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/UpstreamDataContractsProgram.cs` approved
+
+Verification:
+
+```powershell
+dotnet run --project tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj -p:UseSharedCompilation=false
+dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false
+```

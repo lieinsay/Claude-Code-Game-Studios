@@ -606,7 +606,7 @@ graph TB
 | Story-005 Upstream Event Receivers | Done | `src/core/intel/IntelManager.cs` — navigation/repair/rumor/pattern/crew 事件接收与能力重评估 | `tests/unit/intel/events/EventReceiversTest.csproj` — 21/21 PASS |
 | Story-006 Downstream Query Interface | Done | `src/core/intel/IntelManager.cs` — 地点、航线、规律、能力、日志查询接口 | `tests/unit/intel/query/QueryInterfaceTest.csproj` — 44/44 PASS |
 | Story-007 Signal Contract + Non-Degradation | Done | `src/core/intel/IntelManager.cs` — 9 个信号、emit-after-mutation、非降级守卫 | `tests/integration/intel/signal/IntelSignalContractTest.csproj` — 39/39 PASS |
-| Story-008 Persistence + MVP Bootstrap | Done | `src/core/intel/IntelManager.cs` — 7 字段持久化往返、MVP 起始状态、迁移警告、ClearAllState | `tests/integration/intel/persistence/PersistenceIntegrationTest.csproj` — 43/43 PASS |
+| Story-008 Persistence + MVP Bootstrap | Done | `src/core/intel/IntelManager.cs` — 7 字段持久化往返、MVP 起始状态、迁移警告、ClearAllState | `tests/integration/intel/persistence/IntelPersistenceIntegrationTest.csproj` — 43/43 PASS |
 
 ### Resources / Goods 完成项
 

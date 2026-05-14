@@ -88,7 +88,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/persistence/StorageCapabilityTest.csproj` — must exist and pass
+**Required evidence**: `tests/unit/persistence/PersistenceStorageCapabilityTest.csproj` — must exist and pass
 **Status**: [x] PASS 17/17 — 2026-05-11
 
 ---

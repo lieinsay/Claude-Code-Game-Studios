@@ -29,10 +29,10 @@
 | # | Story | Type | TR | Risk | Status |
 |---|-------|------|-----|------|--------|
 | 001 | Screen State Machine & Screen Flow | Logic | TR-ui-001 | LOW | **Complete — 20/20 PASS** |
-| 002 | Modal Stack, Combat Override & Input Routing | Logic | TR-ui-002 | LOW | Ready |
-| 003 | HUD Update, Panel Lifecycle & Cache | Logic | TR-ui-003 | LOW | Ready |
+| 002 | Modal Stack, Combat Override & Input Routing | Logic | TR-ui-002 | LOW | **Complete — 25/25 PASS** |
+| 003 | HUD Update, Panel Lifecycle & Cache | Logic | TR-ui-003 | LOW | **Complete — 25/25 PASS** |
 | 004 | Upstream Data Contracts & Domain Integration | Integration | TR-ui-004 | LOW | Ready |
-| 005 | Animation Timing & Downstream Semantic Events | Integration | TR-ui-004 | LOW | Ready |
+| 005 | Animation Timing & Downstream Semantic Events | Integration | TR-ui-004 | LOW | Complete |
 | 006 | Edge Cases, Web Recovery & Accessibility | Integration | TR-ui-001..004 | LOW | Ready |
 
 ## Story Type Summary
@@ -42,11 +42,11 @@
 
 ## Definition of Done
 
-- [ ] 3 Logic stories have automated unit tests passing (Story 001 complete: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` 20/20 PASS)
+- [x] 3 Logic stories have automated unit tests passing (Story 001 complete: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` 20/20 PASS; Story 002 complete: `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` 25/25 PASS; Story 003 complete: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` 25/25 PASS)
 - [ ] 3 Integration stories have integration tests or documented playtest
 - [x] All 12 screens (S1–S12) registered; Story 001 screen-flow open/close logic covered by UIManager API runner
 - [ ] 4-layer input routing verified: WASD blocked at Layer 0–2, passes at Layer 4
 - [ ] Dual-focus: mouse click → grab_focus() sync verified for all interactive controls
-- [ ] HUD dirty flags: idle _process zero-cost when no flags set
+- [x] HUD dirty flags: idle _process zero-cost when no flags set
 - [ ] Web tab freeze recovery: delta > 1.0s → full_ui_refresh
 - [ ] WCAG AA: all <24px color-coded elements use shape+color+text triple encoding

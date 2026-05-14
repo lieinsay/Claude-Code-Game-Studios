@@ -1,7 +1,7 @@
 # Story 003: HUD Update, Panel Lifecycle & Cache
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -30,48 +30,48 @@
 
 ### HUD Dirty Flag System
 
-- [ ] **AC-1**: GIVEN hull_integrity_changed(30, 25) 信号发射，WHEN _on_signal("hull_bar", payload) 调用，THEN _dirty_flags["hull_bar"]=true + _pending_payloads["hull_bar"]={old:30, new:25}
-- [ ] **AC-2**: GIVEN _dirty_flags 包含 3 个脏元素，WHEN _process 执行（process_priority=-10），THEN 3 个元素全部更新。_dirty_flags 清空。更新在下一帧渲染前完成
-- [ ] **AC-3**: GIVEN _dirty_flags 为空，WHEN _process 执行，THEN 立即返回——零开销。不遍历任何集合
-- [ ] **AC-4**: GIVEN 同一帧内 storage_changed 信号发射 3 次（快速连续变更），WHEN _process 执行，THEN 仅最后 1 次的 payload 被应用。中间值被覆盖——最终一致
+- [x] **AC-1**: GIVEN hull_integrity_changed(30, 25) 信号发射，WHEN _on_signal("hull_bar", payload) 调用，THEN _dirty_flags["hull_bar"]=true + _pending_payloads["hull_bar"]={old:30, new:25}
+- [x] **AC-2**: GIVEN _dirty_flags 包含 3 个脏元素，WHEN _process 执行（process_priority=-10），THEN 3 个元素全部更新。_dirty_flags 清空。更新在下一帧渲染前完成
+- [x] **AC-3**: GIVEN _dirty_flags 为空，WHEN _process 执行，THEN 立即返回——零开销。不遍历任何集合
+- [x] **AC-4**: GIVEN 同一帧内 storage_changed 信号发射 3 次（快速连续变更），WHEN _process 执行，THEN 仅最后 1 次的 payload 被应用。中间值被覆盖——最终一致
 
 ### Signal → HUD Element Mapping
 
-- [ ] **AC-5**: GIVEN hull_band_changed(GREEN, YELLOW) 发射，WHEN 批量更新，THEN S1/S5 船体条颜色从 #5FAF5F 切换为 #E8A840 + 形状指示从 ✓ 变为 ⚡
-- [ ] **AC-6**: GIVEN storage_changed(920, 1000) 发射，WHEN 批量更新，THEN S1 HUD 文本更新为 "920/1000" + 容量条宽度更新为 184px（max_bar_width=200）
-- [ ] **AC-7**: GIVEN carried_changed(slot=4, item="lens_kit", qty=1) 发射且随身物品栏已满 5/5，WHEN 批量更新，THEN S5 指定格图标+数量更新 + 所有格橙色边框指示满载
-- [ ] **AC-8**: GIVEN search_progress_changed(3, 6) 发射，WHEN 批量更新，THEN S5 搜索计数文本更新为 "3/6"
-- [ ] **AC-9**: GIVEN scout_preview_changed(PREVIEW_FULL) 发射，WHEN 批量更新，THEN S5 威胁预览标记切换为完整标签
-- [ ] **AC-10**: GIVEN module_state_changed(slot=0, INSTALLED) 发射，WHEN 批量更新，THEN S1 模块状态灯显示 ✓ 形状 + 绿色
-- [ ] **AC-11**: GIVEN currency_changed(150) 发射，WHEN 批量更新，THEN S9 摊位界面 + S1 Hub HUD 货币余额同步更新
+- [x] **AC-5**: GIVEN hull_band_changed(GREEN, YELLOW) 发射，WHEN 批量更新，THEN S1/S5 船体条颜色从 #5FAF5F 切换为 #E8A840 + 形状指示从 ✓ 变为 ⚡
+- [x] **AC-6**: GIVEN storage_changed(920, 1000) 发射，WHEN 批量更新，THEN S1 HUD 文本更新为 "920/1000" + 容量条宽度更新为 184px（max_bar_width=200）
+- [x] **AC-7**: GIVEN carried_changed(slot=4, item="lens_kit", qty=1) 发射且随身物品栏已满 5/5，WHEN 批量更新，THEN S5 指定格图标+数量更新 + 所有格橙色边框指示满载
+- [x] **AC-8**: GIVEN search_progress_changed(3, 6) 发射，WHEN 批量更新，THEN S5 搜索计数文本更新为 "3/6"
+- [x] **AC-9**: GIVEN scout_preview_changed(PREVIEW_FULL) 发射，WHEN 批量更新，THEN S5 威胁预览标记切换为完整标签
+- [x] **AC-10**: GIVEN module_state_changed(slot=0, INSTALLED) 发射，WHEN 批量更新，THEN S1 模块状态灯显示 ✓ 形状 + 绿色
+- [x] **AC-11**: GIVEN currency_changed(150) 发射，WHEN 批量更新，THEN S9 摊位界面 + S1 Hub HUD 货币余额同步更新
 
 ### HUD Visibility Gating
 
-- [ ] **AC-12**: GIVEN _active_screen=HUB，WHEN 检查 S1/S5 可见性，THEN S1 visible=true + S5 visible=false
-- [ ] **AC-13**: GIVEN _active_screen=EXPLORATION 或 EXTRACTING，WHEN 检查 S1/S5 可见性，THEN S1 visible=false + S5 visible=true
-- [ ] **AC-14**: GIVEN _active_screen=VOYAGE（航行过渡），WHEN 检查，THEN S1 visible=false + S5 visible=false。两个 HUD 均隐藏
+- [x] **AC-12**: GIVEN _active_screen=HUB，WHEN 检查 S1/S5 可见性，THEN S1 visible=true + S5 visible=false
+- [x] **AC-13**: GIVEN _active_screen=EXPLORATION 或 EXTRACTING，WHEN 检查 S1/S5 可见性，THEN S1 visible=false + S5 visible=true
+- [x] **AC-14**: GIVEN _active_screen=VOYAGE（航行过渡），WHEN 检查，THEN S1 visible=false + S5 visible=false。两个 HUD 均隐藏
 
 ### Panel Lifecycle — Non-Modal
 
-- [ ] **AC-15**: GIVEN 玩家距离 S11 嗅辨锚点 1.5× anchor_radius，WHEN PROXIMITY_ENTER 触发，THEN _preload_panel_data("S11") 异步调用。面板数据在后台加载，不阻塞
-- [ ] **AC-16**: GIVEN 非模态面板 S11 数据预加载完成 + 玩家按 Use，WHEN open_non_modal("S11")，THEN S11 打开——0.25s 羊皮纸翻开 tween。面板 ACTIVE
-- [ ] **AC-17**: GIVEN S11 已打开 + 玩家离开 2× anchor_radius，WHEN PROXIMITY_EXIT 触发，THEN S11 自动关闭——0.15s 合上 tween。面板从 _non_modal_panels 移除
-- [ ] **AC-18**: GIVEN S11 已打开 + 玩家在锚点范围内按 Esc，WHEN esc_pressed，THEN S11 立即关闭。不等待 PROXIMITY_EXIT
+- [x] **AC-15**: GIVEN 玩家距离 S11 嗅辨锚点 1.5× anchor_radius，WHEN PROXIMITY_ENTER 触发，THEN _preload_panel_data("S11") 异步调用。面板数据在后台加载，不阻塞
+- [x] **AC-16**: GIVEN 非模态面板 S11 数据预加载完成 + 玩家按 Use，WHEN open_non_modal("S11")，THEN S11 打开——0.25s 羊皮纸翻开 tween。面板 ACTIVE
+- [x] **AC-17**: GIVEN S11 已打开 + 玩家离开 2× anchor_radius，WHEN PROXIMITY_EXIT 触发，THEN S11 自动关闭——0.15s 合上 tween。面板从 _non_modal_panels 移除
+- [x] **AC-18**: GIVEN S11 已打开 + 玩家在锚点范围内按 Esc，WHEN esc_pressed，THEN S11 立即关闭。不等待 PROXIMITY_EXIT
 
 ### Panel Lifecycle — Modal
 
-- [ ] **AC-19**: GIVEN 玩家对修复节点按 Use，WHEN open_modal("S8", {node_id: "lighthouse_01"})，THEN S8 打开。不依赖距离——由领域事件（Use on repair node）触发
-- [ ] **AC-20**: GIVEN S8 已打开 + 玩家在修复面板中按"取消"，WHEN close_modal()，THEN S8 关闭。WASD 移动恢复
+- [x] **AC-19**: GIVEN 玩家对修复节点按 Use，WHEN open_modal("S8", {node_id: "lighthouse_01"})，THEN S8 打开。不依赖距离——由领域事件（Use on repair node）触发
+- [x] **AC-20**: GIVEN S8 已打开 + 玩家在修复面板中按"取消"，WHEN close_modal()，THEN S8 关闭。WASD 移动恢复
 
 ### Lazy Loading & Cache Pool
 
-- [ ] **AC-21**: GIVEN S7 战斗面板在 HUD 初始化时 preload()，WHEN 探索中威胁触发→S7 打开，THEN S7 立即实例化——无加载延迟（< 1ms）
-- [ ] **AC-22**: GIVEN 缓存池有 2 个面板实例（LRU），WHEN 第 3 个面板请求打开，THEN 最久未使用的面板实例被淘汰（queue_free()）。新面板实例加入缓存池
-- [ ] **AC-23**: GIVEN 场景从 HUB 切换到 VOYAGE，WHEN 场景切换，THEN 缓存池清空。所有缓存的面板实例 queue_free()
+- [x] **AC-21**: GIVEN S7 战斗面板在 HUD 初始化时 preload()，WHEN 探索中威胁触发→S7 打开，THEN S7 立即实例化——无加载延迟（< 1ms）
+- [x] **AC-22**: GIVEN 缓存池有 2 个面板实例（LRU），WHEN 第 3 个面板请求打开，THEN 最久未使用的面板实例被淘汰（queue_free()）。新面板实例加入缓存池
+- [x] **AC-23**: GIVEN 场景从 HUB 切换到 VOYAGE，WHEN 场景切换，THEN 缓存池清空。所有缓存的面板实例 queue_free()
 
 ### StationDetailPanel Template
 
-- [ ] **AC-24**: GIVEN 玩家 Use 情报台锚点 + Use 仓库锚点，WHEN 两个 S2 面板先后打开，THEN 使用同一个 StationDetailPanel 模板。数据从 Registry 绑定——不同站点显示不同内容。非 2 个独立场景
+- [x] **AC-24**: GIVEN 玩家 Use 情报台锚点 + Use 仓库锚点，WHEN 两个 S2 面板先后打开，THEN 使用同一个 StationDetailPanel 模板。数据从 Registry 绑定——不同站点显示不同内容。非 2 个独立场景
 
 ---
 
@@ -164,7 +164,16 @@ func _cache_panel(panel_id: StringName, instance: Control) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj -p:UseSharedCompilation=false` (25/25 PASS, 2026-05-14)
+
+---
+
+## Implementation Evidence
+
+**Implementation**: `src/presentation/UIManager.cs` extends the existing headless C# UIManager logic contract with HUD dirty flags, process-priority batch updates, HUD element snapshots, non-modal/modal lifecycle state, S7 preload state, two-entry LRU panel cache, and StationDetailPanel template binding.
+**Test Evidence**: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` — 25/25 PASS.
+**Regression Evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — 20/20 PASS; `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — 25/25 PASS.
+**Residual Risk**: This verifies the UIManager logic model. Real Godot Control node rendering, actual `create_tween()` animation playback, scene PackedScene preload timing, and visual/manual HUD behavior remain downstream #16 integration and story-done verification scope.
 
 ---
 
@@ -172,3 +181,11 @@ func _cache_panel(panel_id: StringName, instance: Control) -> void:
 
 - Depends on: Story 001 (screen states for visibility gating), ADR-0002 (signal connection pattern)
 - Unlocks: Story 004 (panel data binding on lifecycle events), Story 005 (animation integration with lifecycle)
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Criteria**: 24/24 acceptance criteria passing; runner reports 25/25 checks including the added scout preview three-state regression.
+**Deviations**: No blocking GDD/ADR implementation deviations. Advisory documentation issue: `docs/architecture/tr-registry.yaml` maps `TR-ui-003` to an older screen-state-machine text, while Epic/Story/GDD C.6/C.7 define HUD update + lifecycle/cache scope.
+**Test Evidence**: Logic story evidence at `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` — 25/25 PASS. Regression: Story 001 20/20 PASS; Story 002 25/25 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+**Code Review**: Complete — `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/HudUpdatePanelLifecycleProgram.cs` APPROVED after fixing the carried signal contract and scout preview three-state mapping.

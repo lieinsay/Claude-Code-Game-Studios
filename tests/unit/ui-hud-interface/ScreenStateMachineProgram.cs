@@ -259,7 +259,7 @@ static bool Ac19ScreenRegistry()
         [UIManager.MarketScreenId] = (ScreenType.Modal, "settlement"),
         [UIManager.NamingScreenId] = (ScreenType.Modal, "partner"),
         [UIManager.PartnerSniffScreenId] = (ScreenType.NonModal, "partner"),
-        [UIManager.ToastScreenId] = (ScreenType.NonModal, "feedback"),
+        [UIManager.StorageScreenId] = (ScreenType.NonModal, "resources"),
     };
 
     return expected.All(item =>

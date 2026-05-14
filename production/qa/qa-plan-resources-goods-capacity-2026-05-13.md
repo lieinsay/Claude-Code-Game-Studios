@@ -51,10 +51,10 @@ The primary QA objective is to confirm that the C# resource contract is stable e
 | 003 | `tests/unit/resources/CargoUnpackTest.csproj` | PASS |
 | 004 | `tests/unit/resources/WeightMassTest.csproj` | PASS |
 | 005 | `tests/unit/resources/CoreOperationsTest.csproj` | PASS |
-| 006 | `tests/unit/resources/StateMachineTest.csproj` | PASS |
+| 006 | `tests/unit/resources/ResourcesStateMachineTest.csproj` | PASS |
 | 007 | `tests/integration/resources/SpecializedOpsTest.csproj` | PASS |
-| 008 | `tests/integration/resources/SignalContractTest.csproj` | PASS |
-| 009 | `tests/integration/resources/PersistenceIntegrationTest.csproj` | PASS |
+| 008 | `tests/integration/resources/ResourcesSignalContractTest.csproj` | PASS |
+| 009 | `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj` | PASS |
 
 Additional sprint gate evidence:
 

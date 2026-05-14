@@ -60,7 +60,7 @@
 
 | ADR | System | GDD | TR IDs | Implementation | Status |
 |-----|--------|-----|--------|---------------|--------|
-| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/UIManager.cs` + `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` (Story 001 20/20 PASS; Story 002-006 pending) | Accepted + partial implemented |
+| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/UIManager.cs` + `tests/unit/ui-hud-interface/*Test.csproj` (Stories 001-003 PASS; Stories 004-006 pending) | Accepted + partial implemented |
 | — | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Deferred (ADR-0016)** |
 
 ---
@@ -146,8 +146,6 @@ Presentation (1 Accepted + 1 deferred)
 |-------|--------|---------------|
 | TR-navigation-002 | #10 Navigation | ADR-0010 covers data bridge but not formula implementation details |
 | TR-navigation-003 | #10 Navigation | ADR-0010 covers data bridge but not hull band transitions mid-voyage |
-| TR-ui-002 | #16 UI | ADR-0012 covers screen state machine but HUD dirty-flag batch update not detailed |
-| TR-ui-004 | #16 UI | ADR-0012 mentions dual-focus but browser tab freeze recovery is in ADR-0006 |
 | TR-combat-002 | #12 Combat | ADR-0018 covers decision breath state machine but UI panel spec is in ADR-0012 |
 
 ---

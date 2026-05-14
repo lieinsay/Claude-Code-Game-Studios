@@ -192,7 +192,7 @@ func get_carried_contents_by_tag(material_tag: StringName) -> Dictionary:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/resources/PersistenceIntegrationTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj` — must exist and pass
 **Status**: [x] Created and passing — 2026-05-13 (15/15 checks)
 
 ---
@@ -202,7 +202,7 @@ func get_carried_contents_by_tag(material_tag: StringName) -> Dictionary:
 **Completed**: 2026-05-13
 **Criteria**: 15/15 passing
 **Deviations**: None. Readiness metadata was corrected from nonexistent `TR-resources-009` to active `TR-resources-001` and `TR-resources-003`; direct GDD anchors are `AC-RES-008`, `AC-RES-009.3`, `AC-RES-010`, and the MVP Starting State table.
-**Test Evidence**: Integration — `tests/integration/resources/PersistenceIntegrationTest.csproj` passes 15/15 checks.
+**Test Evidence**: Integration — `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj` passes 15/15 checks.
 **Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues; review-mode subagents were not spawned because Codex delegation requires an explicit user request.
 
 ---

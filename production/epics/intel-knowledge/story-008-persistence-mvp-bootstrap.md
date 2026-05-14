@@ -253,7 +253,7 @@ static func _array_to_stringname_array(arr: Array) -> Array:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/intel/persistence/PersistenceIntegrationTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/intel/persistence/IntelPersistenceIntegrationTest.csproj` — must exist and pass
 **Status**: [x] 43/43 PASS — 2026-05-13
 
 ---

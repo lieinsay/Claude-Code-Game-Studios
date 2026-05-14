@@ -65,7 +65,7 @@ This epic is complete when:
 - `tests/integration/hub/DepartureModesTest.csproj` — PASS
 - `tests/integration/hub/ArrivalFlowTest.csproj` — PASS
 - `tests/integration/hub/LifeTraceAnchorsTest.csproj` — PASS
-- `tests/integration/hub/SignalContractTest.csproj` — PASS
+- `tests/integration/hub/HubSignalContractTest.csproj` — PASS
 - `tests/integration/hub/PersistenceTransitionTest.csproj` — PASS
 - 2026-05-12 Codex review rerun — all 8 Hub runners PASS (38/38 checks)
 - `dotnet build CloudWeaverVoyage.sln` — PASS

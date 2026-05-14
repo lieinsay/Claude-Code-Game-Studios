@@ -82,10 +82,10 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | TR-partner-001 | partner-relationships | #15 | 1 scout partner (sky-cat) with sniff verb → reveal_rumor() | Narrative |
 | TR-partner-002 | partner-relationships | #15 | One-time irreversible naming + nest accumulation (4 items, irreversible) | Narrative |
 | TR-partner-003 | partner-relationships | #15 | 6-state runtime machine keyed to Hub states; always present on airship | Narrative |
-| TR-ui-001 | ui-hud-chart-interface | #16 | 12 screens with modal stack (single modal + combat overlay) | UI |
-| TR-ui-002 | ui-hud-chart-interface | #16 | 4-layer input routing priority; signal-driven HUD with dirty-flag batch updates | UI |
-| TR-ui-003 | ui-hud-chart-interface | #16 | Screen state machine: Hub → Chart → Exploration → Return closed loop | UI |
-| TR-ui-004 | ui-hud-chart-interface | #16 | WCAG AA contrast compliance; desktop focus recovery | UI/Accessibility |
+| TR-ui-001 | ui-hud-chart-interface | #16 | Screen state machine, screen flow, and 12-screen registry | UI |
+| TR-ui-002 | ui-hud-chart-interface | #16 | Modal stack, combat override, input routing, and Godot 4.6 dual-focus sync | UI |
+| TR-ui-003 | ui-hud-chart-interface | #16 | HUD dirty-flag batch updates, panel lifecycle, and lazy-load cache pool | UI |
+| TR-ui-004 | ui-hud-chart-interface | #16 | Animation timing contracts, upstream data query interfaces, and downstream semantic events | UI/Integration |
 | TR-feedback-001 | feedback-fx-audio | #17 | Semantic feedback events: route_selected, repair_completed, threat_triggered, etc. | Audio/VFX |
 | TR-feedback-002 | feedback-fx-audio | #17 | Minimum visible-repair feedback owned by #13; home-safety feedback by #7; clarity by #16 | Audio/VFX |
 | TR-onboarding-001 | onboarding-first-loop | #18 | First-loop guidance: Hub → Chart → Explore → Return → Repair | Meta |
@@ -670,10 +670,10 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 | TR-partner-001 | Scout partner + sniff verb | — | ❌ GAP |
 | TR-partner-002 | Naming + nest accumulation | — | ❌ GAP |
 | TR-partner-003 | 6-state machine keyed to Hub | — | ❌ GAP |
-| TR-ui-001 | 12 screens + modal stack | — | ❌ GAP |
-| TR-ui-002 | 4-layer input routing + dirty-flag HUD | — | ❌ GAP |
-| TR-ui-003 | Screen state machine closed loop | — | ❌ GAP |
-| TR-ui-004 | WCAG AA + desktop focus recovery | ADR-0019 | ✅ COVERED |
+| TR-ui-001 | Screen state machine + 12-screen registry | ADR-0012 | ✅ COVERED |
+| TR-ui-002 | Modal stack + input routing + dual-focus | ADR-0012 | ✅ COVERED |
+| TR-ui-003 | HUD dirty flags + panel lifecycle/cache | ADR-0012 | ✅ COVERED |
+| TR-ui-004 | Animation timing + upstream data + semantic events | ADR-0012 | ✅ COVERED |
 | TR-feedback-001 | Semantic feedback events | — | ❌ GAP |
 | TR-feedback-002 | MVP feedback ownership assignment | — | ❌ GAP |
 | TR-onboarding-001 | First-loop guidance | — | ❌ GAP |
@@ -690,7 +690,7 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 | ADR-0004 | Interaction System — C# Handler Base + Registry | TR-movement-* | C# `InteractionHandler` base class; InteractionRegistry autoload; nearest-reachable focus; Use entry dispatches to domain handlers |
 | ADR-0005 | Resource Pool Architecture — 6 Pools, Capacity Types, Terminal Deposit | TR-resources-* | 6 pools with defined stack rules; 3 capacity types; `commit_deposit` atomic + irreversible to Pool 6 |
 | ADR-0006 | Web Platform Constraints & Engine Compatibility | Historical / superseded by ADR-0019 | Retained for rationale only; Web export no longer governs MVP implementation |
-| ADR-0019 | Desktop C# Platform Pivot | TR-platform-*, TR-ui-004 | Godot 4.6.2 .NET/C# desktop-first implementation; Web/GDScript constraints superseded for active MVP work |
+| ADR-0019 | Desktop C# Platform Pivot | TR-platform-* | Godot 4.6.2 .NET/C# desktop-first implementation; Web/GDScript constraints superseded for active MVP work |
 
 ### Should Have Before System Build (Core & Feature — 6 ADRs)
 

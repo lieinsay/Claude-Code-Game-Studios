@@ -169,7 +169,7 @@ func add(...) -> ResourceResult:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/resources/SignalContractTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/resources/ResourcesSignalContractTest.csproj` — must exist and pass
 **Status**: [x] Created and passing — 2026-05-13 (15/15 checks)
 
 ---
@@ -179,7 +179,7 @@ func add(...) -> ResourceResult:
 **Completed**: 2026-05-13
 **Criteria**: 15/15 passing
 **Deviations**: None. Readiness metadata was corrected from nonexistent `TR-resources-008` to active `TR-resources-001`; the direct GDD anchor is `AC-RES-012.1` through `AC-RES-012.12`.
-**Test Evidence**: Integration — `tests/integration/resources/SignalContractTest.csproj` passes 15/15 checks.
+**Test Evidence**: Integration — `tests/integration/resources/ResourcesSignalContractTest.csproj` passes 15/15 checks.
 **Code Review**: Complete — APPROVED. Local review found no blocking ADR, architecture, standards, or testability issues; review-mode subagents were not spawned because Codex delegation requires an explicit user request.
 
 ---

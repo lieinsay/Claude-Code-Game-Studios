@@ -447,33 +447,33 @@ requirements:
   - id: TR-ui-001
     system: ui-hud-chart-interface
     gdd: design/gdd/ui-hud-chart-interface.md
-    requirement: "12 screens with modal stack (single modal + combat overlay)"
+    requirement: "Screen state machine, screen flow, and 12-screen registry"
     created: 2026-05-05
-    revised: ""
+    revised: "2026-05-14"
     status: active
 
   - id: TR-ui-002
     system: ui-hud-chart-interface
     gdd: design/gdd/ui-hud-chart-interface.md
-    requirement: "4-layer input routing priority; signal-driven HUD with dirty-flag batch updates"
+    requirement: "Modal stack, combat override, input routing, and Godot 4.6 dual-focus sync"
     created: 2026-05-05
-    revised: ""
+    revised: "2026-05-14"
     status: active
 
   - id: TR-ui-003
     system: ui-hud-chart-interface
     gdd: design/gdd/ui-hud-chart-interface.md
-    requirement: "Screen state machine: Hub → Chart → Exploration → Return closed loop"
+    requirement: "HUD dirty-flag batch updates, panel lifecycle, and lazy-load cache pool"
     created: 2026-05-05
-    revised: ""
+    revised: "2026-05-14"
     status: active
 
   - id: TR-ui-004
     system: ui-hud-chart-interface
     gdd: design/gdd/ui-hud-chart-interface.md
-    requirement: "WCAG AA contrast compliance; desktop window focus recovery"
+    requirement: "Animation timing contracts, upstream data query interfaces, and downstream semantic events"
     created: 2026-05-05
-    revised: ""
+    revised: "2026-05-14"
     status: active
 
   # === System #17 — feedback-fx-audio ===

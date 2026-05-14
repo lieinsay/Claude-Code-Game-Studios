@@ -172,8 +172,8 @@ func _init_new_game_state() -> void:
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/world-repair/StateMachineTest.csproj` — must exist and pass
-**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/unit/world-repair/StateMachineTest.csproj --no-restore` PASS 13/13; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
+**Required evidence**: `tests/unit/world-repair/WorldRepairStateMachineTest.csproj` — must exist and pass
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/unit/world-repair/WorldRepairStateMachineTest.csproj --no-restore` PASS 13/13; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 

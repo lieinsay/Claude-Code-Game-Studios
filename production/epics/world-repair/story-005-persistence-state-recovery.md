@@ -190,8 +190,8 @@ func _on_feature_ready() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/world-repair/PersistenceTest.csproj` — must exist and pass
-**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/PersistenceTest.csproj --no-restore` PASS 12/12; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
+**Required evidence**: `tests/integration/world-repair/WorldRepairPersistenceTest.csproj` — must exist and pass
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/WorldRepairPersistenceTest.csproj --no-restore` PASS 12/12; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 

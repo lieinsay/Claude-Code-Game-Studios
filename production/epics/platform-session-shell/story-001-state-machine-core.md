@@ -78,7 +78,7 @@
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: `tests/unit/session/StateMachineTest.csproj` — must exist and pass
+**Required evidence**: `tests/unit/session/SessionStateMachineTest.csproj` — must exist and pass
 **Status**: [x] Created and passing — 2026-05-11
 
 ---
@@ -92,5 +92,5 @@
 
 **Implemented**: 2026-05-11
 **Criteria**: 8/8 passing
-**Test Evidence**: Logic test at `tests/unit/session/StateMachineTest.csproj` — 8 acceptance checks passing.
+**Test Evidence**: Logic test at `tests/unit/session/SessionStateMachineTest.csproj` — 8 acceptance checks passing.
 **Code Review**: Local review complete — no blocking issues found.

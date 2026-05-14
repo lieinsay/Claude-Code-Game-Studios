@@ -4,6 +4,7 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: Integration
+> **Estimate**: L / 8-10 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
@@ -16,6 +17,8 @@
 **ADR Decision Summary**: 本 Story 覆盖 GDD 全部 13 个边缘情况 + 桌面窗口生命周期特殊性 + WCAG AA 无障碍验证。核心边缘情况：桌面窗口失焦/恢复 恢复（NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量刷新）；多模态同时请求（S7 覆盖 / S10 排队 / 其余丢弃→Toast）；面板打开期间底层数据变更（面板使用打开时快照——不自动刷新；提交动作通过领域 API 写回）；零物品面板空状态视图（S11/S12/S4）；departure_locked 期间面板请求静默拒绝；命名模态到达序列时序冲突（4 路合取 + skip_count >= 3 不弹出）；船体归零返回 Hub（船体红波段 + 闪烁扳手图标 + can_depart()=false）；货舱模块未安装（S1 货舱区域置灰 + "无货舱"文本）；战斗威胁覆盖容量取舍面板竞态防御；Tab 导航时面板内无可聚焦元素（焦点不穿透）；S7 战斗面板中 Esc 无效；桌面后台恢复 UI 不同步（delta > 1.0s 全量刷新）。WCAG AA 硬性要求：所有 <24px 颜色编码元素必须形状+颜色+文字三重编码；船体波段=色条+分段数+形状(✓/⚡/○)；材料满足/不足=颜色+✓/✗图标+文字；危险红 #D4644B 在帆布米 #E4D2B3 上对比度 ≥ 4.52:1。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
+
+**Performance Budget**: Full UI refresh must complete within one 16.67ms frame at MVP UI scale. Idle `_process()` remains zero-cost when no dirty flags are present, and this story must not add sustained per-frame work beyond the existing dirty-flag batch update path.
 
 **Control Manifest Rules (Presentation layer)**:
 - Required: NOTIFICATION_APPLICATION_RESUMED 时 delta > 1.0s → 全量 UI 刷新；所有 <24px 颜色编码元素三重编码（颜色+形状+文字）；面板空状态视图必须存在——不显示空白面板

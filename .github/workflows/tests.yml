@@ -44,16 +44,16 @@ jobs:
         run: dotnet run --project tests/unit/resources/CoreOperationsTest.csproj
 
       - name: Run resources state machine unit tests
-        run: dotnet run --project tests/unit/resources/StateMachineTest.csproj
+        run: dotnet run --project tests/unit/resources/ResourcesStateMachineTest.csproj
 
       - name: Run resources specialized operations integration tests
         run: dotnet run --project tests/integration/resources/SpecializedOpsTest.csproj
 
       - name: Run resources signal contract integration tests
-        run: dotnet run --project tests/integration/resources/SignalContractTest.csproj
+        run: dotnet run --project tests/integration/resources/ResourcesSignalContractTest.csproj
 
       - name: Run resources persistence integration tests
-        run: dotnet run --project tests/integration/resources/PersistenceIntegrationTest.csproj
+        run: dotnet run --project tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj
 
       - name: Run registry unit tests
         run: dotnet run --project tests/unit/registry/IdRegistryCoreTest.csproj
@@ -62,7 +62,7 @@ jobs:
         run: dotnet run --project tests/unit/registry/DiagnosticSystemTest.csproj
 
       - name: Run session state machine unit tests
-        run: dotnet run --project tests/unit/session/StateMachineTest.csproj
+        run: dotnet run --project tests/unit/session/SessionStateMachineTest.csproj
 
       - name: Run session entry/audio integration tests
         run: dotnet run --project tests/integration/session/EntryAudioTest.csproj
@@ -74,7 +74,7 @@ jobs:
         run: dotnet run --project tests/unit/session/FailureSeverityTest.csproj
 
       - name: Run session storage capability integration tests
-        run: dotnet run --project tests/integration/session/StorageCapabilityTest.csproj
+        run: dotnet run --project tests/integration/session/SessionStorageCapabilityTest.csproj
 
       - name: Run session input gate integration tests
         run: dotnet run --project tests/integration/session/InputGateTest.csproj
@@ -119,7 +119,7 @@ jobs:
         run: dotnet run --project tests/integration/hub/LifeTraceAnchorsTest.csproj
 
       - name: Run hub signal contract integration tests
-        run: dotnet run --project tests/integration/hub/SignalContractTest.csproj
+        run: dotnet run --project tests/integration/hub/HubSignalContractTest.csproj
 
       - name: Run hub persistence transition integration tests
         run: dotnet run --project tests/integration/hub/PersistenceTransitionTest.csproj
@@ -129,6 +129,15 @@ jobs:
 
       - name: Run presentation diagnostic UI tests
         run: dotnet run --project tests/unit/presentation/DiagnosticUITest.csproj
+
+      - name: Run UI HUD screen state machine unit tests
+        run: dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj
+
+      - name: Run UI HUD modal stack input routing unit tests
+        run: dotnet run --project tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj
+
+      - name: Run UI HUD update panel lifecycle unit tests
+        run: dotnet run --project tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj
 
       - name: Run registry domain loading integration tests
         run: dotnet run --project tests/integration/registry/DomainLoadingTest.csproj
@@ -140,7 +149,7 @@ jobs:
         run: dotnet run --project tests/unit/persistence/SnapshotPackageTest.csproj
 
       - name: Run persistence storage capability unit tests
-        run: dotnet run --project tests/unit/persistence/StorageCapabilityTest.csproj
+        run: dotnet run --project tests/unit/persistence/PersistenceStorageCapabilityTest.csproj
 
       - name: Run persistence migration unit tests
         run: dotnet run --project tests/unit/persistence/MigrationTest.csproj
@@ -161,10 +170,10 @@ jobs:
         run: dotnet run --project tests/integration/partner-relationships/HubIntelIntegrationTest.csproj
 
       - name: Run partner persistence integration tests
-        run: dotnet run --project tests/integration/partner-relationships/PersistenceTest.csproj
+        run: dotnet run --project tests/integration/partner-relationships/PartnerPersistenceTest.csproj
 
       - name: Run partner edge cases integration tests
-        run: dotnet run --project tests/integration/partner-relationships/EdgeCasesTest.csproj
+        run: dotnet run --project tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj
 
       - name: Run persistence artifact isolation integration tests
         run: dotnet run --project tests/integration/persistence/ArtifactIsolationTest.csproj

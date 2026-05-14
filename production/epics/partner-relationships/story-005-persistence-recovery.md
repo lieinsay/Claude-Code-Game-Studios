@@ -169,7 +169,7 @@ func _trigger_snapshot() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/partner-relationships/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
+**Required evidence**: `tests/integration/partner-relationships/PartnerPersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
 **Status**: [x] Created and passing — 2026-05-14 (13/13 checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
@@ -184,5 +184,5 @@ func _trigger_snapshot() -> void:
 **Completed**: 2026-05-14
 **Criteria**: 13/13 passing
 **Deviations**: None
-**Test Evidence**: Integration — `tests/integration/partner-relationships/PersistenceTest.csproj` passes 13/13 checks. Story 001, Story 002, Story 003, and Story 004 regressions pass.
+**Test Evidence**: Integration — `tests/integration/partner-relationships/PartnerPersistenceTest.csproj` passes 13/13 checks. Story 001, Story 002, Story 003, and Story 004 regressions pass.
 **Code Review**: Complete — `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/PersistenceProgram.cs` approved with no findings.

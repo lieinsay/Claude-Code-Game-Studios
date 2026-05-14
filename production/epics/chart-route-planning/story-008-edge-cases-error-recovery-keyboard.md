@@ -244,7 +244,7 @@ func _validate_cache_consistency() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/chart/edgecases/EdgeCasesTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/chart/edgecases/ChartEdgeCasesTest.csproj` — must exist and pass
 **Status**: [x] 43/43 PASS — 2026-05-13；Epic #9 复审通过 — 2026-05-13
 
 ---

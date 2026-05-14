@@ -254,8 +254,8 @@ func _validate_ceremony_config() -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/world-repair/EdgeCasesTest.csproj` — must exist and pass
-**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/EdgeCasesTest.csproj --no-restore` PASS 23/23; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
+**Required evidence**: `tests/integration/world-repair/WorldRepairEdgeCasesTest.csproj` — must exist and pass
+**Status**: [x] Done — 2026-05-13 — `dotnet run --project tests/integration/world-repair/WorldRepairEdgeCasesTest.csproj --no-restore` PASS 23/23; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS; `git diff --check` PASS
 
 ---
 

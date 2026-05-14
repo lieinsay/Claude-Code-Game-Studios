@@ -77,7 +77,7 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/session/StorageCapabilityTest.csproj` — must exist and pass
+**Required evidence**: `tests/integration/session/SessionStorageCapabilityTest.csproj` — must exist and pass
 **Status**: [x] Created and passing — 2026-05-11
 
 ---
@@ -91,5 +91,5 @@
 
 **Completed**: 2026-05-11
 **Criteria**: 7/7 passing
-**Test Evidence**: Integration test at `tests/integration/session/StorageCapabilityTest.csproj`.
+**Test Evidence**: Integration test at `tests/integration/session/SessionStorageCapabilityTest.csproj`.
 **Code Review**: Local review complete — no blocking issues found.

@@ -3,8 +3,27 @@
 <!-- STATUS -->
 Epic: Presentation Layer
 Feature: UI / HUD / Chart Interface (#16)
-Task: Epic #16 Story 001 complete；UIManager FSM, departure lock closure, 12-screen registry, and runner evidence verified
+Task: Epic #16 Story 004 complete; next recommended Story 005 Animation Timing & Downstream Semantic Events
 <!-- /STATUS -->
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md` — Story 003: HUD Update, Panel Lifecycle & Cache
+- Criteria: 24/24 acceptance criteria covered; Story 003 runner 25/25 PASS including scout preview three-state regression.
+- Test evidence: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` 25/25 PASS; Story 001 runner 20/20 PASS; Story 002 runner 25/25 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+- Code review: APPROVED after fixing `carried_changed(slot,item,qty)` contract and PREVIEW_NONE/PREVIEW_PRESENCE/PREVIEW_FULL mapping.
+- Deviations: No blocking implementation deviations. Advisory documentation issue: `docs/architecture/tr-registry.yaml` TR-ui-003 text does not match current Epic/Story/GDD HUD lifecycle scope.
+- Tech debt logged: None
+- Next recommended: `production/epics/ui-hud-interface/story-004-upstream-data-contracts-integration.md` — Story 004: Upstream Data Contracts & Domain Integration
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md` — Story 002: Modal Stack, Combat Override & Input Routing
+- Files changed: `src/presentation/UIManager.cs`, `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj`, `tests/unit/ui-hud-interface/ModalStackInputRoutingProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md`, `production/epics/ui-hud-interface/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — 25/25 Story 002 acceptance checks passing
+- Verification: Story 002 runner 25/25 PASS; Story 001 runner 20/20 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS (5 existing warnings, 0 errors); `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Implementation stays in UIManager headless C# logic; real Godot Control rendering and runtime dual-focus behavior remain downstream visual/manual verification scope.
+- Blockers: None
+- Next: `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/ModalStackInputRoutingProgram.cs` then `/story-done production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md`
 
 ## Session Extract — /story-done 2026-05-14
 - Verdict: COMPLETE
@@ -691,9 +710,9 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Target: `production/epics/platform-session-shell/EPIC.md` — Epic #2 Platform Session Shell
 - Plan: Story 001 first as shared state-machine kernel; then Story 002 Entry/Audio and Story 003 Suspend/Resume in parallel; Story 004 failure severity can join after kernel review; Story 006 waits for 003; Story 007 waits for 002/004/005.
 - Story started: `production/epics/platform-session-shell/story-001-state-machine-core.md` — Story 001: Platform State Machine Core
-- Files changed: `src/core/boot/SessionBootChain.cs`, `tests/unit/session/StateMachineTest.csproj`, `tests/unit/session/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/platform-session-shell/story-001-state-machine-core.md`, `production/epics/platform-session-shell/EPIC.md`
-- Test written: `tests/unit/session/StateMachineTest.csproj` — 8/8 Story 001 acceptance checks passing
-- Verification: `dotnet run --project tests/unit/session/StateMachineTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
+- Files changed: `src/core/boot/SessionBootChain.cs`, `tests/unit/session/SessionStateMachineTest.csproj`, `tests/unit/session/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/platform-session-shell/story-001-state-machine-core.md`, `production/epics/platform-session-shell/EPIC.md`
+- Test written: `tests/unit/session/SessionStateMachineTest.csproj` — 8/8 Story 001 acceptance checks passing
+- Verification: `dotnet run --project tests/unit/session/SessionStateMachineTest.csproj` PASS; `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj --no-restore` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
 - Parallel agents started: Story 002 Entry/Audio token flow; Story 003 Desktop suspend/resume flow
 - Blockers: None
 - Next: /code-review `src/core/boot/SessionBootChain.cs` `tests/unit/session/StateMachineProgram.cs` then /story-done `production/epics/platform-session-shell/story-001-state-machine-core.md`
@@ -718,7 +737,7 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 ## Session Extract — Epic #3 local-save-persistence start 2026-05-11
 - Epic: `production/epics/local-save-persistence/EPIC.md` — Local Save / World State Persistence (#3)
 - Stories completed: Story 001 Save Pipeline, Story 002 Snapshot Package Contract, Story 003 Storage Capability Detection
-- Files changed: `src/core/persistence/Persistence.cs` (ValidateDomainPackages added), `src/core/persistence/SnapshotPackage.cs` (ValidateContract + ValidatePayloadTypes + ValidateCanonicalKeys), `src/core/persistence/PersistenceCapabilityDetector.cs` (new), `tests/unit/persistence/SavePipelineTest.csproj`, `tests/unit/persistence/SnapshotPackageTest.csproj`, `tests/unit/persistence/StorageCapabilityTest.csproj`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`
+- Files changed: `src/core/persistence/Persistence.cs` (ValidateDomainPackages added), `src/core/persistence/SnapshotPackage.cs` (ValidateContract + ValidatePayloadTypes + ValidateCanonicalKeys), `src/core/persistence/PersistenceCapabilityDetector.cs` (new), `tests/unit/persistence/SavePipelineTest.csproj`, `tests/unit/persistence/SnapshotPackageTest.csproj`, `tests/unit/persistence/PersistenceStorageCapabilityTest.csproj`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`
 - Test evidence: Story 001 11/11 PASS; Story 002 18/18 PASS; Story 003 17/17 PASS
 - Build: `dotnet build CloudWeaverVoyage.sln --no-restore` PASS (0 errors)
 - Commit: 6388e42 pushed to develop
@@ -753,8 +772,8 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 
 ## Session Extract — /dev-story 2026-05-13
 - Story: `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md` — Story 006: State Machine & Pool Transitions
-- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/StateMachineTest.csproj`, `tests/unit/resources/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md`, `production/epics/resources-goods-capacity/EPIC.md`
-- Test written: `tests/unit/resources/StateMachineTest.csproj` — 12 Story 006 acceptance checks
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/unit/resources/ResourcesStateMachineTest.csproj`, `tests/unit/resources/StateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md`, `production/epics/resources-goods-capacity/EPIC.md`
+- Test written: `tests/unit/resources/ResourcesStateMachineTest.csproj` — 12 Story 006 acceptance checks
 - Verification: Story 006 12/12 PASS; Story 001 14/14 PASS; Story 002 14/14 PASS; Story 003 12/12 PASS; Story 004 9/9 PASS; Story 005 16/16 PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
 - Notes: Story metadata aligned to active registry trace `TR-resources-001`; `AC-RES-006` preserved as the GDD acceptance anchor. `commit_deposit()` implementation and UI confirmation remain Story 007/UI scope.
 - Blockers: None
@@ -772,7 +791,7 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 ## Session Extract — /story-done 2026-05-13
 - Verdict: COMPLETE
 - Story: `production/epics/resources-goods-capacity/story-006-state-machine-pool-transitions.md` — Story 006: State Machine & Pool Transitions
-- Criteria: 12/12 acceptance criteria covered by `tests/unit/resources/StateMachineTest.csproj`; 12/12 checks passing
+- Criteria: 12/12 acceptance criteria covered by `tests/unit/resources/ResourcesStateMachineTest.csproj`; 12/12 checks passing
 - Code review: Complete — APPROVED; no blocking findings
 - Tech debt logged: None
 - Next recommended: `production/epics/resources-goods-capacity/story-007-specialized-operations.md` — Story 007: Specialized Operations
@@ -805,8 +824,8 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 
 ## Session Extract — /dev-story 2026-05-13
 - Story: `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md` — Story 008: Signal Contract & Reentry Guard
-- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/SignalContractTest.csproj`, `tests/integration/resources/SignalContractProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
-- Test written: `tests/integration/resources/SignalContractTest.csproj` — 15 Story 008 acceptance checks
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/ResourcesSignalContractTest.csproj`, `tests/integration/resources/SignalContractProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/integration/resources/ResourcesSignalContractTest.csproj` — 15 Story 008 acceptance checks
 - Verification: Story 008 15/15 PASS; Story 001-007 resource regressions PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
 - Notes: Story metadata aligned to active registry trace `TR-resources-001`; `AC-RES-012.*` preserved as the GDD signal/reentry acceptance anchor. Review-mode file says `full`, but Codex subagent delegation was skipped because the user did not explicitly request delegated agents.
 - Blockers: None
@@ -824,15 +843,15 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 ## Session Extract — /story-done 2026-05-13
 - Verdict: COMPLETE
 - Story: `production/epics/resources-goods-capacity/story-008-signal-contract-reentry-guard.md` — Story 008: Signal Contract & Reentry Guard
-- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/SignalContractTest.csproj`; 15/15 checks passing
+- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/ResourcesSignalContractTest.csproj`; 15/15 checks passing
 - Code review: Complete — APPROVED; no blocking ADR, architecture, standards, or testability findings
 - Tech debt logged: None
 - Next recommended: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
 
 ## Session Extract — /dev-story 2026-05-13
 - Story: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
-- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/PersistenceIntegrationTest.csproj`, `tests/integration/resources/PersistenceIntegrationProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
-- Test written: `tests/integration/resources/PersistenceIntegrationTest.csproj` — 15 Story 009 acceptance checks
+- Files changed: `src/core/resources/ResourcesManager.cs`, `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj`, `tests/integration/resources/PersistenceIntegrationProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md`, `production/epics/resources-goods-capacity/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj` — 15 Story 009 acceptance checks
 - Verification: Story 009 15/15 PASS; Story 001-008 resource regressions PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS
 - Notes: Snapshot integration uses the existing ADR-0003 `SnapshotPackage` C# boundary while preserving the `progress.resources` domain payload; carried pools are excluded from persisted progress, restore splits stacks by current registry limits, and migration overflow is logged/emitted.
 - Blockers: None
@@ -850,7 +869,7 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 ## Session Extract — /story-done 2026-05-13
 - Verdict: COMPLETE
 - Story: `production/epics/resources-goods-capacity/story-009-persistence-external-integration.md` — Story 009: Persistence & External Integration
-- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/PersistenceIntegrationTest.csproj`; 15/15 checks passing
+- Criteria: 15/15 acceptance criteria covered by `tests/integration/resources/ResourcesPersistenceIntegrationTest.csproj`; 15/15 checks passing
 - Code review: Complete — APPROVED; no blocking ADR, architecture, standards, or testability findings
 - Tech debt logged: None
 - Next recommended: Resources, Goods & Capacity Epic #5 is complete; run `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA sign-off.
@@ -944,8 +963,8 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 
 ## Session Extract — /dev-story 2026-05-14
 - Story: `production/epics/partner-relationships/story-005-persistence-recovery.md` — Story 005: Persistence & State Recovery
-- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/integration/partner-relationships/PersistenceTest.csproj`, `tests/integration/partner-relationships/PersistenceProgram.cs`, `production/session-state/active.md`
-- Test written: `tests/integration/partner-relationships/PersistenceTest.csproj` — 13 Story 005 acceptance checks
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/integration/partner-relationships/PartnerPersistenceTest.csproj`, `tests/integration/partner-relationships/PersistenceProgram.cs`, `production/session-state/active.md`
+- Test written: `tests/integration/partner-relationships/PartnerPersistenceTest.csproj` — 13 Story 005 acceptance checks
 - Verification: Story 005 13/13 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `git diff --check` PASS with LF/CRLF warnings only
 - Notes: Snapshot capture uses an injected `IPartnerSnapshotSink`, so PartnerManager can trigger `progress.partner_skycat` snapshots without owning Persistence file I/O. Restore now emits warnings for corrected sniff-success corruption, nest index gaps, and nest-state mismatches while preserving raw nest item data.
 - Blockers: None
@@ -954,7 +973,7 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 ## Session Extract — /story-done 2026-05-14
 - Verdict: COMPLETE
 - Story: `production/epics/partner-relationships/story-005-persistence-recovery.md` — Story 005: Persistence & State Recovery
-- Criteria: 13/13 acceptance criteria covered by `tests/integration/partner-relationships/PersistenceTest.csproj`; 13/13 checks passing
+- Criteria: 13/13 acceptance criteria covered by `tests/integration/partner-relationships/PartnerPersistenceTest.csproj`; 13/13 checks passing
 - Test evidence: Story 005 13/13 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `git diff --check` PASS with LF/CRLF warnings only
 - Code review: Complete — `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/PersistenceProgram.cs` approved with no findings.
 - Tech debt logged: None
@@ -962,19 +981,29 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 
 ## Session Extract — /dev-story 2026-05-14
 - Story: `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md` — Story 006: Edge Cases, R15 Guards & Defensive Handling
-- Files changed: `tests/integration/partner-relationships/EdgeCasesTest.csproj`, `tests/integration/partner-relationships/EdgeCasesProgram.cs`, `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`, `production/session-state/active.md`
-- Test written: `tests/integration/partner-relationships/EdgeCasesTest.csproj` — 34 Story 006 acceptance checks
+- Files changed: `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj`, `tests/integration/partner-relationships/EdgeCasesProgram.cs`, `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`, `production/session-state/active.md`
+- Test written: `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` — 34 Story 006 acceptance checks
 - Verification: Story 006 34/34 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; Story 005 regression 13/13 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS
 - Notes: Production partner logic already satisfied the defensive/R15 behavior from prior stories; this story adds the required comprehensive integration evidence and reflection-based R15 API audits.
 - Blockers: None
-- Next: `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/EdgeCasesTest.csproj` then `/story-done production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`
+- Next: `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` then `/story-done production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE
+- Story: `production/epics/ui-hud-interface/story-004-upstream-data-contracts-integration.md` — Story 004: Upstream Data Contracts & Domain Integration
+- Criteria: 16/16 acceptance criteria covered by `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj`; 16/16 checks passing.
+- Test evidence: Story 004 runner 16/16 PASS; `dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+- Code review: Complete — `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/UpstreamDataContractsProgram.cs` approved with no required changes.
+- Deviations: None. ADR-0012 and TR-ui-004 checks pass for upstream data contract scope; manifest version matches control manifest 2026-05-09.
+- Tech debt logged: None
+- Next recommended: `production/epics/ui-hud-interface/story-005-animation-timing-semantic-events.md` — Story 005: Animation Timing & Downstream Semantic Events
 
 ## Session Extract — /story-done 2026-05-14
 - Verdict: COMPLETE
 - Story: `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md` — Story 006: Edge Cases, R15 Guards & Defensive Handling
-- Criteria: 34/34 acceptance criteria covered by `tests/integration/partner-relationships/EdgeCasesTest.csproj`; 34/34 checks passing
+- Criteria: 34/34 acceptance criteria covered by `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj`; 34/34 checks passing
 - Test evidence: Story 006 34/34 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; Story 005 regression 13/13 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS
-- Code review: Complete — `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/EdgeCasesTest.csproj` approved with suggestions; CI workflow inclusion remains follow-up scope
+- Code review: Complete — `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` approved with suggestions; CI workflow inclusion remains follow-up scope
 - Tech debt logged: None
 - Next recommended: Partner & Relationships Epic has no remaining stories; run `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval
 
@@ -984,7 +1013,7 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Stories: 6/6 complete and closed (`story-001` through `story-006`)
 - Criteria: 119/119 recorded acceptance checks passing across partner unit/integration suites
 - Documentation: Epic status set to Complete; Story 003 and Story 004 AC checkboxes synchronized with their existing passing test evidence
-- Follow-up: CI workflow inclusion for `tests/integration/partner-relationships/EdgeCasesTest.csproj` remains optional follow-up from code review; next gate sequence is `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval
+- Follow-up: CI workflow inclusion for `tests/integration/partner-relationships/PartnerEdgeCasesTest.csproj` remains optional follow-up from code review; next gate sequence is `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval
 
 ## Session Extract — epic closeout 2026-05-14
 - Epic: `production/epics/settlement-market/EPIC.md` — Settlement Market & Port Village Economy
@@ -998,3 +1027,49 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Static evidence: `git diff --check` PASS.
 - Remaining risk: Godot scene-visible market modal, stall art state, purchase audio, and environment ambience remain unverified because #16 UI/HUD and #17 Feedback do not yet expose the visual purchase surface.
 - Next recommended: enter #16 UI/HUD convergence, wire the market modal to `StallOpened`/`PurchaseCompleted`/`PurchaseFailed`, then run a Feature Layer manual smoke for Hub → Repair → Settlement purchase.
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE
+- Story: `production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md` — Story 002: Modal Stack, Combat Override & Input Routing
+- Criteria: 25/25 acceptance criteria covered by `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj`; 25/25 checks passing
+- Test evidence: Story 002 25/25 PASS; Story 001 regression 20/20 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings and 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Code review: Complete — `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/ModalStackInputRoutingProgram.cs` findings fixed before closure; `/story-done` S12 storage identity blocker fixed before completion
+- Tech debt logged: None
+- Next recommended: `production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md` — Story 003: HUD Update, Panel Lifecycle & Cache
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md` — Story 003: HUD Update, Panel Lifecycle & Cache
+- Files changed: `src/presentation/UIManager.cs`, `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj`, `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md`, `production/epics/ui-hud-interface/EPIC.md`, `production/session-state/active.md`
+- Test written: `tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj` — 24/24 Story 003 acceptance checks passing
+- Verification: Story 003 runner 24/24 PASS; Story 001 runner 20/20 PASS; Story 002 runner 25/25 PASS
+- Notes: Implementation stays in UIManager headless C# logic; real Godot Control rendering, actual tween playback, scene preload timing, and manual HUD visuals remain downstream #16 integration/story-done scope.
+- Blockers: None
+- Next: `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/HudUpdatePanelLifecycleProgram.cs` then `/story-done production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md`
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/ui-hud-interface/story-004-upstream-data-contracts-integration.md` — Story 004: Upstream Data Contracts & Domain Integration
+- Files changed: `src/presentation/UIManager.cs`, `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj`, `tests/integration/ui-hud-interface/UpstreamDataContractsProgram.cs`, `CloudWeaverVoyage.sln`, `production/epics/ui-hud-interface/story-004-upstream-data-contracts-integration.md`, `production/session-state/active.md`
+- Test written: `tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj` — 16/16 Story 004 acceptance checks passing
+- Verification: Story 004 runner 16/16 PASS; Story 001 runner 20/20 PASS; Story 002 runner 25/25 PASS; Story 003 runner 25/25 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing unrelated warnings
+- Notes: Implementation adds an injectable upstream data contract and open-time panel binding snapshots to the existing headless C# UIManager model; domain-system query implementations and visible Godot Control rendering remain out of scope.
+- Blockers: None
+- Next: `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/UpstreamDataContractsProgram.cs` then `/story-done production/epics/ui-hud-interface/story-004-upstream-data-contracts-integration.md`
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/ui-hud-interface/story-005-animation-timing-semantic-events.md` — Story 005: Animation Timing & Downstream Semantic Events
+- Files changed: `src/presentation/UIManager.cs`, `tests/integration/ui-hud-interface/AnimationEventsTest.csproj`, `tests/integration/ui-hud-interface/AnimationEventsProgram.cs`, `tests/integration/ui-hud-interface/UpstreamDataContractsProgram.cs`, `CloudWeaverVoyage.sln`, `production/epics/ui-hud-interface/story-005-animation-timing-semantic-events.md`, `production/session-state/active.md`
+- Test written: `tests/integration/ui-hud-interface/AnimationEventsTest.csproj` — 23/23 Story 005 acceptance checks passing
+- Verification: Story 005 runner 23/23 PASS; Story 001 runner 20/20 PASS; Story 002 runner 25/25 PASS; Story 003 runner 25/25 PASS; Story 004 runner 16/16 PASS; `dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false` PASS with 5 existing warnings; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Code-review blockers fixed after initial implementation. UIManager now routes tween/shader/interruption/NinePatch requests through `IUiAnimationDriver`; AC-12 enumerates every registered parchment panel texture contract; AC-23 measures synchronous #16 -> #17 -> consumer cascade depth with nested consumer scopes. Full #17 Feedback implementation and visible Godot scene/render verification remain out of scope.
+- Blockers: None
+- Next: `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/AnimationEventsProgram.cs` then `/story-done production/epics/ui-hud-interface/story-005-animation-timing-semantic-events.md`
+
+## Session Extract — /story-done 2026-05-15
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/ui-hud-interface/story-005-animation-timing-semantic-events.md` — Story 005: Animation Timing & Downstream Semantic Events
+- Criteria: 23/23 acceptance criteria covered by `tests/integration/ui-hud-interface/AnimationEventsTest.csproj`; 23/23 checks passing
+- Test evidence: Story 005 23/23 PASS; Story 001 regression 20/20 PASS; Story 002 regression 25/25 PASS; Story 003 regression 25/25 PASS; Story 004 regression 16/16 PASS; `dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Code review: Complete — `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/AnimationEventsProgram.cs` approved with suggestions
+- Deviations: No blocking deviations. Real Godot Control rendering, concrete `create_tween()` playback, ShaderMaterial visuals, and NinePatch texture assets remain downstream runtime/manual verification scope.
+- Tech debt logged: None
+- Next recommended: `production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md` — Story 006: Edge Cases, Desktop Recovery & Accessibility

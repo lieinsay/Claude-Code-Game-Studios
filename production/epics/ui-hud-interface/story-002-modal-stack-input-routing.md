@@ -1,7 +1,7 @@
 # Story 002: Modal Stack, Combat Override & Input Routing
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,49 +28,49 @@
 
 ### Modal Stack — Single Slot
 
-- [ ] **AC-1**: GIVEN 无模态面板打开，WHEN open_modal(S8)，THEN _modal_panel=S8 实例 + _modal_id=S8。模态遮罩渲染。WASD 移动被阻断
-- [ ] **AC-2**: GIVEN S8 已打开，WHEN open_modal(S9)，THEN 返回 ERR_ANOTHER_MODAL_OPEN。S9 被丢弃→Toast "当前无法操作"。S8 保持打开。_modal_panel 不变
-- [ ] **AC-3**: GIVEN S8 已打开 + 玩家按 Esc，WHEN close_modal()，THEN S8 关闭。_modal_panel=null + _modal_id=""。焦点恢复到打开 S8 之前的元素。WASD 移动恢复
+- [x] **AC-1**: GIVEN 无模态面板打开，WHEN open_modal(S8)，THEN _modal_panel=S8 实例 + _modal_id=S8。模态遮罩渲染。WASD 移动被阻断
+- [x] **AC-2**: GIVEN S8 已打开，WHEN open_modal(S9)，THEN 返回 ERR_ANOTHER_MODAL_OPEN。S9 被丢弃→Toast "当前无法操作"。S8 保持打开。_modal_panel 不变
+- [x] **AC-3**: GIVEN S8 已打开 + 玩家按 Esc，WHEN close_modal()，THEN S8 关闭。_modal_panel=null + _modal_id=""。焦点恢复到打开 S8 之前的元素。WASD 移动恢复
 
 ### Combat Override (S7)
 
-- [ ] **AC-4**: GIVEN S6a（容量取舍）已打开 + 战斗威胁触发，WHEN open_modal(S7)，THEN S6a 状态保存到 _combat_override_stack {panel_id, data_context, scroll_offset, selected_index}。S6a process_mode=DISABLED + modulate.a=0.2。S7 渲染在 CanvasLayer=100
-- [ ] **AC-5**: GIVEN S7 覆盖 S6a + 玩家选择"应急处理"或"硬扛"，WHEN threat_resolved，THEN S7 关闭。从 _combat_override_stack 恢复 S6a——滚动位置、选中索引、物品决策上下文不丢失。_combat_override_stack=null
-- [ ] **AC-6**: GIVEN S7 覆盖 S6a + 玩家选择"撤退"，WHEN threat_resolved，THEN S7 关闭。S6a 被丢弃（不恢复）——撤退意味着"放弃当前探索动作"。_combat_override_stack=null
-- [ ] **AC-7**: GIVEN 无模态面板 + S7 触发，WHEN open_modal(S7)，THEN 正常打开——无覆盖保存。关闭后恢复正常屏幕状态
+- [x] **AC-4**: GIVEN S6a（容量取舍）已打开 + 战斗威胁触发，WHEN open_modal(S7)，THEN S6a 状态保存到 _combat_override_stack {panel_id, data_context, scroll_offset, selected_index}。S6a process_mode=DISABLED + modulate.a=0.2。S7 渲染在 CanvasLayer=100
+- [x] **AC-5**: GIVEN S7 覆盖 S6a + 玩家选择"应急处理"或"硬扛"，WHEN threat_resolved，THEN S7 关闭。从 _combat_override_stack 恢复 S6a——滚动位置、选中索引、物品决策上下文不丢失。_combat_override_stack=null
+- [x] **AC-6**: GIVEN S7 覆盖 S6a + 玩家选择"撤退"，WHEN threat_resolved，THEN S7 关闭。S6a 被丢弃（不恢复）——撤退意味着"放弃当前探索动作"。_combat_override_stack=null
+- [x] **AC-7**: GIVEN 无模态面板 + S7 触发，WHEN open_modal(S7)，THEN 正常打开——无覆盖保存。关闭后恢复正常屏幕状态
 
 ### Queue Strategy
 
-- [ ] **AC-8**: GIVEN 无模态面板 + naming_eligible=true，WHEN open_modal(S10)，THEN S10 命名模态正常打开
-- [ ] **AC-9**: GIVEN S6c（结算摘要）已打开 + 同时 naming_eligible=true，WHEN open_modal(S10)，THEN S10 排队——pending_modal=S10。S6c 关闭后 S10 自动打开
+- [x] **AC-8**: GIVEN 无模态面板 + naming_eligible=true，WHEN open_modal(S10)，THEN S10 命名模态正常打开
+- [x] **AC-9**: GIVEN S6c（结算摘要）已打开 + 同时 naming_eligible=true，WHEN open_modal(S10)，THEN S10 排队——pending_modal=S10。S6c 关闭后 S10 自动打开
 
 ### Non-Modal Panel Coexistence
 
-- [ ] **AC-10**: GIVEN S11（嗅辨）已打开，WHEN open_non_modal(S12 仓库)，THEN S11 和 S12 同时可见。S12 z-index > S11。WASD 移动仍可用
-- [ ] **AC-11**: GIVEN S11+S12 同时打开 + 玩家按 Esc，WHEN esc_pressed，THEN 最后打开的面板（S12）先关闭。再次 Esc→S11 关闭。LIFO 顺序
+- [x] **AC-10**: GIVEN S11（嗅辨）已打开，WHEN open_non_modal(S12 仓库)，THEN S11 和 S12 同时可见。S12 z-index > S11。WASD 移动仍可用
+- [x] **AC-11**: GIVEN S11+S12 同时打开 + 玩家按 Esc，WHEN esc_pressed，THEN 最后打开的面板（S12）先关闭。再次 Esc→S11 关闭。LIFO 顺序
 
 ### 4-Layer Input Routing
 
-- [ ] **AC-12**: GIVEN Layer 0（模态 S3/S6a/S7/S8/S9/S10 任一打开），WHEN 按 WASD，THEN 玩家不移动。按键被模态层消费
-- [ ] **AC-13**: GIVEN Layer 1（S6b 撤离读条），WHEN 按 WASD，THEN 玩家不移动。读条期间移动冻结
-- [ ] **AC-14**: GIVEN Layer 2（S2 非模态/S11/S12 任一打开），WHEN 按 WASD，THEN 玩家正常移动。非模态面板不阻断世界交互
-- [ ] **AC-15**: GIVEN Layer 3（S1/S5 HUD 覆盖层），WHEN 鼠标点击 HUD 区域，THEN 点击穿透到世界层（mouse_filter=IGNORE）。物品栏格除外——物品栏格 mouse_filter=STOP
-- [ ] **AC-16**: GIVEN Layer 4（世界交互），WHEN 按 WASD/E，THEN 玩家正常移动/交互
+- [x] **AC-12**: GIVEN Layer 0（模态 S3/S6a/S7/S8/S9/S10 任一打开），WHEN 按 WASD，THEN 玩家不移动。按键被模态层消费
+- [x] **AC-13**: GIVEN Layer 1（S6b 撤离读条），WHEN 按 WASD，THEN 玩家不移动。读条期间移动冻结
+- [x] **AC-14**: GIVEN Layer 2（S2 非模态/S11/S12 任一打开），WHEN 按 WASD，THEN 玩家正常移动。非模态面板不阻断世界交互
+- [x] **AC-15**: GIVEN Layer 3（S1/S5 HUD 覆盖层），WHEN 鼠标点击 HUD 区域，THEN 点击穿透到世界层（mouse_filter=IGNORE）。物品栏格除外——物品栏格 mouse_filter=STOP
+- [x] **AC-16**: GIVEN Layer 4（世界交互），WHEN 按 WASD/E，THEN 玩家正常移动/交互
 
 ### Global Keys
 
-- [ ] **AC-17**: GIVEN Layer 0 模态面板打开（非 S7/S10），WHEN 按 Esc，THEN 关闭当前模态面板
-- [ ] **AC-18**: GIVEN S7 战斗面板打开，WHEN 按 Esc，THEN 无效。Esc 被消费但不触发关闭。视觉提示"选择一个响应以继续"
-- [ ] **AC-19**: GIVEN S10 命名模态打开，WHEN 按 Esc，THEN 等价于 skip_naming()——跳过命名
-- [ ] **AC-20**: GIVEN Layer 4 + Hub 中，WHEN 按 M 键，THEN S4 航图打开。Layer 0-2 时按 M 键无效
-- [ ] **AC-21**: GIVEN 模态面板打开，WHEN 按 Tab，THEN 焦点在模态面板内循环——不穿透到下层 UI 或世界交互层
+- [x] **AC-17**: GIVEN Layer 0 模态面板打开（非 S7/S10），WHEN 按 Esc，THEN 关闭当前模态面板
+- [x] **AC-18**: GIVEN S7 战斗面板打开，WHEN 按 Esc，THEN 无效。Esc 被消费但不触发关闭。视觉提示"选择一个响应以继续"
+- [x] **AC-19**: GIVEN S10 命名模态打开，WHEN 按 Esc，THEN 等价于 skip_naming()——跳过命名
+- [x] **AC-20**: GIVEN Layer 4 + Hub 中，WHEN 按 M 键，THEN S4 航图打开。Layer 0-2 时按 M 键无效
+- [x] **AC-21**: GIVEN 模态面板打开，WHEN 按 Tab，THEN 焦点在模态面板内循环——不穿透到下层 UI 或世界交互层
 
 ### Godot 4.6 Dual-Focus Sync
 
-- [ ] **AC-22**: GIVEN 修复面板 S8 中的"+1"按钮，WHEN 鼠标点击该按钮，THEN grab_focus() 被调用。键盘焦点移到该按钮——后续 Tab 键从该位置继续
-- [ ] **AC-23**: GIVEN 键盘焦点在"确认提交"按钮上，WHEN 鼠标悬浮在"取消"按钮上，THEN "确认提交"有航标青 focus 边框，"取消"有 10% 亮度 hover 底色。两套样式同时可见但不混淆
-- [ ] **AC-24**: GIVEN 修复面板中"节点名称"标签（只读），WHEN Tab 键遍历焦点，THEN 该标签被跳过（focus_mode=FOCUS_NONE）
-- [ ] **AC-25**: GIVEN 模态面板 S8 打开，WHEN 面板打开完成，THEN 焦点自动移到面板内第一个可交互元素（grab_focus()）
+- [x] **AC-22**: GIVEN 修复面板 S8 中的"+1"按钮，WHEN 鼠标点击该按钮，THEN grab_focus() 被调用。键盘焦点移到该按钮——后续 Tab 键从该位置继续
+- [x] **AC-23**: GIVEN 键盘焦点在"确认提交"按钮上，WHEN 鼠标悬浮在"取消"按钮上，THEN "确认提交"有航标青 focus 边框，"取消"有 10% 亮度 hover 底色。两套样式同时可见但不混淆
+- [x] **AC-24**: GIVEN 修复面板中"节点名称"标签（只读），WHEN Tab 键遍历焦点，THEN 该标签被跳过（focus_mode=FOCUS_NONE）
+- [x] **AC-25**: GIVEN 模态面板 S8 打开，WHEN 面板打开完成，THEN 焦点自动移到面板内第一个可交互元素（grab_focus()）
 
 ---
 
@@ -178,7 +178,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj -p:UseSharedCompilation=false` (25/25 PASS, 2026-05-14)
 
 ---
 
@@ -186,3 +186,22 @@ func _unhandled_input(event: InputEvent) -> void:
 
 - Depends on: Story 001 (screen state machine — modal opens within screen context)
 - Unlocks: Story 004 (modal data binding), Story 006 (edge cases in modal stack behavior)
+
+## Implementation Notes
+
+**Implemented**: 2026-05-14
+**Criteria Covered**: 25/25 acceptance checks passing
+**Test Evidence**: `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — 25/25 PASS
+**Regression Evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — 20/20 PASS
+**Build Evidence**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS (5 existing warnings, 0 errors)
+**Code Review**: Complete — `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/ModalStackInputRoutingProgram.cs` found two routing issues; S7 generic close and mouse focus scope were fixed before closure. `/story-done` found and fixed the S12 identity mismatch (`S12_storage`, owner `resources`).
+**Residual Risk**: This is a headless C# UIManager logic contract; Godot scene-visible Control rendering and real dual-focus mouse/keyboard behavior still need runtime/manual verification in downstream #16 stories.
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Criteria**: 25/25 passing
+**Deviations**: None remaining. The S12 storage identity mismatch found during `/story-done` was corrected before completion.
+**Test Evidence**: Logic test at `tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj` — 25/25 PASS
+**Regression Evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — 20/20 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings and 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+**Code Review**: Complete

@@ -1,9 +1,10 @@
 # Story 005: Animation Timing & Downstream Semantic Events
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
+> **Estimate**: M / 6 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
@@ -127,6 +128,14 @@ func _emit_ui_event(signal_name: StringName, args: Array = []) -> void:
 
 ---
 
+## Performance Budget
+
+- Must preserve the global 60fps / 16.67ms frame target.
+- UI animation work must use SceneTreeTween / ShaderMaterial as specified and stay within Presentation-layer guardrails from `docs/architecture/control-manifest.md`.
+- No manual `_process()` interpolation or CPU-side ink diffusion drawing is allowed.
+
+---
+
 ## QA Test Cases
 
 - **AC-1-9**: All 12 animation contracts verified (duration, easing, property)
@@ -142,7 +151,7 @@ func _emit_ui_event(signal_name: StringName, args: Array = []) -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/ui-hud-interface/AnimationEventsTest.csproj` — must exist and pass, OR documented playtest
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/ui-hud-interface/AnimationEventsTest.csproj -p:UseSharedCompilation=false` (23/23 PASS, 2026-05-14)
 
 ---
 
@@ -151,3 +160,36 @@ func _emit_ui_event(signal_name: StringName, args: Array = []) -> void:
 - Depends on: Story 001 (screen transitions trigger animations), Story 002 (modal open/close triggers events), Story 004 (domain API calls trigger events on success)
 - External: #17 Feedback (consumes ui_* signals)
 - Unlocks: Story 006 (animation edge cases, interruption recovery)
+
+## Implementation Notes
+
+**Implemented**: 2026-05-14
+**Criteria Covered**: 23/23 acceptance checks passing
+**Test Evidence**: `tests/integration/ui-hud-interface/AnimationEventsTest.csproj` — 23/23 PASS
+**Regression Evidence**: Story 001 `ScreenStateMachineTest.csproj` 20/20 PASS; Story 002 `ModalStackInputRoutingTest.csproj` 25/25 PASS; Story 003 `HudUpdatePanelLifecycleTest.csproj` 25/25 PASS; Story 004 `UpstreamDataContractsTest.csproj` 16/16 PASS
+**Build Evidence**: `dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false` PASS (5 existing warnings, 0 errors)
+**Static Evidence**: `git diff --check` PASS with LF/CRLF warnings only
+**Deviations**: None. Implementation uses a headless `IUiAnimationDriver` boundary so UIManager must route tween, shader, interruption, and NinePatch requests through an engine adapter; #17 Feedback consumption is represented by measured synchronous cascade scopes rather than a full FeedbackManager implementation.
+**Residual Risk**: Real Godot Control scene rendering, concrete `create_tween()` playback, ShaderMaterial visuals, and NinePatch texture assets still require runtime/manual verification during `/story-done` or downstream scene integration.
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-15
+**Criteria**: 23/23 passing
+**Deviations**: None blocking. Residual runtime/manual verification remains for concrete Godot Control rendering, `create_tween()` playback, ShaderMaterial visuals, and NinePatch texture assets.
+**Test Evidence**: Integration test at `tests/integration/ui-hud-interface/AnimationEventsTest.csproj` — 23/23 PASS
+**Code Review**: Complete — `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/AnimationEventsProgram.cs` approved with suggestions
+
+Verification:
+
+```powershell
+dotnet run --project tests/integration/ui-hud-interface/AnimationEventsTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj -p:UseSharedCompilation=false
+dotnet build CloudWeaverVoyage.sln -p:UseSharedCompilation=false
+git diff --check
+```
