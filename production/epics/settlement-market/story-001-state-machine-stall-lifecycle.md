@@ -1,7 +1,7 @@
 # Story 001: Settlement State Machine & Stall Lifecycle
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,36 +28,36 @@
 
 ### State Machine Core — Settlement
 
-- [ ] **AC-1**: GIVEN 新游戏启动，WHEN SettlementManager._init_new_game_state()，THEN settlement.glass-harbor settlement_state=DORMANT, completed_node_ids=[]
-- [ ] **AC-2**: GIVEN settlement_state=DORMANT + active_stall_count=1（仅杂货摊），WHEN 首个匹配修复完成后 recalculate_settlement_activity()，THEN active_stall_count=2 → settlement_state→RECOVERING
-- [ ] **AC-3**: GIVEN settlement_state=RECOVERING + active_stall_count=2-3，WHEN 全部修复完成后 recalculate_settlement_activity()，THEN active_stall_count=4 → settlement_state→ACTIVE
-- [ ] **AC-4**: GIVEN settlement_state=RECOVERING + active_stall_count 未达到 total_stall_count，WHEN 检查，THEN 保持 RECOVERING。不提前进入 ACTIVE
+- [x] **AC-1**: GIVEN 新游戏启动，WHEN SettlementManager._init_new_game_state()，THEN settlement.glass-harbor settlement_state=DORMANT, completed_node_ids=[]
+- [x] **AC-2**: GIVEN settlement_state=DORMANT + active_stall_count=1（仅杂货摊），WHEN 首个匹配修复完成后 recalculate_settlement_activity()，THEN active_stall_count=2 → settlement_state→RECOVERING
+- [x] **AC-3**: GIVEN settlement_state=RECOVERING + active_stall_count=2-3，WHEN 全部修复完成后 recalculate_settlement_activity()，THEN active_stall_count=4 → settlement_state→ACTIVE
+- [x] **AC-4**: GIVEN settlement_state=RECOVERING + active_stall_count 未达到 total_stall_count，WHEN 检查，THEN 保持 RECOVERING。不提前进入 ACTIVE
 
 ### State Machine Core — Stall
 
-- [ ] **AC-5**: GIVEN 新游戏启动，WHEN 初始化，THEN stall.gh-general stall_state=OPEN_BASIC + settlement_id="settlement.glass-harbor"。杂货摊默认开启——无需任何修复
-- [ ] **AC-6**: GIVEN 新游戏启动，WHEN 初始化，THEN stall.gh-lens-workshop / stall.gh-sail-shop / stall.gh-chart-studio 均为 CLOSED
-- [ ] **AC-7**: GIVEN stall_state=CLOSED + 匹配的 repair_completed 到达，WHEN F.2 解锁判定通过，THEN stall_state→OPEN_BASIC。合法转换
-- [ ] **AC-8**: GIVEN stall_state=OPEN_BASIC，WHEN MVP 中没有第二个匹配修复，THEN 保持 OPEN_BASIC。OPEN_EXPANDED 在状态机中定义但不可达
+- [x] **AC-5**: GIVEN 新游戏启动，WHEN 初始化，THEN stall.gh-general stall_state=OPEN_BASIC + settlement_id="settlement.glass-harbor"。杂货摊默认开启——无需任何修复
+- [x] **AC-6**: GIVEN 新游戏启动，WHEN 初始化，THEN stall.gh-lens-workshop / stall.gh-sail-shop / stall.gh-chart-studio 均为 CLOSED
+- [x] **AC-7**: GIVEN stall_state=CLOSED + 匹配的 repair_completed 到达，WHEN F.2 解锁判定通过，THEN stall_state→OPEN_BASIC。合法转换
+- [x] **AC-8**: GIVEN stall_state=OPEN_BASIC，WHEN MVP 中没有第二个匹配修复，THEN 保持 OPEN_BASIC。OPEN_EXPANDED 在状态机中定义但不可达
 
 ### State Machine Core — NPC
 
-- [ ] **AC-9**: GIVEN 新游戏启动，WHEN 初始化，THEN npc.atu（杂货摊 NPC）npc_state=IDLE, stall_id="stall.gh-general"
-- [ ] **AC-10**: GIVEN 新游戏启动，WHEN 初始化，THEN npc.wei / npc.yun / npc.cen 均为 ABSENT
-- [ ] **AC-11**: GIVEN npc_state=ABSENT + 所属摊位 closed→open_basic，WHEN 摊位状态变更触发，THEN npc_state→IDLE。NPC 随摊位恢复
+- [x] **AC-9**: GIVEN 新游戏启动，WHEN 初始化，THEN npc.atu（杂货摊 NPC）npc_state=IDLE, stall_id="stall.gh-general"
+- [x] **AC-10**: GIVEN 新游戏启动，WHEN 初始化，THEN npc.wei / npc.yun / npc.cen 均为 ABSENT
+- [x] **AC-11**: GIVEN npc_state=ABSENT + 所属摊位 closed→open_basic，WHEN 摊位状态变更触发，THEN npc_state→IDLE。NPC 随摊位恢复
 
 ### Invalid Transition Rejection
 
-- [ ] **AC-12**: GIVEN stall_state=CLOSED，WHEN 尝试 closed→open_expanded（跳过中间状态），THEN 状态机拒绝。必须经过 OPEN_BASIC
-- [ ] **AC-13**: GIVEN stall_state=OPEN_BASIC，WHEN 尝试 open_basic→closed，THEN 状态机拒绝。修复不可逆
-- [ ] **AC-14**: GIVEN npc_state=ABSENT，WHEN 尝试 absent→active（跳过中间状态），THEN 状态机拒绝。必须经过 IDLE
-- [ ] **AC-15**: GIVEN settlement_state=RECOVERING，WHEN 尝试 recovering→dormant，THEN 状态机拒绝。修复不可逆
-- [ ] **AC-16**: GIVEN settlement_state=ACTIVE，WHEN 尝试 active→recovering 或 active→dormant，THEN 状态机拒绝。已激活不可退化
+- [x] **AC-12**: GIVEN stall_state=CLOSED，WHEN 尝试 closed→open_expanded（跳过中间状态），THEN 状态机拒绝。必须经过 OPEN_BASIC
+- [x] **AC-13**: GIVEN stall_state=OPEN_BASIC，WHEN 尝试 open_basic→closed，THEN 状态机拒绝。修复不可逆
+- [x] **AC-14**: GIVEN npc_state=ABSENT，WHEN 尝试 absent→active（跳过中间状态），THEN 状态机拒绝。必须经过 IDLE
+- [x] **AC-15**: GIVEN settlement_state=RECOVERING，WHEN 尝试 recovering→dormant，THEN 状态机拒绝。修复不可逆
+- [x] **AC-16**: GIVEN settlement_state=ACTIVE，WHEN 尝试 active→recovering 或 active→dormant，THEN 状态机拒绝。已激活不可退化
 
 ### Registry Integration
 
-- [ ] **AC-17**: GIVEN SettlementManager 在 feature_ready 阶段初始化，WHEN 启动，THEN 从 Registry.query_entity() 读取 settlement/settlement.glass-harbor、stall、npc 静态定义。若缺失关键实体 → 记录错误，跳过该实体初始化
-- [ ] **AC-18**: GIVEN MVP 仅有 1 个定居点（琉璃港），WHEN _init_new_game_state()，THEN settlements 仅包含 settlement.glass-harbor。stalls 包含 4 个摊位。npcs 包含 4 个 NPC。无额外实体
+- [x] **AC-17**: GIVEN SettlementManager 在 feature_ready 阶段初始化，WHEN 启动，THEN 从 Registry.query_entity() 读取 settlement/settlement.glass-harbor、stall、npc 静态定义。若缺失关键实体 → 记录错误，跳过该实体初始化
+- [x] **AC-18**: GIVEN MVP 仅有 1 个定居点（琉璃港），WHEN _init_new_game_state()，THEN settlements 仅包含 settlement.glass-harbor。stalls 包含 4 个摊位。npcs 包含 4 个 NPC。无额外实体
 
 ---
 
@@ -229,7 +229,11 @@ func _init_new_game_state() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/settlement-market/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/unit/settlement-market/StateMachineTest.csproj -p:UseSharedCompilation=false` — PASS (5/5 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 

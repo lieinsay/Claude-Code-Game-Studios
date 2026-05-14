@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <OutputPath>bin\StateMachineTest\</OutputPath>
+    <AssemblyName>SettlementMarketStateMachineTest</AssemblyName>
+    <UseAppHost>false</UseAppHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="StateMachineProgram.cs" />
+    <ProjectReference Include="..\..\..\CloudWeaverVoyage.csproj" />
+  </ItemGroup>
+</Project>

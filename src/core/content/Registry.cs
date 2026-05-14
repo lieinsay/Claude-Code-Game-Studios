@@ -308,6 +308,10 @@ public sealed class Registry
         ["route"] = ["origin_location_id", "destination_id", "distance_band", "hazard_tags"],
         ["location"] = ["region_tag", "location_kind", "service_tags", "local_identity_tags", "settlement_need_tags"],
         ["repair-node"] = ["location_id", "node_kind", "restoration_theme", "settlement_need_tags", "repair_visible_state_tags"],
+        ["settlement"] = ["linked_location_ids"],
+        ["stall"] = ["settlement_id", "npc_id"],
+        ["npc"] = ["stall_id"],
+        ["good"] = ["stall_id", "price", "supply_class", "stack_rule", "max_stack", "mass_class"],
         ["stall-good"] = ["commodity_tags", "vendor_tags", "supply_class", "local_identity_tags", "settlement_need_tags", "repair_visible_state_tags"],
         ["companion"] = ["role_tags", "origin_location_id", "archetype_tags"],
         ["threat"] = ["threat_class", "encounter_tags", "counter_tags", "severity_tier"],
@@ -317,7 +321,7 @@ public sealed class Registry
     private static readonly Dictionary<string, string[]> ControlledVocabularies = new(StringComparer.Ordinal)
     {
         ["owner_domain"] = ["resources", "airship", "world", "routes", "intel", "companions", "threats"],
-        ["kind"] = ["resource", "cargo", "module", "home-space", "home-anchor", "route", "location", "repair-node", "stall-good", "companion", "threat", "intel"],
+        ["kind"] = ["resource", "cargo", "module", "home-space", "home-anchor", "route", "location", "repair-node", "settlement", "stall", "npc", "good", "stall-good", "companion", "threat", "intel"],
         ["region_tag"] = ["starter-sea", "sky-reef", "storm-belt", "old-harbor-chain"],
         ["settlement_need_tags"] = ["food", "repair-materials", "navigation-aid", "safety", "trade-link", "home-comfort"],
         ["repair_visible_state_tags"] = ["dark", "damaged", "patched", "lit", "connected", "inhabited", "stock-improved"],
@@ -2329,6 +2333,116 @@ public static class RegistryBootstrap
                 ["abilities"] = ["ability.lighthouse-signal-interpretation"],
             },
         });
+        yield return Entity("repair_node.old_lighthouse", "repair-node", "旧灯塔", 2, new()
+        {
+            ["node_id"] = "repair_node.old_lighthouse",
+            ["location_id"] = "location.glass-harbor-outskirts",
+            ["linked_location_id"] = "location.glass-harbor-outskirts",
+            ["node_kind"] = "lighthouse",
+            ["settlement_market_only"] = true,
+            ["restoration_theme"] = "lens",
+            ["settlement_need_tags"] = new[] { "navigation-aid", "safety" },
+            ["repair_visible_state_tags"] = new[] { "damaged", "lit" },
+            ["required_materials"] = new Dictionary<string, int> { ["resource.repair_kit"] = 2 },
+            ["required_resources"] = new Dictionary<string, int> { ["resource.repair_kit"] = 2 },
+            ["unlocked_routes"] = Array.Empty<string>(),
+        });
+        yield return Entity("repair_node.chart_archive", "repair-node", "星图档案室", 3, new()
+        {
+            ["node_id"] = "repair_node.chart_archive",
+            ["location_id"] = "location.glass-harbor-outskirts",
+            ["linked_location_id"] = "location.glass-harbor-outskirts",
+            ["node_kind"] = "archive",
+            ["settlement_market_only"] = true,
+            ["restoration_theme"] = "charts",
+            ["settlement_need_tags"] = new[] { "navigation-aid", "trade-link" },
+            ["repair_visible_state_tags"] = new[] { "damaged", "patched" },
+            ["required_materials"] = new Dictionary<string, int> { ["resource.navigation_chart"] = 1 },
+            ["required_resources"] = new Dictionary<string, int> { ["resource.navigation_chart"] = 1 },
+            ["unlocked_routes"] = Array.Empty<string>(),
+        });
+        yield return Entity("repair_node.grand_bazaar", "repair-node", "大集棚架", 4, new()
+        {
+            ["node_id"] = "repair_node.grand_bazaar",
+            ["location_id"] = "location.glass-harbor-outskirts",
+            ["linked_location_id"] = "location.glass-harbor-outskirts",
+            ["node_kind"] = "market",
+            ["settlement_market_only"] = true,
+            ["restoration_theme"] = "trade",
+            ["settlement_need_tags"] = new[] { "trade-link", "home-comfort" },
+            ["repair_visible_state_tags"] = new[] { "damaged", "inhabited" },
+            ["required_materials"] = new Dictionary<string, int> { ["resource.basic_supply"] = 2 },
+            ["required_resources"] = new Dictionary<string, int> { ["resource.basic_supply"] = 2 },
+            ["unlocked_routes"] = Array.Empty<string>(),
+        });
+
+        yield return Entity("settlement.glass-harbor", "settlement", "琉璃港", 1, new()
+        {
+            ["linked_location_ids"] = new[] { "location.glass-harbor", "location.glass-harbor-outskirts" },
+            ["settlement_need_tags"] = new[] { "navigation-aid", "trade-link" },
+        });
+        yield return Entity("stall.gh-general", "stall", "阿图杂货摊", 1, new()
+        {
+            ["settlement_id"] = "settlement.glass-harbor",
+            ["npc_id"] = "npc.atu",
+            ["is_default_open"] = true,
+            ["required_node_ids"] = Array.Empty<string>(),
+            ["unlock_threshold_basic"] = 1,
+        });
+        yield return Entity("stall.gh-lens-workshop", "stall", "透镜工坊", 2, new()
+        {
+            ["settlement_id"] = "settlement.glass-harbor",
+            ["npc_id"] = "npc.wei",
+            ["is_default_open"] = false,
+            ["required_node_ids"] = new[] { "repair_node.old_lighthouse" },
+            ["unlock_threshold_basic"] = 1,
+        });
+        yield return Entity("stall.gh-sail-shop", "stall", "帆具铺", 3, new()
+        {
+            ["settlement_id"] = "settlement.glass-harbor",
+            ["npc_id"] = "npc.yun",
+            ["is_default_open"] = false,
+            ["required_node_ids"] = new[] { "repair_node.starlight_dock" },
+            ["unlock_threshold_basic"] = 1,
+        });
+        yield return Entity("stall.gh-chart-studio", "stall", "星图斋", 4, new()
+        {
+            ["settlement_id"] = "settlement.glass-harbor",
+            ["npc_id"] = "npc.cen",
+            ["is_default_open"] = false,
+            ["required_node_ids"] = new[] { "repair_node.chart_archive" },
+            ["unlock_threshold_basic"] = 1,
+        });
+        yield return Entity("npc.atu", "npc", "阿图", 1, new()
+        {
+            ["stall_id"] = "stall.gh-general",
+            ["is_default_present"] = true,
+            ["narrative_key"] = "atu",
+        });
+        yield return Entity("npc.wei", "npc", "韦师傅", 2, new()
+        {
+            ["stall_id"] = "stall.gh-lens-workshop",
+            ["is_default_present"] = false,
+            ["narrative_key"] = "wei",
+        });
+        yield return Entity("npc.yun", "npc", "云姨", 3, new()
+        {
+            ["stall_id"] = "stall.gh-sail-shop",
+            ["is_default_present"] = false,
+            ["narrative_key"] = "yun",
+        });
+        yield return Entity("npc.cen", "npc", "岑测绘", 4, new()
+        {
+            ["stall_id"] = "stall.gh-chart-studio",
+            ["is_default_present"] = false,
+            ["narrative_key"] = "cen",
+        });
+        yield return Entity("good.basic-supply-bundle", "good", "基础物资包", 1, MarketGood("stall.gh-general", 50, "basic", ["stall.gh-general", "stall.gh-lens-workshop", "stall.gh-sail-shop", "stall.gh-chart-studio"]));
+        yield return Entity("good.repair-canvas", "good", "修补帆布", 2, MarketGood("stall.gh-general", 80, "repair", ["stall.gh-general", "stall.gh-lens-workshop", "stall.gh-sail-shop", "stall.gh-chart-studio"]));
+        yield return Entity("good.lens-maintenance-kit", "good", "透镜维护套件", 3, MarketGood("stall.gh-lens-workshop", 50, "basic"));
+        yield return Entity("good.storm-resistant-coating", "good", "抗风暴涂层", 4, MarketGood("stall.gh-sail-shop", 50, "basic"));
+        yield return Entity("good.simple-sextant", "good", "简易六分仪", 5, MarketGood("stall.gh-chart-studio", 50, "navigation"));
+        yield return Entity("good.route-notes", "good", "航线手记", 6, MarketGood("stall.gh-lens-workshop", 120, "intel", ["stall.gh-lens-workshop", "stall.gh-sail-shop", "stall.gh-chart-studio"]));
 
         yield return Entity("threat.guard-sentinel", "threat", "警戒哨兵", 1, new()
         {
@@ -2391,6 +2505,31 @@ public static class RegistryBootstrap
         return entity;
     }
 
+    private static Dictionary<string, object?> MarketGood(
+        string stallId,
+        int price,
+        string supplyClass,
+        string[]? availableStallIds = null)
+    {
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["stall_id"] = stallId,
+            ["available_stall_ids"] = availableStallIds ?? new[] { stallId },
+            ["price"] = price,
+            ["required_stall_state"] = 1,
+            ["commodity_tags"] = new[] { "market" },
+            ["vendor_tags"] = new[] { stallId },
+            ["supply_class"] = supplyClass,
+            ["stack_rule"] = string.Equals(supplyClass, "intel", StringComparison.Ordinal) ? "unique" : "stackable",
+            ["max_stack"] = string.Equals(supplyClass, "intel", StringComparison.Ordinal) ? 1 : 99,
+            ["mass_class"] = "light",
+            ["material_tags"] = new[] { supplyClass },
+            ["local_identity_tags"] = new[] { "glass-harbor" },
+            ["settlement_need_tags"] = new[] { "trade-link" },
+            ["repair_visible_state_tags"] = new[] { "stock-improved" },
+        };
+    }
+
     private static string OwnerDomainForKind(string kind)
     {
         return kind switch
@@ -2398,7 +2537,8 @@ public static class RegistryBootstrap
             "resource" or "cargo" => "resources",
             "module" or "home-space" or "home-anchor" => "airship",
             "route" => "routes",
-            "location" or "repair-node" or "stall-good" => "world",
+            "location" or "repair-node" or "settlement" or "stall" or "npc" or "stall-good" => "world",
+            "good" => "resources",
             "companion" => "companions",
             "threat" => "threats",
             "intel" => "intel",

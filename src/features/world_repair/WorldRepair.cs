@@ -1043,6 +1043,11 @@ public sealed class WorldRepair
 
         foreach (var entity in _registry.ListByKind("repair-node"))
         {
+            if (ReadBool(entity, "settlement_market_only", fallback: false))
+            {
+                continue;
+            }
+
             var definition = DefinitionFromEntity(entity);
             if (definition is null)
             {
@@ -1337,6 +1342,14 @@ public sealed class WorldRepair
         }
 
         return fallback;
+    }
+
+    private static bool ReadBool(
+        IReadOnlyDictionary<string, object?> entity,
+        string key,
+        bool fallback)
+    {
+        return entity.TryGetValue(key, out var value) && value is bool boolValue ? boolValue : fallback;
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> ReadObjectMap(

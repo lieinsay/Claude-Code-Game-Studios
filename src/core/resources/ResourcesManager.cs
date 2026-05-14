@@ -149,6 +149,11 @@ public sealed record ResourceOperationResult(
 }
 
 /// <summary>
+/// Result of a market purchase preflight owned by ResourcesManager.
+/// </summary>
+public sealed record ResourcePurchaseValidation(bool Valid, string Reason, int TotalCost);
+
+/// <summary>
 /// 探索结算或池状态转换的聚合结果，记录保留入仓与损失销毁的资源数量。
 /// </summary>
 public sealed record ResourceTransitionSummary(
@@ -195,6 +200,7 @@ public sealed class ResourcesManager
     private const int CarriedBaseSlots = 5;
     private const int StorageBaseVolume = 1000;
     private const int CargoBayBaseVolume = 0;
+    private const string CurrencyResourceId = "resource.cloud_coin";
 
     private static readonly Dictionary<string, int> SupplyClassCapacity = new(StringComparer.Ordinal)
     {
@@ -798,7 +804,97 @@ public sealed class ResourcesManager
     /// </summary>
     public ResourceOperationResult ExecutePurchase(string goodId, int quantity)
     {
+        if (IsMarketGood(goodId))
+        {
+            var validation = ValidatePurchase(goodId, quantity);
+            if (!validation.Valid)
+            {
+                return validation.Reason == "capacity_full"
+                    ? ResourceOperationResult.Fail(ResourceResult.ErrTargetFull)
+                    : ResourceOperationResult.Fail(ResourceResult.ErrSourceInsufficient);
+            }
+
+            if (!TryEnterMutation())
+            {
+                return ResourceOperationResult.Fail(ResourceResult.ErrBusy);
+            }
+
+            try
+            {
+                var before = ClonePools();
+                var currencyRemoved = RemoveCore(ResourcePool.InStorage, CurrencyResourceId, validation.TotalCost, emitEvents: false);
+                if (!currencyRemoved.Success)
+                {
+                    RestorePools(before);
+                    return currencyRemoved;
+                }
+
+                var goodAdded = AddCore(ResourcePool.InStorage, goodId, quantity, stackRuleOverride: null, allowMultipleUniqueStacks: true, emitEvents: false);
+                if (!goodAdded.Success)
+                {
+                    RestorePools(before);
+                    return IsTransferTargetCapacityFailure(goodAdded.Result)
+                        ? ResourceOperationResult.Fail(ResourceResult.ErrTargetFull, goodAdded.MergeQuantity, goodAdded.OverflowQuantity)
+                        : goodAdded;
+                }
+
+                ResourceRemoved?.Invoke(ResourcePool.InStorage, CurrencyResourceId, validation.TotalCost);
+                ResourceAdded?.Invoke(ResourcePool.InStorage, goodId, quantity);
+                ResourceChanged?.Invoke(ResourcePool.InStorage, CurrencyResourceId, GetQuantity(ResourcePool.InStorage, CurrencyResourceId));
+                ResourceChanged?.Invoke(ResourcePool.InStorage, goodId, GetQuantity(ResourcePool.InStorage, goodId));
+                PoolChanged?.Invoke(ResourcePool.InStorage);
+                return ResourceOperationResult.Ok(quantity, goodAdded.MergeQuantity, goodAdded.OverflowQuantity);
+            }
+            finally
+            {
+                ExitMutation();
+            }
+        }
+
         return Transfer(ResourcePool.Listed, ResourcePool.InStorage, goodId, quantity);
+    }
+
+    /// <summary>
+    /// Validates market purchase currency and storage capacity without mutating pools.
+    /// </summary>
+    public ResourcePurchaseValidation ValidatePurchase(string goodId, int quantity)
+    {
+        if (!IsInitialized)
+        {
+            return new ResourcePurchaseValidation(false, "system_unavailable", 0);
+        }
+
+        if (quantity <= 0)
+        {
+            return new ResourcePurchaseValidation(false, "invalid_quantity", 0);
+        }
+
+        var resolution = ResolveResourceDefinition(goodId, stackRuleOverride: null);
+        if (resolution.Result != ResourceResult.Success || resolution.Definition is null)
+        {
+            return new ResourcePurchaseValidation(false, "missing_reference", 0);
+        }
+
+        var totalCost = checked(GetPurchasePrice(goodId) * quantity);
+        if (GetPlayerCurrency() < totalCost)
+        {
+            return new ResourcePurchaseValidation(false, "insufficient_funds", totalCost);
+        }
+
+        if (PreviewAddToStorage(goodId, quantity) != ResourceResult.Success)
+        {
+            return new ResourcePurchaseValidation(false, "capacity_full", totalCost);
+        }
+
+        return new ResourcePurchaseValidation(true, string.Empty, totalCost);
+    }
+
+    /// <summary>
+    /// Returns the current cloud coin balance tracked in storage.
+    /// </summary>
+    public int GetPlayerCurrency()
+    {
+        return GetQuantity(ResourcePool.InStorage, CurrencyResourceId);
     }
 
     /// <summary>
@@ -2354,6 +2450,51 @@ public sealed class ResourcesManager
         }
 
         return ResourceResult.Success;
+    }
+
+    private int GetPurchasePrice(string goodId)
+    {
+        if (_registry is null)
+        {
+            return 0;
+        }
+
+        var query = _registry.QueryById(goodId);
+        return query.Status == RegistryQueryStatus.Found && query.Entity is not null
+            ? ReadInt(query.Entity, "price", 0)
+            : 0;
+    }
+
+    private bool IsMarketGood(string goodId)
+    {
+        if (_registry is null)
+        {
+            return false;
+        }
+
+        var query = _registry.QueryById(goodId);
+        return query.Status == RegistryQueryStatus.Found
+            && query.Entity is not null
+            && query.Entity.ContainsKey("price");
+    }
+
+    private ResourceResult PreviewAddToStorage(string goodId, int quantity)
+    {
+        var before = ClonePools();
+        try
+        {
+            return AddCore(
+                ResourcePool.InStorage,
+                goodId,
+                quantity,
+                stackRuleOverride: null,
+                allowMultipleUniqueStacks: true,
+                emitEvents: false).Result;
+        }
+        finally
+        {
+            RestorePools(before);
+        }
     }
 
     private ResourceResult BuildExtractionLossSummary(

@@ -1,7 +1,7 @@
 # Story 002: Purchase Flow & Price Formula
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,40 +28,40 @@
 
 ### F.1 Total Cost Calculation
 
-- [ ] **AC-1**: GIVEN good.basic-supply-bundle price=50 + quantity=3，WHEN calculate_total_cost("good.basic-supply-bundle", 3)，THEN 返回 150
-- [ ] **AC-2**: GIVEN good.route-notes price=120 + quantity=1，WHEN calculate_total_cost("good.route-notes", 1)，THEN 返回 120
-- [ ] **AC-3**: GIVEN 任意 good_id + quantity=0，WHEN calculate_total_cost()，THEN 返回 0。但 quantity=0 在 UI 层已被阻止（AC-13）
+- [x] **AC-1**: GIVEN good.basic-supply-bundle price=50 + quantity=3，WHEN calculate_total_cost("good.basic-supply-bundle", 3)，THEN 返回 150
+- [x] **AC-2**: GIVEN good.route-notes price=120 + quantity=1，WHEN calculate_total_cost("good.route-notes", 1)，THEN 返回 120
+- [x] **AC-3**: GIVEN 任意 good_id + quantity=0，WHEN calculate_total_cost()，THEN 返回 0。但 quantity=0 在 UI 层已被阻止（AC-13）
 
 ### Purchase Validation
 
-- [ ] **AC-4**: GIVEN stall_state=OPEN_BASIC + good_id 在该摊位解锁等级下可用 + 货币充足 + 容量足够，WHEN validate_purchase_request(stall_id, good_id, quantity)，THEN 返回 {valid: true, reason: "", total_cost: N}
-- [ ] **AC-5**: GIVEN stall_state=CLOSED，WHEN validate_purchase_request(stall_id, good_id, quantity)，THEN 返回 {valid: false, reason: "stall_closed", total_cost: 0}
-- [ ] **AC-6**: GIVEN 货币不足 (player_currency < total_cost)，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "insufficient_funds", total_cost: N}
-- [ ] **AC-7**: GIVEN 容量不足 (#5.validate_purchase 返回 false, reason="capacity_full")，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "capacity_full", total_cost: N}
-- [ ] **AC-8**: GIVEN good_id 不在当前摊位解锁等级下可用（如 closed 摊位的商品），WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "good_unavailable", total_cost: 0}
+- [x] **AC-4**: GIVEN stall_state=OPEN_BASIC + good_id 在该摊位解锁等级下可用 + 货币充足 + 容量足够，WHEN validate_purchase_request(stall_id, good_id, quantity)，THEN 返回 {valid: true, reason: "", total_cost: N}
+- [x] **AC-5**: GIVEN stall_state=CLOSED，WHEN validate_purchase_request(stall_id, good_id, quantity)，THEN 返回 {valid: false, reason: "stall_closed", total_cost: 0}
+- [x] **AC-6**: GIVEN 货币不足 (player_currency < total_cost)，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "insufficient_funds", total_cost: N}
+- [x] **AC-7**: GIVEN 容量不足 (#5.validate_purchase 返回 false, reason="capacity_full")，WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "capacity_full", total_cost: N}
+- [x] **AC-8**: GIVEN good_id 不在当前摊位解锁等级下可用（如 closed 摊位的商品），WHEN validate_purchase_request()，THEN 返回 {valid: false, reason: "good_unavailable", total_cost: 0}
 
 ### Purchase Execution
 
-- [ ] **AC-9**: GIVEN validate_purchase_request 返回 {valid: true}，WHEN execute_purchase(stall_id, good_id, quantity)，THEN 委托 #5.execute_purchase() + 发射 purchase_completed(good_id, quantity, total_cost) + 返回 {success: true, good_id, quantity, total_cost}
-- [ ] **AC-10**: GIVEN execute_purchase() 被调用但内部二次 validate 失败（状态在两次调用间变化），WHEN 检测到，THEN 返回 {success: false, ...} + 发射 purchase_failed(good_id, reason)。防御性验证
-- [ ] **AC-11**: GIVEN purchase_completed 发射后，WHEN 检查，THEN 触发 ADR-0003 快照 (progress.settlement-market)。购买是状态变更——必须持久化
+- [x] **AC-9**: GIVEN validate_purchase_request 返回 {valid: true}，WHEN execute_purchase(stall_id, good_id, quantity)，THEN 委托 #5.execute_purchase() + 发射 purchase_completed(good_id, quantity, total_cost) + 返回 {success: true, good_id, quantity, total_cost}
+- [x] **AC-10**: GIVEN execute_purchase() 被调用但内部二次 validate 失败（状态在两次调用间变化），WHEN 检测到，THEN 返回 {success: false, ...} + 发射 purchase_failed(good_id, reason)。防御性验证
+- [x] **AC-11**: GIVEN purchase_completed 发射后，WHEN 检查，THEN 触发 ADR-0003 快照 (progress.settlement-market)。购买是状态变更——必须持久化
 
 ### Good Visibility by Unlock Level
 
-- [ ] **AC-12**: GIVEN stall_state=OPEN_BASIC，WHEN get_stall_goods("stall.gh-lens-workshop")，THEN 返回 [good.basic-supply-bundle, good.repair-canvas, good.route-notes, good.lens-maintenance-kit]。基础商品 + 独占风味商品 + 情报商品
-- [ ] **AC-13**: GIVEN stall_state=CLOSED，WHEN get_stall_goods("stall.gh-sail-shop")，THEN 返回 []。关闭摊位无可购买商品
-- [ ] **AC-14**: GIVEN stall.gh-general（默认杂货摊, OPEN_BASIC），WHEN get_stall_goods()，THEN 返回 [good.basic-supply-bundle, good.repair-canvas]。杂货摊仅 2 种通用补给——无独占风味商品
+- [x] **AC-12**: GIVEN stall_state=OPEN_BASIC，WHEN get_stall_goods("stall.gh-lens-workshop")，THEN 返回 [good.basic-supply-bundle, good.repair-canvas, good.route-notes, good.lens-maintenance-kit]。基础商品 + 独占风味商品 + 情报商品
+- [x] **AC-13**: GIVEN stall_state=CLOSED，WHEN get_stall_goods("stall.gh-sail-shop")，THEN 返回 []。关闭摊位无可购买商品
+- [x] **AC-14**: GIVEN stall.gh-general（默认杂货摊, OPEN_BASIC），WHEN get_stall_goods()，THEN 返回 [good.basic-supply-bundle, good.repair-canvas]。杂货摊仅 2 种通用补给——无独占风味商品
 
 ### Quantity Input Validation
 
-- [ ] **AC-15**: GIVEN player_currency=200 + good price=50 + remaining_capacity=10，WHEN 计算 max_affordable，THEN max_affordable = min(floor(200/50), 10) = 4
-- [ ] **AC-16**: GIVEN player_currency=30 + good price=50，WHEN 计算 max_affordable，THEN max_affordable = min(floor(30/50), ...) = 0。商品灰显不可选
-- [ ] **AC-17**: GIVEN quantity 输入控件 + max_affordable=4，WHEN 玩家尝试输入 0、-1 或非整数值，THEN 0 和负值 clamp 为 1；非整数向下取整。减号按钮在 quantity=1 时灰显
+- [x] **AC-15**: GIVEN player_currency=200 + good price=50 + remaining_capacity=10，WHEN 计算 max_affordable，THEN max_affordable = min(floor(200/50), 10) = 4
+- [x] **AC-16**: GIVEN player_currency=30 + good price=50，WHEN 计算 max_affordable，THEN max_affordable = min(floor(30/50), ...) = 0。商品灰显不可选
+- [x] **AC-17**: GIVEN quantity 输入控件 + max_affordable=4，WHEN 玩家尝试输入 0、-1 或非整数值，THEN 0 和负值 clamp 为 1；非整数向下取整。减号按钮在 quantity=1 时灰显
 
 ### Purchase Failure Constants
 
-- [ ] **AC-18**: GIVEN 购买失败原因，WHEN 检查常量定义，THEN PURCHASE_FAIL_CAPACITY="capacity_full", PURCHASE_FAIL_FUNDS="insufficient_funds"。StringName 类型
-- [ ] **AC-19**: GIVEN price=0 的商品（配置错误），WHEN execute_purchase()，THEN 购买成功（total_cost=0，不扣货币），但记录 error 日志 "Settlement: good '%s' has price=0"
+- [x] **AC-18**: GIVEN 购买失败原因，WHEN 检查常量定义，THEN PURCHASE_FAIL_CAPACITY="capacity_full", PURCHASE_FAIL_FUNDS="insufficient_funds"。StringName 类型
+- [x] **AC-19**: GIVEN price=0 的商品（配置错误），WHEN execute_purchase()，THEN 购买成功（total_cost=0，不扣货币），但记录 error 日志 "Settlement: good '%s' has price=0"
 
 ---
 
@@ -207,7 +207,11 @@ func get_max_affordable(good_id: StringName) -> int:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/settlement-market/PurchaseFlowTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/unit/settlement-market/PurchaseFlowTest.csproj -p:UseSharedCompilation=false` — PASS (6/6 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 
