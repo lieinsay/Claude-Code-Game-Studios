@@ -1,7 +1,7 @@
 # Story 001: Screen State Machine & Screen Flow
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,32 +28,32 @@
 
 ### Screen State Machine — States & Transitions
 
-- [ ] **AC-1**: GIVEN 新游戏启动 + Hub 场景激活，WHEN UIManager 初始化完成，THEN _active_screen=HUB。S1 Hub HUD 渲染
-- [ ] **AC-2**: GIVEN _active_screen=HUB + 玩家 Use 舱门或舵轮，WHEN use_gangway()/use_helm() 触发，THEN S3 出航确认模态打开。_active_screen 保持 HUB
-- [ ] **AC-3**: GIVEN _active_screen=HUB + S3 模态打开 + 玩家确认出航，WHEN departure_confirmed，THEN _active_screen→DEPARTURE_LOCKED。_departure_locked=true + 2.0s timer 启动。所有面板 force_close_all_panels()
-- [ ] **AC-4**: GIVEN _active_screen=DEPARTURE_LOCKED + 2.0s timer 到期，WHEN lock_timer_complete，THEN _active_screen→CHART。S4 航图屏幕打开（visible=true）
-- [ ] **AC-5**: GIVEN _active_screen=HUB + 玩家按 M 键，WHEN 无模态面板打开 且 非 departure_locked，THEN _active_screen→CHART。S4 visible=true
-- [ ] **AC-6**: GIVEN _active_screen=CHART + 玩家选中路线，WHEN route_selected，THEN _active_screen→CHART_ROUTE_SELECTED。侧边面板展开，"确认出航"按钮自动获得焦点
-- [ ] **AC-7**: GIVEN _active_screen=CHART_ROUTE_SELECTED + 玩家确认出航，WHEN departure_confirmed，THEN _active_screen→CHART_DEPARTURE_CONFIRMED。墨水扩散 0.6s → 出发口封闭+锁定 1.2s
-- [ ] **AC-8**: GIVEN _active_screen=CHART_DEPARTURE_CONFIRMED + 锁定完成，WHEN lock_complete，THEN _active_screen→VOYAGE。S4 visible=false，黑屏过渡开始
-- [ ] **AC-9**: GIVEN _active_screen=CHART 或 CHART_ROUTE_SELECTED + 玩家按 Esc，WHEN esc_pressed，THEN _active_screen→HUB。S4 visible=false，Hub 恢复
-- [ ] **AC-10**: GIVEN _active_screen=VOYAGE + EncounterContext 就绪，WHEN encounter_context_ready，THEN _active_screen→EXPLORATION。S5 探索 HUD 激活
-- [ ] **AC-11**: GIVEN _active_screen=EXPLORATION + 玩家抵达撤离锚点确认，WHEN extraction_started，THEN _active_screen→EXTRACTING。S6b 撤离读条显示
-- [ ] **AC-12**: GIVEN _active_screen=EXTRACTING + 撤离完成，WHEN extraction_complete，THEN _active_screen→SETTLEMENT。S6c 结算摘要模态打开
-- [ ] **AC-13**: GIVEN _active_screen=SETTLEMENT + S6c + 玩家确认结算，WHEN settlement_confirmed，THEN _active_screen→HUB_ARRIVING。到达序列启动
-- [ ] **AC-14**: GIVEN _active_screen=HUB_ARRIVING + 到达完成 + naming_eligible=true，WHEN arrival_complete，THEN _active_screen→HUB + S10 命名模态排队打开
-- [ ] **AC-15**: GIVEN _active_screen=HUB_ARRIVING + 到达完成 + naming_eligible=false，WHEN arrival_complete，THEN _active_screen→HUB。S1 HUD 恢复
+- [x] **AC-1**: GIVEN 新游戏启动 + Hub 场景激活，WHEN UIManager 初始化完成，THEN _active_screen=HUB。S1 Hub HUD 渲染
+- [x] **AC-2**: GIVEN _active_screen=HUB + 玩家 Use 舱门或舵轮，WHEN use_gangway()/use_helm() 触发，THEN S3 出航确认模态打开。_active_screen 保持 HUB
+- [x] **AC-3**: GIVEN _active_screen=HUB + S3 模态打开 + 玩家确认出航，WHEN departure_confirmed，THEN _active_screen→DEPARTURE_LOCKED。_departure_locked=true + 2.0s timer 启动。所有面板 force_close_all_panels()
+- [x] **AC-4**: GIVEN _active_screen=DEPARTURE_LOCKED + 2.0s timer 到期，WHEN lock_timer_complete，THEN _active_screen→CHART。S4 航图屏幕打开（visible=true）
+- [x] **AC-5**: GIVEN _active_screen=HUB + 玩家按 M 键，WHEN 无模态面板打开 且 非 departure_locked，THEN _active_screen→CHART。S4 visible=true
+- [x] **AC-6**: GIVEN _active_screen=CHART + 玩家选中路线，WHEN route_selected，THEN _active_screen→CHART_ROUTE_SELECTED。侧边面板展开，"确认出航"按钮自动获得焦点
+- [x] **AC-7**: GIVEN _active_screen=CHART_ROUTE_SELECTED + 玩家确认出航，WHEN departure_confirmed，THEN _active_screen→CHART_DEPARTURE_CONFIRMED。墨水扩散 0.6s → 出发口封闭+锁定 1.2s
+- [x] **AC-8**: GIVEN _active_screen=CHART_DEPARTURE_CONFIRMED + 锁定完成，WHEN lock_complete，THEN _active_screen→VOYAGE。S4 visible=false，黑屏过渡开始
+- [x] **AC-9**: GIVEN _active_screen=CHART 或 CHART_ROUTE_SELECTED + 玩家按 Esc，WHEN esc_pressed，THEN _active_screen→HUB。S4 visible=false，Hub 恢复
+- [x] **AC-10**: GIVEN _active_screen=VOYAGE + EncounterContext 就绪，WHEN encounter_context_ready，THEN _active_screen→EXPLORATION。S5 探索 HUD 激活
+- [x] **AC-11**: GIVEN _active_screen=EXPLORATION + 玩家抵达撤离锚点确认，WHEN extraction_started，THEN _active_screen→EXTRACTING。S6b 撤离读条显示
+- [x] **AC-12**: GIVEN _active_screen=EXTRACTING + 撤离完成，WHEN extraction_complete，THEN _active_screen→SETTLEMENT。S6c 结算摘要模态打开
+- [x] **AC-13**: GIVEN _active_screen=SETTLEMENT + S6c + 玩家确认结算，WHEN settlement_confirmed，THEN _active_screen→HUB_ARRIVING。到达序列启动
+- [x] **AC-14**: GIVEN _active_screen=HUB_ARRIVING + 到达完成 + naming_eligible=true，WHEN arrival_complete，THEN _active_screen→HUB + S10 命名模态排队打开
+- [x] **AC-15**: GIVEN _active_screen=HUB_ARRIVING + 到达完成 + naming_eligible=false，WHEN arrival_complete，THEN _active_screen→HUB。S1 HUD 恢复
 
 ### Transition Guards
 
-- [ ] **AC-16**: GIVEN _departure_locked=true，WHEN open_screen(CHART)/open_modal(S8)/press M key，THEN 全部被静默拒绝。返回 ERR_DEPARTURE_LOCKED。无任何面板打开
-- [ ] **AC-17**: GIVEN _active_screen=CHART_DEPARTURE_CONFIRMED，WHEN esc_pressed，THEN 无效。状态不可逆——出航已确认
-- [ ] **AC-18**: GIVEN _active_screen=EXTRACTING + S6b 进行中，WHEN 玩家按 Esc，THEN 无效。撤离读条不可手动取消（除 S7 威胁打断外）
+- [x] **AC-16**: GIVEN _departure_locked=true，WHEN open_screen(CHART)/open_modal(S8)/press M key，THEN 全部被静默拒绝。返回 ERR_DEPARTURE_LOCKED。无任何面板打开
+- [x] **AC-17**: GIVEN _active_screen=CHART_DEPARTURE_CONFIRMED，WHEN esc_pressed，THEN 无效。状态不可逆——出航已确认
+- [x] **AC-18**: GIVEN _active_screen=EXTRACTING + S6b 进行中，WHEN 玩家按 Esc，THEN 无效。撤离读条不可手动取消（除 S7 威胁打断外）
 
 ### 12-Screen Inventory
 
-- [ ] **AC-19**: GIVEN UIManager 初始化完成，WHEN 查询 12 屏注册表，THEN S1–S12 全部注册。每个 screen_id 对应正确的类型（HUD_OVERLAY/FULLSCREEN/MODAL/SEMI_MODAL/NON_MODAL）和所属系统
-- [ ] **AC-20**: GIVEN _active_screen=HUB + S2 非模态面板打开 + WASD 按下，WHEN 检查，THEN 玩家可移动。非模态面板不阻断移动
+- [x] **AC-19**: GIVEN UIManager 初始化完成，WHEN 查询 12 屏注册表，THEN S1–S12 全部注册。每个 screen_id 对应正确的类型（HUD_OVERLAY/FULLSCREEN/MODAL/SEMI_MODAL/NON_MODAL）和所属系统
+- [x] **AC-20**: GIVEN _active_screen=HUB + S2 非模态面板打开 + WASD 按下，WHEN 检查，THEN 玩家可移动。非模态面板不阻断移动
 
 ---
 
@@ -145,7 +145,7 @@ func _on_lock_timer_complete() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj -p:UseSharedCompilation=false` (20/20 PASS, 2026-05-14)
 
 ---
 
@@ -153,3 +153,12 @@ func _on_lock_timer_complete() -> void:
 
 - Depends on: ADR-0012 (UIManager architecture), ADR-0001 (Autoload #16 Phase 8), ADR-0002 (signal protocol)
 - Unlocks: Story 002 (modal stack atop screen FSM), Story 004 (data contracts per screen)
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Criteria**: 20/20 passing
+**Deviations**: None
+**Test Evidence**: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — 20/20 PASS
+**Code Review**: Complete — self-review found and fixed the departure lock HUD/panel closure edge case before closure
+**Residual Risk**: Godot scene-visible Control rendering and real dual-focus behavior remain downstream #16 Story 002-006 scope; Story 001 logic contract is covered by C# runner evidence.

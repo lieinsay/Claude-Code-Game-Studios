@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-14 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11/#12/#15 完成；BUG-005 已修复**
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11/#12/#14/#15 完成；Phase E #16 UI/HUD 已启动，Story 001 Complete；BUG-005 已修复**
 
 ---
 
@@ -43,7 +43,7 @@ gantt
     #12 战斗威胁  (6 Stories)    :done,    p4f, 2026-05-14, 1d
 
     section 🔴 Phase E 呈现层
-    #16 UI/HUD    (6 Stories)    :         p5a, after p4d, 14d
+    #16 UI/HUD    (6 Stories)    :active,  p5a, 2026-05-14, 14d
 
     section ⚪ Phase F 垂直切片
     #17 反馈音频  (待定)         :         p6a, after p5a, 14d
@@ -89,7 +89,7 @@ graph TD
 
     S12["✅ #12 战斗威胁 6S"]:::done
 
-    S16["🔴 #16 UI/HUD 6S"]:::future
+    S16["🟦 #16 UI/HUD 1/6S"]:::active
 
     S17["⚪ #17 反馈音频"]:::vs
     S18["⚪ #18 新手引导"]:::vs
@@ -154,6 +154,7 @@ graph TD
     S8 --> S16
     S9 --> S16
     S11 --> S16
+    S12 --> S16
     S13 --> S16
     S14 --> S16
 
@@ -185,7 +186,7 @@ Phase 0 ✅ ──→ ┌─ #1 内容注册表 ─┬─→ #3 持久化 ─┬
   #8 等 #7 完成后启动, 但仍需 #5 资源池；#9 等 #6 完成后启动
   #10 等 #5+#6+#7+#8+#9 全部完成后启动  ← 这是最大的汇合点
   #11 等 #10 完成后启动
-  #16 等 #11+#13+#14 完成后启动         ← 最终汇合点
+  #16 等 #11+#12+#13+#14 完成后启动    ← 最终汇合点
 ```
 
 ---
@@ -304,10 +305,10 @@ Week 8-10
 ```
 Week 11-12
   #16 UI/HUD ──────────────────────────▶▶▶ 解锁 #17 #18
-    (等 #11 #13 #14 都完成 — UI 需要所有领域数据就绪)
+    (等 #11 #12 #13 #14 都完成 — UI 需要所有领域数据就绪)
 
-阻塞关卡: ⛔ #16 是最终汇合点 — 依赖 6 个系统
-          所有上游数据 (#5 资源 #8 船体 #9 航图 #11 探索 #13 修复 #14 集市) 必须就绪
+阻塞关卡: ✅ #16 已启动 — Story 001 屏幕 FSM 完成
+          所有上游数据 (#5 资源 #8 船体 #9 航图 #11 探索 #12 战斗 #13 修复 #14 集市) 已就绪
 ```
 
 ---
@@ -491,33 +492,34 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
 ✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
-✅ Phase D      ████████████████████████ 100% (#10 Navigation + #13 WorldRepair + #11 Exploration + #12 Combat + #15 Partner + #14 Settlement Complete)
+✅ Phase D      ████████████████████████ 100% (#10 Navigation + #13 WorldRepair + #11 Exploration + #12 Combat + #14 Settlement + #15 Partner Complete)
+🟦 Phase E      ████░░░░░░░░░░░░░░░░░░░  16.7% (#16 UI/HUD Story 001/006 Complete)
 ```
 
 ### 本次生产状态检查 (2026-05-14)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #11 Exploration / Scavenge 全部 6/6 Story 完成并复审通过；Epic #12 Combat / Threat Resolution 全部 6/6 Story 完成；Epic #15 Partner & Relationships 全部 6/6 Story 完成并复审通过；BUG-005 scene reachability 已修复
+- 活跃任务: Epic #16 UI/HUD convergence 已进入；Story 001 Screen State Machine & Screen Flow 完成（20/20 PASS）；下一步 Story 002 Modal Stack, Combat Override & Input Routing；BUG-005 scene reachability 已修复
 - 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 错误）
-- 测试验证: Epic #11 Story 001-006 runner 287/287 checks PASS；Epic #15 Story 001-006 runner 119/119 checks PASS；`tests/**/*.csproj` 全量 C# runner 97/97 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 error）
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#11/#13/#15 Complete、97 个 C# runner 的当前基线
-- 本次完成: Epic #11 Exploration C# 合同、4 阶段探索 FSM、6 个探索公式、EncounterContext 消费、撤离结算与 progress.exploration 持久化已锁定；Epic #12 CombatManager C# 合同、威胁队列、C4 结算、combat_result 信号、Registry threat config 与边界处理已锁定；Epic #15 PartnerManager C# 合同、猫/命名/小窝三层状态机、R15 守卫与 progress.partner_skycat 持久化已锁定
+- 测试验证: Epic #11 Story 001-006 runner 287/287 checks PASS；Epic #15 Story 001-006 runner 119/119 checks PASS；Epic #16 Story 001 runner 20/20 PASS；Feature Layer sweep 30/30 projects PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 Complete、#16 Story 001 Complete、104 个 C# runner 的当前基线
+- 本次完成: Epic #16 Story 001 锁定 UIManager 屏幕 FSM、departure lock 全面板关闭、S1-S12 注册表、Hub→Chart→Voyage→Exploration→Settlement→Hub 逻辑闭环；Story 001 runner 20/20 PASS。
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #16 UI/HUD convergence | #12 combat_result + #14 settlement 合同完成 ✅ | Next |
+| **P0** | #16 Story 002 Modal Stack + Input Routing | #16 Story 001 Complete ✅ | Next |
 | **P1** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #11 探索搜撤、#12 战斗威胁、#14 空港集市和 #15 伙伴关系已完成；下一段进入 #16 UI/HUD convergence，把完整 Feature 数据面暴露到可见界面。
+> 关键建议: #16 UI/HUD convergence 已启动；下一段补齐 Story 002 单槽模态、S7 战斗覆盖和 4 层输入路由，把 Story 001 的屏幕 FSM 扩展为可交互 UI 外壳。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  └─ #16 UI/HUD 上游数据合同整合（消费 #12/#14 已完成合同）
+  └─ #16 Story 002/003 可在 Story 001 屏幕 FSM 上继续推进（输入路由与 HUD 脏标记可分开验证）
 ```
 
 ---
@@ -527,7 +529,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 1. **瓶颈 #1 (内容注册表)**: 15 个系统中 10 个直接依赖它。如果 Schema 设计出错，后续大面积返工。建议 Phase A 结束后做一次 **Schema Freeze**。
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
 3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #16 的 UI 集成质量。
-4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16；#12/#14 已完成，#16 不再被 Feature 数据面阻塞。
+4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16；#16 Story 001 已完成，关键风险转移到 Story 002 输入路由和 Story 004 上游数据整合。
 5. **#17 #18 阻塞**: ADR-0016 和 ADR-0017 未创建。如果 Vertical Slice 需要它们，最晚在 Phase D 结束前完成 ADR。
 
 ---

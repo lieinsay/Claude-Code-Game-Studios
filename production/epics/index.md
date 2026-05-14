@@ -47,7 +47,7 @@ technical preferences and control manifest.
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | In Progress |
+| [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | In Progress — Story 001 Complete |
 | feedback-fx-audio | #17 | feedback-fx-audio.md | (ADR-0016 deferred) | 2 | — | Blocked — ADR-0016 |
 | onboarding-first-loop | #18 | onboarding-first-loop.md | (ADR-0017 deferred) | 1 | — | Blocked — ADR-0017 |
 

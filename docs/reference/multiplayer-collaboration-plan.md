@@ -4,10 +4,10 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | #11 Exploration 完成 | #12 Combat 完成 | #15 Partner 完成 | BUG-005 已修复**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | #11 Exploration 完成 | #12 Combat 完成 | #14 Settlement 完成 | #15 Partner 完成 | #16 UI/HUD Story 001 完成 | BUG-005 已修复**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-14 同步到 #5/#6/#7/#8/#9/#10/#11/#13/#15 Complete、97/97 个 C# runner PASS 的当前基线。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-14 同步到 #5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 Complete、#16 Story 001 Complete、104 个 C# runner 的当前基线。
 
 ---
 
@@ -341,7 +341,7 @@ D-B: Epic #15 Partner + 启动 UI
   Story 003 □ Naming System + Nest Accumulation  (L, 2d)  ← 等 001
 
   Epic #16 UI 前半 (等 #5+#8+#9):
-  Story 001 □ Screen State Machine + Flow        (L, 3d)
+  Story 001 ☑ Screen State Machine + Flow        (L, 3d)  ← ✅ 20/20 PASS
 
 
 D-C: Epic #10 收尾
@@ -437,7 +437,7 @@ D-A: Epic #14 收尾
 D-B: Epic #16 UI 收尾
 ────────────────────────────────────────
   Epic #16:
-  Story 004 □ Upstream Data Contracts            (I, 3d)  ← 等 #11+#13+#14 基础就绪
+  Story 004 □ Upstream Data Contracts            (I, 3d)  ← 等 #11+#12+#13+#14 基础就绪
   Story 005 □ Animation Timing + Events          (I, 2d)  ← 等 004
   Story 006 □ Edge Cases + A11y                  (I, 2d)  ← 等 004-005
 
@@ -598,7 +598,7 @@ D-C: 性能分析 + 优化
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
 | #14 Settlement | 001-006 | #3+#4+#5+#13 Story 003 | ✅ Complete — 2026-05-14 (31/31 PASS) |
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
-| #16 UI | 001 | #5+#8+#9 基础 API | Week 7 |
+| #16 UI | 001 | #5+#8+#9 基础 API | ✅ Story 001 Complete — 2026-05-14 (20/20 PASS); Story 002 Next |
 
 ---
 

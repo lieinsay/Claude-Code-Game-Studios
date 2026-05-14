@@ -60,7 +60,7 @@
 
 | ADR | System | GDD | TR IDs | Implementation | Status |
 |-----|--------|-----|--------|---------------|--------|
-| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/ui_manager.gd` (pending) | Accepted |
+| ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/UIManager.cs` + `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` (Story 001 20/20 PASS; Story 002-006 pending) | Accepted + partial implemented |
 | — | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Deferred (ADR-0016)** |
 
 ---

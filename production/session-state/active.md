@@ -1,10 +1,28 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Feature Layer
-Feature: Combat / Threat Resolution (#12)
-Task: Epic #12 complete；CombatManager、combat_result 合同、数据驱动配置与边界防护已验证并推送
+Epic: Presentation Layer
+Feature: UI / HUD / Chart Interface (#16)
+Task: Epic #16 Story 001 complete；UIManager FSM, departure lock closure, 12-screen registry, and runner evidence verified
 <!-- /STATUS -->
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE
+- Story: `production/epics/ui-hud-interface/story-001-screen-state-machine-flow.md` — Story 001: Screen State Machine & Screen Flow
+- Criteria: 20/20 acceptance criteria covered by `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj`; 20/20 checks passing
+- Risk resolved: departure_locked now force-closes all visible panels, including S1 Hub HUD, and AC-3/AC-16 assert no panels remain open during lock.
+- Test evidence: Story 001 20/20 PASS; Diagnostic UI regression 7/7 PASS; FoundationParity 70/70 PASS
+- Code review: Complete — self-review completed; no remaining blocking findings.
+- Tech debt logged: None
+- Next recommended: `production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md` — Story 002: Modal Stack, Combat Override & Input Routing
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/ui-hud-interface/story-001-screen-state-machine-flow.md` — Story 001: Screen State Machine & Screen Flow
+- Files changed: `src/presentation/UIManager.cs`, `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj`, `tests/unit/ui-hud-interface/ScreenStateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `production/epics/ui-hud-interface/story-001-screen-state-machine-flow.md`, `production/session-state/active.md`
+- Test written: `tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj` — 20/20 Story 001 acceptance checks passing
+- Verification: Story 001 runner 20/20 PASS; Diagnostic UI regression 7/7 PASS; FoundationParity 70/70 PASS
+- Blockers: None
+- Next: `/code-review src/presentation/UIManager.cs tests/unit/ui-hud-interface/ScreenStateMachineProgram.cs` then `/story-done production/epics/ui-hud-interface/story-001-screen-state-machine-flow.md`
 
 ## Session Extract — Epic #12 Combat / Threat Resolution Complete 2026-05-14
 - Verdict: COMPLETE
