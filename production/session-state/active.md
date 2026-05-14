@@ -2,9 +2,20 @@
 
 <!-- STATUS -->
 Epic: Feature Layer
-Feature: Exploration / Scavenge (#11) + Partner & Relationships (#15)
-Task: Epic #11/#15 review complete；文档索引与 reference 已同步
+Feature: Combat / Threat Resolution (#12)
+Task: Epic #12 complete；CombatManager、combat_result 合同、数据驱动配置与边界防护已验证并推送
 <!-- /STATUS -->
+
+## Session Extract — Epic #12 Combat / Threat Resolution Complete 2026-05-14
+- Verdict: COMPLETE
+- Epic #12 Combat / Threat Resolution: 6/6 Stories complete; Story 001 7/7 PASS, Story 002 7/7 PASS, Story 003 4/4 PASS, Story 004 5/5 PASS, Story 005 5/5 PASS, Story 006 9/9 PASS
+- Commits: Group 1 `aa0a1a7`, Group 2 `361bb91`, Group 3 `0a2e908`
+- Implementation: `src/core/combat/CombatManager.cs` adds threat queue, four-state settlement flow, response options, damage/module/knockback formulas, combat_result payload, signal events, data-driven defaults, and defensive invalid-input handling; `src/core/content/Registry.cs` now exposes guard threat configuration lookup.
+- Test evidence: all combat runners PASS; `tests/csharp/FoundationParity/FoundationParity.csproj` 70/70 PASS; #5 `tests/integration/resources/SpecializedOpsTest.csproj` 13/13 PASS; #8 `tests/integration/modules/CombatDamageInterfaceTest.csproj` 4/4 PASS; #11 `tests/unit/exploration/threat/ThreatTriggeringTest.csproj` 31/31 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）；`git diff --check` PASS
+- Docs updated: `production/epics/combat-threat/EPIC.md`, all six Story files, `production/epics/index.md`, `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md`, `docs/architecture/architecture-traceability.md`
+- Residual risk: Godot 可视化决策面板、HUD 威胁状态、玩家击退碰撞和手工 QA 尚未验证；combat tests 直接运行，未纳入 solution，因现有 solution 项目名存在重复。
+- Next recommended: 优先 #14 Settlement Market closeout，然后 #16 UI/HUD convergence。
 
 ## Session Extract — Epic #11/#15 Review + Reference Sync 2026-05-14
 - Verdict: COMPLETE
