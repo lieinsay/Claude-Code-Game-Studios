@@ -1,7 +1,7 @@
 # Story 002: Response Resolution & Settlement Sequence
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -234,7 +234,19 @@ func check_emergency_available() -> bool:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/combat/ResponseResolutionTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/unit/combat/ResponseResolutionTest.csproj -p:UseSharedCompilation=false` (7/7 PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs`.
+- Test runner: `tests/unit/combat/ResponseResolutionTest.csproj`.
+- Acceptance coverage:
+  - AC-1/2/9: emergency handling consumes carried repair kit, suppresses threat, and hard-fails without mutation when unavailable.
+  - AC-3: tank response produces hull damage, optional module damage, knockback, and active threat outcome.
+  - AC-4/5: low-hull and cross-band warnings are exposed without blocking tank.
+  - AC-6/7: retreat result has no damage, marks retreat once, and remains boolean.
+  - AC-8: settlement side effects follow C4 order across #5/#8/#11 injected boundaries.
+  - AC-10/11: decision breath has no timer pressure and state remains AWAITING_RESPONSE while UI inspection queries run.
 
 ---
 

@@ -28,8 +28,8 @@
 
 | # | Story | Type | TRs | ADR |
 |---|-------|------|-----|-----|
-| 001 | [Combat State Machine & Threat Queue](story-001-combat-state-machine-threat-queue.md) | Logic | TR-combat-001 | ADR-0018 |
-| 002 | [Response Resolution & Settlement Sequence](story-002-response-resolution-settlement-sequence.md) | Logic | TR-combat-001, TR-combat-002 | ADR-0018 |
+| 001 | [Combat State Machine & Threat Queue](story-001-combat-state-machine-threat-queue.md) | Logic | TR-combat-001 | ADR-0018 — Complete |
+| 002 | [Response Resolution & Settlement Sequence](story-002-response-resolution-settlement-sequence.md) | Logic | TR-combat-001, TR-combat-002 | ADR-0018 — Complete |
 | 003 | [Damage, Module & Knockback Formulas](story-003-damage-module-knockback-formulas.md) | Logic | TR-combat-003 | ADR-0018 |
 | 004 | [combat_result Contract & Signal Events](story-004-combat-result-contract-signal-events.md) | Integration | TR-combat-003 | ADR-0018 |
 | 005 | [Data-Driven Threat Configuration](story-005-data-driven-threat-configuration.md) | Integration | TR-combat-001 | ADR-0018 |
@@ -53,4 +53,11 @@ This epic is complete when:
 
 ## Next Step
 
-All stories created. Feature Layer 1/3 unblocked epics complete. Next: world-repair #13.
+Story 001 and Story 002 are complete with passing C# unit evidence. Continue with Story 003 + Story 004 for damage/module/knockback formulas and combat_result signal integration.
+
+## Implementation Evidence
+
+- 2026-05-14: Story 001 + Story 002 implemented in `src/core/combat/CombatManager.cs`.
+- Test evidence:
+  - `dotnet run --project tests/unit/combat/StateMachineTest.csproj -p:UseSharedCompilation=false` — 7/7 PASS.
+  - `dotnet run --project tests/unit/combat/ResponseResolutionTest.csproj -p:UseSharedCompilation=false` — 7/7 PASS.

@@ -1,7 +1,7 @@
 # Story 001: Combat State Machine & Threat Queue
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -202,7 +202,20 @@ signal combat_result_ready(result: Dictionary)
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/combat/StateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/unit/combat/StateMachineTest.csproj -p:UseSharedCompilation=false` (7/7 PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs`.
+- Test runner: `tests/unit/combat/StateMachineTest.csproj`.
+- Acceptance coverage:
+  - AC-1 through AC-4: state flow IDLE -> AWAITING_RESPONSE -> PROCESSING -> RESOLVED -> IDLE.
+  - AC-5: PROCESSING cannot regress to AWAITING_RESPONSE.
+  - AC-6/7: busy calls return ERR_BUSY, distinct threats queue, duplicate `threat_id` is deduplicated.
+  - AC-8/10: FIFO drain and inactive/suppressed threat skip.
+  - AC-9: queue overflow drops oldest and records warning.
+  - AC-11/12: constructor initialization stays light and event-driven.
+  - AC-13/14: decision breath remains untimed and inspectable while state stays AWAITING_RESPONSE.
 
 ---
 
