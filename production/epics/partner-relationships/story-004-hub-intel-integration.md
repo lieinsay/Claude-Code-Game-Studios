@@ -165,7 +165,7 @@ func _safe_reveal_rumor(reveal_target: StringName, hazard_hint: StringName, conf
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/partner-relationships/HubIntelIntegrationTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] Created and passing — 2026-05-13 (16/16 checks)
+**Status**: [x] Created and passing — 2026-05-13 (16/16 checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

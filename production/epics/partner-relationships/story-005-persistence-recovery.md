@@ -170,7 +170,7 @@ func _trigger_snapshot() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/partner-relationships/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] Created and passing — 2026-05-14 (13/13 checks)
+**Status**: [x] Created and passing — 2026-05-14 (13/13 checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

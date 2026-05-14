@@ -185,7 +185,7 @@ func get_sniffable_items() -> Array:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/partner-relationships/ScoutSniffTest.csproj` — must exist and pass
-**Status**: [x] Created and passing — 2026-05-13 (`18/18` checks)
+**Status**: [x] Created and passing — 2026-05-13 (`18/18` checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

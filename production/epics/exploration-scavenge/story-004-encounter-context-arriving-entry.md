@@ -1,7 +1,7 @@
 # Story 004: EncounterContext Consumption & ARRIVING Entry
 
 > **Epic**: Exploration / Scavenge Scenario
-> **Status**: Done
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -209,7 +209,7 @@ func _on_voyage_completed(ctx: Dictionary) -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/exploration/EncounterContextEntryTest.csproj` — must exist and pass
-**Status**: [x] 37/37 PASS — 2026-05-13
+**Status**: [x] 37/37 PASS — 2026-05-13; rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

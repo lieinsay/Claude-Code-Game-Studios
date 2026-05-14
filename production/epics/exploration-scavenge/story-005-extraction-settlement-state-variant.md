@@ -227,8 +227,8 @@ func _attempt_settlement_retry(settlement: Dictionary, damage_summary: Dictionar
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/exploration/ExtractionSettlementTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] 68/68 PASS — 2026-05-14
+**Required evidence**: `tests/integration/exploration/extraction-settlement/ExtractionSettlementTest.csproj` — must exist and pass, OR documented playtest covering all ACs
+**Status**: [x] 68/68 PASS — 2026-05-14; rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

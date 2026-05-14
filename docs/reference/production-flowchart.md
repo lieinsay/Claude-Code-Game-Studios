@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-13 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11 完成；BUG-005 已修复**
+> 生成日期: 2026-05-14 | 基于: systems-index.md + 16 Epic 115 Story
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11/#15 完成；BUG-005 已修复**
 
 ---
 
@@ -37,7 +37,7 @@ gantt
     section 🟠 Phase D 等 Core 层
     #10 航行风险  (8 Stories)    :done,    p4a, 2026-05-13, 1d
     #13 世界修复  (6 Stories)    :done,    p4b, 2026-05-13, 1d
-    #15 伙伴关系  (6 Stories)    :         p4c, after p3e, 10d
+    #15 伙伴关系  (6 Stories)    :done,    p4c, 2026-05-14, 1d
     #11 探索搜撤  (6 Stories)    :done,    p4d, 2026-05-14, 1d
     #14 空港集市  (6 Stories)    :         p4e, after p4b, 10d
     #12 战斗威胁  (6 Stories)    :         p4f, after p4d, 10d
@@ -82,9 +82,9 @@ graph TD
 
     S10["✅ #10 航行风险 8S"]:::done
     S13["✅ #13 世界修复 6S"]:::done
-    S15["🟠 #15 伙伴关系 6S"]:::future
+    S15["✅ #15 伙伴关系 6S"]:::done
 
-    S11["🟠 #11 探索搜撤 6S"]:::future
+    S11["✅ #11 探索搜撤 6S"]:::done
     S14["🟠 #14 空港集市 6S"]:::future
 
     S12["🟠 #12 战斗威胁 6S"]:::future
@@ -290,8 +290,8 @@ Week 8-10
     (等 #11 完成)
 
 阻塞关卡: ✅ #10 Phase D 最大汇合点已完成 — 5 个 Core 上游已验证
-          🟠 #11 现在是下一段关键入口 (探索由航行触发)
-          ⛔ #12 必须等 #11 (战斗在探索中发生)
+          ✅ #11 已完成并解锁 #12/#16/#17/#18
+          ⛔ #12 必须等 #11 (战斗在探索中发生) — 现在已满足
           ⛔ #14 必须等 #13 (集市状态由世界修复驱动)
 
 并行度: D1 三人并行 → D2 二人并行 → D3 单人
@@ -484,41 +484,42 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 ## 七、当前进度与下一步
 
-### 当前位置 (2026-05-13)
+### 当前位置 (2026-05-14)
 
 ```
 ✅ Phase 0      ████████████████████████ 100%
 ✅ Phase A      ████████████████████████ 100% (#1 8/8 完成, #2 7/7 完成)
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
 ✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
-🔵 Phase D      ██████████░░░░░░░░░░░░░░  进行中 (#10 Navigation + #13 WorldRepair Complete；#11 Exploration 已满足 #10 上游)
+🔵 Phase D      █████████████████░░░░░░░  进行中 (#10 Navigation + #13 WorldRepair + #11 Exploration + #15 Partner Complete；#12/#14 仍在推进)
 ```
 
-### 本次生产状态检查 (2026-05-13)
+### 本次生产状态检查 (2026-05-14)
 
 - 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #10 Navigation Route Risk 全部 8/8 Story 完成并复审通过；Epic #13 World Repair 全部 6/6 Story 完成；BUG-005 scene reachability 已修复
+- 活跃任务: Epic #11 Exploration / Scavenge 全部 6/6 Story 完成并复审通过；Epic #15 Partner & Relationships 全部 6/6 Story 完成并复审通过；BUG-005 scene reachability 已修复
 - 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 错误）
-- 测试验证: Epic #10 Story 001-008 runner 281/281 checks PASS；Epic #13 Story 001-006 runner 91/91 checks PASS；`tests/**/*.csproj` 全量 C# runner 85/85 PASS，0 FAIL
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#13 Complete、85 个 C# runner 的当前基线
-- 本次完成: Epic #10 Navigation C# 合同、6 态 Voyage FSM、5 公式、EncounterContext 9-field、progress.voyage 持久化和 38 个边缘案例已锁定；Epic #13 WorldRepair 已完成
+- 测试验证: Epic #11 Story 001-006 runner 287/287 checks PASS；Epic #15 Story 001-006 runner 119/119 checks PASS；`tests/**/*.csproj` 全量 C# runner 97/97 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 error）
+- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#11/#13/#15 Complete、97 个 C# runner 的当前基线
+- 本次完成: Epic #11 Exploration C# 合同、4 阶段探索 FSM、6 个探索公式、EncounterContext 消费、撤离结算与 progress.exploration 持久化已锁定；Epic #15 PartnerManager C# 合同、猫/命名/小窝三层状态机、R15 守卫与 progress.partner_skycat 持久化已锁定
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #11 Exploration Scavenge Story 001 | #10 EncounterContext/voyage_completed 合同完成 ✅ | Next |
+| **P0** | #12 Combat Threat Story 001 | #11 threat_context 与 Exploration 威胁触发合同完成 ✅ | Next |
+| **P0** | #14 Settlement Market 收口 | #11 货币来源 + #13 repair_completed 合同完成 ✅ | 并行 |
 | **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
 
-> 关键建议: #10 航行风险已完成，下一段优先推进 #11 探索搜撤；TC-RGC-005~009 仍等待下游交互/UI 路径落地。
+> 关键建议: #11 探索搜撤和 #15 伙伴关系已完成；下一段优先收口 #12 战斗威胁与 #14 空港集市，为 #16 UI/HUD 最终汇合准备完整 Feature 数据面。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ┌─ #11 探索搜撤 Story 001 State Machine + Phase Transitions (依赖 #10 ✅)
-  ├─ #13 世界修复 Epic 已完成，可作为 #14/#16/#17 下游合同输入
-  └─ TC-RGC-005~009 下游交互/UI 接线（TC-RGC-003/004 visible Godot 复测已通过）
+  ┌─ #12 战斗威胁 Story 001 State Machine + Threat Queue (依赖 #11 ✅)
+  ├─ #14 空港集市后续 Story（依赖 #11 货币来源 + #13 修复合同 ✅）
+  └─ #16 UI/HUD 上游数据合同预对齐（等待 #12/#14 收口）
 ```
 
 ---
@@ -527,8 +528,8 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 1. **瓶颈 #1 (内容注册表)**: 15 个系统中 10 个直接依赖它。如果 Schema 设计出错，后续大面积返工。建议 Phase A 结束后做一次 **Schema Freeze**。
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
-3. **最大汇合点 #10 (航行风险)**: 已完成并解锁 #11；后续关键风险转移到 #11 → #12 → #16 整条链的集成质量。
-4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16，这条链上的任何延迟都会推迟 MVP。
+3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #12 → #16 的威胁/UI 集成质量。
+4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16；#11 已完成，任何 #12/#16 延迟都会直接推迟 MVP。
 5. **#17 #18 阻塞**: ADR-0016 和 ADR-0017 未创建。如果 Vertical Slice 需要它们，最晚在 Phase D 结束前完成 ADR。
 
 ---

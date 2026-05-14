@@ -170,7 +170,7 @@ func _debug_verify_r15_guards() -> bool:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/partner-relationships/EdgeCasesTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] Created — `dotnet run --project tests/integration/partner-relationships/EdgeCasesTest.csproj` PASS (34/34)
+**Status**: [x] Created — `dotnet run --project tests/integration/partner-relationships/EdgeCasesTest.csproj` PASS (34/34); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

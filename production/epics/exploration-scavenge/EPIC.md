@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: design/gdd/exploration-scavenge-scenario.md
 > **Architecture Module**: Autoload #11 — ExplorationManager
-> **Status**: Complete
+> **Status**: Complete — reviewed 2026-05-14
 > **Stories**: 6 (001-006)
 
 ## Overview
@@ -61,4 +61,4 @@ This epic is complete when:
 
 ## Next Step
 
-All stories created. Feature Layer 3/5 unblocked epics complete. Next: settlement-market #14 (ADR-0014 deferred), partner-relationships #15 (ADR-0015 deferred).
+All stories complete and reviewed. Epic #11 is verified by 6/6 Story runners (287/287 checks PASS) and is ready for downstream consumption by Combat #12, UI/HUD #16, Feedback #17, and Onboarding #18. Epic #15 is also complete; remaining Feature Layer implementation focus is #12 Combat and #14 Settlement before the #16 UI/HUD convergence.

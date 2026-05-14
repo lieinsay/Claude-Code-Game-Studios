@@ -1,13 +1,13 @@
 # 多人协作生产计划 — 云海织航 MVP
 
-> 生成: 2026-05-10 | 最后更新: 2026-05-13
+> 生成: 2026-05-10 | 最后更新: 2026-05-14
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
 > 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | BUG-005 已修复**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-13 同步到 #5/#6/#7/#8/#9/#10 Complete、85 个 C# runner PASS 的当前基线。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-14 同步到 #5/#6/#7/#8/#9/#10/#11/#13/#15 Complete、97/97 个 C# runner PASS 的当前基线。
 
 ---
 
@@ -400,12 +400,12 @@ D-A: Epic #14 继续 + Epic #13 收尾
   Story 004 □ Signal + Resources Integration     (I, 2d)  ← 等 003
 
 
-D-B: Epic #15 继续 + Epic #16 继续
+D-B: Epic #15 完成 + Epic #16 继续
 ────────────────────────────────────────
   Epic #15:
-  Story 004 □ Hub Event + Intel API Integration  (I, 2d)  ← 等 001-003
-  Story 005 □ Persistence + State Recovery       (I, 1d)  ← 等 003
-  Story 006 □ Edge Cases + R15 Guards            (I, 2d)  ← 等 004-005
+  Story 004 ☑ Hub Event + Intel API Integration  (I, 2d)  ← ✅ 16/16 PASS
+  Story 005 ☑ Persistence + State Recovery       (I, 1d)  ← ✅ 13/13 PASS
+  Story 006 ☑ Edge Cases + R15 Guards            (I, 2d)  ← ✅ 34/34 PASS
 
   Epic #16:
   Story 002 □ Modal Stack + Input Routing        (L, 2d)  ← 等 001
@@ -414,12 +414,12 @@ D-B: Epic #15 继续 + Epic #16 继续
 
 D-C: Epic #11 Exploration (全部 6 个 Story)
 ────────────────────────────────────────
-  Story 001 □ State Machine + Phase Transitions  (L, 2d)
-  Story 002 □ Search/Scavenge + Intel Formulas   (L, 2d)  ← 与 001 并行
-  Story 003 □ Threat Trigger + Scout Preview     (L, 2d)  ← 等 001
-  Story 004 □ EncounterContext + ARRIVING Entry  (I, 2d)  ← 等 001+#10
-  Story 005 □ Extraction + Settlement Loss       (I, 2d)  ← 等 002
-  Story 006 □ Persistence + Session Recovery     (I, 2d)  ← 等 004-005
+  Story 001 ☑ State Machine + Phase Transitions  (L, 2d)  ← ✅ 52/52 PASS
+  Story 002 ☑ Search/Scavenge + Intel Formulas   (L, 2d)  ← ✅ 35/35 PASS
+  Story 003 ☑ Threat Trigger + Scout Preview     (L, 2d)  ← ✅ 31/31 PASS
+  Story 004 ☑ EncounterContext + ARRIVING Entry  (I, 2d)  ← ✅ 37/37 PASS
+  Story 005 ☑ Extraction + Settlement Loss       (I, 2d)  ← ✅ 68/68 PASS
+  Story 006 ☑ Persistence + Session Recovery     (I, 2d)  ← ✅ 64/64 PASS
 ```
 
 ### 第 9 周: Feature 后半
@@ -440,7 +440,7 @@ D-B: Epic #16 UI 收尾
   Story 006 □ Edge Cases + A11y                  (I, 2d)  ← 等 004-005
 
 
-D-C: Epic #12 Combat (等 #11 完成)
+D-C: Epic #12 Combat (等 #11 完成 — 已满足)
 ────────────────────────────────────────
   Story 001 □ Combat State Machine + Threat Queue(L, 2d)
   Story 002 □ Response Resolution + Settlement   (L, 2d)  ← 等 001
@@ -591,11 +591,11 @@ D-C: 性能分析 + 优化
 | #8 Modules | 001-008 | #3 快照 + #5 池定义 + #7 槽位注册 | ✅ Complete + reviewed — 2026-05-13 |
 | #9 Chart | 001-008 | #1 ID + #3 快照 + #6 知识状态 | ✅ Complete + reviewed — 2026-05-13 |
 | #10 Navigation | 001-008 | #5+#6+#7+#8+#9 全部 | ✅ Complete + reviewed — 2026-05-13 (281/281 PASS) |
-| #11 Exploration | 001 | #4+#5+#6+#8+#10 全部 | Next / Week 8 |
-| #12 Combat | 001 | #5+#8+#11 全部 | Week 9 |
+| #11 Exploration | 001-006 | #4+#5+#6+#8+#10 全部 | ✅ Complete + reviewed — 2026-05-14 (287/287 PASS) |
+| #12 Combat | 001 | #5+#8+#11 全部 | Next / Week 9 |
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
 | #14 Settlement | 001 | #3+#4+#5+#13 Story 003 | Week 7-8 |
-| #15 Partner | 001 | #1+#3+#5+#6+#7+#9 全部 | Week 7 |
+| #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
 | #16 UI | 001 | #5+#8+#9 基础 API | Week 7 |
 
 ---
@@ -607,7 +607,7 @@ D-C: 性能分析 + 优化
 | Registry schema 后期变更 | 中 | 高: 14 系统受影响 | Phase 1 完成后 schema freeze |
 | Persistence 序列化格式变更 | 低 | 高: 8 系统受影响 | Phase 1 内确定 Canonical JSON 格式 |
 | 全链路集成时信号协议不匹配 | 中 | 中: 返工 2-3 天 | Gate 1-3 各做一次信号 contract 验证 |
-| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | 砍 Feature 层到最小 (仅 #11+#13)，推迟 #14+#15 |
+| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | #11/#13/#15 已完成；优先保 #12→#16 关键路径，#14 可做最小合同收口 |
 | Godot .NET 构建问题 | 低 | 中: 阻塞全员 | Phase 0 彻底验证 + CI 每日构建 |
 
 ---

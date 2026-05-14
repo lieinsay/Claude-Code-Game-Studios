@@ -174,7 +174,7 @@ func _process(delta: float) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/partner-relationships/CatStateMachineTest.csproj` — must exist and pass
-**Status**: [x] Created and passing — 2026-05-13 (`15/15` checks)
+**Status**: [x] Created and passing — 2026-05-13 (`15/15` checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

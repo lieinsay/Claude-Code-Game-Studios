@@ -2,9 +2,18 @@
 
 <!-- STATUS -->
 Epic: Feature Layer
-Feature: Exploration / Scavenge (#11)
-Task: Story 005+006 Complete（68+64 PASS）；Epic #11 全部完成
+Feature: Exploration / Scavenge (#11) + Partner & Relationships (#15)
+Task: Epic #11/#15 review complete；文档索引与 reference 已同步
 <!-- /STATUS -->
+
+## Session Extract — Epic #11/#15 Review + Reference Sync 2026-05-14
+- Verdict: COMPLETE
+- Epic #11 Exploration / Scavenge: 6/6 Story complete and reviewed; runner evidence 287/287 PASS
+- Epic #15 Partner & Relationships: 6/6 Story complete and reviewed; runner evidence 119/119 PASS
+- Test evidence: `tests/**/*.csproj` full C# runner sweep 97/97 PASS
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（4 个既有 warning，0 error）
+- Docs updated: `production/epics/index.md`, Epic #11/#15 Story evidence, `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md`, `docs/architecture/architecture-traceability.md`, `docs/document-index.md`
+- Next recommended: #12 Combat Threat Story 001 and #14 Settlement Market closeout before #16 UI/HUD convergence
 
 ## Session Extract — /story-done 2026-05-14 (Story 006)
 - Verdict: COMPLETE WITH NOTES

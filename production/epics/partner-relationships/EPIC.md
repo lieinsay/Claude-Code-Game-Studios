@@ -60,4 +60,4 @@ This epic is complete when:
 
 ## Next Step
 
-All stories complete and closed. Feature Layer 5/5 unblocked — all Feature Layer epics complete. Next: Presentation Layer — ui-hud-interface #16 (ADR-0012 ready, needs story decomposition).
+All stories complete and reviewed. Epic #15 is verified by 6/6 Story runners (119/119 checks PASS) and remains a terminal Feature Layer system: PartnerManager exposes query/state contracts for Hub/UI without blocking the critical #11 → #12 → #16 path. Remaining Feature Layer implementation focus is #12 Combat and #14 Settlement before the #16 UI/HUD convergence.

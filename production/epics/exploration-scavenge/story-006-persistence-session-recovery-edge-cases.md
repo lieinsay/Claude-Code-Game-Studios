@@ -270,8 +270,8 @@ func _deserialize_exploration(snapshot: Dictionary) -> void:
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `tests/integration/exploration/PersistenceRecoveryTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [x] 64/64 PASS — 2026-05-14
+**Required evidence**: `tests/integration/exploration/persistence-recovery/PersistenceRecoveryTest.csproj` — must exist and pass, OR documented playtest covering all ACs
+**Status**: [x] 64/64 PASS — 2026-05-14; rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 

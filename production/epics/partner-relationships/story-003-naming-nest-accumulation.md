@@ -184,7 +184,7 @@ func _accumulate_nest_item() -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/partner-relationships/NamingNestTest.csproj` — must exist and pass
-**Status**: [x] Created and passing — 2026-05-13 (23/23 checks)
+**Status**: [x] Created and passing — 2026-05-13 (23/23 checks); rerun PASS — 2026-05-14 Epic #11/#15 review
 
 ---
 
