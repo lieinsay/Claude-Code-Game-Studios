@@ -329,8 +329,8 @@ D-A: Epic #13 收尾 + 启动 Epic #14
   Story 006 □ Edge Cases + Visual/Audio          (I, 2d)  ← 等 004-005
 
   Epic #14 Settlement (等 #13 Story 003):
-  Story 001 □ Settlement State Machine + Stall   (L, 2d)
-  Story 002 □ Purchase Flow + Price Formula      (L, 2d)  ← 与 001 并行
+  Story 001 ☑ Settlement State Machine + Stall   (L, 2d)  ← ✅ 5/5 PASS
+  Story 002 ☑ Purchase Flow + Price Formula      (L, 2d)  ← ✅ 6/6 PASS
 
 
 D-B: Epic #15 Partner + 启动 UI
@@ -382,7 +382,7 @@ Phase 2 完成时刻:
   #11 Exploration (等 #4+#5+#6+#8+#10 → 全部满足)
   #12 Combat      (等 #5+#8+#11 → 等 #11 完成)
   #13 Repair      (等 #3+#5+#6+#9 → 全部满足，D-A 已在做)
-  #14 Settlement  (等 #3+#4+#5+#13 → 等 #13 完成)
+  #14 Settlement  (等 #3+#4+#5+#13 → ✅ Complete, 31/31 settlement-market checks PASS)
   #15 Partner     (等 #1+#3+#5+#6+#7+#9 → 全部满足，D-B 已在做)
 ```
 
@@ -396,7 +396,7 @@ D-A: Epic #14 继续 + Epic #13 收尾
   Story 006 □ Edge Cases + Visual/Audio          (I, 2d)
 
   Epic #14:
-  Story 003 □ Repair-Driven Unlock + NPC State   (L, 2d)  ← 等 #13 Story 004
+  Story 003 ☑ Repair-Driven Unlock + NPC State   (L, 2d)  ← ✅ 4/4 PASS
   Story 004 □ Signal + Resources Integration     (I, 2d)  ← 等 003
 
 
@@ -428,7 +428,9 @@ D-C: Epic #11 Exploration (全部 6 个 Story)
 D-A: Epic #14 收尾
 ────────────────────────────────────────
   Epic #14:
-  Story 005 □ Persistence + State Recovery       (I, 1d)  ← 等 001-004
+  Story 004 ☑ Signal + Resources Integration     (I, 2d)  ← ✅ 6/6 PASS
+  Story 005 ☑ Persistence + State Recovery       (I, 1d)  ← ✅ 5/5 PASS
+  Story 006 ☑ Edge Cases + UI Defensive          (I, 1d)  ← ✅ 5/5 PASS
   Story 006 □ Edge Cases + UI + Defensive        (I, 2d)  ← 等 004-005
 
 
@@ -594,7 +596,7 @@ D-C: 性能分析 + 优化
 | #11 Exploration | 001-006 | #4+#5+#6+#8+#10 全部 | ✅ Complete + reviewed — 2026-05-14 (287/287 PASS) |
 | #12 Combat | 001-006 | #5+#8+#11 全部 | ✅ Complete — 2026-05-14 (37/37 grouped PASS) |
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
-| #14 Settlement | 001 | #3+#4+#5+#13 Story 003 | Week 7-8 |
+| #14 Settlement | 001-006 | #3+#4+#5+#13 Story 003 | ✅ Complete — 2026-05-14 (31/31 PASS) |
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
 | #16 UI | 001 | #5+#8+#9 基础 API | Week 7 |
 
@@ -607,7 +609,7 @@ D-C: 性能分析 + 优化
 | Registry schema 后期变更 | 中 | 高: 14 系统受影响 | Phase 1 完成后 schema freeze |
 | Persistence 序列化格式变更 | 低 | 高: 8 系统受影响 | Phase 1 内确定 Canonical JSON 格式 |
 | 全链路集成时信号协议不匹配 | 中 | 中: 返工 2-3 天 | Gate 1-3 各做一次信号 contract 验证 |
-| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | #11/#12/#13/#15 已完成；优先保 #14→#16 关键路径 |
+| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | #11/#12/#13/#14/#15 已完成；优先保 #16 关键路径 |
 | Godot .NET 构建问题 | 低 | 中: 阻塞全员 | Phase 0 彻底验证 + CI 每日构建 |
 
 ---

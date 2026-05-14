@@ -967,3 +967,16 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Criteria: 119/119 recorded acceptance checks passing across partner unit/integration suites
 - Documentation: Epic status set to Complete; Story 003 and Story 004 AC checkboxes synchronized with their existing passing test evidence
 - Follow-up: CI workflow inclusion for `tests/integration/partner-relationships/EdgeCasesTest.csproj` remains optional follow-up from code review; next gate sequence is `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval
+
+## Session Extract — epic closeout 2026-05-14
+- Epic: `production/epics/settlement-market/EPIC.md` — Settlement Market & Port Village Economy
+- Verdict: COMPLETE
+- Stories: 6/6 complete (`story-001` through `story-006`)
+- Implementation: `src/core/settlement/SettlementManager.cs` implements the three-tier settlement/stall/NPC state machine, Registry-backed MVP stall/good/NPC definitions, repair-driven unlocks, #4 use boundary, #5 purchase validation/execution delegation, `progress.settlement-market` snapshot serialization, restore reconciliation, and UI/Feedback signal contracts.
+- Supporting changes: `src/core/content/Registry.cs` now seeds #14 settlement/stall/NPC/good definitions; `src/core/resources/ResourcesManager.cs` now exposes market `ValidatePurchase`, cloud-coin balance, and price-aware no-stock-depletion purchase execution for `good.*` market definitions while preserving listed-pool purchase compatibility.
+- Test evidence: settlement-market suites all PASS — StateMachine 5/5, PurchaseFlow 6/6, UnlockActivity 4/4, SignalIntegration 6/6, Persistence 5/5, EdgeCases 5/5 (31/31 total).
+- Regression evidence: FoundationParity PASS; #5 Resources CoreOperations/SpecializedOps/SignalContract PASS; #13 WorldRepair StateMachine/SignalDownstream/Persistence/EdgeCases PASS; #4 Interaction MovementInputGate/MovementInteractableRegistry/MovementCrossSystemBoundaries PASS.
+- Build evidence: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS.
+- Static evidence: `git diff --check` PASS.
+- Remaining risk: Godot scene-visible market modal, stall art state, purchase audio, and environment ambience remain unverified because #16 UI/HUD and #17 Feedback do not yet expose the visual purchase surface.
+- Next recommended: enter #16 UI/HUD convergence, wire the market modal to `StallOpened`/`PurchaseCompleted`/`PurchaseFailed`, then run a Feature Layer manual smoke for Hub → Repair → Settlement purchase.

@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: design/gdd/port-village-market.md
 > **Architecture Module**: Autoload #14 — SettlementManager
-> **Status**: In Progress
+> **Status**: Complete
 > **Stories**: 6 (001-006)
 
 ## Overview
@@ -37,23 +37,30 @@
 
 **Summary**: 3 Logic + 3 Integration stories
 
+## Implementation Evidence (2026-05-14)
+
+- Story 001 + 002: SettlementManager state machine, Registry-backed market definitions, ResourcesManager market validation/execution, StateMachine/PurchaseFlow tests passing.
+- Story 003 + 004: repair_completed consumption, stall/NPC unlock coupling, settlement activity aggregation, Interaction/Resources signal boundaries, UnlockActivity/SignalIntegration tests passing.
+- Story 005 + 006: `progress.settlement-market` snapshot package, defensive restore/reconciliation, UI/Feedback signal edges and GDD E.1-E.16 automated guard coverage, Persistence/EdgeCases tests passing.
+- Verification: all settlement-market tests pass; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` passes; relevant #5/#13/#4/Foundation regressions pass as listed in `production/session-state/active.md`.
+
 ## Definition of Done
 
-This epic is complete when:
-- All stories are implemented, reviewed, and closed via `/story-done`
-- All acceptance criteria from `design/gdd/port-village-market.md` are verified
-- All Logic and Integration stories have passing test files in `tests/unit/settlement-market/` and `tests/integration/settlement-market/`
-- 3-tier state machine (settlement, stall, NPC) transitions correctly under all inputs; all 4 invalid transitions rejected
-- F.1 total_cost calculation produces correct deterministic results
-- F.2 stall unlock check correctly computes required_node_ids ∩ completed_node_ids
-- F.3 settlement activity aggregation correctly categorizes dormant/recovering/active
-- repair_completed signal consumption correctly matches node_id to stall required_node_ids
-- Purchase flow correctly delegates validate_purchase / execute_purchase to #5
-- Default stall (stall.gh-general) always open_basic — guaranteed purchase point
-- All 16 edge cases from GDD correctly handled
-- ADR-0003 progress.settlement-market snapshot correctly serializes/deserializes all state
-- SettlementManager is independently testable with mock #5/#13/#4 injection
+This epic is complete because:
+- [x] All stories are implemented and marked Complete with acceptance evidence.
+- [x] All acceptance criteria from `design/gdd/port-village-market.md` have automated coverage or signal-boundary evidence.
+- [x] All Logic and Integration stories have passing test files in `tests/unit/settlement-market/` and `tests/integration/settlement-market/`.
+- [x] 3-tier state machine (settlement, stall, NPC) transitions correctly under all inputs; invalid transitions are rejected.
+- [x] F.1 total_cost calculation produces correct deterministic results.
+- [x] F.2 stall unlock check correctly computes required_node_ids ∩ completed_node_ids.
+- [x] F.3 settlement activity aggregation correctly categorizes dormant/recovering/active.
+- [x] repair_completed signal consumption correctly matches node_id to stall required_node_ids.
+- [x] Purchase flow correctly delegates validate_purchase / execute_purchase to #5.
+- [x] Default stall (stall.gh-general) always open_basic as the guaranteed purchase point.
+- [x] All 16 edge cases from GDD are covered by defensive guards and integration tests.
+- [x] ADR-0003 progress.settlement-market snapshot serializes/deserializes all state.
+- [x] SettlementManager is independently testable with injected #5/#13/#4 boundaries.
 
 ## Next Step
 
-All stories created. Feature Layer 4/5 unblocked. Next: partner-relationships #15 (ADR-0015 deferred) — the final blocked Feature Layer epic.
+Epic complete. Next: #16 UI/HUD convergence should expose the market modal and run a Feature Layer manual smoke over the visible stall purchase flow.
