@@ -834,3 +834,116 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Manual evidence: TC-RGC-001 PASS, TC-RGC-002 PASS, TC-RGC-010 PASS; TC-RGC-003/004 visible Godot retest PASS with screenshot evidence; TC-RGC-005 through TC-RGC-009 remain blocked by downstream interaction/UI wiring.
 - Bugs: BUG-001/002/003/004 verified fixed; BUG-005 `Downstream gameplay scene is not mounted after audio activation` resolved by HubRuntime scene mount.
 - Next recommended: Continue #9 Chart Route Planning and downstream runtime UI paths; re-run TC-RGC-005 through TC-RGC-009 after relevant controls land.
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/partner-relationships/story-001-cat-state-machine-presence.md` — Story 001: Cat State Machine & Presence Contract
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/unit/partner-relationships/CatStateMachineTest.csproj`, `tests/unit/partner-relationships/CatStateMachineProgram.cs`, `CloudWeaverVoyage.sln`, `production/session-state/active.md`
+- Test written: `tests/unit/partner-relationships/CatStateMachineTest.csproj` — 15 Story 001 acceptance checks
+- Verification: Story 001 15/15 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore` PASS after normal solution restore generated missing assets
+- Notes: Implementation stays inside Story 001 boundaries: no scout_sniff algorithm, naming/nest accumulation, persistence snapshot, Hub signal wiring, or visual animation work.
+- Blockers: None
+- Next: `/code-review src/features/partner_relationships/PartnerManager.cs tests/unit/partner-relationships/CatStateMachineProgram.cs` then `/story-done production/epics/partner-relationships/story-001-cat-state-machine-presence.md`
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/partner-relationships/story-001-cat-state-machine-presence.md` — Story 001: Cat State Machine & Presence Contract
+- Criteria: 15/15 acceptance criteria covered by `tests/unit/partner-relationships/CatStateMachineTest.csproj`; 15/15 checks passing
+- Code review: Complete — APPROVED WITH SUGGESTIONS; non-blocking timing config note carried forward
+- Tech debt logged: None
+- Next recommended: `production/epics/partner-relationships/story-002-scout-sniff-confidence.md` — Story 002: Scout Sniff Algorithm & Confidence Clamp
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/partner-relationships/story-002-scout-sniff-confidence.md` — Story 002: Scout Sniff Algorithm & Confidence Clamp
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/unit/partner-relationships/ScoutSniffTest.csproj`, `tests/unit/partner-relationships/ScoutSniffProgram.cs`, `production/session-state/active.md`
+- Test written: `tests/unit/partner-relationships/ScoutSniffTest.csproj` — 18 Story 002 acceptance checks
+- Verification: Story 002 18/18 PASS; Story 001 regression 15/15 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS
+- Notes: Upstream Registry, inventory, and Intel systems are injected boundaries; `dotnet sln add` was not applied because the existing solution has an unrelated duplicate `SignalContractTest` project-name issue.
+- Blockers: None
+- Next: `/code-review src/features/partner_relationships/PartnerManager.cs tests/unit/partner-relationships/ScoutSniffProgram.cs` then `/story-done production/epics/partner-relationships/story-002-scout-sniff-confidence.md`
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/partner-relationships/story-002-scout-sniff-confidence.md` — Story 002: Scout Sniff Algorithm & Confidence Clamp
+- Criteria: 18/18 acceptance criteria covered by `tests/unit/partner-relationships/ScoutSniffTest.csproj`; 18/18 checks passing
+- Test evidence: `dotnet run --project tests/unit/partner-relationships/ScoutSniffTest.csproj -p:UseSharedCompilation=false` PASS; Story 001 regression `CatStateMachineTest.csproj` PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS
+- Code review: Complete — APPROVED WITH SUGGESTIONS; public API XML comment language issue fixed before closure
+- Tech debt logged: None
+- Next recommended: `production/epics/partner-relationships/story-003-naming-nest-accumulation.md` — Story 003: Naming System & Nest Accumulation
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/partner-relationships/story-003-naming-nest-accumulation.md` — Story 003: Naming System & Nest Accumulation
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/unit/partner-relationships/NamingNestTest.csproj`, `tests/unit/partner-relationships/NamingNestProgram.cs`, `production/session-state/active.md`
+- Test written: `tests/unit/partner-relationships/NamingNestTest.csproj` — 23 Story 003 acceptance checks
+- Verification: Story 003 23/23 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Story behavior follows the naming/nest acceptance criteria and ADR-0015 sections; the story metadata still references `TR-partner-003`, while the current TR registry maps naming/nest to `TR-partner-002`.
+- Blockers: None
+- Next: `/code-review src/features/partner_relationships/PartnerManager.cs tests/unit/partner-relationships/NamingNestProgram.cs` then `/story-done production/epics/partner-relationships/story-003-naming-nest-accumulation.md`
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/partner-relationships/story-003-naming-nest-accumulation.md` — Story 003: Naming System & Nest Accumulation
+- Criteria: 23/23 acceptance criteria covered by `tests/unit/partner-relationships/NamingNestTest.csproj`; 23/23 checks passing
+- Code review: Complete — public nest mutation path fixed before closure; nest accumulation now only occurs through successful `ScoutSniff`.
+- Tech debt logged: None
+- Next recommended: `production/epics/partner-relationships/story-004-hub-intel-integration.md` — Story 004: Hub / Intel Integration
+
+## Session Extract — /dev-story 2026-05-13
+- Story: `production/epics/partner-relationships/story-004-hub-intel-integration.md` — Story 004: Hub Event & Intel API Integration
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/integration/partner-relationships/HubIntelIntegrationTest.csproj`, `tests/integration/partner-relationships/HubIntelIntegrationProgram.cs`, `tests/unit/partner-relationships/ScoutSniffProgram.cs`, `tests/unit/partner-relationships/NamingNestProgram.cs`, `production/session-state/active.md`
+- Test written: `tests/integration/partner-relationships/HubIntelIntegrationTest.csproj` — 16 Story 004 acceptance checks
+- Verification: Story 004 16/16 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Feature-ready orchestration now restores `progress.partner_skycat`, subscribes Hub events, syncs current Hub state/zone, queues one new-game `OnPartnerJoined`, and degrades gracefully when Intel/Resources boundaries are unavailable.
+- Blockers: None
+- Next: `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/HubIntelIntegrationProgram.cs` then `/story-done production/epics/partner-relationships/story-004-hub-intel-integration.md`
+
+## Session Extract — /story-done 2026-05-13
+- Verdict: COMPLETE
+- Story: `production/epics/partner-relationships/story-004-hub-intel-integration.md` — Story 004: Hub Event & Intel API Integration
+- Criteria: 16/16 acceptance criteria covered by `tests/integration/partner-relationships/HubIntelIntegrationTest.csproj`; 16/16 checks passing
+- Code review: Complete — direct `SyncWithHubState(HubDockingState)` zone derivation gap fixed before closure; retest approved.
+- Tech debt logged: None
+- Next recommended: `production/epics/partner-relationships/story-005-persistence-recovery.md` — Story 005: Persistence & State Recovery
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/partner-relationships/story-005-persistence-recovery.md` — Story 005: Persistence & State Recovery
+- Files changed: `src/features/partner_relationships/PartnerManager.cs`, `tests/integration/partner-relationships/PersistenceTest.csproj`, `tests/integration/partner-relationships/PersistenceProgram.cs`, `production/session-state/active.md`
+- Test written: `tests/integration/partner-relationships/PersistenceTest.csproj` — 13 Story 005 acceptance checks
+- Verification: Story 005 13/13 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Snapshot capture uses an injected `IPartnerSnapshotSink`, so PartnerManager can trigger `progress.partner_skycat` snapshots without owning Persistence file I/O. Restore now emits warnings for corrected sniff-success corruption, nest index gaps, and nest-state mismatches while preserving raw nest item data.
+- Blockers: None
+- Next: `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/PersistenceProgram.cs` then `/story-done production/epics/partner-relationships/story-005-persistence-recovery.md`
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE
+- Story: `production/epics/partner-relationships/story-005-persistence-recovery.md` — Story 005: Persistence & State Recovery
+- Criteria: 13/13 acceptance criteria covered by `tests/integration/partner-relationships/PersistenceTest.csproj`; 13/13 checks passing
+- Test evidence: Story 005 13/13 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Code review: Complete — `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/PersistenceProgram.cs` approved with no findings.
+- Tech debt logged: None
+- Next recommended: `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md` — Story 006: Edge Cases, R15 Guards & Defensive Handling
+
+## Session Extract — /dev-story 2026-05-14
+- Story: `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md` — Story 006: Edge Cases, R15 Guards & Defensive Handling
+- Files changed: `tests/integration/partner-relationships/EdgeCasesTest.csproj`, `tests/integration/partner-relationships/EdgeCasesProgram.cs`, `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`, `production/session-state/active.md`
+- Test written: `tests/integration/partner-relationships/EdgeCasesTest.csproj` — 34 Story 006 acceptance checks
+- Verification: Story 006 34/34 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; Story 005 regression 13/13 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS
+- Notes: Production partner logic already satisfied the defensive/R15 behavior from prior stories; this story adds the required comprehensive integration evidence and reflection-based R15 API audits.
+- Blockers: None
+- Next: `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/EdgeCasesTest.csproj` then `/story-done production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md`
+
+## Session Extract — /story-done 2026-05-14
+- Verdict: COMPLETE
+- Story: `production/epics/partner-relationships/story-006-edge-cases-r15-defensive.md` — Story 006: Edge Cases, R15 Guards & Defensive Handling
+- Criteria: 34/34 acceptance criteria covered by `tests/integration/partner-relationships/EdgeCasesTest.csproj`; 34/34 checks passing
+- Test evidence: Story 006 34/34 PASS; Story 001 regression 15/15 PASS; Story 002 regression 18/18 PASS; Story 003 regression 23/23 PASS; Story 004 regression 16/16 PASS; Story 005 regression 13/13 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS
+- Code review: Complete — `/code-review tests/integration/partner-relationships/EdgeCasesProgram.cs tests/integration/partner-relationships/EdgeCasesTest.csproj` approved with suggestions; CI workflow inclusion remains follow-up scope
+- Tech debt logged: None
+- Next recommended: Partner & Relationships Epic has no remaining stories; run `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval
+
+## Session Extract — epic closeout 2026-05-14
+- Epic: `production/epics/partner-relationships/EPIC.md` — Partner & Relationships
+- Verdict: COMPLETE
+- Stories: 6/6 complete and closed (`story-001` through `story-006`)
+- Criteria: 119/119 recorded acceptance checks passing across partner unit/integration suites
+- Documentation: Epic status set to Complete; Story 003 and Story 004 AC checkboxes synchronized with their existing passing test evidence
+- Follow-up: CI workflow inclusion for `tests/integration/partner-relationships/EdgeCasesTest.csproj` remains optional follow-up from code review; next gate sequence is `/smoke-check sprint`, `/team-qa sprint`, then `/gate-check` after QA approval

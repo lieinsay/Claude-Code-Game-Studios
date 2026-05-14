@@ -148,6 +148,24 @@ jobs:
       - name: Run persistence backup failover unit tests
         run: dotnet run --project tests/unit/persistence/BackupFailoverTest.csproj
 
+      - name: Run partner cat state machine unit tests
+        run: dotnet run --project tests/unit/partner-relationships/CatStateMachineTest.csproj
+
+      - name: Run partner scout sniff unit tests
+        run: dotnet run --project tests/unit/partner-relationships/ScoutSniffTest.csproj
+
+      - name: Run partner naming and nest unit tests
+        run: dotnet run --project tests/unit/partner-relationships/NamingNestTest.csproj
+
+      - name: Run partner hub intel integration tests
+        run: dotnet run --project tests/integration/partner-relationships/HubIntelIntegrationTest.csproj
+
+      - name: Run partner persistence integration tests
+        run: dotnet run --project tests/integration/partner-relationships/PersistenceTest.csproj
+
+      - name: Run partner edge cases integration tests
+        run: dotnet run --project tests/integration/partner-relationships/EdgeCasesTest.csproj
+
       - name: Run persistence artifact isolation integration tests
         run: dotnet run --project tests/integration/persistence/ArtifactIsolationTest.csproj
 

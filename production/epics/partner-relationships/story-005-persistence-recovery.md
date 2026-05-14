@@ -1,23 +1,32 @@
 # Story 005: Persistence & State Recovery
 
 > **Epic**: Partner & Relationships
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
+> **Estimate**: M
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 (Desktop Godot .NET/C#) governs active implementation; translate any pre-pivot wording, API names, and test paths to C# desktop equivalents before implementation.
 
 ## Context
 
 **GDD**: `design/gdd/partner-relationships.md`
-**Requirement**: `TR-partner-003`
+**Requirement**: `TR-partner-001`, `TR-partner-002`, `TR-partner-003`
 
 **ADR Governing Implementation**: ADR-0015 (§6 ADR-0003 序列化, §2 Dictionary 后端存储); ADR-0003 (Canonical JSON 快照包)
 **ADR Decision Summary**: PartnerManager 的所有持久化状态通过 ADR-0003 Canonical JSON 快照包保存为 progress.partner_skycat。7 个持久化字段：name, naming_done, naming_skip_count, sniff_success_occurred, nest_state, nest_items[], sniffed_items[]。瞬态字段（cat_state, _cat_state_cooldown, _sniff_lockout_remaining）不持久化——读档后从 Hub 上下文重新派生（E.4.a）。快照时机：每次嗅辨完成后、命名提交/跳过时、nest_state 变更时。反序列化一致性修正：(1) sniff_success_occurred=true 但 sniffed_items 为空 → 修正为 false；(2) naming_state 从 naming_done + naming_skip_count 派生；(3) nest_items 顺序验证——必须匹配静态清单索引。快照原子性：sniff 结果 + nest 累积 + 命名写入在同一事务中——若快照写入失败，数据已在内存中正确，下次快照会包含完整状态。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
-**Control Manifest Rules (Feature layer)**:
+**Performance**: Partner snapshot payload is small and must stay within ADR-0003 save encode + SHA-256 budget: p95 <50ms for a 2MB snapshot, max 100ms. No frame impact expected because snapshot capture is triggered at discrete state-change boundaries only: sniff completion, naming submit/skip, and nest_state change.
+
+**Control Manifest Rules (Foundation / Global)**:
+- Required: Save/load uses Canonical JSON with sorted keys, NFC normalization, and finite IEEE 754 floats only
+- Required: Domain systems export state via SnapshotPackage with typed fields; Persistence orchestrates but never interprets domain payload
+- Forbidden: Snapshot payloads must not include Node, Resource, Object, Callable, or RID references
+- Guardrail: Save encode + SHA-256 p95 <50ms for a 2MB snapshot, max 100ms
+
+**ADR-0015 Implementation Rules**:
 - Required: 瞬态字段永不写入快照——读档后重派生；序列化前 .duplicate(true) 所有 Array 字段；反序列化时执行一致性修正
 - Forbidden: 快照中包含 cat_state / cooldown 瞬态值；读档后以快照中的瞬态值覆盖派生值
 - Guardrail: sniff_success_occurred 与 sniffed_items 不一致 → 自动修正 + warning
@@ -28,34 +37,34 @@
 
 ### New Game Initialization
 
-- [ ] **AC-1**: GIVEN 新游戏 + 无 progress.partner_skycat 快照，WHEN _init_new_game_state()，THEN name="" + naming_done=false + naming_skip_count=0 + sniff_success_occurred=false + nest_state=EMPTY + nest_items=[] + sniffed_items=[]
+- [x] **AC-1**: GIVEN 新游戏 + 无 progress.partner_skycat 快照，WHEN _init_new_game_state()，THEN name="" + naming_done=false + naming_skip_count=0 + sniff_success_occurred=false + nest_state=EMPTY + nest_items=[] + sniffed_items=[]
 
 ### Serialization Roundtrip
 
-- [ ] **AC-2**: GIVEN 中间状态：name="小云" + naming_done=true + naming_skip_count=0 + sniff_success_occurred=true + sniffed_items=[A,B,C] + nest_state=ACCUMULATING + nest_items=[0,1]，WHEN _serialize_partner() → JSON → _deserialize_partner()，THEN 所有 7 字段一致无丢失
-- [ ] **AC-3**: GIVEN 全部终态：name="那只猫" + naming_done=true + naming_skip_count=3 + sniff_success_occurred=true + sniffed_items=[A..F] + nest_state=FULL + nest_items=[0,1,2,3]，WHEN 序列化往返，THEN 所有字段完整恢复
+- [x] **AC-2**: GIVEN 中间状态：name="小云" + naming_done=true + naming_skip_count=0 + sniff_success_occurred=true + sniffed_items=[A,B,C] + nest_state=ACCUMULATING + nest_items=[0,1]，WHEN _serialize_partner() → JSON → _deserialize_partner()，THEN 所有 7 字段一致无丢失
+- [x] **AC-3**: GIVEN 全部终态：name="那只猫" + naming_done=true + naming_skip_count=3 + sniff_success_occurred=true + sniffed_items=[A..F] + nest_state=FULL + nest_items=[0,1,2,3]，WHEN 序列化往返，THEN 所有字段完整恢复
 
 ### Transient Field Derivation (E.4.a)
 
-- [ ] **AC-4**: GIVEN 存档时 cat_state=SNIFFING，WHEN 读档，THEN cat_state 由 Hub 上下文派生（非 SNIFFING）。嗅辨动画不恢复——数据已在嗅辨时提交
-- [ ] **AC-5**: GIVEN 存档时 _cat_state_cooldown=0.3, _sniff_lockout_remaining=1.2，WHEN 读档，THEN cooldown=0.0, lockout=0.0。瞬态计时器重置
+- [x] **AC-4**: GIVEN 存档时 cat_state=SNIFFING，WHEN 读档，THEN cat_state 由 Hub 上下文派生（非 SNIFFING）。嗅辨动画不恢复——数据已在嗅辨时提交
+- [x] **AC-5**: GIVEN 存档时 _cat_state_cooldown=0.3, _sniff_lockout_remaining=1.2，WHEN 读档，THEN cooldown=0.0, lockout=0.0。瞬态计时器重置
 
 ### Consistency Correction
 
-- [ ] **AC-6**: GIVEN 快照中 sniff_success_occurred=true 但 sniffed_items=[]（数据损坏），WHEN _deserialize_partner()，THEN sniff_success_occurred 修正为 false + 记录 warning
-- [ ] **AC-7**: GIVEN 快照中 naming_done=true + naming_skip_count=2（不一致），WHEN 反序列化，THEN naming_state 从 naming_done 派生为 COMPLETED。naming_done 是主权威字段
-- [ ] **AC-8**: GIVEN 快照中 nest_items=[0,3]（跳过索引），WHEN 验证，THEN 记录 warning——但保留原始数据。不崩溃
+- [x] **AC-6**: GIVEN 快照中 sniff_success_occurred=true 但 sniffed_items=[]（数据损坏），WHEN _deserialize_partner()，THEN sniff_success_occurred 修正为 false + 记录 warning
+- [x] **AC-7**: GIVEN 快照中 naming_done=true + naming_skip_count=2（不一致），WHEN 反序列化，THEN naming_state 从 naming_done 派生为 COMPLETED。naming_done 是主权威字段
+- [x] **AC-8**: GIVEN 快照中 nest_items=[0,3]（跳过索引），WHEN 验证，THEN 记录 warning——但保留原始数据。不崩溃
 
 ### Snapshot Triggers
 
-- [ ] **AC-9**: GIVEN scout_sniff() 成功，WHEN 返回前，THEN _trigger_snapshot() 被调用
-- [ ] **AC-10**: GIVEN submit_partner_name() 或 skip_naming() 完成状态变更，WHEN 返回前，THEN _trigger_snapshot() 被调用
-- [ ] **AC-11**: GIVEN nest_state 变更（空→first / accumulating→full 等），WHEN 变更完成，THEN _trigger_snapshot() 被调用
+- [x] **AC-9**: GIVEN scout_sniff() 成功，WHEN 返回前，THEN _trigger_snapshot() 被调用
+- [x] **AC-10**: GIVEN submit_partner_name() 或 skip_naming() 完成状态变更，WHEN 返回前，THEN _trigger_snapshot() 被调用
+- [x] **AC-11**: GIVEN nest_state 变更（空→first / accumulating→full 等），WHEN 变更完成，THEN _trigger_snapshot() 被调用
 
 ### Naming Recovery (E.1.e)
 
-- [ ] **AC-12**: GIVEN 存档时 naming_state=PROMPTED + naming_skip_count=2，WHEN 读档，THEN naming_state 派生为 PENDING + skip_count=2。下次 player_returned_to_hub 触发命名 UI（还有 1 次机会）
-- [ ] **AC-13**: GIVEN 存档时 naming_state=PROMPTED + naming_skip_count=3，WHEN 读档，THEN naming_state=COMPLETED + name="那只猫"。窗口已关闭
+- [x] **AC-12**: GIVEN 存档时 naming_state=PROMPTED + naming_skip_count=2，WHEN 读档，THEN naming_state 派生为 PENDING + skip_count=2。下次 player_returned_to_hub 触发命名 UI（还有 1 次机会）
+- [x] **AC-13**: GIVEN 存档时 naming_state=PROMPTED + naming_skip_count=3，WHEN 读档，THEN naming_state=COMPLETED + name="那只猫"。窗口已关闭
 
 ---
 
@@ -161,7 +170,7 @@ func _trigger_snapshot() -> void:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/partner-relationships/PersistenceTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-14 (13/13 checks)
 
 ---
 
@@ -169,3 +178,11 @@ func _trigger_snapshot() -> void:
 
 - Depends on: Story 001 (cat state derivation), Story 002 (scout_sniff snapshot trigger), Story 003 (naming/nest snapshot trigger), Story 004 (init sequence), local-save-persistence Epic (capture_snapshot, restore_snapshot)
 - Unlocks: Story 006 (persistence edge cases)
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Criteria**: 13/13 passing
+**Deviations**: None
+**Test Evidence**: Integration — `tests/integration/partner-relationships/PersistenceTest.csproj` passes 13/13 checks. Story 001, Story 002, Story 003, and Story 004 regressions pass.
+**Code Review**: Complete — `/code-review src/features/partner_relationships/PartnerManager.cs tests/integration/partner-relationships/PersistenceProgram.cs` approved with no findings.

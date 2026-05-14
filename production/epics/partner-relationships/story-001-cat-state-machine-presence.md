@@ -1,7 +1,7 @@
 # Story 001: Cat State Machine & Presence Contract
 
 > **Epic**: Partner & Relationships
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,33 +28,33 @@
 
 ### R2 Presence Contract
 
-- [ ] **AC-1**: GIVEN Hub 状态为 landed / departure_locked / in_transit / arrival 任意值，WHEN query_partner_present()，THEN 返回 true。零例外
-- [ ] **AC-2**: GIVEN 新游戏启动 + 任意 Hub 状态，WHEN 初始化，THEN 无猫"不在场"的代码路径。R2 是硬约束——不持有 absent 状态
+- [x] **AC-1**: GIVEN Hub 状态为 landed / departure_locked / in_transit / arrival 任意值，WHEN query_partner_present()，THEN 返回 true。零例外
+- [x] **AC-2**: GIVEN 新游戏启动 + 任意 Hub 状态，WHEN 初始化，THEN 无猫"不在场"的代码路径。R2 是硬约束——不持有 absent 状态
 
 ### Cat State Machine Core
 
-- [ ] **AC-3**: GIVEN 新游戏 + Hub=landed + 玩家未移动，WHEN 初始化，THEN cat_state=SLEEPING_ON_INTEL_STATION。猫在驾驶舱情报台
-- [ ] **AC-4**: GIVEN cat_state=SLEEPING_ON_INTEL_STATION + 玩家进入生活舱，WHEN player_entered_zone("living_quarters")，THEN cat_state→IDLE_LIVING_QUARTERS
-- [ ] **AC-5**: GIVEN cat_state=IDLE_LIVING_QUARTERS + 玩家走向工作台，WHEN 触发，THEN cat_state→FOLLOWING_PLAYER_TO_BENCH → BENCH_ADJACENT（到达时）
-- [ ] **AC-6**: GIVEN cat_state=BENCH_ADJACENT + 玩家离开工作台 reach_limit，WHEN 触发，THEN cat_state→IDLE_LIVING_QUARTERS
-- [ ] **AC-7**: GIVEN cat_state=IDLE_LIVING_QUARTERS + 闲置时间 > T_nest_settle (20s)，WHEN 触发，THEN cat_state→IN_NEST
-- [ ] **AC-8**: GIVEN cat_state=IN_NEST + 玩家进入生活舱触发半径，WHEN 触发，THEN cat_state→IDLE_LIVING_QUARTERS。猫离开窝
+- [x] **AC-3**: GIVEN 新游戏 + Hub=landed + 玩家未移动，WHEN 初始化，THEN cat_state=SLEEPING_ON_INTEL_STATION。猫在驾驶舱情报台
+- [x] **AC-4**: GIVEN cat_state=SLEEPING_ON_INTEL_STATION + 玩家进入生活舱，WHEN player_entered_zone("living_quarters")，THEN cat_state→IDLE_LIVING_QUARTERS
+- [x] **AC-5**: GIVEN cat_state=IDLE_LIVING_QUARTERS + 玩家走向工作台，WHEN 触发，THEN cat_state→FOLLOWING_PLAYER_TO_BENCH → BENCH_ADJACENT（到达时）
+- [x] **AC-6**: GIVEN cat_state=BENCH_ADJACENT + 玩家离开工作台 reach_limit，WHEN 触发，THEN cat_state→IDLE_LIVING_QUARTERS
+- [x] **AC-7**: GIVEN cat_state=IDLE_LIVING_QUARTERS + 闲置时间 > T_nest_settle (20s)，WHEN 触发，THEN cat_state→IN_NEST
+- [x] **AC-8**: GIVEN cat_state=IN_NEST + 玩家进入生活舱触发半径，WHEN 触发，THEN cat_state→IDLE_LIVING_QUARTERS。猫离开窝
 
 ### Hub State Coupling
 
-- [ ] **AC-9**: GIVEN Hub→departure_locked + 猫在任意状态，WHEN hub_state_changed(DEPARTURE_LOCKED)，THEN 猫状态冻结——所有后续 zone 事件不触发状态变更
-- [ ] **AC-10**: GIVEN Hub→in_transit，WHEN hub_state_changed(IN_TRANSIT)，THEN 猫不渲染、不可交互。逻辑态保持 idle_living_quarters。query_partner_present() 仍然返回 true
-- [ ] **AC-11**: GIVEN Hub→arrival + 猫 pre-departure 状态为 IN_NEST 或任意态，WHEN hub_state_changed(ARRIVAL)，THEN cat_state 强制→IDLE_LIVING_QUARTERS。猫在生活舱暖光区，不在入口（R13）
+- [x] **AC-9**: GIVEN Hub→departure_locked + 猫在任意状态，WHEN hub_state_changed(DEPARTURE_LOCKED)，THEN 猫状态冻结——所有后续 zone 事件不触发状态变更
+- [x] **AC-10**: GIVEN Hub→in_transit，WHEN hub_state_changed(IN_TRANSIT)，THEN 猫不渲染、不可交互。逻辑态保持 idle_living_quarters。query_partner_present() 仍然返回 true
+- [x] **AC-11**: GIVEN Hub→arrival + 猫 pre-departure 状态为 IN_NEST 或任意态，WHEN hub_state_changed(ARRIVAL)，THEN cat_state 强制→IDLE_LIVING_QUARTERS。猫在生活舱暖光区，不在入口（R13）
 
 ### Zone Boundary Spam Prevention (E.4.b)
 
-- [ ] **AC-12**: GIVEN cat_state 刚转换完成，WHEN player_entered_zone 在 0.5s 内再次触发，THEN 状态不转换。防抖 cooldown 有效
-- [ ] **AC-13**: GIVEN cooldown=0.5s 已过 + 新 zone 事件到达，WHEN 触发，THEN 正常处理转换。cooldown 不永久锁死
+- [x] **AC-12**: GIVEN cat_state 刚转换完成，WHEN player_entered_zone 在 0.5s 内再次触发，THEN 状态不转换。防抖 cooldown 有效
+- [x] **AC-13**: GIVEN cooldown=0.5s 已过 + 新 zone 事件到达，WHEN 触发，THEN 正常处理转换。cooldown 不永久锁死
 
 ### Initialization
 
-- [ ] **AC-14**: GIVEN PartnerManager 在 feature_ready 阶段初始化，WHEN 加载完成，THEN cat_state 从当前 Hub 状态派生。landed → SLEEPING_ON_INTEL_STATION；in_transit → IDLE_LIVING_QUARTERS；arrival → IDLE_LIVING_QUARTERS
-- [ ] **AC-15**: GIVEN MVP 唯一伙伴 ID="partner.sky-cat"，WHEN 初始化，THEN partners Dictionary 仅含此一个 key。无第二只伙伴
+- [x] **AC-14**: GIVEN PartnerManager 在 feature_ready 阶段初始化，WHEN 加载完成，THEN cat_state 从当前 Hub 状态派生。landed → SLEEPING_ON_INTEL_STATION；in_transit → IDLE_LIVING_QUARTERS；arrival → IDLE_LIVING_QUARTERS
+- [x] **AC-15**: GIVEN MVP 唯一伙伴 ID="partner.sky-cat"，WHEN 初始化，THEN partners Dictionary 仅含此一个 key。无第二只伙伴
 
 ---
 
@@ -174,7 +174,7 @@ func _process(delta: float) -> void:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/partner-relationships/CatStateMachineTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — 2026-05-13 (`15/15` checks)
 
 ---
 
@@ -182,3 +182,11 @@ func _process(delta: float) -> void:
 
 - Depends on: airship-hub Epic (Hub states, player_entered_zone), platform-session-shell Epic (Autoload #15 Phase 5)
 - Unlocks: Story 002 (sniffing state gate), Story 004 (Hub event signal wiring)
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Criteria**: 15/15 passing
+**Deviations**: None. `scout_sniff()`, naming/nest accumulation, Hub signal wiring, `report_observation_event` / `reveal_rumor`, visual animation, and physical trigger regions remain downstream story scope.
+**Test Evidence**: Logic — `tests/unit/partner-relationships/CatStateMachineTest.csproj` passes 15/15 checks.
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS. No blocking ADR, architecture, standards, or testability issues; timing constants can move to tuning config when partner tuning data exists.
