@@ -1,7 +1,7 @@
 # Story 003: Damage, Module & Knockback Formulas
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -175,7 +175,17 @@ func _get_threat_facing(threat_context: Dictionary) -> Vector2:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/combat/DamageFormulasTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/unit/combat/DamageFormulasTest.csproj -p:UseSharedCompilation=false` (4/4 grouped checks PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs`.
+- Test runner: `tests/unit/combat/DamageFormulasTest.csproj`.
+- Acceptance coverage:
+  - AC-1 through AC-4: `CalcHullDamage` returns uniform integer damage in [8,12] for tank and 0 for emergency/retreat.
+  - AC-5 through AC-9: `CalcModuleDamage` uses module chance, empty-safe handling, and actual_state installed filtering while ignoring visible_state as an eligibility blocker.
+  - AC-10 through AC-12: `CheckEmergencyAvailable` reads carried repair materials and treats zero/missing stacks as unavailable.
+  - AC-13 through AC-16: `CalcKnockback` returns 0/null for emergency, configured tank/retreat distances, normalized threat-to-player direction, facing fallback, and final random unit fallback.
 
 ---
 

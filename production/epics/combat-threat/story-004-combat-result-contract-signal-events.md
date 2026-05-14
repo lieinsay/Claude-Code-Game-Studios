@@ -1,7 +1,7 @@
 # Story 004: combat_result Contract & Signal Events
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -178,7 +178,18 @@ func _resolve_threat_safe(threat_context: Dictionary) -> Dictionary:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/combat/CombatResultSignalTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/integration/combat/CombatResultSignalTest.csproj -p:UseSharedCompilation=false` (5/5 grouped checks PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs`.
+- Test runner: `tests/integration/combat/CombatResultSignalTest.csproj`.
+- Acceptance coverage:
+  - AC-1 through AC-3: `CombatResult` exposes all six contract fields for suppressed/tanked/retreated outcomes.
+  - AC-4 through AC-6: outcome-specific events and shared `ThreatResolved` event emit for each result.
+  - AC-7/8: signals fire after CombatManager reaches RESOLVED and the observed cascade depth remains <= 2.
+  - AC-9 through AC-13: #8 hull/module, #5 resource, and #11 exploration callbacks execute through injected boundaries.
+  - AC-14/15: `retreat_flagged` persists across later emergency/tank settlements in the same exploration session.
 
 ---
 
