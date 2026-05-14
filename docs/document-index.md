@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-14
-> **项目阶段**: Pre-Production — Desktop C# Foundation/Core/Feature 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#13/#15 **Complete** | BUG-005 已修复
+> **项目阶段**: Pre-Production — Desktop C# Foundation/Core/Feature 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#15 **Complete** | BUG-005 已修复
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #13 #15 | Active/Next: #12 Combat, #14 Settlement, downstream runtime UI wiring
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 33 个 C# 源文件 + 97 个 C# test runner: unit 49 / integration 47 / parity 1)；GDScript P3 原型保留为迁移参考
+> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #15 | Active/Next: #14 Settlement, then #16 UI/HUD convergence
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 34 个 C# 源文件 + 103 个 C# test runner: unit 52 / integration 50 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -47,10 +47,10 @@ graph TB
     end
 
     subgraph 源代码["💻 源代码层 src/"]
-        CORE["core/ (8 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Boot"]
+        CORE["core/ (9 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Combat·Boot"]
         FEATURE["feature/ (3)<br/>Exploration·WorldRepair·Partner"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>97/97 C# runners PASS<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS<br/>Modules/Hull Story 001-008 PASS<br/>Chart Story 001-008 PASS<br/>Navigation Story 001-008 PASS<br/>Exploration Story 001-006 PASS<br/>WorldRepair Story 001-006 PASS<br/>Partner Story 001-006 PASS"]
+        TEST["tests/<br/>103 C# runners<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS<br/>Modules/Hull Story 001-008 PASS<br/>Chart Story 001-008 PASS<br/>Navigation Story 001-008 PASS<br/>Exploration Story 001-006 PASS<br/>Combat Story 001-006 PASS<br/>WorldRepair Story 001-006 PASS<br/>Partner Story 001-006 PASS"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -109,7 +109,7 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
-| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#13/#15 已完成 |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#15 已完成 |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
@@ -124,7 +124,7 @@ graph TB
 | [production/epics/navigation-route-risk/EPIC.md](../production/epics/navigation-route-risk/EPIC.md) | Epic #10: 航行路线风险 (8/8 Stories **Complete** — 2026-05-13 复审通过，281/281 PASS) |
 | **Feature 层 (5 Epic / 30 Stories)** | |
 | [production/epics/exploration-scavenge/EPIC.md](../production/epics/exploration-scavenge/EPIC.md) | Epic #11: 探索搜撤 (6/6 Stories **Complete** — 2026-05-14 复审通过，287/287 PASS) |
-| [production/epics/combat-threat/EPIC.md](../production/epics/combat-threat/EPIC.md) | Epic #12: 战斗威胁处理 (6 Stories) |
+| [production/epics/combat-threat/EPIC.md](../production/epics/combat-threat/EPIC.md) | Epic #12: 战斗威胁处理 (6/6 Stories **Complete** — 2026-05-14，37/37 grouped PASS) |
 | [production/epics/world-repair/EPIC.md](../production/epics/world-repair/EPIC.md) | Epic #13: 世界修复解锁 (6 Stories) |
 | [production/epics/settlement-market/EPIC.md](../production/epics/settlement-market/EPIC.md) | Epic #14: 空港集市交易 (6 Stories) |
 | [production/epics/partner-relationships/EPIC.md](../production/epics/partner-relationships/EPIC.md) | Epic #15: 伙伴功能与关系 (6/6 Stories **Complete** — 2026-05-14 复审通过，119/119 PASS) |
@@ -549,7 +549,7 @@ graph TB
 | Epic | System # | Stories | 职责概括 | Autoload |
 |------|----------|---------|---------|----------|
 | [exploration-scavenge](../production/epics/exploration-scavenge/EPIC.md) | #11 | 6 | 探索/搜撤——4 阶段状态机、6 搜索点、2 intel 点、scout η 威胁预览、撤离 λ 保护；2026-05-14 复审 287/287 PASS | ExplorationManager (#11) |
-| [combat-threat](../production/epics/combat-threat/EPIC.md) | #12 | 6 | 战斗与威胁处理——4 态微状态机、3 种响应、C4 10 步结算序列、combat_result 6-field 契约 | CombatManager (#12) |
+| [combat-threat](../production/epics/combat-threat/EPIC.md) | #12 | 6 | 战斗与威胁处理——4 态微状态机、3 种响应、C4 10 步结算序列、combat_result 6-field 契约、Registry threat config；2026-05-14 完成 37/37 grouped PASS | CombatManager (#12) |
 | [world-repair](../production/epics/world-repair/EPIC.md) | #13 | 6 | 世界修复与解锁——3 态状态机、deposit_validation 5 种 violation、repair_completed 6 路 fan-out；2026-05-13 完成 91/91 PASS | WorldRepair (#13) |
 | [settlement-market](../production/epics/settlement-market/EPIC.md) | #14 | 6 | 空港/集市交易——3 层状态机、repair 驱动摊位解锁、F.1 价格公式、validate_purchase 4 种拒绝 | SettlementManager (#14) |
 | [partner-relationships](../production/epics/partner-relationships/EPIC.md) | #15 | 6 | 伙伴功能与关系——6 态猫状态机、R15 6 硬禁止、scout_sniff 6 步算法、F.1 置信度截断 66、命名+小窝两套状态机；2026-05-14 复审 119/119 PASS | PartnerManager (#15) |
@@ -581,8 +581,8 @@ graph TB
 
 ## 五、C# 实现进度
 
-> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#13 WorldRepair、#15 Partner 完成并解锁 #12/#14/#16 下游合同；BUG-005 scene reachability 已修复；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 error）；`tests/**/*.csproj` 全量 C# runner 97/97 PASS；Epic #11 Story runners 287/287 checks PASS；Epic #15 Story runners 119/119 checks PASS。
+> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#15 Partner 完成并解锁 #14/#16 下游合同；BUG-005 scene reachability 已修复；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）；Epic #12 combat runners 37/37 grouped checks PASS；FoundationParity 70/70 PASS；#5/#8/#11 相关回归 PASS。
 
 ### Content Registry 完成项
 
@@ -637,6 +637,7 @@ graph TB
 | Epic | 状态 | 实现 | 验证 |
 |------|------|------|------|
 | Epic #11 Exploration / Scavenge | Done + reviewed | `src/feature/ExplorationManager.cs` — 6 个 Story 合同：4 阶段探索 FSM、搜索/情报公式、威胁触发与侦察预览、EncounterContext 入场、撤离结算与状态变体、progress.exploration 持久化恢复 | Story 001-006 复审 PASS；Exploration 6 个 runner，287/287 checks PASS；全量 C# runner 97/97 PASS |
+| Epic #12 Combat / Threat Resolution | Done | `src/core/combat/CombatManager.cs` — 6 个 Story 合同：4 态威胁 FSM、FIFO threat queue、3 响应 C4 结算、damage/module/knockback 公式、combat_result 信号、Registry threat config 与防御边界 | Story 001-006 PASS；Combat 6 个 runner，37/37 grouped checks PASS；FoundationParity 与 #5/#8/#11 回归 PASS |
 | Epic #13 World Repair | Done | `src/features/world_repair/WorldRepair.cs` — 6 个 Story 合同：修复节点状态机、deposit validation、公式进度、信号链、持久化和防御边界 | Story 001-006 自动化证据 91/91 PASS |
 | Epic #15 Partner & Relationships | Done + reviewed | `src/features/partner_relationships/PartnerManager.cs` — 6 个 Story 合同：猫 6 态存在性契约、scout_sniff 6 步算法、命名/小窝状态机、Hub/Intel 集成、progress.partner_skycat 持久化、R15 防御守卫 | Story 001-006 复审 PASS；Partner 6 个 runner，119/119 checks PASS；全量 C# runner 97/97 PASS |
 
@@ -660,6 +661,7 @@ graph TB
 | **Core / Resources** | `src/core/resources/ResourcesManager.cs` | 6 资源池 + stack merge |
 | **Core / Intel** | `src/core/intel/IntelManager.cs` | KnowledgeState / Rumor / Pattern 逻辑 |
 | **Core / Chart** | `src/core/chart/ChartManager.cs` | ChartState / RouteSelectability / departure 确认 |
+| **Core / Combat** | `src/core/combat/CombatManager.cs` | CombatState / threat queue / combat_result 结算 |
 | **Feature** | `src/features/world_repair/WorldRepair.cs` | 修复状态机 + deposit / repair_completed |
 | **Presentation** | `src/presentation/UIManager.cs` | 屏幕 FSM + ModalStack + InputLayer |
 | **Presentation** | `src/presentation/FeedbackManager.cs` | 语义反馈事件中心 |
@@ -674,8 +676,8 @@ graph TB
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P0 | [#12 Combat Threat Story 001](../production/epics/combat-threat/story-001-combat-state-machine-threat-queue.md) | #11 Exploration threat_context 与 guard threat 触发合同完成；Combat 已解锁 |
-| P1 | TC-RGC-005~009 downstream runtime UI wiring | TC-RGC-003/004 visible Godot 复测已通过；后续剩余资源操作、修复、航线、存档 UI 路径 |
+| P0 | [#14 Settlement Market closeout](../production/epics/settlement-market/EPIC.md) | #12 Combat 已完成；优先收口交易/集市合同，为 UI/HUD 汇合准备最后 Feature 数据面 |
+| P1 | [#16 UI/HUD convergence](../production/epics/ui-hud-interface/EPIC.md) | 汇合 #11/#12/#14/#15 合同，补 Godot 可视化、HUD 威胁状态与手工 QA |
 
 ---
 
@@ -1016,6 +1018,7 @@ graph LR
 | 2026-05-13 | Epic #9 Chart Route Planning Story 001-008 复审 + chart runner 复跑 | 通过 (273/273 PASS) | [Epic #9](../production/epics/chart-route-planning/EPIC.md) |
 | 2026-05-13 | Epic #10 Navigation Route Risk Story 001-008 复审 + navigation runner 复跑 | 通过 (281/281 PASS) | [Epic #10](../production/epics/navigation-route-risk/EPIC.md) |
 | 2026-05-14 | Epic #11 Exploration Scavenge Story 001-006 复审 + exploration runner 复跑 | 通过 (287/287 PASS；全量 C# runner 97/97 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS) | [Epic #11](../production/epics/exploration-scavenge/EPIC.md) |
+| 2026-05-14 | Epic #12 Combat Threat Resolution Story 001-006 实现 + combat runner / #5/#8/#11 回归 | 通过 (37/37 grouped PASS；FoundationParity 70/70 PASS；#5/#8/#11 回归 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS) | [Epic #12](../production/epics/combat-threat/EPIC.md) |
 | 2026-05-14 | Epic #15 Partner Relationships Story 001-006 复审 + partner runner 复跑 | 通过 (119/119 PASS；全量 C# runner 97/97 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS) | [Epic #15](../production/epics/partner-relationships/EPIC.md) |
 
 ### 平台转向复审 — 修正文件总览 (2026-05-09)
@@ -1312,22 +1315,22 @@ graph TB
   production/      ████████████████░░░░  130+ 文件  (Epics/Stories + 会话状态 + 日志)
   .claude/         ██████████████████████████████████████████████████  123 文件  (Agent + Skill + 规则 + 模板)
   .github/         █░░░░░░░░░░░░░░░░░░░   3 文件  (Issue/PR 模板)
-  src/             ███████████████░░░░░  33 C# 文件  (Core + Feature + Presentation + Godot 节点脚本)
-  tests/           ████████████████████  97 C# runner  (Unit 49 + Integration 47 + Parity 1)
+  src/             ███████████████░░░░░  34 C# 文件  (Core + Feature + Presentation + Godot 节点脚本)
+  tests/           ████████████████████  103 C# runner  (Unit 52 + Integration 50 + Parity 1)
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
   📊 总计: ~384+ 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
-  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#13/#15 Complete | #12/#14 Next
-  💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 33 C# + 97 C# test runners)
-  ✅ Pre-Production — Desktop C# Foundation/Core 完成 | Epic #5/#6/#8/#9/#10 complete
+  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#15 Complete | #14 Next
+  💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 34 C# + 103 C# test runners)
+  ✅ Pre-Production — Desktop C# Foundation/Core/Feature 前置推进 | Epic #5/#6/#8/#9/#10/#11/#12/#13/#15 complete
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-14 — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、WorldRepair #13、Partner #15 全部完成；全量 C# runner 97/97 PASS；BUG-005 已修复。
+> 更新于 2026-05-14 — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Partner #15 全部完成；Combat runner 37/37 grouped PASS；BUG-005 已修复。
 
 ### 已全部完成 ✅
 
@@ -1358,8 +1361,9 @@ graph TB
 - [x] **Modules / Hull Epic #8** — 8/8 Story Complete；Story 001-008 自动化证据 36/36 PASS；#10/#11/#12/#16 可消费模块、船体、货舱容量与损伤合同
 - [x] **Chart / Route Planning Epic #9** — 8/8 Story Complete；Story 001-008 自动化证据 273/273 PASS；#10/#13/#15/#16/#18 可消费航图、航线、route_committed 与 UI 查询合同
 - [x] **Navigation / Route Risk Epic #10** — 8/8 Story Complete；Story 001-008 自动化证据 281/281 PASS；#11/#17 可消费 EncounterContext、voyage_completed 与 navigation encounter 事件合同
+- [x] **Combat / Threat Resolution Epic #12** — 6/6 Story Complete；Story 001-006 自动化证据 37/37 grouped PASS；#16 可消费 combat_result、威胁信号与 HUD 决策入口合同
 - [x] **World Repair Epic #13** — 6/6 Story Complete；Story 001-006 自动化证据 91/91 PASS；#14/#16/#17 可消费 repair_completed、route enhancement、progress.world-repair 与 MVP feedback 合同
-- [x] **全量 C# runner 回归** — `tests/**/*.csproj` 97/97 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 error）
+- [x] **Epic #12 关键回归** — Combat 6 个 runner 37/37 grouped PASS；FoundationParity 70/70 PASS；#5/#8/#11 相关回归 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）
 - [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
 
 ### 仍待完成
@@ -1372,7 +1376,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-14** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、WorldRepair #13、Partner #15 全部完成；全量 C# runner 97/97 PASS；BUG-005 已修复。
+> **更新于 2026-05-14** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Partner #15 全部完成；Combat runner 37/37 grouped PASS；BUG-005 已修复。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。
