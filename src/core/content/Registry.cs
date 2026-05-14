@@ -503,6 +503,22 @@ public sealed class Registry
     }
 
     /// <summary>
+    /// Returns a threat configuration by threat type, or null when the type is unknown.
+    /// </summary>
+    public IReadOnlyDictionary<string, object?>? GetThreatConfig(string threatType)
+    {
+        if (string.IsNullOrWhiteSpace(threatType))
+        {
+            return null;
+        }
+
+        return ListByKind("threat")
+            .FirstOrDefault(entity =>
+                string.Equals(ReadString(entity, "threat_type"), threatType, StringComparison.Ordinal)
+                || string.Equals(ReadString(entity, "threat_class"), threatType, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// Lists active or draft content definitions for an owner domain in deterministic order.
     /// Results are capped at MaxQueryResultCount when set; 0 = unlimited.
     /// </summary>
@@ -2321,11 +2337,20 @@ public static class RegistryBootstrap
             ["counter_tags"] = new[] { "evade", "retreat" },
             ["severity_tier"] = "moderate",
             ["threat_type"] = "guard",
-            ["trigger_radius"] = 120.0,
+            ["threat_category"] = "guard",
+            ["trigger_radius"] = 6.0,
+            ["trigger_radius_min"] = 4.0,
+            ["trigger_radius_max"] = 6.0,
             ["trigger_probability"] = 0.70,
+            ["full_damage_min"] = 8,
+            ["full_damage_max"] = 12,
             ["hull_damage_min"] = 8,
             ["hull_damage_max"] = 12,
             ["module_damage_chance"] = 0.30,
+            ["emergency_cost_repair_kit"] = 1,
+            ["knockback_distance_tanked"] = 8.0,
+            ["knockback_distance_retreat"] = 10.0,
+            ["can_be_suppressed"] = true,
             ["can_retreat"] = true,
         });
 

@@ -50,7 +50,7 @@
 |-----|--------|-----|--------|---------------|--------|
 | ADR-0010 | #10 Navigation | `navigation-route-risk.md` | TR-navigation-001, TR-navigation-002, TR-navigation-003 | pending | Accepted |
 | ADR-0011 | #13 World Repair | `world-repair-unlock.md` | TR-repair-001, TR-repair-002, TR-repair-003 | pending | Accepted |
-| ADR-0018 | #12 Combat/Threat | `combat-threat-handling.md` | TR-combat-001, TR-combat-002, TR-combat-003 | pending | Accepted |
+| ADR-0018 | #12 Combat/Threat | `combat-threat-handling.md` | TR-combat-001, TR-combat-002, TR-combat-003 | `src/core/combat/CombatManager.cs` + `tests/unit/combat/**` + `tests/integration/combat/**` (37/37 grouped checks PASS) | Accepted + implemented |
 | ADR-0013 | #11 Exploration | `exploration-scavenge-scenario.md` | TR-exploration-001, TR-exploration-002, TR-exploration-003 | `src/feature/ExplorationManager.cs` + `tests/unit/exploration/**` + `tests/integration/exploration/**` (287/287 PASS) | Accepted + implemented |
 | ADR-0014 | #14 Settlement | `port-village-market.md` | TR-settlement-001, TR-settlement-002, TR-settlement-003 | pending | Accepted |
 | ADR-0015 | #15 Partner | `partner-relationships.md` | TR-partner-001, TR-partner-002, TR-partner-003 | `src/features/partner_relationships/PartnerManager.cs` + `tests/unit/partner-relationships/**` + `tests/integration/partner-relationships/**` (119/119 PASS) | Accepted + implemented |

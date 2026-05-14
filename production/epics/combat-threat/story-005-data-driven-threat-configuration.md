@@ -1,7 +1,7 @@
 # Story 005: Data-Driven Threat Configuration
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -194,7 +194,18 @@ func get_available_responses() -> Array[Dictionary]:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/combat/ThreatConfigTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/integration/combat/ThreatConfigTest.csproj -p:UseSharedCompilation=false` (5/5 grouped checks PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs` and `src/core/content/Registry.cs`.
+- Test runner: `tests/integration/combat/ThreatConfigTest.csproj`.
+- Acceptance coverage:
+  - AC-1/12/13: Registry exposes complete guard C8 config via `GetThreatConfig("guard")`; unknown threat type returns null for Exploration fallback.
+  - AC-2/10/11: CombatManager reads values from `encounter_params`, supports future threat types by data, and ignores unknown keys.
+  - AC-3/5: validation clamps unsafe knockback distance and swaps inverted damage ranges.
+  - AC-4: `can_be_suppressed=false` disables emergency handling even when repair kits exist.
+  - AC-6 through AC-9: missing fields use safe defaults for damage, module chance, knockback, and emergency cost.
 
 ---
 

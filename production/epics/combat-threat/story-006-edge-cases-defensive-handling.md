@@ -1,7 +1,7 @@
 # Story 006: Edge Cases & Defensive Error Handling
 
 > **Epic**: Combat / Threat Resolution
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -244,7 +244,22 @@ func resolve_threat(threat_context: Dictionary) -> Dictionary:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/combat/EdgeCasesTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — `dotnet run --project tests/integration/combat/EdgeCasesTest.csproj -p:UseSharedCompilation=false` (9/9 grouped checks PASS, 2026-05-14)
+
+## Completion Evidence — 2026-05-14
+
+- Implemented in `src/core/combat/CombatManager.cs`, `src/core/content/Registry.cs`, and existing #11/#8 defensive boundaries.
+- Test runner: `tests/integration/combat/EdgeCasesTest.csproj`.
+- Acceptance coverage:
+  - AC-1/2: low hull tank clamps to hull=0, Exploration is not terminated, and #8 departure blocks with `hull_destroyed`.
+  - AC-3/4: cross-band warning appears for damaged->critical risk and not for intact no-crossing case.
+  - AC-5 through AC-7: empty/damaged actual module slots are excluded while unchecked installed slots remain eligible.
+  - AC-8/11/12: retreat flag persists across emergency, tank, and multiple retreats.
+  - AC-9: degenerate knockback uses facing or random unit fallback.
+  - AC-10: hull damage applies before simultaneous module damage.
+  - AC-13: repair_kit zero quantity disables emergency handling.
+  - AC-14: existing Exploration #11 guard keeps guard threats inert when #12 is unavailable.
+  - AC-15 through AC-17: invalid context, missing params, and invalid response return defensive errors/defaults without side effects.
 
 ---
 

@@ -4,7 +4,7 @@
 > 基于: 16 Epic × 115 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | BUG-005 已修复**
+> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | #11 Exploration 完成 | #12 Combat 完成 | #15 Partner 完成 | BUG-005 已修复**
 
 > **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
 > **文档索引**: `docs/document-index.md` 已于 2026-05-14 同步到 #5/#6/#7/#8/#9/#10/#11/#13/#15 Complete、97/97 个 C# runner PASS 的当前基线。
@@ -51,7 +51,7 @@ D-C (Core 后半 + Feature 层)
   Epic #9  航图航线          8 stories
   Epic #10 航行风险          8 stories
   Epic #11 探索搜撤          6 stories
-  Epic #12 战斗威胁          6 stories
+  Epic #12 战斗威胁          6 stories ✅
   ─────────────────────────
   合计: 36 stories
 ```
@@ -440,14 +440,14 @@ D-B: Epic #16 UI 收尾
   Story 006 □ Edge Cases + A11y                  (I, 2d)  ← 等 004-005
 
 
-D-C: Epic #12 Combat (等 #11 完成 — 已满足)
+D-C: Epic #12 Combat (等 #11 完成 — 已满足，2026-05-14 完成)
 ────────────────────────────────────────
-  Story 001 □ Combat State Machine + Threat Queue(L, 2d)
-  Story 002 □ Response Resolution + Settlement   (L, 2d)  ← 等 001
-  Story 003 □ Damage/Module/Knockback Formulas   (L, 2d)  ← 等 001
-  Story 004 □ combat_result Contract + Signals   (I, 2d)  ← 等 002-003
-  Story 005 □ Data-Driven Threat Config          (I, 1d)  ← 等 001
-  Story 006 □ Edge Cases + Defensive             (I, 1d)  ← 等 004-005
+  Story 001 ☑ Combat State Machine + Threat Queue(L, 2d)  ← ✅ 7/7 PASS
+  Story 002 ☑ Response Resolution + Settlement   (L, 2d)  ← ✅ 7/7 PASS
+  Story 003 ☑ Damage/Module/Knockback Formulas   (L, 2d)  ← ✅ 4/4 grouped PASS
+  Story 004 ☑ combat_result Contract + Signals   (I, 2d)  ← ✅ 5/5 grouped PASS
+  Story 005 ☑ Data-Driven Threat Config          (I, 1d)  ← ✅ 5/5 grouped PASS
+  Story 006 ☑ Edge Cases + Defensive             (I, 1d)  ← ✅ 9/9 grouped PASS
 ```
 
 ### 第 10 周: 收尾 + 集成
@@ -459,7 +459,7 @@ D-C: Epic #12 Combat (等 #11 完成 — 已满足)
   D-B □ Hub + 伙伴 + UI 集成测试
   D-C □ 航图 → 航行 → 探索 → 战斗 → 返回 全链路测试
 
-  □ 核心循环: Hub → Chart → Navigation → Exploration → Combat → Extraction → Repair → Settlement
+  □ 核心循环: Hub → Chart → Navigation → Exploration → Combat ✅ → Extraction → Repair → Settlement
   □ 存档恢复: 全状态快照 roundtrip
   □ CI 全部 PASS
 ```
@@ -592,7 +592,7 @@ D-C: 性能分析 + 优化
 | #9 Chart | 001-008 | #1 ID + #3 快照 + #6 知识状态 | ✅ Complete + reviewed — 2026-05-13 |
 | #10 Navigation | 001-008 | #5+#6+#7+#8+#9 全部 | ✅ Complete + reviewed — 2026-05-13 (281/281 PASS) |
 | #11 Exploration | 001-006 | #4+#5+#6+#8+#10 全部 | ✅ Complete + reviewed — 2026-05-14 (287/287 PASS) |
-| #12 Combat | 001 | #5+#8+#11 全部 | Next / Week 9 |
+| #12 Combat | 001-006 | #5+#8+#11 全部 | ✅ Complete — 2026-05-14 (37/37 grouped PASS) |
 | #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
 | #14 Settlement | 001 | #3+#4+#5+#13 Story 003 | Week 7-8 |
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
@@ -607,7 +607,7 @@ D-C: 性能分析 + 优化
 | Registry schema 后期变更 | 中 | 高: 14 系统受影响 | Phase 1 完成后 schema freeze |
 | Persistence 序列化格式变更 | 低 | 高: 8 系统受影响 | Phase 1 内确定 Canonical JSON 格式 |
 | 全链路集成时信号协议不匹配 | 中 | 中: 返工 2-3 天 | Gate 1-3 各做一次信号 contract 验证 |
-| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | #11/#13/#15 已完成；优先保 #12→#16 关键路径，#14 可做最小合同收口 |
+| 人员不足 (实际 <3 人) | 中 | 高: 工期 ×1.5 | #11/#12/#13/#15 已完成；优先保 #14→#16 关键路径 |
 | Godot .NET 构建问题 | 低 | 中: 阻塞全员 | Phase 0 彻底验证 + CI 每日构建 |
 
 ---
