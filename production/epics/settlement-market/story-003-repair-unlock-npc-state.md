@@ -1,7 +1,7 @@
 # Story 003: Repair-Driven Unlock & NPC State
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Manifest Version**: 2026-05-09
@@ -28,40 +28,40 @@
 
 ### F.2 Stall Unlock Check
 
-- [ ] **AC-1**: GIVEN stall.gh-sail-shop required_node_ids=[repair_node.starlight_dock] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked("stall.gh-sail-shop", completed_node_ids)，THEN 返回 true。1 个匹配 ≥ unlock_threshold_basic(1)
-- [ ] **AC-2**: GIVEN stall.gh-lens-workshop required_node_ids=[repair_node.old_lighthouse] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked("stall.gh-lens-workshop", completed_node_ids)，THEN 返回 false。无交集
-- [ ] **AC-3**: GIVEN stall.gh-chart-studio required_node_ids=[] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked()，THEN 返回 false。空 required_node_ids → 永不自动解锁
-- [ ] **AC-4**: GIVEN stall required_node_ids=[repair_node.starlight_dock, repair_node.old_lighthouse] + completed_node_ids={repair_node.starlight_dock}（仅 1 个匹配），WHEN is_stall_unlocked()，THEN 返回 true。unlock_threshold_basic=1 → 满足 1 个即解锁
+- [x] **AC-1**: GIVEN stall.gh-sail-shop required_node_ids=[repair_node.starlight_dock] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked("stall.gh-sail-shop", completed_node_ids)，THEN 返回 true。1 个匹配 ≥ unlock_threshold_basic(1)
+- [x] **AC-2**: GIVEN stall.gh-lens-workshop required_node_ids=[repair_node.old_lighthouse] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked("stall.gh-lens-workshop", completed_node_ids)，THEN 返回 false。无交集
+- [x] **AC-3**: GIVEN stall.gh-chart-studio required_node_ids=[] + completed_node_ids={repair_node.starlight_dock}，WHEN is_stall_unlocked()，THEN 返回 false。空 required_node_ids → 永不自动解锁
+- [x] **AC-4**: GIVEN stall required_node_ids=[repair_node.starlight_dock, repair_node.old_lighthouse] + completed_node_ids={repair_node.starlight_dock}（仅 1 个匹配），WHEN is_stall_unlocked()，THEN 返回 true。unlock_threshold_basic=1 → 满足 1 个即解锁
 
 ### Completed Node IDs Management
 
-- [ ] **AC-5**: GIVEN completed_node_ids=[]，WHEN on_repair_completed("repair_node.starlight_dock") 且 linked_location_id 匹配 glass-harbor，THEN completed_node_ids 变为 ["repair_node.starlight_dock"]
-- [ ] **AC-6**: GIVEN completed_node_ids 已包含 "repair_node.starlight_dock"，WHEN 再次收到相同 repair_completed("repair_node.starlight_dock")，THEN completed_node_ids 保持不变。集合去重——重复信号不产生重复条目
-- [ ] **AC-7**: GIVEN completed_node_ids=["repair_node.starlight_dock"]，WHEN 收到不匹配该 settlement 的 repair_completed("repair_node.far_away_beacon")，THEN completed_node_ids 保持不变。不相关的修复不影响
+- [x] **AC-5**: GIVEN completed_node_ids=[]，WHEN on_repair_completed("repair_node.starlight_dock") 且 linked_location_id 匹配 glass-harbor，THEN completed_node_ids 变为 ["repair_node.starlight_dock"]
+- [x] **AC-6**: GIVEN completed_node_ids 已包含 "repair_node.starlight_dock"，WHEN 再次收到相同 repair_completed("repair_node.starlight_dock")，THEN completed_node_ids 保持不变。集合去重——重复信号不产生重复条目
+- [x] **AC-7**: GIVEN completed_node_ids=["repair_node.starlight_dock"]，WHEN 收到不匹配该 settlement 的 repair_completed("repair_node.far_away_beacon")，THEN completed_node_ids 保持不变。不相关的修复不影响
 
 ### Repair-Driven Stall Unlock
 
-- [ ] **AC-8**: GIVEN stall.gh-sail-shop=CLOSED + npc.yun=ABSENT + completed_node_ids 新加入 repair_node.starlight_dock（匹配 required_node_ids），WHEN on_repair_completed() 处理后，THEN stall_state→OPEN_BASIC + npc_state→IDLE。摊位解锁 + NPC 恢复原子绑定
-- [ ] **AC-9**: GIVEN stall.gh-sail-shop 已是 OPEN_BASIC + 重复 repair_completed 到达，WHEN 处理，THEN stall_state 保持 OPEN_BASIC。不重复触发转换
-- [ ] **AC-10**: GIVEN 单个 repair_completed(node_id) 的 node_id 同时匹配 2 个摊位的 required_node_ids（如 repair_node.grand_bazaar），WHEN 处理，THEN 两个摊位各自独立 CLOSED→OPEN_BASIC + 对应 NPC ABSENT→IDLE
+- [x] **AC-8**: GIVEN stall.gh-sail-shop=CLOSED + npc.yun=ABSENT + completed_node_ids 新加入 repair_node.starlight_dock（匹配 required_node_ids），WHEN on_repair_completed() 处理后，THEN stall_state→OPEN_BASIC + npc_state→IDLE。摊位解锁 + NPC 恢复原子绑定
+- [x] **AC-9**: GIVEN stall.gh-sail-shop 已是 OPEN_BASIC + 重复 repair_completed 到达，WHEN 处理，THEN stall_state 保持 OPEN_BASIC。不重复触发转换
+- [x] **AC-10**: GIVEN 单个 repair_completed(node_id) 的 node_id 同时匹配 2 个摊位的 required_node_ids（如 repair_node.grand_bazaar），WHEN 处理，THEN 两个摊位各自独立 CLOSED→OPEN_BASIC + 对应 NPC ABSENT→IDLE
 
 ### F.3 Settlement Activity Aggregation
 
-- [ ] **AC-11**: GIVEN active_stall_count=1（仅杂货摊），WHEN recalculate_settlement_activity("settlement.glass-harbor")，THEN settlement_state=DORMANT。active_stall_count=1 ≤ dormant_max_stalls(1)
-- [ ] **AC-12**: GIVEN active_stall_count=2（杂货摊 + 1 个修复解锁），WHEN recalculate_settlement_activity()，THEN settlement_state→RECOVERING。1 < 2 < total(4)
-- [ ] **AC-13**: GIVEN active_stall_count=3，WHEN recalculate_settlement_activity()，THEN 保持 RECOVERING。未达到 total_stall_count(4)
-- [ ] **AC-14**: GIVEN active_stall_count=4（全部摊位 open_basic），WHEN recalculate_settlement_activity()，THEN settlement_state→ACTIVE。全部摊位开启
-- [ ] **AC-15**: GIVEN active_stall_count=4 → settlement_state=ACTIVE 后，WHEN settlement_activity_changed 信号发射，THEN 参数 (settlement_id="settlement.glass-harbor", active_stall_count=4)
+- [x] **AC-11**: GIVEN active_stall_count=1（仅杂货摊），WHEN recalculate_settlement_activity("settlement.glass-harbor")，THEN settlement_state=DORMANT。active_stall_count=1 ≤ dormant_max_stalls(1)
+- [x] **AC-12**: GIVEN active_stall_count=2（杂货摊 + 1 个修复解锁），WHEN recalculate_settlement_activity()，THEN settlement_state→RECOVERING。1 < 2 < total(4)
+- [x] **AC-13**: GIVEN active_stall_count=3，WHEN recalculate_settlement_activity()，THEN 保持 RECOVERING。未达到 total_stall_count(4)
+- [x] **AC-14**: GIVEN active_stall_count=4（全部摊位 open_basic），WHEN recalculate_settlement_activity()，THEN settlement_state→ACTIVE。全部摊位开启
+- [x] **AC-15**: GIVEN active_stall_count=4 → settlement_state=ACTIVE 后，WHEN settlement_activity_changed 信号发射，THEN 参数 (settlement_id="settlement.glass-harbor", active_stall_count=4)
 
 ### NPC-Stall Coupling
 
-- [ ] **AC-16**: GIVEN stall_id="stall.gh-lens-workshop" + npc.wei stall_id="stall.gh-lens-workshop"，WHEN 摊位 CLOSED→OPEN_BASIC 触发，THEN npc.wei ABSENT→IDLE。NPC 通过 stall_id 字段关联摊位
-- [ ] **AC-17**: GIVEN NPC stall_id 字段引用了不存在的摊位，WHEN 初始化验证，THEN 记录 warning。不崩溃——该 NPC 保持在初始状态
+- [x] **AC-16**: GIVEN stall_id="stall.gh-lens-workshop" + npc.wei stall_id="stall.gh-lens-workshop"，WHEN 摊位 CLOSED→OPEN_BASIC 触发，THEN npc.wei ABSENT→IDLE。NPC 通过 stall_id 字段关联摊位
+- [x] **AC-17**: GIVEN NPC stall_id 字段引用了不存在的摊位，WHEN 初始化验证，THEN 记录 warning。不崩溃——该 NPC 保持在初始状态
 
 ### Edge Conditions — Unlock & Activity
 
-- [ ] **AC-18**: GIVEN 全部 4 个摊位均已 OPEN_BASIC（MVP 终态），WHEN 新的 repair_completed 到达，THEN F.2 判定无 unlocked stall → 信号被安全忽略。无错误
-- [ ] **AC-19**: GIVEN repair_completed(node_id) 的 node_id 不属于任何摊位的 required_node_ids，WHEN 处理，THEN 静默忽略。不产生错误——某些修复只影响其他系统
+- [x] **AC-18**: GIVEN 全部 4 个摊位均已 OPEN_BASIC（MVP 终态），WHEN 新的 repair_completed 到达，THEN F.2 判定无 unlocked stall → 信号被安全忽略。无错误
+- [x] **AC-19**: GIVEN repair_completed(node_id) 的 node_id 不属于任何摊位的 required_node_ids，WHEN 处理，THEN 静默忽略。不产生错误——某些修复只影响其他系统
 
 ---
 
@@ -227,7 +227,11 @@ func _get_stall_def(stall_id: StringName) -> Dictionary:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/settlement-market/UnlockActivityTest.csproj` — must exist and pass
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/unit/settlement-market/UnlockActivityTest.csproj -p:UseSharedCompilation=false` — PASS (4/4 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 

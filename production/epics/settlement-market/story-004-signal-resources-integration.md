@@ -1,7 +1,7 @@
 # Story 004: Repair Signal & Resources Integration
 
 > **Epic**: Settlement Market & Port Village Economy
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -28,30 +28,30 @@
 
 ### Signal Wiring — repair_completed
 
-- [ ] **AC-1**: GIVEN SettlementManager 收到 feature_ready，WHEN _connect_signals()，THEN WorldRepair.repair_completed.connect(SettlementManager.on_repair_completed)。信号连接建立
-- [ ] **AC-2**: GIVEN WorldRepair 发射 repair_completed(&"repair_node.starlight_dock")，WHEN SettlementManager.on_repair_completed() 处理完成，THEN 匹配摊位 stall_opened 信号发射 + settlement_activity_changed 发射。信号级联深度 ≤ 2（repair_completed → stall_opened / settlement_activity_changed → UI/FX 消费）
-- [ ] **AC-3**: GIVEN repair_completed 信号到达 + #13 Registry 中 linked_location_id 查询正常，WHEN 处理，THEN 不阻塞 #13 的信号链。#14 的 on_repair_completed 同步执行但快速返回（MVP <0.1ms）
+- [x] **AC-1**: GIVEN SettlementManager 收到 feature_ready，WHEN _connect_signals()，THEN WorldRepair.repair_completed.connect(SettlementManager.on_repair_completed)。信号连接建立
+- [x] **AC-2**: GIVEN WorldRepair 发射 repair_completed(&"repair_node.starlight_dock")，WHEN SettlementManager.on_repair_completed() 处理完成，THEN 匹配摊位 stall_opened 信号发射 + settlement_activity_changed 发射。信号级联深度 ≤ 2（repair_completed → stall_opened / settlement_activity_changed → UI/FX 消费）
+- [x] **AC-3**: GIVEN repair_completed 信号到达 + #13 Registry 中 linked_location_id 查询正常，WHEN 处理，THEN 不阻塞 #13 的信号链。#14 的 on_repair_completed 同步执行但快速返回（MVP <0.1ms）
 
 ### Signal Wiring — use_requested
 
-- [ ] **AC-4**: GIVEN InteractionRegistry (#4) 发射 use_requested(&"stall.gh-general")，WHEN SettlementManager.on_use_requested() 处理，THEN 验证该 stall_id 是否为已开启摊位。若 OPEN_BASIC → stall_opened 信号通知 UI 打开界面
-- [ ] **AC-5**: GIVEN use_requested(&"stall.gh-lens-workshop") + 该摊位为 CLOSED，WHEN on_use_requested()，THEN 无操作。closed 摊位不应被注册为焦点目标——此为防御性检查
-- [ ] **AC-6**: GIVEN use_requested(target_id) 的 target_id 不是已知 stall_id，WHEN on_use_requested()，THEN 静默忽略。不崩溃
+- [x] **AC-4**: GIVEN InteractionRegistry (#4) 发射 use_requested(&"stall.gh-general")，WHEN SettlementManager.on_use_requested() 处理，THEN 验证该 stall_id 是否为已开启摊位。若 OPEN_BASIC → stall_opened 信号通知 UI 打开界面
+- [x] **AC-5**: GIVEN use_requested(&"stall.gh-lens-workshop") + 该摊位为 CLOSED，WHEN on_use_requested()，THEN 无操作。closed 摊位不应被注册为焦点目标——此为防御性检查
+- [x] **AC-6**: GIVEN use_requested(target_id) 的 target_id 不是已知 stall_id，WHEN on_use_requested()，THEN 静默忽略。不崩溃
 
 ### Purchase Integration with #5 Resources
 
-- [ ] **AC-7**: GIVEN validate_purchase_request() 调用，WHEN 内部逻辑，THEN 委托 ResourcesManager.validate_purchase(good_id, quantity) 检查货币+容量。SettlementManager 不直接访问 player_currency 或 capacity 字段
-- [ ] **AC-8**: GIVEN execute_purchase() 调用，WHEN 逻辑，THEN 委托 ResourcesManager.execute_purchase(good_id, quantity) 执行扣除+转移。SettlementManager 不拥有货物所有权
-- [ ] **AC-9**: GIVEN ResourcesManager 不可用（Autoload 尚未就绪），WHEN validate_purchase_request() 中调用，THEN 安全失败返回 {valid: false, reason: "system_unavailable"}。不崩溃
+- [x] **AC-7**: GIVEN validate_purchase_request() 调用，WHEN 内部逻辑，THEN 委托 ResourcesManager.validate_purchase(good_id, quantity) 检查货币+容量。SettlementManager 不直接访问 player_currency 或 capacity 字段
+- [x] **AC-8**: GIVEN execute_purchase() 调用，WHEN 逻辑，THEN 委托 ResourcesManager.execute_purchase(good_id, quantity) 执行扣除+转移。SettlementManager 不拥有货物所有权
+- [x] **AC-9**: GIVEN ResourcesManager 不可用（Autoload 尚未就绪），WHEN validate_purchase_request() 中调用，THEN 安全失败返回 {valid: false, reason: "system_unavailable"}。不崩溃
 
 ### Interactive Stalls Registration
 
-- [ ] **AC-10**: GIVEN settlement.glass-harbor 的 4 个摊位（1 open + 3 closed），WHEN get_interactive_stalls("settlement.glass-harbor")，THEN 返回仅含 stall.gh-general。closed 摊位不可交互
-- [ ] **AC-11**: GIVEN 帆具铺修复后 stall.gh-sail-shop→OPEN_BASIC，WHEN get_interactive_stalls("settlement.glass-harbor")，THEN 返回 [stall.gh-general, stall.gh-sail-shop]
+- [x] **AC-10**: GIVEN settlement.glass-harbor 的 4 个摊位（1 open + 3 closed），WHEN get_interactive_stalls("settlement.glass-harbor")，THEN 返回仅含 stall.gh-general。closed 摊位不可交互
+- [x] **AC-11**: GIVEN 帆具铺修复后 stall.gh-sail-shop→OPEN_BASIC，WHEN get_interactive_stalls("settlement.glass-harbor")，THEN 返回 [stall.gh-general, stall.gh-sail-shop]
 
 ### Signal Documentation — All 6 Settlement Signals
 
-- [ ] **AC-12**: GIVEN SettlementManager 类声明，WHEN 检查，THEN 包含全部 6 个信号：
+- [x] **AC-12**: GIVEN SettlementManager 类声明，WHEN 检查，THEN 包含全部 6 个信号：
   - stall_opened(stall_id: StringName, settlement_id: StringName)
   - stall_state_changed(stall_id: StringName, old_state: int, new_state: int)
   - npc_state_changed(npc_id: StringName, old_state: int, new_state: int)
@@ -61,7 +61,7 @@
 
 ### Feature Ready Initialization
 
-- [ ] **AC-13**: GIVEN Phase 5 feature_ready 信号到达，WHEN SettlementManager._on_feature_ready()，THEN 顺序执行: (1) _connect_signals() (2) _init_new_game_state() 或 _restore_from_snapshot() (3) 注册所有 open_basic 摊位到 #4 焦点系统
+- [x] **AC-13**: GIVEN Phase 5 feature_ready 信号到达，WHEN SettlementManager._on_feature_ready()，THEN 顺序执行: (1) _connect_signals() (2) _init_new_game_state() 或 _restore_from_snapshot() (3) 注册所有 open_basic 摊位到 #4 焦点系统
 
 ---
 
@@ -158,7 +158,11 @@ func _is_resources_available() -> bool:
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/settlement-market/SignalIntegrationTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Acceptance Evidence (2026-05-14)**:
+- `dotnet run --project tests/integration/settlement-market/SignalIntegrationTest.csproj -p:UseSharedCompilation=false` — PASS (6/6 checks)
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS
 
 ---
 
