@@ -1,7 +1,7 @@
 # Story 006: Edge Cases, Desktop Recovery & Accessibility
 
 > **Epic**: UI / HUD / 航图界面
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: L / 8-10 hours
@@ -14,7 +14,7 @@
 **Requirement**: `TR-ui-001`, `TR-ui-002`, `TR-ui-003`, `TR-ui-004`
 
 **ADR Governing Implementation**: ADR-0012 (§6 desktop window freeze 恢复, §5 dual-focus 同步, §9 空状态视图, C.9 WCAG AA, Edge Cases 全部 13 项)
-**ADR Decision Summary**: 本 Story 覆盖 GDD 全部 13 个边缘情况 + 桌面窗口生命周期特殊性 + WCAG AA 无障碍验证。核心边缘情况：桌面窗口失焦/恢复 恢复（NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量刷新）；多模态同时请求（S7 覆盖 / S10 排队 / 其余丢弃→Toast）；面板打开期间底层数据变更（面板使用打开时快照——不自动刷新；提交动作通过领域 API 写回）；零物品面板空状态视图（S11/S12/S4）；departure_locked 期间面板请求静默拒绝；命名模态到达序列时序冲突（4 路合取 + skip_count >= 3 不弹出）；船体归零返回 Hub（船体红波段 + 闪烁扳手图标 + can_depart()=false）；货舱模块未安装（S1 货舱区域置灰 + "无货舱"文本）；战斗威胁覆盖容量取舍面板竞态防御；Tab 导航时面板内无可聚焦元素（焦点不穿透）；S7 战斗面板中 Esc 无效；桌面后台恢复 UI 不同步（delta > 1.0s 全量刷新）。WCAG AA 硬性要求：所有 <24px 颜色编码元素必须形状+颜色+文字三重编码；船体波段=色条+分段数+形状(✓/⚡/○)；材料满足/不足=颜色+✓/✗图标+文字；危险红 #D4644B 在帆布米 #E4D2B3 上对比度 ≥ 4.52:1。
+**ADR Decision Summary**: 本 Story 覆盖 GDD 全部 13 个边缘情况 + 桌面窗口生命周期特殊性 + WCAG AA 无障碍验证。核心边缘情况：桌面窗口失焦/恢复 恢复（NOTIFICATION_APPLICATION_RESUMED + delta > 1.0s → _request_full_ui_refresh() 绕过脏标记全量刷新）；多模态同时请求（S7 覆盖 / S10 排队 / 其余丢弃→Toast）；面板打开期间底层数据变更（面板使用打开时快照——不自动刷新；提交动作通过领域 API 写回）；零物品面板空状态视图（S11/S12/S4）；departure_locked 期间面板请求静默拒绝；命名模态到达序列时序冲突（4 路合取 + skip_count >= 3 不弹出）；船体归零返回 Hub（船体红波段 + 闪烁扳手图标 + can_depart()=false）；货舱模块未安装（S1 货舱区域置灰 + "无货舱"文本）；战斗威胁覆盖容量取舍面板竞态防御；Tab 导航时面板内无可聚焦元素（焦点不穿透）；S7 战斗面板中 Esc 无效；桌面后台恢复 UI 不同步（delta > 1.0s 全量刷新）。WCAG AA 硬性要求：所有 <24px 颜色编码元素必须形状+颜色+文字三重编码；船体波段=色条+分段数+形状(✓/⚡/○)；材料满足/不足=颜色+✓/✗图标+文字；危险红/航标青语义色作为文本前景色请求时必须解析到可访问替代文本色，并在帆布米 #E4D2B3 上达到对应 AA 对比度。
 
 **Engine**: Godot 4.6.2 | **Risk**: LOW
 
@@ -78,8 +78,8 @@
 
 ### Color Contrast — WCAG AA
 
-- [ ] **AC-21**: GIVEN 危险红色文本 #D4644B 在帆布米底色 #E4D2B3 上，WHEN 测量对比度，THEN ≥ 4.52:1（AA 达标）
-- [ ] **AC-22**: GIVEN 航标青文本 #4FB7B2 在帆布米底色上，WHEN 测量对比度，THEN ≥ 3:1（≥18px 文本 AA 达标）
+- [ ] **AC-21**: GIVEN 危险红语义色 #D4644B 被请求为帆布米底色 #E4D2B3 上的文本前景色，WHEN 解析实际渲染文本色并测量对比度，THEN 使用可访问危险文本色 #98382D 且 ≥ 4.52:1（AA 达标）
+- [ ] **AC-22**: GIVEN 航标青语义色 #4FB7B2 被请求为帆布米底色上的文本前景色，WHEN 解析实际渲染文本色并测量对比度，THEN 使用可访问航标文本色 #3C7F7B 且 ≥ 3:1（≥18px 文本 AA 达标）
 
 ### Highlightable Markers for Onboarding (#18)
 
@@ -179,7 +179,11 @@ func _register_highlightable(anchor_node: Node, panel_id: StringName, priority: 
 
 **Story Type**: Integration
 **Required evidence**: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` — must exist and pass, OR documented playtest covering all ACs
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj -p:UseSharedCompilation=false` (25/25 PASS, 2026-05-15)
+
+**Implementation Evidence**: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` covers desktop resume/full refresh, full-refresh carried-grid clearing, panel snapshot isolation, empty states, naming skip lockout, hull/cargo edge displays, combat override recovery/discard, no-focus Tab trapping, S7 Esc blocking, small-status triple encoding, contrast audit/fallback, and onboarding highlight metadata.
+
+**Revision Noted**: AC-21/22 were formalized around actual rendered text foregrounds because the canonical semantic swatches (`#D4644B` and `#4FB7B2`) do not meet the stated text contrast thresholds on `#E4D2B3` under the WCAG 2.x relative-luminance formula. Implementation preserves canonical semantic swatches for status encoding, exposes accurate contrast auditing, and resolves text rendering to accessible foreground tokens.
 
 ---
 
@@ -187,3 +191,27 @@ func _register_highlightable(anchor_node: Node, panel_id: StringName, priority: 
 
 - Depends on: Story 001 (screen states), Story 002 (modal stack + input routing), Story 003 (HUD dirty flags + full_ui_refresh), Story 004 (upstream data contracts — empty states), Story 005 (animation interruption)
 - Unlocks: N/A — 这是 UI / HUD / 航图界面 Epic 的最后一个 Story
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-15
+**Criteria**: 24/24 acceptance criteria passing; 25/25 automated checks passing including AC-2b carried-grid stale-state regression
+**Deviations**: None blocking. AC-21/22 were formalized around actual rendered text foregrounds because the canonical semantic swatches do not meet the prior text contrast claims on `#E4D2B3`; this is documented in the Test Evidence revision note. Real Godot Control scene rendering and final visual/runtime inspection remain downstream manual verification scope.
+**Test Evidence**: Integration test at `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` — 25/25 PASS
+**Code Review**: Complete — `/code-review src/presentation/UIManager.cs tests/integration/ui-hud-interface/EdgeCasesDesktopA11yProgram.cs` found three issues; all were fixed before closure.
+
+Verification:
+
+```powershell
+dotnet run --project tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/ModalStackInputRoutingTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/unit/ui-hud-interface/HudUpdatePanelLifecycleTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/integration/ui-hud-interface/UpstreamDataContractsTest.csproj -p:UseSharedCompilation=false
+dotnet run --project tests/integration/ui-hud-interface/AnimationEventsTest.csproj -p:UseSharedCompilation=false
+dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false
+dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false
+git diff --check
+```

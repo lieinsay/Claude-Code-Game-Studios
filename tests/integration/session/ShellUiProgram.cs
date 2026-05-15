@@ -15,7 +15,11 @@ Run("AC-7: loading screen includes phase and progress", Ac7LoadingProgress);
 Run("Scene: Godot Control scene covers presenter panels and action nodes", SceneContractMatchesPresenter);
 Run("Regression: scene default does not strand visible runtime on loading panel", SceneDefaultAvoidsLoadingStrand);
 Run("Regression: visible runtime scene has runtime script and button handlers", RuntimeSceneHasScriptAndButtonHandlers);
+Run("Regression: shell UI releases mouse input during gameplay", ShellRuntimeReleasesMouseToGameplay);
 Run("Regression: audio confirmation mounts Hub runtime instead of recovery placeholder", AudioConfirmationMountsHubRuntime);
+Run("Regression: Hub runtime exposes discoverable UI and save/load controls", HubRuntimeExposesSmokeControls);
+Run("Regression: Hub runtime wires UI and save/load controls", HubRuntimeWiresSmokeControls);
+Run("Regression: Chart panel traps focus away from Hub controls", ChartPanelTrapsFocusAwayFromHubControls);
 
 if (failed > 0)
 {
@@ -253,6 +257,19 @@ static bool RuntimeScriptWiresButtons(string repoRoot)
 		&& script.Contains("res://src/scenes/HubRuntime.tscn", StringComparison.Ordinal);
 }
 
+static bool ShellRuntimeReleasesMouseToGameplay()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "SessionShellRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("_shell_ui_root = _find_control(\"ShellUiRoot\")", StringComparison.Ordinal)
+		&& script.Contains("_set_shell_mouse_passthrough(false)", StringComparison.Ordinal)
+		&& script.Contains("_set_shell_mouse_passthrough(true)", StringComparison.Ordinal)
+		&& script.Contains("Control.MOUSE_FILTER_IGNORE", StringComparison.Ordinal)
+		&& script.Contains("Control.MOUSE_FILTER_STOP", StringComparison.Ordinal);
+}
+
 static bool AudioConfirmationMountsHubRuntime()
 {
 	var repoRoot = FindRepoRoot();
@@ -268,11 +285,77 @@ static bool AudioConfirmationMountsHubRuntime()
 		&& HasNode(hubScene, "CargoValue", "Label")
 		&& HasNode(hubScene, "ModuleValue", "Label")
 		&& HasNode(hubScene, "HullValue", "Label")
+		&& HasNode(hubScene, "ChartButton", "Button")
+		&& HasNode(hubScene, "SaveButton", "Button")
+		&& HasNode(hubScene, "LoadButton", "Button")
 		&& hubScene.Contains("受困货物 0", StringComparison.Ordinal)
 		&& hubScene.Contains("云织号空艇中枢", StringComparison.Ordinal)
 		&& runtimeScript.Contains("_gameplay_layer.add_child(_active_gameplay)", StringComparison.Ordinal)
 		&& runtimeScript.Contains("_hide_shell_panels()", StringComparison.Ordinal)
 		&& !runtimeScript.Contains("Gameplay scene wiring is not mounted yet.", StringComparison.Ordinal);
+}
+
+static bool HubRuntimeExposesSmokeControls()
+{
+	var repoRoot = FindRepoRoot();
+	var hubScenePath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.tscn");
+	var hubScene = File.ReadAllText(hubScenePath);
+
+	return hubScene.Contains("path=\"res://src/scenes/HubRuntime.gd\"", StringComparison.Ordinal)
+		&& hubScene.Contains("script = ExtResource(\"1_hub_runtime\")", StringComparison.Ordinal)
+		&& HasNode(hubScene, "RuntimeHintLabel", "Label")
+		&& HasNode(hubScene, "ActionStack", "VBoxContainer")
+		&& HasNode(hubScene, "ChartButton", "Button")
+		&& HasNode(hubScene, "SaveButton", "Button")
+		&& HasNode(hubScene, "LoadButton", "Button")
+		&& HasNode(hubScene, "SaveStatusLabel", "Label")
+		&& HasNode(hubScene, "ChartPanel", "PanelContainer")
+		&& HasNode(hubScene, "ChartTitleLabel", "Label")
+		&& HasNode(hubScene, "ChartStatusLabel", "Label")
+		&& HasNode(hubScene, "RouteMistButton", "Button")
+		&& HasNode(hubScene, "RouteMarketButton", "Button")
+		&& HasNode(hubScene, "DepartButton", "Button")
+		&& HasNode(hubScene, "ChartCloseButton", "Button")
+		&& hubScene.Contains("打开航图 / HUD  M", StringComparison.Ordinal)
+		&& hubScene.Contains("保存  S", StringComparison.Ordinal)
+		&& hubScene.Contains("加载  L", StringComparison.Ordinal)
+		&& hubScene.Contains("HUD / 航图界面", StringComparison.Ordinal);
+}
+
+static bool HubRuntimeWiresSmokeControls()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("_wire_button(\"ChartButton\", _on_chart_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"SaveButton\", _on_save_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"LoadButton\", _on_load_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"RouteMistButton\", _on_route_mist_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"RouteMarketButton\", _on_route_market_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"DepartButton\", _on_depart_pressed)", StringComparison.Ordinal)
+		&& script.Contains("KEY_M", StringComparison.Ordinal)
+		&& script.Contains("KEY_S", StringComparison.Ordinal)
+		&& script.Contains("KEY_L", StringComparison.Ordinal)
+		&& script.Contains("FileAccess.open(SAVE_PATH, FileAccess.WRITE)", StringComparison.Ordinal)
+		&& script.Contains("FileAccess.open(SAVE_PATH, FileAccess.READ)", StringComparison.Ordinal)
+		&& script.Contains("JSON.stringify(snapshot)", StringComparison.Ordinal)
+		&& script.Contains("JSON.parse_string", StringComparison.Ordinal)
+		&& script.Contains("user://smoke_session_state.json", StringComparison.Ordinal);
+}
+
+static bool ChartPanelTrapsFocusAwayFromHubControls()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("if _is_visible(_chart_panel):", StringComparison.Ordinal)
+		&& script.Contains("if key.keycode == KEY_ESCAPE:", StringComparison.Ordinal)
+		&& script.Contains("_set_hub_controls_enabled(false)", StringComparison.Ordinal)
+		&& script.Contains("_set_hub_controls_enabled(true)", StringComparison.Ordinal)
+		&& script.Contains("button.disabled = not enabled", StringComparison.Ordinal)
+		&& script.Contains("Control.FOCUS_ALL if enabled else Control.FOCUS_NONE", StringComparison.Ordinal);
 }
 
 static bool HasNode(string scene, string nodeName, string nodeType)

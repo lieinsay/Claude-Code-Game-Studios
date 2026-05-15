@@ -5,6 +5,7 @@ var _loading_panel: Control
 var _entry_panel: Control
 var _audio_panel: Control
 var _recovery_panel: Control
+var _shell_ui_root: Control
 var _diagnostic_panel: CanvasItem
 var _gameplay_layer: Node
 var _hub_scene: PackedScene
@@ -38,6 +39,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _cache_nodes() -> void:
+	_shell_ui_root = _find_control("ShellUiRoot")
 	_loading_panel = _find_control("LoadingPanel")
 	_entry_panel = _find_control("EntryPanel")
 	_audio_panel = _find_control("AudioActivationPanel")
@@ -171,6 +173,7 @@ func _show_entry() -> void:
 
 
 func _show_only(target: Control) -> void:
+	_set_shell_mouse_passthrough(false)
 	for panel in _panels:
 		if panel != null:
 			panel.visible = panel == target
@@ -180,6 +183,12 @@ func _hide_shell_panels() -> void:
 	for panel in _panels:
 		if panel != null:
 			panel.visible = false
+	_set_shell_mouse_passthrough(true)
+
+
+func _set_shell_mouse_passthrough(enabled: bool) -> void:
+	if _shell_ui_root != null:
+		_shell_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE if enabled else Control.MOUSE_FILTER_STOP
 
 
 func _mount_hub_runtime() -> bool:

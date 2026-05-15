@@ -1,6 +1,9 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/scenes/HubRuntime.gd" id="1_hub_runtime"]
 
 [node name="HubRuntime" type="Node2D"]
+script = ExtResource("1_hub_runtime")
 
 [node name="HubCanvas" type="CanvasLayer" parent="."]
 
@@ -25,34 +28,48 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 40.0
-offset_top = 26.0
+offset_top = 24.0
 offset_right = -40.0
-offset_bottom = 76.0
+offset_bottom = 72.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 32
 text = "云织号空艇中枢"
 horizontal_alignment = 1
 
+[node name="RuntimeHintLabel" type="Label" parent="HubCanvas/HubRoot"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 74.0
+offset_right = -40.0
+offset_bottom = 108.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "HUD 入口：打开航图 / HUD（M）。保存（S）与加载（L）在右侧操作带。"
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="Deck" type="PanelContainer" parent="HubCanvas/HubRoot"]
 layout_mode = 1
 anchors_preset = 15
-anchor_left = 0.08
-anchor_top = 0.18
-anchor_right = 0.92
-anchor_bottom = 0.82
+anchor_left = 0.06
+anchor_top = 0.17
+anchor_right = 0.94
+anchor_bottom = 0.84
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="DeckMargin" type="MarginContainer" parent="HubCanvas/HubRoot/Deck"]
 layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 28
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
 
 [node name="DeckStack" type="VBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin"]
 layout_mode = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 18
 
 [node name="StationRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack"]
 layout_mode = 2
@@ -86,74 +103,180 @@ theme_override_font_sizes/font_size = 20
 text = "模块台：已启用"
 horizontal_alignment = 1
 
-[node name="StatusList" type="VBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack"]
+[node name="StatusAndActions" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack"]
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="StatusList" type="VBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 14
 
-[node name="StorageRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList"]
+[node name="StorageRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="StorageLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/StorageRow"]
+[node name="StorageLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/StorageRow"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "仓储"
 
-[node name="StorageValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/StorageRow"]
+[node name="StorageValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/StorageRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "基础补给 x10 / 修理包 x4"
 
-[node name="CargoRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList"]
+[node name="CargoRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="CargoLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/CargoRow"]
+[node name="CargoLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/CargoRow"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "货舱"
 
-[node name="CargoValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/CargoRow"]
+[node name="CargoValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/CargoRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "已用 0 / 有效容量 500 / 受困货物 0"
 
-[node name="ModuleRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList"]
+[node name="ModuleRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="ModuleLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/ModuleRow"]
+[node name="ModuleLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/ModuleRow"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "模块"
 
-[node name="ModuleValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/ModuleRow"]
+[node name="ModuleValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/ModuleRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "槽位 A 空置 / 槽位 B 货舱模块已安装"
 
-[node name="HullRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList"]
+[node name="HullRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="HullLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/HullRow"]
+[node name="HullLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/HullRow"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "船体"
 
-[node name="HullValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusList/HullRow"]
+[node name="HullValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/HullRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "完整度 100 / 承载带稳定 / 可出航"
+
+[node name="ActionStack" type="VBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ActionTitleLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "可发现入口"
+horizontal_alignment = 1
+
+[node name="ChartButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
+layout_mode = 2
+focus_mode = 2
+text = "打开航图 / HUD  M"
+
+[node name="SaveButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
+layout_mode = 2
+focus_mode = 2
+text = "保存  S"
+
+[node name="LoadButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
+layout_mode = 2
+focus_mode = 2
+text = "加载  L"
+
+[node name="SaveStatusLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "保存/加载状态：待操作"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ChartPanel" type="PanelContainer" parent="HubCanvas/HubRoot"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.18
+anchor_top = 0.24
+anchor_right = 0.82
+anchor_bottom = 0.78
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChartMargin" type="MarginContainer" parent="HubCanvas/HubRoot/ChartPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 22
+
+[node name="ChartStack" type="VBoxContainer" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ChartTitleLabel" type="Label" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "HUD / 航图界面"
+horizontal_alignment = 1
+
+[node name="ChartStatusLabel" type="Label" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "HUD / 航图已打开：选择一条 MVP 航线后确认出发。"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="RouteRow" type="HBoxContainer" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RouteMistButton" type="Button" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack/RouteRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "雾海短程"
+
+[node name="RouteMarketButton" type="Button" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack/RouteRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "旧集市航道"
+
+[node name="ChartActionRow" type="HBoxContainer" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DepartButton" type="Button" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack/ChartActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "确认出发"
+
+[node name="ChartCloseButton" type="Button" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack/ChartActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "返回 Hub  Esc"
 
 [node name="Footer" type="Label" parent="HubCanvas/HubRoot"]
 layout_mode = 1
@@ -168,6 +291,6 @@ offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "甲板安静，货索固定。航图桌已经点亮，等待下一条航线。"
+text = "HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载入口在右侧。"
 horizontal_alignment = 1
 autowrap_mode = 3

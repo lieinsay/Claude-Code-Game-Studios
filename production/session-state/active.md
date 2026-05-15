@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Presentation Layer
 Feature: UI / HUD / Chart Interface (#16)
-Task: Epic #16 Story 004 complete; next recommended Story 005 Animation Timing & Downstream Semantic Events
+Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
 <!-- /STATUS -->
 
 ## Session Extract — /story-done 2026-05-14
@@ -1073,3 +1073,23 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Deviations: No blocking deviations. Real Godot Control rendering, concrete `create_tween()` playback, ShaderMaterial visuals, and NinePatch texture assets remain downstream runtime/manual verification scope.
 - Tech debt logged: None
 - Next recommended: `production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md` — Story 006: Edge Cases, Desktop Recovery & Accessibility
+
+## Session Extract — /dev-story 2026-05-15
+- Story: `production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md` — Story 006: Edge Cases, Desktop Recovery & Accessibility
+- Files changed: `src/presentation/UIManager.cs`, `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj`, `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yProgram.cs`, `production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md`, `production/session-state/active.md`
+- Test written: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` — 25/25 Story 006 acceptance checks passing
+- Verification: Story 006 runner 25/25 PASS; Story 001 runner 20/20 PASS; Story 002 runner 25/25 PASS; Story 003 runner 25/25 PASS; Story 004 runner 16/16 PASS; Story 005 runner 23/23 PASS; `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `git diff --check` PASS with LF/CRLF warning only
+- Notes: Implementation adds headless desktop resume/full-refresh contracts, carried-grid stale-state clearing, cargo/hull edge displays, production-safe no-focus modal fallback, disabled-control activation guards, highlight metadata, and a11y encoding/contrast audits. AC-21/22 are formalized around actual rendered text foregrounds because the canonical semantic swatches are mathematically inconsistent with the prior text contrast claims; implementation preserves semantic swatches and provides accessible text fallback tokens.
+- Code review fixes: Removed the synthetic production no-focus modal registration, made focus traversal fall back to the modal container when all controls are unavailable, added full-refresh carried-grid empty-state clearing, and changed AC-21/22 evidence to validate the actual accessible text foreground.
+- Blockers: None
+- Next: `/story-done production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md`
+
+## Session Extract — /story-done 2026-05-15
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/ui-hud-interface/story-006-edge-cases-web-recovery-a11y.md` — Story 006: Edge Cases, Desktop Recovery & Accessibility
+- Criteria: 24/24 acceptance criteria covered; 25/25 automated checks passing including AC-2b carried-grid stale-state regression
+- Test evidence: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` — 25/25 PASS; UI/HUD Story 001-006 runners all PASS; `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `git diff --check` PASS with LF/CRLF warnings only
+- Deviations: None blocking. AC-21/22 formalized around actual rendered text foregrounds; real Godot Control scene rendering and final visual/runtime inspection remain downstream manual verification scope.
+- Code review: Complete — findings fixed before closure
+- Tech debt logged: None
+- Next recommended: No remaining Story 006 unlocks; UI/HUD epic is complete. Run `/smoke-check sprint`, then `/team-qa sprint`, then `/gate-check` after QA approval.

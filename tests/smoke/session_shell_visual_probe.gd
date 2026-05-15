@@ -36,10 +36,34 @@ func _run() -> void:
 
 	_expect(not _is_panel_visible(session, "EntryPanel"), "Entry panel is hidden after audio confirmation")
 	_expect(not _is_panel_visible(session, "AudioActivationPanel"), "Audio panel is hidden after audio confirmation")
+	_expect(_control_mouse_filter(session, "ShellUiRoot") == Control.MOUSE_FILTER_IGNORE, "Shell UI releases mouse input to Hub")
 	_expect(session.find_child("HubRuntime", true, false) != null, "HubRuntime is mounted")
 	_expect(_label_text(session, "Header") == "云织号空艇中枢", "Hub header uses Chinese text")
 	_expect(_label_text(session, "CargoValue").contains("受困货物 0"), "Cargo status reports trapped goods in Chinese")
 	_expect(_label_text(session, "HullValue").contains("可出航"), "Hull status uses Chinese text")
+	_expect(_button_text(session, "ChartButton").contains("航图 / HUD"), "HUD and Chart entry is visible")
+	_expect(_button_text(session, "SaveButton").contains("保存"), "Save entry is visible")
+	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
+
+	var hub := session.find_child("HubRuntime", true, false)
+	hub.call("_on_save_pressed")
+	await process_frame
+	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Save action gives visible success feedback")
+
+	hub.call("_on_load_pressed")
+	await process_frame
+	_expect(_label_text(session, "SaveStatusLabel").contains("加载完成"), "Load action gives visible success feedback")
+
+	hub.call("_on_chart_pressed")
+	await process_frame
+	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after HUD entry")
+	_expect(_label_text(session, "ChartTitleLabel") == "HUD / 航图界面", "Chart panel identifies the UI/HUD surface")
+	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
+	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
+	_expect(_button_disabled(session, "LoadButton"), "Load entry is disabled while Chart panel is open")
+	_expect(_button_focus_mode(session, "ChartButton") == Control.FOCUS_NONE, "Chart entry leaves focus chain while Chart panel is open")
+	_expect(_button_focus_mode(session, "SaveButton") == Control.FOCUS_NONE, "Save entry leaves focus chain while Chart panel is open")
+	_expect(_button_focus_mode(session, "LoadButton") == Control.FOCUS_NONE, "Load entry leaves focus chain while Chart panel is open")
 
 	if DisplayServer.get_name() == "headless":
 		print("SKIP Runtime screenshot unavailable with current display driver")
@@ -61,6 +85,26 @@ func _run() -> void:
 func _label_text(root_node: Node, node_name: String) -> String:
 	var label := root_node.find_child(node_name, true, false) as Label
 	return "" if label == null else label.text
+
+
+func _button_text(root_node: Node, node_name: String) -> String:
+	var button := root_node.find_child(node_name, true, false) as Button
+	return "" if button == null else button.text
+
+
+func _button_disabled(root_node: Node, node_name: String) -> bool:
+	var button := root_node.find_child(node_name, true, false) as Button
+	return false if button == null else button.disabled
+
+
+func _button_focus_mode(root_node: Node, node_name: String) -> int:
+	var button := root_node.find_child(node_name, true, false) as Button
+	return -1 if button == null else button.focus_mode
+
+
+func _control_mouse_filter(root_node: Node, node_name: String) -> int:
+	var control := root_node.find_child(node_name, true, false) as Control
+	return -1 if control == null else control.mouse_filter
 
 
 func _is_panel_visible(root_node: Node, node_name: String) -> bool:

@@ -848,18 +848,22 @@ static bool UIOpenModalChangesInputLayer()
     var ui = new UIManager();
     ui.Initialize();
     var opened = false;
-    ui.UIPanelOpened += panelId => opened = panelId == "inventory";
-    var result = ui.OpenModal("inventory");
-    return result && opened && ui.ActiveInputLayer == InputLayer.Modal && ui.IsModalOpen();
+    ui.UIPanelOpened += panelId => opened = panelId == UIManager.CapacityChoiceScreenId;
+    var result = ui.OpenModal(UIManager.CapacityChoiceScreenId);
+    return result
+        && opened
+        && ui.ActiveInputLayer == InputLayer.Modal
+        && ui.IsModalOpen()
+        && ui.CurrentModalId == UIManager.CapacityChoiceScreenId;
 }
 
 static bool UICloseModalRestoresWorld()
 {
     var ui = new UIManager();
     ui.Initialize();
-    ui.OpenModal("inventory");
+    ui.OpenModal(UIManager.CapacityChoiceScreenId);
     var closed = false;
-    ui.UIPanelClosed += panelId => closed = panelId == "inventory";
+    ui.UIPanelClosed += panelId => closed = panelId == UIManager.CapacityChoiceScreenId;
     ui.CloseModal();
     return closed && ui.ActiveInputLayer == InputLayer.World && !ui.IsModalOpen();
 }
@@ -868,20 +872,26 @@ static bool UICombatModalOverrides()
 {
     var ui = new UIManager();
     ui.Initialize();
-    ui.OpenModal("inventory");
+    ui.OpenModal(UIManager.CapacityChoiceScreenId);
     var combatOpened = false;
-    ui.UIPanelOpened += panelId => combatOpened = panelId == "S7_combat";
-    var result = ui.OpenModal("S7_combat");
+    ui.UIPanelOpened += panelId => combatOpened = panelId == UIManager.CombatScreenId;
+    var result = ui.OpenModal(UIManager.CombatScreenId);
     ui.CloseModal();
-    return result && combatOpened && ui.IsModalOpen();
+    return result
+        && combatOpened
+        && ui.IsModalOpen()
+        && ui.CurrentModalId == UIManager.CombatScreenId
+        && ui.IsPanelVisible(UIManager.CapacityChoiceScreenId);
 }
 
 static bool UISecondNonCombatModalRejected()
 {
     var ui = new UIManager();
     ui.Initialize();
-    ui.OpenModal("inventory");
-    return !ui.OpenModal("settings");
+    ui.OpenModal(UIManager.CapacityChoiceScreenId);
+    return !ui.OpenModal(UIManager.RepairScreenId)
+        && ui.CurrentModalId == UIManager.CapacityChoiceScreenId
+        && ui.LastToastMessage == UIManager.CurrentActionUnavailableToast;
 }
 
 // ========================================================================
