@@ -2,11 +2,11 @@
 
 ## Session Info
 
-- **Status:** PENDING EXECUTION
+- **Status:** EXECUTED
 - **Date:** 2026-05-15
 - **Build:** Current workspace, exact commit/build ID to be filled before execution
-- **Duration:** TBD
-- **Tester:** TBD
+- **Duration:** Not timed; qualitative pass
+- **Tester:** Internal user QA
 - **Platform:** Windows desktop
 - **Input Method:** Keyboard and mouse
 - **Session Type:** First time / cold start
@@ -17,78 +17,81 @@ Can a first-time player understand the immediate goal, start a session, recogniz
 
 ## First Impressions (First 5 Minutes)
 
-- **Understood the goal?** TBD
-- **Understood the controls?** TBD
-- **Emotional response:** TBD
-- **Notes:** TBD
+- **Understood the goal?** Yes, for reaching Hub and opening Chart/HUD
+- **Understood the controls?** Yes
+- **Emotional response:** No frustration reported
+- **Notes:** Tester reached Hub, found the Chart/HUD entry quickly, opened Chart, selected a route, and attempted departure.
 
 ## Gameplay Flow
 
 ### What worked well
 
-- TBD
+- Startup to Hub worked.
+- Chart/HUD entry was found quickly.
+- Chart opened and route selection / departure attempt were available.
+- Save/load feedback showed visible text.
 
 ### Pain points
 
-- TBD
+- None reported.
 
 ### Confusion points
 
-- TBD
+- None reported.
 
 ### Moments of delight
 
-- TBD
+- Not specifically reported.
 
 ## Bugs Encountered
 
 | # | Description | Severity | Reproducible |
 | --- | --- | --- | --- |
-| TBD | TBD | TBD | TBD |
+| 1 | No bugs reported during this session. | None | N/A |
 
 ## Feature-Specific Feedback
 
 ### Entry Shell
 
-- **Understood purpose?** TBD
-- **Found engaging?** TBD
-- **Suggestions:** TBD
+- **Understood purpose?** Yes
+- **Found engaging?** Not specifically evaluated
+- **Suggestions:** None
 
 ### Hub and HUD
 
-- **Understood purpose?** TBD
-- **Found engaging?** TBD
-- **Suggestions:** TBD
+- **Understood purpose?** Yes
+- **Found engaging?** Not specifically evaluated
+- **Suggestions:** None
 
 ### Chart and Route Selection
 
-- **Understood purpose?** TBD
-- **Found engaging?** TBD
-- **Suggestions:** TBD
+- **Understood purpose?** Yes
+- **Found engaging?** Not specifically evaluated
+- **Suggestions:** None
 
 ### Save and Load
 
-- **Understood purpose?** TBD
-- **Found engaging?** TBD
-- **Suggestions:** TBD
+- **Understood purpose?** Yes
+- **Found engaging?** Not specifically evaluated
+- **Suggestions:** None
 
 ## Quantitative Data
 
-- **Time to start session:** TBD
-- **Time to find Chart:** TBD
-- **Time to understand Save/Load feedback:** TBD
-- **Features discovered vs missed:** TBD
+- **Time to start session:** Not timed; tester reports success.
+- **Time to find Chart:** "Very quickly."
+- **Time to understand Save/Load feedback:** Not timed; tester reports clear text prompt.
+- **Features discovered vs missed:** Hub, Chart/HUD, route selection, departure attempt, save, and load were discovered; no missed feature reported.
 
 ## Overall Assessment
 
-- **Would play again?** TBD
-- **Difficulty:** TBD
-- **Pacing:** TBD
-- **Session length preference:** TBD
-- **Fun hypothesis:** TBD
+- **Would play again?** Not evaluated
+- **Difficulty:** Not evaluated
+- **Pacing:** No pacing issue reported for the entry flow
+- **Session length preference:** Not evaluated
+- **Fun hypothesis:** Partially validated for UI/HUD discoverability and first-entry clarity only; not enough evidence for broader core-loop fun.
 
 ## Top 3 Priorities From This Session
 
-1. TBD
-2. TBD
-3. TBD
+1. No new-player blocker found in startup, Hub reachability, Chart/HUD discovery, route selection, departure attempt, or Save/Load feedback.
+2. Continue with mid-game systems playtest to verify repeated Hub/Chart/Save/Load use and system comprehension.
+3. Continue with difficulty-curve playtest before revisiting the Production to Polish gate.

@@ -36,7 +36,7 @@ User + Claude Code
 | Field | Value |
 |-------|-------|
 | **Depends On** | ADR-0001 (Autoload #12 启动顺序, Phase 5 feature_ready)；ADR-0002 (Signal 通信协议 — typed params, sync emit, max depth 2)；ADR-0003 (威胁持久化通过 #11 探索点快照 — `progress.exploration`)；ADR-0005 (ResourcesManager — `consume_in_combat`, `get_carried_contents_by_tag`)；ADR-0009 (Module/Hull — `apply_hull_damage`, `apply_module_damage`, `get_installed_slots`)；ADR-0010 (EncounterContext — 威胁点配置传递到 #11 再传入本系统)；ADR-0012 (UIManager — 决策面板 UI, 输入路由, 威胁活跃指示器) |
-| **Enables** | ADR-0013 (Exploration — 威胁触发与结算结果消费)；ADR-0017 (Feedback/VFX — 威胁结算事件的视听反馈)；Future threat type expansions |
+| **Enables** | ADR-0013 (Exploration — 威胁触发与结算结果消费)；ADR-0016 (Feedback/VFX — 威胁结算事件的视听反馈)；Future threat type expansions |
 | **Blocks** | Exploration (#11) 威胁点结算逻辑 — 依赖 `resolve_threat()` 入口和 `combat_result` 契约；Feedback (#17) 威胁结算事件 — 依赖威胁信号定义 |
 | **Ordering Note** | 应在 ADR-0005 (ResourcesManager) 和 ADR-0009 (Module/Hull) 之后 Accepted — 核心结算依赖 `consume_in_combat` 和 `apply_hull_damage` |
 

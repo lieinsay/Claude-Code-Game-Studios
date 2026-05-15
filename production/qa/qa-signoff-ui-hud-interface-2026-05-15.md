@@ -21,7 +21,7 @@ The UI/HUD epic is acceptable for gate review based on automated story coverage,
 | Full C# project sweep | PASS, 115/115 projects |
 | Foundation parity suite | PASS, 70/70 checks |
 | UI/HUD story suites | PASS, 134/134 checks |
-| Session shell integration | PASS, 15/15 checks |
+| Session shell integration | PASS, 18/18 checks |
 | Godot desktop runtime probe | PASS |
 | Smoke report `production/qa/smoke-2026-05-15.md` | PASS |
 | `git diff --check` | PASS, LF/CRLF warnings only |

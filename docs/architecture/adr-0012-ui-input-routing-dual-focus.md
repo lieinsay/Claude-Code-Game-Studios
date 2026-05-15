@@ -31,7 +31,7 @@ User + Claude Code (technical-director pending)
 | Field | Value |
 |-------|-------|
 | **Depends On** | ADR-0001 (Autoload #16 Phase 8 ui_ready)；ADR-0002 (Signal 通信协议 — typed params, sync emit, max cascade depth 2)；ADR-0006 (Web 平台约束 — 单线程、键鼠唯一输入、tab freeze delta 恢复、AudioContext 用户手势激活) |
-| **Enables** | ADR-0017 (Feedback 系统 — 消费 #16 发出的 ui_* 语义事件驱动音频/VFX)；ADR-0018 (Onboarding 系统 — 消费面板打开/关闭事件和焦点状态定位引导高亮) |
+| **Enables** | ADR-0016 (Feedback 系统 — 消费 #16 发出的 ui_* 语义事件驱动音频/VFX)；ADR-0017 (Onboarding 系统 — 消费面板打开/关闭事件和焦点状态定位引导高亮) |
 | **Blocks** | 所有需要 UI 面板的系统的故事 (#5 仓库/货舱面板、#7 站点面板/出航确认、#8 模块状态灯、#9 航图屏幕、#11 探索 HUD/容量取舍/撤离读条/结算摘要、#12 战斗威胁面板、#13 修复面板、#14 摊位界面、#15 命名/嗅辨面板) |
 | **Ordering Note** | 应在 ADR-0001 + ADR-0002 + ADR-0006 全部 Accepted 后 Author。Phase 8 Autoload #16 在所有 Foundation + Core + Feature Autoload 之后初始化 — 消费所有下层系统数据，被 #17/#18 消费 |
 

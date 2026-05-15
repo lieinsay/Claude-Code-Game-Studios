@@ -1,10 +1,10 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-14
-> **项目阶段**: Pre-Production — Desktop C# Foundation/Core/Feature 前置推进 | Epic #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 **Complete** | Epic #16 Story 001 **Complete** | BUG-005 已修复
+> **最后更新**: 2026-05-15
+> **项目阶段**: Production — Sprint 001 Polish Stabilization | Epic #1-#16 **Complete** | Epic #17 **Ready** | #18 Story split pending
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
-> **ADR**: 16 Accepted (0001-0015 + 0018) + 2 Deferred (0016-0017) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 16/18 Epic 完成规划 — 115 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 | Active/Next: #16 UI/HUD Story 002
+> **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
+> **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 | Ready: #17 Feedback | Pending: #18 Onboarding
 > **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 34 个 C# 源文件 + 104 个 C# test runner: unit 53 / integration 50 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
@@ -24,7 +24,7 @@ graph TB
         CONCEPT["game-concept.md<br/>游戏概念"]
         SYSIDX["systems-index.md<br/>系统索引"]
         GDD["18 个 GDD 文档<br/>游戏设计文档"]
-        REVIEWS["13 个 Review Logs<br/>设计审查记录"]
+        REVIEWS["15 个 Review Logs<br/>设计审查记录"]
         ART["art-bible.md<br/>艺术圣经"]
         UX["ux/ (3)<br/>Hub·Chart·Exploration UX Spec"]
         REGISTRY["entities.yaml<br/>实体注册表"]
@@ -41,7 +41,7 @@ graph TB
 
     subgraph 生产["📋 生产层 production/"]
         ACTIVE["session-state/active.md<br/>当前会话状态"]
-        EPICS["epics/<br/>16 Epic 已有 Story<br/>115 Stories 已分解"]
+        EPICS["epics/<br/>17 Epic 已有 Story<br/>120 Stories 已分解"]
         LOGS["session-logs/<br/>会话日志"]
         PHASES["Phase 2-5 审查报告"]
     end
@@ -109,7 +109,7 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
-| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 16/18 Epic 完成规划 (115 Stories)；#1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 已完成；#16 Story 001 Complete |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 17/18 Epic 完成规划 (120 Stories)；#1-#16 已完成；#17 Ready；#18 待拆分 |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
@@ -137,13 +137,13 @@ graph TB
 ## 二、游戏设计文档 (GDD) — 依赖关系图
 
 > 18 个系统，5 层架构。实线箭头 = 运行时依赖，虚线 = 信号/事件订阅。
-> Feature 层 6/6 ADR 全部 Accepted，5/5 Epic 全部 Story 分解完成（共 30 Stories）。
+> Feature 层主线 ADR 全部 Accepted，5/5 Epic 全部 Story 分解完成（共 30 Stories）；#17 Vertical Slice stories ready；#18 implementation story split pending。
 
 ```mermaid
 graph TB
     subgraph Presentation["🖥️ Presentation 层 (1/3)"]
         UI["#16 UI/HUD/航图界面<br/>ADR-0012 ✅ 6 Stories"]
-        VFX["#17 反馈/特效/音频 (VS)<br/>⏳ ADR-0016"]
+        VFX["#17 反馈/特效/音频 (VS)<br/>GDD ✅<br/>ADR-0016 ✅<br/>5 Stories Ready"]
     end
 
     subgraph Feature["⚔️ Feature 层 (5/5 ✅ 30 Stories)"]
@@ -153,7 +153,7 @@ graph TB
         REPAIR["#13 世界修复与解锁<br/>ADR-0011 ✅ 6 Stories"]
         SETTLE["#14 空港/村镇/集市<br/>ADR-0014 ✅ 6 Stories"]
         PARTNER["#15 伙伴功能与关系<br/>ADR-0015 ✅ 6 Stories"]
-        ONBOARD["#18 新手引导 (VS)<br/>⏳ ADR-0017"]
+        ONBOARD["#18 新手引导 (VS)<br/>GDD ✅<br/>ADR-0017 ✅"]
     end
 
     subgraph Core["🔧 Core 层 (5/5 ✅ 40 Stories)"]
@@ -268,8 +268,8 @@ graph TB
 | 14 | 空港/村镇状态与集市交易 | [port-village-market.md](../design/gdd/port-village-market.md) | Feature | ADR-0014 | ✅ 已审查 |
 | 15 | 伙伴功能与关系 | [partner-relationships.md](../design/gdd/partner-relationships.md) | Feature | ADR-0015 | ✅ 已审查 |
 | 16 | UI / HUD / 航图界面 | [ui-hud-chart-interface.md](../design/gdd/ui-hud-chart-interface.md) | Presentation | ADR-0012 | ✅ 已审查 |
-| 17 | 反馈、特效与音频语义 | *(Vertical Slice)* | Presentation | ADR-0016 | ⏳ VS |
-| 18 | 新手引导与首轮闭环 | *(Vertical Slice)* | Feature | ADR-0017 | ⏳ VS |
+| 17 | 反馈、特效与音频语义 | [feedback-fx-audio.md](../design/gdd/feedback-fx-audio.md) | Presentation | ADR-0016 | ✅ GDD / ✅ ADR |
+| 18 | 新手引导与首轮闭环 | [onboarding-first-loop.md](../design/gdd/onboarding-first-loop.md) | Feature | ADR-0017 | ✅ GDD / ✅ ADR |
 
 ### GDD 审查记录 (Review Logs)
 
@@ -280,6 +280,7 @@ graph TB
 | #3 本地存档 | [review-log](../design/gdd/reviews/local-save-world-state-persistence-review-log.md) |
 | #4 移动交互 | [review-log](../design/gdd/reviews/player-movement-interaction-review-log.md) |
 | #5 资源货物 | [review-log](../design/gdd/reviews/resources-goods-capacity-review-log.md) |
+| #6 玩家知识 | [review-log](../design/gdd/reviews/player-knowledge-intel-review-log.md) |
 | #7 飞艇家园 | [review-log](../design/gdd/reviews/airship-hub-review-log.md) |
 | #8 模块船体 | [review-log](../design/gdd/reviews/airship-modules-hull-state-review-log.md) |
 | #9 航图规划 | [review-log](../design/gdd/reviews/chart-route-planning-review-log.md) |
@@ -287,6 +288,8 @@ graph TB
 | #12 战斗威胁 | [review-log](../design/gdd/reviews/combat-threat-handling-review-log.md) |
 | #13 世界修复 | [review-log](../design/gdd/reviews/world-repair-unlock-review-log.md) |
 | #14 空港集市 | [review-log](../design/gdd/reviews/port-village-market-review-log.md) |
+| #17 反馈音画 | [review-log](../design/gdd/reviews/feedback-fx-audio-review-log.md) |
+| #18 新手引导 | [review-log](../design/gdd/reviews/onboarding-first-loop-review-log.md) |
 | 跨 GDD 审查 | [cross-review-2026-05-03](../design/gdd/gdd-cross-review-2026-05-03.md) |
 
 > **VS** = Vertical Slice 阶段实现，MVP 不要求完整版本。
@@ -295,7 +298,7 @@ graph TB
 
 ## 三、架构决策记录 (ADR) 全景
 
-> **状态**: 16 ADRs Accepted ✅ + 2 Deferred ⏳ (2026-05-08)
+> **状态**: 19 ADRs Accepted ✅ (2026-05-15)
 > **TR Registry**: 54 条技术需求已录入 `docs/architecture/tr-registry.yaml`
 > **TR 覆盖率**: 100% — 54/54 TRs 有完整 ADR 覆盖
 > **门禁检查**: Technical Setup → Pre-Production — CONCERNS (4/4 directors, 0 NOT READY) → 已进入 Pre-Production
@@ -335,7 +338,7 @@ graph TB
         P1["ADR-0012<br/>UIManager #16"]
     end
 
-    subgraph Deferred["⏳ Deferred (2 ADRs)"]
+    subgraph VerticalSliceADR["✅ Vertical Slice ADRs (2)"]
         D4["ADR-0016<br/>Feedback #17"]
         D5["ADR-0017<br/>Onboarding #18"]
     end
@@ -343,8 +346,8 @@ graph TB
     Foundation --> Core
     Core --> Feature
     Feature --> Presentation
-    Feature -.-> Deferred
-    Presentation -.-> Deferred
+    Feature -.-> VerticalSliceADR
+    Presentation -.-> VerticalSliceADR
 
     F2 -..-> Core
     F2 -..-> Feature
@@ -432,14 +435,14 @@ stateDiagram-v2
 
 ### 架构文档清单
 
-> **16 ADR Accepted + 2 Deferred — 全部 54 TR 已覆盖 (100%)**
+> **19 ADR Accepted — 全部 54 TR 已覆盖路径 (100%)**
 
 | 文件 | 说明 |
 |------|------|
 | [architecture.md](architecture/architecture.md) | 主架构 — v1 签收 (TD+LP 双签收) |
 | [architecture-traceability.md](architecture/architecture-traceability.md) | 可追溯性索引 — 54 TR 全覆盖矩阵 (100%) |
 | [tr-registry.yaml](architecture/tr-registry.yaml) | 54 条技术需求注册表 |
-| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式 (16 ADR 注册) |
+| [registry/architecture.yaml](registry/architecture.yaml) | 架构注册表 — 状态所有权、接口契约、禁止模式（含 ADR-0016/0017 stance） |
 | | **Foundation ADRs (6) — 全部 Accepted ✅** |
 | [adr-0001-autoload-scene-boot-order.md](architecture/adr-0001-autoload-scene-boot-order.md) | ADR-0001: Autoload/Scene 架构 — 9 Autoload + 9-Phase 启动链 |
 | [adr-0002-signal-communication-protocol.md](architecture/adr-0002-signal-communication-protocol.md) | ADR-0002: Signal 通信协议 — typed params + sync emit + max depth 2 |
@@ -459,17 +462,17 @@ stateDiagram-v2
 | [adr-0014-settlement-market-system.md](architecture/adr-0014-settlement-market-system.md) | ADR-0014: Settlement/Market — 3 层状态机 + repair 驱动解锁 + F.1 价格公式 |
 | [adr-0015-partner-relationships-system.md](architecture/adr-0015-partner-relationships-system.md) | ADR-0015: Partner — 6 态猫状态机 + R15 6 硬禁止 + scout_sniff 6 步算法 + F.1 置信度截断 |
 | [adr-0018-combat-threat-resolution.md](architecture/adr-0018-combat-threat-resolution.md) | ADR-0018: Combat/Threat — 4 态状态机 + resolve_threat + combat_result 契约 |
-| | **Deferred ADRs (2) — ⏳ Production 阶段编写** |
-| ADR-0016 | #17 Feedback/VFX/Audio — MEDIUM priority, Before VFX/Audio implementation |
-| ADR-0017 | #18 Onboarding/First Loop — LOW priority, Vertical Slice phase |
+| | **Vertical Slice ADRs (2) — Accepted ✅** |
+| [adr-0016-feedback-vfx-audio-semantics.md](architecture/adr-0016-feedback-vfx-audio-semantics.md) | ADR-0016: #17 Feedback/VFX/Audio — use before VFX/Audio implementation |
+| [adr-0017-onboarding-first-loop.md](architecture/adr-0017-onboarding-first-loop.md) | ADR-0017: #18 Onboarding/First Loop — use before Vertical Slice onboarding implementation |
 
 ---
 
 ## 四、Epic/Story 生产框架
 
-> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 1/3 — 16 个 Epic 全部 Story 分解完成**
-> **115 个 Story**: 59 Logic + 53 Integration + 2 UI + 1 Config
-> **2026-05-08**
+> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 2/3 — 17 个 Epic 全部 Story 分解完成**
+> **120 个 Story**: 66 Logic + 50 Integration + 3 UI + 1 Config
+> **2026-05-15**
 
 ### 层级分解全景
 
@@ -502,16 +505,18 @@ graph TB
         FT5["#15 Partner<br/>6 Stories"]
     end
 
-    subgraph Presentation["🖥️ Presentation 层 (1/3 Epic / 6 Stories)"]
+    subgraph Presentation["🖥️ Presentation 层 (2/3 Epic / 11 Stories)"]
         direction LR
         P1["#16 UI/HUD<br/>6 Stories ✅"]
-        P_BLOCKED["#17 Feedback<br/>#18 Onboarding<br/>⏳ Blocked (ADR+无GDD)"]
+        P2["#17 Feedback<br/>5 Stories Ready"]
+        P_BLOCKED["#18 Onboarding<br/>GDD ✅<br/>ADR ✅<br/>Story split pending"]
     end
 
     Foundation --> Core
     Core --> Feature
     Feature --> Presentation
-    P_BLOCKED -.->|"ADR-0016/17"| Presentation
+    P2 -.->|"ADR-0016"| Presentation
+    P_BLOCKED -.->|"ADR-0017"| Presentation
 ```
 
 ### 各层 Story 统计
@@ -521,8 +526,8 @@ graph TB
 | Foundation | 5/5 | 39 | 22 | 14 | 2 | 1 |
 | Core | 5/5 | 40 | 25 | 15 | — | — |
 | Feature | 5/5 | 30 | 15 | 15 | — | — |
-| Presentation | 1/3 | 6 | 3 | 3 | — | — |
-| **合计** | **16/18** | **115** | **65** | **47** | **2** | **1** |
+| Presentation | 2/3 | 11 | 4 | 6 | 1 | — |
+| **合计** | **17/18** | **120** | **66** | **50** | **3** | **1** |
 
 ### Foundation 层 5 个 Epic 详解
 
@@ -564,8 +569,8 @@ graph TB
 
 | Epic | System # | 阻塞原因 | Priority |
 |------|----------|---------|----------|
-| feedback-fx-audio | #17 | ADR-0016 deferred + 无 GDD (Vertical Slice) | 🟡 MEDIUM |
-| onboarding-first-loop | #18 | ADR-0017 deferred + 无 GDD (Vertical Slice) | 🟢 LOW |
+| feedback-fx-audio | #17 | ADR-0016 accepted + GDD approved + 5 implementation stories ready | 🟡 MEDIUM |
+| onboarding-first-loop | #18 | ADR-0017 accepted + GDD approved (Vertical Slice implementation pending) | 🟢 LOW |
 
 ### Story 类型与质量门
 
@@ -581,8 +586,8 @@ graph TB
 
 ## 五、C# 实现进度
 
-> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#14 Settlement、#15 Partner 完成；Presentation #16 UI/HUD Story 001 完成并解锁 Story 002；BUG-005 scene reachability 已修复；115 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）；Epic #16 Story 001 runner 20/20 PASS；Feature Layer sweep 30/30 projects PASS；FoundationParity 70/70 PASS；Chart UI contract 56/56 PASS。
+> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#14 Settlement、#15 Partner 完成；Presentation #16 UI/HUD 完成，#17 Feedback stories ready，#18 Onboarding 待拆；BUG-005 scene reachability 已修复；120 个生产 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS；Epic #16 Story 001-006 runners PASS；FoundationParity 70/70 PASS；Chart/UI smoke and accessibility checks PASS。
 
 ### Content Registry 完成项
 
@@ -647,7 +652,7 @@ graph TB
 
 | 范围 | 状态 | 说明 |
 |------|------|------|
-| `production/epics/**/*.md` | 115/115 aligned | 所有 Story 已补齐 `Manifest Version: 2026-05-09`、ADR-0019 Implementation Contract、Type、Estimate、Test Evidence |
+| `production/epics/**/*.md` | 120/120 aligned | 所有 Story 已补齐 `Manifest Version: 2026-05-09`、ADR-0019 Implementation Contract、Type、Estimate、Test Evidence |
 | Legacy platform wording | Cleared | Story 文本不再要求 Web/GDScript/ADR-0006 路径；实现入口按 Desktop Godot .NET/C# 翻译 |
 | Story-004 Reference Integrity | Done | 引用完整性 Story 消费 Story-003 生命周期信息；Deprecated/Retired/Draft/Unloaded/Missing/Cycle/Ambiguous 查询路径均有 C# 单元证据 |
 
@@ -1088,7 +1093,7 @@ graph TB
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                      RESOLVED BLOCKERS (2026-05-05)                    │   │
 │  │                                                                        │   │
-│  │  ✅ ADR Acceptance:   12 Proposed → 16 Accepted + 2 Deferred          │   │
+│  │  ✅ ADR Acceptance:   19 Accepted                                      │   │
 │  │  ✅ TR Registry:      0 entries → 54 TRs populated                     │   │
 │  │  ✅ TR Coverage:      65.4% → 100% (54/54 TRs)                        │   │
 │  │  ✅ Engine Config:    [CHOOSE] → Godot 4.6.2 .NET + C# Desktop-first    │   │
@@ -1099,8 +1104,8 @@ graph TB
 │  │                   PRE-PRODUCTION P3 PROGRESS                            │   │
 │  │                                                                        │   │
 │  │  ✅ Foundation 5/5 Epics (39 Stories)  ✅ Core 5/5 Epics (40 Stories) │   │
-│  │  ✅ Feature 5/5 Epics (30 Stories)      ✅ Presentation 1/3 (6 Stories)│   │
-│  │  📊 Total: 115 Stories — 65 Logic + 47 Integration + 2 UI + 1 Config  │   │
+│  │  ✅ Feature 5/5 Epics (30 Stories)     ✅ Presentation 2/3 (11 Stories)│   │
+│  │  📊 Total: 120 Stories — 66 Logic + 50 Integration + 3 UI + 1 Config  │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1324,23 +1329,23 @@ graph TB
   prototypes/      ██░░░░░░░░░░░░░░░░░░   1 文件  (P3 架构原型 README)
 
   📊 总计: ~384+ 个文档/源代码/测试文件 + 12 个配置/数据文件
-  🏗️ ADR: 16 Accepted + 2 Deferred | TR: 54 条注册 | Control Manifest: Active | TR 覆盖率: 100%
-  📋 Epic/Story: 16/18 Epic 完成规划 (115 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 Complete | #16 Story 001 Complete
+  🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
+  📋 Epic/Story: 17/18 Epic 完成规划 (120 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16 Complete | #17 Ready
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 34 C# + 104 C# test runners)
-  ✅ Pre-Production — Desktop C# Foundation/Core/Feature 前置推进 | Epic #5/#6/#8/#9/#10/#11/#12/#13/#14/#15 complete；#16 Story 001 complete
+  ✅ Production — Sprint 001 Polish Stabilization | Epic #1-#16 complete；#17 Ready；#18 pending story split
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-14 — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 Story 001 完成；BUG-005 已修复。
+> 更新于 2026-05-15 — Desktop C# Foundation/Core/Feature 前置推进；UI/HUD #16 完成；#17/#18 GDD 已批准；ADR-0016/0017 已接受。
 
 ### 已全部完成 ✅
 
-- [x] **16 个 ADR** (Foundation 6 + Core 6 + Feature 4) — 全部 Accepted
+- [x] **19 个 Accepted ADR** — ADR-0001 through ADR-0019 全部 Accepted
 - [x] **TR Registry** — `docs/architecture/tr-registry.yaml` — 54 条全部录入
-- [x] **TR 覆盖率 100%** — 54/54 TRs 有完整 ADR 覆盖
+- [x] **TR 覆盖路径 100%** — 54/54 TRs 有 Accepted ADR 覆盖路径
 - [x] **引擎正式配置** — `CLAUDE.md` — Godot 4.6.2 .NET + C# Desktop-first
 - [x] **Control Manifest** — `docs/architecture/control-manifest.md`
 - [x] **Architecture Traceability Index** — `docs/architecture/architecture-traceability.md`
@@ -1348,12 +1353,14 @@ graph TB
 - [x] **Accessibility Requirements** — `design/accessibility-requirements.md`
 - [x] **UX Specs (×3)** — `design/ux/hub.md`, `chart.md`, `exploration.md`
 - [x] **Interaction Patterns Library** — `design/ux/interaction-patterns.md`
+- [x] **Vertical Slice GDDs #17/#18** — `feedback-fx-audio.md`, `onboarding-first-loop.md` 已批准
 - [x] **Test Framework** — `tests/unit/` + `tests/integration/` (gdUnit4)
 - [x] **CI/CD Workflow** — `.github/workflows/tests.yml`
 - [x] **Foundation 层 Epic/Story 分解** — 5/5 Epic (39 Stories)
 - [x] **Core 层 Epic/Story 分解** — 5/5 Epic (40 Stories)
 - [x] **Feature 层 Epic/Story 分解** — 5/5 Epic (30 Stories): #11/#12/#13/#14/#15
-- [x] **Presentation 层 #16 UI/HUD** — 1/3 Epic (6 Stories)
+- [x] **Presentation 层 #16 UI/HUD** — Complete (6 Stories)
+- [x] **Presentation 层 #17 Feedback/VFX/Audio** — Ready (5 Stories)
 - [x] **P3 架构原型** — 9 Autoload + SessionShell Boot Chain + 39 Tests + 49 Verification Checks (2026-05-09)
 - [x] **平台转向复审** — Web/GDScript 残余清理: 10 个文件修复, 0 blockers, CONCERNS verdict (2026-05-09)
 - [x] **project.godot** — Godot 4.6.2 项目初始化 (9 Autoload 声明 / Compatibility 渲染器)
@@ -1368,21 +1375,21 @@ graph TB
 - [x] **Combat / Threat Resolution Epic #12** — 6/6 Story Complete；Story 001-006 自动化证据 37/37 grouped PASS；#16 可消费 combat_result、威胁信号与 HUD 决策入口合同
 - [x] **World Repair Epic #13** — 6/6 Story Complete；Story 001-006 自动化证据 91/91 PASS；#14/#16/#17 可消费 repair_completed、route enhancement、progress.world-repair 与 MVP feedback 合同
 - [x] **Settlement / Market Epic #14** — 6/6 Story Complete；Story 001-006 自动化证据 31/31 PASS；#16 可消费 stall_opened、purchase_completed、purchase_failed 与 progress.settlement-market 合同
-- [x] **UI / HUD Epic #16 Story 001** — Screen State Machine & Screen Flow Complete；20/20 PASS；Story 002 Modal Stack + Input Routing 已解锁
+- [x] **UI / HUD Epic #16** — 6/6 Stories Complete；Screen FSM、Modal/Input、HUD lifecycle、Domain integration、Semantic events、Desktop/A11y regressions PASS
 - [x] **Epic #12 关键回归** — Combat 6 个 runner 37/37 grouped PASS；FoundationParity 70/70 PASS；#5/#8/#11 相关回归 PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）
-- [x] **Story readiness metadata sweep** — 115 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径与 Estimate 字段
+- [x] **Story readiness metadata sweep** — 120 个生产 Story 已对齐 Manifest 2026-05-09、ADR-0019、C# evidence 路径
 
 ### 仍待完成
 
-- [ ] **ADR-0016** (#17 Feedback/VFX/Audio) — MEDIUM priority, 需先创建 GDD
-- [ ] **ADR-0017** (#18 Onboarding/First Loop) — LOW priority, 需先创建 GDD
-- [ ] **#17 feedback-fx-audio Epic/Story 分解** — Vertical Slice 阶段
+- [x] **ADR-0016** (#17 Feedback/VFX/Audio) — Accepted 2026-05-15
+- [x] **ADR-0017** (#18 Onboarding/First Loop) — Accepted 2026-05-15
+- [x] **#17 feedback-fx-audio Epic/Story 分解** — 5 Stories Ready
 - [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
 - [ ] **Sprint Plan** — 首个开发 Sprint 计划
 
 ---
 
-> **更新于 2026-05-14** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 Story 001 完成；BUG-005 已修复。
+> **更新于 2026-05-15** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 完成；#17 Feedback stories ready；#18 GDD 与 ADR 已批准，后续待拆实现 stories。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

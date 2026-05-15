@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: "2026-05-09"
+last_updated: "2026-05-15"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -293,6 +293,19 @@ state_ownership:
     added: 2026-05-05
     revised: ""
 
+  - state: onboarding_progress
+    status: active
+    owner_system: "OnboardingManager (#18 onboarding-first-loop)"
+    adr: docs/architecture/adr-0017-onboarding-first-loop.md
+    interface: "Snapshot package domain_id='progress.onboarding' with completed_steps, suppressed_steps, first_loop_complete, schema_version. Persistence (#3) validates/promotes; UIManager (#16) renders hints but does not own completion state."
+    write_access: "OnboardingManager-only; Persistence validates/promotes the snapshot without interpreting UI flow."
+    referenced_by:
+      - docs/architecture/adr-0017-onboarding-first-loop.md
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
+    revised: ""
+
 # Example:
 #
 # state_ownership:
@@ -519,7 +532,7 @@ interfaces:
     consumers:
       - Persistence (#3 — receives progress.resources snapshot)
     adr: docs/architecture/adr-0005-resource-pool-system.md
-    signal_signature: "register_domain_serializer("resources", _serialize_resources) / _deserialize_resources(snapshot). Snapshot contains pools 1-3 (on_person, in_storage, loaded) + capacity bonuses. Canonical JSON encoding per ADR-0003."
+    signal_signature: 'register_domain_serializer("resources", _serialize_resources) / _deserialize_resources(snapshot). Snapshot contains pools 1-3 (on_person, in_storage, loaded) + capacity bonuses. Canonical JSON encoding per ADR-0003.'
     referenced_by:
       - docs/architecture/adr-0005-resource-pool-system.md
     added: 2026-05-04
@@ -774,6 +787,51 @@ interfaces:
     referenced_by:
       - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
     added: 2026-05-05
+    revised: ""
+
+  - contract: feedback_request_contract
+    status: active
+    pattern: direct_call
+    producer: FeedbackManager (#17)
+    consumers:
+      - UIManager (#16 — status/caption layer)
+      - Audio cue pool
+      - Visual cue overlay
+      - QA diagnostics
+    adr: docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+    signal_signature: "RequestFeedback(FeedbackRequest request) where request includes EventId, SourceSystem, Priority, CoalesceKey, optional VisualCueId, AudioCueId, CaptionText, StatusText, and payload. Outputs are terminal presentation requests and must not write domain state."
+    referenced_by:
+      - docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
+    revised: ""
+
+  - contract: subtitle_requested_contract
+    status: active
+    pattern: signal
+    producer: FeedbackManager (#17)
+    consumers:
+      - UIManager (#16 — subtitle/caption rendering layer)
+    adr: docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+    signal_signature: "subtitle_requested(caption_text: String, event_id: StringName, priority: int) — emitted whenever FeedbackRequest.CaptionText conveys meaningful audio information. UIManager renders visible text; audio-only meaning is forbidden."
+    referenced_by:
+      - docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
+    revised: ""
+
+  - contract: onboarding_hint_contract
+    status: active
+    pattern: direct_call
+    producer: OnboardingManager (#18)
+    consumers:
+      - UIManager (#16 — hint/highlight rendering layer)
+    adr: docs/architecture/adr-0017-onboarding-first-loop.md
+    signal_signature: "ShowOnboardingHint(OnboardingHintRequest request) / HideOnboardingHint(step_id: StringName). Request includes StepId, HintTextKey, optional HighlightAnchorId, Priority, and DurationSeconds. UIManager owns rendering and focus isolation."
+    referenced_by:
+      - docs/architecture/adr-0017-onboarding-first-loop.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
     revised: ""
 
   - contract: route_committed_contract
@@ -1113,6 +1171,31 @@ api_decisions:
     added: 2026-05-05
     revised: ""
 
+  - purpose: feedback_semantic_router
+    status: active
+    api: "C# FeedbackManager presentation service with FeedbackRequest, FeedbackPriority, coalescing, missing-asset fallback, optional status/caption output, and QA diagnostics."
+    not: "Putting all VFX/audio behavior inside UIManager; direct domain-to-asset playback; crashing on missing VFX/audio assets; audio-only meaningful feedback."
+    adr: docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+    reason: "Centralized semantic routing keeps UIManager focused on layout/input ownership, gives missing assets and muted audio one fallback path, and lets future authored assets plug into a stable request contract."
+    referenced_by:
+      - docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
+    revised: ""
+
+  - purpose: onboarding_guidance_manager
+    status: active
+    api: "C# OnboardingManager Vertical Slice service with stable step IDs, OnboardingStepProgress, OnboardingHintRequest, and progress.onboarding snapshot export."
+    not: "Blocking tutorial modal; UIManager-owned onboarding progression; recomputing completed hints every launch without persistent progress."
+    adr: docs/architecture/adr-0017-onboarding-first-loop.md
+    reason: "First-loop guidance needs persisted completion state and low-intrusion hints while UIManager remains the sole renderer and focus/input owner."
+    referenced_by:
+      - docs/architecture/adr-0017-onboarding-first-loop.md
+      - docs/architecture/adr-0003-save-system-snapshot-json.md
+      - docs/architecture/adr-0012-ui-input-routing-dual-focus.md
+    added: 2026-05-15
+    revised: ""
+
   - purpose: chart_terminal_state_guard
     status: active
     api: "DEPARTURE_CONFIRMED 终端状态守卫 — chart_state_transition() 在任何 trigger 下对 DEPARTURE_CONFIRMED 状态返回 {allowed: false}。route_committed 单次发射保证由状态机本身提供，不依赖外部去重逻辑。"
@@ -1338,6 +1421,27 @@ forbidden_patterns:
     why: "Canvas draw_*() executes on CPU per-frame and triggers full CanvasItem redraw. Under WebGL 2 Compatibility renderer, CPU-side drawing is significantly slower than GPU ShaderMaterial. Ink spread via draw_*() would consume ~2-5ms/frame on Web — exceeding the animation budget. ShaderMaterial performs the same visual at <0.1ms GPU-side."
     adr: docs/architecture/adr-0012-ui-input-routing-dual-focus.md
     added: 2026-05-05
+
+  - pattern: feedback_domain_state_write
+    status: active
+    description: "FeedbackManager, feedback sinks, VFX overlays, audio cue playback, status text, and subtitle output must not mutate domain state. Feedback outputs are terminal presentation effects only."
+    why: "ADR-0016 keeps #17 as a presentation-layer consumer. Writing gameplay state from feedback output would bypass domain owners, create signal loops, and violate ADR-0002 emit-after-mutation ordering."
+    adr: docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+    added: 2026-05-15
+
+  - pattern: feedback_overlay_input_capture
+    status: active
+    description: "Feedback overlays must not capture mouse input or Control focus by default. They must render with focus disabled and mouse_filter=Ignore unless a future explicit settings panel is opened through UIManager."
+    why: "Feedback is visual/audio presentation, not input routing. Capturing focus would break ADR-0012 active panel isolation for Chart and Exploration HUD."
+    adr: docs/architecture/adr-0016-feedback-vfx-audio-semantics.md
+    added: 2026-05-15
+
+  - pattern: onboarding_hint_input_capture
+    status: active
+    description: "Onboarding hints and highlights must not capture gameplay input, mouse input, or Control focus by default. Hints must include text and cannot rely on color alone."
+    why: "ADR-0017 requires low-intrusion guidance. UIManager remains the focus/input owner, and hints must not mask base UI discoverability or accessibility failures."
+    adr: docs/architecture/adr-0017-onboarding-first-loop.md
+    added: 2026-05-15
 
   - pattern: direct_chart_state_write
     status: active

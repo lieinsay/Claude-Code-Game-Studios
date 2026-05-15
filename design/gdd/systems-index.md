@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-09
+> **Last Updated**: 2026-05-15
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
@@ -88,8 +88,8 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Approved | `design/gdd/port-village-market.md` | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
 | 15 | 伙伴功能与关系 | Narrative / Gameplay | MVP | Approved | `design/gdd/partner-relationships.md` | 飞艇家园 Hub; 航图与航线规划; 玩家知识与情报; 内容数据与状态注册表; 资源、货物与容量; 本地存档与世界状态持久化 |
 | 16 | UI / HUD / 航图界面 | UI | MVP | Designed | `design/gdd/ui-hud-chart-interface.md` | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
-| 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Not Started | — | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
-| 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Not Started | — | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
+| 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Approved | `design/gdd/feedback-fx-audio.md` | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
+| 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Approved | `design/gdd/onboarding-first-loop.md` | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
 
 ---
 
@@ -203,6 +203,8 @@ Scope boundary: MVP needs basic feedback; this system becomes a fuller productio
 
 MVP owner note: minimum visible recovery feedback belongs to `世界修复与解锁`; minimum home-safety feedback belongs to `飞艇家园 Hub`; minimum clarity feedback belongs to `UI / HUD / 航图界面`.
 
+GDD: `design/gdd/feedback-fx-audio.md` - approved 2026-05-15. ADR-0016 accepted 2026-05-15.
+
 ### 18. 新手引导与首轮闭环
 
 Guidance for the first complete loop: prepare in the airship, pick route, explore, return, buy or repair, see world response.
@@ -210,6 +212,8 @@ Guidance for the first complete loop: prepare in the airship, pick route, explor
 Scope boundary: MVP may validate this manually; vertical slice formalizes onboarding.
 
 MVP owner note: this system is not the only owner of the first loop. MVP GDDs for Hub, Route Map, Exploration, World Repair, Settlement/Market, and UI must each include their part of the first-loop handoff.
+
+GDD: `design/gdd/onboarding-first-loop.md` - approved 2026-05-15. ADR-0017 accepted 2026-05-15.
 
 ---
 
@@ -368,12 +372,12 @@ The MVP version of each system must stay within these bounds:
 | Metric | Count |
 |---|---:|
 | Total systems identified | 18 |
-| Design docs started | 16 |
-| Design docs reviewed | 16 |
-| Design docs approved | 16 |
+| Design docs started | 18 |
+| Design docs reviewed | 18 |
+| Design docs approved | 18 |
 | Design docs needing revision | 0 |
 | MVP systems designed | 16 / 16 |
-| Vertical Slice systems designed | 0 / 2 |
+| Vertical Slice systems designed | 2 / 2 |
 
 ---
 
@@ -386,5 +390,11 @@ The MVP version of each system must stay within these bounds:
 - [x] Design #16 UI/HUD/航图界面 (last MVP system) — COMPLETE 2026-05-03, CD APPROVED.
 - [x] Run `/review-all-gdds` for holistic cross-GDD consistency — 2026-05-08, 14 blockers resolved, 25 warnings noted.
 - [x] Run `/review-all-gdds` re-check — 2026-05-08, **PASS** (0 blockers, 15 warnings, 17/25 resolved).
+- [x] Design #17 反馈、特效与音频语义 — COMPLETE 2026-05-15.
+- [x] Design-review #17 反馈、特效与音频语义 — APPROVED 2026-05-15.
+- [x] Accept ADR-0016 反馈、特效与音频语义 — ACCEPTED 2026-05-15.
+- [x] Design #18 新手引导与首轮闭环 — COMPLETE 2026-05-15.
+- [x] Design-review #18 新手引导与首轮闭环 — APPROVED 2026-05-15.
+- [x] Accept ADR-0017 新手引导与首轮闭环 — ACCEPTED 2026-05-15.
 - [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
 - [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.

@@ -65,6 +65,59 @@ func _run() -> void:
 	_expect(_button_focus_mode(session, "SaveButton") == Control.FOCUS_NONE, "Save entry leaves focus chain while Chart panel is open")
 	_expect(_button_focus_mode(session, "LoadButton") == Control.FOCUS_NONE, "Load entry leaves focus chain while Chart panel is open")
 
+	hub.call("_on_route_mist_pressed")
+	await process_frame
+	hub.call("_on_depart_pressed")
+	await process_frame
+	_expect(not _is_panel_visible(session, "ChartPanel"), "Chart panel closes after departure")
+	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
+	_expect(_label_text(session, "ExplorationTitleLabel") == "探索 HUD", "Exploration surface has a clear title")
+	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Exploration surface shows selected route")
+	_expect(_label_text(session, "ExplorationResourceLabel").contains("资源压力"), "Exploration surface shows resource pressure feedback")
+	_expect(_label_text(session, "ExplorationThreatLabel").contains("威胁反馈"), "Exploration surface shows threat feedback")
+	_expect(_label_text(session, "ExplorationHullLabel").contains("船体状态"), "Exploration surface shows hull feedback")
+	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
+
+	hub.call("_on_exploration_advance_pressed")
+	await process_frame
+	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Exploration advance creates resource pressure")
+	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Exploration advance creates low threat feedback")
+
+	hub.call("_on_exploration_advance_pressed")
+	await process_frame
+	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 180/500"), "Exploration second advance changes carried cargo")
+	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Exploration second advance escalates threat feedback")
+	_expect(_label_text(session, "ExplorationHullLabel").contains("94/100"), "Exploration second advance changes hull feedback")
+
+	hub.call("_on_save_pressed")
+	await process_frame
+	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Exploration state can be saved")
+
+	hub.call("_show_hub")
+	await process_frame
+	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on Hub return")
+	_expect(not _button_disabled(session, "ChartButton"), "Hub Chart entry is enabled after Exploration return")
+	_expect(_label_text(session, "CargoValue").contains("已用 180"), "Hub cargo summary syncs exploration cargo")
+	_expect(_label_text(session, "HullValue").contains("完整度 94"), "Hub hull summary syncs exploration damage")
+	_expect(_label_text(session, "StorageValue").contains("云晶 x2"), "Hub storage summary syncs exploration rewards")
+	_expect(_label_text(session, "ChartStation").contains("中威胁"), "Hub chart station syncs route pressure")
+
+	hub.call("_on_load_pressed")
+	await process_frame
+	_expect(_is_panel_visible(session, "ExplorationPanel"), "Loading exploration save restores Exploration HUD")
+	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
+
+	hub.call("_on_exploration_advance_pressed")
+	await process_frame
+	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
+	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
+
+	hub.call("_show_hub")
+	await process_frame
+	_expect(_label_text(session, "CargoValue").contains("收益锁定"), "Hub cargo summary syncs completed pressure loop")
+	_expect(_label_text(session, "ChartStation").contains("压力循环完成"), "Hub chart station syncs completed pressure loop")
+	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
+
 	if DisplayServer.get_name() == "headless":
 		print("SKIP Runtime screenshot unavailable with current display driver")
 	else:

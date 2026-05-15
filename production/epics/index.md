@@ -2,7 +2,7 @@
 
 > **Last Updated**: 2026-05-15
 > **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
-> **ADR Coverage**: 17 Accepted + 2 Deferred (ADR-0019 platform pivot active)
+> **ADR Coverage**: 19 Accepted (ADR-0019 platform pivot active)
 
 ## Active Implementation Contract
 
@@ -48,13 +48,26 @@ technical preferences and control manifest.
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
 | [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | **Complete** |
-| feedback-fx-audio | #17 | feedback-fx-audio.md | (ADR-0016 deferred) | 2 | — | Blocked — ADR-0016 |
-| onboarding-first-loop | #18 | onboarding-first-loop.md | (ADR-0017 deferred) | 1 | — | Blocked — ADR-0017 |
+| [feedback-fx-audio](feedback-fx-audio/EPIC.md) | #17 | feedback-fx-audio.md | ADR-0016 | 2 | 5 (001-005) | **Ready — story split 2026-05-15** |
+| onboarding-first-loop | #18 | onboarding-first-loop.md | ADR-0017 | 1 | — | Deferred implementation — accepted for Polish/post-gate scope |
 
-## Deferred ADR Status
+## Vertical Slice ADR Status
 
 | ADR | System | Priority | Recommended Trigger |
 |-----|--------|----------|---------------------|
-| ADR-0016 | #17 Feedback | MEDIUM | Before VFX/Audio implementation |
-| ADR-0017 | #18 Onboarding | LOW | Vertical Slice phase |
+| ADR-0016 | #17 Feedback | MEDIUM | Accepted; use before VFX/Audio implementation |
+| ADR-0017 | #18 Onboarding | LOW | Accepted; use before Vertical Slice onboarding implementation |
 | ADR-0019 | Platform/C# Pivot | ACTIVE | Governs all new implementation stories |
+
+## Production to Polish Scope Note
+
+For the 2026-05-15 Production to Polish gate, #17 Feedback and #18 Onboarding are accepted as deferred Polish/post-gate work rather than hard blockers. UI/HUD #16 now covers the verified MVP smoke loop feedback and discoverability needed for this gate: Hub/HUD visibility, Chart route departure, Exploration HUD pressure feedback, Save/Load, return-to-Hub, and Hub summary sync. #17 now has implementation stories ready; authored onboarding remains tracked future implementation scope.
+
+Sprint 001 scope briefs and formal GDDs now define the first Polish boundary:
+
+- #17: `production/polish-backlog/feedback-fx-audio-scope-brief-2026-05-15.md`
+- #18: `production/polish-backlog/onboarding-first-loop-scope-brief-2026-05-15.md`
+- #17 GDD: `design/gdd/feedback-fx-audio.md`
+- #18 GDD: `design/gdd/onboarding-first-loop.md`
+
+Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 implementation stories are split and #18 remains pending story split.

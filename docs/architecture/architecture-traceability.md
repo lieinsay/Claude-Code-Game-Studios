@@ -16,7 +16,7 @@
 | Presentation | #16-#17 | ADR-0012 | 6 | 4 | 2 | 0 | 66.7% |
 | **Total** | **18 systems** | **16 ADRs** | **54** | **54** | **0** | **0** | **100%** |
 
-> **Note**: Feature layer has 2 deferred ADRs (0016-0017). Zero TR gaps — all 54 TRs now have full ADR coverage.
+> **Note**: ADR-0016 and ADR-0017 are now Accepted. Zero TR gaps — all 54 TRs now have ADR coverage paths.
 
 ---
 
@@ -54,14 +54,14 @@
 | ADR-0013 | #11 Exploration | `exploration-scavenge-scenario.md` | TR-exploration-001, TR-exploration-002, TR-exploration-003 | `src/feature/ExplorationManager.cs` + `tests/unit/exploration/**` + `tests/integration/exploration/**` (287/287 PASS) | Accepted + implemented |
 | ADR-0014 | #14 Settlement | `port-village-market.md` | TR-settlement-001, TR-settlement-002, TR-settlement-003 | `src/core/settlement/SettlementManager.cs` + `tests/unit/settlement-market/**` + `tests/integration/settlement-market/**` (31/31 PASS) | Accepted + implemented |
 | ADR-0015 | #15 Partner | `partner-relationships.md` | TR-partner-001, TR-partner-002, TR-partner-003 | `src/features/partner_relationships/PartnerManager.cs` + `tests/unit/partner-relationships/**` + `tests/integration/partner-relationships/**` (119/119 PASS) | Accepted + implemented |
-| — | #18 Onboarding | `onboarding-first-loop.md` | TR-onboarding-001 | pending | **Deferred (ADR-0017)** |
+| ADR-0017 | #18 Onboarding | `onboarding-first-loop.md` | TR-onboarding-001 | pending | **Accepted** |
 
 ### Presentation Layer
 
 | ADR | System | GDD | TR IDs | Implementation | Status |
 |-----|--------|-----|--------|---------------|--------|
 | ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/UIManager.cs` + `tests/unit/ui-hud-interface/*Test.csproj` (Stories 001-003 PASS; Stories 004-006 pending) | Accepted + partial implemented |
-| — | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Deferred (ADR-0016)** |
+| ADR-0016 | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Accepted** |
 
 ---
 
@@ -87,8 +87,8 @@ For designers: given a GDD, which ADRs govern its implementation?
 | Settlement/Market | #14 | ADR-0014 | ADR-0002, ADR-0005, ADR-0011, ADR-0013 |
 | Partner | #15 | ADR-0015 | ADR-0007 |
 | UI/HUD | #16 | ADR-0012 | ADR-0002 |
-| Feedback/VFX/Audio | #17 | (ADR-0016 deferred) | ADR-0002 |
-| Onboarding | #18 | (ADR-0017 deferred) | ADR-0008 |
+| Feedback/VFX/Audio | #17 | ADR-0016 | ADR-0002 |
+| Onboarding | #18 | ADR-0017 | ADR-0008 |
 
 ---
 
@@ -108,17 +108,17 @@ Core (5 ADRs + cross-system)
   ADR-0009 ──→ ADR-0010 (can_depart → voyage start)
   ADR-0010 ──→ ADR-0013 (EncounterContext → Exploration)
 
-Feature (6 Accepted + 2 deferred)
+Feature (7 Accepted)
   ADR-0018 ──→ (no downstream ADRs yet — Threat → Exploration)
   ADR-0011 ──→ ADR-0007, ADR-0008, ADR-0014 (repair_completed 驱动摊位解锁)
   ADR-0013 ──→ ADR-0014 (探索产出的货币为集市提供资金来源)
   ADR-0014 ──→ (no downstream ADRs yet — Settlement 为 Feature 层终端系统)
   ADR-0015 ──→ (no downstream — Partner 为 Feature 层终端系统, query interface for Hub #7)
-  [ADR-0017] ── deferred
+  ADR-0017 ── (no downstream ADRs yet — Onboarding VS)
 
-Presentation (1 Accepted + 1 deferred)
+Presentation (2 Accepted)
   ADR-0012 ──→ (no downstream ADRs — UI consumes all)
-  [ADR-0016] ── deferred
+  ADR-0016 ──→ (no downstream ADRs yet — Feedback VS)
 ```
 
 **Circular dependency check**: No cycles detected. All dependency edges are unidirectional (Foundation → Core → Feature → Presentation).
@@ -133,12 +133,11 @@ Presentation (1 Accepted + 1 deferred)
 |-----|--------|--------|-------------|
 | — | — | No critical gaps remaining | — |
 
-### Non-Critical Gaps (can be deferred to Production)
+### Non-Critical Gaps
 
 | Gap | System | Impact |
 |-----|--------|--------|
-| ADR-0016 | #17 Feedback | 反馈系统无 ADR 覆盖 — Presentation 层 |
-| ADR-0017 | #18 Onboarding | 新手引导无 ADR 覆盖 — Feature 层 (VS) |
+| — | — | No non-critical ADR gaps remaining; #17/#18 implementation stories remain future work |
 
 ### Partial Coverage
 
@@ -150,12 +149,12 @@ Presentation (1 Accepted + 1 deferred)
 
 ---
 
-## Deferred ADR Schedule
+## Vertical Slice ADR Implementation Triggers
 
 | ADR | System | Priority | Recommended Trigger | Earliest Date |
 |-----|--------|----------|--------------------|---------------|
-| ADR-0016 | #17 Feedback | 🟡 MEDIUM | Before VFX/Audio implementation | Production Sprint 2+ |
-| ADR-0017 | #18 Onboarding | 🟢 LOW | Vertical Slice phase | Production Sprint 4+ |
+| ADR-0016 | #17 Feedback | 🟡 MEDIUM | Use for VFX/Audio implementation story split | Production Sprint 2+ |
+| ADR-0017 | #18 Onboarding | 🟢 LOW | Use for Vertical Slice onboarding implementation story split | Production Sprint 4+ |
 
 ---
 
@@ -167,5 +166,5 @@ Presentation (1 Accepted + 1 deferred)
 - [ ] Zero circular dependencies in ADR graph
 - [ ] Zero Foundation layer gaps (100% coverage achieved)
 - [ ] All Core layer TRs have ADR coverage (100% achieved)
-- [ ] Feature layer gaps documented with deferred ADR schedule
+- [x] Vertical Slice ADR acceptance and implementation trigger schedule documented
 - [ ] TR Registry has 54 active entries across 18 systems

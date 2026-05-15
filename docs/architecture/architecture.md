@@ -745,6 +745,6 @@ No existing ADRs to audit. Quality check criteria (from director gates) will app
 
 6. **TR Registry population** — 52 technical requirements extracted. They need to be written to `docs/architecture/tr-registry.yaml` with stable IDs before story creation begins.
 
-7. **#17 Feedback and #18 Onboarding are Vertical Slice** — Their ADRs (ADR-0016, ADR-0017) are deferred. MVP must still provide minimum feedback (owned by #13 repair ceremony, #7 Hub safety, #16 UI clarity) and first-loop guidance (owned by #7, #9, #11, #13, #14, #16 collectively).
+7. **#17 Feedback and #18 Onboarding are Vertical Slice** — Their ADRs (ADR-0016, ADR-0017) are accepted; implementation remains Vertical Slice / Polish scope. MVP must still provide minimum feedback (owned by #13 repair ceremony, #7 Hub safety, #16 UI clarity) and first-loop guidance (owned by #7, #9, #11, #13, #14, #16 collectively).
 
 8. **C# build and test path** — The first implementation sprint must add a `dotnet build` check and a desktop/headless validation route before retiring GDScript prototype tests.

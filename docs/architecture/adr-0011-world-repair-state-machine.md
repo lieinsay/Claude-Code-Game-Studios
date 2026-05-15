@@ -31,7 +31,7 @@ User + Claude Code (technical-director pending)
 | Field | Value |
 |-------|-------|
 | **Depends On** | ADR-0001 (Autoload #13 启动顺序, Phase 5 feature_ready)；ADR-0002 (Signal 通信协议)；ADR-0003 (快照包持久化 — progress.world-repair)；ADR-0005 (ResourcesManager — can_deposit / commit_deposit / deposit_committed 信号, Pool 6 终态)；ADR-0007 (IntelManager — on_repair_completed 能力解锁触发) |
-| **Enables** | ADR-0014 (Settlement — 消费 repair_completed 信号驱动 NPC/库存)；ADR-0016 (UI — 修复交互面板、提交确认弹窗、进度 toast) |
+| **Enables** | ADR-0014 (Settlement — 消费 repair_completed 信号驱动 NPC/库存)；ADR-0012 (UI — 修复交互面板、提交确认弹窗、进度 toast)；ADR-0016 (Feedback — 修复完成视听反馈) |
 | **Blocks** | Chart (#9) 航线增强逻辑 — 依赖 repair_completed 后的 on_route_enhanced 调用；Settlement (#14) NPC 恢复 — 依赖 repair_completed 信号 |
 | **Ordering Note** | 应在 ADR-0005 (ResourcesManager) 和 ADR-0007 (IntelManager) 之后 Accepted — 核心交互依赖 commit_deposit 和 on_repair_completed |
 

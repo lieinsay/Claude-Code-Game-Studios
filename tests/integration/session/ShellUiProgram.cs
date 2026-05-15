@@ -20,6 +20,9 @@ Run("Regression: audio confirmation mounts Hub runtime instead of recovery place
 Run("Regression: Hub runtime exposes discoverable UI and save/load controls", HubRuntimeExposesSmokeControls);
 Run("Regression: Hub runtime wires UI and save/load controls", HubRuntimeWiresSmokeControls);
 Run("Regression: Chart panel traps focus away from Hub controls", ChartPanelTrapsFocusAwayFromHubControls);
+Run("Regression: route departure opens exploration HUD surface", RouteDepartureOpensExplorationSurface);
+Run("Regression: exploration pressure loop mutates and persists", ExplorationPressureLoopMutatesAndPersists);
+Run("Regression: Hub summary syncs exploration pressure state", HubSummarySyncsExplorationPressureState);
 
 if (failed > 0)
 {
@@ -316,10 +319,21 @@ static bool HubRuntimeExposesSmokeControls()
 		&& HasNode(hubScene, "RouteMarketButton", "Button")
 		&& HasNode(hubScene, "DepartButton", "Button")
 		&& HasNode(hubScene, "ChartCloseButton", "Button")
+		&& HasNode(hubScene, "ExplorationPanel", "PanelContainer")
+		&& HasNode(hubScene, "ExplorationTitleLabel", "Label")
+		&& HasNode(hubScene, "ExplorationRouteLabel", "Label")
+		&& HasNode(hubScene, "ExplorationResourceLabel", "Label")
+		&& HasNode(hubScene, "ExplorationThreatLabel", "Label")
+		&& HasNode(hubScene, "ExplorationHullLabel", "Label")
+		&& HasNode(hubScene, "ExplorationRecoveryLabel", "Label")
+		&& HasNode(hubScene, "ExplorationAdvanceButton", "Button")
+		&& HasNode(hubScene, "ExplorationReturnButton", "Button")
 		&& hubScene.Contains("打开航图 / HUD  M", StringComparison.Ordinal)
 		&& hubScene.Contains("保存  S", StringComparison.Ordinal)
 		&& hubScene.Contains("加载  L", StringComparison.Ordinal)
-		&& hubScene.Contains("HUD / 航图界面", StringComparison.Ordinal);
+		&& hubScene.Contains("HUD / 航图界面", StringComparison.Ordinal)
+		&& hubScene.Contains("推进探索 / 搜索", StringComparison.Ordinal)
+		&& hubScene.Contains("探索 HUD", StringComparison.Ordinal);
 }
 
 static bool HubRuntimeWiresSmokeControls()
@@ -334,6 +348,8 @@ static bool HubRuntimeWiresSmokeControls()
 		&& script.Contains("_wire_button(\"RouteMistButton\", _on_route_mist_pressed)", StringComparison.Ordinal)
 		&& script.Contains("_wire_button(\"RouteMarketButton\", _on_route_market_pressed)", StringComparison.Ordinal)
 		&& script.Contains("_wire_button(\"DepartButton\", _on_depart_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"ExplorationAdvanceButton\", _on_exploration_advance_pressed)", StringComparison.Ordinal)
+		&& script.Contains("_wire_button(\"ExplorationReturnButton\", _show_hub)", StringComparison.Ordinal)
 		&& script.Contains("KEY_M", StringComparison.Ordinal)
 		&& script.Contains("KEY_S", StringComparison.Ordinal)
 		&& script.Contains("KEY_L", StringComparison.Ordinal)
@@ -356,6 +372,65 @@ static bool ChartPanelTrapsFocusAwayFromHubControls()
 		&& script.Contains("_set_hub_controls_enabled(true)", StringComparison.Ordinal)
 		&& script.Contains("button.disabled = not enabled", StringComparison.Ordinal)
 		&& script.Contains("Control.FOCUS_ALL if enabled else Control.FOCUS_NONE", StringComparison.Ordinal);
+}
+
+static bool RouteDepartureOpensExplorationSurface()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.gd");
+	var hubScenePath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.tscn");
+	var script = File.ReadAllText(runtimeScriptPath);
+	var scene = File.ReadAllText(hubScenePath);
+
+	return HasNode(scene, "ExplorationPanel", "PanelContainer")
+		&& HasNode(scene, "ExplorationAdvanceButton", "Button")
+		&& HasNode(scene, "ExplorationReturnButton", "Button")
+		&& script.Contains("func _show_exploration_surface() -> void:", StringComparison.Ordinal)
+		&& script.Contains("_chart_panel.visible = false", StringComparison.Ordinal)
+		&& script.Contains("_exploration_panel.visible = true", StringComparison.Ordinal)
+		&& script.Contains("_set_exploration_status()", StringComparison.Ordinal)
+		&& script.Contains("资源压力：", StringComparison.Ordinal)
+		&& script.Contains("威胁反馈：", StringComparison.Ordinal)
+		&& script.Contains("船体状态：", StringComparison.Ordinal)
+		&& script.Contains("恢复提示：", StringComparison.Ordinal);
+}
+
+static bool ExplorationPressureLoopMutatesAndPersists()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("var _exploration_step := 0", StringComparison.Ordinal)
+		&& script.Contains("func _on_exploration_advance_pressed() -> void:", StringComparison.Ordinal)
+		&& script.Contains("_exploration_step = min(_exploration_step + 1, 3)", StringComparison.Ordinal)
+		&& script.Contains("\"exploration_step\": _exploration_step", StringComparison.Ordinal)
+		&& script.Contains("_exploration_step = max(0, int(parsed.get(\"exploration_step\", 0)))", StringComparison.Ordinal)
+		&& script.Contains("搜索消耗 1", StringComparison.Ordinal)
+		&& script.Contains("中威胁", StringComparison.Ordinal)
+		&& script.Contains("94/100", StringComparison.Ordinal)
+		&& script.Contains("一轮压力循环完成", StringComparison.Ordinal)
+		&& script.Contains("S 保存，L 加载", StringComparison.Ordinal);
+}
+
+static bool HubSummarySyncsExplorationPressureState()
+{
+	var repoRoot = FindRepoRoot();
+	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.gd");
+	var script = File.ReadAllText(runtimeScriptPath);
+
+	return script.Contains("_storage_value_label = find_child(\"StorageValue\"", StringComparison.Ordinal)
+		&& script.Contains("_cargo_value_label = find_child(\"CargoValue\"", StringComparison.Ordinal)
+		&& script.Contains("_hull_value_label = find_child(\"HullValue\"", StringComparison.Ordinal)
+		&& script.Contains("_chart_station_label = find_child(\"ChartStation\"", StringComparison.Ordinal)
+		&& script.Contains("_cargo_station_label = find_child(\"CargoStation\"", StringComparison.Ordinal)
+		&& script.Contains("func _update_hub_summary() -> void:", StringComparison.Ordinal)
+		&& script.Contains("_update_hub_summary()", StringComparison.Ordinal)
+		&& script.Contains("云晶 x2", StringComparison.Ordinal)
+		&& script.Contains("已用 180", StringComparison.Ordinal)
+		&& script.Contains("完整度 94", StringComparison.Ordinal)
+		&& script.Contains("压力循环完成 3/3", StringComparison.Ordinal)
+		&& script.Contains("收益锁定 260/500", StringComparison.Ordinal);
 }
 
 static bool HasNode(string scene, string nodeName, string nodeType)

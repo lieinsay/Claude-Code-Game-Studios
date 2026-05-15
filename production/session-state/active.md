@@ -287,8 +287,8 @@ Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
 
 ### 全量 Story Readiness 元数据收口 — 2026-05-10
 
-- [x] `production/epics/**/*.md` — 115 个 Story 统一 `Manifest Version: 2026-05-09`
-- [x] 115 个 Story 补齐 ADR-0019 Desktop Godot .NET/C# implementation contract
+- [x] `production/epics/**/*.md` — 120 个 Story 统一 `Manifest Version: 2026-05-09`
+- [x] 120 个 Story 补齐 ADR-0019 Desktop Godot .NET/C# implementation contract
 - [x] Story test evidence 从 legacy `.gd` 路径翻译为 C# `.csproj` evidence path
 - [x] 补齐缺失 `Estimate` 的 UI story，并保留 Type/Test Evidence gate
 - [x] `production/epics/content-registry/story-003-content-lifecycle.md` — 范围校正: Lifecycle 提供 status/migration hint；Deprecated/Retired 引用错误由 Story-004 Reference Integrity 判定
@@ -375,7 +375,7 @@ Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
 - [x] Completion trace written: `production/session-state/platform-pivot-foundation-completion-2026-05-09.md`.
 
 
-## Current: Pre-Production — Desktop C# Foundation Ready — 2026-05-09
+## Current: Production — Sprint 001 Polish Stabilization — 2026-05-15
 
 ### Platform / Language Pivot 进行中
 
@@ -472,19 +472,19 @@ Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
 
 ### Presentation Layer 进行中
 
-**1/3 Presentation Epics — UI/HUD 完成 (6 stories, 2 Blocked)**
+**2/3 Presentation Epics — UI/HUD 完成，Feedback Ready (11 stories, 1 pending)**
 
 | Epic | # | Stories | Types |
 |------|---|---------|-------|
 | ui-hud-interface | #16 | 6 | 3 Logic + 3 Integration |
-| feedback-fx-audio | #17 | — | Blocked — ADR-0016 deferred, 无 GDD |
-| onboarding-first-loop | #18 | — | Blocked — ADR-0017 deferred, 无 GDD |
+| feedback-fx-audio | #17 | 5 | 1 Logic + 3 Integration + 1 UI — Ready |
+| onboarding-first-loop | #18 | `design/gdd/onboarding-first-loop.md` | GDD approved — ADR-0017 Accepted |
 
-### Pre-Production 入口状态
+### Production / Polish 入口状态
 
-- **Stage**: Pre-Production (已写入 `production/stage.txt`)
-- **ADRs**: 16 Accepted (0001-0015 + 0018), 2 deferred (0016-0017)
-- **Stories**: 115 total (Foundation 39 + Core 40 + Feature 30 + Presentation 6)
+- **Stage**: Production (已写入 `production/stage.txt`)
+- **ADRs**: 19 Accepted (0001-0019)
+- **Stories**: 120 total (Foundation 39 + Core 40 + Feature 30 + Presentation 11)
 - **UX Specs**: 3 complete (Hub, Chart, Exploration)
 - **Tests**: 1 example (GdUnit4 framework ready, CI wired)
 - **Art Bible**: 9 chapters complete
@@ -509,7 +509,7 @@ Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
 - `design/ux/hub.md`
 - `design/ux/chart.md`
 - `design/ux/exploration.md`
-- `production/epics/index.md` — 18-system complete coverage table (Foundation 5 + Core 5 + Feature 5 Ready + Presentation 1 Ready + 2 Blocked)
+- `production/epics/index.md` — 18-system complete coverage table (Foundation 5 + Core 5 + Feature 5 Ready + Presentation 2 Ready + 1 Pending)
 - `docs/architecture/adr-0013-exploration-scavenge-system.md` — ADR-0013 Accepted (2026-05-08)
 - `docs/architecture/adr-0015-partner-relationships-system.md` — ADR-0015 Accepted (2026-05-08)
 - `production/epics/partner-relationships/EPIC.md`

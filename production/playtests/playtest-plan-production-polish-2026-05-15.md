@@ -1,7 +1,7 @@
 # Playtest Execution Plan: Production to Polish Gate
 
 **Date:** 2026-05-15
-**Status:** PENDING EXECUTION
+**Status:** EXECUTED WITH NOTES
 **Gate:** Production to Polish
 **Purpose:** Fill the playtest evidence gap identified by `production/gate-checks/gate-check-production-to-polish-2026-05-15.md`.
 
@@ -9,9 +9,9 @@
 
 | Session | Focus | Target Tester | Required Outcome |
 | --- | --- | --- | --- |
-| 001 | New player experience | First-time tester or internal tester acting cold | Confirms whether the game communicates the goal and controls within the first 2 minutes. |
-| 002 | Mid-game systems | Returning/internal tester | Confirms Hub, Chart, Save/Load, inventory/resource, and interaction systems are understandable without developer guidance. |
-| 003 | Difficulty curve | Returning/internal tester | Confirms route risk, resource pressure, threat handling, and recovery feel fair rather than confusing. |
+| 001 | New player experience | First-time tester or internal tester acting cold | EXECUTED - startup, Hub, Chart/HUD discovery, route attempt, and Save/Load feedback passed. |
+| 002 | Mid-game systems | Returning/internal tester | EXECUTED - repeated Chart use, focus isolation, Save/Load, and mixed input passed. |
+| 003 | Difficulty curve | Returning/internal tester | EXECUTED WITH NOTES - route departure blocker was found, fixed as BUG-006, and retested; full pressure-loop difficulty remains unevaluated. |
 
 ## Shared Test Build
 
@@ -49,7 +49,7 @@ Each session should attempt the longest available visible route:
 
 The Production to Polish gate can be reconsidered when:
 
-- All three session files have status `EXECUTED`.
-- The top three findings are categorized as design, bug, balance, or polish.
-- Any S1/S2 blockers are fixed or explicitly accepted with owner/date.
-- Fun hypothesis is marked `validated`, `revised`, or `not validated` with evidence.
+- All three session files have status `EXECUTED` or `EXECUTED WITH NOTES`. Completed 2026-05-15.
+- The top three findings are categorized as design, bug, balance, or polish. Completed: BUG-006 was filed and verified fixed; remaining full pressure-loop tuning is a design/playtest gap.
+- Any S1/S2 blockers are fixed or explicitly accepted with owner/date. Completed for BUG-006.
+- Fun hypothesis is marked `validated`, `revised`, or `not validated` with evidence. Current result: partially validated for UI/HUD and route feedback, not validated for full pressure/recovery loop.
