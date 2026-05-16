@@ -4,6 +4,7 @@
 > **Status**: Ready
 > **Layer**: Presentation
 > **Type**: UI
+> **Estimate**: M / 4-6 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 governs active implementation; implement in Godot .NET/C# desktop code unless a later ADR grants an exception.
 
@@ -47,6 +48,7 @@ Derived from ADR-0016:
 - Visual cues must be brief and non-modal. They may pulse/highlight/status-label active surfaces but must not open a modal unless a future settings story explicitly owns that panel.
 - Route, Exploration HUD, Repair, Market/Inventory, Session, and Global Warning cue families must preserve the readability of their primary UI text.
 - Scene cleanup must follow ADR-0001/ADR-0012 principles: stop tweens, release references, and avoid freed node access.
+- Performance: visual cues must stay lightweight and non-modal, with no per-frame work when no cues are active.
 
 ---
 

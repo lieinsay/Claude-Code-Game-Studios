@@ -1139,3 +1139,31 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Deviations: None. TR-feedback-001 remains active; ADR-0016, ADR-0012, and ADR-0003 boundaries are preserved.
 - Tech debt logged: None
 - Next recommended: `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md` — Story 003: Accessible Fallbacks, Subtitles and Missing Assets.
+
+## Session Extract — /dev-story 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md` — Story 003: Accessible Fallbacks, Subtitles and Missing Assets
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj`, `tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md`, `production/session-state/active.md`
+- Test written: `tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj` — 7/7 Story 003 acceptance checks passing
+- Verification: Story 003 runner 7/7 PASS; Story 001 runner 8/8 PASS; Story 002 runner 6/6 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: Implementation remains headless C# presentation routing. Missing visual/audio cue IDs no-op per channel with rate-limited diagnostics, muted/unavailable audio preserves visible fallback, caption text emits `SubtitleRequested`, caption-layer failure falls back to status text, and color-only visuals are rejected or labeled before output.
+- Blockers: None
+- Next: `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs` then `/story-done production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md`
+
+## Session Extract — /code-review fix 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md`
+- Fix: `FeedbackOutputSelected` now fires after presentation fallback filtering with sanitized cue IDs, and `FeedbackPresentationOutputSelected` exposes channel-safe outputs for future presentation sinks.
+- Fix: Audio output now requires an actually available visible fallback; caption-only requests are rejected when the caption layer is unavailable and no status text exists.
+- Test update: `tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs` now asserts sanitized selected requests for missing visual/audio assets and covers the caption-layer-unavailable audio skip regression.
+- Verification: Story 003 runner 7/7 PASS; Story 001 runner 8/8 PASS; Story 002 runner 6/6 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+- Blockers: None
+- Next: Re-run `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs`, then `/story-done production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md`.
+
+## Session Extract — /story-done 2026-05-16
+- Verdict: COMPLETE
+- Story: `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md` — Story 003: Accessible Fallbacks, Subtitles and Missing Assets
+- Criteria: 7/7 acceptance criteria covered by `tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj`; 7/7 checks passing.
+- Test evidence: Story 003 7/7 PASS; Story 001 regression 8/8 PASS; Story 002 regression 6/6 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+- Code review: Complete — `$code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs` approved after sanitized output and caption-layer audio fallback fixes.
+- Deviations: None. Implementation remains headless C# presentation routing; final rendered VFX/audio behavior and focus-safe overlay placement remain downstream Story 004/005 scope.
+- Tech debt logged: None
+- Next recommended: `production/epics/feedback-fx-audio/story-004-focus-safe-visual-cue-layer.md` — Story 004: Focus-Safe Visual Cue Layer

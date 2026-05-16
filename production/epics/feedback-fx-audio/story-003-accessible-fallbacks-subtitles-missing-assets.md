@@ -1,7 +1,7 @@
 # Story 003: Accessible Fallbacks, Subtitles and Missing Assets
 
 > **Epic**: Feedback, VFX, and Audio Semantics
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -29,13 +29,13 @@
 
 *From GDD `design/gdd/feedback-fx-audio.md`, scoped to this story:*
 
-- [ ] GIVEN a missing visual asset, WHEN the relevant feedback request is processed, THEN the visual cue is skipped, text/status fallback is preserved, and the game does not crash.
-- [ ] GIVEN a missing audio asset, WHEN the relevant feedback request is processed, THEN the audio cue is skipped, caption/status fallback is preserved, and the game does not crash.
-- [ ] GIVEN audio is muted or unavailable, WHEN a meaningful audio cue would play, THEN equivalent visible text or caption remains available.
-- [ ] GIVEN a feedback request contains `caption_text`, WHEN #17 processes it, THEN #17 emits or requests `subtitle_requested` and #16 or the subtitle layer can render the text.
-- [ ] GIVEN save or load completes, WHEN audio and VFX assets are missing, THEN player-facing text still confirms completion.
-- [ ] GIVEN the caption layer is unavailable, WHEN a caption would be requested, THEN #17 falls back to existing UI status text if present.
-- [ ] GIVEN color alone would carry meaning, WHEN a fallback is generated, THEN text, icon, motion, or label also carries the meaning.
+- [x] GIVEN a missing visual asset, WHEN the relevant feedback request is processed, THEN the visual cue is skipped, text/status fallback is preserved, and the game does not crash.
+- [x] GIVEN a missing audio asset, WHEN the relevant feedback request is processed, THEN the audio cue is skipped, caption/status fallback is preserved, and the game does not crash.
+- [x] GIVEN audio is muted or unavailable, WHEN a meaningful audio cue would play, THEN equivalent visible text or caption remains available.
+- [x] GIVEN a feedback request contains `caption_text`, WHEN #17 processes it, THEN #17 emits or requests `subtitle_requested` and #16 or the subtitle layer can render the text.
+- [x] GIVEN save or load completes, WHEN audio and VFX assets are missing, THEN player-facing text still confirms completion.
+- [x] GIVEN the caption layer is unavailable, WHEN a caption would be requested, THEN #17 falls back to existing UI status text if present.
+- [x] GIVEN color alone would carry meaning, WHEN a fallback is generated, THEN text, icon, motion, or label also carries the meaning.
 
 ---
 
@@ -101,7 +101,7 @@ Derived from ADR-0016:
 - `tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj` — must exist and pass
 - `production/qa/evidence/feedback-fx-audio-accessibility-evidence.md` — manual accessibility note if visual/audio rendering is involved
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj -p:UseSharedCompilation=false` passed 7/7 on 2026-05-16.
 
 ---
 
@@ -109,3 +109,11 @@ Derived from ADR-0016:
 
 - Depends on: Story 001
 - Unlocks: Story 004, Story 005
+
+## Completion Notes
+
+**Completed**: 2026-05-16
+**Criteria**: 7/7 passing.
+**Deviations**: None. The implementation remains headless C# presentation routing; final authored VFX/audio asset playback and visual overlay placement stay in downstream Stories 004/005.
+**Test Evidence**: Integration evidence at `tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj`; `dotnet run --project tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj -p:UseSharedCompilation=false` PASS 7/7. Story 001 and Story 002 feedback regression runners also PASS, and `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+**Code Review**: Complete — `$code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/AccessibleFallbacksProgram.cs` approved after sanitized output and caption-layer audio fallback fixes.

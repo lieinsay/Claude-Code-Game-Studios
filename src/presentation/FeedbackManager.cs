@@ -29,6 +29,24 @@ public enum FeedbackOutputDecision
 	SkippedUnsupported = 3,
 	SkippedInvalidPayload = 4,
 	Idle = 5,
+	VisualSkippedMissingAsset = 6,
+	AudioSkippedMissingAsset = 7,
+	AudioSkippedUnavailable = 8,
+	SubtitleRequested = 9,
+	StatusFallbackRequested = 10,
+	ColorOnlyFallbackRejected = 11,
+	AccessibilityFallbackApplied = 12,
+}
+
+/// <summary>
+/// 反馈输出通道；用于测试和 QA 验证可见/可听 fallback 合同。
+/// </summary>
+public enum FeedbackOutputChannel
+{
+	Visual = 0,
+	Audio = 1,
+	Subtitle = 2,
+	Status = 3,
 }
 
 /// <summary>
@@ -134,6 +152,27 @@ public sealed record FeedbackFrameResult(
 	FeedbackRequest? SelectedRequest);
 
 /// <summary>
+/// #17 向字幕层请求的一条可访问字幕。
+/// </summary>
+public sealed record FeedbackSubtitleRequest(
+	string CaptionText,
+	string EventId,
+	FeedbackPriority Priority,
+	double DurationSeconds);
+
+/// <summary>
+/// 已选择反馈请求在单个 presentation 通道上的输出或 fallback 决策。
+/// </summary>
+public sealed record FeedbackPresentationOutput(
+	FeedbackOutputChannel Channel,
+	string EventId,
+	string? CueId,
+	string? Text,
+	double DurationSeconds,
+	FeedbackOutputDecision Decision,
+	string? FallbackReason);
+
+/// <summary>
 /// 面向测试和 QA 的路由诊断快照。
 /// </summary>
 public sealed record FeedbackDiagnosticSnapshot(
@@ -146,7 +185,8 @@ public sealed record FeedbackDiagnosticSnapshot(
 	int PriorityScore,
 	FeedbackOutputDecision Decision,
 	bool Coalesced,
-	string? StatusText);
+	string? StatusText,
+	string? FallbackReason = null);
 
 /// <summary>
 /// 语义反馈事件中心，负责生成视觉、音频、字幕、状态与 QA 诊断请求。
@@ -161,6 +201,10 @@ public sealed class FeedbackManager
 	public const int MaxUrgencyBonus = 25;
 	public const int MaxNoveltyBonus = 10;
 	public const int MaxCooldownPenalty = 50;
+	public const double CaptionBaseSeconds = 1.5d;
+	public const double CaptionCharsPerSecond = 14.0d;
+	public const double MinCaptionDurationSeconds = 2.0d;
+	public const double MaxCaptionDurationSeconds = 6.0d;
 
 	private static readonly IReadOnlyDictionary<string, FeedbackEventDefinition> SupportedEvents = BuildSupportedEvents();
 
@@ -170,6 +214,11 @@ public sealed class FeedbackManager
 	private readonly HashSet<UIManager> connectedUiManagers = new();
 	private readonly HashSet<Persistence> connectedPersistenceSystems = new();
 	private readonly List<FeedbackDiagnosticSnapshot> diagnostics = new();
+	private readonly List<FeedbackPresentationOutput> presentationOutputs = new();
+	private readonly HashSet<string> missingVisualCueIds = new(StringComparer.Ordinal);
+	private readonly HashSet<string> missingAudioCueIds = new(StringComparer.Ordinal);
+	private readonly HashSet<string> colorOnlyVisualCueIds = new(StringComparer.Ordinal);
+	private readonly HashSet<string> rateLimitedMissingAssetDiagnostics = new(StringComparer.Ordinal);
 	private readonly Func<double> clockSeconds;
 	private int nextSequence;
 
@@ -197,8 +246,23 @@ public sealed class FeedbackManager
 	/// <summary>反馈请求从冲突队列中被选中输出时触发。</summary>
 	public event Action<FeedbackRequest>? FeedbackOutputSelected;
 
+	/// <summary>单个 presentation 通道完成安全 fallback 解析后触发。</summary>
+	public event Action<FeedbackPresentationOutput>? FeedbackPresentationOutputSelected;
+
+	/// <summary>请求 UIManager 或字幕层渲染一条字幕。</summary>
+	public event Action<FeedbackSubtitleRequest>? SubtitleRequested;
+
 	/// <summary>是否已经初始化。</summary>
 	public bool IsInitialized { get; private set; }
+
+	/// <summary>当前音频是否静音；静音不会抑制字幕或状态文字。</summary>
+	public bool IsAudioMuted { get; set; }
+
+	/// <summary>当前音频设备是否可用；不可用时音频通道跳过并保留可见 fallback。</summary>
+	public bool IsAudioDeviceAvailable { get; set; } = true;
+
+	/// <summary>当前字幕层是否可用；不可用时回退到状态文字。</summary>
+	public bool IsCaptionLayerAvailable { get; set; } = true;
 
 	/// <summary>已排队但尚未输出的反馈请求快照。</summary>
 	public IReadOnlyList<FeedbackRequest> PendingRequests =>
@@ -206,6 +270,9 @@ public sealed class FeedbackManager
 
 	/// <summary>路由、合并、跳过与输出选择的诊断快照。</summary>
 	public IReadOnlyList<FeedbackDiagnosticSnapshot> Diagnostics => diagnostics.AsReadOnly();
+
+	/// <summary>已处理请求产生的视觉、音频、字幕和状态输出快照。</summary>
+	public IReadOnlyList<FeedbackPresentationOutput> PresentationOutputs => presentationOutputs.AsReadOnly();
 
 	/// <summary>实际处理过非空反馈队列的帧次数。</summary>
 	public int FrameWorkCount { get; private set; }
@@ -232,6 +299,30 @@ public sealed class FeedbackManager
 		{
 			callback(parameters);
 		}
+	}
+
+	/// <summary>标记一个视觉提示资产缺失；处理时该通道会 no-op 并保留文字 fallback。</summary>
+	public void MarkVisualCueMissing(string visualCueId)
+	{
+		missingVisualCueIds.Add(RequireCueId(visualCueId, nameof(visualCueId)));
+	}
+
+	/// <summary>标记一个音频提示资产缺失；处理时该通道会 no-op 并保留字幕或文字 fallback。</summary>
+	public void MarkAudioCueMissing(string audioCueId)
+	{
+		missingAudioCueIds.Add(RequireCueId(audioCueId, nameof(audioCueId)));
+	}
+
+	/// <summary>标记一个视觉 fallback 仅靠颜色表达含义，输出前必须补充文本、图标、运动或标签。</summary>
+	public void MarkColorOnlyVisualCue(string visualCueId)
+	{
+		colorOnlyVisualCueIds.Add(RequireCueId(visualCueId, nameof(visualCueId)));
+	}
+
+	/// <summary>清除测试/QA 输出快照，不影响已排队请求。</summary>
+	public void ClearPresentationOutputs()
+	{
+		presentationOutputs.Clear();
 	}
 
 	/// <summary>通知反馈系统消费一个 UI 语义事件。</summary>
@@ -381,19 +472,30 @@ public sealed class FeedbackManager
 			latestByCoalesceKey.Remove(selected.Request.CoalesceKey);
 		}
 
-		FeedbackOutputSelected?.Invoke(selected.Request);
+		var safeRequest = DispatchPresentationOutputs(selected.Request);
+		FeedbackOutputSelected?.Invoke(safeRequest);
 		RecordDiagnostic(
-			selected.Request.EventId,
-			selected.Request.SourceSystem,
-			selected.Request.CueFamily,
-			selected.Request.Priority,
-			selected.Request.CoalesceKey,
+			safeRequest.EventId,
+			safeRequest.SourceSystem,
+			safeRequest.CueFamily,
+			safeRequest.Priority,
+			safeRequest.CoalesceKey,
 			selected.PriorityScore,
 			FeedbackOutputDecision.OutputSelected,
 			coalesced: false,
-			selected.Request.StatusText);
+			safeRequest.StatusText);
 
 		return new FeedbackFrameResult(1, ImmediateReturn: false, IteratedQueue: true, selected.Request);
+	}
+
+	/// <summary>按照 GDD 公式计算字幕持续时间。</summary>
+	public static double CalculateCaptionDurationSeconds(string? captionText)
+	{
+		var characterCount = string.IsNullOrEmpty(captionText) ? 0 : captionText.Length;
+		return Math.Clamp(
+			CaptionBaseSeconds + characterCount / CaptionCharsPerSecond,
+			MinCaptionDurationSeconds,
+			MaxCaptionDurationSeconds);
 	}
 
 	/// <summary>按照 GDD 公式计算反馈优先级分数。</summary>
@@ -634,6 +736,16 @@ public sealed class FeedbackManager
 		};
 	}
 
+	private static string RequireCueId(string value, string parameterName)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			throw new ArgumentException("Cue id must not be empty.", parameterName);
+		}
+
+		return value;
+	}
+
 	private static IReadOnlyDictionary<string, object?> CopyPayload(IReadOnlyDictionary<string, object?>? payload)
 	{
 		var copy = new Dictionary<string, object?>(StringComparer.Ordinal);
@@ -709,6 +821,283 @@ public sealed class FeedbackManager
 		return Convert.ToString(value);
 	}
 
+	private FeedbackRequest DispatchPresentationOutputs(FeedbackRequest request)
+	{
+		var statusOutputWritten = false;
+		var safeVisualCueId = DispatchVisualOutput(request, ref statusOutputWritten);
+		var safeAudioCueId = DispatchAudioOutput(request, ref statusOutputWritten);
+		DispatchCaptionOrStatusOutput(request, ref statusOutputWritten);
+		RequestStatusFallback(request, "status_text", ref statusOutputWritten);
+		return request with { VisualCueId = safeVisualCueId, AudioCueId = safeAudioCueId };
+	}
+
+	private string? DispatchVisualOutput(FeedbackRequest request, ref bool statusOutputWritten)
+	{
+		if (request.VisualCueId is null)
+		{
+			return null;
+		}
+
+		if (missingVisualCueIds.Contains(request.VisualCueId))
+		{
+			RecordRateLimitedMissingAssetDiagnostic(
+				request,
+				request.VisualCueId,
+				FeedbackOutputDecision.VisualSkippedMissingAsset,
+				"missing_visual_asset");
+			RequestStatusFallback(request, "missing_visual_asset", ref statusOutputWritten);
+			return null;
+		}
+
+		if (colorOnlyVisualCueIds.Contains(request.VisualCueId))
+		{
+			if (!HasAccessibleVisualFallback(request))
+			{
+				RecordDiagnostic(
+					request.EventId,
+					request.SourceSystem,
+					request.CueFamily,
+					request.Priority,
+					request.CoalesceKey,
+					BasePriorityScore(request.Priority),
+					FeedbackOutputDecision.ColorOnlyFallbackRejected,
+					coalesced: false,
+					request.StatusText,
+					"color_only_visual_cue");
+				return null;
+			}
+
+			var label = AccessibleVisualFallbackText(request);
+			AddPresentationOutput(
+				FeedbackOutputChannel.Visual,
+				request.EventId,
+				request.VisualCueId,
+				label,
+				durationSeconds: 0.0d,
+				FeedbackOutputDecision.AccessibilityFallbackApplied,
+				"color_only_visual_labeled");
+			RecordDiagnostic(
+				request.EventId,
+				request.SourceSystem,
+				request.CueFamily,
+				request.Priority,
+				request.CoalesceKey,
+				BasePriorityScore(request.Priority),
+				FeedbackOutputDecision.AccessibilityFallbackApplied,
+				coalesced: false,
+				request.StatusText,
+				"color_only_visual_labeled");
+			return request.VisualCueId;
+		}
+
+		AddPresentationOutput(
+			FeedbackOutputChannel.Visual,
+			request.EventId,
+			request.VisualCueId,
+			AccessibleVisualFallbackText(request),
+			durationSeconds: 0.0d,
+			FeedbackOutputDecision.OutputSelected,
+			null);
+		return request.VisualCueId;
+	}
+
+	private string? DispatchAudioOutput(FeedbackRequest request, ref bool statusOutputWritten)
+	{
+		if (request.AudioCueId is null)
+		{
+			return null;
+		}
+
+		var hasAvailableVisibleFallback = request.StatusText is not null
+			|| (request.CaptionText is not null && IsCaptionLayerAvailable);
+		if (!hasAvailableVisibleFallback)
+		{
+			RecordDiagnostic(
+				request.EventId,
+				request.SourceSystem,
+				request.CueFamily,
+				request.Priority,
+				request.CoalesceKey,
+				BasePriorityScore(request.Priority),
+				FeedbackOutputDecision.SkippedInvalidPayload,
+				coalesced: false,
+				request.StatusText,
+				"audio_without_available_visible_fallback");
+			return null;
+		}
+
+		if (missingAudioCueIds.Contains(request.AudioCueId))
+		{
+			RecordRateLimitedMissingAssetDiagnostic(
+				request,
+				request.AudioCueId,
+				FeedbackOutputDecision.AudioSkippedMissingAsset,
+				"missing_audio_asset");
+			RequestStatusFallback(request, "missing_audio_asset", ref statusOutputWritten);
+			return null;
+		}
+
+		if (IsAudioMuted || !IsAudioDeviceAvailable)
+		{
+			var reason = IsAudioMuted ? "audio_muted" : "audio_device_unavailable";
+			RecordDiagnostic(
+				request.EventId,
+				request.SourceSystem,
+				request.CueFamily,
+				request.Priority,
+				request.CoalesceKey,
+				BasePriorityScore(request.Priority),
+				FeedbackOutputDecision.AudioSkippedUnavailable,
+				coalesced: false,
+				request.StatusText,
+				reason);
+			RequestStatusFallback(request, reason, ref statusOutputWritten);
+			return null;
+		}
+
+		AddPresentationOutput(
+			FeedbackOutputChannel.Audio,
+			request.EventId,
+			request.AudioCueId,
+			null,
+			durationSeconds: 0.0d,
+			FeedbackOutputDecision.OutputSelected,
+			null);
+		return request.AudioCueId;
+	}
+
+	private void DispatchCaptionOrStatusOutput(FeedbackRequest request, ref bool statusOutputWritten)
+	{
+		if (request.CaptionText is null)
+		{
+			return;
+		}
+
+		if (!IsCaptionLayerAvailable)
+		{
+			RequestStatusFallback(request, "caption_layer_unavailable", ref statusOutputWritten);
+			return;
+		}
+
+		var subtitle = new FeedbackSubtitleRequest(
+			request.CaptionText,
+			request.EventId,
+			request.Priority,
+			CalculateCaptionDurationSeconds(request.CaptionText));
+		SubtitleRequested?.Invoke(subtitle);
+		AddPresentationOutput(
+			FeedbackOutputChannel.Subtitle,
+			request.EventId,
+			null,
+			request.CaptionText,
+			subtitle.DurationSeconds,
+			FeedbackOutputDecision.SubtitleRequested,
+			null);
+		RecordDiagnostic(
+			request.EventId,
+			request.SourceSystem,
+			request.CueFamily,
+			request.Priority,
+			request.CoalesceKey,
+			BasePriorityScore(request.Priority),
+			FeedbackOutputDecision.SubtitleRequested,
+			coalesced: false,
+			request.StatusText);
+	}
+
+	private void RequestStatusFallback(FeedbackRequest request, string fallbackReason, ref bool statusOutputWritten)
+	{
+		if (statusOutputWritten || request.StatusText is null)
+		{
+			return;
+		}
+
+		AddPresentationOutput(
+			FeedbackOutputChannel.Status,
+			request.EventId,
+			null,
+			request.StatusText,
+			durationSeconds: 0.0d,
+			FeedbackOutputDecision.StatusFallbackRequested,
+			fallbackReason);
+		RecordDiagnostic(
+			request.EventId,
+			request.SourceSystem,
+			request.CueFamily,
+			request.Priority,
+			request.CoalesceKey,
+			BasePriorityScore(request.Priority),
+			FeedbackOutputDecision.StatusFallbackRequested,
+			coalesced: false,
+			request.StatusText,
+			fallbackReason);
+		statusOutputWritten = true;
+	}
+
+	private bool HasAccessibleVisualFallback(FeedbackRequest request)
+	{
+		return request.StatusText is not null
+			|| request.CaptionText is not null
+			|| FindString(request.Payload, "icon_id") is not null
+			|| FindString(request.Payload, "motion_id") is not null
+			|| FindString(request.Payload, "label_text") is not null;
+	}
+
+	private static string? AccessibleVisualFallbackText(FeedbackRequest request)
+	{
+		return request.StatusText
+			?? request.CaptionText
+			?? FindString(request.Payload, "label_text")
+			?? FindString(request.Payload, "icon_id")
+			?? FindString(request.Payload, "motion_id");
+	}
+
+	private void AddPresentationOutput(
+		FeedbackOutputChannel channel,
+		string eventId,
+		string? cueId,
+		string? text,
+		double durationSeconds,
+		FeedbackOutputDecision decision,
+		string? fallbackReason)
+	{
+		var output = new FeedbackPresentationOutput(
+			channel,
+			eventId,
+			cueId,
+			text,
+			durationSeconds,
+			decision,
+			fallbackReason);
+		presentationOutputs.Add(output);
+		FeedbackPresentationOutputSelected?.Invoke(output);
+	}
+
+	private void RecordRateLimitedMissingAssetDiagnostic(
+		FeedbackRequest request,
+		string cueId,
+		FeedbackOutputDecision decision,
+		string fallbackReason)
+	{
+		var key = $"{decision}:{cueId}";
+		if (!rateLimitedMissingAssetDiagnostics.Add(key))
+		{
+			return;
+		}
+
+		RecordDiagnostic(
+			request.EventId,
+			request.SourceSystem,
+			request.CueFamily,
+			request.Priority,
+			request.CoalesceKey,
+			BasePriorityScore(request.Priority),
+			decision,
+			coalesced: false,
+			request.StatusText,
+			fallbackReason);
+	}
+
 	private int SelectNextPendingIndex()
 	{
 		var selectedIndex = 0;
@@ -736,7 +1125,8 @@ public sealed class FeedbackManager
 		int priorityScore,
 		FeedbackOutputDecision decision,
 		bool coalesced,
-		string? statusText)
+		string? statusText,
+		string? fallbackReason = null)
 	{
 		var diagnostic = new FeedbackDiagnosticSnapshot(
 			NextSequence(),
@@ -748,7 +1138,8 @@ public sealed class FeedbackManager
 			priorityScore,
 			decision,
 			coalesced,
-			statusText);
+			statusText,
+			fallbackReason);
 		diagnostics.Add(diagnostic);
 		return diagnostic;
 	}

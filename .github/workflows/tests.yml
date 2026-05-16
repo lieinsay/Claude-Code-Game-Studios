@@ -136,6 +136,9 @@ jobs:
       - name: Run feedback semantic event wiring integration tests
         run: dotnet run --project tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj
 
+      - name: Run feedback accessible fallbacks integration tests
+        run: dotnet run --project tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj
+
       - name: Run UI HUD screen state machine unit tests
         run: dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj
 

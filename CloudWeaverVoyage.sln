@@ -235,6 +235,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "feedback-fx-audio", "feedba
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemanticEventWiringTest", "tests\integration\feedback-fx-audio\SemanticEventWiringTest.csproj", "{0F5A20C3-B6F9-42C7-A63F-9F2AE3C27430}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessibleFallbacksTest", "tests\integration\feedback-fx-audio\AccessibleFallbacksTest.csproj", "{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1445,6 +1447,18 @@ Global
 		{0F5A20C3-B6F9-42C7-A63F-9F2AE3C27430}.Release|x64.Build.0 = Release|Any CPU
 		{0F5A20C3-B6F9-42C7-A63F-9F2AE3C27430}.Release|x86.ActiveCfg = Release|Any CPU
 		{0F5A20C3-B6F9-42C7-A63F-9F2AE3C27430}.Release|x86.Build.0 = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|x64.Build.0 = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Debug|x86.Build.0 = Debug|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|x64.ActiveCfg = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|x64.Build.0 = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|x86.ActiveCfg = Release|Any CPU
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1562,5 +1576,6 @@ Global
 		{44EB1000-7740-4C34-B535-FA0752CFCD3C} = {DB23EC0F-3A4C-95FD-8369-3EEC1898CC8F}
 		{E7ED70AC-1F11-9DD0-156E-B3103CA9F4AC} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{0F5A20C3-B6F9-42C7-A63F-9F2AE3C27430} = {E7ED70AC-1F11-9DD0-156E-B3103CA9F4AC}
+		{276FF281-D1FF-4D95-AE69-A9A555E9A3F0} = {E7ED70AC-1F11-9DD0-156E-B3103CA9F4AC}
 	EndGlobalSection
 EndGlobal
