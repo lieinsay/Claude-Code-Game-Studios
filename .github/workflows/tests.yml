@@ -139,6 +139,12 @@ jobs:
       - name: Run feedback accessible fallbacks integration tests
         run: dotnet run --project tests/integration/feedback-fx-audio/AccessibleFallbacksTest.csproj
 
+      - name: Run feedback focus-safe visual cue integration tests
+        run: dotnet run --project tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj
+
+      - name: Run feedback smoke regression integration tests
+        run: dotnet run --project tests/integration/feedback-fx-audio/SmokeRegressionTest.csproj
+
       - name: Run UI HUD screen state machine unit tests
         run: dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj
 

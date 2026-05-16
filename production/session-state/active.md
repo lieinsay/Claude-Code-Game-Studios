@@ -1167,3 +1167,50 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Deviations: None. Implementation remains headless C# presentation routing; final rendered VFX/audio behavior and focus-safe overlay placement remain downstream Story 004/005 scope.
 - Tech debt logged: None
 - Next recommended: `production/epics/feedback-fx-audio/story-004-focus-safe-visual-cue-layer.md` — Story 004: Focus-Safe Visual Cue Layer
+
+## Session Extract — /dev-story 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-004-focus-safe-visual-cue-layer.md` — Story 004: Focus-Safe Visual Cue Layer
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj`, `tests/integration/feedback-fx-audio/FocusSafeVisualCueProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/session-state/active.md`
+- Test written: `tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj` — 6/6 Story 004 acceptance checks passing
+- Verification: Story 004 runner 6/6 PASS; Story 001 runner 8/8 PASS; Story 002 runner 6/6 PASS; Story 003 runner 7/7 PASS; UI/HUD focus regression `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` 25/25 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: `FeedbackManager` now records focus-safe visual overlay snapshots with focus disabled, `MouseFilterMode.Ignore`, non-modal behavior, active-surface placement/readability guards, and non-critical scene-transition fade/release cleanup without Godot node references.
+- Blockers: None
+- Next: `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/FocusSafeVisualCueProgram.cs` then `/story-done production/epics/feedback-fx-audio/story-004-focus-safe-visual-cue-layer.md`
+
+## Session Extract — /story-done 2026-05-16
+- Verdict: COMPLETE
+- Story: `production/epics/feedback-fx-audio/story-004-focus-safe-visual-cue-layer.md` — Story 004: Focus-Safe Visual Cue Layer
+- Criteria: 6/6 acceptance criteria covered by `tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj`; focused runner passes 9/9 including Hub departure, critical transition release, and QA snapshot reset regressions.
+- Test evidence: Story 004 9/9 PASS; UI/HUD focus regression `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` 25/25 PASS; Story 001 regression 8/8 PASS; Story 002 regression 6/6 PASS; Story 003 regression 7/7 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+- Code review: Complete — `$code-review` approved the Story 004 changes after Hub departure payload, critical cue release, and overlay reset fixes.
+- Deviations: None. Implementation remains headless C# presentation routing; final authored VFX/audio assets and rendered visual fidelity remain out of scope for this story.
+- Tech debt logged: None
+- Next recommended: `production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md` — Story 005: Smoke Regression, Diagnostics and Performance
+
+## Session Extract — /dev-story 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md` — Story 005: Smoke Regression, Diagnostics and Performance
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/integration/feedback-fx-audio/SmokeRegressionTest.csproj`, `tests/integration/feedback-fx-audio/SmokeRegressionProgram.cs`, `production/qa/evidence/feedback-fx-audio-smoke-evidence.md`, `production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md`, `.github/workflows/tests.yml`, `CloudWeaverVoyage.sln`, `production/session-state/active.md`
+- Test written: `tests/integration/feedback-fx-audio/SmokeRegressionTest.csproj` — 6/6 Story 005 acceptance checks passing
+- Verification: Story 005 runner 6/6 PASS; Story 001 runner 8/8 PASS; Story 002 runner 6/6 PASS; Story 003 runner 7/7 PASS; Story 004 runner 9/9 PASS; UI/HUD a11y 25/25 PASS; Shell UI 18/18 PASS; Godot headless perf probe exit 0; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: `FeedbackManager` now clears non-Session pending feedback cues before load-complete routing while preserving Session save/load cues; smoke evidence records fallback, coalescing, diagnostics, focus safety, and numeric budget coverage.
+- Blockers: None
+- Next: `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SmokeRegressionProgram.cs production/qa/evidence/feedback-fx-audio-smoke-evidence.md` then `/story-done production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md`
+
+## Session Extract — /code-review fix 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md` — Story 005: Smoke Regression, Diagnostics and Performance
+- Fix: Stabilized Persistence bridge coalesce keys to artifact-level `save:{artifact}` / `load:{artifact}` so rapid real save/load completion events coalesce instead of being split by generation.
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/integration/feedback-fx-audio/SmokeRegressionProgram.cs`, `production/session-state/active.md`
+- Test updated: AC-3 now uses `ConnectPersistenceEvents(...)` plus repeated `RequestSaveProgress()` / `RequestLoadProgress()` calls and verifies the selected output request carries the latest generation.
+- Verification: Story 005 runner 6/6 PASS; Story 001 runner 8/8 PASS; Story 002 runner 6/6 PASS; Story 003 runner 7/7 PASS; Story 004 runner 9/9 PASS; `dotnet build CloudWeaverVoyage.csproj -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only
+- Blockers: None
+- Next: Re-run `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SmokeRegressionProgram.cs production/qa/evidence/feedback-fx-audio-smoke-evidence.md`, then `/story-done production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md`
+
+## Session Extract — /story-done 2026-05-16
+- Verdict: COMPLETE WITH NOTES
+- Story: `production/epics/feedback-fx-audio/story-005-smoke-regression-diagnostics-performance.md` — Story 005: Smoke Regression, Diagnostics and Performance
+- Criteria: 6/6 acceptance criteria covered by `tests/integration/feedback-fx-audio/SmokeRegressionTest.csproj`; Story 005 runner passes 6/6 including real Persistence bridge save/load coalescing.
+- Test evidence: Story 005 6/6 PASS; Story 001 regression 8/8 PASS; Story 002 regression 6/6 PASS; Story 003 regression 7/7 PASS; Story 004 regression 9/9 PASS; UI/HUD a11y 25/25 PASS; Shell UI 18/18 PASS; Godot headless perf probe rerun exit 0 after one transient frame-budget failure; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+- Code review: Complete — `$code-review` approved after the Persistence bridge coalesce key fix.
+- Deviations: None blocking. Completion note records the transient headless perf probe failure and immediate passing rerun.
+- Tech debt logged: None
+- Next recommended: #17 epic closeout, then #18 onboarding story split/implementation planning.

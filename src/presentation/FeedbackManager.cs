@@ -50,6 +50,30 @@ public enum FeedbackOutputChannel
 }
 
 /// <summary>
+/// 视觉提示在 UIManager 拥有的呈现层中的安全落点。
+/// </summary>
+public enum FeedbackVisualPlacement
+{
+	PassiveStatus = 0,
+	ChartRouteSelection = 1,
+	ChartDepartureTransition = 2,
+	ExplorationHudStatusRail = 3,
+	RepairStatus = 4,
+	MarketInventoryStatus = 5,
+	SessionStatus = 6,
+}
+
+/// <summary>
+/// 非模态视觉提示的生命周期状态。
+/// </summary>
+public enum FeedbackVisualCueLifecycleState
+{
+	Active = 0,
+	Fading = 1,
+	Released = 2,
+}
+
+/// <summary>
 /// ADR-0016 规定的不可变反馈请求值。
 /// </summary>
 public sealed record FeedbackRequest
@@ -173,6 +197,32 @@ public sealed record FeedbackPresentationOutput(
 	string? FallbackReason);
 
 /// <summary>
+/// UIManager 视觉提示层的一条安全覆盖物快照；不保存 Godot 节点引用。
+/// </summary>
+public sealed record FeedbackVisualCueOverlay(
+	string EventId,
+	string CueId,
+	string CueFamily,
+	FeedbackPriority Priority,
+	FeedbackVisualPlacement Placement,
+	string TargetSurfaceId,
+	string AnchorId,
+	string ReadabilityGuardToken,
+	string? LabelText,
+	double DurationSeconds,
+	bool FocusDisabled,
+	MouseFilterMode MouseFilter,
+	bool CapturesKeyboardFocus,
+	bool CapturesMouseInput,
+	bool IsModal,
+	bool CoversPrimaryText,
+	bool CoversInteractiveControls,
+	bool BlocksSceneTransition,
+	bool HoldsNodeReference,
+	FeedbackVisualCueLifecycleState LifecycleState,
+	bool FadeRequested);
+
+/// <summary>
 /// 面向测试和 QA 的路由诊断快照。
 /// </summary>
 public sealed record FeedbackDiagnosticSnapshot(
@@ -205,6 +255,10 @@ public sealed class FeedbackManager
 	public const double CaptionCharsPerSecond = 14.0d;
 	public const double MinCaptionDurationSeconds = 2.0d;
 	public const double MaxCaptionDurationSeconds = 6.0d;
+	public const double AmbientVisualCueDurationSeconds = 0.35d;
+	public const double MinorVisualCueDurationSeconds = 0.35d;
+	public const double MajorVisualCueDurationSeconds = 0.5d;
+	public const double CriticalVisualCueDurationSeconds = 0.7d;
 
 	private static readonly IReadOnlyDictionary<string, FeedbackEventDefinition> SupportedEvents = BuildSupportedEvents();
 
@@ -215,6 +269,8 @@ public sealed class FeedbackManager
 	private readonly HashSet<Persistence> connectedPersistenceSystems = new();
 	private readonly List<FeedbackDiagnosticSnapshot> diagnostics = new();
 	private readonly List<FeedbackPresentationOutput> presentationOutputs = new();
+	private readonly List<FeedbackVisualCueOverlay> visualCueOverlays = new();
+	private readonly List<FeedbackVisualCueOverlay> releasedVisualCueOverlays = new();
 	private readonly HashSet<string> missingVisualCueIds = new(StringComparer.Ordinal);
 	private readonly HashSet<string> missingAudioCueIds = new(StringComparer.Ordinal);
 	private readonly HashSet<string> colorOnlyVisualCueIds = new(StringComparer.Ordinal);
@@ -249,6 +305,9 @@ public sealed class FeedbackManager
 	/// <summary>单个 presentation 通道完成安全 fallback 解析后触发。</summary>
 	public event Action<FeedbackPresentationOutput>? FeedbackPresentationOutputSelected;
 
+	/// <summary>请求 UIManager 拥有的视觉提示层渲染一条非模态覆盖物。</summary>
+	public event Action<FeedbackVisualCueOverlay>? VisualCueOverlayRequested;
+
 	/// <summary>请求 UIManager 或字幕层渲染一条字幕。</summary>
 	public event Action<FeedbackSubtitleRequest>? SubtitleRequested;
 
@@ -268,11 +327,20 @@ public sealed class FeedbackManager
 	public IReadOnlyList<FeedbackRequest> PendingRequests =>
 		queue.OrderBy(item => item.EnqueueSequence).Select(item => item.Request).ToArray();
 
+	/// <summary>最近一次加载完成前清理掉的非会话瞬态反馈数量。</summary>
+	public int LastLoadClearedTransientCueCount { get; private set; }
+
 	/// <summary>路由、合并、跳过与输出选择的诊断快照。</summary>
 	public IReadOnlyList<FeedbackDiagnosticSnapshot> Diagnostics => diagnostics.AsReadOnly();
 
 	/// <summary>已处理请求产生的视觉、音频、字幕和状态输出快照。</summary>
 	public IReadOnlyList<FeedbackPresentationOutput> PresentationOutputs => presentationOutputs.AsReadOnly();
+
+	/// <summary>当前仍由视觉提示层追踪的覆盖物快照。</summary>
+	public IReadOnlyList<FeedbackVisualCueOverlay> VisualCueOverlays => visualCueOverlays.AsReadOnly();
+
+	/// <summary>已释放的覆盖物快照，用于证明场景切换不会保留节点引用。</summary>
+	public IReadOnlyList<FeedbackVisualCueOverlay> ReleasedVisualCueOverlays => releasedVisualCueOverlays.AsReadOnly();
 
 	/// <summary>实际处理过非空反馈队列的帧次数。</summary>
 	public int FrameWorkCount { get; private set; }
@@ -323,6 +391,8 @@ public sealed class FeedbackManager
 	public void ClearPresentationOutputs()
 	{
 		presentationOutputs.Clear();
+		visualCueOverlays.Clear();
+		releasedVisualCueOverlays.Clear();
 	}
 
 	/// <summary>通知反馈系统消费一个 UI 语义事件。</summary>
@@ -353,6 +423,7 @@ public sealed class FeedbackManager
 			RouteUiPurchaseConfirmed(uiManager, stallId, goodId, quantity, totalCost);
 		uiManager.UIItemTransferred += (itemId, fromPool, toPool, quantity) =>
 			RouteUiItemTransferred(uiManager, itemId, fromPool, toPool, quantity);
+		uiManager.ScreenChanged += (_, _) => HandleSceneTransitionStarted();
 	}
 
 	/// <summary>一次性连接 #3 Persistence 的保存和加载完成事件到 #17 路由器。</summary>
@@ -486,6 +557,56 @@ public sealed class FeedbackManager
 			safeRequest.StatusText);
 
 		return new FeedbackFrameResult(1, ImmediateReturn: false, IteratedQueue: true, selected.Request);
+	}
+
+	/// <summary>场景或全屏状态切换开始时，淡出活动视觉提示并释放节点引用。</summary>
+	public int HandleSceneTransitionStarted()
+	{
+		var cleaned = 0;
+		for (var index = 0; index < visualCueOverlays.Count; index++)
+		{
+			var overlay = visualCueOverlays[index];
+			if (overlay.LifecycleState != FeedbackVisualCueLifecycleState.Active)
+			{
+				continue;
+			}
+
+			visualCueOverlays[index] = overlay with
+			{
+				LifecycleState = FeedbackVisualCueLifecycleState.Fading,
+				FadeRequested = true,
+				HoldsNodeReference = false,
+				BlocksSceneTransition = false,
+			};
+			cleaned++;
+		}
+
+		return cleaned;
+	}
+
+	/// <summary>移除已淡出的提示快照；关键提示也不会阻塞场景完成。</summary>
+	public int ReleaseFadedVisualCues()
+	{
+		var released = 0;
+		for (var index = visualCueOverlays.Count - 1; index >= 0; index--)
+		{
+			if (visualCueOverlays[index].LifecycleState != FeedbackVisualCueLifecycleState.Fading)
+			{
+				continue;
+			}
+
+			var releasedOverlay = visualCueOverlays[index] with
+			{
+				LifecycleState = FeedbackVisualCueLifecycleState.Released,
+				HoldsNodeReference = false,
+				BlocksSceneTransition = false,
+			};
+			visualCueOverlays.RemoveAt(index);
+			releasedVisualCueOverlays.Add(releasedOverlay);
+			released++;
+		}
+
+		return released;
 	}
 
 	/// <summary>按照 GDD 公式计算字幕持续时间。</summary>
@@ -669,7 +790,7 @@ public sealed class FeedbackManager
 			{
 				["artifact_kind"] = normalizedArtifact,
 				["generation"] = generation,
-				["coalesce_key"] = $"save:{normalizedArtifact}:{generation}",
+				["coalesce_key"] = $"save:{normalizedArtifact}",
 				["status_text"] = "feedback.save_completed",
 				["caption_text"] = "feedback.save_completed.caption",
 			},
@@ -680,13 +801,14 @@ public sealed class FeedbackManager
 	private void RoutePersistenceLoadCompleted(string artifactKind, int generation)
 	{
 		var normalizedArtifact = NormalizePersistenceArtifact(artifactKind);
+		LastLoadClearedTransientCueCount = ClearTransientCueQueueForLoad();
 		RouteSemanticEvent(
 			"ui_load_completed",
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["artifact_kind"] = normalizedArtifact,
 				["generation"] = generation,
-				["coalesce_key"] = $"load:{normalizedArtifact}:{generation}",
+				["coalesce_key"] = $"load:{normalizedArtifact}",
 				["status_text"] = "feedback.load_completed",
 				["caption_text"] = "feedback.load_completed.caption",
 			},
@@ -696,6 +818,30 @@ public sealed class FeedbackManager
 	private static string NormalizePersistenceArtifact(string artifactKind)
 	{
 		return string.IsNullOrWhiteSpace(artifactKind) ? "progress" : artifactKind;
+	}
+
+	private int ClearTransientCueQueueForLoad()
+	{
+		var cleared = 0;
+		for (var index = queue.Count - 1; index >= 0; index--)
+		{
+			var request = queue[index].Request;
+			if (!IsLoadTransientCue(request))
+			{
+				continue;
+			}
+
+			queue.RemoveAt(index);
+			latestByCoalesceKey.Remove(request.CoalesceKey);
+			cleared++;
+		}
+
+		return cleared;
+	}
+
+	private static bool IsLoadTransientCue(FeedbackRequest request)
+	{
+		return !string.Equals(request.CueFamily, "Session", StringComparison.Ordinal);
 	}
 
 	/// <summary>语义事件存根：航线已选择。</summary>
@@ -782,7 +928,7 @@ public sealed class FeedbackManager
 	{
 		foreach (var requirement in definition.RequiredPayload)
 		{
-			if (!payload.TryGetValue(requirement.Key, out var value) || !requirement.Accepts(value))
+			if (!requirement.Accepts(payload))
 			{
 				return false;
 			}
@@ -796,7 +942,8 @@ public sealed class FeedbackManager
 		return eventId switch
 		{
 			"ui_panel_opened" or "ui_panel_closed" => WithPayloadKey(eventId, payload, "panel_id"),
-			"ui_route_selected" or "ui_departure_confirmed" => WithPayloadKey(eventId, payload, "route_id"),
+			"ui_route_selected" => WithPayloadKey(eventId, payload, "route_id"),
+			"ui_departure_confirmed" => WithFirstPayloadKey(eventId, payload, "route_id", "departure_mode"),
 			"ui_threat_response_chosen" => WithPayloadKey(eventId, payload, "threat_id"),
 			"ui_repair_submitted" => WithPayloadKey(eventId, payload, "node_id"),
 			"ui_purchase_confirmed" => WithPayloadKey(eventId, payload, "good_id"),
@@ -807,8 +954,22 @@ public sealed class FeedbackManager
 
 	private static string WithPayloadKey(string eventId, IReadOnlyDictionary<string, object?> payload, string key)
 	{
-		var value = FindString(payload, key);
+		var value = FindNonEmptyString(payload, key);
 		return string.IsNullOrWhiteSpace(value) ? eventId : $"{eventId}:{value}";
+	}
+
+	private static string WithFirstPayloadKey(string eventId, IReadOnlyDictionary<string, object?> payload, params string[] keys)
+	{
+		foreach (var key in keys)
+		{
+			var value = FindNonEmptyString(payload, key);
+			if (value is not null)
+			{
+				return $"{eventId}:{value}";
+			}
+		}
+
+		return eventId;
 	}
 
 	private static string? FindString(IReadOnlyDictionary<string, object?> payload, string key)
@@ -819,6 +980,12 @@ public sealed class FeedbackManager
 		}
 
 		return Convert.ToString(value);
+	}
+
+	private static string? FindNonEmptyString(IReadOnlyDictionary<string, object?> payload, string key)
+	{
+		var value = FindString(payload, key);
+		return string.IsNullOrWhiteSpace(value) ? null : value;
 	}
 
 	private FeedbackRequest DispatchPresentationOutputs(FeedbackRequest request)
@@ -868,6 +1035,7 @@ public sealed class FeedbackManager
 			}
 
 			var label = AccessibleVisualFallbackText(request);
+			AddVisualCueOverlay(request, request.VisualCueId, label);
 			AddPresentationOutput(
 				FeedbackOutputChannel.Visual,
 				request.EventId,
@@ -890,6 +1058,7 @@ public sealed class FeedbackManager
 			return request.VisualCueId;
 		}
 
+		AddVisualCueOverlay(request, request.VisualCueId, AccessibleVisualFallbackText(request));
 		AddPresentationOutput(
 			FeedbackOutputChannel.Visual,
 			request.EventId,
@@ -899,6 +1068,113 @@ public sealed class FeedbackManager
 			FeedbackOutputDecision.OutputSelected,
 			null);
 		return request.VisualCueId;
+	}
+
+	private void AddVisualCueOverlay(FeedbackRequest request, string cueId, string? labelText)
+	{
+		var overlay = new FeedbackVisualCueOverlay(
+			request.EventId,
+			cueId,
+			request.CueFamily,
+			request.Priority,
+			ResolveVisualPlacement(request),
+			TargetSurfaceFor(request),
+			AnchorFor(request),
+			ReadabilityGuardFor(request),
+			labelText,
+			VisualDurationFor(request.Priority),
+			FocusDisabled: true,
+			MouseFilterMode.Ignore,
+			CapturesKeyboardFocus: false,
+			CapturesMouseInput: false,
+			IsModal: false,
+			CoversPrimaryText: false,
+			CoversInteractiveControls: false,
+			BlocksSceneTransition: false,
+			HoldsNodeReference: false,
+			FeedbackVisualCueLifecycleState.Active,
+			FadeRequested: false);
+		visualCueOverlays.Add(overlay);
+		VisualCueOverlayRequested?.Invoke(overlay);
+	}
+
+	private static double VisualDurationFor(FeedbackPriority priority)
+	{
+		return priority switch
+		{
+			FeedbackPriority.Critical => CriticalVisualCueDurationSeconds,
+			FeedbackPriority.Major => MajorVisualCueDurationSeconds,
+			FeedbackPriority.Minor => MinorVisualCueDurationSeconds,
+			_ => AmbientVisualCueDurationSeconds,
+		};
+	}
+
+	private static FeedbackVisualPlacement ResolveVisualPlacement(FeedbackRequest request)
+	{
+		return request.EventId switch
+		{
+			"ui_route_selected" => FeedbackVisualPlacement.ChartRouteSelection,
+			"ui_departure_confirmed" => FeedbackVisualPlacement.ChartDepartureTransition,
+			"ui_threat_response_chosen" => FeedbackVisualPlacement.ExplorationHudStatusRail,
+			"ui_repair_submitted" => FeedbackVisualPlacement.RepairStatus,
+			"ui_purchase_confirmed" or "ui_item_transferred" => FeedbackVisualPlacement.MarketInventoryStatus,
+			"ui_save_completed" or "ui_load_completed" => FeedbackVisualPlacement.SessionStatus,
+			_ => FeedbackVisualPlacement.PassiveStatus,
+		};
+	}
+
+	private static bool IsHubDeparture(FeedbackRequest request)
+	{
+		return string.Equals(FindNonEmptyString(request.Payload, "departure_mode"), "hub", StringComparison.Ordinal);
+	}
+
+	private static string TargetSurfaceFor(FeedbackRequest request)
+	{
+		return ResolveVisualPlacement(request) switch
+		{
+			FeedbackVisualPlacement.ChartRouteSelection => UIManager.ChartScreenId,
+			FeedbackVisualPlacement.ChartDepartureTransition => IsHubDeparture(request)
+				? "departure_transition"
+				: UIManager.ChartScreenId,
+			FeedbackVisualPlacement.ExplorationHudStatusRail => UIManager.ExplorationHudScreenId,
+			FeedbackVisualPlacement.RepairStatus => UIManager.RepairScreenId,
+			FeedbackVisualPlacement.MarketInventoryStatus => UIManager.MarketScreenId,
+			FeedbackVisualPlacement.SessionStatus => "session_status",
+			_ => "ui_feedback_layer",
+		};
+	}
+
+	private static string AnchorFor(FeedbackRequest request)
+	{
+		return ResolveVisualPlacement(request) switch
+		{
+			FeedbackVisualPlacement.ChartRouteSelection => FindString(request.Payload, "route_id") ?? "chart.route",
+			FeedbackVisualPlacement.ChartDepartureTransition =>
+				FindNonEmptyString(request.Payload, "route_id")
+				?? FindNonEmptyString(request.Payload, "departure_mode")
+				?? "chart.departure",
+			FeedbackVisualPlacement.ExplorationHudStatusRail => FindString(request.Payload, "threat_id") ?? "exploration.status",
+			FeedbackVisualPlacement.RepairStatus => FindString(request.Payload, "node_id") ?? "repair.status",
+			FeedbackVisualPlacement.MarketInventoryStatus =>
+				FindString(request.Payload, "item_id") ?? FindString(request.Payload, "good_id") ?? "inventory.status",
+			FeedbackVisualPlacement.SessionStatus => FindString(request.Payload, "artifact_kind") ?? "session.status",
+			_ => FindString(request.Payload, "panel_id") ?? "ui.status",
+		};
+	}
+
+	private static string ReadabilityGuardFor(FeedbackRequest request)
+	{
+		return ResolveVisualPlacement(request) switch
+		{
+			FeedbackVisualPlacement.ChartRouteSelection => "preserve:route_identity,route_risk_text",
+			FeedbackVisualPlacement.ChartDepartureTransition => "preserve:departure_status",
+			FeedbackVisualPlacement.ExplorationHudStatusRail =>
+				"preserve:S5_hull_bar,S5_search_count,S5_threat_preview,S5_carried_grid",
+			FeedbackVisualPlacement.RepairStatus => "preserve:repair_result_text,materials_labels",
+			FeedbackVisualPlacement.MarketInventoryStatus => "preserve:item_delta,currency_label,stock_label",
+			FeedbackVisualPlacement.SessionStatus => "preserve:session_status_text",
+			_ => "preserve:active_panel_label",
+		};
 	}
 
 	private string? DispatchAudioOutput(FeedbackRequest request, ref bool statusOutputWritten)
@@ -1193,7 +1469,7 @@ public sealed class FeedbackManager
 				"audio.chart.departure_confirmed",
 				"feedback.departure_confirmed.caption",
 				"feedback.departure_confirmed",
-				RequiredString("route_id")),
+				RequiredAnyString("route_id", "departure_mode")),
 			["ui_threat_response_chosen"] = new(
 				"ui_threat_response_chosen",
 				"ui-hud-chart-interface",
@@ -1267,19 +1543,42 @@ public sealed class FeedbackManager
 	{
 		return new FeedbackPayloadRequirement(
 			key,
-			value => value is string text && !string.IsNullOrWhiteSpace(text));
+			payload => payload.TryGetValue(key, out var value)
+				&& value is string text
+				&& !string.IsNullOrWhiteSpace(text));
+	}
+
+	private static FeedbackPayloadRequirement RequiredAnyString(params string[] keys)
+	{
+		return new FeedbackPayloadRequirement(
+			string.Join("|", keys),
+			payload =>
+			{
+				foreach (var key in keys)
+				{
+					if (payload.TryGetValue(key, out var value)
+						&& value is string text
+						&& !string.IsNullOrWhiteSpace(text))
+					{
+						return true;
+					}
+				}
+
+				return false;
+			});
 	}
 
 	private static FeedbackPayloadRequirement RequiredInt(string key)
 	{
-		return new FeedbackPayloadRequirement(key, value => value is int);
+		return new FeedbackPayloadRequirement(key, payload => payload.TryGetValue(key, out var value) && value is int);
 	}
 
 	private static FeedbackPayloadRequirement RequiredMaterialSubmissions(string key)
 	{
 		return new FeedbackPayloadRequirement(
 			key,
-			value => value is IReadOnlyList<MaterialSubmission>);
+			payload => payload.TryGetValue(key, out var value)
+				&& value is IReadOnlyList<MaterialSubmission>);
 	}
 
 	private sealed record FeedbackEventDefinition(
@@ -1293,7 +1592,7 @@ public sealed class FeedbackManager
 		string? StatusText,
 		params FeedbackPayloadRequirement[] RequiredPayload);
 
-	private sealed record FeedbackPayloadRequirement(string Key, Func<object?, bool> Accepts);
+	private sealed record FeedbackPayloadRequirement(string Key, Func<IReadOnlyDictionary<string, object?>, bool> Accepts);
 
 	private sealed class PendingFeedback
 	{

@@ -1,7 +1,7 @@
 # Story 004: Focus-Safe Visual Cue Layer
 
 > **Epic**: Feedback, VFX, and Audio Semantics
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: M / 4-6 hours
@@ -30,12 +30,12 @@
 
 *From GDD `design/gdd/feedback-fx-audio.md`, scoped to this story:*
 
-- [ ] GIVEN Chart is active, WHEN feedback overlays appear, THEN underlying Hub controls do not regain focus and mouse input remains routed to Chart.
-- [ ] GIVEN Exploration HUD is active, WHEN resource, threat, or hull feedback events are consumed, THEN visible labels remain readable and no control is obscured.
-- [ ] GIVEN a route is selected, WHEN route selection feedback appears, THEN the route receives visible selection confirmation without covering route identity or risk readability.
-- [ ] GIVEN departure is confirmed, WHEN a major or critical visual cue appears, THEN it confirms the irreversible transition without delaying or blocking the transition.
-- [ ] GIVEN a focused modal or chart is open, WHEN feedback overlay Controls are present, THEN they use focus-disabled / mouse-ignore behavior by default.
-- [ ] GIVEN a scene transition happens during an active cue, WHEN non-critical cues are still active, THEN they stop or fade without holding references to freed nodes.
+- [x] GIVEN Chart is active, WHEN feedback overlays appear, THEN underlying Hub controls do not regain focus and mouse input remains routed to Chart.
+- [x] GIVEN Exploration HUD is active, WHEN resource, threat, or hull feedback events are consumed, THEN visible labels remain readable and no control is obscured.
+- [x] GIVEN a route is selected, WHEN route selection feedback appears, THEN the route receives visible selection confirmation without covering route identity or risk readability.
+- [x] GIVEN departure is confirmed, WHEN a major or critical visual cue appears, THEN it confirms the irreversible transition without delaying or blocking the transition.
+- [x] GIVEN a focused modal or chart is open, WHEN feedback overlay Controls are present, THEN they use focus-disabled / mouse-ignore behavior by default.
+- [x] GIVEN a scene transition happens during an active cue, WHEN non-critical cues are still active, THEN they stop or fade without holding references to freed nodes.
 
 ---
 
@@ -96,7 +96,7 @@ Derived from ADR-0016:
 - `tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj` OR `production/qa/evidence/feedback-fx-audio-focus-visual-evidence.md`
 - Existing UI/HUD focus regression must still pass: `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj -p:UseSharedCompilation=false` passed 9/9 on 2026-05-16; `dotnet run --project tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj -p:UseSharedCompilation=false` passed 25/25.
 
 ---
 
@@ -104,3 +104,11 @@ Derived from ADR-0016:
 
 - Depends on: Story 001, Story 002, Story 003
 - Unlocks: Story 005
+
+## Completion Notes
+
+**Completed**: 2026-05-16
+**Criteria**: 6/6 passing. The focused runner contains 9 checks: 6 acceptance criteria plus Hub departure, critical transition release, and QA snapshot reset regressions.
+**Deviations**: None. The implementation remains headless C# presentation routing; final authored VFX/audio assets and rendered visual fidelity remain out of scope for this story.
+**Test Evidence**: UI evidence at `tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj`; `dotnet run --project tests/integration/feedback-fx-audio/FocusSafeVisualCueTest.csproj -p:UseSharedCompilation=false` PASS 9/9. Existing UI/HUD focus regression `tests/integration/ui-hud-interface/EdgeCasesDesktopA11yTest.csproj` PASS 25/25. Story 001, Story 002, and Story 003 feedback regression runners also PASS, and `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+**Code Review**: Complete — `$code-review` approved the Story 004 changes after Hub departure payload, critical cue release, and overlay reset fixes.
