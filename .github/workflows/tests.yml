@@ -130,6 +130,12 @@ jobs:
       - name: Run presentation diagnostic UI tests
         run: dotnet run --project tests/unit/presentation/DiagnosticUITest.csproj
 
+      - name: Run feedback router core unit tests
+        run: dotnet run --project tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj
+
+      - name: Run feedback semantic event wiring integration tests
+        run: dotnet run --project tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj
+
       - name: Run UI HUD screen state machine unit tests
         run: dotnet run --project tests/unit/ui-hud-interface/ScreenStateMachineTest.csproj
 

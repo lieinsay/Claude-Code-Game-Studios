@@ -1,9 +1,9 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Presentation Layer
-Feature: UI / HUD / Chart Interface (#16)
-Task: Epic #16 Story 006 complete; UI/HUD epic ready for smoke/QA close-out
+Epic: Feedback, VFX, and Audio Semantics (#17)
+Feature: UI and Session Semantic Event Wiring
+Task: Story 002 complete; next recommended Story 003 readiness
 <!-- /STATUS -->
 
 ## Session Extract — /story-done 2026-05-14
@@ -1093,3 +1093,49 @@ All 14 blockers across 10 GDDs resolved in 3 rounds:
 - Code review: Complete — findings fixed before closure
 - Tech debt logged: None
 - Next recommended: No remaining Story 006 unlocks; UI/HUD epic is complete. Run `/smoke-check sprint`, then `/team-qa sprint`, then `/gate-check` after QA approval.
+
+## Session Extract — /dev-story 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-001-feedback-request-router-core.md` — Story 001: Feedback Request Router Core
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj`, `tests/unit/feedback-fx-audio/FeedbackRouterCoreProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/session-state/active.md`
+- Test written: `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` — 8/8 Story 001 acceptance/regression checks passing
+- Verification: Story 001 runner 8/8 PASS; `dotnet build CloudWeaverVoyage.csproj` PASS with 0 warnings, 0 errors; `dotnet build CloudWeaverVoyage.sln` PASS with 5 existing warnings, 0 errors; FoundationParity 70/70 PASS; `git diff --check` PASS with LF/CRLF warnings only
+- Notes: `FeedbackManager` now exposes immutable `FeedbackRequest` values, priority scoring, deterministic FIFO tie handling, 0.25s coalescing with latest status retention, idle-frame zero-work evidence, unsupported-event and invalid-payload diagnostics, injected/system monotonic timing for production coalescing, and preserves the legacy feedback callback surface for existing tests.
+- Blockers: None
+- Next: `/code-review src/presentation/FeedbackManager.cs tests/unit/feedback-fx-audio/FeedbackRouterCoreProgram.cs` then `/story-done production/epics/feedback-fx-audio/story-001-feedback-request-router-core.md`
+
+## Session Extract — /story-done 2026-05-16
+- Verdict: COMPLETE
+- Story: `production/epics/feedback-fx-audio/story-001-feedback-request-router-core.md` — Story 001: Feedback Request Router Core
+- Criteria: 6/6 acceptance criteria covered; 8/8 automated Story 001 checks passing including default-clock coalescing and invalid-payload diagnostics regressions.
+- Test evidence: `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` PASS 8/8; `dotnet build CloudWeaverVoyage.csproj` PASS with 0 warnings, 0 errors; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln` PASS with 0 warnings, 0 errors; `git diff --check` PASS with LF/CRLF warnings only.
+- Code review: Complete — `/code-review src/presentation/FeedbackManager.cs tests/unit/feedback-fx-audio/FeedbackRouterCoreProgram.cs` approved after default-clock and invalid-payload blockers were fixed.
+- Deviations: None. TR-feedback-001 remains active, ADR-0016 boundaries are preserved, and story/control manifest versions match.
+- Tech debt logged: None
+- Next recommended: `production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md` — Story 002: UI and Session Semantic Event Wiring; `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md` is also unblocked by Story 001.
+
+## Session Extract — /dev-story 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md` — Story 002: UI and Session Semantic Event Wiring
+- Files changed: `src/presentation/FeedbackManager.cs`, `tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj`, `tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs`, `CloudWeaverVoyage.sln`, `.github/workflows/tests.yml`, `production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md`, `production/session-state/active.md`
+- Test written: `tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj` — 6/6 Story 002 acceptance checks passing
+- Verification: Story 002 runner 6/6 PASS; Story 001 runner 8/8 PASS; UI/HUD Story 005 semantic event runner 23/23 PASS; FoundationParity 70/70 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+- Notes: `FeedbackManager` now wires UIManager semantic events and Persistence save/load completion events into #17 feedback requests, records cue family in requests/diagnostics, preserves UIManager focus ownership, keeps save/load source as Persistence, and requires no final VFX/audio assets for the evidence path.
+- Blockers: None
+- Next: `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs` then `/story-done production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md`
+
+## Session Extract — /code-review fix 2026-05-16
+- Story: `production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md`
+- Fix: Save completion wiring now consumes `Persistence.PromotionCompleted` so both progress and settings saves emit `ui_save_completed` with the correct `artifact_kind`; progress save no longer depends on the progress-only `SaveCompleted` event.
+- Test update: `tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs` now covers progress/settings save and load completion paths and checks progress save is not duplicated.
+- Verification: Story 002 runner 6/6 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+- Blockers: None
+- Next: Re-run `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs`, then `/story-done production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md`.
+
+## Session Extract — /story-done 2026-05-16
+- Verdict: COMPLETE
+- Story: `production/epics/feedback-fx-audio/story-002-ui-session-semantic-event-wiring.md` — Story 002: UI and Session Semantic Event Wiring
+- Criteria: 6/6 acceptance criteria covered by `tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj`; 6/6 checks passing.
+- Test evidence: Story 002 6/6 PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors; manifest version matches `2026-05-09`.
+- Code review: Complete — `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs` approved after settings save completion coverage was fixed.
+- Deviations: None. TR-feedback-001 remains active; ADR-0016, ADR-0012, and ADR-0003 boundaries are preserved.
+- Tech debt logged: None
+- Next recommended: `production/epics/feedback-fx-audio/story-003-accessible-fallbacks-subtitles-missing-assets.md` — Story 003: Accessible Fallbacks, Subtitles and Missing Assets.

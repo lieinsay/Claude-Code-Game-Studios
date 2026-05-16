@@ -1,9 +1,10 @@
 # Story 001: Feedback Request Router Core
 
 > **Epic**: Feedback, VFX, and Audio Semantics
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
+> **Estimate**: M / 6-8 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 governs active implementation; implement in Godot .NET/C# desktop code unless a later ADR grants an exception.
 
@@ -29,12 +30,12 @@
 
 *From GDD `design/gdd/feedback-fx-audio.md`, scoped to this story:*
 
-- [ ] GIVEN a supported #16 semantic event, WHEN it is emitted after state mutation, THEN #17 creates a feedback request without writing back to domain state.
-- [ ] GIVEN a semantic event is normalized, WHEN #17 builds a request, THEN it records `event_id`, `source_system`, `priority`, `coalesce_key`, optional `visual_cue_id`, optional `audio_cue_id`, optional `caption_text`, optional `status_text`, and read-only `payload`.
-- [ ] GIVEN multiple candidate feedback requests, WHEN channel conflict occurs, THEN `priority_score = base_priority + urgency_bonus + novelty_bonus - cooldown_penalty` chooses the highest-priority request deterministically.
-- [ ] GIVEN repeated identical events arrive rapidly, WHEN they share a `coalesce_key` within the default 0.25s window, THEN cues are merged or rate-limited while the latest status remains visible.
-- [ ] GIVEN the feedback queue is empty, WHEN frames advance, THEN `FeedbackManager` does no per-frame polling work.
-- [ ] GIVEN tests inspect diagnostics, WHEN requests are routed, coalesced, or skipped, THEN diagnostics expose enough data to verify event ID, priority, coalesce key, and output decisions.
+- [x] GIVEN a supported #16 semantic event, WHEN it is emitted after state mutation, THEN #17 creates a feedback request without writing back to domain state.
+- [x] GIVEN a semantic event is normalized, WHEN #17 builds a request, THEN it records `event_id`, `source_system`, `priority`, `coalesce_key`, optional `visual_cue_id`, optional `audio_cue_id`, optional `caption_text`, optional `status_text`, and read-only `payload`.
+- [x] GIVEN multiple candidate feedback requests, WHEN channel conflict occurs, THEN `priority_score = base_priority + urgency_bonus + novelty_bonus - cooldown_penalty` chooses the highest-priority request deterministically, with equal scores resolved by FIFO enqueue order.
+- [x] GIVEN repeated identical events arrive rapidly, WHEN they share a `coalesce_key` within the default 0.25s window, THEN cues are merged or rate-limited while the latest status remains visible.
+- [x] GIVEN the feedback queue is empty, WHEN frames advance, THEN `FeedbackManager` does no per-frame polling work.
+- [x] GIVEN tests inspect diagnostics, WHEN requests are routed, coalesced, or skipped, THEN diagnostics expose enough data to verify event ID, priority, coalesce key, and output decisions.
 
 ---
 
@@ -78,7 +79,7 @@ Derived from ADR-0016:
   - Given: ambient, minor, major, and critical requests with known urgency, novelty, and cooldown values
   - When: the router selects the next output
   - Then: the request with the highest computed priority score is selected
-  - Edge cases: tied score uses stable ordering; critical interrupts ambient
+  - Edge cases: tied score uses FIFO enqueue order; critical interrupts ambient
 
 - **AC-4**: Coalescing keeps latest status
   - Given: two events with the same `coalesce_key` inside 0.25s
@@ -100,7 +101,7 @@ Derived from ADR-0016:
 **Required evidence**:
 - `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` passed 8/8 on 2026-05-16.
 
 ---
 
@@ -108,3 +109,11 @@ Derived from ADR-0016:
 
 - Depends on: ADR-0016 Accepted, `src/presentation/FeedbackManager.cs` existing stub
 - Unlocks: Story 002, Story 003
+
+## Completion Notes
+
+**Completed**: 2026-05-16
+**Criteria**: 6/6 passing; covered by `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` with 8/8 acceptance and regression checks passing.
+**Deviations**: None. TR-feedback-001 remains active, the story Manifest Version matches `docs/architecture/control-manifest.md` (`2026-05-09`), and the implementation stays presentation-only under ADR-0016.
+**Test Evidence**: Logic evidence at `tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj`; `dotnet run --project tests/unit/feedback-fx-audio/FeedbackRouterCoreTest.csproj` PASS, `dotnet build CloudWeaverVoyage.csproj` PASS, `dotnet run --project tests/csharp/FoundationParity/FoundationParity.csproj` PASS 70/70, `dotnet build CloudWeaverVoyage.sln` PASS, `git diff --check` PASS with LF/CRLF warnings only.
+**Code Review**: Complete — `/code-review src/presentation/FeedbackManager.cs tests/unit/feedback-fx-audio/FeedbackRouterCoreProgram.cs` approved after default-clock coalescing and invalid-payload diagnostics were fixed.

@@ -1,9 +1,10 @@
 # Story 002: UI and Session Semantic Event Wiring
 
 > **Epic**: Feedback, VFX, and Audio Semantics
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
+> **Estimate**: M / 4-6 hours
 > **Manifest Version**: 2026-05-09
 > **Implementation Contract**: ADR-0019 governs active implementation; implement in Godot .NET/C# desktop code unless a later ADR grants an exception.
 
@@ -29,12 +30,12 @@
 
 *From GDD `design/gdd/feedback-fx-audio.md`, scoped to this story:*
 
-- [ ] GIVEN #16 emits `ui_panel_opened` or `ui_panel_closed`, WHEN #17 consumes it, THEN a minor context-change feedback request is created without changing focus state.
-- [ ] GIVEN a route is selected, WHEN `ui_route_selected` is consumed, THEN the route receives a visible selection confirmation request and any optional audio has a text-equivalent path.
-- [ ] GIVEN departure is confirmed, WHEN `ui_departure_confirmed` is consumed, THEN a major or critical cue confirms the irreversible transition without delaying the transition.
-- [ ] GIVEN #16 emits `ui_threat_response_chosen`, `ui_repair_submitted`, `ui_purchase_confirmed`, or `ui_item_transferred`, WHEN #17 consumes them, THEN each maps to the intended cue family and priority band.
-- [ ] GIVEN save or load completes, WHEN the session event is consumed, THEN player-facing text still confirms completion and the source is #2/#3 session or persistence state rather than the #16 UI event table.
-- [ ] GIVEN the current MVP runtime bridge already exposes route selection, departure, Exploration HUD pressure, threat, hull, and return-Hub summary feedback, WHEN #17 hooks are connected, THEN those channels remain understandable without becoming dependent on final VFX/audio assets.
+- [x] GIVEN #16 emits `ui_panel_opened` or `ui_panel_closed`, WHEN #17 consumes it, THEN a minor context-change feedback request is created without changing focus state.
+- [x] GIVEN a route is selected, WHEN `ui_route_selected` is consumed, THEN the route receives a visible selection confirmation request and any optional audio has a text-equivalent path.
+- [x] GIVEN departure is confirmed, WHEN `ui_departure_confirmed` is consumed, THEN a major or critical cue confirms the irreversible transition without delaying the transition.
+- [x] GIVEN #16 emits `ui_threat_response_chosen`, `ui_repair_submitted`, `ui_purchase_confirmed`, or `ui_item_transferred`, WHEN #17 consumes them, THEN diagnostics record these exact mappings: `ui_threat_response_chosen` -> Exploration HUD / Major, `ui_repair_submitted` -> Repair / Major, `ui_purchase_confirmed` -> Market/Inventory / Major, and `ui_item_transferred` -> Market/Inventory / Minor.
+- [x] GIVEN save or load completes, WHEN the session event is consumed, THEN player-facing text still confirms completion and the source is #2/#3 session or persistence state rather than the #16 UI event table.
+- [x] GIVEN the current MVP runtime bridge already exposes route selection, departure, Exploration HUD pressure, threat, hull, and return-Hub summary feedback, WHEN #17 hooks are connected, THEN each channel emits either visible status/caption text or a diagnostic feedback request containing `source_system`, `event_id`, cue family, and priority, and no channel requires final VFX/audio assets to communicate its outcome.
 
 ---
 
@@ -99,7 +100,7 @@ Derived from ADR-0016:
 **Required evidence**:
 - `tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj` — must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing — `dotnet run --project tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj` passed 6/6 on 2026-05-16, including progress/settings save-load completion coverage after code-review fix.
 
 ---
 
@@ -107,3 +108,13 @@ Derived from ADR-0016:
 
 - Depends on: Story 001
 - Unlocks: Story 003, Story 004, Story 005
+
+---
+
+## Completion Notes
+
+**Completed**: 2026-05-16
+**Criteria**: 6/6 passing
+**Deviations**: None
+**Test Evidence**: Integration test at `tests/integration/feedback-fx-audio/SemanticEventWiringTest.csproj` — 6/6 PASS, including progress/settings save-load completion coverage.
+**Code Review**: Complete — `/code-review src/presentation/FeedbackManager.cs tests/integration/feedback-fx-audio/SemanticEventWiringProgram.cs` approved after the settings save completion route was fixed.
