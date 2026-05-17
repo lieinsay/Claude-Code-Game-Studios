@@ -49,6 +49,12 @@ Task: Replace smoke-state runtime bridge with C# domain-backed playability befor
 - Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
 - Remaining Sprint 003 Production blockers: PVS3-006 final smoke evidence package and PVS3-007 manual playtest/QA sign-off. Do not advance to Polish yet.
 
+## Session Extract -- Sprint 003 PVS3-006 Automated Smoke Evidence 2026-05-17
+- PVS3-006 complete: automated smoke evidence recorded at `production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md`.
+- Evidence maps QA-1..QA-5 to the C# runtime bridge, Chart/Hub domain departure, Resources/Hull mutation, canonical Persistence save/load, and minimum greybox presentation assertions.
+- Verification: `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 30/30; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `git diff --check` PASS with LF/CRLF warnings only.
+- Remaining Sprint 003 Production blocker: PVS3-007 manual playtest and QA sign-off. Automated evidence supports gate recheck preparation, not a Polish PASS.
+
 ## Session Extract — Production Recovery Recheck 2026-05-17
 - Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.
 - Reason: Epic #1-#17 completion primarily proves headless C# systems, tests, and documentation. Prior smoke/playtest evidence proved a button-driven runtime bridge, not a true playable vertical slice.

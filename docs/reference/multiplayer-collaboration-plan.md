@@ -4,10 +4,10 @@
 > 基于: 17 Epic × 120 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Production 继续中 | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | Sprint 002 灰盒可玩恢复 PASS | Sprint 003 Domain-Backed Playable Slice 进行中 | #18 Onboarding 待拆分**
+> 当前状态: **Production 继续中 | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | Sprint 002 灰盒可玩恢复 PASS | Sprint 003 自动 smoke evidence PASS，人工 QA 待完成 | #18 Onboarding 待拆分**
 
 > **Readiness 基线**: 所有 120 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-17 同步到 Sprint 003 Production recovery 状态。Epic #1-#17 Complete 不等于 Polish ready；最新 Production → Polish gate 仍 FAIL。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-17 同步到 Sprint 003 Production recovery 状态。Epic #1-#17 Complete 不等于 Polish ready；Sprint 003 PVS3-006 自动证据通过后仍需 PVS3-007 人工 QA；最新 Production → Polish gate 仍 FAIL。
 
 ---
 
@@ -511,6 +511,7 @@ D-B: Hub / Resources / Modules-Hull runtime authority
 D-C: Chart / Exploration route authority + QA smoke
   ☑ 航线选择、出航从 ChartManager / HubManager domain contracts 派生
   ☑ 更新 Godot smoke probe，证明 domain-backed mutation 与 return-to-Hub sync
+  ☑ 固化 PVS3-006 自动 smoke evidence
   □ 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
 
 共享:
@@ -622,7 +623,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
 | #16 UI | 001-006 | #5+#8+#9+#11+#12+#13+#14 基础 API | ✅ Complete — 2026-05-15 |
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
-| Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-005 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker; final smoke/manual QA still open |
+| Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-006 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker; manual QA sign-off still open |
 | #18 Onboarding | TBD | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | Pending story split |
 
 ---

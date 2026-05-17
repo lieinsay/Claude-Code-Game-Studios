@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-17
-> **项目阶段**: Production — Sprint 003 Domain-Backed Playable Slice | Epic #1-#17 **Complete** 仅证明 headless/domain/story 证据，不等于 Polish ready | #18 Story split pending
+> **项目阶段**: Production — Sprint 003 Domain-Backed Playable Slice | 自动 smoke 证据 PASS，PVS3-007 人工 QA 仍待完成 | Epic #1-#17 **Complete** 仅证明 headless/domain/story 证据，不等于 Polish ready | #18 Story split pending
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Active Recovery: Sprint 003 domain-backed playable slice | Pending: #18 Onboarding
@@ -111,10 +111,11 @@ graph TB
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 17/18 Epic 完成规划 (120 Stories)；#1-#17 已完成；#18 待拆分 |
-| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — PVS3-002A/PVS3-005 已完成 C# runtime authority、canonical Persistence、最低灰盒场景表现；继续 PVS3-006/007 QA |
+| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — PVS3-001..PVS3-006 已完成 C# runtime authority、canonical Persistence、最低灰盒表现和自动 smoke 证据；继续 PVS3-007 人工 QA |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 最新 Production → Polish recheck：FAIL，继续留在 Production |
 | [production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 QA Plan — domain-backed playable slice 验证入口、自动/人工证据要求 |
+| [production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md](../production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md) | Sprint 003 PVS3-006 自动 smoke evidence：domain-backed route、canonical Persistence、灰盒表现 PASS；不等于 Polish PASS |
 | [production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md](../production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md) | Sprint 002 QA sign-off：灰盒恢复通过，但不批准进入 Polish |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
@@ -1346,7 +1347,7 @@ graph TB
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-17 — Sprint 002 灰盒可玩闭环恢复通过；Production → Polish 仍 FAIL；Sprint 003 聚焦 domain-backed playable slice 与 canonical persistence。
+> 更新于 2026-05-17 — Sprint 002 灰盒可玩闭环恢复通过；Production → Polish 仍 FAIL；Sprint 003 PVS3-006 自动 evidence PASS，下一步 PVS3-007 人工 QA。
 
 ### 已全部完成 ✅
 
@@ -1395,11 +1396,11 @@ graph TB
 - [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
 - [x] **Sprint Plan** — Sprint 001 Polish Stabilization 已创建并完成 Must/Should Have scope
 - [x] **Sprint 002 Playable Vertical Slice Recovery** — 灰盒 Hub -> Chart -> Exploration -> Return 人工可玩闭环恢复通过
-- [ ] **Sprint 003 Domain-Backed Playable Slice** — 将灰盒闭环接入 C# domain managers / canonical persistence，并补最低灰盒场景表现
+- [ ] **Sprint 003 Domain-Backed Playable Slice** — C# domain managers / canonical persistence / 最低灰盒表现 / 自动 smoke evidence 已完成；剩余 PVS3-007 人工 QA sign-off
 
 ---
 
-> **更新于 2026-05-17** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；Sprint 002 灰盒 playable slice 通过，但 Production → Polish 仍 FAIL；Sprint 003 继续补 domain-backed runtime 与 canonical persistence。
+> **更新于 2026-05-17** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；Sprint 002 灰盒 playable slice 通过，但 Production → Polish 仍 FAIL；Sprint 003 已完成 domain-backed runtime、canonical persistence、最低灰盒表现和自动 smoke evidence，继续 PVS3-007 人工 QA。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

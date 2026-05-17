@@ -135,8 +135,14 @@ Sprint 003 QA can sign off only when:
 - Human playtest completes the same path without debug-only calls.
 - Remaining risks are documented in the QA sign-off and gate recheck.
 
-## Known Risk Before Implementation
+## Known Residual Risk After PVS3-006
 
-The current running scene is GDScript-first. Existing C# Godot node scripts are
-not the active runtime path, so PVS3-002 must first establish a real bridge
-surface for `HubRuntime` before claiming domain-backed playability.
+- The running scene bridge is now `HubRuntime.cs`; the prior GDScript runtime
+  authority blocker is resolved for Sprint 003 evidence.
+- PVS3-007 manual playtest and QA sign-off remain required before any future
+  Production -> Polish gate recheck can pass.
+- Exploration search still uses a documented adapter fixture for the minimum
+  playable route; broader `NavigationManager` / `ExplorationManager` runtime
+  contract coverage remains a Production follow-up.
+- Headless screenshot capture is skipped under the current display driver, so
+  visual smoke evidence relies on node visibility and layout assertions.

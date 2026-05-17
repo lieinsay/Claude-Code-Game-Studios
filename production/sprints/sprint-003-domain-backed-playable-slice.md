@@ -144,13 +144,29 @@ Godot-to-C# adapters while preserving the human-playable route.
   for the domain-backed greybox route, then PVS3-007 needs a human manual
   playtest / QA sign-off before another Production -> Polish gate attempt.
 
+### 2026-05-17 -- PVS3-006 Complete
+
+- Added automated evidence package:
+  `production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md`.
+- Evidence maps the smoke route to QA-1 through QA-5: C# runtime bridge,
+  Chart/Hub departure, Resources/Hull mutation, canonical Persistence save/load,
+  and minimum greybox presentation.
+- Verification:
+  - `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 30/30.
+  - `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
+  - `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+  - `git diff --check` PASS with LF/CRLF warnings only.
+- Remaining Production risk: PVS3-007 manual playtest / QA sign-off is now the
+  last must-have Sprint 003 blocker before another Production -> Polish gate
+  recheck. Automated smoke evidence is not a Polish PASS.
+
 ## Definition of Done
 
 - [ ] Must Have tasks PVS3-001 through PVS3-007 complete
-- [ ] Godot smoke probe passes and proves domain-backed state mutation
-- [ ] `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` passes
-- [ ] Relevant C# unit/integration tests pass
+- [x] Godot smoke probe passes and proves domain-backed state mutation
+- [x] `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` passes
+- [x] Relevant C# unit/integration tests pass
 - [ ] Manual playtest confirms Hub -> Chart -> Exploration -> Return remains playable
-- [ ] Save/load uses canonical persistence or a documented adapter around it
-- [ ] Greybox presentation is sufficient for Production gate evidence
+- [x] Save/load uses canonical persistence or a documented adapter around it
+- [x] Greybox presentation is sufficient for Production gate evidence
 - [ ] Production -> Polish gate can be rechecked without relying on smoke-state stubs
