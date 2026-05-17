@@ -1,10 +1,10 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-17
-> **项目阶段**: Production — Sprint 003 Domain-Backed Playable Slice | PVS3-001..PVS3-007 完成，等待 Production → Polish gate recheck | Epic #1-#17 **Complete** 仅证明 headless/domain/story 证据，不等于 Polish ready | #18 Story split pending
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Story split pending
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Active Recovery: Sprint 003 domain-backed playable slice | Pending: #18 Onboarding
+> **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Polish Entry: #18 Onboarding story split + perf rerun | Sprint 003 recovery complete
 > **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 35 个 C# 源文件 + 120 个 C# test runner: unit 59 / integration 60 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
@@ -111,9 +111,10 @@ graph TB
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 17/18 Epic 完成规划 (120 Stories)；#1-#17 已完成；#18 待拆分 |
-| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — PVS3-001..PVS3-006 已完成 C# runtime authority、canonical Persistence、最低灰盒表现和自动 smoke 证据；继续 PVS3-007 人工 QA |
+| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
-| [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 最新 Production → Polish recheck：FAIL，继续留在 Production |
+| [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
+| [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 历史 recheck：FAIL，已由 Sprint 003 解除 |
 | [production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 QA Plan — domain-backed playable slice 验证入口、自动/人工证据要求 |
 | [production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md](../production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md) | Sprint 003 PVS3-006 自动 smoke evidence：domain-backed route、canonical Persistence、灰盒表现 PASS；不等于 Polish PASS |
 | [production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 PVS3-007 人工 playtest checklist — EXECUTED PASS |
@@ -1342,14 +1343,14 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 17/18 Epic 完成规划 (120 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17 Complete | #18 Pending
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Production — Sprint 003 Domain-Backed Playable Slice | Epic #1-#17 complete 是系统证据，不是 Polish PASS；#18 pending story split
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 pending story split
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-17 — Sprint 002 灰盒可玩闭环恢复通过；Production → Polish 仍 FAIL；Sprint 003 PVS3-001..PVS3-007 完成，下一步重跑 gate check。
+> 更新于 2026-05-17 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；下一步进入 Polish entry work。
 
 ### 已全部完成 ✅
 
@@ -1395,14 +1396,14 @@ graph TB
 - [x] **ADR-0016** (#17 Feedback/VFX/Audio) — Accepted 2026-05-15
 - [x] **ADR-0017** (#18 Onboarding/First Loop) — Accepted 2026-05-15
 - [x] **#17 feedback-fx-audio Epic/Story 实现** — 5 Stories Complete
-- [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
+- [ ] **#18 onboarding-first-loop Epic/Story 分解** — Polish entry
 - [x] **Sprint Plan** — Sprint 001 Polish Stabilization 已创建并完成 Must/Should Have scope
 - [x] **Sprint 002 Playable Vertical Slice Recovery** — 灰盒 Hub -> Chart -> Exploration -> Return 人工可玩闭环恢复通过
-- [x] **Sprint 003 Domain-Backed Playable Slice** — C# domain managers / canonical persistence / 最低灰盒表现 / 自动 smoke evidence / 人工 QA sign-off 已完成；等待 Production → Polish gate recheck
+- [x] **Sprint 003 Domain-Backed Playable Slice** — C# domain managers / canonical persistence / 最低灰盒表现 / 自动 smoke evidence / 人工 QA sign-off 已完成；Production → Polish gate PASS WITH CONDITIONS
 
 ---
 
-> **更新于 2026-05-17** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；Sprint 002 灰盒 playable slice 通过；Sprint 003 已完成 domain-backed runtime、canonical persistence、最低灰盒表现、自动 smoke evidence 和人工 QA，下一步重跑 Production → Polish gate。
+> **更新于 2026-05-17** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；Sprint 003 已完成 domain-backed runtime、canonical persistence、最低灰盒表现、自动 smoke evidence 和人工 QA；Production → Polish PASS WITH CONDITIONS，下一步 #18 story split 与 fresh perf probe。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

@@ -95,8 +95,9 @@ Evidence:
 
 ## Residual Risks
 
-- PVS3-007 manual playtest and QA sign-off are still required before the next
-  Production -> Polish gate recheck.
+- PVS3-007 manual playtest and QA sign-off were completed after this automated
+  evidence package; together they support the passed Production -> Polish gate
+  recheck.
 - Exploration search currently uses a documented adapter fixture around the
   route pressure/reward event; broader `NavigationManager` /
   `ExplorationManager` runtime contract coverage remains a Production follow-up.
@@ -105,4 +106,3 @@ Evidence:
   captured image pixels.
 - The solution build still reports 5 existing warnings in older test runners;
   they are not introduced by Sprint 003 PVS3-006.
-

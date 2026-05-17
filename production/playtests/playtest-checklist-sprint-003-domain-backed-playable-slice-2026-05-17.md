@@ -89,6 +89,5 @@ File a design/UX note if:
 
 **Gate Impact:**
 
-This checklist is executed with PASS and can be used to close PVS3-007. It
-supports the next Production -> Polish gate recheck, but the gate still needs to
-be run explicitly before changing project stage.
+This checklist is executed with PASS and closes PVS3-007. It supports the
+Production -> Polish gate recheck that passed with conditions on 2026-05-17.

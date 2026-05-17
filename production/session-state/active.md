@@ -1,10 +1,16 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Domain-Backed Playable Slice
-Feature: Production Recovery Sprint 003
-Task: Replace smoke-state runtime bridge with C# domain-backed playability before any Polish transition
+Epic: Polish Entry
+Feature: Production to Polish Gate Passed
+Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hardening follow-ups
 <!-- /STATUS -->
+
+## Session Extract -- Production to Polish PASS WITH CONDITIONS 2026-05-17
+- Gate recheck complete: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md`.
+- Verdict: **PASS WITH CONDITIONS**; `production/stage.txt` is now `Polish`.
+- Sprint 003 evidence accepted: domain-backed Godot smoke PASS, adapter test 30/30 PASS, solution build PASS, and user manual PVS3-007 PASS.
+- Conditions carried into Polish: #18 Onboarding implementation story split, fresh perf probe repair/rerun after headless timeout, broader Navigation/Exploration runtime contract hardening, and optional captured visual evidence.
 
 ## Session Extract -- Production Domain Recheck 2026-05-17
 - Verdict: Production -> Polish is still **FAIL**; remain in Production.

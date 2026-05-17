@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Production 保持中 | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 002 灰盒可玩恢复 PASS | Production → Polish gate 仍 FAIL | Sprint 003 PVS3-001..PVS3-007 完成，下一步重跑 gate；#18 Onboarding 待拆分**
+> 当前状态: **Polish | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 待拆分**
 
 ---
 
@@ -501,16 +501,16 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
 🟠 Recovery/S2  ████████████████████████ 100% (灰盒 playable slice human PASS)
 🟠 Recovery/S3  ████████████████████████ 100% (C# HubRuntime + domain managers + canonical Persistence + greybox + smoke + manual QA PASS)
-⚪ Phase F/#18  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
+🟡 Polish/#18   ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
 ```
 
 ### 本次生产状态检查 (2026-05-17)
 
 - 阶段文件: `production/stage.txt` 为 `Production`
-- 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md` — **FAIL**，不要进入 Polish。
-- 活跃任务: Sprint 003 Domain-Backed Playable Slice。
+- 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
+- 活跃任务: Polish entry follow-ups。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: Sprint 003 PVS3-001..PVS3-007 已完成；下一步必须重跑 Production -> Polish gate check，不能直接改阶段。
+- 当前 blocker: 无 Production 硬阻塞；Polish 条件为 #18 story split、fresh perf probe、Navigation/Exploration runtime hardening。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,12 +519,12 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Production -> Polish gate recheck | Sprint 003 PVS3-001..PVS3-007 Complete ✅ | Next |
+| **P0** | #18 Onboarding story split / implementation planning | Gate PASS WITH CONDITIONS ✅ | Next |
 | **P0** | Sprint 003: broaden Exploration/Navigation manager contract beyond fixture | Chart/Hub/Resources/Hull adapter ✅ | Next |
-| **P1** | Production -> Polish gate recheck package | PVS3-007 QA sign-off | 本轮 Production |
+| **P1** | Fresh performance probe repair/rerun | Gate condition | Polish entry |
 | **P2** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Sprint 003 后 |
 
-> 关键建议: 先完成 Sprint 003，把现有灰盒闭环从 smoke-state demo 升级为 domain-backed playable slice；之后再重跑 Production → Polish gate。
+> 关键建议: 先处理 Polish gate conditions：#18 story split、fresh perf probe、runtime hardening，然后进入正式 Polish backlog。
 
 ### 并行机会提醒
 

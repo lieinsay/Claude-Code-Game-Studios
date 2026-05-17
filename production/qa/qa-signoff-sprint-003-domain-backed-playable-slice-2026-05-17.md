@@ -51,8 +51,8 @@ QA approves Sprint 003 with conditions because:
 2. No S1/S2 launch, movement, prompt, E-use, departure, search, return, or
    save/load failures were reported.
 3. Automated evidence and manual evidence now cover the same playable route.
-4. Remaining risks are suitable for a formal Production -> Polish gate recheck,
-   not for skipping the gate.
+4. Remaining risks are suitable for Polish entry conditions, not for blocking
+   the Production -> Polish gate.
 
 ## Open Risks
 

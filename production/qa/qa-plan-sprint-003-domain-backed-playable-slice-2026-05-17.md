@@ -139,8 +139,8 @@ Sprint 003 QA can sign off only when:
 
 - The running scene bridge is now `HubRuntime.cs`; the prior GDScript runtime
   authority blocker is resolved for Sprint 003 evidence.
-- PVS3-007 manual playtest and QA sign-off remain required before any future
-  Production -> Polish gate recheck can pass.
+- PVS3-007 manual playtest and QA sign-off were required before the
+  Production -> Polish gate could pass, and are now recorded as complete.
 - Exploration search still uses a documented adapter fixture for the minimum
   playable route; broader `NavigationManager` / `ExplorationManager` runtime
   contract coverage remains a Production follow-up.
