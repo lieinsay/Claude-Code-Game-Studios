@@ -1,6 +1,6 @@
 # Epic #17: Feedback, VFX, and Audio Semantics
 
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **GDD**: `design/gdd/feedback-fx-audio.md`
 > **Architecture Module**: Presentation service — `FeedbackManager`
@@ -38,13 +38,13 @@ soundscape, and settings UI remain out of this epic.
 
 ## Stories
 
-| # | Story | Type | TRs | ADR |
-|---|-------|------|-----|-----|
-| 001 | [Feedback Request Router Core](story-001-feedback-request-router-core.md) | Logic | TR-feedback-001 | ADR-0016 |
-| 002 | [UI and Session Semantic Event Wiring](story-002-ui-session-semantic-event-wiring.md) | Integration | TR-feedback-001 | ADR-0016, ADR-0012 |
-| 003 | [Accessible Fallbacks, Subtitles and Missing Assets](story-003-accessible-fallbacks-subtitles-missing-assets.md) | Integration | TR-feedback-001, TR-feedback-002 | ADR-0016 |
-| 004 | [Focus-Safe Visual Cue Layer](story-004-focus-safe-visual-cue-layer.md) | UI | TR-feedback-002 | ADR-0016, ADR-0012 |
-| 005 | [Smoke Regression, Diagnostics and Performance](story-005-smoke-regression-diagnostics-performance.md) | Integration | TR-feedback-001, TR-feedback-002 | ADR-0016, ADR-0019 |
+| # | Story | Type | TRs | ADR | Status |
+|---|-------|------|-----|-----|--------|
+| 001 | [Feedback Request Router Core](story-001-feedback-request-router-core.md) | Logic | TR-feedback-001 | ADR-0016 | Complete — 8/8 PASS |
+| 002 | [UI and Session Semantic Event Wiring](story-002-ui-session-semantic-event-wiring.md) | Integration | TR-feedback-001 | ADR-0016, ADR-0012 | Complete — 6/6 PASS |
+| 003 | [Accessible Fallbacks, Subtitles and Missing Assets](story-003-accessible-fallbacks-subtitles-missing-assets.md) | Integration | TR-feedback-001, TR-feedback-002 | ADR-0016 | Complete — 7/7 PASS |
+| 004 | [Focus-Safe Visual Cue Layer](story-004-focus-safe-visual-cue-layer.md) | UI | TR-feedback-002 | ADR-0016, ADR-0012 | Complete — 9/9 PASS |
+| 005 | [Smoke Regression, Diagnostics and Performance](story-005-smoke-regression-diagnostics-performance.md) | Integration | TR-feedback-001, TR-feedback-002 | ADR-0016, ADR-0019 | Complete — 6/6 PASS |
 
 **Summary**: 1 Logic + 3 Integration + 1 UI stories
 
@@ -69,6 +69,13 @@ This epic is complete when:
 - Replacing UIManager layout, modal, screen-state, or focus ownership.
 - Full #18 onboarding guidance.
 
+## Completion Evidence
+
+- **Completed**: 2026-05-16
+- **Story evidence**: Story 001 8/8 PASS; Story 002 6/6 PASS; Story 003 7/7 PASS; Story 004 9/9 PASS; Story 005 6/6 PASS.
+- **Regression evidence**: UI/HUD accessibility 25/25 PASS, Shell UI 18/18 PASS, Godot headless perf probe rerun exit 0 after one transient frame-budget failure.
+- **Build evidence**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
+
 ## Next Step
 
-Run `/story-readiness production/epics/feedback-fx-audio/story-001-feedback-request-router-core.md`, then `/dev-story` for Story 001.
+Close #17 in production/reference indexes, then split or plan #18 onboarding stories.

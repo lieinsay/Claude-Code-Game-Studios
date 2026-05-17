@@ -1,13 +1,13 @@
 # 多人协作生产计划 — 云海织航 MVP
 
-> 生成: 2026-05-10 | 最后更新: 2026-05-14
-> 基于: 16 Epic × 115 Story 完整分解
+> 生成: 2026-05-10 | 最后更新: 2026-05-16
+> 基于: 17 Epic × 120 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Phase 0 完成 | Phase 1 Foundation 完成 | Content Registry #1 完成 | Platform Session Shell #2 完成 | Local Save Persistence #3 完成 | Player Movement & Interaction #4 完成 | Resources #5 完成 | Intel #6 完成 | Airship Hub #7 完成 | Modules/Hull #8 完成 | Chart #9 完成 | #10 Navigation 完成并复审通过 | #11 Exploration 完成 | #12 Combat 完成 | #14 Settlement 完成 | #15 Partner 完成 | #16 UI/HUD Story 001 完成 | BUG-005 已修复**
+> 当前状态: **Phase 0 完成 | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 待拆分 | BUG-005 已修复**
 
-> **Readiness 基线**: 所有 115 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-14 同步到 #5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 Complete、#16 Story 001 Complete、104 个 C# runner 的当前基线。
+> **Readiness 基线**: 所有 120 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-16 同步到 #1-#17 Complete、#18 Pending、120 个 C# runner 的当前基线。
 
 ---
 
@@ -491,9 +491,9 @@ D-C: 性能分析 + 优化
   □ 场景切换 <500ms
   □ 存档 p95 <50ms
 
-后续 (Vertical Slice，需先创建 ADR-0016/0017):
-  □ Epic #17 Feedback/Audio
-  □ Epic #18 Onboarding
+后续 (Vertical Slice):
+  ☑ Epic #17 Feedback/Audio first Polish slice
+  □ Epic #18 Onboarding story split
 ```
 
 ---
@@ -595,10 +595,12 @@ D-C: 性能分析 + 优化
 | #10 Navigation | 001-008 | #5+#6+#7+#8+#9 全部 | ✅ Complete + reviewed — 2026-05-13 (281/281 PASS) |
 | #11 Exploration | 001-006 | #4+#5+#6+#8+#10 全部 | ✅ Complete + reviewed — 2026-05-14 (287/287 PASS) |
 | #12 Combat | 001-006 | #5+#8+#11 全部 | ✅ Complete — 2026-05-14 (37/37 grouped PASS) |
-| #13 WorldRepair | 001 | #3+#5+#6+#9 全部 | Week 5 |
+| #13 WorldRepair | 001-006 | #3+#5+#6+#9 全部 | ✅ Complete — 2026-05-13 (91/91 PASS) |
 | #14 Settlement | 001-006 | #3+#4+#5+#13 Story 003 | ✅ Complete — 2026-05-14 (31/31 PASS) |
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
-| #16 UI | 001 | #5+#8+#9 基础 API | ✅ Story 001 Complete — 2026-05-14 (20/20 PASS); Story 002 Next |
+| #16 UI | 001-006 | #5+#8+#9+#11+#12+#13+#14 基础 API | ✅ Complete — 2026-05-15 |
+| #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
+| #18 Onboarding | TBD | #7+#9+#11+#13+#14+#16 完成 | Pending story split |
 
 ---
 

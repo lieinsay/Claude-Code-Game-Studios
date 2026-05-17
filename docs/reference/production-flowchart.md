@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-14 | 基于: systems-index.md + 16 Epic 115 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 — #3/#4 全部完成；Phase C #5/#6/#7/#8/#9 完成；Phase D #10/#13/#11/#12/#14/#15 完成；Phase E #16 UI/HUD 已启动，Story 001 Complete；BUG-005 已修复**
+> 生成日期: 2026-05-16 | 基于: systems-index.md + 17 Epic 120 Story
+> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 | Phase C #5/#6/#7/#8/#9 完成 | Phase D #10/#13/#11/#12/#14/#15 完成 | Phase E #16 UI/HUD 完成 | Phase F #17 Feedback 完成；#18 Onboarding 待拆分**
 
 ---
 
@@ -42,11 +42,11 @@ gantt
     #14 空港集市  (6 Stories)    :done,    p4e, 2026-05-14, 1d
     #12 战斗威胁  (6 Stories)    :done,    p4f, 2026-05-14, 1d
 
-    section 🔴 Phase E 呈现层
-    #16 UI/HUD    (6 Stories)    :active,  p5a, 2026-05-14, 14d
+    section ✅ Phase E 呈现层
+    #16 UI/HUD    (6 Stories)    :done,    p5a, 2026-05-14, 2026-05-15
 
-    section ⚪ Phase F 垂直切片
-    #17 反馈音频  (待定)         :         p6a, after p5a, 14d
+    section ✅/⚪ Phase F 垂直切片
+    #17 反馈音频  (5 Stories)   :done,    p6a, 2026-05-16, 1d
     #18 新手引导  (待定)         :         p6b, after p5a, 14d
 ```
 
@@ -89,9 +89,9 @@ graph TD
 
     S12["✅ #12 战斗威胁 6S"]:::done
 
-    S16["🟦 #16 UI/HUD 1/6S"]:::active
+    S16["✅ #16 UI/HUD 6S"]:::done
 
-    S17["⚪ #17 反馈音频"]:::vs
+    S17["✅ #17 反馈音频 5S"]:::done
     S18["⚪ #18 新手引导"]:::vs
 
     P0 --> S1
@@ -300,27 +300,27 @@ Week 8-10
 
 ---
 
-### Phase E 🔴 — 呈现层 (等 Feature 层)
+### Phase E ✅ — 呈现层 (等 Feature 层)
 
 ```
 Week 11-12
   #16 UI/HUD ──────────────────────────▶▶▶ 解锁 #17 #18
     (等 #11 #12 #13 #14 都完成 — UI 需要所有领域数据就绪)
 
-阻塞关卡: ✅ #16 已启动 — Story 001 屏幕 FSM 完成
-          所有上游数据 (#5 资源 #8 船体 #9 航图 #11 探索 #12 战斗 #13 修复 #14 集市) 已就绪
+当前: ✅ #16 已完成 — Story 001-006 全部通过自动化验证
+      所有上游数据 (#5 资源 #8 船体 #9 航图 #11 探索 #12 战斗 #13 修复 #14 集市) 已就绪
 ```
 
 ---
 
-### Phase F ⚪ — 垂直切片
+### Phase F ✅/⚪ — 垂直切片
 
 ```
 Week 13+
-┌─ #17 反馈音频 ─────────────────────── (等 #10 #11 #12 #13 #16)
-└─ #18 新手引导 ─────────────────────── (等 #7 #9 #11 #13 #14 #16)
+┌─ #17 反馈音频 ─────────────────────── ✅ Complete (Story 001-005, 36/36 feedback checks)
+└─ #18 新手引导 ─────────────────────── ⚪ Pending story split (等 #7 #9 #11 #13 #14 #16)
 
-注意: #17 #18 需要先创建 ADR-0016 / ADR-0017, 当前尚未启动
+注意: ADR-0016 / ADR-0017 已 Accepted；#17 first Polish slice 已完成，#18 仍需拆分实现 stories。
 ```
 
 ---
@@ -493,33 +493,36 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase B      ████████████████████████ 100% (#3 8/8 完成, #4 7/7 完成)
 ✅ Phase C      ████████████████████████ 100% (#5/#6/#7/#8/#9 完成)
 ✅ Phase D      ████████████████████████ 100% (#10 Navigation + #13 WorldRepair + #11 Exploration + #12 Combat + #14 Settlement + #15 Partner Complete)
-🟦 Phase E      ████░░░░░░░░░░░░░░░░░░░  16.7% (#16 UI/HUD Story 001/006 Complete)
+✅ Phase E      ████████████████████████ 100% (#16 UI/HUD Story 001-006 Complete)
+✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
+⚪ Phase F/#18  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
 ```
 
-### 本次生产状态检查 (2026-05-14)
+### 本次生产状态检查 (2026-05-16)
 
-- 阶段文件: `production/stage.txt` 仍为 `Pre-Production — Desktop C# Foundation Ready`
-- 活跃任务: Epic #16 UI/HUD convergence 已进入；Story 001 Screen State Machine & Screen Flow 完成（20/20 PASS）；下一步 Story 002 Modal Stack, Combat Override & Input Routing；BUG-005 scene reachability 已修复
-- 构建验证: 首次 `dotnet build CloudWeaverVoyage.sln --no-restore` 因新增 Chart 测试项目缺少 NuGet assets 失败；`dotnet restore CloudWeaverVoyage.sln` 后，`dotnet build CloudWeaverVoyage.sln --no-restore` PASS（4 个既有 warning，0 错误）
-- 测试验证: Epic #11 Story 001-006 runner 287/287 checks PASS；Epic #15 Story 001-006 runner 119/119 checks PASS；Epic #16 Story 001 runner 20/20 PASS；Feature Layer sweep 30/30 projects PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）
-- 文档索引: `docs/document-index.md` 已同步到 #5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15 Complete、#16 Story 001 Complete、104 个 C# runner 的当前基线
-- 本次完成: Epic #16 Story 001 锁定 UIManager 屏幕 FSM、departure lock 全面板关闭、S1-S12 注册表、Hub→Chart→Voyage→Exploration→Settlement→Hub 逻辑闭环；Story 001 runner 20/20 PASS。
+- 阶段文件: `production/stage.txt` 为 `Production`
+- 活跃任务: Epic #17 Feedback/VFX/Audio first Polish slice 已完成；下一步是 #18 Onboarding story split/implementation planning。
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（0 warning，0 error）
+- 测试验证: #17 Story 001-005 runner 全部 PASS（8/8、6/6、7/7、9/9、6/6）；UI/HUD a11y 25/25 PASS；Shell UI 18/18 PASS；Godot headless perf probe rerun exit 0。
+- 文档索引: `docs/document-index.md` 已同步到 #1-#17 Complete、#18 Pending、120 个 C# runner 的当前基线。
+- 本次完成: FeedbackManager first Polish slice 覆盖语义请求路由、UI/Session 事件桥接、缺失资产/字幕/可见 fallback、focus-safe overlay、smoke/perf/diagnostic 回归。
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #16 Story 002 Modal Stack + Input Routing | #16 Story 001 Complete ✅ | Next |
-| **P1** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
-| **P2** | #7 Hub Godot 场景灰盒验证与 UI 证据 | #7 C# 合同完成 | 后续场景/UI 阶段 |
+| **P0** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Next |
+| **P1** | #17 authored VFX/audio asset pass | #17 feedback router complete ✅ | Polish |
+| **P2** | Hub/Chart/Exploration rendered UI evidence refresh | #16/#17 C# contracts complete ✅ | 后续场景/UI 阶段 |
 
-> 关键建议: #16 UI/HUD convergence 已启动；下一段补齐 Story 002 单槽模态、S7 战斗覆盖和 4 层输入路由，把 Story 001 的屏幕 FSM 扩展为可交互 UI 外壳。
+> 关键建议: #17 已完成 first Polish feedback slice；下一段优先把 #18 onboarding 从 GDD/ADR/brief 转成可实施 Story，并把最终 authored VFX/audio 资产作为后续 Polish 内容处理。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  └─ #16 Story 002/003 可在 Story 001 屏幕 FSM 上继续推进（输入路由与 HUD 脏标记可分开验证）
+  ├─ #18 story split 可与 authored VFX/audio asset planning 并行
+  └─ Hub/Chart/Exploration rendered evidence refresh 可独立于 #18 文档拆分推进
 ```
 
 ---
@@ -529,8 +532,8 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 1. **瓶颈 #1 (内容注册表)**: 15 个系统中 10 个直接依赖它。如果 Schema 设计出错，后续大面积返工。建议 Phase A 结束后做一次 **Schema Freeze**。
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
 3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #16 的 UI 集成质量。
-4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16；#16 Story 001 已完成，关键风险转移到 Story 002 输入路由和 Story 004 上游数据整合。
-5. **#17 #18 阻塞**: ADR-0016 和 ADR-0017 未创建。如果 Vertical Slice 需要它们，最晚在 Phase D 结束前完成 ADR。
+4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16 已完成；关键风险转移到 #18 onboarding scope control 与 rendered evidence。
+5. **#18 阻塞**: ADR-0017 已 Accepted，但 implementation stories 尚未拆分；进入实现前需要 story-readiness。
 
 ---
 
@@ -538,5 +541,5 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 - 系统依赖: `design/gdd/systems-index.md` — Dependency Map 章节
 - Epic/Story 定义: `production/epics/` 目录下各 Epic 文件
-- Story 类型分布: Logic 65 + Integration 47 + UI 2 = 115 Stories (含 #17 #18)
+- Story 类型分布: Logic 66 + Integration 50 + UI 3 + Config 1 = 120 Stories (#1-#17；#18 尚未拆分)
 - 引擎版本: Godot 4.6.2 .NET (ADR-0019)

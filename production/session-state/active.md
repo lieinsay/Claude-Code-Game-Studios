@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Feedback, VFX, and Audio Semantics (#17)
-Feature: UI and Session Semantic Event Wiring
-Task: Story 002 complete; next recommended Story 003 readiness
+Feature: First Polish Feedback Slice
+Task: Epic #17 complete; next recommended #18 onboarding story split/implementation planning
 <!-- /STATUS -->
 
 ## Session Extract — /story-done 2026-05-14
@@ -477,7 +477,7 @@ Task: Story 002 complete; next recommended Story 003 readiness
 | Epic | # | Stories | Types |
 |------|---|---------|-------|
 | ui-hud-interface | #16 | 6 | 3 Logic + 3 Integration |
-| feedback-fx-audio | #17 | 5 | 1 Logic + 3 Integration + 1 UI — Ready |
+| feedback-fx-audio | #17 | 5 | 1 Logic + 3 Integration + 1 UI — Complete |
 | onboarding-first-loop | #18 | `design/gdd/onboarding-first-loop.md` | GDD approved — ADR-0017 Accepted |
 
 ### Production / Polish 入口状态
