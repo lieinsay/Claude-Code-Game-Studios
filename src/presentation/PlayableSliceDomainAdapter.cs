@@ -16,10 +16,14 @@ public sealed class PlayableSliceDomainAdapter
 	private readonly HubManager hub;
 	private readonly ResourcesManager resources;
 	private readonly ModuleHullManager modules;
+	private readonly Persistence persistence;
 	private string lastCommittedRoute = string.Empty;
 	private string lastCommittedDestination = string.Empty;
 	private string lastStatus = "Domain adapter initialized.";
+	private string lastSaveStatus = "尚未保存";
+	private string lastLoadStatus = "尚未加载";
 	private int explorationStep;
+	private PlayableSliceSceneState sceneState = new("hub", "", 0, 158.0f, 610.0f, "");
 
 	public PlayableSliceDomainAdapter()
 	{
@@ -27,6 +31,7 @@ public sealed class PlayableSliceDomainAdapter
 		modules = new ModuleHullManager(resources);
 		chart = BuildChartManager();
 		hub = BuildHubManager();
+		persistence = BuildPersistence();
 	}
 
 	public PlayableSliceSnapshot Snapshot => new(
@@ -49,6 +54,9 @@ public sealed class PlayableSliceDomainAdapter
 		StorageText: StorageText,
 		HullIntegrity: modules.GetHullState().Integrity,
 		ThreatText: ThreatText,
+		PersistenceGeneration: persistence.CurrentGeneration,
+		LastSaveStatus: lastSaveStatus,
+		LastLoadStatus: lastLoadStatus,
 		LastStatus: lastStatus);
 
 	public void OpenChart()
@@ -129,6 +137,27 @@ public sealed class PlayableSliceDomainAdapter
 			: $"HubManager arrival completed; reward extraction failed: {extraction.Result}.";
 	}
 
+	public PersistenceOperationResult SaveSceneState(PlayableSliceSceneState state)
+	{
+		sceneState = state with { ExplorationStep = explorationStep };
+		var result = persistence.RequestSaveProgress();
+		lastSaveStatus = result.Success
+			? $"canonical progress saved gen {result.Generation}"
+			: $"canonical progress save failed: {result.Reason}";
+		lastStatus = lastSaveStatus;
+		return result;
+	}
+
+	public (PersistenceOperationResult Result, PlayableSliceSceneState State) LoadSceneState()
+	{
+		var result = persistence.RequestLoadProgress();
+		lastLoadStatus = result.Success
+			? $"canonical progress loaded gen {result.Generation}"
+			: $"canonical progress load failed: {result.Reason}";
+		lastStatus = lastLoadStatus;
+		return (result, sceneState);
+	}
+
 	private ResourcesManager BuildResourcesManager()
 	{
 		var registry = new Registry();
@@ -188,6 +217,92 @@ public sealed class PlayableSliceDomainAdapter
 		return manager;
 	}
 
+	private Persistence BuildPersistence()
+	{
+		var manager = new Persistence();
+		resources.RegisterPersistence(manager);
+		modules.RegisterPersistence(manager);
+		manager.RegisterDomainSerializer("progress.airship", hub.BuildSnapshotPackage);
+		manager.RegisterDomainDeserializer("progress.airship", package => hub.RestoreFromProgressAirship(package.Payload));
+		manager.RegisterDomainSerializer("progress.routes", BuildChartSnapshotPackage);
+		manager.RegisterDomainDeserializer("progress.routes", package => chart.RestoreFromSnapshot(package.Payload));
+		manager.RegisterDomainSerializer("progress.playable_slice", BuildPlayableSliceSnapshotPackage);
+		manager.RegisterDomainDeserializer("progress.playable_slice", RestorePlayableSliceSnapshotPackage);
+		return manager;
+	}
+
+	private SnapshotPackage BuildChartSnapshotPackage()
+	{
+		var routeId = string.IsNullOrWhiteSpace(lastCommittedRoute)
+			? chart.SelectedRouteId
+			: lastCommittedRoute;
+		var payload = chart.BuildSnapshotPayload(routeId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+		payload["domain_id"] = "progress.routes";
+		var package = new SnapshotPackage
+		{
+			DomainId = "progress.routes",
+			SnapshotSchemaVersion = 1,
+			DomainState = SnapshotDomainState.Ready,
+		};
+		package.ContentDomainVersions["routes"] = "2026-05-09";
+		if (!string.IsNullOrWhiteSpace(routeId))
+		{
+			package.StableIdRefs.Add(routeId);
+		}
+		foreach (var (key, value) in payload)
+		{
+			package.Payload[key] = value;
+		}
+		return package;
+	}
+
+	private SnapshotPackage BuildPlayableSliceSnapshotPackage()
+	{
+		var state = sceneState with { ExplorationStep = explorationStep };
+		var package = new SnapshotPackage
+		{
+			DomainId = "progress.playable_slice",
+			SnapshotSchemaVersion = 1,
+			DomainState = SnapshotDomainState.Ready,
+		};
+		package.ContentDomainVersions["playable-slice"] = "2026-05-17";
+		if (!string.IsNullOrWhiteSpace(state.Route))
+		{
+			package.StableIdRefs.Add(state.Route);
+		}
+		package.Payload["screen"] = state.Screen;
+		package.Payload["route"] = state.Route;
+		package.Payload["exploration_step"] = state.ExplorationStep;
+		package.Payload["player_x"] = state.PlayerX;
+		package.Payload["player_y"] = state.PlayerY;
+		package.Payload["footer"] = state.Footer;
+		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		return package;
+	}
+
+	private void RestorePlayableSliceSnapshotPackage(SnapshotPackage package)
+	{
+		sceneState = new PlayableSliceSceneState(
+			ReadString(package.Payload, "screen", "hub"),
+			ReadString(package.Payload, "route", ""),
+			ReadInt(package.Payload, "exploration_step", 0),
+			ReadFloat(package.Payload, "player_x", 158.0f),
+			ReadFloat(package.Payload, "player_y", 610.0f),
+			ReadString(package.Payload, "footer", ""));
+		explorationStep = Math.Max(0, sceneState.ExplorationStep);
+		var currentCarried = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		if (currentCarried > 0)
+		{
+			resources.Remove(ResourcePool.Carried, RewardResourceId, currentCarried);
+		}
+		var restoredCarried = Math.Max(0, ReadInt(package.Payload, "reward_carried", 0));
+		if (restoredCarried > 0)
+		{
+			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
+		}
+		lastStatus = "Playable slice scene state restored from canonical progress.";
+	}
+
 	private static string RouteName(string routeId) => routeId switch
 	{
 		"route.mist" => "雾海短程",
@@ -213,6 +328,27 @@ public sealed class PlayableSliceDomainAdapter
 		$"基础补给 x{resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId)} / "
 		+ $"信标水晶 x{TotalRewards} / "
 		+ $"修理包 x{resources.GetQuantity(ResourcePool.InStorage, RepairKitId)}";
+
+	private static string ReadString(IReadOnlyDictionary<string, object?> payload, string key, string fallback) =>
+		payload.TryGetValue(key, out var value) ? value?.ToString() ?? fallback : fallback;
+
+	private static int ReadInt(IReadOnlyDictionary<string, object?> payload, string key, int fallback)
+	{
+		if (!payload.TryGetValue(key, out var value) || value is null)
+		{
+			return fallback;
+		}
+		return Convert.ToInt32(value);
+	}
+
+	private static float ReadFloat(IReadOnlyDictionary<string, object?> payload, string key, float fallback)
+	{
+		if (!payload.TryGetValue(key, out var value) || value is null)
+		{
+			return fallback;
+		}
+		return Convert.ToSingle(value);
+	}
 }
 
 public sealed record PlayableSliceSnapshot(
@@ -235,4 +371,15 @@ public sealed record PlayableSliceSnapshot(
 	string StorageText,
 	int HullIntegrity,
 	string ThreatText,
+	int PersistenceGeneration,
+	string LastSaveStatus,
+	string LastLoadStatus,
 	string LastStatus);
+
+public sealed record PlayableSliceSceneState(
+	string Screen,
+	string Route,
+	int ExplorationStep,
+	float PlayerX,
+	float PlayerY,
+	string Footer);

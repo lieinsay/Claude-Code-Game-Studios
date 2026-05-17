@@ -1,11 +1,9 @@
 using System;
-using System.Text.Json;
 using Godot;
 using CloudWeaverVoyage.Presentation;
 
 public partial class HubRuntime : Node2D
 {
-	private const string SavePath = "user://smoke_session_state.json";
 	private static readonly Vector2 HubPlayerStart = new(158, 610);
 	private static readonly Vector2 ExplorationPlayerStart = new(168, 610);
 	private const float PlayerSpeed = 260.0f;
@@ -196,60 +194,32 @@ public partial class HubRuntime : Node2D
 
 	public void OnSavePressed()
 	{
-		var snapshot = new SaveState(
+		var result = domain.SaveSceneState(new PlayableSliceSceneState(
 			currentScreen,
 			selectedRoute,
 			explorationStep,
 			playerPosition.X,
 			playerPosition.Y,
-			LabelText("Footer"));
-		using var file = Godot.FileAccess.Open(SavePath, Godot.FileAccess.ModeFlags.Write);
-		if (file is null)
-		{
-			SetSaveStatus("保存失败：无法打开 user:// 存档。");
-			return;
-		}
-
-		file.StoreString(JsonSerializer.Serialize(snapshot));
-		SetSaveStatus("保存完成：user://smoke_session_state.json");
+			LabelText("Footer")));
+		SetSaveStatus(result.Success
+			? $"保存完成：canonical progress gen {result.Generation}"
+			: $"保存失败：{result.Reason}");
 	}
 
 	public void OnLoadPressed()
 	{
-		if (!Godot.FileAccess.FileExists(SavePath))
+		var (result, restored) = domain.LoadSceneState();
+		if (!result.Success)
 		{
-			SetSaveStatus("加载失败：未找到可继续的本地存档。");
+			SetSaveStatus($"加载失败：{result.Reason}");
 			return;
 		}
 
-		using var file = Godot.FileAccess.Open(SavePath, Godot.FileAccess.ModeFlags.Read);
-		if (file is null)
-		{
-			SetSaveStatus("加载失败：无法读取 user:// 存档。");
-			return;
-		}
-
-		SaveState? parsed;
-		try
-		{
-			parsed = JsonSerializer.Deserialize<SaveState>(file.GetAsText());
-		}
-		catch (JsonException)
-		{
-			parsed = null;
-		}
-
-		if (parsed is null)
-		{
-			SetSaveStatus("加载失败：存档格式无效。");
-			return;
-		}
-
-		currentScreen = string.IsNullOrWhiteSpace(parsed.Screen) ? "hub" : parsed.Screen;
-		selectedRoute = parsed.Route ?? "";
-		explorationStep = Math.Max(0, parsed.ExplorationStep);
-		playerPosition = new Vector2(parsed.PlayerX, parsed.PlayerY);
-		SetSaveStatus($"加载完成：已恢复 {currentScreen}");
+		currentScreen = string.IsNullOrWhiteSpace(restored.Screen) ? "hub" : restored.Screen;
+		selectedRoute = restored.Route ?? "";
+		explorationStep = Math.Max(0, restored.ExplorationStep);
+		playerPosition = new Vector2(restored.PlayerX, restored.PlayerY);
+		SetSaveStatus($"加载完成：canonical progress gen {result.Generation} / {currentScreen}");
 
 		if (currentScreen == "chart")
 		{
@@ -259,7 +229,7 @@ public partial class HubRuntime : Node2D
 		else if (currentScreen == "exploration")
 		{
 			ShowExplorationSurface();
-			SetSaveStatus("加载完成：已恢复探索 HUD");
+			SetSaveStatus($"加载完成：canonical progress gen {result.Generation} / 探索 HUD");
 		}
 		else
 		{
@@ -347,6 +317,9 @@ public partial class HubRuntime : Node2D
 			["cargo_used"] = snapshot.CargoUsed,
 			["hull_integrity"] = snapshot.HullIntegrity,
 			["threat_text"] = snapshot.ThreatText,
+			["persistence_generation"] = snapshot.PersistenceGeneration,
+			["last_save_status"] = snapshot.LastSaveStatus,
+			["last_load_status"] = snapshot.LastLoadStatus,
 			["last_status"] = snapshot.LastStatus,
 		};
 	}
@@ -733,11 +706,4 @@ public partial class HubRuntime : Node2D
 		}
 	}
 
-	private sealed record SaveState(
-		string Screen,
-		string Route,
-		int ExplorationStep,
-		float PlayerX,
-		float PlayerY,
-		string Footer);
 }

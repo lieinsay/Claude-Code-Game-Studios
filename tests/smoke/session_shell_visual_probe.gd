@@ -137,7 +137,9 @@ func _run() -> void:
 
 	hub.call("OnSavePressed")
 	await process_frame
-	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Exploration state can be saved")
+	var saved_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(_label_text(session, "SaveStatusLabel").contains("canonical progress"), "Exploration state saves through canonical Persistence")
+	_expect(int(saved_snapshot.get("persistence_generation", 0)) > 0, "Canonical Persistence records progress generation")
 
 	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
 	await process_frame
@@ -159,6 +161,10 @@ func _run() -> void:
 	await process_frame
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Loading exploration save restores Exploration HUD")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
+	var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "Canonical load restores carried ResourcesManager rewards")
+	_expect(int(loaded_snapshot.get("reward_in_storage", 0)) == 0, "Canonical load restores pre-return ResourcesManager storage state")
+	_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "Canonical load status is exposed in domain snapshot")
 
 	hub.call("OnExplorationAdvancePressed")
 	await process_frame

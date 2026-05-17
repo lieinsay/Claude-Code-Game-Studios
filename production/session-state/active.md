@@ -34,6 +34,13 @@ Task: Replace smoke-state runtime bridge with C# domain-backed playability befor
 - Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 22/22; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
 - Remaining Sprint 003 Production blockers: PVS3-004 canonical persistence, PVS3-005 authored greybox scene upgrade, PVS3-006/PVS3-007 smoke/manual QA sign-off. Do not advance to Polish yet.
 
+## Session Extract -- Sprint 003 PVS3-004 Canonical Persistence 2026-05-17
+- PVS3-004 complete: `HubRuntime.cs` no longer saves/loads `user://smoke_session_state.json`; Ctrl+S/Ctrl+L now call `PlayableSliceDomainAdapter` and the C# `Persistence` pipeline.
+- Registered canonical progress domains: `progress.resources`, `progress.airship.modules_hull`, `progress.airship`, `progress.routes`, and adapter-owned `progress.playable_slice`.
+- Adapter-owned persistence covers scene-local restore hints not owned by canonical managers: screen, route display cache, exploration step, player marker position, footer, and carried exploration rewards.
+- Verification: `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 30/30; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS on final incremental run.
+- Remaining Sprint 003 Production blockers: PVS3-005 minimum authored greybox scene pass, PVS3-006 fresh smoke evidence after greybox pass, and PVS3-007 manual playtest/QA sign-off.
+
 ## Session Extract — Production Recovery Recheck 2026-05-17
 - Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.
 - Reason: Epic #1-#17 completion primarily proves headless C# systems, tests, and documentation. Prior smoke/playtest evidence proved a button-driven runtime bridge, not a true playable vertical slice.

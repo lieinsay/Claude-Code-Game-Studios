@@ -49,11 +49,25 @@ Check(damaged.BasicSupplyInStorage == 8, "ResourcesManager consumes second basic
 Check(damaged.RewardCarried == 2, "ResourcesManager carries second search reward");
 Check(damaged.HullIntegrity == 94, "ModuleHullManager applies hull pressure for step 2");
 
+var save = adapter.SaveSceneState(new PlayableSliceSceneState("exploration", "route.mist", 2, 592, 594, "saved from test"));
+var saved = adapter.Snapshot;
+Check(save.Success, "Persistence saves playable slice progress");
+Check(saved.PersistenceGeneration == 1, "Persistence records generation after save");
+
 adapter.ReturnToHub();
 var returned = adapter.Snapshot;
 Check(returned.HubDockingState == "Landed", "HubManager returns to Landed after arrival");
 Check(returned.RewardCarried == 0, "ResourcesManager clears carried rewards on Hub return");
 Check(returned.RewardInStorage == 2, "ResourcesManager extracts carried rewards to storage on Hub return");
+
+var load = adapter.LoadSceneState();
+var loaded = adapter.Snapshot;
+Check(load.Result.Success, "Persistence loads playable slice progress");
+Check(load.State.Screen == "exploration", "Persistence restores playable slice screen");
+Check(loaded.ExplorationStep == 2, "Persistence restores playable slice exploration step");
+Check(loaded.RewardCarried == 2, "Persistence restores ResourcesManager carried rewards");
+Check(loaded.RewardInStorage == 0, "Persistence restores ResourcesManager storage before Hub return");
+Check(loaded.HullIntegrity == 94, "Persistence restores ModuleHullManager hull damage");
 
 Console.WriteLine($"RESULT {total - failed}/{total} passing");
 return failed == 0 ? 0 : 1;

@@ -94,6 +94,33 @@ Godot-to-C# adapters while preserving the human-playable route.
   runtime continues to use the temporary smoke save file until that story
   replaces it.
 
+### 2026-05-17 -- PVS3-004 Complete
+
+- Replaced `HubRuntime.cs` save/load calls with
+  `PlayableSliceDomainAdapter.SaveSceneState` and `LoadSceneState`; the scene no
+  longer writes or reads `user://smoke_session_state.json`.
+- `PlayableSliceDomainAdapter` now owns a `Persistence` pipeline and registers:
+  `progress.resources`, `progress.airship.modules_hull`, `progress.airship`,
+  `progress.routes`, and `progress.playable_slice`.
+- `progress.playable_slice` records the presentation-local restore hints that
+  canonical domain managers do not own: current screen, selected route,
+  exploration step, player position, footer text, and carried exploration
+  rewards.
+- Updated `tests/integration/playable-slice/DomainAdapterTest.csproj`; the
+  runner proves canonical save/load restores exploration screen, resource
+  carried/storage state, and hull damage after an intervening return-to-Hub
+  mutation.
+- Updated `tests/smoke/session_shell_visual_probe.gd`; the Godot route now
+  asserts canonical progress generation and canonical load status in the C#
+  domain snapshot.
+- Verification:
+  - `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 30/30.
+  - `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
+  - `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors on the final incremental run.
+- Remaining Production risk: PVS3-005 minimum authored greybox scene pass and
+  PVS3-006/PVS3-007 smoke/manual QA are still open before another
+  Production -> Polish gate attempt.
+
 ## Definition of Done
 
 - [ ] Must Have tasks PVS3-001 through PVS3-007 complete
