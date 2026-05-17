@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md` — **FAIL**，不要进入 Polish。
 - 活跃任务: Sprint 003 Domain-Backed Playable Slice。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: `HubRuntime.cs` 已接入 Chart/Hub/Resources/Hull/Persistence domain snapshots，并完成最低灰盒场景表现与 PVS3-006 自动 smoke evidence；下一步必须完成人工 QA。
+- 当前 blocker: `HubRuntime.cs` 已接入 Chart/Hub/Resources/Hull/Persistence domain snapshots，并完成最低灰盒场景表现与 PVS3-006 自动 smoke evidence；PVS3-007 checklist/sign-off 已创建，下一步必须由人工执行 QA。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。

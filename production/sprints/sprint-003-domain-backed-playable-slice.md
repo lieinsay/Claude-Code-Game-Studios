@@ -160,6 +160,15 @@ Godot-to-C# adapters while preserving the human-playable route.
   last must-have Sprint 003 blocker before another Production -> Polish gate
   recheck. Automated smoke evidence is not a Polish PASS.
 
+### 2026-05-17 -- PVS3-007 Started
+
+- Added manual playtest checklist:
+  `production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- Added pending QA sign-off:
+  `production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- PVS3-007 remains open until a human tester completes the checklist and fills
+  the sign-off result. No Production -> Polish PASS is authorized yet.
+
 ## Definition of Done
 
 - [ ] Must Have tasks PVS3-001 through PVS3-007 complete

@@ -516,7 +516,7 @@ D-C: Chart / Exploration route authority + QA smoke
 
 共享:
   ☑ 最低灰盒场景表现升级
-  □ Sprint 003 manual playtest + QA sign-off
+  ▣ Sprint 003 manual playtest + QA sign-off checklist/sign-off prepared
 ```
 
 ---

@@ -116,6 +116,8 @@ graph TB
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 最新 Production → Polish recheck：FAIL，继续留在 Production |
 | [production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 QA Plan — domain-backed playable slice 验证入口、自动/人工证据要求 |
 | [production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md](../production/qa/evidence/sprint-003-domain-backed-playable-smoke-evidence-2026-05-17.md) | Sprint 003 PVS3-006 自动 smoke evidence：domain-backed route、canonical Persistence、灰盒表现 PASS；不等于 Polish PASS |
+| [production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 PVS3-007 人工 playtest checklist — READY FOR HUMAN EXECUTION |
+| [production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 QA sign-off 草案 — PENDING HUMAN PLAYTEST |
 | [production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md](../production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md) | Sprint 002 QA sign-off：灰盒恢复通过，但不批准进入 Polish |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
