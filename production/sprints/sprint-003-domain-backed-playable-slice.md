@@ -53,9 +53,46 @@ Godot-to-C# adapters while preserving the human-playable route.
 
 ## QA Plan
 
-Create after adapter design:
-
 - `production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md`
+
+## Progress Notes
+
+### 2026-05-17 -- PVS3-001 Complete
+
+- Added `production/sprints/sprint-003-runtime-adapter-boundary.md`.
+- Added `production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- Decision: `HubRuntime.cs` remains a Godot presentation/input shell; C# domain
+  managers own Hub, Chart, Exploration, Resources/Hull, Feedback, and
+  Persistence authority.
+- Next implementation should start with PVS3-002/PVS3-003 by adding a thin
+  Godot-friendly runtime adapter and moving route/search evidence off
+  smoke-state fields.
+
+### 2026-05-17 -- PVS3-002/PVS3-003 Complete
+
+- Added `src/presentation/PlayableSliceDomainAdapter.cs` as a headless,
+  Godot-wrap-ready adapter around `ChartManager`, `HubManager`,
+  `ResourcesManager`, and `ModuleHullManager`.
+- Migrated `src/scenes/HubRuntime.tscn` from `HubRuntime.gd` to the C# scene
+  script `src/scenes/HubRuntime.cs`; the prior GDScript runtime authority was
+  removed.
+- Project binding fix: `CloudWeaverVoyage.csproj` now uses
+  `Godot.NET.Sdk/4.6.2`, `project.godot` uses the matching assembly name, and
+  `NuGet.config` points to the local GodotSharp SDK package source.
+- Added `tests/integration/playable-slice/DomainAdapterTest.csproj`; the runner
+  proves route opening, route selection, departure commit, Hub in-transit,
+  ResourcesManager supply/reward mutation, ModuleHullManager hull damage, and
+  return-to-Hub extraction snapshots.
+- Updated `tests/smoke/session_shell_visual_probe.gd` to drive the C# scene
+  script and assert Chart/Hub/Resources/Hull domain snapshots after the same
+  playable movement/E-use path.
+- Verification:
+  - `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+  - `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 22/22.
+  - `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; screenshot capture remains skipped under the headless display driver.
+- Remaining Production risk: PVS3-004 canonical persistence is still open; the
+  runtime continues to use the temporary smoke save file until that story
+  replaces it.
 
 ## Definition of Done
 
@@ -67,4 +104,3 @@ Create after adapter design:
 - [ ] Save/load uses canonical persistence or a documented adapter around it
 - [ ] Greybox presentation is sufficient for Production gate evidence
 - [ ] Production -> Polish gate can be rechecked without relying on smoke-state stubs
-

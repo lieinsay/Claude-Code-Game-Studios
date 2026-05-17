@@ -26,7 +26,7 @@ window/stretch/aspect="expand"
 
 [dotnet]
 
-project/assembly_name="云海织航"
+project/assembly_name="CloudWeaverVoyage"
 
 [input]
 

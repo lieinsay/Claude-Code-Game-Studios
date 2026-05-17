@@ -10,11 +10,29 @@ Task: Replace smoke-state runtime bridge with C# domain-backed playability befor
 - Verdict: Production -> Polish is still **FAIL**; remain in Production.
 - Sprint 002 result: approved as successful greybox playable recovery, not as Polish readiness.
 - Key evidence accepted: human can complete Hub -> Chart -> Exploration -> Return with movement, E-use prompts, search feedback, and save/load restore.
-- Key blocker retained: `src/scenes/HubRuntime.gd` still owns route, exploration step, resource/threat/hull feedback, and `user://smoke_session_state.json` save/load instead of using the C# domain managers and canonical persistence path as runtime authority.
+- Original blocker retained at recheck time: `src/scenes/HubRuntime.gd` owned route, exploration step, resource/threat/hull feedback, and `user://smoke_session_state.json` save/load instead of using the C# domain managers and canonical persistence path as runtime authority. PVS3-002A/PVS3-003 have since resolved the GDScript runtime authority and route/resource/hull pieces; canonical persistence remains open.
 - New gate report: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md`.
 - Sprint 002 QA sign-off: `production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md` -- APPROVED WITH CONDITIONS for greybox recovery only.
 - New active sprint: `production/sprints/sprint-003-domain-backed-playable-slice.md`.
 - Sprint 003 goal: domain-backed playable route, canonical persistence adapter, minimum authored greybox presentation, fresh smoke/build/manual QA evidence.
+
+## Session Extract -- Sprint 003 PVS3-001 Adapter Boundary 2026-05-17
+- Story PVS3-001 complete: `production/sprints/sprint-003-runtime-adapter-boundary.md` now defines the Godot-to-C# runtime adapter boundary.
+- QA plan created: `production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- Decision updated by PVS3-002A: `HubRuntime.cs` is now responsible for Godot node presentation, local input sampling, spatial prompt checks, and debug harness calls; C# managers own Hub, Chart, Navigation/Exploration, Resources/Hull, Feedback, and canonical Persistence authority.
+- Persistence direction: `ResourcesManager` and `ModuleHullManager` register directly; `ChartManager` and `ExplorationManager` need adapter-owned `SnapshotPackage` wrappers around their existing serialize/restore payload APIs.
+- Implementation constraint found: the active runtime scene is GDScript-first (`SessionShell.tscn` uses `SessionShellRuntime.gd`); PVS3-002 must establish a real Godot-to-C# bridge surface before claiming domain-backed playability.
+- Next recommended: implement PVS3-002/PVS3-003 with a thin Godot-friendly runtime adapter, then replace `user://smoke_session_state.json` with `Persistence.RequestSaveProgress` / `RequestLoadProgress` under PVS3-004.
+
+## Session Extract -- Sprint 003 PVS3-002 Adapter Start 2026-05-17
+- Added headless C# adapter: `src/presentation/PlayableSliceDomainAdapter.cs`.
+- Added focused test: `tests/integration/playable-slice/DomainAdapterTest.csproj` with 22/22 PASS after PVS3-003 resource/hull wiring.
+- Evidence now proves the intended Chart/Hub domain sequence outside Godot: open chart -> select `route.mist` -> confirm departure -> Chart route committed -> Hub `InTransit` -> exploration fixture pressure -> Hub arrival `Landed`.
+- PVS3-002A resolved the direct C# scene-node blocker by switching the main project to `Godot.NET.Sdk/4.6.2`, adding a local GodotSharp `NuGet.config`, and aligning `project.godot` assembly name with `CloudWeaverVoyage.csproj`.
+- `src/scenes/HubRuntime.tscn` now attaches `src/scenes/HubRuntime.cs`; `src/scenes/HubRuntime.gd` was removed so runtime authority is no longer GDScript.
+- PVS3-003 minimum domain feedback is complete: search consumes `ResourcesManager` basic supply, adds `resource.beacon_crystal` carried rewards, applies `ModuleHullManager` hull damage, and extracts carried rewards to storage on Hub return.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings; `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 22/22; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
+- Remaining Sprint 003 Production blockers: PVS3-004 canonical persistence, PVS3-005 authored greybox scene upgrade, PVS3-006/PVS3-007 smoke/manual QA sign-off. Do not advance to Polish yet.
 
 ## Session Extract — Production Recovery Recheck 2026-05-17
 - Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.

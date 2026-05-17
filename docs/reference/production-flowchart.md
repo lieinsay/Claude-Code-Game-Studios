@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Production 保持中 | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 002 灰盒可玩恢复 PASS | Production → Polish gate 仍 FAIL | Sprint 003 Domain-Backed Playable Slice 进行中；#18 Onboarding 待拆分**
+> 当前状态: **Production 保持中 | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 002 灰盒可玩恢复 PASS | Production → Polish gate 仍 FAIL | Sprint 003 PVS3-002A/PVS3-003 完成，PVS3-004 persistence 为下一 blocker；#18 Onboarding 待拆分**
 
 ---
 
@@ -500,7 +500,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase E      ████████████████████████ 100% (#16 UI/HUD Story 001-006 Complete)
 ✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
 🟠 Recovery/S2  ████████████████████████ 100% (灰盒 playable slice human PASS)
-🟠 Recovery/S3  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (domain-backed playable slice active)
+🟠 Recovery/S3  ██████░░░░░░░░░░░░░░░░░░  30% (C# HubRuntime + Chart/Hub/Resources/Hull adapter PASS; persistence/greybox/QA open)
 ⚪ Phase F/#18  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
 ```
 
@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md` — **FAIL**，不要进入 Polish。
 - 活跃任务: Sprint 003 Domain-Backed Playable Slice。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: `HubRuntime.gd` 仍用 smoke-state 和 `user://smoke_session_state.json`；下一步必须接入 C# domain managers / canonical persistence。
+- 当前 blocker: `HubRuntime.cs` 已接入 Chart/Hub/Resources/Hull domain snapshots；下一步必须把 `user://smoke_session_state.json` 替换为 canonical persistence，并完成最低灰盒场景表现升级。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,8 +519,8 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Sprint 003: Godot-to-C# runtime adapter boundary | C# managers Complete ✅ | Next |
-| **P0** | Sprint 003: domain-backed Chart/Exploration/Resources-Hull/Persistence runtime | Adapter boundary | Next |
+| **P0** | Sprint 003: canonical Persistence adapter for playable slice | PVS3-002A/PVS3-003 Complete ✅ | Next |
+| **P0** | Sprint 003: broaden Exploration/Navigation manager contract beyond fixture | Chart/Hub/Resources/Hull adapter ✅ | Next |
 | **P1** | 最低灰盒场景表现升级 + fresh smoke/manual QA | Sprint 003 domain route | 本轮 Production |
 | **P2** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Sprint 003 后 |
 

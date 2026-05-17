@@ -505,12 +505,13 @@ D-A: Persistence / snapshot adapter
   □ 验证 save/load 不再依赖 user://smoke_session_state.json 作为 gate 证据
 
 D-B: Hub / Resources / Modules-Hull runtime authority
-  □ 明确 HubRuntime 标签从 C# manager snapshot 派生
-  □ 搜索反馈接入资源、船体或其明确 adapter
+  ☑ HubRuntime 迁移为 C# scene script，并从 C# manager snapshot 派生标签
+  ☑ 搜索反馈接入 ResourcesManager 与 ModuleHullManager 的最小 adapter
 
 D-C: Chart / Exploration route authority + QA smoke
-  □ 航线选择、出航、探索 step 从 Chart/Exploration domain contracts 派生
-  □ 更新 Godot smoke probe，证明 domain-backed mutation 与 return-to-Hub sync
+  ☑ 航线选择、出航从 ChartManager / HubManager domain contracts 派生
+  ☑ 更新 Godot smoke probe，证明 domain-backed mutation 与 return-to-Hub sync
+  □ 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
 
 共享:
   □ 最低灰盒场景表现升级
@@ -621,7 +622,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
 | #16 UI | 001-006 | #5+#8+#9+#11+#12+#13+#14 基础 API | ✅ Complete — 2026-05-15 |
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
-| Sprint 003 Domain-backed playable slice | PVS3-001 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker |
+| Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-003 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker; persistence/greybox/manual QA still open |
 | #18 Onboarding | TBD | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | Pending story split |
 
 ---

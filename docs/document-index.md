@@ -111,8 +111,10 @@ graph TB
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 17/18 Epic 完成规划 (120 Stories)；#1-#17 已完成；#18 待拆分 |
-| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — 将灰盒可玩闭环接入 C# domain managers / canonical persistence |
+| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — PVS3-002A 已将 HubRuntime 迁移到 C# scene script；继续接入 canonical persistence / greybox scene pass |
+| [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 最新 Production → Polish recheck：FAIL，继续留在 Production |
+| [production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md](../production/qa/qa-plan-sprint-003-domain-backed-playable-slice-2026-05-17.md) | Sprint 003 QA Plan — domain-backed playable slice 验证入口、自动/人工证据要求 |
 | [production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md](../production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md) | Sprint 002 QA sign-off：灰盒恢复通过，但不批准进入 Polish |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |

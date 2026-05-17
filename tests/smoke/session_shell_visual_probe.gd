@@ -48,13 +48,13 @@ func _run() -> void:
 	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
 
 	var hub := session.find_child("HubRuntime", true, false)
-	var start_position := hub.call("_debug_player_position") as Vector2
+	var start_position := hub.call("DebugPlayerPosition") as Vector2
 	Input.action_press(&"move_right")
 	await process_frame
 	await process_frame
 	Input.action_release(&"move_right")
 	await process_frame
-	var moved_position := hub.call("_debug_player_position") as Vector2
+	var moved_position := hub.call("DebugPlayerPosition") as Vector2
 	_expect(moved_position.x > start_position.x, "Player marker moves with project input actions")
 
 	var save_status_before_move_down := _label_text(session, "SaveStatusLabel")
@@ -65,18 +65,18 @@ func _run() -> void:
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel") == save_status_before_move_down, "Move-down input does not trigger Save shortcut")
 
-	hub.call("_on_save_pressed")
+	hub.call("OnSavePressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Save action gives visible success feedback")
 
-	hub.call("_on_load_pressed")
+	hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("加载完成"), "Load action gives visible success feedback")
 
-	hub.call("_debug_set_player_position", Vector2(362, 613))
+	hub.call("DebugSetPlayerPosition", Vector2(362, 613))
 	await process_frame
-	_expect(hub.call("_debug_interaction_prompt").contains("使用舵台"), "Moving near the helm reveals a spatial interaction prompt")
-	hub.call("_try_spatial_interaction")
+	_expect(hub.call("DebugInteractionPrompt").contains("使用舵台"), "Moving near the helm reveals a spatial interaction prompt")
+	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
 	_expect(_label_text(session, "ChartTitleLabel") == "HUD / 航图界面", "Chart panel identifies the UI/HUD surface")
@@ -87,10 +87,21 @@ func _run() -> void:
 	_expect(_button_focus_mode(session, "SaveButton") == Control.FOCUS_NONE, "Save entry leaves focus chain while Chart panel is open")
 	_expect(_button_focus_mode(session, "LoadButton") == Control.FOCUS_NONE, "Load entry leaves focus chain while Chart panel is open")
 
-	hub.call("_on_route_mist_pressed")
+	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
+	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
+
+	hub.call("OnRouteMistPressed")
 	await process_frame
-	hub.call("_on_depart_pressed")
+	var route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(route_snapshot.get("selected_route", "")) == "route.mist", "C# HubRuntime route selection is backed by ChartManager state")
+	_expect(str(route_snapshot.get("chart_state", "")) == "RouteSelected", "ChartManager enters RouteSelected after route choice")
+	hub.call("OnDepartPressed")
 	await process_frame
+	var departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(departure_snapshot.get("committed_route", "")) == "route.mist", "C# HubRuntime departure commits through ChartManager")
+	_expect(str(departure_snapshot.get("hub_last_route", "")) == "route.mist", "HubManager records the chart departure route")
+	_expect(str(departure_snapshot.get("hub_docking_state", "")) == "InTransit", "HubManager enters InTransit after departure")
 	_expect(not _is_panel_visible(session, "ChartPanel"), "Chart panel closes after departure")
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
 	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
@@ -102,47 +113,59 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationHullLabel").contains("船体状态"), "Exploration surface shows hull feedback")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
 
-	hub.call("_debug_set_player_position", Vector2(638, 613))
+	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
-	_expect(hub.call("_debug_interaction_prompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
-	hub.call("_try_spatial_interaction")
+	_expect(hub.call("DebugInteractionPrompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
+	hub.call("TrySpatialInteraction")
 	await process_frame
+	var search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(search_snapshot.get("exploration_step", 0)) == 1, "C# HubRuntime search advances domain adapter snapshot")
+	_expect(int(search_snapshot.get("basic_supply_in_storage", 0)) == 9, "C# HubRuntime search consumes ResourcesManager supply")
+	_expect(int(search_snapshot.get("reward_carried", 0)) == 1, "C# HubRuntime search adds carried ResourcesManager reward")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Spatial search interaction creates low threat feedback")
 
-	hub.call("_on_exploration_advance_pressed")
+	hub.call("OnExplorationAdvancePressed")
 	await process_frame
+	var damage_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(damage_snapshot.get("basic_supply_in_storage", 0)) == 8, "C# HubRuntime second advance consumes another ResourcesManager supply")
+	_expect(int(damage_snapshot.get("reward_carried", 0)) == 2, "C# HubRuntime second advance keeps rewards in carried pool before return")
+	_expect(int(damage_snapshot.get("hull_integrity", 0)) == 94, "C# HubRuntime second advance applies ModuleHullManager damage")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 180/500"), "Exploration second advance changes carried cargo")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Exploration second advance escalates threat feedback")
 	_expect(_label_text(session, "ExplorationHullLabel").contains("94/100"), "Exploration second advance changes hull feedback")
 
-	hub.call("_on_save_pressed")
+	hub.call("OnSavePressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Exploration state can be saved")
 
-	hub.call("_debug_set_player_position", Vector2(1058, 613))
+	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
 	await process_frame
-	_expect(hub.call("_debug_interaction_prompt").contains("返回 Hub"), "Moving near the return point reveals a spatial return prompt")
-	hub.call("_try_spatial_interaction")
+	_expect(hub.call("DebugInteractionPrompt").contains("返回 Hub"), "Moving near the return point reveals a spatial return prompt")
+	hub.call("TrySpatialInteraction")
 	await process_frame
+	var return_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(return_snapshot.get("hub_docking_state", "")) == "Landed", "HubManager returns to Landed after spatial Hub return")
+	_expect(int(return_snapshot.get("reward_carried", 0)) == 0, "ResourcesManager clears carried rewards after spatial Hub return")
+	_expect(int(return_snapshot.get("reward_in_storage", 0)) == 2, "ResourcesManager extracts rewards to storage after spatial Hub return")
 	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on spatial Hub return")
 	_expect(not _button_disabled(session, "ChartButton"), "Hub Chart entry is enabled after Exploration return")
 	_expect(_label_text(session, "CargoValue").contains("已用 180"), "Hub cargo summary syncs exploration cargo")
 	_expect(_label_text(session, "HullValue").contains("完整度 94"), "Hub hull summary syncs exploration damage")
-	_expect(_label_text(session, "StorageValue").contains("云晶 x2"), "Hub storage summary syncs exploration rewards")
+	_expect(_label_text(session, "StorageValue").contains("信标水晶 x2"), "Hub storage summary syncs exploration rewards")
 	_expect(_label_text(session, "ChartStation").contains("中威胁"), "Hub chart station syncs route pressure")
 
-	hub.call("_on_load_pressed")
+	hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Loading exploration save restores Exploration HUD")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
 
-	hub.call("_on_exploration_advance_pressed")
+	hub.call("OnExplorationAdvancePressed")
 	await process_frame
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
 
-	hub.call("_show_hub")
+	hub.call("ShowHub")
 	await process_frame
 	_expect(_label_text(session, "CargoValue").contains("收益锁定"), "Hub cargo summary syncs completed pressure loop")
 	_expect(_label_text(session, "ChartStation").contains("压力循环完成"), "Hub chart station syncs completed pressure loop")
