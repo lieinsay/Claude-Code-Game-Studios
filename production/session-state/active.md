@@ -1,10 +1,20 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Feedback, VFX, and Audio Semantics (#17)
-Feature: First Polish Feedback Slice
-Task: Epic #17 complete; next recommended #18 onboarding story split/implementation planning
+Epic: Playable Vertical Slice Recovery
+Feature: Production Recovery Sprint 002
+Task: Restore real Hub -> Chart -> Exploration -> Return playability before any Polish transition
 <!-- /STATUS -->
+
+## Session Extract — Production Recovery Recheck 2026-05-17
+- Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.
+- Reason: Epic #1-#17 completion primarily proves headless C# systems, tests, and documentation. Prior smoke/playtest evidence proved a button-driven runtime bridge, not a true playable vertical slice.
+- New sprint: `production/sprints/sprint-002-playable-vertical-slice-recovery.md` — Playable Vertical Slice Recovery.
+- Files changed for recovery: `src/scenes/HubRuntime.gd`, `tests/smoke/session_shell_visual_probe.gd`, `production/gate-checks/gate-check-production-to-polish-2026-05-17-playable-recovery.md`, `production/sprints/sprint-002-playable-vertical-slice-recovery.md`, `production/sprint-status.yaml`, `production/session-state/active.md`.
+- Runtime recovery started: `HubRuntime` now has a visible player marker, movement via project input actions, Hub spatial helm/storage interaction points, Exploration search/return interaction points, E-use prompts, and player-position save/load.
+- Verification: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS, including movement, spatial Hub interaction, spatial Exploration search, save/load restore, and spatial return-to-Hub.
+- Risk follow-up: Sprint 002 QA plan and manual playtest checklist now exist. Manual human execution remains required before any future Production -> Polish PASS.
+- Manual playtest update 2026-05-17: User reports other manual tests pass after the WASD/save conflict fix. Sprint 002 now has both automated Godot smoke evidence and human playable-loop evidence.
 
 ## Session Extract — /story-done 2026-05-14
 - Verdict: COMPLETE WITH NOTES

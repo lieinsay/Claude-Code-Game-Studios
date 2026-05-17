@@ -46,7 +46,7 @@ offset_right = -40.0
 offset_bottom = 108.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 18
-text = "HUD 入口：打开航图 / HUD（M）。保存（S）与加载（L）在右侧操作带。"
+text = "HUD 入口：打开航图 / HUD（M）。保存 Ctrl+S，加载 Ctrl+L，也可用右侧按钮。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -197,12 +197,12 @@ text = "打开航图 / HUD  M"
 [node name="SaveButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 focus_mode = 2
-text = "保存  S"
+text = "保存  Ctrl+S"
 
 [node name="LoadButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 focus_mode = 2
-text = "加载  L"
+text = "加载  Ctrl+L"
 
 [node name="SaveStatusLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
@@ -359,6 +359,6 @@ offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载入口在右侧。"
+text = "HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载可用按钮或 Ctrl+S / Ctrl+L。"
 horizontal_alignment = 1
 autowrap_mode = 3

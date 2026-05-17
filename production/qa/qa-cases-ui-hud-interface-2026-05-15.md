@@ -24,7 +24,7 @@ D:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64\Godot_v4.6.2-stable_mono_w
 Key runtime entry points:
 
 - Entry shell: `开始航行`, `设置`, audio confirmation and muted fallback.
-- Hub runtime: `打开航图 / HUD M`, `保存 S`, `加载 L`.
+- Hub runtime: `打开航图 / HUD M`, `保存 Ctrl+S`, `加载 Ctrl+L`.
 - Chart runtime: route buttons, `确认出发`, close / `Esc`.
 - Save/load feedback: visible `保存完成` and `加载完成` status messages.
 

@@ -38,6 +38,8 @@ func _run() -> void:
 	_expect(not _is_panel_visible(session, "AudioActivationPanel"), "Audio panel is hidden after audio confirmation")
 	_expect(_control_mouse_filter(session, "ShellUiRoot") == Control.MOUSE_FILTER_IGNORE, "Shell UI releases mouse input to Hub")
 	_expect(session.find_child("HubRuntime", true, false) != null, "HubRuntime is mounted")
+	_expect(session.find_child("PlayerMarker", true, false) != null, "Playable player marker is mounted")
+	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
 	_expect(_label_text(session, "Header") == "云织号空艇中枢", "Hub header uses Chinese text")
 	_expect(_label_text(session, "CargoValue").contains("受困货物 0"), "Cargo status reports trapped goods in Chinese")
 	_expect(_label_text(session, "HullValue").contains("可出航"), "Hull status uses Chinese text")
@@ -46,6 +48,23 @@ func _run() -> void:
 	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
 
 	var hub := session.find_child("HubRuntime", true, false)
+	var start_position := hub.call("_debug_player_position") as Vector2
+	Input.action_press(&"move_right")
+	await process_frame
+	await process_frame
+	Input.action_release(&"move_right")
+	await process_frame
+	var moved_position := hub.call("_debug_player_position") as Vector2
+	_expect(moved_position.x > start_position.x, "Player marker moves with project input actions")
+
+	var save_status_before_move_down := _label_text(session, "SaveStatusLabel")
+	Input.action_press(&"move_down")
+	await process_frame
+	await process_frame
+	Input.action_release(&"move_down")
+	await process_frame
+	_expect(_label_text(session, "SaveStatusLabel") == save_status_before_move_down, "Move-down input does not trigger Save shortcut")
+
 	hub.call("_on_save_pressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Save action gives visible success feedback")
@@ -54,9 +73,12 @@ func _run() -> void:
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("加载完成"), "Load action gives visible success feedback")
 
-	hub.call("_on_chart_pressed")
+	hub.call("_debug_set_player_position", Vector2(362, 613))
 	await process_frame
-	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after HUD entry")
+	_expect(hub.call("_debug_interaction_prompt").contains("使用舵台"), "Moving near the helm reveals a spatial interaction prompt")
+	hub.call("_try_spatial_interaction")
+	await process_frame
+	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
 	_expect(_label_text(session, "ChartTitleLabel") == "HUD / 航图界面", "Chart panel identifies the UI/HUD surface")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
@@ -71,6 +93,8 @@ func _run() -> void:
 	await process_frame
 	_expect(not _is_panel_visible(session, "ChartPanel"), "Chart panel closes after departure")
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
+	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
+	_expect(session.find_child("ReturnInteractPoint", true, false) != null, "Exploration has a spatial return interaction point")
 	_expect(_label_text(session, "ExplorationTitleLabel") == "探索 HUD", "Exploration surface has a clear title")
 	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Exploration surface shows selected route")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("资源压力"), "Exploration surface shows resource pressure feedback")
@@ -78,10 +102,13 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationHullLabel").contains("船体状态"), "Exploration surface shows hull feedback")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
 
-	hub.call("_on_exploration_advance_pressed")
+	hub.call("_debug_set_player_position", Vector2(638, 613))
 	await process_frame
-	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Exploration advance creates resource pressure")
-	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Exploration advance creates low threat feedback")
+	_expect(hub.call("_debug_interaction_prompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
+	hub.call("_try_spatial_interaction")
+	await process_frame
+	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
+	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Spatial search interaction creates low threat feedback")
 
 	hub.call("_on_exploration_advance_pressed")
 	await process_frame
@@ -93,9 +120,12 @@ func _run() -> void:
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Exploration state can be saved")
 
-	hub.call("_show_hub")
+	hub.call("_debug_set_player_position", Vector2(1058, 613))
 	await process_frame
-	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on Hub return")
+	_expect(hub.call("_debug_interaction_prompt").contains("返回 Hub"), "Moving near the return point reveals a spatial return prompt")
+	hub.call("_try_spatial_interaction")
+	await process_frame
+	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on spatial Hub return")
 	_expect(not _button_disabled(session, "ChartButton"), "Hub Chart entry is enabled after Exploration return")
 	_expect(_label_text(session, "CargoValue").contains("已用 180"), "Hub cargo summary syncs exploration cargo")
 	_expect(_label_text(session, "HullValue").contains("完整度 94"), "Hub hull summary syncs exploration damage")
