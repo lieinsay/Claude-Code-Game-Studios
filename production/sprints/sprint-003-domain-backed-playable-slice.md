@@ -169,13 +169,25 @@ Godot-to-C# adapters while preserving the human-playable route.
 - PVS3-007 remains open until a human tester completes the checklist and fills
   the sign-off result. No Production -> Polish PASS is authorized yet.
 
+### 2026-05-17 -- PVS3-007 Complete
+
+- User manual test report: Sprint 003 domain-backed playable route tested with
+  no problems.
+- Updated manual checklist:
+  `production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- Updated QA sign-off:
+  `production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
+- QA verdict: **APPROVED WITH CONDITIONS** for Sprint 003 Production recovery
+  evidence. Next step is a fresh Production -> Polish gate check; this sprint
+  sign-off does not change the project stage by itself.
+
 ## Definition of Done
 
-- [ ] Must Have tasks PVS3-001 through PVS3-007 complete
+- [x] Must Have tasks PVS3-001 through PVS3-007 complete
 - [x] Godot smoke probe passes and proves domain-backed state mutation
 - [x] `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` passes
 - [x] Relevant C# unit/integration tests pass
-- [ ] Manual playtest confirms Hub -> Chart -> Exploration -> Return remains playable
+- [x] Manual playtest confirms Hub -> Chart -> Exploration -> Return remains playable
 - [x] Save/load uses canonical persistence or a documented adapter around it
 - [x] Greybox presentation is sufficient for Production gate evidence
-- [ ] Production -> Polish gate can be rechecked without relying on smoke-state stubs
+- [x] Production -> Polish gate can be rechecked without relying on smoke-state stubs

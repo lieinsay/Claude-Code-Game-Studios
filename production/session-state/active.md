@@ -58,8 +58,14 @@ Task: Replace smoke-state runtime bridge with C# domain-backed playability befor
 ## Session Extract -- Sprint 003 PVS3-007 Manual QA Start 2026-05-17
 - PVS3-007 started: manual playtest checklist created at `production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
 - Pending QA sign-off created at `production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md`.
-- Sign-off verdict is `PENDING HUMAN PLAYTEST`; PVS3-007 cannot close until a human tester completes the checklist and records route outcome, tester, build/commit, and findings.
+- Initial sign-off verdict was pending at PVS3-007 start; this entry is superseded by the completion extract below.
 - Current next action: execute the manual Hub -> Chart -> Exploration -> Search -> Save -> Return -> Load route from `SessionShell`, then update the sign-off to APPROVED or APPROVED WITH CONDITIONS if no S1/S2 blockers remain.
+
+## Session Extract -- Sprint 003 PVS3-007 Manual QA Complete 2026-05-17
+- User manual test report: Sprint 003 domain-backed playable route tested with no problems.
+- PVS3-007 complete: `production/playtests/playtest-checklist-sprint-003-domain-backed-playable-slice-2026-05-17.md` is now EXECUTED -- PASS.
+- QA sign-off updated: `production/qa/qa-signoff-sprint-003-domain-backed-playable-slice-2026-05-17.md` is APPROVED WITH CONDITIONS for Sprint 003 Production recovery evidence.
+- Sprint 003 must-have scope PVS3-001..PVS3-007 is complete. Next action: run a fresh Production -> Polish gate check; do not change stage before gate result.
 
 ## Session Extract — Production Recovery Recheck 2026-05-17
 - Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.
