@@ -514,7 +514,7 @@ D-C: Chart / Exploration route authority + QA smoke
   □ 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
 
 共享:
-  □ 最低灰盒场景表现升级
+  ☑ 最低灰盒场景表现升级
   □ Sprint 003 manual playtest + QA sign-off
 ```
 
@@ -622,7 +622,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #15 Partner | 001-006 | #1+#3+#5+#6+#7+#9 全部 | ✅ Complete + reviewed — 2026-05-14 (119/119 PASS) |
 | #16 UI | 001-006 | #5+#8+#9+#11+#12+#13+#14 基础 API | ✅ Complete — 2026-05-15 |
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
-| Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-004 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker; greybox/manual QA still open |
+| Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-005 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Active Production blocker; final smoke/manual QA still open |
 | #18 Onboarding | TBD | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | Pending story split |
 
 ---

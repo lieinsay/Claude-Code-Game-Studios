@@ -49,17 +49,17 @@ stories:
     name: "Minimum authored greybox scene pass"
     file: "production/sprints/sprint-003-domain-backed-playable-slice.md"
     priority: must-have
-    status: todo
-    owner: ""
+    status: done
+    owner: "Codex"
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-17"
   - id: "PVS3-006"
     name: "Domain-backed playable smoke probe"
     file: "production/sprints/sprint-003-domain-backed-playable-slice.md"
     priority: must-have
-    status: todo
-    owner: ""
+    status: in-progress
+    owner: "Codex"
     estimate_days: 0.75
     blocker: ""
     completed: ""

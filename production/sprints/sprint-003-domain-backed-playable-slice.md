@@ -121,6 +121,29 @@ Godot-to-C# adapters while preserving the human-playable route.
   PVS3-006/PVS3-007 smoke/manual QA are still open before another
   Production -> Polish gate attempt.
 
+### 2026-05-17 -- PVS3-005 Complete
+
+- Added an authored greybox layer in `HubRuntime.cs` above the existing runtime
+  surface:
+  - Hub deck floor and rail.
+  - Helm console prop and label.
+  - Storage crate prop, band, and label.
+  - Module bench prop and label.
+  - Exploration sky field and route trail.
+  - Search wreck prop/highlight/label.
+  - Return beacon prop/core/label.
+- The greybox layer is presentation-only; manager state remains owned by
+  `PlayableSliceDomainAdapter` and the C# domain managers.
+- Updated `tests/smoke/session_shell_visual_probe.gd` to assert that Hub props
+  are visible in Hub mode, Exploration props are hidden in Hub mode, Exploration
+  props appear after departure, and Hub props return after spatial return.
+- Verification:
+  - `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+  - `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
+- Remaining Production risk: PVS3-006 should formalize the final smoke evidence
+  for the domain-backed greybox route, then PVS3-007 needs a human manual
+  playtest / QA sign-off before another Production -> Polish gate attempt.
+
 ## Definition of Done
 
 - [ ] Must Have tasks PVS3-001 through PVS3-007 complete

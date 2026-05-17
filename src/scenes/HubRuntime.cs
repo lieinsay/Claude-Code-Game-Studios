@@ -20,6 +20,8 @@ public partial class HubRuntime : Node2D
 	private ColorRect? hubStorageMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
+	private readonly Godot.Collections.Array<CanvasItem> hubSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private Label? chartStatusLabel;
 	private Label? explorationRouteLabel;
 	private Label? explorationResourceLabel;
@@ -295,6 +297,9 @@ public partial class HubRuntime : Node2D
 
 	public string DebugInteractionPrompt() => interactionPromptLabel?.Text ?? "";
 
+	public bool DebugNodeVisible(string nodeName) =>
+		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
+
 	public Godot.Collections.Dictionary DebugDomainSnapshot()
 	{
 		var snapshot = domain.Snapshot;
@@ -363,6 +368,8 @@ public partial class HubRuntime : Node2D
 		playableLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		hubRoot.AddChild(playableLayer);
 
+		AddHubGreyboxSet();
+		AddExplorationGreyboxSet();
 		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
@@ -390,6 +397,31 @@ public partial class HubRuntime : Node2D
 		playableLayer.AddChild(interactionPromptLabel);
 	}
 
+	private void AddHubGreyboxSet()
+	{
+		AddSceneRect(hubSceneItems, "HubDeckFloor", new Vector2(88, 526), new Vector2(1096, 112), new Color(0.18f, 0.23f, 0.24f, 0.88f));
+		AddSceneRect(hubSceneItems, "HubDeckRail", new Vector2(104, 502), new Vector2(1064, 12), new Color(0.43f, 0.55f, 0.56f, 0.95f));
+		AddSceneRect(hubSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
+		AddSceneLabel(hubSceneItems, "HelmConsoleLabel", new Vector2(298, 552), new Vector2(126, 22), "航图舵台");
+		AddSceneRect(hubSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
+		AddSceneRect(hubSceneItems, "StorageCrateBand", new Vector2(536, 564), new Vector2(100, 10), new Color(0.68f, 0.59f, 0.39f, 0.95f));
+		AddSceneLabel(hubSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
+		AddSceneRect(hubSceneItems, "ModuleBenchProp", new Vector2(792, 548), new Vector2(156, 56), new Color(0.26f, 0.30f, 0.38f, 0.92f));
+		AddSceneLabel(hubSceneItems, "ModuleBenchLabel", new Vector2(806, 552), new Vector2(128, 22), "模块检修台");
+	}
+
+	private void AddExplorationGreyboxSet()
+	{
+		AddSceneRect(explorationSceneItems, "ExplorationSkyField", new Vector2(92, 500), new Vector2(1092, 138), new Color(0.10f, 0.20f, 0.25f, 0.90f));
+		AddSceneRect(explorationSceneItems, "ExplorationRouteTrail", new Vector2(176, 586), new Vector2(820, 14), new Color(0.34f, 0.54f, 0.50f, 0.95f));
+		AddSceneRect(explorationSceneItems, "SearchWreckProp", new Vector2(558, 540), new Vector2(170, 66), new Color(0.28f, 0.42f, 0.29f, 0.96f));
+		AddSceneRect(explorationSceneItems, "SearchWreckHighlight", new Vector2(590, 556), new Vector2(104, 12), new Color(0.62f, 0.75f, 0.42f, 0.98f));
+		AddSceneLabel(explorationSceneItems, "SearchWreckLabel", new Vector2(574, 548), new Vector2(138, 22), "漂浮残骸");
+		AddSceneRect(explorationSceneItems, "ReturnBeaconProp", new Vector2(986, 526), new Vector2(104, 82), new Color(0.50f, 0.28f, 0.24f, 0.96f));
+		AddSceneRect(explorationSceneItems, "ReturnBeaconCore", new Vector2(1024, 540), new Vector2(28, 52), new Color(0.78f, 0.62f, 0.42f, 0.98f));
+		AddSceneLabel(explorationSceneItems, "ReturnBeaconLabel", new Vector2(990, 532), new Vector2(96, 22), "返航信标");
+	}
+
 	private ColorRect AddWorldMarker(string nodeName, Vector2 markerPosition, Color markerColor, string labelText)
 	{
 		var marker = new ColorRect
@@ -414,6 +446,42 @@ public partial class HubRuntime : Node2D
 		label.AddThemeFontSizeOverride("font_size", 16);
 		marker.AddChild(label);
 		return marker;
+	}
+
+	private ColorRect AddSceneRect(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2 position, Vector2 size, Color color)
+	{
+		var rect = new ColorRect
+		{
+			Name = nodeName,
+			Color = color,
+			Position = position,
+			CustomMinimumSize = size,
+			Size = size,
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			ZIndex = -2,
+		};
+		playableLayer?.AddChild(rect);
+		group.Add(rect);
+		return rect;
+	}
+
+	private Label AddSceneLabel(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2 position, Vector2 size, string text)
+	{
+		var label = new Label
+		{
+			Name = nodeName,
+			Position = position,
+			Size = size,
+			Text = text,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center,
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			ZIndex = -1,
+		};
+		label.AddThemeFontSizeOverride("font_size", 15);
+		playableLayer?.AddChild(label);
+		group.Add(label);
+		return label;
 	}
 
 	private void WireButtons()
@@ -592,6 +660,8 @@ public partial class HubRuntime : Node2D
 
 	private void SetWorldMode(string mode)
 	{
+		SetSceneGroupVisible(hubSceneItems, mode == "hub");
+		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
 		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub";
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
@@ -613,6 +683,14 @@ public partial class HubRuntime : Node2D
 			}
 		}
 		UpdateSpatialInteraction();
+	}
+
+	private static void SetSceneGroupVisible(Godot.Collections.Array<CanvasItem> group, bool visible)
+	{
+		foreach (var item in group)
+		{
+			item.Visible = visible;
+		}
 	}
 
 	private void UpdateSpatialInteraction()
