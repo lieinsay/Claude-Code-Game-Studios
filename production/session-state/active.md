@@ -1,10 +1,20 @@
 # Active Design Session
 
 <!-- STATUS -->
-Epic: Playable Vertical Slice Recovery
-Feature: Production Recovery Sprint 002
-Task: Restore real Hub -> Chart -> Exploration -> Return playability before any Polish transition
+Epic: Domain-Backed Playable Slice
+Feature: Production Recovery Sprint 003
+Task: Replace smoke-state runtime bridge with C# domain-backed playability before any Polish transition
 <!-- /STATUS -->
+
+## Session Extract -- Production Domain Recheck 2026-05-17
+- Verdict: Production -> Polish is still **FAIL**; remain in Production.
+- Sprint 002 result: approved as successful greybox playable recovery, not as Polish readiness.
+- Key evidence accepted: human can complete Hub -> Chart -> Exploration -> Return with movement, E-use prompts, search feedback, and save/load restore.
+- Key blocker retained: `src/scenes/HubRuntime.gd` still owns route, exploration step, resource/threat/hull feedback, and `user://smoke_session_state.json` save/load instead of using the C# domain managers and canonical persistence path as runtime authority.
+- New gate report: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md`.
+- Sprint 002 QA sign-off: `production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md` -- APPROVED WITH CONDITIONS for greybox recovery only.
+- New active sprint: `production/sprints/sprint-003-domain-backed-playable-slice.md`.
+- Sprint 003 goal: domain-backed playable route, canonical persistence adapter, minimum authored greybox presentation, fresh smoke/build/manual QA evidence.
 
 ## Session Extract — Production Recovery Recheck 2026-05-17
 - Verdict: Production -> Polish is **FAIL** for playable readiness; remain in Production.

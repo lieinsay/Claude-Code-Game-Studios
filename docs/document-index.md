@@ -1,10 +1,10 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-16
-> **项目阶段**: Production — Sprint 001 Polish Stabilization | Epic #1-#17 **Complete** | #18 Story split pending
+> **最后更新**: 2026-05-17
+> **项目阶段**: Production — Sprint 003 Domain-Backed Playable Slice | Epic #1-#17 **Complete** 仅证明 headless/domain/story 证据，不等于 Polish ready | #18 Story split pending
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Pending: #18 Onboarding
+> **Epic/Story**: 17/18 Epic 完成规划 — 120 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Active Recovery: Sprint 003 domain-backed playable slice | Pending: #18 Onboarding
 > **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 35 个 C# 源文件 + 120 个 C# test runner: unit 59 / integration 60 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
@@ -42,6 +42,7 @@ graph TB
     subgraph 生产["📋 生产层 production/"]
         ACTIVE["session-state/active.md<br/>当前会话状态"]
         EPICS["epics/<br/>17 Epic 已有 Story<br/>120 Stories 已分解"]
+        SPRINT3["sprints/sprint-003-domain-backed-playable-slice.md<br/>当前 Production 恢复冲刺"]
         LOGS["session-logs/<br/>会话日志"]
         PHASES["Phase 2-5 审查报告"]
     end
@@ -110,6 +111,9 @@ graph TB
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 17/18 Epic 完成规划 (120 Stories)；#1-#17 已完成；#18 待拆分 |
+| [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | 当前 Production Sprint 003 — 将灰盒可玩闭环接入 C# domain managers / canonical persistence |
+| [production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md) | 最新 Production → Polish recheck：FAIL，继续留在 Production |
+| [production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md](../production/qa/qa-signoff-sprint-002-playable-vertical-slice-recovery-2026-05-17.md) | Sprint 002 QA sign-off：灰盒恢复通过，但不批准进入 Polish |
 | **Foundation 层 (5 Epic / 39 Stories)** | |
 | [production/epics/content-registry/EPIC.md](../production/epics/content-registry/EPIC.md) | Epic #1: 内容注册表 (8/8 Stories **Complete** — Epic 已关闭) |
 | [production/epics/platform-session-shell/EPIC.md](../production/epics/platform-session-shell/EPIC.md) | Epic #2: 平台会话壳 (7 Stories) |
@@ -471,9 +475,9 @@ stateDiagram-v2
 
 ## 四、Epic/Story 生产框架
 
-> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 2/3 — 17 个 Epic 全部 Story 分解完成并已完成 #1-#17**
+> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 2/3 — 17 个 Epic 全部 Story 分解完成并已完成 #1-#17；当前仍需 Sprint 003 补足 domain-backed playable evidence**
 > **120 个 Story**: 66 Logic + 50 Integration + 3 UI + 1 Config
-> **2026-05-16**
+> **2026-05-17**
 
 ### 层级分解全景
 
@@ -1333,14 +1337,14 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 17/18 Epic 完成规划 (120 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17 Complete | #18 Pending
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Production — Sprint 001 Polish Stabilization | Epic #1-#17 complete；#18 pending story split
+  ✅ Production — Sprint 003 Domain-Backed Playable Slice | Epic #1-#17 complete 是系统证据，不是 Polish PASS；#18 pending story split
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-16 — Desktop C# Foundation/Core/Feature 前置推进；UI/HUD #16 与 Feedback #17 完成；#18 GDD 已批准且 ADR-0017 已接受。
+> 更新于 2026-05-17 — Sprint 002 灰盒可玩闭环恢复通过；Production → Polish 仍 FAIL；Sprint 003 聚焦 domain-backed playable slice 与 canonical persistence。
 
 ### 已全部完成 ✅
 
@@ -1388,10 +1392,12 @@ graph TB
 - [x] **#17 feedback-fx-audio Epic/Story 实现** — 5 Stories Complete
 - [ ] **#18 onboarding-first-loop Epic/Story 分解** — Vertical Slice 阶段
 - [x] **Sprint Plan** — Sprint 001 Polish Stabilization 已创建并完成 Must/Should Have scope
+- [x] **Sprint 002 Playable Vertical Slice Recovery** — 灰盒 Hub -> Chart -> Exploration -> Return 人工可玩闭环恢复通过
+- [ ] **Sprint 003 Domain-Backed Playable Slice** — 将灰盒闭环接入 C# domain managers / canonical persistence，并补最低灰盒场景表现
 
 ---
 
-> **更新于 2026-05-16** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；#18 GDD 与 ADR 已批准，后续待拆实现 stories。
+> **更新于 2026-05-17** — Desktop C# Foundation/Core/Feature 前置推进；Resources #5、Intel #6、Hub #7、Modules/Hull #8、Chart #9、Navigation #10、Exploration #11、Combat #12、WorldRepair #13、Settlement #14、Partner #15 全部完成；UI/HUD #16 与 Feedback #17 完成；Sprint 002 灰盒 playable slice 通过，但 Production → Polish 仍 FAIL；Sprint 003 继续补 domain-backed runtime 与 canonical persistence。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
-> 生成日期: 2026-05-16 | 基于: systems-index.md + 17 Epic 120 Story
-> 当前状态: **Phase 0 ✅ 完成 | Phase A ✅ 完成 | Phase B ✅ 完成 | Phase C #5/#6/#7/#8/#9 完成 | Phase D #10/#13/#11/#12/#14/#15 完成 | Phase E #16 UI/HUD 完成 | Phase F #17 Feedback 完成；#18 Onboarding 待拆分**
+> 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
+> 当前状态: **Production 保持中 | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 002 灰盒可玩恢复 PASS | Production → Polish gate 仍 FAIL | Sprint 003 Domain-Backed Playable Slice 进行中；#18 Onboarding 待拆分**
 
 ---
 
@@ -48,6 +48,10 @@ gantt
     section ✅/⚪ Phase F 垂直切片
     #17 反馈音频  (5 Stories)   :done,    p6a, 2026-05-16, 1d
     #18 新手引导  (待定)         :         p6b, after p5a, 14d
+
+    section 🟠 Production Recovery Gate
+    Sprint 002 灰盒可玩恢复       :done,    r2, 2026-05-17, 1d
+    Sprint 003 Domain-backed slice :active,  r3, 2026-05-17, 7d
 ```
 
 ---
@@ -485,7 +489,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 ## 七、当前进度与下一步
 
-### 当前位置 (2026-05-14)
+### 当前位置 (2026-05-17)
 
 ```
 ✅ Phase 0      ████████████████████████ 100%
@@ -495,34 +499,39 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase D      ████████████████████████ 100% (#10 Navigation + #13 WorldRepair + #11 Exploration + #12 Combat + #14 Settlement + #15 Partner Complete)
 ✅ Phase E      ████████████████████████ 100% (#16 UI/HUD Story 001-006 Complete)
 ✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
+🟠 Recovery/S2  ████████████████████████ 100% (灰盒 playable slice human PASS)
+🟠 Recovery/S3  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (domain-backed playable slice active)
 ⚪ Phase F/#18  ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
 ```
 
-### 本次生产状态检查 (2026-05-16)
+### 本次生产状态检查 (2026-05-17)
 
 - 阶段文件: `production/stage.txt` 为 `Production`
-- 活跃任务: Epic #17 Feedback/VFX/Audio first Polish slice 已完成；下一步是 #18 Onboarding story split/implementation planning。
-- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（0 warning，0 error）
-- 测试验证: #17 Story 001-005 runner 全部 PASS（8/8、6/6、7/7、9/9、6/6）；UI/HUD a11y 25/25 PASS；Shell UI 18/18 PASS；Godot headless perf probe rerun exit 0。
-- 文档索引: `docs/document-index.md` 已同步到 #1-#17 Complete、#18 Pending、120 个 C# runner 的当前基线。
-- 本次完成: FeedbackManager first Polish slice 覆盖语义请求路由、UI/Session 事件桥接、缺失资产/字幕/可见 fallback、focus-safe overlay、smoke/perf/diagnostic 回归。
+- 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-domain-recheck.md` — **FAIL**，不要进入 Polish。
+- 活跃任务: Sprint 003 Domain-Backed Playable Slice。
+- 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
+- 当前 blocker: `HubRuntime.gd` 仍用 smoke-state 和 `user://smoke_session_state.json`；下一步必须接入 C# domain managers / canonical persistence。
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
+- 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
+- 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
 
 ### 下一步行动
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Next |
-| **P1** | #17 authored VFX/audio asset pass | #17 feedback router complete ✅ | Polish |
-| **P2** | Hub/Chart/Exploration rendered UI evidence refresh | #16/#17 C# contracts complete ✅ | 后续场景/UI 阶段 |
+| **P0** | Sprint 003: Godot-to-C# runtime adapter boundary | C# managers Complete ✅ | Next |
+| **P0** | Sprint 003: domain-backed Chart/Exploration/Resources-Hull/Persistence runtime | Adapter boundary | Next |
+| **P1** | 最低灰盒场景表现升级 + fresh smoke/manual QA | Sprint 003 domain route | 本轮 Production |
+| **P2** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Sprint 003 后 |
 
-> 关键建议: #17 已完成 first Polish feedback slice；下一段优先把 #18 onboarding 从 GDD/ADR/brief 转成可实施 Story，并把最终 authored VFX/audio 资产作为后续 Polish 内容处理。
+> 关键建议: 先完成 Sprint 003，把现有灰盒闭环从 smoke-state demo 升级为 domain-backed playable slice；之后再重跑 Production → Polish gate。
 
 ### 并行机会提醒
 
 ```
 现在就可以同时做:
-  ├─ #18 story split 可与 authored VFX/audio asset planning 并行
-  └─ Hub/Chart/Exploration rendered evidence refresh 可独立于 #18 文档拆分推进
+  ├─ Adapter boundary 可与最低灰盒表现升级并行
+  └─ QA plan / smoke probe 可在 domain 接入方案稳定后并行推进
 ```
 
 ---
@@ -532,8 +541,9 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 1. **瓶颈 #1 (内容注册表)**: 15 个系统中 10 个直接依赖它。如果 Schema 设计出错，后续大面积返工。建议 Phase A 结束后做一次 **Schema Freeze**。
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
 3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #16 的 UI 集成质量。
-4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16 已完成；关键风险转移到 #18 onboarding scope control 与 rendered evidence。
-5. **#18 阻塞**: ADR-0017 已 Accepted，但 implementation stories 尚未拆分；进入实现前需要 story-readiness。
+4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16 已完成；关键风险转移到 Sprint 003 的 domain-backed playable evidence。
+5. **#18 阻塞**: ADR-0017 已 Accepted，但 implementation stories 尚未拆分；应在 Sprint 003 gate 风险解除后再进入 story-readiness。
+6. **Production gate blocker**: Epic #1-#17 Complete 主要证明 headless C# domain/story 证据；Polish 前仍需证明 Godot playable runtime 使用真实 domain authority 与 canonical persistence。
 
 ---
 
