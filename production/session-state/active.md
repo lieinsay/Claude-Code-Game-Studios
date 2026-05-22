@@ -27,6 +27,14 @@ Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hard
 - Verification: `dotnet run --project tests/integration/onboarding-first-loop/PersistenceSnapshotTest.csproj` PASS 6/6; Story 001 regression PASS 6/6; Story 002 regression PASS 7/7; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
 - `/story-done` verdict: COMPLETE. Story 004 is next: `production/epics/onboarding-first-loop/story-004-focus-safe-hint-rendering-and-accessibility.md`.
 
+## Session Extract -- Polish #18 Story 004 Complete 2026-05-22
+- Story complete: `production/epics/onboarding-first-loop/story-004-focus-safe-hint-rendering-and-accessibility.md` -- Focus-Safe Hint Rendering and Accessibility.
+- `UIManager` now exposes a headless focus-safe onboarding hint render contract with `OnboardingHintRenderSnapshot`; snapshots are non-modal, focus-disabled, `MouseFilterMode.Ignore`, text-labeled, one-visible-hint by default, and non-color-only.
+- Chart/Exploration skip stale Hub anchors, Exploration pressure hints preserve critical HUD labels, and unsafe/missing anchors fall back to `onboarding.safe_text`.
+- Evidence created: `production/qa/evidence/onboarding-focus-safe-hints-evidence.md`.
+- Verification: `dotnet run --project tests/integration/onboarding-first-loop/FocusSafeHintRenderingTest.csproj` PASS 7/7; Story 001/002/003 regressions PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+- `/story-done` verdict: COMPLETE. Story 005 is next: `production/epics/onboarding-first-loop/story-005-first-loop-smoke-regression-and-qa-evidence.md`.
+
 ## Session Extract -- Polish #18 Story Split 2026-05-22
 - #18 Onboarding / First Loop story split complete.
 - Added `production/epics/onboarding-first-loop/EPIC.md`.

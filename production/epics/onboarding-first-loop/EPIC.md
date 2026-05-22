@@ -41,7 +41,7 @@ steps so hints do not repeat after save/load.
 | 001 | [First-Loop Step State and Hint Scoring](story-001-first-loop-step-state-and-hint-scoring.md) | Logic | TR-onboarding-001 | ADR-0017 | Complete |
 | 002 | [UI and Domain Event Integration](story-002-ui-and-domain-event-integration.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0012 | Complete |
 | 003 | [Onboarding Persistence Snapshot](story-003-onboarding-persistence-snapshot.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0003 | Complete |
-| 004 | [Focus-Safe Hint Rendering and Accessibility](story-004-focus-safe-hint-rendering-and-accessibility.md) | UI | TR-onboarding-001 | ADR-0017, ADR-0012 | Ready |
+| 004 | [Focus-Safe Hint Rendering and Accessibility](story-004-focus-safe-hint-rendering-and-accessibility.md) | UI | TR-onboarding-001 | ADR-0017, ADR-0012 | Complete |
 | 005 | [First-Loop Smoke Regression and QA Evidence](story-005-first-loop-smoke-regression-and-qa-evidence.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0019 | Ready |
 
 **Summary**: 1 Logic + 3 Integration + 1 UI stories

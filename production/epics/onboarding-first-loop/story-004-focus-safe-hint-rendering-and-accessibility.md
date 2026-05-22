@@ -1,7 +1,7 @@
 # Story 004: Focus-Safe Hint Rendering and Accessibility
 
 > **Epic**: Onboarding and First Loop
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: M / 6-8 hours
@@ -30,12 +30,12 @@
 
 *From GDD `design/gdd/onboarding-first-loop.md`, scoped to this story:*
 
-- [ ] GIVEN an onboarding hint is visible, WHEN keyboard and mouse input continue, THEN the hint does not steal focus or mouse input from the active surface.
-- [ ] GIVEN Chart is active, WHEN Hub anchors still exist underneath, THEN onboarding ignores Hub anchors until Chart closes.
-- [ ] GIVEN Exploration HUD pressure feedback is visible, WHEN a pressure-loop hint appears, THEN it does not cover resource, threat, hull, or status feedback labels.
-- [ ] GIVEN hints or highlights appear, WHEN accessibility is checked, THEN every hint has text and does not rely on color alone.
-- [ ] GIVEN a keyboard-only or mouse-only player follows the first loop, WHEN hints are visible, THEN both paths remain valid.
-- [ ] GIVEN a hint anchor is missing or unsafe, WHEN rendering is requested, THEN UIManager shows a safe text-only hint or skips the hint without crashing.
+- [x] GIVEN an onboarding hint is visible, WHEN keyboard and mouse input continue, THEN the hint does not steal focus or mouse input from the active surface.
+- [x] GIVEN Chart is active, WHEN Hub anchors still exist underneath, THEN onboarding ignores Hub anchors until Chart closes.
+- [x] GIVEN Exploration HUD pressure feedback is visible, WHEN a pressure-loop hint appears, THEN it does not cover resource, threat, hull, or status feedback labels.
+- [x] GIVEN hints or highlights appear, WHEN accessibility is checked, THEN every hint has text and does not rely on color alone.
+- [x] GIVEN a keyboard-only or mouse-only player follows the first loop, WHEN hints are visible, THEN both paths remain valid.
+- [x] GIVEN a hint anchor is missing or unsafe, WHEN rendering is requested, THEN UIManager shows a safe text-only hint or skips the hint without crashing.
 
 ---
 
@@ -103,7 +103,15 @@ Derived from ADR-0017 and ADR-0012:
 **Required evidence**:
 - `production/qa/evidence/onboarding-focus-safe-hints-evidence.md` plus focused UI/hint regression checks
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Evidence**:
+- `production/qa/evidence/onboarding-focus-safe-hints-evidence.md` -- created, PASS summary.
+- `dotnet run --project tests/integration/onboarding-first-loop/FocusSafeHintRenderingTest.csproj` -- PASS, 7/7 checks.
+- `dotnet run --project tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` -- PASS, 6/6 checks.
+- `dotnet run --project tests/integration/onboarding-first-loop/EventIntegrationTest.csproj` -- PASS, 7/7 checks.
+- `dotnet run --project tests/integration/onboarding-first-loop/PersistenceSnapshotTest.csproj` -- PASS, 6/6 checks.
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` -- PASS, 5 existing warnings, 0 errors.
 
 ---
 
@@ -112,3 +120,9 @@ Derived from ADR-0017 and ADR-0012:
 - Depends on: Story 001, Story 002
 - Unlocks: Story 005
 
+## Completion Notes
+
+- Added `UIManager.RenderOnboardingHint(...)` and `OnboardingHintRenderSnapshot` as the headless rendering contract for future Godot Control overlays.
+- Rendered onboarding hints are non-modal, focus-disabled, mouse-filter ignored, text-labeled, and marked as non-color-only.
+- Chart/Exploration active surfaces skip stale Hub anchors; unsafe or missing anchors fall back to `onboarding.safe_text` text-only presentation.
+- Exploration pressure hints include readability guards for hull, search, threat, carried-grid, and status labels.

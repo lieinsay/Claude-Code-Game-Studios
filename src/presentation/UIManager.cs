@@ -197,6 +197,34 @@ public sealed record AnchorMetadataSnapshot(
 	bool HighlightRequestAccepted);
 
 /// <summary>
+/// Focus-safe snapshot for one rendered onboarding hint overlay.
+/// </summary>
+public sealed record OnboardingHintRenderSnapshot(
+	string StepId,
+	string HintTextKey,
+	string? AnchorId,
+	string TargetSurfaceId,
+	OnboardingSurface ActiveSurface,
+	bool Visible,
+	bool Skipped,
+	string? FallbackReason,
+	bool TextOnlyFallback,
+	bool HasTextLabel,
+	bool ColorOnlyMeaning,
+	bool FocusDisabled,
+	MouseFilterMode MouseFilter,
+	bool CapturesKeyboardFocus,
+	bool CapturesMouseInput,
+	bool IsModal,
+	bool CoversResourceLabel,
+	bool CoversThreatLabel,
+	bool CoversHullLabel,
+	bool CoversStatusLabel,
+	bool KeyboardPathValid,
+	bool MousePathValid,
+	string ReadabilityGuardToken);
+
+/// <summary>
 /// 当前焦点元素处理 Enter 键后的结果。
 /// </summary>
 public enum FocusActivationResult
@@ -597,6 +625,7 @@ public sealed class UIManager
 	private readonly Dictionary<string, string> disabledElementTooltips = new(StringComparer.Ordinal);
 	private readonly HashSet<string> destroyedFocusableElements = new(StringComparer.Ordinal);
 	private readonly Dictionary<string, AnchorMetadataSnapshot> anchorMetadata = new(StringComparer.Ordinal);
+	private readonly List<OnboardingHintRenderSnapshot> onboardingHintSnapshots = new();
 	private StationDetailSnapshot? lastStationDetailSnapshot;
 	private PanelBindingSnapshot? lastPanelBindingSnapshot;
 	private UiDomainCommandSnapshot? lastDomainCommandSnapshot;
@@ -733,6 +762,9 @@ public sealed class UIManager
 
 	/// <summary>最近一次引导高亮请求是否因出航锁定被静默拒绝。</summary>
 	public bool LastHighlightRequestRejectedSilently => lastHighlightRequestRejectedSilently;
+
+	/// <summary>当前可见的新手引导提示快照；默认最多一个。</summary>
+	public IReadOnlyList<OnboardingHintRenderSnapshot> OnboardingHintSnapshots => onboardingHintSnapshots.AsReadOnly();
 
 	/// <summary>最近一次 `_process` 记录的桌面帧 delta。</summary>
 	public double LastProcessDeltaSeconds => lastProcessDeltaSeconds;
@@ -1964,6 +1996,81 @@ public sealed class UIManager
 		var updated = snapshot with { HighlightRequestAccepted = accepted };
 		anchorMetadata[anchorId] = updated;
 		return updated;
+	}
+
+	/// <summary>Renders a focus-safe onboarding hint snapshot without changing focus or input ownership.</summary>
+	public OnboardingHintRenderSnapshot RenderOnboardingHint(
+		OnboardingHintRequest request,
+		OnboardingSurface activeSurface,
+		IReadOnlyCollection<string>? suppressedStepIds = null,
+		IReadOnlySet<string>? unsafeAnchorIds = null)
+	{
+		ArgumentNullException.ThrowIfNull(request);
+		onboardingHintSnapshots.Clear();
+
+		if (string.IsNullOrWhiteSpace(request.HintTextKey))
+		{
+			var skipped = BuildOnboardingHintSnapshot(
+				request,
+				activeSurface,
+				targetSurfaceId: "onboarding.safe_text",
+				visible: false,
+				skipped: true,
+				fallbackReason: "missing_hint_text",
+				textOnlyFallback: false);
+			onboardingHintSnapshots.Add(skipped);
+			return skipped;
+		}
+
+		if (suppressedStepIds is not null && suppressedStepIds.Contains(request.StepId))
+		{
+			var skipped = BuildOnboardingHintSnapshot(
+				request,
+				activeSurface,
+				targetSurfaceId: SurfaceIdForOnboarding(activeSurface),
+				visible: false,
+				skipped: true,
+				fallbackReason: "step_suppressed",
+				textOnlyFallback: false);
+			onboardingHintSnapshots.Add(skipped);
+			return skipped;
+		}
+
+		if (activeSurface is OnboardingSurface.Chart or OnboardingSurface.Exploration
+			&& IsHubAnchor(request.HighlightAnchorId))
+		{
+			var skipped = BuildOnboardingHintSnapshot(
+				request,
+				activeSurface,
+				targetSurfaceId: SurfaceIdForOnboarding(activeSurface),
+				visible: false,
+				skipped: true,
+				fallbackReason: "inactive_hub_anchor",
+				textOnlyFallback: false);
+			onboardingHintSnapshots.Add(skipped);
+			return skipped;
+		}
+
+		var anchorUnsafe = request.HighlightAnchorId is null
+			|| string.IsNullOrWhiteSpace(request.HighlightAnchorId)
+			|| (unsafeAnchorIds?.Contains(request.HighlightAnchorId) ?? false);
+		var targetSurfaceId = anchorUnsafe ? "onboarding.safe_text" : SurfaceIdForOnboarding(activeSurface);
+		var rendered = BuildOnboardingHintSnapshot(
+			request,
+			activeSurface,
+			targetSurfaceId,
+			visible: true,
+			skipped: false,
+			fallbackReason: anchorUnsafe ? "text_only_fallback" : null,
+			textOnlyFallback: anchorUnsafe);
+		onboardingHintSnapshots.Add(rendered);
+		return rendered;
+	}
+
+	/// <summary>Clears visible onboarding hint snapshots without touching UI focus.</summary>
+	public void ClearOnboardingHints()
+	{
+		onboardingHintSnapshots.Clear();
 	}
 
 	/// <summary>返回船体波段的颜色、形状、文字和分段数三重编码。</summary>
@@ -3884,6 +3991,74 @@ public sealed class UIManager
 		public void Dispose()
 		{
 		}
+	}
+
+	private static OnboardingHintRenderSnapshot BuildOnboardingHintSnapshot(
+		OnboardingHintRequest request,
+		OnboardingSurface activeSurface,
+		string targetSurfaceId,
+		bool visible,
+		bool skipped,
+		string? fallbackReason,
+		bool textOnlyFallback)
+	{
+		return new OnboardingHintRenderSnapshot(
+			request.StepId,
+			request.HintTextKey,
+			request.HighlightAnchorId,
+			targetSurfaceId,
+			activeSurface,
+			visible,
+			skipped,
+			fallbackReason,
+			textOnlyFallback,
+			HasTextLabel: !string.IsNullOrWhiteSpace(request.HintTextKey),
+			ColorOnlyMeaning: false,
+			FocusDisabled: true,
+			MouseFilterMode.Ignore,
+			CapturesKeyboardFocus: false,
+			CapturesMouseInput: false,
+			IsModal: false,
+			CoversResourceLabel: false,
+			CoversThreatLabel: false,
+			CoversHullLabel: false,
+			CoversStatusLabel: false,
+			KeyboardPathValid: true,
+			MousePathValid: true,
+			ReadabilityGuardForOnboarding(activeSurface));
+	}
+
+	private static string SurfaceIdForOnboarding(OnboardingSurface activeSurface)
+	{
+		return activeSurface switch
+		{
+			OnboardingSurface.Chart => ChartScreenId,
+			OnboardingSurface.Exploration => ExplorationHudScreenId,
+			OnboardingSurface.Session => "session_status",
+			OnboardingSurface.Hub => HubHudScreenId,
+			_ => "onboarding.safe_text",
+		};
+	}
+
+	private static string ReadabilityGuardForOnboarding(OnboardingSurface activeSurface)
+	{
+		return activeSurface switch
+		{
+			OnboardingSurface.Chart => "preserve:route_identity,route_risk_text,departure_status",
+			OnboardingSurface.Exploration =>
+				$"preserve:{ExplorationHullBarElementId},{ExplorationSearchCountElementId},{ExplorationThreatPreviewElementId},{ExplorationCarriedGridElementId},status",
+			OnboardingSurface.Session => "preserve:session_status_text",
+			OnboardingSurface.Hub => "preserve:hub_status,hub_summary,hub_controls",
+			_ => "preserve:active_surface_text",
+		};
+	}
+
+	private static bool IsHubAnchor(string? anchorId)
+	{
+		return !string.IsNullOrWhiteSpace(anchorId)
+			&& (anchorId.StartsWith("hub.", StringComparison.Ordinal)
+				|| anchorId.StartsWith("anchor.", StringComparison.Ordinal)
+				|| string.Equals(anchorId, HubHudScreenId, StringComparison.Ordinal));
 	}
 
 	private static Dictionary<string, ScreenDefinition> BuildScreenRegistry()
