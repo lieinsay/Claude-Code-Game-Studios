@@ -40,6 +40,8 @@ func _run() -> void:
 	_expect(_control_mouse_filter(session, "ShellUiRoot") == Control.MOUSE_FILTER_IGNORE, "Shell UI releases mouse input to Hub")
 	_expect(session.find_child("HubRuntime", true, false) != null, "HubRuntime is mounted")
 	_expect(session.find_child("PlayerMarker", true, false) != null, "Playable player marker is mounted")
+	_expect(session.find_child("WorldSceneLayer", true, false) != null, "World scene layer is separate from interaction markers")
+	_expect(session.find_child("WorldInteractionLayer", true, false) != null, "World interaction layer is separate from scene art")
 	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
 	var hub := session.find_child("HubRuntime", true, false)
 	var initial_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -55,9 +57,24 @@ func _run() -> void:
 	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
 
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub has an authored greybox deck floor")
+	_expect(hub.call("DebugNodeVisible", "HubIslandWalkBoundary"), "Hub has a walkable island boundary")
+	_expect(hub.call("DebugNodeVisible", "HubShipHull"), "Hub has a ship hull spatial anchor")
+	_expect(hub.call("DebugNodeVisible", "HubBoardingRamp"), "Hub has a boarding ramp spatial anchor")
+	_expect(hub.call("DebugNodeVisible", "HubCabinRoom"), "Hub has a cockpit room volume")
+	_expect(hub.call("DebugNodeVisible", "HubCargoRoom"), "Hub has a cargo room volume")
+	_expect(hub.call("DebugNodeVisible", "HubEngineRoom"), "Hub has an engine room volume")
 	_expect(hub.call("DebugNodeVisible", "HelmConsoleProp"), "Hub has an authored greybox helm console prop")
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field is hidden while in Hub")
+	var hub_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
+	_expect(hub_walk_bounds.x > 900.0 and hub_walk_bounds.y > 200.0, "Hub exposes a meaningful walkable bounds size")
+	hub.call("DebugSetPlayerPosition", Vector2(20, 20))
+	await process_frame
+	var clamped_hub_position := hub.call("DebugPlayerPosition") as Vector2
+	_expect(bool(hub.call("DebugPlayerWithinWalkBounds")), "Hub clamps debug player position inside walkable bounds")
+	_expect(clamped_hub_position.x >= 132.0 and clamped_hub_position.y >= 380.0, "Hub walkable boundary prevents leaving the island/ship space")
+	hub.call("DebugSetPlayerPosition", Vector2(158, 610))
+	await process_frame
 	var start_position := hub.call("DebugPlayerPosition") as Vector2
 	Input.action_press(&"move_right")
 	await process_frame
@@ -127,6 +144,10 @@ func _run() -> void:
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
 	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
 	_expect(session.find_child("ReturnInteractPoint", true, false) != null, "Exploration has a spatial return interaction point")
+	_expect(hub.call("DebugNodeVisible", "ExplorationIslandWalkBoundary"), "Exploration has a walkable island boundary")
+	_expect(hub.call("DebugNodeVisible", "ExplorationDockedShip"), "Exploration has a docked ship spatial anchor")
+	_expect(hub.call("DebugNodeVisible", "ExplorationBoardingRamp"), "Exploration has a boarding ramp spatial anchor")
+	_expect(hub.call("DebugNodeVisible", "ExplorationIslandPath"), "Exploration has a walkable island path")
 	_expect(hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration has an authored greybox sky field")
 	_expect(hub.call("DebugNodeVisible", "SearchWreckProp"), "Exploration has an authored greybox search wreck prop")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconProp"), "Exploration has an authored greybox return beacon prop")
@@ -140,6 +161,8 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("威胁反馈"), "Exploration surface shows threat feedback")
 	_expect(_label_text(session, "ExplorationHullLabel").contains("船体状态"), "Exploration surface shows hull feedback")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
+	var exploration_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
+	_expect(exploration_walk_bounds.x > 900.0 and exploration_walk_bounds.y > 200.0, "Exploration exposes a meaningful walkable bounds size")
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame

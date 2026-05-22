@@ -4,10 +4,10 @@
 > 基于: 18 Epic × 125 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Polish Story 002 exploration semantics 完成 | Polish Story 003 authored content slice 完成 | Polish Story 004 content validation guard 完成 | Polish Story 005 ID migration guard 完成 | Production → Polish PASS WITH CONDITIONS**
+> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Polish Story 002 exploration semantics 完成 | Polish Story 003 authored content slice 完成 | Polish Story 004 content validation guard 完成 | Polish Story 005 ID migration guard 完成 | Polish Story 006 spatial prototype 完成 | Production → Polish PASS WITH CONDITIONS**
 
 > **Readiness 基线**: 所有 125 个 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18、Polish Story 001-005 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、authored route/search content slice、authored content validation guard、route/search ID migration guard、真实 preflight、dynamic Exploration semantics、windowed screenshot evidence 已完成，后续进入 content scale-up / final authored route-search design / art-audio treatment 的普通 Polish backlog，其中内容节奏、美术/音频口味和长时 playtest 需要人工判断。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18、Polish Story 001-006 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、authored route/search content slice、authored content validation guard、route/search ID migration guard、spatial scene separation/walkable prototype、真实 preflight、dynamic Exploration semantics、windowed screenshot evidence 已完成，后续进入 cross-launch persistence trust / full room interiors / art-audio treatment 的普通 Polish backlog，其中内容节奏、美术/音频口味和长时 playtest 需要人工判断。
 
 ---
 
@@ -517,6 +517,7 @@ D-C: Chart / Exploration route authority + QA smoke
   ☑ [Polish Story 003] 将 playable route/search 数据推进为 authored content slice
   ☑ [Polish Story 004] 为 authored content slice 增加轻量自动 validation guard
   ☑ [Polish Story 005] 为 playable route/search ID 增加 local migration guard
+  ☑ [Polish Story 006] 根据人工 QA 将场景/交互分层，并增加可行走 Hub/岛/船空间原型
 
 共享:
   ☑ 最低灰盒场景表现升级
@@ -634,6 +635,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | Polish Story 003 Authored content slice | 003 | Polish Story 002 Complete | ✅ Complete — authored content version/status + route/search display metadata + smoke/perf evidence |
 | Polish Story 004 Content validation guard | 004 | Polish Story 003 Complete | ✅ Complete — authored content metadata, route/search IDs, display text, reward ranges, and threat fields validated in adapter regression |
 | Polish Story 005 ID migration guard | 005 | Polish Story 004 Complete | ✅ Complete — route/search migration maps validated; legacy route selection and restore resolve to current authored IDs |
+| Polish Story 006 Spatial prototype | 006 | Human QA PASS WITH CONDITIONS | ✅ Complete — world/interaction layer split, walkable Hub/Exploration bounds, ship/room spatial anchors, smoke/perf evidence |
 
 ---
 

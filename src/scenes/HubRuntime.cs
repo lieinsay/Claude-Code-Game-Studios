@@ -6,6 +6,8 @@ public partial class HubRuntime : Node2D
 {
 	private static readonly Vector2 HubPlayerStart = new(158, 610);
 	private static readonly Vector2 ExplorationPlayerStart = new(168, 610);
+	private static readonly Rect2 HubWalkBounds = new(new Vector2(132, 380), new Vector2(1016, 252));
+	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
 
@@ -15,6 +17,8 @@ public partial class HubRuntime : Node2D
 	private Control? explorationPanel;
 	private Control? hubRoot;
 	private Control? playableLayer;
+	private Control? sceneLayer;
+	private Control? interactionLayer;
 	private ColorRect? playerMarker;
 	private Label? interactionPromptLabel;
 	private ColorRect? hubHelmMarker;
@@ -72,7 +76,7 @@ public partial class HubRuntime : Node2D
 		if (direction != Vector2.Zero)
 		{
 			playerPosition += direction.Normalized() * PlayerSpeed * (float)delta;
-			playerPosition = playerPosition.Clamp(new Vector2(76, 150), new Vector2(1204, 650));
+			playerPosition = ClampToCurrentWalkBounds(playerPosition);
 			playerMarker.Position = playerPosition - (playerMarker.Size * 0.5f);
 		}
 
@@ -305,7 +309,7 @@ public partial class HubRuntime : Node2D
 
 	public void DebugSetPlayerPosition(Vector2 position)
 	{
-		playerPosition = position;
+		playerPosition = ClampToCurrentWalkBounds(position);
 		if (playerMarker is not null)
 		{
 			playerMarker.Position = playerPosition - (playerMarker.Size * 0.5f);
@@ -314,6 +318,10 @@ public partial class HubRuntime : Node2D
 	}
 
 	public Vector2 DebugPlayerPosition() => playerPosition;
+
+	public Vector2 DebugWalkBoundsSize() => CurrentWalkBounds().Size;
+
+	public bool DebugPlayerWithinWalkBounds() => CurrentWalkBounds().HasPoint(playerPosition);
 
 	public string DebugInteractionPrompt() => interactionPromptLabel?.Text ?? "";
 
@@ -432,6 +440,24 @@ public partial class HubRuntime : Node2D
 		playableLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		hubRoot.AddChild(playableLayer);
 
+		sceneLayer = new Control
+		{
+			Name = "WorldSceneLayer",
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			ZIndex = -4,
+		};
+		sceneLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+		playableLayer.AddChild(sceneLayer);
+
+		interactionLayer = new Control
+		{
+			Name = "WorldInteractionLayer",
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+			ZIndex = 2,
+		};
+		interactionLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+		playableLayer.AddChild(interactionLayer);
+
 		AddHubGreyboxSet();
 		AddExplorationGreyboxSet();
 		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
@@ -447,7 +473,7 @@ public partial class HubRuntime : Node2D
 			Size = new Vector2(28, 28),
 			MouseFilter = Control.MouseFilterEnum.Ignore,
 		};
-		playableLayer.AddChild(playerMarker);
+		interactionLayer.AddChild(playerMarker);
 
 		interactionPromptLabel = new Label
 		{
@@ -458,11 +484,23 @@ public partial class HubRuntime : Node2D
 			Text = "WASD / 方向键移动，靠近可交互点按 E。",
 		};
 		interactionPromptLabel.AddThemeFontSizeOverride("font_size", 18);
-		playableLayer.AddChild(interactionPromptLabel);
+		interactionLayer.AddChild(interactionPromptLabel);
 	}
 
 	private void AddHubGreyboxSet()
 	{
+		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 0.90f));
+		AddSceneRect(hubSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubShipHull", new Vector2(236, 448), new Vector2(772, 174), new Color(0.19f, 0.26f, 0.31f, 0.92f));
+		AddSceneRect(hubSceneItems, "HubBoardingRamp", new Vector2(168, 568), new Vector2(96, 34), new Color(0.48f, 0.42f, 0.31f, 0.96f));
+		AddSceneLabel(hubSceneItems, "HubBoardingRampLabel", new Vector2(168, 544), new Vector2(104, 22), "登船坡道");
+		AddSceneRect(hubSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
+		AddSceneLabel(hubSceneItems, "HubCabinRoomLabel", new Vector2(296, 472), new Vector2(140, 22), "驾驶舱");
+		AddSceneRect(hubSceneItems, "HubCargoRoom", new Vector2(506, 464), new Vector2(184, 64), new Color(0.37f, 0.30f, 0.21f, 0.94f));
+		AddSceneLabel(hubSceneItems, "HubCargoRoomLabel", new Vector2(530, 472), new Vector2(136, 22), "货舱");
+		AddSceneRect(hubSceneItems, "HubEngineRoom", new Vector2(766, 464), new Vector2(184, 64), new Color(0.28f, 0.30f, 0.38f, 0.94f));
+		AddSceneLabel(hubSceneItems, "HubEngineRoomLabel", new Vector2(788, 472), new Vector2(140, 22), "轮机间");
 		AddSceneRect(hubSceneItems, "HubDeckFloor", new Vector2(88, 526), new Vector2(1096, 112), new Color(0.18f, 0.23f, 0.24f, 0.88f));
 		AddSceneRect(hubSceneItems, "HubDeckRail", new Vector2(104, 502), new Vector2(1064, 12), new Color(0.43f, 0.55f, 0.56f, 0.95f));
 		AddSceneRect(hubSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
@@ -476,6 +514,13 @@ public partial class HubRuntime : Node2D
 
 	private void AddExplorationGreyboxSet()
 	{
+		AddSceneRect(explorationSceneItems, "ExplorationIslandWalkBoundary", ExplorationWalkBounds.Position, ExplorationWalkBounds.Size, new Color(0.12f, 0.27f, 0.24f, 0.90f));
+		AddSceneRect(explorationSceneItems, "ExplorationIslandUpperEdge", new Vector2(132, 390), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
+		AddSceneRect(explorationSceneItems, "ExplorationIslandLowerEdge", new Vector2(132, 624), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
+		AddSceneRect(explorationSceneItems, "ExplorationDockedShip", new Vector2(156, 546), new Vector2(154, 74), new Color(0.20f, 0.27f, 0.33f, 0.96f));
+		AddSceneRect(explorationSceneItems, "ExplorationBoardingRamp", new Vector2(290, 580), new Vector2(92, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
+		AddSceneLabel(explorationSceneItems, "ExplorationBoardingRampLabel", new Vector2(166, 522), new Vector2(132, 22), "靠岸空艇");
+		AddSceneRect(explorationSceneItems, "ExplorationIslandPath", new Vector2(342, 584), new Vector2(610, 20), new Color(0.32f, 0.44f, 0.36f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationSkyField", new Vector2(92, 500), new Vector2(1092, 138), new Color(0.10f, 0.20f, 0.25f, 0.90f));
 		AddSceneRect(explorationSceneItems, "ExplorationRouteTrail", new Vector2(176, 586), new Vector2(820, 14), new Color(0.34f, 0.54f, 0.50f, 0.95f));
 		explorationRouteProgressFill = AddSceneRect(explorationSceneItems, "ExplorationRouteProgressFill", new Vector2(176, 586), new Vector2(0, 14), new Color(0.78f, 0.70f, 0.36f, 0.98f));
@@ -503,7 +548,7 @@ public partial class HubRuntime : Node2D
 			Size = new Vector2(92, 38),
 			MouseFilter = Control.MouseFilterEnum.Ignore,
 		};
-		playableLayer?.AddChild(marker);
+		interactionLayer?.AddChild(marker);
 
 		var label = new Label
 		{
@@ -530,7 +575,7 @@ public partial class HubRuntime : Node2D
 			MouseFilter = Control.MouseFilterEnum.Ignore,
 			ZIndex = -2,
 		};
-		playableLayer?.AddChild(rect);
+		sceneLayer?.AddChild(rect);
 		group.Add(rect);
 		return rect;
 	}
@@ -549,7 +594,7 @@ public partial class HubRuntime : Node2D
 			ZIndex = -1,
 		};
 		label.AddThemeFontSizeOverride("font_size", 15);
-		playableLayer?.AddChild(label);
+		sceneLayer?.AddChild(label);
 		group.Add(label);
 		return label;
 	}
@@ -805,6 +850,7 @@ public partial class HubRuntime : Node2D
 				{
 					playerPosition = HubPlayerStart;
 				}
+				playerPosition = ClampToCurrentWalkBounds(playerPosition);
 				playerMarker.Position = playerPosition - (playerMarker.Size * 0.5f);
 			}
 		}
@@ -865,6 +911,14 @@ public partial class HubRuntime : Node2D
 		return marker is null || !marker.Visible
 			? float.PositiveInfinity
 			: playerPosition.DistanceTo(marker.Position + (marker.Size * 0.5f));
+	}
+
+	private Rect2 CurrentWalkBounds() => currentScreen == "exploration" ? ExplorationWalkBounds : HubWalkBounds;
+
+	private Vector2 ClampToCurrentWalkBounds(Vector2 position)
+	{
+		var bounds = CurrentWalkBounds();
+		return position.Clamp(bounds.Position, bounds.Position + bounds.Size);
 	}
 
 	private static bool IsSaveShortcut(InputEventKey key) =>

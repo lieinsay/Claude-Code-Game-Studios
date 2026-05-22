@@ -3,13 +3,24 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish route/search loop human QA checklist ready; waiting on human playtest/design judgment
+Task: Polish Story 006 spatial scene separation and walkable prototype complete; continue with cross-launch persistence trust or richer room/interior polish
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 006 Spatial Scene Separation Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-006-spatial-scene-separation-walkable-prototype.md` -- Spatial Scene Separation and Walkable Prototype.
+- Input was the executed human QA checklist: `production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md` (PASS WITH CONDITIONS).
+- `HubRuntime.cs` now separates runtime world art into `WorldSceneLayer` and interaction/player markers into `WorldInteractionLayer`.
+- Hub movement now clamps to a Hub walkable boundary; Exploration movement clamps to a separate Exploration walkable boundary.
+- Hub scene now exposes island boundary, ship hull, boarding ramp, cockpit/cargo/engine room volumes, and existing helm/storage/module anchors.
+- Exploration scene now exposes island boundary, docked ship, boarding ramp, island path, and existing search/return/threat/extraction anchors.
+- Smoke now asserts layer separation, walkable boundaries, room/ship anchors, and that route/search/save/load still passes.
+- Evidence: `production/qa/evidence/polish-006-spatial-scene-separation-walkable-prototype-evidence.md`.
+- Remaining scope is not a blocker: final art/audio, full room interiors, richer collision/navigation, and cross-launch persistence trust remain downstream Polish backlog. Do not declare Release readiness from this closure.
 
 ## Session Extract -- Polish Route/Search Human QA Checklist Ready 2026-05-22
 - Human QA checklist created: `production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md`.
 - Scope covers Polish Story 001-005 after Navigation/Exploration runtime hardening, authored content slice, content validation guard, and ID migration guard.
-- Checklist status is READY FOR HUMAN EXECUTION, not PASS.
+- Checklist was later executed as PASS WITH CONDITIONS and used as the input for Polish Story 006; it is still not a Release readiness claim.
 - Human tester should run the Hub -> Chart -> Exploration -> Search -> Save -> Return -> Load -> complete pressure loop route and record subjective clarity, tone, pacing, save/load trust, and presentation needs.
 - Recommended verdict choices: PASS, PASS WITH CONDITIONS, CONCERN, or BLOCKED.
 - Do not declare Release readiness from checklist creation; next implementation story should be based on human findings.
