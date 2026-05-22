@@ -419,6 +419,69 @@ public sealed class Persistence
         return result;
     }
 
+    /// <summary>
+    /// 导出指定工件最近提升的安全 manifest，供平台层写入真实耐久介质。
+    /// 返回空字典表示该工件尚无安全数据。
+    /// </summary>
+    /// <param name="artifactKind">目标工件类型。</param>
+    /// <returns>可被规范 JSON 编码的 manifest 副本。</returns>
+    public Dictionary<string, object?> ExportArtifactManifest(PersistenceArtifactKind artifactKind)
+    {
+        return CloneManifest(GetSlot(artifactKind).SafeData);
+    }
+
+    /// <summary>
+    /// 从平台层读取到的 manifest 导入指定工件的安全槽。
+    /// 导入只恢复工件槽状态；领域对象仍通过 RequestLoadProgress/Settings 统一反序列化。
+    /// </summary>
+    /// <param name="artifactKind">目标工件类型。</param>
+    /// <param name="manifest">从耐久介质读取的 manifest。</param>
+    /// <param name="reason">导入失败时的机读原因码。</param>
+    /// <returns>导入是否成功。</returns>
+    public bool TryImportArtifactManifest(
+        PersistenceArtifactKind artifactKind,
+        IReadOnlyDictionary<string, object?> manifest,
+        out string reason)
+    {
+        reason = string.Empty;
+        if (!manifest.TryGetValue("domains", out var domainsValue)
+            || domainsValue is not IReadOnlyDictionary<string, object?>)
+        {
+            reason = "missing_domains";
+            return false;
+        }
+
+        if (!TryReadInt(manifest, "generation", out var generation) || generation <= 0)
+        {
+            reason = "invalid_generation";
+            return false;
+        }
+
+        if (manifest.TryGetValue("_checksum", out var checksumValue)
+            && !string.IsNullOrWhiteSpace(checksumValue?.ToString()))
+        {
+            var checksumManifest = CloneManifest(manifest);
+            checksumManifest.Remove("_checksum");
+            var actualChecksum = ComputeChecksum(CanonicalJsonEncode(checksumManifest));
+            if (!string.Equals(checksumValue.ToString(), actualChecksum, StringComparison.Ordinal))
+            {
+                reason = "checksum_mismatch";
+                return false;
+            }
+        }
+
+        var slot = GetSlot(artifactKind);
+        var kindLabel = artifactKind == PersistenceArtifactKind.Progress ? "progress" : "settings";
+        slot.SafeData = CloneManifest(manifest);
+        slot.CurrentGeneration = generation;
+        slot.State = ArtifactState.Safe;
+        slot.ReasonCode = string.Empty;
+        slot.LastVerifiedCheckpoint = TryReadLong(manifest, "timestamp", out var timestamp) ? timestamp : 0;
+        slot.ManifestPointer = $"{kindLabel}:gen{slot.CurrentGeneration}:imported";
+        slot.CheckpointSummary = $"gen{slot.CurrentGeneration}";
+        return true;
+    }
+
     // ---------------------------------------------------------------------------
     // 静态工具
     // ---------------------------------------------------------------------------
@@ -459,6 +522,22 @@ public sealed class Persistence
         var builder = new StringBuilder();
         WriteCanonicalJson(builder, data);
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// 解码由 CanonicalJsonEncode 生成的 JSON 对象，恢复为 persistence 支持的对象图。
+    /// </summary>
+    /// <param name="json">JSON 对象文本。</param>
+    /// <returns>字符串键字典对象图。</returns>
+    public static Dictionary<string, object?> CanonicalJsonDecodeObject(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        if (document.RootElement.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidOperationException("canonical_json_root_not_object");
+        }
+
+        return ReadJsonObject(document.RootElement);
     }
 
     /// <summary>
@@ -615,9 +694,9 @@ public sealed class Persistence
         Dictionary<string, Action<SnapshotPackage>> deserializers,
         IReadOnlyDictionary<string, object?> domains)
     {
-        foreach (var (domainId, snapshotData) in domains)
+        foreach (var (domainId, deserializer) in deserializers)
         {
-            if (!deserializers.TryGetValue(domainId, out var deserializer)
+            if (!domains.TryGetValue(domainId, out var snapshotData)
                 || snapshotData is not IReadOnlyDictionary<string, object?> snapshotMap)
             {
                 continue;
@@ -704,6 +783,78 @@ public sealed class Persistence
         }
 
         return result;
+    }
+
+    private static bool TryReadInt(
+        IReadOnlyDictionary<string, object?> data,
+        string key,
+        out int value)
+    {
+        value = 0;
+        if (!data.TryGetValue(key, out var raw) || raw is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            value = Convert.ToInt32(raw, CultureInfo.InvariantCulture);
+            return true;
+        }
+        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)
+        {
+            return false;
+        }
+    }
+
+    private static bool TryReadLong(
+        IReadOnlyDictionary<string, object?> data,
+        string key,
+        out long value)
+    {
+        value = 0;
+        if (!data.TryGetValue(key, out var raw) || raw is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            value = Convert.ToInt64(raw, CultureInfo.InvariantCulture);
+            return true;
+        }
+        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)
+        {
+            return false;
+        }
+    }
+
+    private static Dictionary<string, object?> ReadJsonObject(JsonElement element)
+    {
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var property in element.EnumerateObject())
+        {
+            result[property.Name] = ReadJsonValue(property.Value);
+        }
+
+        return result;
+    }
+
+    private static object? ReadJsonValue(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.Object => ReadJsonObject(element),
+            JsonValueKind.Array => element.EnumerateArray().Select(ReadJsonValue).ToList(),
+            JsonValueKind.String => element.GetString(),
+            JsonValueKind.Number when element.TryGetInt32(out var intValue) => intValue,
+            JsonValueKind.Number when element.TryGetInt64(out var longValue) => longValue,
+            JsonValueKind.Number when element.TryGetDouble(out var doubleValue) => doubleValue,
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null,
+            _ => null,
+        };
     }
 
     private static void WriteCanonicalArray(StringBuilder builder, IEnumerable enumerable)

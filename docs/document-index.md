@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-22
-> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001 runtime hardening complete | Polish Story 002 exploration semantics complete | Polish Story 003 authored content slice complete | Polish Story 004 content validation guard complete | Polish Story 005 ID migration guard complete | Polish Story 006 spatial prototype complete
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001 runtime hardening complete | Polish Story 002 exploration semantics complete | Polish Story 003 authored content slice complete | Polish Story 004 content validation guard complete | Polish Story 005 ID migration guard complete | Polish Story 006 spatial prototype complete | Polish Story 007 cross-launch persistence trust complete
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 18/18 Epic 完成 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 #18 | Polish Entry: #18 smoke/perf PASS
@@ -128,6 +128,8 @@ graph TB
 | [production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md](../production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md) | Polish route/search human QA checklist — EXECUTED PASS WITH CONDITIONS; not a Release readiness claim |
 | [production/polish-backlog/story-polish-006-spatial-scene-separation-walkable-prototype.md](../production/polish-backlog/story-polish-006-spatial-scene-separation-walkable-prototype.md) | Polish Story 006 — Spatial scene separation and walkable prototype Complete |
 | [production/qa/evidence/polish-006-spatial-scene-separation-walkable-prototype-evidence.md](../production/qa/evidence/polish-006-spatial-scene-separation-walkable-prototype-evidence.md) | Polish Story 006 evidence — world/interaction layer split, walkable boundaries, ship/room anchors, smoke/perf PASS |
+| [production/polish-backlog/story-polish-007-cross-launch-persistence-trust.md](../production/polish-backlog/story-polish-007-cross-launch-persistence-trust.md) | Polish Story 007 — Cross-launch persistence trust Complete |
+| [production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md](../production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md) | Polish Story 007 evidence — canonical progress durable manifest, SessionShell restart load, smoke/perf PASS |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -1361,7 +1363,7 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 18/18 Epic 完成 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17/#18 Complete
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001 runtime hardening Complete；Polish Story 002 exploration semantics Complete；Polish Story 003 authored content slice Complete；Polish Story 004 content validation guard Complete；Polish Story 005 ID migration guard Complete；Polish Story 006 spatial prototype Complete
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001 runtime hardening Complete；Polish Story 002 exploration semantics Complete；Polish Story 003 authored content slice Complete；Polish Story 004 content validation guard Complete；Polish Story 005 ID migration guard Complete；Polish Story 006 spatial prototype Complete；Polish Story 007 cross-launch persistence trust Complete
 ```
 
 ---
@@ -1421,7 +1423,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；Polish Story 001 runtime hardening、Story 002 richer Exploration scene semantics、Story 003 authored route/search content slice、Story 004 authored content validation guard、Story 005 ID migration guard 与 Story 006 spatial scene separation/walkable prototype 已完成。人工 QA checklist 为 PASS WITH CONDITIONS，并已驱动 Story 006。下一步建议验证 cross-launch persistence trust，或继续做 full room interiors / final art-audio treatment。
+> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；Polish Story 001 runtime hardening、Story 002 richer Exploration scene semantics、Story 003 authored route/search content slice、Story 004 authored content validation guard、Story 005 ID migration guard、Story 006 spatial scene separation/walkable prototype 与 Story 007 cross-launch persistence trust 已完成。人工 QA checklist 为 PASS WITH CONDITIONS，并已驱动 Story 006-007。下一步建议继续做 full room interiors / save-slot UX / final art-audio treatment，或安排人工 close/relaunch QA 复测。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

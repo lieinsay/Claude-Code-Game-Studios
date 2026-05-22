@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 006 spatial scene separation and walkable prototype complete; continue with cross-launch persistence trust or richer room/interior polish
+Task: Polish Story 007 cross-launch persistence trust complete; continue with room/interior polish, save-slot UX, or manual close/relaunch QA
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 007 Cross-Launch Persistence Trust Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-007-cross-launch-persistence-trust.md` -- Cross-Launch Persistence Trust.
+- Input was the remaining human QA risk that save/load did not yet prove close/relaunch persistence.
+- `Persistence` now exposes safe artifact manifest export/import and canonical JSON object decode for platform storage bridges.
+- `Persistence` now restores domains in registered-deserializer order so canonical JSON key sorting cannot change restore semantics.
+- `PlayableSliceDomainAdapter` now exposes progress JSON export/import while remaining headless.
+- `HubRuntime` writes successful canonical progress saves to `user://cloudweaver_playable_progress.json` and imports that file before load.
+- Added Godot smoke: `tests/smoke/session_shell_durable_persistence_probe.gd`, covering save in one SessionShell, free/restart SessionShell, load, and restore the Exploration HUD.
+- Evidence: `production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md`.
+- Remaining scope is not a blocker: full save-slot UX, backup/quarantine UI, long manual close/relaunch trust, final content scale, full room interiors, art/audio treatment, and Release readiness remain downstream. Do not declare Release readiness from this closure.
 
 ## Session Extract -- Polish Story 006 Spatial Scene Separation Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-006-spatial-scene-separation-walkable-prototype.md` -- Spatial Scene Separation and Walkable Prototype.

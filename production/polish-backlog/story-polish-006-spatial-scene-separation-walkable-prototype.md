@@ -44,4 +44,4 @@ resources, hull, onboarding, and persistence.
 - Hub scene now includes island boundary, ship hull, boarding ramp, cockpit/cargo/engine room volumes, and existing helm/storage/module anchors.
 - Exploration scene now includes island boundary, docked ship, boarding ramp, island path, and existing search/return/threat/extraction anchors.
 - Smoke evidence validates the new layer split, walkable boundaries, room/ship anchors, and continued route/search/save/load loop.
-- Remaining scope is not blocking for this story: final art/audio, richer collision/navigation, room interiors, and cross-launch persistence trust remain downstream Polish backlog.
+- Remaining scope is not blocking for this story: final art/audio, richer collision/navigation, and room interiors remain downstream Polish backlog. Cross-launch persistence trust was later addressed by Polish Story 007.

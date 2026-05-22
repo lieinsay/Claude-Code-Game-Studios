@@ -222,6 +222,22 @@ var save = adapter.SaveSceneState(new PlayableSliceSceneState("exploration", "ro
 var saved = adapter.Snapshot;
 Check(save.Success, "Persistence saves playable slice progress");
 Check(saved.PersistenceGeneration == 1, "Persistence records generation after save");
+var exportedProgressJson = adapter.ExportProgressJson();
+Check(exportedProgressJson.Contains("\"progress.playable_slice\"", StringComparison.Ordinal), "adapter exports canonical progress JSON for durable storage");
+var corruptedProgressJson = exportedProgressJson.Replace("\"hull_integrity\":94", "\"hull_integrity\":95", StringComparison.Ordinal);
+var corruptedAdapter = new PlayableSliceDomainAdapter();
+Check(!corruptedAdapter.TryImportProgressJson(corruptedProgressJson, out var corruptedReason)
+	&& corruptedReason == "checksum_mismatch", "adapter rejects corrupted durable progress checksum");
+var restartedAdapter = new PlayableSliceDomainAdapter();
+Check(restartedAdapter.TryImportProgressJson(exportedProgressJson, out var importReason), $"adapter imports canonical progress JSON after restart ({importReason})");
+var restartedLoad = restartedAdapter.LoadSceneState();
+var restartedLoaded = restartedAdapter.Snapshot;
+Check(restartedLoad.Result.Success, "restarted adapter loads imported durable progress");
+Check(restartedLoad.State.Screen == "exploration", "restarted adapter restores saved screen from durable progress");
+Check(restartedLoaded.ExplorationStep == 2, "restarted adapter restores exploration step from durable progress");
+Check(restartedLoaded.LastSearchPointId == "sp.playable.2", "restarted adapter restores search point from durable progress");
+Check(restartedLoaded.RewardCarried == 2, "restarted adapter restores carried rewards from durable progress");
+Check(restartedLoaded.HullIntegrity == 94, "restarted adapter restores hull damage from durable progress");
 
 adapter.ReturnToHub();
 var returned = adapter.Snapshot;

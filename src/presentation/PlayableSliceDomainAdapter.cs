@@ -240,6 +240,33 @@ public sealed class PlayableSliceDomainAdapter
 		return result;
 	}
 
+	public string ExportProgressJson()
+	{
+		var manifest = persistence.ExportArtifactManifest(PersistenceArtifactKind.Progress);
+		return manifest.Count == 0 ? string.Empty : Persistence.CanonicalJsonEncode(manifest);
+	}
+
+	public bool TryImportProgressJson(string json, out string reason)
+	{
+		reason = string.Empty;
+		if (string.IsNullOrWhiteSpace(json))
+		{
+			reason = "empty_progress_json";
+			return false;
+		}
+
+		try
+		{
+			var manifest = Persistence.CanonicalJsonDecodeObject(json);
+			return persistence.TryImportArtifactManifest(PersistenceArtifactKind.Progress, manifest, out reason);
+		}
+		catch (Exception exception) when (exception is JsonException or InvalidOperationException)
+		{
+			reason = exception.Message;
+			return false;
+		}
+	}
+
 	public (PersistenceOperationResult Result, PlayableSliceSceneState State) LoadSceneState()
 	{
 		var result = persistence.RequestLoadProgress();

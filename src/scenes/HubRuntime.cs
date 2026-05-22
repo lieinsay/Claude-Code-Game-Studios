@@ -8,6 +8,8 @@ public partial class HubRuntime : Node2D
 	private static readonly Vector2 ExplorationPlayerStart = new(168, 610);
 	private static readonly Rect2 HubWalkBounds = new(new Vector2(132, 380), new Vector2(1016, 252));
 	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
+	private const string DurableProgressFileName = "cloudweaver_playable_progress.json";
+	private const string DurableProgressPath = $"user://{DurableProgressFileName}";
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
 
@@ -58,6 +60,7 @@ public partial class HubRuntime : Node2D
 	{
 		CacheNodes();
 		domain.RegisterOnboarding(onboarding);
+		TryImportDurableProgressFromDisk(updateStatus: false);
 		CreatePlayableLayer();
 		WireButtons();
 		ShowHub();
@@ -223,14 +226,23 @@ public partial class HubRuntime : Node2D
 			playerPosition.X,
 			playerPosition.Y,
 			LabelText("Footer")));
-		SetSaveStatus(result.Success
-			? $"保存完成：canonical progress gen {result.Generation}"
-			: $"保存失败：{result.Reason}");
+		if (!result.Success)
+		{
+			SetSaveStatus($"保存失败：{result.Reason}");
+			UpdateOnboardingHint();
+			return;
+		}
+
+		var durableSaved = TryWriteDurableProgressToDisk(out var durableReason);
+		SetSaveStatus(durableSaved
+			? $"保存完成：canonical progress gen {result.Generation} / 本地耐久存档"
+			: $"保存完成：canonical progress gen {result.Generation} / 本地写入失败 {durableReason}");
 		UpdateOnboardingHint();
 	}
 
 	public void OnLoadPressed()
 	{
+		TryImportDurableProgressFromDisk(updateStatus: false);
 		var (result, restored) = domain.LoadSceneState();
 		if (!result.Success)
 		{
@@ -327,6 +339,21 @@ public partial class HubRuntime : Node2D
 
 	public bool DebugNodeVisible(string nodeName) =>
 		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
+
+	public bool DebugDurableProgressExists() => Godot.FileAccess.FileExists(DurableProgressPath);
+
+	public string DebugDurableProgressPath() => ProjectSettings.GlobalizePath(DurableProgressPath);
+
+	public void DebugClearDurableProgress()
+	{
+		if (!Godot.FileAccess.FileExists(DurableProgressPath))
+		{
+			return;
+		}
+
+		using var directory = DirAccess.Open("user://");
+		directory?.Remove(DurableProgressFileName);
+	}
 
 	public Godot.Collections.Dictionary DebugDomainSnapshot()
 	{
@@ -991,6 +1018,61 @@ public partial class HubRuntime : Node2D
 		{
 			button.GrabFocus();
 		}
+	}
+
+	private bool TryWriteDurableProgressToDisk(out string reason)
+	{
+		reason = string.Empty;
+		var json = domain.ExportProgressJson();
+		if (string.IsNullOrWhiteSpace(json))
+		{
+			reason = "empty_progress_manifest";
+			return false;
+		}
+
+		using var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Write);
+		if (file is null)
+		{
+			reason = Godot.FileAccess.GetOpenError().ToString();
+			return false;
+		}
+
+		file.StoreString(json);
+		return true;
+	}
+
+	private bool TryImportDurableProgressFromDisk(bool updateStatus)
+	{
+		if (!Godot.FileAccess.FileExists(DurableProgressPath))
+		{
+			return false;
+		}
+
+		using var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Read);
+		if (file is null)
+		{
+			if (updateStatus)
+			{
+				SetSaveStatus($"本地存档读取失败：{Godot.FileAccess.GetOpenError()}");
+			}
+			return false;
+		}
+
+		var json = file.GetAsText();
+		if (domain.TryImportProgressJson(json, out var reason))
+		{
+			if (updateStatus)
+			{
+				SetSaveStatus("本地耐久存档已导入，可加载 canonical progress。");
+			}
+			return true;
+		}
+
+		if (updateStatus)
+		{
+			SetSaveStatus($"本地存档导入失败：{reason}");
+		}
+		return false;
 	}
 
 }

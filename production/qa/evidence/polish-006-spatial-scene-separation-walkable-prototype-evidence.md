@@ -36,5 +36,5 @@
 
 - This is a greybox spatial prototype, not final art/audio.
 - The ship rooms are volumes/anchors, not full room interiors.
-- Cross-launch persistence trust remains a separate QA/design risk from the human checklist.
+- Cross-launch persistence trust was a separate QA/design risk from the human checklist and was later addressed by Polish Story 007.
 - No Release readiness claim is made by this evidence.
