@@ -20,6 +20,13 @@ Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hard
 - Verification: `dotnet run --project tests/integration/onboarding-first-loop/EventIntegrationTest.csproj` PASS 7/7; Story 001 regression PASS 6/6; playable-slice adapter regression PASS 30/30; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings, 0 errors.
 - `/story-done` verdict: COMPLETE. Story 003 is now unblocked: `production/epics/onboarding-first-loop/story-003-onboarding-persistence-snapshot.md`.
 
+## Session Extract -- Polish #18 Story 003 Complete 2026-05-22
+- Story complete: `production/epics/onboarding-first-loop/story-003-onboarding-persistence-snapshot.md` -- Onboarding Persistence Snapshot.
+- `OnboardingManager` now registers `progress.onboarding` with canonical `Persistence`, exports pure-data `SnapshotPackage` payloads, and restores valid known steps while diagnosing malformed or unknown persisted data.
+- Snapshot payload persists schema version, completed step IDs, suppressed step IDs, `first_loop_complete`, and completion generation; settings/preferences remain out of progress.
+- Verification: `dotnet run --project tests/integration/onboarding-first-loop/PersistenceSnapshotTest.csproj` PASS 6/6; Story 001 regression PASS 6/6; Story 002 regression PASS 7/7; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+- `/story-done` verdict: COMPLETE. Story 004 is next: `production/epics/onboarding-first-loop/story-004-focus-safe-hint-rendering-and-accessibility.md`.
+
 ## Session Extract -- Polish #18 Story Split 2026-05-22
 - #18 Onboarding / First Loop story split complete.
 - Added `production/epics/onboarding-first-loop/EPIC.md`.

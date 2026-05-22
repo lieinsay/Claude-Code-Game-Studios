@@ -1,7 +1,7 @@
 # Story 003: Onboarding Persistence Snapshot
 
 > **Epic**: Onboarding and First Loop
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: S / 4-6 hours
@@ -30,11 +30,11 @@
 
 *From GDD `design/gdd/onboarding-first-loop.md`, scoped to this story:*
 
-- [ ] GIVEN onboarding has completed steps, WHEN progress is saved, THEN `progress.onboarding` contains stable completed step IDs, suppressed step IDs, `first_loop_complete`, and schema version.
-- [ ] GIVEN progress is loaded, WHEN completed steps are restored, THEN completed hints do not repeat unless onboarding state is reset.
-- [ ] GIVEN save/load restores mid-loop onboarding state, WHEN the next eligible hint is evaluated, THEN completed steps stay complete and only incomplete steps can become eligible.
-- [ ] GIVEN malformed or unknown persisted step IDs are loaded, WHEN the package is restored, THEN valid known steps restore and invalid data is diagnosed without crashing.
-- [ ] GIVEN onboarding preferences are reset or disabled in future settings scope, WHEN progress remains intact, THEN preference state is kept separate from `progress.onboarding`.
+- [x] GIVEN onboarding has completed steps, WHEN progress is saved, THEN `progress.onboarding` contains stable completed step IDs, suppressed step IDs, `first_loop_complete`, and schema version.
+- [x] GIVEN progress is loaded, WHEN completed steps are restored, THEN completed hints do not repeat unless onboarding state is reset.
+- [x] GIVEN save/load restores mid-loop onboarding state, WHEN the next eligible hint is evaluated, THEN completed steps stay complete and only incomplete steps can become eligible.
+- [x] GIVEN malformed or unknown persisted step IDs are loaded, WHEN the package is restored, THEN valid known steps restore and invalid data is diagnosed without crashing.
+- [x] GIVEN onboarding preferences are reset or disabled in future settings scope, WHEN progress remains intact, THEN preference state is kept separate from `progress.onboarding`.
 
 ---
 
@@ -99,7 +99,13 @@ Derived from ADR-0017 and ADR-0003:
 **Required evidence**:
 - `tests/integration/onboarding-first-loop/PersistenceSnapshotTest.csproj` -- must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Evidence**:
+- `dotnet run --project tests/integration/onboarding-first-loop/PersistenceSnapshotTest.csproj` -- PASS, 6/6 checks.
+- `dotnet run --project tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` -- PASS, 6/6 checks.
+- `dotnet run --project tests/integration/onboarding-first-loop/EventIntegrationTest.csproj` -- PASS, 7/7 checks.
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` -- PASS, 5 existing warnings, 0 errors.
 
 ---
 
@@ -108,3 +114,9 @@ Derived from ADR-0017 and ADR-0003:
 - Depends on: Story 001, Story 002
 - Unlocks: Story 005
 
+## Completion Notes
+
+- `OnboardingManager` now exports `progress.onboarding` through a canonical `SnapshotPackage` and registers with `Persistence`.
+- Snapshot payload includes schema version, stable completed step IDs, stable suppressed step IDs, `first_loop_complete`, and completion generation using only JSON-compatible data.
+- Restore is defensive: known valid step IDs restore, unknown IDs and malformed fields are diagnosed in `LastRestoreDiagnostics`, and no Godot object references or preferences are persisted.
+- Completed hints remain complete after load, and mid-loop restore evaluates the next incomplete step as the eligible target.

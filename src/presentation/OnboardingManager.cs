@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CloudWeaverVoyage.Core;
 
 namespace CloudWeaverVoyage.Presentation;
 
@@ -96,12 +97,25 @@ public sealed record OnboardingObservedEvent(
 	string? Reason);
 
 /// <summary>
+/// Result of restoring a progress.onboarding snapshot.
+/// </summary>
+public sealed record OnboardingSnapshotRestoreResult(
+	bool Success,
+	IReadOnlyList<string> Diagnostics);
+
+/// <summary>
 /// Headless first-loop guidance service for #18 onboarding.
 /// </summary>
 public sealed class OnboardingManager
 {
 	/// <summary>Stable GDD step: find the Hub HUD.</summary>
 	public const string FindHubHudStepId = "find_hub_hud";
+
+	/// <summary>Canonical persistence domain for onboarding progress.</summary>
+	public const string ProgressDomainId = "progress.onboarding";
+
+	/// <summary>Current progress.onboarding schema version.</summary>
+	public const int SnapshotSchemaVersion = 1;
 
 	/// <summary>Stable GDD step: open the chart.</summary>
 	public const string OpenChartStepId = "open_chart";
@@ -154,6 +168,7 @@ public sealed class OnboardingManager
 	private readonly Dictionary<string, StepRuntimeState> steps = new(StringComparer.Ordinal);
 	private readonly List<OnboardingObservedEvent> observedEvents = new();
 	private readonly HashSet<string> suppressedHintStepIds = new(StringComparer.Ordinal);
+	private readonly List<string> lastRestoreDiagnostics = new();
 	private int completionGeneration;
 	private string? selectedRouteId;
 	private PlayableSliceSnapshot? lastExplorationSnapshot;
@@ -179,6 +194,9 @@ public sealed class OnboardingManager
 
 	/// <summary>Step IDs whose stale hints were suppressed by surface changes.</summary>
 	public IReadOnlyCollection<string> SuppressedHintStepIds => suppressedHintStepIds.ToArray();
+
+	/// <summary>Diagnostics from the most recent snapshot restore attempt.</summary>
+	public IReadOnlyList<string> LastRestoreDiagnostics => lastRestoreDiagnostics.AsReadOnly();
 
 	/// <summary>Percentage of first-loop steps completed, from 0 to 100.</summary>
 	public double FirstLoopProgressPercent =>
@@ -219,6 +237,7 @@ public sealed class OnboardingManager
 		lastHubSnapshot = null;
 		observedEvents.Clear();
 		suppressedHintStepIds.Clear();
+		lastRestoreDiagnostics.Clear();
 	}
 
 	/// <summary>Consumes a deterministic step completion signal.</summary>
@@ -262,6 +281,7 @@ public sealed class OnboardingManager
 		}
 
 		state.State = OnboardingStepState.Suppressed;
+		suppressedHintStepIds.Add(stepId);
 		return true;
 	}
 
@@ -437,6 +457,69 @@ public sealed class OnboardingManager
 		}
 	}
 
+	/// <summary>Registers progress.onboarding with the canonical persistence pipeline.</summary>
+	public void RegisterPersistence(Persistence persistence)
+	{
+		ArgumentNullException.ThrowIfNull(persistence);
+		persistence.RegisterDomainSerializer(ProgressDomainId, BuildSnapshotPackage);
+		persistence.RegisterDomainDeserializer(ProgressDomainId, package => RestoreFromSnapshotPackage(package));
+	}
+
+	/// <summary>Builds a pure-data progress.onboarding snapshot package.</summary>
+	public SnapshotPackage BuildSnapshotPackage()
+	{
+		var completed = Definitions
+			.Where(definition => steps[definition.StepId].State == OnboardingStepState.Completed)
+			.Select(definition => definition.StepId)
+			.ToArray();
+		var suppressed = Definitions
+			.Where(definition => steps[definition.StepId].State == OnboardingStepState.Suppressed)
+			.Select(definition => definition.StepId)
+			.ToArray();
+
+		var package = new SnapshotPackage
+		{
+			DomainId = ProgressDomainId,
+			SnapshotSchemaVersion = SnapshotSchemaVersion,
+			DomainState = SnapshotDomainState.Ready,
+		};
+		package.ContentDomainVersions["onboarding-first-loop"] = "2026-05-22";
+		foreach (var stepId in completed.Concat(suppressed).Distinct(StringComparer.Ordinal))
+		{
+			package.StableIdRefs.Add(stepId);
+		}
+
+		package.Payload["schema_version"] = SnapshotSchemaVersion;
+		package.Payload["completed_step_ids"] = completed;
+		package.Payload["suppressed_step_ids"] = suppressed;
+		package.Payload["first_loop_complete"] = IsFirstLoopComplete;
+		package.Payload["completion_generation"] = completionGeneration;
+		return package;
+	}
+
+	/// <summary>Restores progress.onboarding from a snapshot package without throwing on malformed data.</summary>
+	public OnboardingSnapshotRestoreResult RestoreFromSnapshotPackage(SnapshotPackage package)
+	{
+		ArgumentNullException.ThrowIfNull(package);
+		lastRestoreDiagnostics.Clear();
+		if (!string.Equals(package.DomainId, ProgressDomainId, StringComparison.Ordinal))
+		{
+			lastRestoreDiagnostics.Add("unexpected_domain_id");
+		}
+
+		var payloadSchema = ReadInt(package.Payload, "schema_version", package.SnapshotSchemaVersion);
+		if (package.SnapshotSchemaVersion != SnapshotSchemaVersion || payloadSchema != SnapshotSchemaVersion)
+		{
+			lastRestoreDiagnostics.Add("unsupported_schema_version");
+		}
+
+		var completed = ReadStepIdSet(package.Payload, "completed_step_ids", lastRestoreDiagnostics);
+		var suppressed = ReadStepIdSet(package.Payload, "suppressed_step_ids", lastRestoreDiagnostics);
+
+		RestoreKnownStepSets(completed, suppressed);
+		return new OnboardingSnapshotRestoreResult(lastRestoreDiagnostics.Count == 0, lastRestoreDiagnostics.ToArray());
+	}
+
 	/// <summary>Consumes visible resource/threat/hull pressure after the adapter changed state.</summary>
 	public OnboardingStepEventResult ObserveExplorationPressureChanged(
 		PlayableSliceSnapshot snapshot,
@@ -575,6 +658,129 @@ public sealed class OnboardingManager
 			|| before.HullIntegrity != after.HullIntegrity
 			|| !string.Equals(before.StorageText, after.StorageText, StringComparison.Ordinal)
 			|| !string.Equals(before.HubDockingState, after.HubDockingState, StringComparison.Ordinal);
+	}
+
+	private void RestoreKnownStepSets(IReadOnlySet<string> completed, IReadOnlySet<string> suppressed)
+	{
+		steps.Clear();
+		suppressedHintStepIds.Clear();
+		foreach (var definition in Definitions)
+		{
+			steps[definition.StepId] = new StepRuntimeState();
+		}
+
+		completionGeneration = 0;
+		foreach (var definition in Definitions)
+		{
+			if (!completed.Contains(definition.StepId))
+			{
+				continue;
+			}
+
+			completionGeneration++;
+			steps[definition.StepId].State = OnboardingStepState.Completed;
+			steps[definition.StepId].CompletionGeneration = completionGeneration;
+		}
+
+		foreach (var definition in Definitions)
+		{
+			if (completed.Contains(definition.StepId) || !suppressed.Contains(definition.StepId))
+			{
+				continue;
+			}
+
+			steps[definition.StepId].State = OnboardingStepState.Suppressed;
+			suppressedHintStepIds.Add(definition.StepId);
+		}
+
+		if (!IsFirstLoopComplete)
+		{
+			foreach (var definition in Definitions)
+			{
+				var state = steps[definition.StepId];
+				if (state.State == OnboardingStepState.Completed)
+				{
+					continue;
+				}
+
+				if (state.State == OnboardingStepState.NotStarted)
+				{
+					state.State = OnboardingStepState.Eligible;
+				}
+
+				break;
+			}
+		}
+
+		LastIgnoredEventReason = null;
+		ActiveSurface = OnboardingSurface.Unknown;
+		observedEvents.Clear();
+		selectedRouteId = null;
+		lastExplorationSnapshot = null;
+		lastHubSnapshot = null;
+	}
+
+	private static IReadOnlySet<string> ReadStepIdSet(
+		IReadOnlyDictionary<string, object?> payload,
+		string key,
+		ICollection<string> diagnostics)
+	{
+		var result = new HashSet<string>(StringComparer.Ordinal);
+		if (!payload.TryGetValue(key, out var value) || value is null)
+		{
+			diagnostics.Add($"missing_{key}");
+			return result;
+		}
+
+		if (value is string)
+		{
+			diagnostics.Add($"invalid_{key}_type");
+			return result;
+		}
+
+		if (value is not System.Collections.IEnumerable items)
+		{
+			diagnostics.Add($"invalid_{key}_type");
+			return result;
+		}
+
+		foreach (var item in items)
+		{
+			var stepId = Convert.ToString(item);
+			if (string.IsNullOrWhiteSpace(stepId))
+			{
+				diagnostics.Add($"invalid_{key}_entry");
+				continue;
+			}
+
+			if (!DefinitionsById.ContainsKey(stepId))
+			{
+				diagnostics.Add($"unknown_step_id:{stepId}");
+				continue;
+			}
+
+			result.Add(stepId);
+		}
+
+		return result;
+	}
+
+	private static int ReadInt(IReadOnlyDictionary<string, object?> payload, string key, int fallback)
+	{
+		if (!payload.TryGetValue(key, out var value) || value is null)
+		{
+			return fallback;
+		}
+
+		return value switch
+		{
+			int intValue => intValue,
+			long longValue => checked((int)longValue),
+			double doubleValue => checked((int)doubleValue),
+			float floatValue => checked((int)floatValue),
+			string text when int.TryParse(text, out var parsed) => parsed,
+			_ => fallback,
+		};
 	}
 
 	private StepRuntimeState GetRuntimeState(string stepId)
