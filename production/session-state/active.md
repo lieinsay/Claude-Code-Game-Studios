@@ -3,8 +3,16 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 005 route/search ID migration guard complete; continue Polish backlog until human design input is needed
+Task: Polish route/search loop human QA checklist ready; waiting on human playtest/design judgment
 <!-- /STATUS -->
+
+## Session Extract -- Polish Route/Search Human QA Checklist Ready 2026-05-22
+- Human QA checklist created: `production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md`.
+- Scope covers Polish Story 001-005 after Navigation/Exploration runtime hardening, authored content slice, content validation guard, and ID migration guard.
+- Checklist status is READY FOR HUMAN EXECUTION, not PASS.
+- Human tester should run the Hub -> Chart -> Exploration -> Search -> Save -> Return -> Load -> complete pressure loop route and record subjective clarity, tone, pacing, save/load trust, and presentation needs.
+- Recommended verdict choices: PASS, PASS WITH CONDITIONS, CONCERN, or BLOCKED.
+- Do not declare Release readiness from checklist creation; next implementation story should be based on human findings.
 
 ## Session Extract -- Polish Story 005 Route/Search ID Migration Guard Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-005-route-search-id-migration-guard.md` -- Route / Search ID Migration Guard.

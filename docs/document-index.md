@@ -125,6 +125,7 @@ graph TB
 | [production/qa/evidence/polish-004-authored-content-validation-guard-evidence.md](../production/qa/evidence/polish-004-authored-content-validation-guard-evidence.md) | Polish Story 004 evidence — authored content metadata, route/search IDs, text, reward ranges, and threat fields PASS |
 | [production/polish-backlog/story-polish-005-route-search-id-migration-guard.md](../production/polish-backlog/story-polish-005-route-search-id-migration-guard.md) | Polish Story 005 — Route/search ID migration guard Complete |
 | [production/qa/evidence/polish-005-route-search-id-migration-guard-evidence.md](../production/qa/evidence/polish-005-route-search-id-migration-guard-evidence.md) | Polish Story 005 evidence — route/search migration map validation + legacy route selection/restore PASS |
+| [production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md](../production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md) | Polish route/search human QA checklist — READY FOR HUMAN EXECUTION; not a Release readiness claim |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -1418,7 +1419,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；Polish Story 001 runtime hardening、Story 002 richer Exploration scene semantics、Story 003 authored route/search content slice、Story 004 authored content validation guard 与 Story 005 ID migration guard 已完成。下一步进入 route/search content scale-up、final authored route/search design 或 final art/audio treatment 的普通 Polish backlog，其中内容节奏、美术/音频口味和长时 playtest 需要人工判断。
+> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；Polish Story 001 runtime hardening、Story 002 richer Exploration scene semantics、Story 003 authored route/search content slice、Story 004 authored content validation guard 与 Story 005 ID migration guard 已完成。人工 QA checklist 已创建：`production/playtests/playtest-checklist-polish-route-search-loop-2026-05-22.md`。下一步需要人工判断内容节奏、美术/音频口味和长时 playtest 结果，再决定 route/search content scale-up、final authored route/search design 或 final art/audio treatment。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。
