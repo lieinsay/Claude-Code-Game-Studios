@@ -23,31 +23,31 @@ Engine: Godot 4.6.2 .NET
 Platform: Windows desktop
 Input: Keyboard and mouse
 Entry scene: project default -> src/scenes/SessionShell.tscn
-Build/Commit: fill in before test
-Tester: fill in before test
-Duration: 10-15 minutes minimum
+Build/Commit: d755e80
+Tester: liein
+Duration: 10 minutes
 ```
 
 ## Required Route
 
 | Step | Action | Expected Result | Pass/Fail | Notes |
 |------|--------|-----------------|-----------|-------|
-| 1 | Launch the project from the default scene | Entry screen appears without errors | [ ] | |
-| 2 | Start a session and continue past the audio prompt | Hub appears with greybox deck/helm/storage/module landmarks | [ ] | |
-| 3 | Move with WASD and arrow keys for at least 20 seconds | Player marker moves predictably; `S` moves down and does not save | [ ] | |
-| 4 | Read the active onboarding hint without clicking it | Hint is visible, non-blocking, and does not steal input | [ ] | |
-| 5 | Move near the helm console | Prompt indicates `E` can open Chart | [ ] | |
-| 6 | Press `E` near the helm | Chart opens; Hub controls are disabled while Chart is open | [ ] | |
-| 7 | Select `雾海短程` | Route name, route selection, and departure intent are clear | [ ] | |
-| 8 | Confirm departure | Exploration surface appears with route/search/return landmarks | [ ] | |
-| 9 | Before searching, read the Exploration labels | Route, search point, extraction, resource, threat, and hull text are understandable | [ ] | |
-| 10 | Move near the search point and press `E` once | First search records `雾灯残骸`; resource/cargo feedback changes visibly | [ ] | |
-| 11 | Search a second time | Threat/hull/cargo pressure escalates and still feels understandable | [ ] | |
-| 12 | Save in Exploration with `Ctrl+S` or the Save control | Save succeeds and movement remains responsive | [ ] | |
-| 13 | Return to Hub through the return beacon | Hub appears; cargo/storage/hull/route summaries reflect exploration state | [ ] | |
-| 14 | Load the saved Exploration state with `Ctrl+L` or Load control | Exploration restores route display, pressure step, carried rewards, and load feedback | [ ] | |
-| 15 | Continue searching after load until the pressure loop completes | Search marker/extraction text reach a clear completed or settlement-ready state | [ ] | |
-| 16 | Return to Hub again | Final Hub summaries remain coherent and no stale onboarding hint appears | [ ] | |
+| 1 | Launch the project from the default scene | Entry screen appears without errors | [x] | |
+| 2 | Start a session and continue past the audio prompt | Hub appears with greybox deck/helm/storage/module landmarks | [x] | |
+| 3 | Move with WASD and arrow keys for at least 20 seconds | Player marker moves predictably; `S` moves down and does not save | [x] | |
+| 4 | Read the active onboarding hint without clicking it | Hint is visible, non-blocking, and does not steal input | [x] | |
+| 5 | Move near the helm console | Prompt indicates `E` can open Chart | [x] | |
+| 6 | Press `E` near the helm | Chart opens; Hub controls are disabled while Chart is open | [x] | |
+| 7 | Select `雾海短程` | Route name, route selection, and departure intent are clear | [x] | |
+| 8 | Confirm departure | Exploration surface appears with route/search/return landmarks | [x] | |
+| 9 | Before searching, read the Exploration labels | Route, search point, extraction, resource, threat, and hull text are understandable | [x] | |
+| 10 | Move near the search point and press `E` once | First search records `雾灯残骸`; resource/cargo feedback changes visibly | [x] | |
+| 11 | Search a second time | Threat/hull/cargo pressure escalates and still feels understandable | [x] | |
+| 12 | Save in Exploration with `Ctrl+S` or the Save control | Save succeeds and movement remains responsive | [x] | |
+| 13 | Return to Hub through the return beacon | Hub appears; cargo/storage/hull/route summaries reflect exploration state | [x] | |
+| 14 | Load the saved Exploration state with `Ctrl+L` or Load control | Exploration restores route display, pressure step, carried rewards, and load feedback | [x] | |
+| 15 | Continue searching after load until the pressure loop completes | Search marker/extraction text reach a clear completed or settlement-ready state | [x] | |
+| 16 | Return to Hub again | Final Hub summaries remain coherent and no stale onboarding hint appears | [x] | |
 
 ## Human Judgment Questions
 
@@ -55,13 +55,13 @@ Answer in short notes. These are intentionally subjective.
 
 | Question | Notes |
 |----------|-------|
-| Is the first route objective clear without reading this checklist? | |
-| Do `雾海短程`, `雾灯残骸`, `剪云裂隙`, and `返航浮标箱` fit the intended tone? | |
-| Does the first search reward feel satisfying enough? | |
-| Does threat/hull pressure arrive too early, too late, or about right? | |
-| Is the save/load moment understandable and trustworthy? | |
-| Do the greybox landmarks support navigation, or do they need visual/audio treatment before content expansion? | |
-| Would you rather expand content next, tune pacing next, or improve presentation next? | |
+| Is the first route objective clear without reading this checklist? | 一般明确 |
+| Do `雾海短程`, `雾灯残骸`, `剪云裂隙`, and `返航浮标箱` fit the intended tone? | 一般符合 |
+| Does the first search reward feel satisfying enough? | 一般满意 |
+| Does threat/hull pressure arrive too early, too late, or about right? | 暂时无所谓 |
+| Is the save/load moment understandable and trustworthy? | 没有持久化的保存文件，关闭游戏下一次无法恢复 |
+| Do the greybox landmarks support navigation, or do they need visual/audio treatment before content expansion? | 过于抽象而且地图过于小，只是一个没有任何效果的图片 |
+| Would you rather expand content next, tune pacing next, or improve presentation next? | 当务之急还是要让场景更合理，比如能在岛上行走，岛有边界，能上船，船上有各种房间，都能移动 |
 
 ## Failure Rules
 
@@ -87,25 +87,24 @@ File a Polish design/UX note if:
 
 ## Result
 
-**Verdict:** Pending human execution
+**Verdict:** `PASS WITH CONDITIONS`
+**Tester:**  liein
+**Build/Commit:** d755e80
+**Duration:** 10 minutes
 
-Choose one after testing:
+**Conditions:**
 
-- `PASS`: Loop is clear enough to expand content.
-- `PASS WITH CONDITIONS`: Loop works, but pacing/text/presentation needs targeted polish.
-- `CONCERN`: No blocker, but the next Polish story should address major feel/readability issues.
-- `BLOCKED`: A required route step failed or the loop cannot be manually completed.
-
-**Tester:**  
-**Build/Commit:**  
-**Duration:**  
+- Current Hub -> Chart -> Exploration -> Search -> Save -> Return -> Load loop is manually completable.
+- Cross-launch persistence is not trusted yet: tester reports no persistent save file after closing the game, so the next pass should verify quit/relaunch continue behavior before treating save/load as complete player-facing persistence.
+- Presentation should be prioritized before content expansion: tester reports UI and scene are mixed together, and the scene reads like a static image rather than a usable space.
+- Do not use this PASS WITH CONDITIONS as Release readiness.
 
 **Top Findings:**
 
-1. 
-2. 
-3. 
+1. UI and scene are mixed together, which makes the player feel like they are operating panels over a background rather than moving through a game space.
+2. The current scene reads like a static image with little gameplay function; it needs walkable boundaries, meaningful spatial layout, and interactable places before content scale-up.
+3. Save/load works during the tested route, but tester reports that closing the game leaves no trusted persistent save to restore on the next launch.
 
 **Recommended Next Polish Story:**
 
--
+- Polish Story 006: Spatial Scene Separation and Walkable Hub/Island Prototype. Focus on separating HUD/Chart panels from the playable scene, adding walkable island/ship boundaries, boarding access, and room-like ship spaces before expanding route/search content.
