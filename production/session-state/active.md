@@ -6,6 +6,13 @@ Feature: Production to Polish Gate Passed
 Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hardening follow-ups
 <!-- /STATUS -->
 
+## Session Extract -- Polish #18 Story 001 Complete 2026-05-22
+- Story complete: `production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md` -- First-Loop Step State and Hint Scoring.
+- Added headless C# `src/presentation/OnboardingManager.cs` with stable eight-step GDD ordering, ADR-0017 states, deterministic completion generation, progress percent, hint scoring, repeat counts, and ignored-event diagnostics.
+- Added focused unit runner: `tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj`.
+- Verification: `dotnet run --project tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` PASS 6/6; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings, 0 errors.
+- `/story-done` verdict: COMPLETE. Story 002 is now unblocked: `production/epics/onboarding-first-loop/story-002-ui-and-domain-event-integration.md`.
+
 ## Session Extract -- Polish #18 Story Split 2026-05-22
 - #18 Onboarding / First Loop story split complete.
 - Added `production/epics/onboarding-first-loop/EPIC.md`.

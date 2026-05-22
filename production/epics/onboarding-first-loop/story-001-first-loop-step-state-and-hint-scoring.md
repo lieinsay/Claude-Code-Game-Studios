@@ -1,7 +1,7 @@
 # Story 001: First-Loop Step State and Hint Scoring
 
 > **Epic**: Onboarding and First Loop
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
 > **Estimate**: M / 6-8 hours
@@ -30,11 +30,11 @@
 
 *From GDD `design/gdd/onboarding-first-loop.md`, scoped to this story:*
 
-- [ ] GIVEN a new first-loop session, WHEN onboarding initializes, THEN it tracks the eight stable steps: `find_hub_hud`, `open_chart`, `select_route`, `depart_route`, `advance_pressure`, `notice_save_load`, `return_hub`, and `notice_summary_change`.
-- [ ] GIVEN a step completion signal arrives, WHEN the step is incomplete, THEN the step becomes `completed` and first-loop progress updates deterministically.
-- [ ] GIVEN all prior steps are complete or eligible, WHEN the manager evaluates guidance, THEN it chooses the highest scoring eligible hint using `hint_priority_score = base_step_priority + blocker_bonus + time_unseen_bonus - completed_penalty - repeat_penalty`.
-- [ ] GIVEN a completed step, WHEN hints are evaluated again, THEN that step does not become visible unless onboarding state is reset.
-- [ ] GIVEN invalid, duplicate, or out-of-order events, WHEN they are consumed, THEN the manager remains deterministic and does not mark unrelated steps complete.
+- [x] GIVEN a new first-loop session, WHEN onboarding initializes, THEN it tracks the eight stable steps: `find_hub_hud`, `open_chart`, `select_route`, `depart_route`, `advance_pressure`, `notice_save_load`, `return_hub`, and `notice_summary_change`.
+- [x] GIVEN a step completion signal arrives, WHEN the step is incomplete, THEN the step becomes `completed` and first-loop progress updates deterministically.
+- [x] GIVEN all prior steps are complete or eligible, WHEN the manager evaluates guidance, THEN it chooses the highest scoring eligible hint using `hint_priority_score = base_step_priority + blocker_bonus + time_unseen_bonus - completed_penalty - repeat_penalty`.
+- [x] GIVEN a completed step, WHEN hints are evaluated again, THEN that step does not become visible unless onboarding state is reset.
+- [x] GIVEN invalid, duplicate, or out-of-order events, WHEN they are consumed, THEN the manager remains deterministic and does not mark unrelated steps complete.
 
 ---
 
@@ -100,7 +100,11 @@ Derived from ADR-0017:
 **Required evidence**:
 - `tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` -- must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Evidence**:
+- `dotnet run --project tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` -- PASS, 6/6 checks.
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` -- PASS, 5 existing warnings, 0 errors.
 
 ---
 
@@ -109,3 +113,8 @@ Derived from ADR-0017:
 - Depends on: ADR-0017 Accepted
 - Unlocks: Story 002, Story 003
 
+## Completion Notes
+
+- Added `src/presentation/OnboardingManager.cs` as a headless C# manager with stable GDD step IDs, ADR-0017 states, deterministic completion ordering, progress diagnostics, hint scoring, repeat counts, and ignored-event reasons.
+- Added `tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` and focused runner coverage for all five acceptance criteria plus score cap/penalty regression.
+- Kept this story free of Godot `Control`, `Node`, focus ownership, and gameplay-domain mutation.

@@ -38,7 +38,7 @@ steps so hints do not repeat after save/load.
 
 | # | Story | Type | TRs | ADR | Status |
 |---|-------|------|-----|-----|--------|
-| 001 | [First-Loop Step State and Hint Scoring](story-001-first-loop-step-state-and-hint-scoring.md) | Logic | TR-onboarding-001 | ADR-0017 | Ready |
+| 001 | [First-Loop Step State and Hint Scoring](story-001-first-loop-step-state-and-hint-scoring.md) | Logic | TR-onboarding-001 | ADR-0017 | Complete |
 | 002 | [UI and Domain Event Integration](story-002-ui-and-domain-event-integration.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0012 | Ready |
 | 003 | [Onboarding Persistence Snapshot](story-003-onboarding-persistence-snapshot.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0003 | Ready |
 | 004 | [Focus-Safe Hint Rendering and Accessibility](story-004-focus-safe-hint-rendering-and-accessibility.md) | UI | TR-onboarding-001 | ADR-0017, ADR-0012 | Ready |
@@ -76,4 +76,3 @@ This epic is complete when:
 ## Next Step
 
 Run `/story-readiness production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md`, then implement stories in order.
-
