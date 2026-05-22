@@ -49,19 +49,19 @@ technical preferences and control manifest.
 |------|----------|-----|----------------|-----|---------|--------|
 | [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | **Complete** |
 | [feedback-fx-audio](feedback-fx-audio/EPIC.md) | #17 | feedback-fx-audio.md | ADR-0016 | 2 | 5 (001-005) | **Complete — 2026-05-16** |
-| [onboarding-first-loop](onboarding-first-loop/EPIC.md) | #18 | onboarding-first-loop.md | ADR-0017 | 1 | 5 (001-005) | **Ready — Polish entry** |
+| [onboarding-first-loop](onboarding-first-loop/EPIC.md) | #18 | onboarding-first-loop.md | ADR-0017 | 1 | 5 (001-005) | **Complete — 2026-05-22** |
 
 ## Vertical Slice ADR Status
 
 | ADR | System | Priority | Recommended Trigger |
 |-----|--------|----------|---------------------|
 | ADR-0016 | #17 Feedback | COMPLETE | Accepted and implemented for first Polish feedback slice |
-| ADR-0017 | #18 Onboarding | READY | Accepted; 5 Polish entry stories created |
+| ADR-0017 | #18 Onboarding | COMPLETE | Accepted and implemented for first-loop Polish entry |
 | ADR-0019 | Platform/C# Pivot | ACTIVE | Governs all new implementation stories |
 
 ## Production to Polish Scope Note
 
-For the 2026-05-15 Production to Polish gate, #17 Feedback and #18 Onboarding were accepted as deferred Polish/post-gate work rather than hard blockers. UI/HUD #16 covers the verified MVP smoke loop feedback and discoverability needed for that gate: Hub/HUD visibility, Chart route departure, Exploration HUD pressure feedback, Save/Load, return-to-Hub, and Hub summary sync. #17 has since completed its first Polish implementation slice; authored onboarding remains tracked future implementation scope.
+For the 2026-05-15 Production to Polish gate, #17 Feedback and #18 Onboarding were accepted as deferred Polish/post-gate work rather than hard blockers. UI/HUD #16 covers the verified MVP smoke loop feedback and discoverability needed for that gate: Hub/HUD visibility, Chart route departure, Exploration HUD pressure feedback, Save/Load, return-to-Hub, and Hub summary sync. #17 has since completed its first Polish implementation slice; #18 has completed its first-loop onboarding implementation slice with Godot smoke/perf evidence.
 
 Sprint 001 scope briefs and formal GDDs now define the first Polish boundary:
 
@@ -70,4 +70,4 @@ Sprint 001 scope briefs and formal GDDs now define the first Polish boundary:
 - #17 GDD: `design/gdd/feedback-fx-audio.md`
 - #18 GDD: `design/gdd/onboarding-first-loop.md`
 
-Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 implementation stories are complete and #18 now has 5 Ready Polish entry stories under `production/epics/onboarding-first-loop/`.
+Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 and #18 implementation stories are complete under `production/epics/feedback-fx-audio/` and `production/epics/onboarding-first-loop/`.

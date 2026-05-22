@@ -40,6 +40,12 @@ func _run() -> void:
 	_expect(session.find_child("HubRuntime", true, false) != null, "HubRuntime is mounted")
 	_expect(session.find_child("PlayerMarker", true, false) != null, "Playable player marker is mounted")
 	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
+	var hub := session.find_child("HubRuntime", true, false)
+	var initial_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	var initial_steps := initial_onboarding.get("steps", {}) as Dictionary
+	_expect(str(initial_steps.get("find_hub_hud", "")) == "Completed", "Onboarding completes Hub HUD visibility in runtime")
+	_expect(str(initial_onboarding.get("next_hint_step", "")) == "open_chart", "Onboarding next hint starts at opening Chart")
+	_expect(int(initial_onboarding.get("hint_mouse_filter", -1)) == Control.MOUSE_FILTER_IGNORE, "Runtime onboarding hint ignores mouse input")
 	_expect(_label_text(session, "Header") == "云织号空艇中枢", "Hub header uses Chinese text")
 	_expect(_label_text(session, "CargoValue").contains("受困货物 0"), "Cargo status reports trapped goods in Chinese")
 	_expect(_label_text(session, "HullValue").contains("可出航"), "Hull status uses Chinese text")
@@ -47,7 +53,6 @@ func _run() -> void:
 	_expect(_button_text(session, "SaveButton").contains("保存"), "Save entry is visible")
 	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
 
-	var hub := session.find_child("HubRuntime", true, false)
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub has an authored greybox deck floor")
 	_expect(hub.call("DebugNodeVisible", "HelmConsoleProp"), "Hub has an authored greybox helm console prop")
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
@@ -83,6 +88,8 @@ func _run() -> void:
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
+	var chart_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(str(chart_onboarding.get("next_hint_step", "")) == "select_route", "Onboarding advances to route-selection hint after Chart opens")
 	_expect(_label_text(session, "ChartTitleLabel") == "HUD / 航图界面", "Chart panel identifies the UI/HUD surface")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
@@ -97,11 +104,15 @@ func _run() -> void:
 
 	hub.call("OnRouteMistPressed")
 	await process_frame
+	var selected_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(str(selected_onboarding.get("next_hint_step", "")) == "depart_route", "Onboarding advances to departure hint after route selection")
 	var route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(route_snapshot.get("selected_route", "")) == "route.mist", "C# HubRuntime route selection is backed by ChartManager state")
 	_expect(str(route_snapshot.get("chart_state", "")) == "RouteSelected", "ChartManager enters RouteSelected after route choice")
 	hub.call("OnDepartPressed")
 	await process_frame
+	var departed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(str(departed_onboarding.get("next_hint_step", "")) == "advance_pressure", "Onboarding advances to pressure hint after departure")
 	var departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(departure_snapshot.get("committed_route", "")) == "route.mist", "C# HubRuntime departure commits through ChartManager")
 	_expect(str(departure_snapshot.get("hub_last_route", "")) == "route.mist", "HubManager records the chart departure route")
@@ -126,6 +137,9 @@ func _run() -> void:
 	_expect(hub.call("DebugInteractionPrompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
+	var pressure_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	var pressure_next_hint := str(pressure_onboarding.get("next_hint_step", ""))
+	_expect(pressure_next_hint == "notice_save_load", "Onboarding advances to save/load awareness after pressure feedback (%s)" % pressure_next_hint)
 	var search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(search_snapshot.get("exploration_step", 0)) == 1, "C# HubRuntime search advances domain adapter snapshot")
 	_expect(int(search_snapshot.get("basic_supply_in_storage", 0)) == 9, "C# HubRuntime search consumes ResourcesManager supply")
@@ -145,6 +159,8 @@ func _run() -> void:
 
 	hub.call("OnSavePressed")
 	await process_frame
+	var saved_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(str(saved_onboarding.get("next_hint_step", "")) == "return_hub", "Onboarding advances to return-Hub hint after save/load awareness")
 	var saved_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(_label_text(session, "SaveStatusLabel").contains("canonical progress"), "Exploration state saves through canonical Persistence")
 	_expect(int(saved_snapshot.get("persistence_generation", 0)) > 0, "Canonical Persistence records progress generation")
@@ -154,6 +170,8 @@ func _run() -> void:
 	_expect(hub.call("DebugInteractionPrompt").contains("返回 Hub"), "Moving near the return point reveals a spatial return prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
+	var completed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(bool(completed_onboarding.get("first_loop_complete", false)), "Onboarding first loop completes after Hub return and summary change")
 	var return_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(return_snapshot.get("hub_docking_state", "")) == "Landed", "HubManager returns to Landed after spatial Hub return")
 	_expect(int(return_snapshot.get("reward_carried", 0)) == 0, "ResourcesManager clears carried rewards after spatial Hub return")
@@ -170,6 +188,8 @@ func _run() -> void:
 	hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Loading exploration save restores Exploration HUD")
+	var loaded_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
+	_expect(str(loaded_onboarding.get("next_hint_step", "")) == "return_hub", "Loading mid-loop onboarding progress does not replay completed save/load hint")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
 	var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "Canonical load restores carried ResourcesManager rewards")

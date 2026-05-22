@@ -1,7 +1,7 @@
 # Story 005: First-Loop Smoke Regression and QA Evidence
 
 > **Epic**: Onboarding and First Loop
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: M / 6-8 hours
@@ -30,12 +30,12 @@
 
 *From GDD `design/gdd/onboarding-first-loop.md`, scoped to this story:*
 
-- [ ] GIVEN the first-loop smoke path runs with onboarding enabled, WHEN the route completes, THEN no existing UI/HUD, save/load, focus, playable slice, or accessibility regression fails.
-- [ ] GIVEN keyboard-only and mouse-oriented walkthroughs are executed, WHEN hints are visible, THEN both complete Hub -> Chart -> Exploration -> Save/Load awareness -> return Hub.
-- [ ] GIVEN completed hints are saved and loaded, WHEN the route resumes, THEN completed hints do not replay and the next incomplete step remains eligible.
-- [ ] GIVEN onboarding is disabled or reset in test configuration, WHEN the first loop runs, THEN base UI remains understandable and route completion still works.
-- [ ] GIVEN performance smoke runs after onboarding integration, WHEN budgets are measured, THEN frame, memory, save/load, and transition budgets remain within current Polish entry thresholds or any variance is documented with a fix plan.
-- [ ] GIVEN QA sign-off is prepared, WHEN evidence is reviewed, THEN the report cites automated tests, Godot smoke, manual walkthroughs, accessibility checks, and any remaining conditions.
+- [x] GIVEN the first-loop smoke path runs with onboarding enabled, WHEN the route completes, THEN no existing UI/HUD, save/load, focus, playable slice, or accessibility regression fails.
+- [x] GIVEN keyboard-only and mouse-oriented walkthroughs are executed, WHEN hints are visible, THEN both complete Hub -> Chart -> Exploration -> Save/Load awareness -> return Hub.
+- [x] GIVEN completed hints are saved and loaded, WHEN the route resumes, THEN completed hints do not replay and the next incomplete step remains eligible.
+- [x] GIVEN onboarding is disabled or reset in test configuration, WHEN the first loop runs, THEN base UI remains understandable and route completion still works.
+- [x] GIVEN performance smoke runs after onboarding integration, WHEN budgets are measured, THEN frame, memory, save/load, and transition budgets remain within current Polish entry thresholds or any variance is documented with a fix plan.
+- [x] GIVEN QA sign-off is prepared, WHEN evidence is reviewed, THEN the report cites automated tests, Godot smoke, manual walkthroughs, accessibility checks, and any remaining conditions.
 
 ---
 
@@ -108,7 +108,14 @@ Derived from ADR-0017 and the Production -> Polish gate conditions:
 - `production/qa/evidence/onboarding-first-loop-smoke-evidence.md`
 - `production/qa/qa-signoff-onboarding-first-loop.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Evidence**:
+- `tests/integration/onboarding-first-loop/FirstLoopRegressionTest.csproj` -- PASS, 6/6 checks.
+- `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` -- PASS, runtime onboarding + playable loop smoke.
+- `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd` -- PASS, frame/memory/save/load/transition budgets.
+- `production/qa/evidence/onboarding-first-loop-smoke-evidence.md` -- created, PASS summary.
+- `production/qa/qa-signoff-onboarding-first-loop.md` -- created, APPROVED WITH CONDITIONS.
 
 ---
 
@@ -117,3 +124,9 @@ Derived from ADR-0017 and the Production -> Polish gate conditions:
 - Depends on: Stories 001-004
 - Unlocks: Polish onboarding completion review
 
+## Completion Notes
+
+- Connected runtime onboarding through C# `HubRuntime`, `PlayableSliceDomainAdapter.RegisterOnboarding(...)`, and `OnboardingManager`; no GDScript runtime authority was reintroduced.
+- Added `RuntimeHintLabel` updates and smoke diagnostics so Godot verifies first-loop progression and hint mouse transparency.
+- Repaired `tests/smoke/session_shell_perf_probe.gd` after the C# runtime migration by replacing obsolete snake_case calls with C# method names.
+- Added Story 005 focused regression runner and QA evidence/sign-off docs.

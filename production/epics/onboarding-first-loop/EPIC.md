@@ -1,6 +1,6 @@
 # Epic #18: Onboarding and First Loop
 
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **GDD**: `design/gdd/onboarding-first-loop.md`
 > **Architecture Module**: Presentation service -- `OnboardingManager`
@@ -42,7 +42,7 @@ steps so hints do not repeat after save/load.
 | 002 | [UI and Domain Event Integration](story-002-ui-and-domain-event-integration.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0012 | Complete |
 | 003 | [Onboarding Persistence Snapshot](story-003-onboarding-persistence-snapshot.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0003 | Complete |
 | 004 | [Focus-Safe Hint Rendering and Accessibility](story-004-focus-safe-hint-rendering-and-accessibility.md) | UI | TR-onboarding-001 | ADR-0017, ADR-0012 | Complete |
-| 005 | [First-Loop Smoke Regression and QA Evidence](story-005-first-loop-smoke-regression-and-qa-evidence.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0019 | Ready |
+| 005 | [First-Loop Smoke Regression and QA Evidence](story-005-first-loop-smoke-regression-and-qa-evidence.md) | Integration | TR-onboarding-001 | ADR-0017, ADR-0019 | Complete |
 
 **Summary**: 1 Logic + 3 Integration + 1 UI stories
 
@@ -75,4 +75,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/story-readiness production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md`, then implement stories in order.
+Epic #18 implementation stories are complete. Next, continue normal Polish backlog work: runtime hardening for Navigation/Exploration beyond the playable fixture, windowed visual capture if required, and final art/audio treatment for onboarding hints.

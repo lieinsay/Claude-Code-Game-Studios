@@ -305,7 +305,9 @@ public sealed class OnboardingManager
 		int blockerBonus = 0,
 		int repeatCountOverride = 0)
 	{
-		var candidates = Definitions.Select(definition =>
+		var candidates = Definitions
+			.Where(definition => steps[definition.StepId].State is OnboardingStepState.Eligible or OnboardingStepState.Visible)
+			.Select(definition =>
 		{
 			var state = steps[definition.StepId];
 			return new OnboardingHintCandidate(

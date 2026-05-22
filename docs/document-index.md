@@ -1,11 +1,11 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-17
-> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Story split complete, implementation pending
+> **最后更新**: 2026-05-22
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding implementation complete
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
-> **Epic/Story**: 18/18 Epic 完成规划 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 | Ready: #18 Onboarding | Polish Entry: story-readiness + perf rerun
-> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 35 个 C# 源文件 + 120 个 C# test runner: unit 59 / integration 60 / parity 1)；GDScript P3 原型保留为迁移参考
+> **Epic/Story**: 18/18 Epic 完成 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 #18 | Polish Entry: #18 smoke/perf PASS
+> **源代码**: Godot 4.6.2 .NET/C# 主线实现 (src 35 个 C# 源文件 + 121 个 C# test runner: unit 59 / integration 61 / parity 1)；GDScript P3 原型保留为迁移参考
 
 ---
 
@@ -51,7 +51,7 @@ graph TB
         CORE["core/ (9 C#)<br/>Registry·Persistence·Interact<br/>Resources·Intel·Chart·Combat·Boot"]
         FEATURE["feature/ (3)<br/>Exploration·WorldRepair·Partner"]
         PRESENTATION["presentation/ (2)<br/>UIManager·FeedbackManager"]
-        TEST["tests/<br/>120 C# runners<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS<br/>Modules/Hull Story 001-008 PASS<br/>Chart Story 001-008 PASS<br/>Navigation Story 001-008 PASS<br/>Exploration Story 001-006 PASS<br/>Combat Story 001-006 PASS<br/>WorldRepair Story 001-006 PASS<br/>Partner Story 001-006 PASS<br/>UI/HUD Story 001-006 PASS<br/>Feedback Story 001-005 PASS"]
+        TEST["tests/<br/>121 C# runners<br/>FoundationParity 70/70<br/>Registry/Persistence/Session/Movement/Hub PASS<br/>Resources Story 001-009 PASS<br/>Intel Story 001-008 PASS<br/>Modules/Hull Story 001-008 PASS<br/>Chart Story 001-008 PASS<br/>Navigation Story 001-008 PASS<br/>Exploration Story 001-006 PASS<br/>Combat Story 001-006 PASS<br/>WorldRepair Story 001-006 PASS<br/>Partner Story 001-006 PASS<br/>UI/HUD Story 001-006 PASS<br/>Feedback Story 001-005 PASS<br/>Onboarding Story 001-005 PASS"]
     end
 
     subgraph 基础设施["⚙️ 基础设施 .claude/"]
@@ -110,8 +110,8 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
-| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 18/18 Epic 完成规划 (125 Stories)；#1-#17 已完成；#18 Ready |
-| [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18 Onboarding / First Loop — 5 Polish entry Stories Ready |
+| [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 18/18 Epic 完成 (125 Stories)；#1-#18 已完成 |
+| [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18 Onboarding / First Loop — 5/5 Polish entry Stories Complete |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -139,9 +139,10 @@ graph TB
 | [production/epics/world-repair/EPIC.md](../production/epics/world-repair/EPIC.md) | Epic #13: 世界修复解锁 (6 Stories) |
 | [production/epics/settlement-market/EPIC.md](../production/epics/settlement-market/EPIC.md) | Epic #14: 空港集市交易 (6/6 Stories **Complete** — 2026-05-14，31/31 PASS) |
 | [production/epics/partner-relationships/EPIC.md](../production/epics/partner-relationships/EPIC.md) | Epic #15: 伙伴功能与关系 (6/6 Stories **Complete** — 2026-05-14 复审通过，119/119 PASS) |
-| **Presentation 层 (2 Epic / 11 Stories)** | |
+| **Presentation 层 (3 Epic / 16 Stories)** | |
 | [production/epics/ui-hud-interface/EPIC.md](../production/epics/ui-hud-interface/EPIC.md) | Epic #16: UI/HUD/航图界面 (6/6 Stories **Complete** — Story 001-006 PASS) |
 | [production/epics/feedback-fx-audio/EPIC.md](../production/epics/feedback-fx-audio/EPIC.md) | Epic #17: 反馈/特效/音频语义 (5/5 Stories **Complete** — Story 001-005 PASS) |
+| [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18: 新手引导与首轮闭环 (5/5 Stories **Complete** — Story 001-005 PASS) |
 | [production/session-logs/session-log.md](../production/session-logs/session-log.md) | 会话日志 |
 
 ---
@@ -149,11 +150,11 @@ graph TB
 ## 二、游戏设计文档 (GDD) — 依赖关系图
 
 > 18 个系统，5 层架构。实线箭头 = 运行时依赖，虚线 = 信号/事件订阅。
-> Feature/Presentation 主线 ADR 全部 Accepted；#17 first Polish feedback slice complete；#18 implementation story split complete。
+> Feature/Presentation 主线 ADR 全部 Accepted；#17 first Polish feedback slice complete；#18 first-loop onboarding slice complete。
 
 ```mermaid
 graph TB
-    subgraph Presentation["🖥️ Presentation 层 (2/3)"]
+    subgraph Presentation["🖥️ Presentation 层 (3/3)"]
         UI["#16 UI/HUD/航图界面<br/>ADR-0012 ✅ 6 Stories"]
         VFX["#17 反馈/特效/音频 (VS)<br/>GDD ✅<br/>ADR-0016 ✅<br/>5 Stories Complete"]
     end
@@ -165,7 +166,7 @@ graph TB
         REPAIR["#13 世界修复与解锁<br/>ADR-0011 ✅ 6 Stories"]
         SETTLE["#14 空港/村镇/集市<br/>ADR-0014 ✅ 6 Stories"]
         PARTNER["#15 伙伴功能与关系<br/>ADR-0015 ✅ 6 Stories"]
-        ONBOARD["#18 新手引导 (VS)<br/>GDD ✅<br/>ADR-0017 ✅<br/>5 Stories Ready"]
+        ONBOARD["#18 新手引导 (VS)<br/>GDD ✅<br/>ADR-0017 ✅<br/>5 Stories Complete"]
     end
 
     subgraph Core["🔧 Core 层 (5/5 ✅ 40 Stories)"]
@@ -482,7 +483,7 @@ stateDiagram-v2
 
 ## 四、Epic/Story 生产框架
 
-> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 3/3 — 18 个 Epic 全部 Story 分解完成；#1-#17 Complete，#18 Ready**
+> **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 3/3 — 18 个 Epic 全部 Story 完成；#1-#18 Complete**
 > **125 个 Story**: 67 Logic + 53 Integration + 4 UI + 1 Config
 > **2026-05-22**
 
@@ -521,7 +522,7 @@ graph TB
         direction LR
         P1["#16 UI/HUD<br/>6 Stories ✅"]
         P2["#17 Feedback<br/>5 Stories ✅"]
-        P_BLOCKED["#18 Onboarding<br/>GDD ✅<br/>ADR ✅<br/>5 Stories Ready"]
+        P_BLOCKED["#18 Onboarding<br/>GDD ✅<br/>ADR ✅<br/>5 Stories Complete"]
     end
 
     Foundation --> Core
@@ -582,7 +583,7 @@ graph TB
 
 | Epic | System # | 阻塞原因 | Priority |
 |------|----------|---------|----------|
-| onboarding-first-loop | #18 | ADR-0017 accepted + GDD approved + 5 stories Ready (implementation pending) | 🟢 LOW |
+| onboarding-first-loop | #18 | ADR-0017 accepted + GDD approved + 5 stories Complete; Godot smoke/perf PASS | 🟢 LOW |
 
 ### Story 类型与质量门
 
@@ -598,8 +599,8 @@ graph TB
 
 ## 五、C# 实现进度
 
-> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#14 Settlement、#15 Partner 完成；Presentation #16 UI/HUD 与 #17 Feedback 完成，#18 Onboarding 5 Stories Ready；BUG-005 scene reachability 已修复；125 个 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
-> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS；Epic #16 Story 001-006 runners PASS；Epic #17 Story 001-005 runners PASS；FoundationParity 70/70 PASS；Chart/UI/Feedback smoke and accessibility checks PASS。
+> **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#14 Settlement、#15 Partner 完成；Presentation #16 UI/HUD、#17 Feedback、#18 Onboarding 完成；BUG-005 scene reachability 已修复；125 个 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
+> **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS；Epic #16 Story 001-006 runners PASS；Epic #17 Story 001-005 runners PASS；Epic #18 Story 001-005 runners PASS；FoundationParity 70/70 PASS；Chart/UI/Feedback/Onboarding smoke and accessibility checks PASS。
 
 ### Content Registry 完成项
 
@@ -1342,16 +1343,16 @@ graph TB
 
   📊 总计: ~384+ 个文档/源代码/测试文件 + 12 个配置/数据文件
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
-  📋 Epic/Story: 18/18 Epic 完成规划 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17 Complete | #18 Ready
+  📋 Epic/Story: 18/18 Epic 完成 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17/#18 Complete
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Ready
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-17 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；下一步进入 Polish entry work。
+> 更新于 2026-05-22 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；#18 Onboarding Story 001-005 完成。
 
 ### 已全部完成 ✅
 
@@ -1397,14 +1398,14 @@ graph TB
 - [x] **ADR-0016** (#17 Feedback/VFX/Audio) — Accepted 2026-05-15
 - [x] **ADR-0017** (#18 Onboarding/First Loop) — Accepted 2026-05-15
 - [x] **#17 feedback-fx-audio Epic/Story 实现** — 5 Stories Complete
-- [x] **#18 onboarding-first-loop Epic/Story 分解** — 5 Stories Ready
+- [x] **#18 onboarding-first-loop Epic/Story 实现** — 5 Stories Complete
 - [x] **Sprint Plan** — Sprint 001 Polish Stabilization 已创建并完成 Must/Should Have scope
 - [x] **Sprint 002 Playable Vertical Slice Recovery** — 灰盒 Hub -> Chart -> Exploration -> Return 人工可玩闭环恢复通过
 - [x] **Sprint 003 Domain-Backed Playable Slice** — C# domain managers / canonical persistence / 最低灰盒表现 / 自动 smoke evidence / 人工 QA sign-off 已完成；Production → Polish gate PASS WITH CONDITIONS
 
 ---
 
-> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 已拆为 5 个 Ready stories。下一步运行 Story 001 readiness，然后实施 #18；同时修复/重跑 fresh perf probe。
+> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过。下一步进入 Navigation/Exploration runtime hardening 与视觉 Polish backlog。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

@@ -52,6 +52,14 @@ public sealed class PlayableSliceDomainAdapter
 	/// <summary>Raised after HubManager returns to Landed and summaries have updated.</summary>
 	public event Action<PlayableSliceSnapshot, PlayableSliceSnapshot>? ReturnedToHub;
 
+	/// <summary>Connects onboarding observation and progress persistence to this adapter.</summary>
+	public void RegisterOnboarding(OnboardingManager onboardingManager)
+	{
+		ArgumentNullException.ThrowIfNull(onboardingManager);
+		onboardingManager.ConnectPlayableSliceEvents(this);
+		onboardingManager.RegisterPersistence(persistence);
+	}
+
 	public PlayableSliceSnapshot Snapshot => new(
 		ChartState: chart.CurrentState.ToString(),
 		SelectedRouteId: chart.SelectedRouteId,

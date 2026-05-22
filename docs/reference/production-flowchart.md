@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Polish | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Ready**
+> 当前状态: **Polish | Phase 0-A-F/#18 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Complete**
 
 ---
 
@@ -322,9 +322,9 @@ Week 11-12
 ```
 Week 13+
 ┌─ #17 反馈音频 ─────────────────────── ✅ Complete (Story 001-005, 36/36 feedback checks)
-└─ #18 新手引导 ─────────────────────── 🟡 Ready (5 Polish entry stories)
+└─ #18 新手引导 ─────────────────────── ✅ Complete (Story 001-005, Godot smoke/perf PASS)
 
-注意: ADR-0016 / ADR-0017 已 Accepted；#17 first Polish slice 已完成，#18 已拆分 5 个实现 stories。
+注意: ADR-0016 / ADR-0017 已 Accepted；#17 first Polish slice 与 #18 first-loop onboarding slice 均已完成。
 ```
 
 ---
@@ -501,7 +501,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
 🟠 Recovery/S2  ████████████████████████ 100% (灰盒 playable slice human PASS)
 🟠 Recovery/S3  ████████████████████████ 100% (C# HubRuntime + domain managers + canonical Persistence + greybox + smoke + manual QA PASS)
-🟡 Polish/#18   ████░░░░░░░░░░░░░░░░░░░░  15% (#18 Onboarding stories Ready; implementation pending)
+✅ Polish/#18   ████████████████████████ 100% (#18 Onboarding Story 001-005 Complete; smoke/perf PASS)
 ```
 
 ### 本次生产状态检查 (2026-05-17)
@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
 - 活跃任务: Polish entry follow-ups。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；Polish 条件为 #18 implementation、fresh perf probe、Navigation/Exploration runtime hardening。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation 与 fresh perf probe 已完成，Navigation/Exploration runtime hardening 仍保留为普通 Polish backlog。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,12 +519,12 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #18 Story 001 readiness + implementation | #18 story split Complete ✅ | Next |
+| **P0** | Navigation/Exploration runtime hardening beyond playable fixture | Sprint 003 + #18 evidence ✅ | Next |
 | **P0** | Sprint 003: broaden Exploration/Navigation manager contract beyond fixture | Chart/Hub/Resources/Hull adapter ✅ | Next |
-| **P1** | Fresh performance probe repair/rerun | Gate condition | Polish entry |
+| **P1** | Windowed visual capture for onboarding if required | Headless smoke PASS ✅ | Polish |
 | **P2** | Navigation/Exploration runtime hardening | Sprint 003 adapter fixture documented | Polish |
 
-> 关键建议: 先处理 Polish gate conditions：#18 implementation、fresh perf probe、runtime hardening，然后进入正式 Polish backlog。
+> 关键建议: #18 implementation 与 fresh perf probe 已完成；下一步进入正式 Polish backlog，优先处理 Navigation/Exploration runtime hardening。
 
 ### 并行机会提醒
 
@@ -542,8 +542,8 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
 3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #16 的 UI 集成质量。
 4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16 已完成；关键风险转移到 Sprint 003 的 domain-backed playable evidence。
-5. **#18 阻塞**: ADR-0017 已 Accepted，5 个 implementation stories 已拆分；下一步进入 Story 001 readiness。
-6. **Production gate blocker**: Epic #1-#17 Complete 主要证明 headless C# domain/story 证据；Polish 前仍需证明 Godot playable runtime 使用真实 domain authority 与 canonical persistence。
+5. **#18 状态**: ADR-0017 已 Accepted，5 个 implementation stories 已完成；Story 005 QA sign-off 为 APPROVED WITH CONDITIONS。
+6. **Production gate blocker 已解除**: Epic #1-#18 Complete 现在包含 headless C# story evidence、domain-backed Godot smoke、canonical persistence、onboarding smoke/perf evidence；后续风险转入普通 Polish backlog。
 
 ---
 

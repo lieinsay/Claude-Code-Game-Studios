@@ -10,6 +10,7 @@ public partial class HubRuntime : Node2D
 	private const float InteractionRadius = 74.0f;
 
 	private readonly PlayableSliceDomainAdapter domain = new();
+	private readonly OnboardingManager onboarding = new();
 	private Control? chartPanel;
 	private Control? explorationPanel;
 	private Control? hubRoot;
@@ -34,6 +35,7 @@ public partial class HubRuntime : Node2D
 	private Label? chartStationLabel;
 	private Label? cargoStationLabel;
 	private Label? saveStatusLabel;
+	private Label? runtimeHintLabel;
 	private Label? footerLabel;
 	private readonly Button?[] hubActionButtons = new Button?[3];
 	private string selectedRoute = "";
@@ -45,9 +47,12 @@ public partial class HubRuntime : Node2D
 	public override void _Ready()
 	{
 		CacheNodes();
+		domain.RegisterOnboarding(onboarding);
 		CreatePlayableLayer();
 		WireButtons();
 		ShowHub();
+		onboarding.ObserveHubVisible(inputReachable: true, ownerStateAlreadyMutated: true);
+		UpdateOnboardingHint();
 	}
 
 	public override void _Process(double delta)
@@ -138,6 +143,7 @@ public partial class HubRuntime : Node2D
 		domain.OpenChart();
 		ShowChartPanel();
 		SetChartStatus("HUD / 航图已打开：选择一条 MVP 航线后确认出发。");
+		UpdateOnboardingHint();
 	}
 
 	public void OnRouteMistPressed() => SelectDomainRoute("route.mist");
@@ -164,6 +170,7 @@ public partial class HubRuntime : Node2D
 		explorationStep = 0;
 		playerPosition = ExplorationPlayerStart;
 		ShowExplorationSurface();
+		UpdateOnboardingHint();
 	}
 
 	public void OnExplorationAdvancePressed()
@@ -176,6 +183,7 @@ public partial class HubRuntime : Node2D
 		domain.AdvanceExploration();
 		explorationStep = domain.Snapshot.ExplorationStep;
 		SetExplorationStatus();
+		UpdateOnboardingHint();
 		if (explorationStep >= 3)
 		{
 			SetFooter("一轮探索压力循环完成：返回 Hub 后可继续复测闭环。Ctrl+S 保存，Ctrl+L 加载。");
@@ -192,10 +200,12 @@ public partial class HubRuntime : Node2D
 	{
 		domain.ReturnToHub();
 		ShowHub();
+		UpdateOnboardingHint();
 	}
 
 	public void OnSavePressed()
 	{
+		onboarding.ObserveSaveLoadAwareness(visibleOrUsed: true, ownerStateAlreadyMutated: true);
 		var result = domain.SaveSceneState(new PlayableSliceSceneState(
 			currentScreen,
 			selectedRoute,
@@ -206,6 +216,7 @@ public partial class HubRuntime : Node2D
 		SetSaveStatus(result.Success
 			? $"保存完成：canonical progress gen {result.Generation}"
 			: $"保存失败：{result.Reason}");
+		UpdateOnboardingHint();
 	}
 
 	public void OnLoadPressed()
@@ -237,6 +248,7 @@ public partial class HubRuntime : Node2D
 		{
 			ShowHub();
 		}
+		UpdateOnboardingHint();
 	}
 
 	public void ShowHub()
@@ -255,6 +267,7 @@ public partial class HubRuntime : Node2D
 		SetWorldMode("hub");
 		SetFooter("HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载可用按钮或 Ctrl+S / Ctrl+L。");
 		GrabButton("ChartButton");
+		UpdateOnboardingHint();
 	}
 
 	public void TrySpatialInteraction()
@@ -268,6 +281,7 @@ public partial class HubRuntime : Node2D
 		{
 			SetFooter("仓储已检查：基础补给、信标水晶和修理包状态已同步。");
 			SetSaveStatus("交互完成：仓储状态可见");
+			UpdateOnboardingHint();
 		}
 		else if (nearestInteraction == "exploration_search")
 		{
@@ -329,6 +343,28 @@ public partial class HubRuntime : Node2D
 		};
 	}
 
+	/// <summary>Returns runtime onboarding state for smoke tests and QA diagnostics.</summary>
+	public Godot.Collections.Dictionary DebugOnboardingSnapshot()
+	{
+		var hint = onboarding.EvaluateNextHint();
+		var steps = new Godot.Collections.Dictionary();
+		foreach (var stepId in onboarding.StepIds)
+		{
+			steps[stepId] = onboarding.GetStepProgress(stepId).State.ToString();
+		}
+
+		return new Godot.Collections.Dictionary
+		{
+			["progress_percent"] = onboarding.FirstLoopProgressPercent,
+			["first_loop_complete"] = onboarding.IsFirstLoopComplete,
+			["active_surface"] = onboarding.ActiveSurface.ToString(),
+			["next_hint_step"] = hint?.StepId ?? "",
+			["hint_text"] = runtimeHintLabel?.Text ?? "",
+			["hint_mouse_filter"] = runtimeHintLabel is null ? -1 : (int)runtimeHintLabel.MouseFilter,
+			["steps"] = steps,
+		};
+	}
+
 	private void CacheNodes()
 	{
 		hubRoot = FindControl("HubRoot");
@@ -346,6 +382,12 @@ public partial class HubRuntime : Node2D
 		chartStationLabel = FindChild("ChartStation", true, false) as Label;
 		cargoStationLabel = FindChild("CargoStation", true, false) as Label;
 		saveStatusLabel = FindChild("SaveStatusLabel", true, false) as Label;
+		runtimeHintLabel = FindChild("RuntimeHintLabel", true, false) as Label;
+		if (runtimeHintLabel is not null)
+		{
+			runtimeHintLabel.MouseFilter = Control.MouseFilterEnum.Ignore;
+			runtimeHintLabel.FocusMode = Control.FocusModeEnum.None;
+		}
 		footerLabel = FindChild("Footer", true, false) as Label;
 		hubActionButtons[0] = FindChild("ChartButton", true, false) as Button;
 		hubActionButtons[1] = FindChild("SaveButton", true, false) as Button;
@@ -519,6 +561,7 @@ public partial class HubRuntime : Node2D
 		selectedRoute = domain.Snapshot.SelectedRouteId;
 		SetChartStatus($"已选择航线：{RouteName()}。按“确认出发”进入探索。");
 		GrabButton("DepartButton");
+		UpdateOnboardingHint();
 	}
 
 	private void ShowChartPanel()
@@ -760,6 +803,35 @@ public partial class HubRuntime : Node2D
 	private void SetFooter(string text)
 	{
 		if (footerLabel is not null) footerLabel.Text = text;
+	}
+
+	private void UpdateOnboardingHint()
+	{
+		if (runtimeHintLabel is null)
+		{
+			return;
+		}
+
+		var hint = onboarding.EvaluateNextHint();
+		runtimeHintLabel.Text = hint is null
+			? "新手提示：首轮航线已完成，可继续自由探索。"
+			: HintText(hint.StepId);
+	}
+
+	private static string HintText(string stepId)
+	{
+		return stepId switch
+		{
+			OnboardingManager.FindHubHudStepId => "新手提示：查看 Hub 状态，按 M 或靠近舵台按 E 打开航图。",
+			OnboardingManager.OpenChartStepId => "新手提示：打开航图后选择一条可见航线。",
+			OnboardingManager.SelectRouteStepId => "新手提示：选择“雾海短程”或旧集市航道，然后确认出发。",
+			OnboardingManager.DepartRouteStepId => "新手提示：确认出发会进入探索 HUD。",
+			OnboardingManager.AdvancePressureStepId => "新手提示：靠近漂浮残骸按 E 搜索，观察资源、威胁和船体反馈。",
+			OnboardingManager.NoticeSaveLoadStepId => "新手提示：Ctrl+S 保存、Ctrl+L 加载；按钮也可用。",
+			OnboardingManager.ReturnHubStepId => "新手提示：靠近返航信标按 E 返回 Hub。",
+			OnboardingManager.NoticeSummaryChangeStepId => "新手提示：返回后查看货舱、船体和航图摘要变化。",
+			_ => "新手提示：继续完成当前首轮目标。",
+		};
 	}
 
 	private string LabelText(string nodeName) => (FindChild(nodeName, true, false) as Label)?.Text ?? "";

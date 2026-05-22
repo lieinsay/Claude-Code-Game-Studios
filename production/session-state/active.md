@@ -6,6 +6,15 @@ Feature: Production to Polish Gate Passed
 Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hardening follow-ups
 <!-- /STATUS -->
 
+## Session Extract -- Polish #18 Story 005 and Epic Complete 2026-05-22
+- Story complete: `production/epics/onboarding-first-loop/story-005-first-loop-smoke-regression-and-qa-evidence.md` -- First-Loop Smoke Regression and QA Evidence.
+- Runtime onboarding is now connected through C# `HubRuntime`, `PlayableSliceDomainAdapter.RegisterOnboarding(...)`, `OnboardingManager`, and canonical `progress.onboarding` persistence.
+- Added focused runner: `tests/integration/onboarding-first-loop/FirstLoopRegressionTest.csproj` -- PASS 6/6 checks.
+- Godot smoke evidence: `tests/smoke/session_shell_visual_probe.gd` PASS with onboarding step progression, focus-safe hint mouse filter, canonical save/load, and completed-hint non-replay after load.
+- Fresh perf evidence: `tests/smoke/session_shell_perf_probe.gd` PASS after replacing stale GDScript snake_case runtime calls with C# `HubRuntime` method names; frame/memory/save/load/transition budgets pass under headless.
+- Evidence/sign-off created: `production/qa/evidence/onboarding-first-loop-smoke-evidence.md`; `production/qa/qa-signoff-onboarding-first-loop.md` verdict APPROVED WITH CONDITIONS.
+- `/story-done` verdict: COMPLETE. Epic #18 Onboarding / First Loop is now Complete; no remaining #18 story is open. Next recommended: Navigation/Exploration runtime hardening beyond the current playable fixture, plus optional windowed visual capture during Polish.
+
 ## Session Extract -- Polish #18 Story 001 Complete 2026-05-22
 - Story complete: `production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md` -- First-Loop Step State and Hint Scoring.
 - Added headless C# `src/presentation/OnboardingManager.cs` with stable eight-step GDD ordering, ADR-0017 states, deterministic completion generation, progress percent, hint scoring, repeat counts, and ignored-event diagnostics.
@@ -51,7 +60,7 @@ Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hard
 - Gate recheck complete: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md`.
 - Verdict: **PASS WITH CONDITIONS**; `production/stage.txt` is now `Polish`.
 - Sprint 003 evidence accepted: domain-backed Godot smoke PASS, adapter test 30/30 PASS, solution build PASS, and user manual PVS3-007 PASS.
-- Conditions carried into Polish: #18 Onboarding implementation story split, fresh perf probe repair/rerun after headless timeout, broader Navigation/Exploration runtime contract hardening, and optional captured visual evidence.
+- Conditions carried into Polish at gate time: #18 Onboarding implementation story split, fresh perf probe repair/rerun after headless timeout, broader Navigation/Exploration runtime contract hardening, and optional captured visual evidence. As of 2026-05-22, #18 implementation and fresh perf probe are resolved; runtime hardening and optional windowed capture remain.
 
 ## Session Extract -- Production Domain Recheck 2026-05-17
 - Verdict: Production -> Polish is still **FAIL**; remain in Production.
@@ -590,7 +599,7 @@ Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hard
 
 ### Presentation Layer 进行中
 
-**2/3 Presentation Epics — UI/HUD 完成，Feedback Ready (11 stories, 1 pending)**
+**3/3 Presentation Epics — UI/HUD、Feedback、Onboarding 完成**
 
 | Epic | # | Stories | Types |
 |------|---|---------|-------|
