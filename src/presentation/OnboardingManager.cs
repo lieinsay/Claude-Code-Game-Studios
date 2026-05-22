@@ -65,6 +65,37 @@ public sealed record OnboardingStepEventResult(
 	int CompletionGeneration);
 
 /// <summary>
+/// Active surface observed by onboarding integration.
+/// </summary>
+public enum OnboardingSurface
+{
+	/// <summary>No playable surface has been observed yet.</summary>
+	Unknown = 0,
+
+	/// <summary>The Hub surface is visible.</summary>
+	Hub = 1,
+
+	/// <summary>The Chart surface is visible.</summary>
+	Chart = 2,
+
+	/// <summary>The Exploration surface is visible.</summary>
+	Exploration = 3,
+
+	/// <summary>A session save/load surface or affordance is visible.</summary>
+	Session = 4,
+}
+
+/// <summary>
+/// Read-only diagnostic for one consumed onboarding integration event.
+/// </summary>
+public sealed record OnboardingObservedEvent(
+	string EventId,
+	OnboardingSurface Surface,
+	string? StepId,
+	bool Accepted,
+	string? Reason);
+
+/// <summary>
 /// Headless first-loop guidance service for #18 onboarding.
 /// </summary>
 public sealed class OnboardingManager
@@ -121,7 +152,12 @@ public sealed class OnboardingManager
 		new ReadOnlyDictionary<string, StepDefinition>(Definitions.ToDictionary(item => item.StepId, StringComparer.Ordinal));
 
 	private readonly Dictionary<string, StepRuntimeState> steps = new(StringComparer.Ordinal);
+	private readonly List<OnboardingObservedEvent> observedEvents = new();
+	private readonly HashSet<string> suppressedHintStepIds = new(StringComparer.Ordinal);
 	private int completionGeneration;
+	private string? selectedRouteId;
+	private PlayableSliceSnapshot? lastExplorationSnapshot;
+	private PlayableSliceSnapshot? lastHubSnapshot;
 
 	/// <summary>Creates a new manager with the first GDD step eligible.</summary>
 	public OnboardingManager()
@@ -134,6 +170,15 @@ public sealed class OnboardingManager
 
 	/// <summary>Most recent ignored completion reason, exposed for QA diagnostics.</summary>
 	public string? LastIgnoredEventReason { get; private set; }
+
+	/// <summary>Current active surface observed by integration handlers.</summary>
+	public OnboardingSurface ActiveSurface { get; private set; } = OnboardingSurface.Unknown;
+
+	/// <summary>Observed integration events in arrival order.</summary>
+	public IReadOnlyList<OnboardingObservedEvent> ObservedEvents => observedEvents.AsReadOnly();
+
+	/// <summary>Step IDs whose stale hints were suppressed by surface changes.</summary>
+	public IReadOnlyCollection<string> SuppressedHintStepIds => suppressedHintStepIds.ToArray();
 
 	/// <summary>Percentage of first-loop steps completed, from 0 to 100.</summary>
 	public double FirstLoopProgressPercent =>
@@ -168,6 +213,12 @@ public sealed class OnboardingManager
 		steps[FindHubHudStepId].State = OnboardingStepState.Eligible;
 		completionGeneration = 0;
 		LastIgnoredEventReason = null;
+		ActiveSurface = OnboardingSurface.Unknown;
+		selectedRouteId = null;
+		lastExplorationSnapshot = null;
+		lastHubSnapshot = null;
+		observedEvents.Clear();
+		suppressedHintStepIds.Clear();
 	}
 
 	/// <summary>Consumes a deterministic step completion signal.</summary>
@@ -289,6 +340,170 @@ public sealed class OnboardingManager
 		return best;
 	}
 
+	/// <summary>Connects typed UIManager events to first-loop onboarding steps.</summary>
+	public void ConnectUiEvents(UIManager uiManager)
+	{
+		ArgumentNullException.ThrowIfNull(uiManager);
+		uiManager.ScreenChanged += (_, next) =>
+		{
+			if (next == Screen.Hub)
+			{
+				ObserveHubVisible(inputReachable: true, ownerStateAlreadyMutated: true);
+			}
+			else if (next is Screen.Chart or Screen.ChartRouteSelected or Screen.ChartDepartureConfirmed)
+			{
+				ObserveChartActive(ownerStateAlreadyMutated: true);
+			}
+			else if (next == Screen.Exploration)
+			{
+				ObserveExplorationActive(ownerStateAlreadyMutated: true);
+			}
+		};
+		uiManager.UIRouteSelected += (routeId, _) => ObserveRouteSelected(routeId, ownerStateAlreadyMutated: true);
+		uiManager.UIDepartureConfirmed += (routeId, _) => ObserveDepartureConfirmed(routeId, ownerStateAlreadyMutated: true);
+	}
+
+	/// <summary>Connects typed playable-slice adapter events to first-loop onboarding steps.</summary>
+	public void ConnectPlayableSliceEvents(PlayableSliceDomainAdapter adapter)
+	{
+		ArgumentNullException.ThrowIfNull(adapter);
+		adapter.ChartOpened += () => ObserveChartActive(ownerStateAlreadyMutated: true);
+		adapter.RouteSelected += routeId => ObserveRouteSelected(routeId, ownerStateAlreadyMutated: true);
+		adapter.DepartureConfirmed += routeId => ObserveDepartureConfirmed(routeId, ownerStateAlreadyMutated: true);
+		adapter.ExplorationPressureChanged += (_, after) => ObserveExplorationPressureChanged(after, ownerStateAlreadyMutated: true);
+		adapter.SaveLoadUsed += (_, success) => ObserveSaveLoadAwareness(visibleOrUsed: success, ownerStateAlreadyMutated: true);
+		adapter.ReturnedToHub += (before, after) => ObserveReturnedToHub(before, after, ownerStateAlreadyMutated: true);
+	}
+
+	/// <summary>Consumes a Hub-visible event after the owning UI surface is reachable.</summary>
+	public OnboardingStepEventResult ObserveHubVisible(bool inputReachable, bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Hub;
+		if (!ownerStateAlreadyMutated || !inputReachable)
+		{
+			return RecordIgnoredEvent("hub_visible", OnboardingSurface.Hub, FindHubHudStepId, "hub_not_reachable");
+		}
+
+		return RecordEvent("hub_visible", OnboardingSurface.Hub, CompleteStep(FindHubHudStepId));
+	}
+
+	/// <summary>Consumes a Chart-active event and suppresses stale Hub hints.</summary>
+	public OnboardingStepEventResult ObserveChartActive(bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Chart;
+		suppressedHintStepIds.Add(FindHubHudStepId);
+		if (!ownerStateAlreadyMutated)
+		{
+			return RecordIgnoredEvent("chart_active", OnboardingSurface.Chart, OpenChartStepId, "owner_state_not_mutated");
+		}
+
+		return RecordEvent("chart_active", OnboardingSurface.Chart, CompleteStep(OpenChartStepId));
+	}
+
+	/// <summary>Consumes a route-selected event after Chart state has mutated.</summary>
+	public OnboardingStepEventResult ObserveRouteSelected(string routeId, bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Chart;
+		if (!ownerStateAlreadyMutated || string.IsNullOrWhiteSpace(routeId))
+		{
+			return RecordIgnoredEvent("route_selected", OnboardingSurface.Chart, SelectRouteStepId, "route_not_committed");
+		}
+
+		selectedRouteId = routeId;
+		return RecordEvent("route_selected", OnboardingSurface.Chart, CompleteStep(SelectRouteStepId));
+	}
+
+	/// <summary>Consumes a departure-confirmed event after Chart/Hub state has mutated.</summary>
+	public OnboardingStepEventResult ObserveDepartureConfirmed(string routeId, bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Exploration;
+		if (!ownerStateAlreadyMutated
+			|| string.IsNullOrWhiteSpace(routeId)
+			|| !string.Equals(selectedRouteId, routeId, StringComparison.Ordinal))
+		{
+			return RecordIgnoredEvent("departure_confirmed", OnboardingSurface.Exploration, DepartRouteStepId, "departure_not_committed");
+		}
+
+		return RecordEvent("departure_confirmed", OnboardingSurface.Exploration, CompleteStep(DepartRouteStepId));
+	}
+
+	/// <summary>Consumes an Exploration-active event without completing pressure by itself.</summary>
+	public void ObserveExplorationActive(bool ownerStateAlreadyMutated)
+	{
+		if (ownerStateAlreadyMutated)
+		{
+			ActiveSurface = OnboardingSurface.Exploration;
+			observedEvents.Add(new OnboardingObservedEvent("exploration_active", ActiveSurface, null, Accepted: true, null));
+		}
+	}
+
+	/// <summary>Consumes visible resource/threat/hull pressure after the adapter changed state.</summary>
+	public OnboardingStepEventResult ObserveExplorationPressureChanged(
+		PlayableSliceSnapshot snapshot,
+		bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Exploration;
+		if (!ownerStateAlreadyMutated || !PressureChanged(snapshot))
+		{
+			lastExplorationSnapshot = snapshot;
+			return RecordIgnoredEvent(
+				"exploration_pressure_changed",
+				OnboardingSurface.Exploration,
+				AdvancePressureStepId,
+				"pressure_unchanged");
+		}
+
+		lastExplorationSnapshot = snapshot;
+		return RecordEvent("exploration_pressure_changed", OnboardingSurface.Exploration, CompleteStep(AdvancePressureStepId));
+	}
+
+	/// <summary>Consumes save/load visibility or successful use as onboarding awareness.</summary>
+	public OnboardingStepEventResult ObserveSaveLoadAwareness(bool visibleOrUsed, bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Session;
+		if (!ownerStateAlreadyMutated || !visibleOrUsed)
+		{
+			return RecordIgnoredEvent("save_load_awareness", OnboardingSurface.Session, NoticeSaveLoadStepId, "save_load_not_visible");
+		}
+
+		return RecordEvent("save_load_awareness", OnboardingSurface.Session, CompleteStep(NoticeSaveLoadStepId));
+	}
+
+	/// <summary>Consumes return-Hub and summary-change facts after Hub/domain state has mutated.</summary>
+	public IReadOnlyList<OnboardingStepEventResult> ObserveReturnedToHub(
+		PlayableSliceSnapshot before,
+		PlayableSliceSnapshot after,
+		bool ownerStateAlreadyMutated)
+	{
+		ActiveSurface = OnboardingSurface.Hub;
+		var results = new List<OnboardingStepEventResult>();
+		if (!ownerStateAlreadyMutated || !string.Equals(after.HubDockingState, "Landed", StringComparison.Ordinal))
+		{
+			results.Add(RecordIgnoredEvent("returned_to_hub", OnboardingSurface.Hub, ReturnHubStepId, "hub_not_landed"));
+			return results;
+		}
+
+		results.Add(RecordEvent("returned_to_hub", OnboardingSurface.Hub, CompleteStep(ReturnHubStepId)));
+		if (SummaryChanged(before, after))
+		{
+			results.Add(RecordEvent(
+				"hub_summary_changed",
+				OnboardingSurface.Hub,
+				CompleteStep(NoticeSummaryChangeStepId)));
+		}
+		else
+		{
+			results.Add(RecordIgnoredEvent(
+				"hub_summary_changed",
+				OnboardingSurface.Hub,
+				NoticeSummaryChangeStepId,
+				"summary_unchanged"));
+		}
+
+		lastHubSnapshot = after;
+		return results;
+	}
+
 	/// <summary>Calculates ADR-0017 hint priority score.</summary>
 	public static int CalculateHintPriorityScore(
 		int baseStepPriority,
@@ -307,6 +522,59 @@ public sealed class OnboardingManager
 	{
 		LastIgnoredEventReason = reason;
 		return new OnboardingStepEventResult(false, stepId, reason, completionGeneration);
+	}
+
+	private OnboardingStepEventResult RecordEvent(
+		string eventId,
+		OnboardingSurface surface,
+		OnboardingStepEventResult result)
+	{
+		observedEvents.Add(new OnboardingObservedEvent(eventId, surface, result.StepId, result.Accepted, result.IgnoredReason));
+		return result;
+	}
+
+	private OnboardingStepEventResult RecordIgnoredEvent(
+		string eventId,
+		OnboardingSurface surface,
+		string stepId,
+		string reason)
+	{
+		var result = Ignore(stepId, reason);
+		observedEvents.Add(new OnboardingObservedEvent(eventId, surface, stepId, Accepted: false, reason));
+		return result;
+	}
+
+	private bool PressureChanged(PlayableSliceSnapshot snapshot)
+	{
+		if (ActiveSurface != OnboardingSurface.Exploration)
+		{
+			return false;
+		}
+
+		if (lastExplorationSnapshot is null)
+		{
+			return snapshot.ExplorationStep > 0
+				|| snapshot.CargoUsed > 0
+				|| snapshot.RewardCarried > 0
+				|| snapshot.HullIntegrity < 100
+				|| !string.Equals(snapshot.ThreatText, "暂无遭遇", StringComparison.Ordinal);
+		}
+
+		return snapshot.ExplorationStep != lastExplorationSnapshot.ExplorationStep
+			|| snapshot.CargoUsed != lastExplorationSnapshot.CargoUsed
+			|| snapshot.RewardCarried != lastExplorationSnapshot.RewardCarried
+			|| snapshot.HullIntegrity != lastExplorationSnapshot.HullIntegrity
+			|| !string.Equals(snapshot.ThreatText, lastExplorationSnapshot.ThreatText, StringComparison.Ordinal);
+	}
+
+	private static bool SummaryChanged(PlayableSliceSnapshot before, PlayableSliceSnapshot after)
+	{
+		return before.RewardInStorage != after.RewardInStorage
+			|| before.RewardCarried != after.RewardCarried
+			|| before.CargoUsed != after.CargoUsed
+			|| before.HullIntegrity != after.HullIntegrity
+			|| !string.Equals(before.StorageText, after.StorageText, StringComparison.Ordinal)
+			|| !string.Equals(before.HubDockingState, after.HubDockingState, StringComparison.Ordinal);
 	}
 
 	private StepRuntimeState GetRuntimeState(string stepId)

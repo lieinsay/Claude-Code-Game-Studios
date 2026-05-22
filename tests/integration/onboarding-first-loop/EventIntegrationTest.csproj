@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <OutputPath>bin\StepStateHintScoringTest\</OutputPath>
+    <OutputPath>bin\EventIntegrationTest\</OutputPath>
     <UseAppHost>false</UseAppHost>
     <GodotProjectDir>$(MSBuildThisFileDirectory)..\..\..\</GodotProjectDir>
     <GodotProjectDirBase64>$([MSBuild]::ConvertToBase64('$(GodotProjectDir)'))</GodotProjectDirBase64>
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="StepStateHintScoringProgram.cs" />
+    <Compile Include="EventIntegrationProgram.cs" />
     <ProjectReference Include="..\..\..\CloudWeaverVoyage.csproj" />
   </ItemGroup>
 </Project>

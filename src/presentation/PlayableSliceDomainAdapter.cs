@@ -34,6 +34,24 @@ public sealed class PlayableSliceDomainAdapter
 		persistence = BuildPersistence();
 	}
 
+	/// <summary>Raised after ChartManager opens the chart.</summary>
+	public event Action? ChartOpened;
+
+	/// <summary>Raised after ChartManager accepts a selected route.</summary>
+	public event Action<string>? RouteSelected;
+
+	/// <summary>Raised after ChartManager and HubManager accept departure.</summary>
+	public event Action<string>? DepartureConfirmed;
+
+	/// <summary>Raised after ResourcesManager or ModuleHullManager pressure changes in exploration.</summary>
+	public event Action<PlayableSliceSnapshot, PlayableSliceSnapshot>? ExplorationPressureChanged;
+
+	/// <summary>Raised after canonical persistence save/load is used.</summary>
+	public event Action<string, bool>? SaveLoadUsed;
+
+	/// <summary>Raised after HubManager returns to Landed and summaries have updated.</summary>
+	public event Action<PlayableSliceSnapshot, PlayableSliceSnapshot>? ReturnedToHub;
+
 	public PlayableSliceSnapshot Snapshot => new(
 		ChartState: chart.CurrentState.ToString(),
 		SelectedRouteId: chart.SelectedRouteId,
@@ -63,6 +81,7 @@ public sealed class PlayableSliceDomainAdapter
 	{
 		chart.OpenChart();
 		lastStatus = $"ChartManager {chart.CurrentState}: visible routes {chart.VisibleRoutes.Count}.";
+		ChartOpened?.Invoke();
 	}
 
 	public bool SelectRoute(string routeId)
@@ -71,6 +90,11 @@ public sealed class PlayableSliceDomainAdapter
 		lastStatus = selected
 			? $"ChartManager selected {RouteName(routeId)}."
 			: $"ChartManager rejected route {routeId}.";
+		if (selected)
+		{
+			RouteSelected?.Invoke(routeId);
+		}
+
 		return selected;
 	}
 
@@ -96,11 +120,17 @@ public sealed class PlayableSliceDomainAdapter
 		lastStatus = locked
 			? $"HubManager departed via {RouteName(routeId)}."
 			: $"HubManager rejected departure: {hub.LastRejectionReason}.";
+		if (locked)
+		{
+			DepartureConfirmed?.Invoke(routeId);
+		}
+
 		return locked;
 	}
 
 	public void AdvanceExploration()
 	{
+		var before = Snapshot;
 		var nextStep = Math.Min(explorationStep + 1, 3);
 		if (nextStep == explorationStep)
 		{
@@ -125,16 +155,19 @@ public sealed class PlayableSliceDomainAdapter
 
 		explorationStep = nextStep;
 		lastStatus = $"ResourcesManager/ModuleHullManager advanced exploration to {explorationStep}/3.";
+		ExplorationPressureChanged?.Invoke(before, Snapshot);
 	}
 
 	public void ReturnToHub()
 	{
+		var before = Snapshot;
 		var extraction = resources.ExtractCarriedToStorage();
 		hub.TriggerArrival();
 		hub.CompleteArrivalAnimation();
 		lastStatus = extraction.Success
 			? "HubManager arrival completed; ResourcesManager extracted carried rewards to storage."
 			: $"HubManager arrival completed; reward extraction failed: {extraction.Result}.";
+		ReturnedToHub?.Invoke(before, Snapshot);
 	}
 
 	public PersistenceOperationResult SaveSceneState(PlayableSliceSceneState state)
@@ -145,6 +178,7 @@ public sealed class PlayableSliceDomainAdapter
 			? $"canonical progress saved gen {result.Generation}"
 			: $"canonical progress save failed: {result.Reason}";
 		lastStatus = lastSaveStatus;
+		SaveLoadUsed?.Invoke("save", result.Success);
 		return result;
 	}
 
@@ -155,6 +189,7 @@ public sealed class PlayableSliceDomainAdapter
 			? $"canonical progress loaded gen {result.Generation}"
 			: $"canonical progress load failed: {result.Reason}";
 		lastStatus = lastLoadStatus;
+		SaveLoadUsed?.Invoke("load", result.Success);
 		return (result, sceneState);
 	}
 

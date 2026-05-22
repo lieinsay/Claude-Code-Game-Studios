@@ -1,7 +1,7 @@
 # Story 002: UI and Domain Event Integration
 
 > **Epic**: Onboarding and First Loop
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: M / 6-8 hours
@@ -30,12 +30,12 @@
 
 *From GDD `design/gdd/onboarding-first-loop.md`, scoped to this story:*
 
-- [ ] GIVEN the player reaches Hub, WHEN Hub UI is visible and input reachable, THEN `find_hub_hud` can complete.
-- [ ] GIVEN the player opens Chart by mouse or keyboard, WHEN Chart is active, THEN `open_chart` can complete and Hub guidance is hidden.
-- [ ] GIVEN a route is selected and departure is confirmed, WHEN Chart/Hub domain events are observed after mutation, THEN `select_route` and `depart_route` can complete.
-- [ ] GIVEN Exploration resource/threat/hull feedback changes, WHEN pressure feedback is visible, THEN `advance_pressure` can complete without covering feedback labels.
-- [ ] GIVEN Save/Load entries are visible or used, WHEN the player notices or uses them, THEN `notice_save_load` can complete.
-- [ ] GIVEN the player returns to Hub and summaries change, WHEN cargo/storage/hull/route summaries update, THEN `return_hub` and `notice_summary_change` can complete.
+- [x] GIVEN the player reaches Hub, WHEN Hub UI is visible and input reachable, THEN `find_hub_hud` can complete.
+- [x] GIVEN the player opens Chart by mouse or keyboard, WHEN Chart is active, THEN `open_chart` can complete and Hub guidance is hidden.
+- [x] GIVEN a route is selected and departure is confirmed, WHEN Chart/Hub domain events are observed after mutation, THEN `select_route` and `depart_route` can complete.
+- [x] GIVEN Exploration resource/threat/hull feedback changes, WHEN pressure feedback is visible, THEN `advance_pressure` can complete without covering feedback labels.
+- [x] GIVEN Save/Load entries are visible or used, WHEN the player notices or uses them, THEN `notice_save_load` can complete.
+- [x] GIVEN the player returns to Hub and summaries change, WHEN cargo/storage/hull/route summaries update, THEN `return_hub` and `notice_summary_change` can complete.
 
 ---
 
@@ -107,7 +107,13 @@ Derived from ADR-0017 and ADR-0012:
 **Required evidence**:
 - `tests/integration/onboarding-first-loop/EventIntegrationTest.csproj` -- must exist and pass
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing
+
+**Evidence**:
+- `dotnet run --project tests/integration/onboarding-first-loop/EventIntegrationTest.csproj` -- PASS, 7/7 checks.
+- `dotnet run --project tests/unit/onboarding-first-loop/StepStateHintScoringTest.csproj` -- PASS, 6/6 checks.
+- `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` -- PASS, 30/30 checks.
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` -- PASS, 0 warnings, 0 errors.
 
 ---
 
@@ -116,3 +122,9 @@ Derived from ADR-0017 and ADR-0012:
 - Depends on: Story 001
 - Unlocks: Story 003, Story 004, Story 005
 
+## Completion Notes
+
+- Extended `OnboardingManager` with typed UI and playable-slice integration handlers, active-surface diagnostics, observed-event snapshots, and stale Hub hint suppression.
+- Added post-mutation typed events to `PlayableSliceDomainAdapter` for chart open, route selection, departure, exploration pressure, save/load use, and return-Hub summary changes.
+- Added `tests/integration/onboarding-first-loop/EventIntegrationTest.csproj`, covering all six acceptance criteria plus a full adapter-connected eight-step completion regression.
+- Onboarding still observes only; it does not open panels, force focus, mutate routes/cargo/hull, or perform save/load.
