@@ -120,19 +120,20 @@ public sealed class PlayableSliceDomainAdapter
 
 	public bool SelectRoute(string routeId)
 	{
-		var selected = chart.SelectRoute(routeId);
+		var resolvedRouteId = fixture.ResolveRouteId(routeId);
+		var selected = chart.SelectRoute(resolvedRouteId);
 		lastStatus = selected
-			? $"ChartManager selected {RouteName(routeId)}."
+			? $"ChartManager selected {RouteName(resolvedRouteId)}."
 			: $"ChartManager rejected route {routeId}.";
 		if (selected)
 		{
-			RouteSelected?.Invoke(routeId);
+			RouteSelected?.Invoke(resolvedRouteId);
 		}
 
 		return selected;
 	}
 
-	public string GetRouteDisplayName(string routeId) => RouteName(routeId);
+	public string GetRouteDisplayName(string routeId) => RouteName(fixture.ResolveRouteId(routeId));
 
 	public bool ConfirmDeparture()
 	{
@@ -229,7 +230,7 @@ public sealed class PlayableSliceDomainAdapter
 
 	public PersistenceOperationResult SaveSceneState(PlayableSliceSceneState state)
 	{
-		sceneState = state with { ExplorationStep = explorationStep };
+		sceneState = state with { Route = fixture.ResolveRouteId(state.Route), ExplorationStep = explorationStep };
 		var result = persistence.RequestSaveProgress();
 		lastSaveStatus = result.Success
 			? $"canonical progress saved gen {result.Generation}"
@@ -529,9 +530,10 @@ public sealed class PlayableSliceDomainAdapter
 
 	private void RestorePlayableSliceSnapshotPackage(SnapshotPackage package)
 	{
+		var restoredRoute = fixture.ResolveRouteId(ReadString(package.Payload, "route", ""));
 		sceneState = new PlayableSliceSceneState(
 			ReadString(package.Payload, "screen", "hub"),
-			ReadString(package.Payload, "route", ""),
+			restoredRoute,
 			ReadInt(package.Payload, "exploration_step", 0),
 			ReadFloat(package.Payload, "player_x", 158.0f),
 			ReadFloat(package.Payload, "player_y", 610.0f),
@@ -547,19 +549,19 @@ public sealed class PlayableSliceDomainAdapter
 		{
 			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
 		}
-		lastSearchPointId = ReadString(package.Payload, "last_search_point_id", "");
+		lastSearchPointId = fixture.ResolveSearchPointId(ReadString(package.Payload, "last_search_point_id", ""));
 		lastSearchPointName = ReadString(package.Payload, "last_search_point_name", SearchPointName(lastSearchPointId));
 		lastSearchMessage = ReadString(package.Payload, "last_search_message", "尚未搜索");
 		lastStatus = "Playable slice scene state restored from canonical progress.";
 	}
 
 	private string RouteName(string routeId) =>
-		fixture.RouteById.TryGetValue(routeId, out var route)
+		fixture.RouteById.TryGetValue(fixture.ResolveRouteId(routeId), out var route)
 			? route.DisplayName
 			: string.IsNullOrWhiteSpace(routeId) ? "未命名航线" : routeId;
 
 	private string SearchPointName(string pointId) =>
-		fixture.SearchPoints.FirstOrDefault(point => point.PointId == pointId)?.DisplayName ?? string.Empty;
+		fixture.SearchPoints.FirstOrDefault(point => point.PointId == fixture.ResolveSearchPointId(pointId))?.DisplayName ?? string.Empty;
 
 	private int CargoUsed => TotalRewards * 80 + (explorationStep >= 2 ? 20 : 0);
 
@@ -711,9 +713,19 @@ internal sealed class PlayableSliceRuntimeFixture
 		new("sp.playable.2", "剪云裂隙", "Fallback threat playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
 		new("sp.playable.3", "返航浮标箱", "Fallback extraction playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
 	];
+	public IReadOnlyDictionary<string, string> RouteIdMigrations { get; init; } =
+		new Dictionary<string, string>(StringComparer.Ordinal);
+	public IReadOnlyDictionary<string, string> SearchPointIdMigrations { get; init; } =
+		new Dictionary<string, string>(StringComparer.Ordinal);
 
 	public IReadOnlyDictionary<string, PlayableRouteFixture> RouteById =>
 		Routes.ToDictionary(route => route.RouteId, StringComparer.Ordinal);
+
+	public string ResolveRouteId(string routeId) =>
+		RouteIdMigrations.TryGetValue(routeId, out var currentRouteId) ? currentRouteId : routeId;
+
+	public string ResolveSearchPointId(string pointId) =>
+		SearchPointIdMigrations.TryGetValue(pointId, out var currentPointId) ? currentPointId : pointId;
 
 	public int ThreatDamage => SearchPoints
 		.Where(point => !string.IsNullOrWhiteSpace(point.ThreatId))
@@ -746,6 +758,8 @@ internal sealed class PlayableSliceRuntimeFixture
 			VoyageFastForwardSeconds = ReadDouble(root, "voyage_fast_forward_seconds", 240.0d),
 			InitialResources = ReadInitialResources(root),
 			StartingModules = ReadStartingModules(root),
+			RouteIdMigrations = ReadIdMigrations(root, "route_ids"),
+			SearchPointIdMigrations = ReadIdMigrations(root, "search_point_ids"),
 			Routes = ReadRoutes(root),
 			SearchPoints = ReadSearchPoints(root),
 		};
@@ -832,6 +846,29 @@ internal sealed class PlayableSliceRuntimeFixture
 		return searchPoints.Length > 0
 			? searchPoints
 			: new PlayableSliceRuntimeFixture().SearchPoints;
+	}
+
+	private static IReadOnlyDictionary<string, string> ReadIdMigrations(JsonElement root, string migrationPropertyName)
+	{
+		if (!root.TryGetProperty("id_migrations", out var migrations)
+			|| migrations.ValueKind != JsonValueKind.Object
+			|| !migrations.TryGetProperty(migrationPropertyName, out var array)
+			|| array.ValueKind != JsonValueKind.Array)
+		{
+			return new Dictionary<string, string>(StringComparer.Ordinal);
+		}
+
+		var result = new Dictionary<string, string>(StringComparer.Ordinal);
+		foreach (var item in array.EnumerateArray())
+		{
+			var source = ReadString(item, "from", "");
+			var target = ReadString(item, "to", "");
+			if (!string.IsNullOrWhiteSpace(source) && !string.IsNullOrWhiteSpace(target) && source != target)
+			{
+				result[source] = target;
+			}
+		}
+		return result;
 	}
 
 	private static IReadOnlyList<string> ReadStringArray(JsonElement item, string propertyName)

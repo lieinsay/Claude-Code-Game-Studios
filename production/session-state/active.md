@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 004 authored content validation guard complete; continue Polish backlog
+Task: Polish Story 005 route/search ID migration guard complete; continue Polish backlog until human design input is needed
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 005 Route/Search ID Migration Guard Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-005-route-search-id-migration-guard.md` -- Route / Search ID Migration Guard.
+- `src/presentation/playable_slice_authored_content.json` now includes explicit `id_migrations.route_ids` and `id_migrations.search_point_ids` entries with reasons.
+- `PlayableSliceDomainAdapter` resolves legacy route IDs for display lookup, route selection, save-scene normalization, and playable slice restore.
+- `PlayableSliceDomainAdapter` resolves legacy search-point IDs during playable slice restore and search display fallback.
+- `tests/integration/playable-slice/DomainAdapterProgram.cs` now validates migration map structure and proves legacy route selection/restore maps to the current `route.mist` ID.
+- Focused playable-slice integration evidence is now `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 118/118.
+- Evidence: `production/qa/evidence/polish-005-route-search-id-migration-guard-evidence.md`.
+- Remaining scope is not a blocker: this is a local playable route/search ID guard, not final project-wide save migration infrastructure or final content design. Future content scale-up, final route/search design, final art/audio, and long manual play evidence need human design/QA judgment before Release readiness can be discussed.
 
 ## Session Extract -- Polish Story 004 Authored Content Validation Guard Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-004-authored-content-validation-guard.md` -- Authored Content Validation Guard.

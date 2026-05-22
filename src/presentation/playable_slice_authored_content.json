@@ -11,6 +11,22 @@
   "starting_modules": [
     { "slot_id": "slot_a", "module_type": "Cargo" }
   ],
+  "id_migrations": {
+    "route_ids": [
+      {
+        "from": "route.playable-mist",
+        "to": "route.mist",
+        "reason": "Legacy playable-slice route id retained for local save compatibility."
+      }
+    ],
+    "search_point_ids": [
+      {
+        "from": "sp.playable.legacy-1",
+        "to": "sp.playable.1",
+        "reason": "Legacy first-search id retained for local save compatibility."
+      }
+    ]
+  },
   "routes": [
     {
       "route_id": "route.mist",

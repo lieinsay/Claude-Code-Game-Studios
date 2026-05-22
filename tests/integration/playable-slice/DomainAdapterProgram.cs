@@ -61,15 +61,29 @@ static JsonElement RequiredArray(JsonElement element, string propertyName)
 		: default;
 }
 
+static JsonElement OptionalMigrationArray(JsonElement element, string propertyName)
+{
+	if (!element.TryGetProperty("id_migrations", out var migrations) || migrations.ValueKind != JsonValueKind.Object)
+	{
+		return default;
+	}
+
+	return RequiredArray(migrations, propertyName);
+}
+
 var contentPath = Path.Combine(FindProjectRoot(), "src", "presentation", "playable_slice_authored_content.json");
 Check(File.Exists(contentPath), "authored playable content file exists");
 using var contentDocument = JsonDocument.Parse(File.ReadAllText(contentPath));
 var contentRoot = contentDocument.RootElement;
 var routes = RequiredArray(contentRoot, "routes");
 var searchPoints = RequiredArray(contentRoot, "search_points");
+var routeMigrations = OptionalMigrationArray(contentRoot, "route_ids");
+var searchPointMigrations = OptionalMigrationArray(contentRoot, "search_point_ids");
 var routeIds = new HashSet<string>(StringComparer.Ordinal);
 var routeDestinations = new HashSet<string>(StringComparer.Ordinal);
 var searchPointIds = new HashSet<string>(StringComparer.Ordinal);
+var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
+var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var routeCount = routes.ValueKind == JsonValueKind.Array ? routes.GetArrayLength() : 0;
 var searchPointCount = searchPoints.ValueKind == JsonValueKind.Array ? searchPoints.GetArrayLength() : 0;
 var status = RequiredString(contentRoot, "content_status");
@@ -127,6 +141,36 @@ if (searchPoints.ValueKind == JsonValueKind.Array)
 	}
 }
 
+Check(routeMigrations.ValueKind == JsonValueKind.Array, "route id migration map is explicit");
+if (routeMigrations.ValueKind == JsonValueKind.Array)
+{
+	foreach (var migration in routeMigrations.EnumerateArray())
+	{
+		var source = RequiredString(migration, "from");
+		var target = RequiredString(migration, "to");
+		Check(source.StartsWith("route.", StringComparison.Ordinal), $"route migration source '{source}' uses route namespace");
+		Check(routeMigrationSources.Add(source), $"route migration source '{source}' is unique");
+		Check(!routeIds.Contains(source), $"route migration source '{source}' is not an active route id");
+		Check(routeIds.Contains(target), $"route migration target '{target}' resolves to active route");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(migration, "reason")), $"route migration '{source}' records a reason");
+	}
+}
+
+Check(searchPointMigrations.ValueKind == JsonValueKind.Array, "search point id migration map is explicit");
+if (searchPointMigrations.ValueKind == JsonValueKind.Array)
+{
+	foreach (var migration in searchPointMigrations.EnumerateArray())
+	{
+		var source = RequiredString(migration, "from");
+		var target = RequiredString(migration, "to");
+		Check(source.StartsWith("sp.", StringComparison.Ordinal), $"search migration source '{source}' uses search namespace");
+		Check(searchPointMigrationSources.Add(source), $"search migration source '{source}' is unique");
+		Check(!searchPointIds.Contains(source), $"search migration source '{source}' is not an active search point id");
+		Check(searchPointIds.Contains(target), $"search migration target '{target}' resolves to active search point");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(migration, "reason")), $"search migration '{source}' records a reason");
+	}
+}
+
 var adapter = new PlayableSliceDomainAdapter();
 adapter.OpenChart();
 var opened = adapter.Snapshot;
@@ -134,8 +178,11 @@ Check(opened.ChartState == "Browsing", "adapter opens ChartManager into Browsing
 Check(opened.ContentVersion == "polish-003-authored-route-search-v1", "adapter loads authored playable content version");
 Check(opened.ContentStatus == "polish_authored", "adapter reports authored playable content status");
 Check(opened.VisibleRouteCount >= 2, "adapter exposes seeded visible routes");
+Check(adapter.GetRouteDisplayName("route.playable-mist") == "雾海短程", "adapter resolves legacy route id display name through migration map");
+Check(adapter.SelectRoute("route.playable-mist"), "adapter accepts legacy route id through migration map");
+var migratedSelected = adapter.Snapshot;
+Check(migratedSelected.SelectedRouteId == "route.mist", "legacy route selection resolves to current route id");
 
-Check(adapter.SelectRoute("route.mist"), "adapter selects mist route through ChartManager");
 var selected = adapter.Snapshot;
 Check(selected.ChartState == "RouteSelected", "ChartManager state is RouteSelected");
 Check(selected.SelectedRouteId == "route.mist", "selected route comes from ChartManager");
@@ -192,6 +239,12 @@ Check(loaded.LastSearchPointId == "sp.playable.2", "Persistence restores last Ex
 Check(loaded.RewardCarried == 2, "Persistence restores ResourcesManager carried rewards");
 Check(loaded.RewardInStorage == 0, "Persistence restores ResourcesManager storage before Hub return");
 Check(loaded.HullIntegrity == 94, "Persistence restores ModuleHullManager hull damage");
+
+var legacySave = adapter.SaveSceneState(new PlayableSliceSceneState("exploration", "route.playable-mist", loaded.ExplorationStep, 592, 594, "saved with legacy route id"));
+var legacyLoad = adapter.LoadSceneState();
+Check(legacySave.Success, "Persistence saves scene state containing legacy route id");
+Check(legacyLoad.Result.Success, "Persistence reloads scene state containing legacy route id");
+Check(legacyLoad.State.Route == "route.mist", "Persistence migrates legacy route id to current route id on restore");
 
 Console.WriteLine($"RESULT {total - failed}/{total} passing");
 return failed == 0 ? 0 : 1;
