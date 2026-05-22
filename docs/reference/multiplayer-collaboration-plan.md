@@ -1,13 +1,13 @@
 # 多人协作生产计划 — 云海织航 MVP
 
-> 生成: 2026-05-10 | 最后更新: 2026-05-17
-> 基于: 17 Epic × 120 Story 完整分解
+> 生成: 2026-05-10 | 最后更新: 2026-05-22
+> 基于: 18 Epic × 125 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 待拆分**
+> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Ready**
 
-> **Readiness 基线**: 所有 120 个生产 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-17 同步到 Polish entry 状态。Epic #1-#17 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；#18 story split 与 fresh perf probe 是 Polish 入口条件。
+> **Readiness 基线**: 所有 125 个 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 Polish entry 状态。Epic #1-#17 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；#18 story split 已完成，fresh perf probe 仍是 Polish 入口条件。
 
 ---
 
@@ -494,7 +494,7 @@ D-C: 性能分析 + 优化
 后续 (Vertical Slice):
   ☑ Epic #17 Feedback/Audio first Polish slice
   ▣ Sprint 003 Domain-Backed Playable Slice（当前 Production blocker）
-  □ Epic #18 Onboarding story split（Sprint 003 gate 风险解除后）
+  ▣ Epic #18 Onboarding implementation（Story 001 readiness next）
 ```
 
 ### Production Recovery 并行分工 (Sprint 003)
@@ -624,7 +624,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #16 UI | 001-006 | #5+#8+#9+#11+#12+#13+#14 基础 API | ✅ Complete — 2026-05-15 |
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
 | Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-007 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Complete; Production -> Polish PASS WITH CONDITIONS |
-| #18 Onboarding | TBD | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | Polish entry story split |
+| #18 Onboarding | 001-005 | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | Polish entry Ready |
 
 ---
 

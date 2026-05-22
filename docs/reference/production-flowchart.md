@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Polish | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 待拆分**
+> 当前状态: **Polish | Phase 0-A-F/#17 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Ready**
 
 ---
 
@@ -322,9 +322,9 @@ Week 11-12
 ```
 Week 13+
 ┌─ #17 反馈音频 ─────────────────────── ✅ Complete (Story 001-005, 36/36 feedback checks)
-└─ #18 新手引导 ─────────────────────── ⚪ Pending story split (等 #7 #9 #11 #13 #14 #16)
+└─ #18 新手引导 ─────────────────────── 🟡 Ready (5 Polish entry stories)
 
-注意: ADR-0016 / ADR-0017 已 Accepted；#17 first Polish slice 已完成，#18 仍需拆分实现 stories。
+注意: ADR-0016 / ADR-0017 已 Accepted；#17 first Polish slice 已完成，#18 已拆分 5 个实现 stories。
 ```
 
 ---
@@ -501,7 +501,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 ✅ Phase F/#17  ████████████████████████ 100% (#17 Feedback Story 001-005 Complete)
 🟠 Recovery/S2  ████████████████████████ 100% (灰盒 playable slice human PASS)
 🟠 Recovery/S3  ████████████████████████ 100% (C# HubRuntime + domain managers + canonical Persistence + greybox + smoke + manual QA PASS)
-🟡 Polish/#18   ░░░░░░░░░░░░░░░░░░░░░░░░   0% (#18 Onboarding story split pending)
+🟡 Polish/#18   ████░░░░░░░░░░░░░░░░░░░░  15% (#18 Onboarding stories Ready; implementation pending)
 ```
 
 ### 本次生产状态检查 (2026-05-17)
@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
 - 活跃任务: Polish entry follow-ups。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；Polish 条件为 #18 story split、fresh perf probe、Navigation/Exploration runtime hardening。
+- 当前 blocker: 无 Production 硬阻塞；Polish 条件为 #18 implementation、fresh perf probe、Navigation/Exploration runtime hardening。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,12 +519,12 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | #18 Onboarding story split / implementation planning | Gate PASS WITH CONDITIONS ✅ | Next |
+| **P0** | #18 Story 001 readiness + implementation | #18 story split Complete ✅ | Next |
 | **P0** | Sprint 003: broaden Exploration/Navigation manager contract beyond fixture | Chart/Hub/Resources/Hull adapter ✅ | Next |
 | **P1** | Fresh performance probe repair/rerun | Gate condition | Polish entry |
-| **P2** | #18 Onboarding story split / implementation planning | #7/#9/#11/#13/#14/#16 Complete ✅ | Sprint 003 后 |
+| **P2** | Navigation/Exploration runtime hardening | Sprint 003 adapter fixture documented | Polish |
 
-> 关键建议: 先处理 Polish gate conditions：#18 story split、fresh perf probe、runtime hardening，然后进入正式 Polish backlog。
+> 关键建议: 先处理 Polish gate conditions：#18 implementation、fresh perf probe、runtime hardening，然后进入正式 Polish backlog。
 
 ### 并行机会提醒
 
@@ -542,7 +542,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 2. **瓶颈 #3 (持久化)**: 8 个系统直接依赖。序列化格式一旦确定不要轻易改。
 3. **最大汇合点 #10 (航行风险)**: 已完成并已通过 #11 消费验证；后续关键风险转移到 #16 的 UI 集成质量。
 4. **关键路径上 50 个 Story**: #1 → #6 → #9 → #10 → #11 → #12 → #16 已完成；关键风险转移到 Sprint 003 的 domain-backed playable evidence。
-5. **#18 阻塞**: ADR-0017 已 Accepted，但 implementation stories 尚未拆分；应在 Sprint 003 gate 风险解除后再进入 story-readiness。
+5. **#18 阻塞**: ADR-0017 已 Accepted，5 个 implementation stories 已拆分；下一步进入 Story 001 readiness。
 6. **Production gate blocker**: Epic #1-#17 Complete 主要证明 headless C# domain/story 证据；Polish 前仍需证明 Godot playable runtime 使用真实 domain authority 与 canonical persistence。
 
 ---
@@ -551,5 +551,5 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 - 系统依赖: `design/gdd/systems-index.md` — Dependency Map 章节
 - Epic/Story 定义: `production/epics/` 目录下各 Epic 文件
-- Story 类型分布: Logic 66 + Integration 50 + UI 3 + Config 1 = 120 Stories (#1-#17；#18 尚未拆分)
+- Story 类型分布: Logic 67 + Integration 53 + UI 4 + Config 1 = 125 Stories (#1-#18)
 - 引擎版本: Godot 4.6.2 .NET (ADR-0019)

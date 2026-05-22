@@ -6,6 +6,18 @@ Feature: Production to Polish Gate Passed
 Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hardening follow-ups
 <!-- /STATUS -->
 
+## Session Extract -- Polish #18 Story Split 2026-05-22
+- #18 Onboarding / First Loop story split complete.
+- Added `production/epics/onboarding-first-loop/EPIC.md`.
+- Added 5 Ready stories:
+  - Story 001: First-Loop Step State and Hint Scoring
+  - Story 002: UI and Domain Event Integration
+  - Story 003: Onboarding Persistence Snapshot
+  - Story 004: Focus-Safe Hint Rendering and Accessibility
+  - Story 005: First-Loop Smoke Regression and QA Evidence
+- Updated `production/epics/index.md`, `docs/document-index.md`, `docs/reference/production-flowchart.md`, and `docs/reference/multiplayer-collaboration-plan.md`.
+- Next action: run story-readiness for `production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md`, then implement Story 001.
+
 ## Session Extract -- Production to Polish PASS WITH CONDITIONS 2026-05-17
 - Gate recheck complete: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md`.
 - Verdict: **PASS WITH CONDITIONS**; `production/stage.txt` is now `Polish`.

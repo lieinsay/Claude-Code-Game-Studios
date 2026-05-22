@@ -1,6 +1,6 @@
 # Epics Index
 
-> **Last Updated**: 2026-05-16
+> **Last Updated**: 2026-05-22
 > **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
 > **ADR Coverage**: 19 Accepted (ADR-0019 platform pivot active)
 
@@ -49,14 +49,14 @@ technical preferences and control manifest.
 |------|----------|-----|----------------|-----|---------|--------|
 | [ui-hud-interface](ui-hud-interface/EPIC.md) | #16 | ui-hud-chart-interface.md | ADR-0012 | 4 | 6 (001-006) | **Complete** |
 | [feedback-fx-audio](feedback-fx-audio/EPIC.md) | #17 | feedback-fx-audio.md | ADR-0016 | 2 | 5 (001-005) | **Complete — 2026-05-16** |
-| onboarding-first-loop | #18 | onboarding-first-loop.md | ADR-0017 | 1 | — | Deferred implementation — accepted for Polish/post-gate scope |
+| [onboarding-first-loop](onboarding-first-loop/EPIC.md) | #18 | onboarding-first-loop.md | ADR-0017 | 1 | 5 (001-005) | **Ready — Polish entry** |
 
 ## Vertical Slice ADR Status
 
 | ADR | System | Priority | Recommended Trigger |
 |-----|--------|----------|---------------------|
 | ADR-0016 | #17 Feedback | COMPLETE | Accepted and implemented for first Polish feedback slice |
-| ADR-0017 | #18 Onboarding | LOW | Accepted; use before Vertical Slice onboarding implementation |
+| ADR-0017 | #18 Onboarding | READY | Accepted; 5 Polish entry stories created |
 | ADR-0019 | Platform/C# Pivot | ACTIVE | Governs all new implementation stories |
 
 ## Production to Polish Scope Note
@@ -70,4 +70,4 @@ Sprint 001 scope briefs and formal GDDs now define the first Polish boundary:
 - #17 GDD: `design/gdd/feedback-fx-audio.md`
 - #18 GDD: `design/gdd/onboarding-first-loop.md`
 
-Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 implementation stories are complete and #18 remains pending story split.
+Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 implementation stories are complete and #18 now has 5 Ready Polish entry stories under `production/epics/onboarding-first-loop/`.
