@@ -6,6 +6,16 @@ Feature: Production to Polish Gate Passed
 Task: Polish Story 001 Navigation / Exploration runtime hardening complete; continue Polish backlog
 <!-- /STATUS -->
 
+## Session Extract -- Polish Story 002 Exploration Semantics Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-002-richer-exploration-scene-semantics.md` -- Richer Exploration Scene Semantics.
+- `HubRuntime.cs` now adds a presentation-only dynamic Exploration semantics layer: route progress fill, active search-point label, threat-zone marker, threat semantic text, extraction cargo marker, and extraction status text.
+- The semantic layer reads `PlayableSliceDomainAdapter.Snapshot`; C# managers remain the authority for Navigation, Exploration, Resources/Hull, Persistence, and onboarding.
+- Smoke coverage now asserts entry semantics, first-search point binding, progress-strip advance, threat-zone visibility after pressure, threat text sync, settlement-ready extraction text, and completed search marker text.
+- Windowed evidence captured: `production/qa/evidence/polish-002-exploration-semantics-probe.png` and `production/qa/evidence/polish-002-final-hub-probe.png`.
+- Evidence: `production/qa/evidence/polish-002-richer-exploration-scene-semantics-evidence.md`.
+- Verification: `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 40/40; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `godot --path . -s tests/smoke/session_shell_visual_probe.gd` PASS with screenshots; `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings.
+- Remaining scope is not a blocker: this is still greybox scene semantics over MVP fixture data; final authored Exploration art/content and route/search tables remain downstream Polish backlog. Do not declare Release readiness from this closure.
+
 ## Session Extract -- Polish Story 001 Risk Closure 2026-05-22
 - Residual risk pass complete for `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md`.
 - Moved seeded MVP route/search/startup data from adapter methods into `src/presentation/playable_slice_runtime_fixture.json`.

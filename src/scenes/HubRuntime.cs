@@ -21,6 +21,9 @@ public partial class HubRuntime : Node2D
 	private ColorRect? hubStorageMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
+	private ColorRect? explorationRouteProgressFill;
+	private ColorRect? explorationThreatZone;
+	private ColorRect? extractionCargoProp;
 	private readonly Godot.Collections.Array<CanvasItem> hubSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private Label? chartStatusLabel;
@@ -29,6 +32,9 @@ public partial class HubRuntime : Node2D
 	private Label? explorationThreatLabel;
 	private Label? explorationHullLabel;
 	private Label? explorationRecoveryLabel;
+	private Label? explorationPointSemanticLabel;
+	private Label? explorationThreatSemanticLabel;
+	private Label? explorationExtractionSemanticLabel;
 	private Label? storageValueLabel;
 	private Label? cargoValueLabel;
 	private Label? hullValueLabel;
@@ -339,6 +345,9 @@ public partial class HubRuntime : Node2D
 			["exploration_step"] = snapshot.ExplorationStep,
 			["last_search_point"] = snapshot.LastSearchPointId,
 			["last_search_message"] = snapshot.LastSearchMessage,
+			["scene_search_point_text"] = explorationPointSemanticLabel?.Text ?? "",
+			["scene_threat_text"] = explorationThreatSemanticLabel?.Text ?? "",
+			["scene_extraction_text"] = explorationExtractionSemanticLabel?.Text ?? "",
 			["basic_supply_in_storage"] = snapshot.BasicSupplyInStorage,
 			["repair_kits_in_storage"] = snapshot.RepairKitsInStorage,
 			["reward_in_storage"] = snapshot.RewardInStorage,
@@ -466,12 +475,18 @@ public partial class HubRuntime : Node2D
 	{
 		AddSceneRect(explorationSceneItems, "ExplorationSkyField", new Vector2(92, 500), new Vector2(1092, 138), new Color(0.10f, 0.20f, 0.25f, 0.90f));
 		AddSceneRect(explorationSceneItems, "ExplorationRouteTrail", new Vector2(176, 586), new Vector2(820, 14), new Color(0.34f, 0.54f, 0.50f, 0.95f));
+		explorationRouteProgressFill = AddSceneRect(explorationSceneItems, "ExplorationRouteProgressFill", new Vector2(176, 586), new Vector2(0, 14), new Color(0.78f, 0.70f, 0.36f, 0.98f));
+		explorationPointSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationPointSemanticLabel", new Vector2(186, 508), new Vector2(360, 24), "搜索点：待接近");
 		AddSceneRect(explorationSceneItems, "SearchWreckProp", new Vector2(558, 540), new Vector2(170, 66), new Color(0.28f, 0.42f, 0.29f, 0.96f));
 		AddSceneRect(explorationSceneItems, "SearchWreckHighlight", new Vector2(590, 556), new Vector2(104, 12), new Color(0.62f, 0.75f, 0.42f, 0.98f));
 		AddSceneLabel(explorationSceneItems, "SearchWreckLabel", new Vector2(574, 548), new Vector2(138, 22), "漂浮残骸");
+		explorationThreatZone = AddSceneRect(explorationSceneItems, "ExplorationThreatZone", new Vector2(768, 528), new Vector2(150, 68), new Color(0.62f, 0.25f, 0.22f, 0.52f));
+		explorationThreatSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationThreatSemanticLabel", new Vector2(756, 506), new Vector2(190, 24), "威胁区：未触发");
 		AddSceneRect(explorationSceneItems, "ReturnBeaconProp", new Vector2(986, 526), new Vector2(104, 82), new Color(0.50f, 0.28f, 0.24f, 0.96f));
 		AddSceneRect(explorationSceneItems, "ReturnBeaconCore", new Vector2(1024, 540), new Vector2(28, 52), new Color(0.78f, 0.62f, 0.42f, 0.98f));
 		AddSceneLabel(explorationSceneItems, "ReturnBeaconLabel", new Vector2(990, 532), new Vector2(96, 22), "返航信标");
+		extractionCargoProp = AddSceneRect(explorationSceneItems, "ExtractionCargoProp", new Vector2(930, 602), new Vector2(110, 24), new Color(0.68f, 0.58f, 0.34f, 0.94f));
+		explorationExtractionSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationExtractionSemanticLabel", new Vector2(924, 508), new Vector2(246, 24), "撤离：可随时返航");
 	}
 
 	private ColorRect AddWorldMarker(string nodeName, Vector2 markerPosition, Color markerColor, string labelText)
@@ -614,6 +629,7 @@ public partial class HubRuntime : Node2D
 		{
 			explorationRouteLabel.Text = $"路线：{RouteName()}；探索进度 {snapshot.ExplorationStep}/3";
 		}
+		UpdateExplorationSceneSemantics(snapshot);
 
 		if (explorationStep <= 0)
 		{
@@ -655,6 +671,62 @@ public partial class HubRuntime : Node2D
 		if (explorationThreatLabel is not null) explorationThreatLabel.Text = threatText;
 		if (explorationHullLabel is not null) explorationHullLabel.Text = hullText;
 		if (explorationRecoveryLabel is not null) explorationRecoveryLabel.Text = recoveryText;
+	}
+
+	private void UpdateExplorationSceneSemantics(PlayableSliceSnapshot snapshot)
+	{
+		var step = Math.Clamp(snapshot.ExplorationStep, 0, 3);
+		if (explorationRouteProgressFill is not null)
+		{
+			var width = 820.0f * (step / 3.0f);
+			explorationRouteProgressFill.Size = new Vector2(width, explorationRouteProgressFill.Size.Y);
+			explorationRouteProgressFill.CustomMinimumSize = explorationRouteProgressFill.Size;
+		}
+
+		var activePoint = string.IsNullOrWhiteSpace(snapshot.LastSearchPointId)
+			? "待接近"
+			: snapshot.LastSearchPointId;
+		if (explorationPointSemanticLabel is not null)
+		{
+			explorationPointSemanticLabel.Text = $"搜索点：{activePoint} / {snapshot.ExplorationSubstate}";
+		}
+
+		var threatActive = snapshot.ExplorationSubstate == "Threatened" || step >= 2;
+		if (explorationThreatZone is not null)
+		{
+			explorationThreatZone.Visible = currentScreen == "exploration" && threatActive;
+		}
+		if (explorationThreatSemanticLabel is not null)
+		{
+			explorationThreatSemanticLabel.Text = threatActive
+				? $"威胁区：{snapshot.ThreatText} / 船体 {snapshot.HullIntegrity}"
+				: "威胁区：未触发";
+			explorationThreatSemanticLabel.Visible = currentScreen == "exploration";
+		}
+
+		if (extractionCargoProp is not null)
+		{
+			extractionCargoProp.Color = step >= 3
+				? new Color(0.84f, 0.70f, 0.32f, 0.98f)
+				: new Color(0.68f, 0.58f, 0.34f, 0.94f);
+		}
+		if (explorationExtractionSemanticLabel is not null)
+		{
+			explorationExtractionSemanticLabel.Text = step >= 3
+				? $"撤离：收益锁定 {snapshot.CargoUsed}/{snapshot.CargoCapacity}"
+				: $"撤离：携带 {snapshot.CargoUsed}/{snapshot.CargoCapacity}";
+		}
+
+		SetMarkerLabel(explorationSearchMarker, step >= 3 ? "已搜索" : $"搜索 {Math.Min(step + 1, 3)}/3");
+		SetMarkerLabel(explorationReturnMarker, step >= 3 ? "结算 E" : "返航 E");
+	}
+
+	private static void SetMarkerLabel(Control? marker, string text)
+	{
+		if (marker?.FindChild($"{marker.Name}Label", false, false) is Label label)
+		{
+			label.Text = text;
+		}
 	}
 
 	private void UpdateHubSummary()

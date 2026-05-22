@@ -4,10 +4,10 @@
 > 基于: 18 Epic × 125 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Production → Polish PASS WITH CONDITIONS**
+> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Polish Story 002 exploration semantics 完成 | Production → Polish PASS WITH CONDITIONS**
 
 > **Readiness 基线**: 所有 125 个 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18 与 Polish Story 001 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、fixture JSON 化、真实 preflight、windowed screenshot evidence 已完成，后续进入 richer Exploration semantics / final content production 的普通 Polish backlog。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18、Polish Story 001 与 Polish Story 002 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、fixture JSON 化、真实 preflight、dynamic Exploration semantics、windowed screenshot evidence 已完成，后续进入 final content production / art-audio treatment 的普通 Polish backlog。
 
 ---
 
@@ -513,6 +513,7 @@ D-C: Chart / Exploration route authority + QA smoke
   ☑ 更新 Godot smoke probe，证明 domain-backed mutation 与 return-to-Hub sync
   ☑ 固化 PVS3-006 自动 smoke evidence
   ☑ [Polish Story 001] 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
+  ☑ [Polish Story 002] 为 Exploration greybox 添加动态 route/search/threat/extraction 语义层
 
 共享:
   ☑ 最低灰盒场景表现升级
@@ -626,6 +627,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-007 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Complete; Production -> Polish PASS WITH CONDITIONS |
 | #18 Onboarding | 001-005 | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | ✅ Complete — 2026-05-22 |
 | Polish Story 001 Runtime hardening | 001 | Sprint 003 + #18 Complete | ✅ Complete — NavigationManager EncounterContext + ExplorationManager search/threat contract + fixture risk closure + windowed evidence |
+| Polish Story 002 Exploration semantics | 002 | Polish Story 001 Complete | ✅ Complete — dynamic route/search/threat/extraction semantics + windowed evidence |
 
 ---
 

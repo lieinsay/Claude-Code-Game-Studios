@@ -2,6 +2,7 @@ extends SceneTree
 
 const SESSION_SCENE := "res://src/scenes/SessionShell.tscn"
 const SCREENSHOT_PATH := "user://session_shell_hub_probe.png"
+const EXPLORATION_SEMANTICS_SCREENSHOT_PATH := "user://session_shell_exploration_semantics_probe.png"
 
 var _failed := false
 
@@ -127,6 +128,9 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration has an authored greybox sky field")
 	_expect(hub.call("DebugNodeVisible", "SearchWreckProp"), "Exploration has an authored greybox search wreck prop")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconProp"), "Exploration has an authored greybox return beacon prop")
+	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("待接近"), "Exploration scene starts with dynamic search-point semantic label")
+	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("携带 0/500"), "Exploration scene starts with dynamic extraction status")
+	_expect(not hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration threat zone is hidden before pressure")
 	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub greybox floor is hidden while in Exploration")
 	_expect(_label_text(session, "ExplorationTitleLabel") == "探索 HUD", "Exploration surface has a clear title")
 	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Exploration surface shows selected route")
@@ -150,6 +154,8 @@ func _run() -> void:
 	_expect(int(search_snapshot.get("reward_carried", 0)) == 1, "C# HubRuntime search adds carried ResourcesManager reward")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Spatial search interaction creates low threat feedback")
+	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("sp.playable.1"), "Exploration semantic label follows the first manager search point")
+	_expect(_control_width(session, "ExplorationRouteProgressFill") > 250.0, "Exploration route progress strip advances after first search")
 
 	hub.call("OnExplorationAdvancePressed")
 	await process_frame
@@ -161,6 +167,8 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 180/500"), "Exploration second advance changes carried cargo")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Exploration second advance escalates threat feedback")
 	_expect(_label_text(session, "ExplorationHullLabel").contains("94/100"), "Exploration second advance changes hull feedback")
+	_expect(hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration semantic threat zone appears after pressure")
+	_expect(_label_text(session, "ExplorationThreatSemanticLabel").contains("中威胁"), "Exploration threat semantic label follows manager threat text")
 
 	hub.call("OnSavePressed")
 	await process_frame
@@ -206,6 +214,9 @@ func _run() -> void:
 	await process_frame
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
+	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("收益锁定 260/500"), "Exploration extraction semantic label switches to settlement-ready state")
+	_expect(_label_text(session, "SearchInteractPointLabel").contains("已搜索"), "Exploration search marker reflects completed search semantics")
+	await _save_runtime_screenshot(root, EXPLORATION_SEMANTICS_SCREENSHOT_PATH, "Exploration semantics screenshot")
 
 	hub.call("OnExplorationReturnPressed")
 	await process_frame
@@ -214,17 +225,7 @@ func _run() -> void:
 	_expect(_label_text(session, "ChartStation").contains("压力循环完成"), "Hub chart station syncs completed pressure loop")
 	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
 
-	if DisplayServer.get_name() == "headless":
-		print("SKIP Runtime screenshot unavailable with current display driver")
-	else:
-		await RenderingServer.frame_post_draw
-		var texture := root.get_texture()
-		if texture == null:
-			print("SKIP Runtime screenshot unavailable with current display driver")
-		else:
-			var image := texture.get_image()
-			var saved := image.save_png(SCREENSHOT_PATH)
-			_expect(saved == OK, "Runtime screenshot saved to %s" % ProjectSettings.globalize_path(SCREENSHOT_PATH))
+	await _save_runtime_screenshot(root, SCREENSHOT_PATH, "Runtime screenshot")
 
 	session.queue_free()
 	await process_frame
@@ -251,6 +252,11 @@ func _button_focus_mode(root_node: Node, node_name: String) -> int:
 	return -1 if button == null else button.focus_mode
 
 
+func _control_width(root_node: Node, node_name: String) -> float:
+	var control := root_node.find_child(node_name, true, false) as Control
+	return 0.0 if control == null else control.size.x
+
+
 func _control_mouse_filter(root_node: Node, node_name: String) -> int:
 	var control := root_node.find_child(node_name, true, false) as Control
 	return -1 if control == null else control.mouse_filter
@@ -259,6 +265,20 @@ func _control_mouse_filter(root_node: Node, node_name: String) -> int:
 func _is_panel_visible(root_node: Node, node_name: String) -> bool:
 	var panel := root_node.find_child(node_name, true, false) as CanvasItem
 	return panel != null and panel.visible
+
+
+func _save_runtime_screenshot(viewport: Window, path: String, label: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		print("SKIP %s unavailable with current display driver" % label)
+		return
+	await RenderingServer.frame_post_draw
+	var texture := viewport.get_texture()
+	if texture == null:
+		print("SKIP %s unavailable with current display driver" % label)
+		return
+	var image := texture.get_image()
+	var saved := image.save_png(path)
+	_expect(saved == OK, "%s saved to %s" % [label, ProjectSettings.globalize_path(path)])
 
 
 func _expect(condition: bool, label: String) -> void:
