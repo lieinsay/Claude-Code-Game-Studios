@@ -117,6 +117,9 @@ func _run() -> void:
 	_expect(str(departure_snapshot.get("committed_route", "")) == "route.mist", "C# HubRuntime departure commits through ChartManager")
 	_expect(str(departure_snapshot.get("hub_last_route", "")) == "route.mist", "HubManager records the chart departure route")
 	_expect(str(departure_snapshot.get("hub_docking_state", "")) == "InTransit", "HubManager enters InTransit after departure")
+	_expect(str(departure_snapshot.get("navigation_state", "")) == "Arrived", "NavigationManager produces a completed route contract")
+	_expect(str(departure_snapshot.get("encounter_destination", "")) == "location.mist-short", "NavigationManager produces EncounterContext destination")
+	_expect(str(departure_snapshot.get("exploration_phase", "")) == "Exploring", "ExplorationManager consumes EncounterContext before Exploration HUD opens")
 	_expect(not _is_panel_visible(session, "ChartPanel"), "Chart panel closes after departure")
 	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
 	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
@@ -142,6 +145,7 @@ func _run() -> void:
 	_expect(pressure_next_hint == "notice_save_load", "Onboarding advances to save/load awareness after pressure feedback (%s)" % pressure_next_hint)
 	var search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(search_snapshot.get("exploration_step", 0)) == 1, "C# HubRuntime search advances domain adapter snapshot")
+	_expect(str(search_snapshot.get("last_search_point", "")) == "sp.playable.1", "ExplorationManager records runtime search point")
 	_expect(int(search_snapshot.get("basic_supply_in_storage", 0)) == 9, "C# HubRuntime search consumes ResourcesManager supply")
 	_expect(int(search_snapshot.get("reward_carried", 0)) == 1, "C# HubRuntime search adds carried ResourcesManager reward")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
@@ -153,6 +157,7 @@ func _run() -> void:
 	_expect(int(damage_snapshot.get("basic_supply_in_storage", 0)) == 8, "C# HubRuntime second advance consumes another ResourcesManager supply")
 	_expect(int(damage_snapshot.get("reward_carried", 0)) == 2, "C# HubRuntime second advance keeps rewards in carried pool before return")
 	_expect(int(damage_snapshot.get("hull_integrity", 0)) == 94, "C# HubRuntime second advance applies ModuleHullManager damage")
+	_expect(str(damage_snapshot.get("exploration_substate", "")) == "Threatened", "ExplorationManager owns the threat substate after pressure")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 180/500"), "Exploration second advance changes carried cargo")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Exploration second advance escalates threat feedback")
 	_expect(_label_text(session, "ExplorationHullLabel").contains("94/100"), "Exploration second advance changes hull feedback")
@@ -194,6 +199,7 @@ func _run() -> void:
 	var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "Canonical load restores carried ResourcesManager rewards")
 	_expect(int(loaded_snapshot.get("reward_in_storage", 0)) == 0, "Canonical load restores pre-return ResourcesManager storage state")
+	_expect(str(loaded_snapshot.get("exploration_phase", "")) == "Exploring", "Canonical load restores ExplorationManager active session")
 	_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "Canonical load status is exposed in domain snapshot")
 
 	hub.call("OnExplorationAdvancePressed")

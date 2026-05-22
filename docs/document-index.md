@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-22
-> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding implementation complete
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001 runtime hardening complete
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 18/18 Epic 完成 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 #18 | Polish Entry: #18 smoke/perf PASS
@@ -112,7 +112,8 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 18/18 Epic 完成 (125 Stories)；#1-#18 已完成 |
 | [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18 Onboarding / First Loop — 5/5 Polish entry Stories Complete |
-| [production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Polish Story 001 — Navigation / Exploration runtime hardening beyond the playable fixture |
+| [production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Polish Story 001 — Navigation / Exploration runtime hardening Complete |
+| [production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md](../production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md) | Polish Story 001 evidence — NavigationManager EncounterContext + ExplorationManager runtime search/threat contract PASS |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -698,7 +699,7 @@ graph TB
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P0 | [Polish Story 001: Navigation / Exploration Runtime Hardening](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | #18 与 fresh perf 已完成；下一步把当前 playable adapter fixture 扩展到 Navigation/Exploration runtime contract |
+| P0 | Polish authored route/search content follow-up | Polish Story 001 已完成 runtime authority hardening；下一步可把 seeded MVP routes/search loot pools 迁到更正式的 authored content path |
 | P1 | Windowed onboarding/runtime visual capture | Headless smoke 已 PASS；如需要非 headless 像素/视频证据，在视觉 Polish 中补充 |
 
 ---
@@ -1346,7 +1347,7 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 18/18 Epic 完成 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17/#18 Complete
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001 runtime hardening Complete
 ```
 
 ---
@@ -1406,7 +1407,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过。下一步从 `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` 开始。
+> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；`production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` 已完成。下一步进入 authored route/search content、视觉捕获或更丰富 Exploration scene semantics 的普通 Polish backlog。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

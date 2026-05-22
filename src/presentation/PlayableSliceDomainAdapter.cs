@@ -14,11 +14,16 @@ public sealed class PlayableSliceDomainAdapter
 	private const string RewardResourceId = "resource.beacon_crystal";
 	private readonly ChartManager chart;
 	private readonly HubManager hub;
+	private readonly NavigationManager navigation;
+	private readonly ExplorationManager exploration;
 	private readonly ResourcesManager resources;
 	private readonly ModuleHullManager modules;
 	private readonly Persistence persistence;
 	private string lastCommittedRoute = string.Empty;
 	private string lastCommittedDestination = string.Empty;
+	private EncounterContext? activeEncounterContext;
+	private string lastSearchPointId = string.Empty;
+	private string lastSearchMessage = "尚未搜索";
 	private string lastStatus = "Domain adapter initialized.";
 	private string lastSaveStatus = "尚未保存";
 	private string lastLoadStatus = "尚未加载";
@@ -31,6 +36,8 @@ public sealed class PlayableSliceDomainAdapter
 		modules = new ModuleHullManager(resources);
 		chart = BuildChartManager();
 		hub = BuildHubManager();
+		navigation = BuildNavigationManager();
+		exploration = BuildExplorationManager();
 		persistence = BuildPersistence();
 	}
 
@@ -70,7 +77,17 @@ public sealed class PlayableSliceDomainAdapter
 		HubDockingState: hub.DockingState.ToString(),
 		HubDepartureMode: hub.LastDepartureMode,
 		HubLastRoute: hub.LastDepartureRoute,
+		NavigationState: navigation.CurrentState.ToString(),
+		NavigationProgress: navigation.GetVoyageProgress(),
+		EncounterDestinationId: activeEncounterContext?.DestinationId ?? string.Empty,
+		EncounterResult: activeEncounterContext?.VoyageResult ?? string.Empty,
+		EncounterDamage: activeEncounterContext?.AccumulatedDamage ?? 0,
+		ExplorationPhase: exploration.CurrentPhase.ToString(),
+		ExplorationSubstate: exploration.CurrentSubstate.ToString(),
+		ExplorationPointId: exploration.CurrentPointId,
 		ExplorationStep: explorationStep,
+		LastSearchPointId: lastSearchPointId,
+		LastSearchMessage: lastSearchMessage,
 		BasicSupplyInStorage: resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId),
 		RepairKitsInStorage: resources.GetQuantity(ResourcePool.InStorage, RepairKitId),
 		RewardInStorage: resources.GetQuantity(ResourcePool.InStorage, RewardResourceId),
@@ -125,11 +142,19 @@ public sealed class PlayableSliceDomainAdapter
 		var began = hub.BeginDeparture(HubDepartureMode.Chart, routeId);
 		var locked = began && hub.CompleteDepartureLock();
 		explorationStep = 0;
+		activeEncounterContext = null;
+		lastSearchPointId = string.Empty;
+		lastSearchMessage = "尚未搜索";
 		lastStatus = locked
 			? $"HubManager departed via {RouteName(routeId)}."
 			: $"HubManager rejected departure: {hub.LastRejectionReason}.";
 		if (locked)
 		{
+			var destinationId = summary.TryGetValue("destination_id", out var rawDestination)
+				? rawDestination?.ToString() ?? lastCommittedDestination
+				: lastCommittedDestination;
+			var hazardTags = ReadStringList(summary, "hazard_tags");
+			StartNavigationAndExploration(routeId, destinationId, hazardTags);
 			DepartureConfirmed?.Invoke(routeId);
 		}
 
@@ -149,16 +174,24 @@ public sealed class PlayableSliceDomainAdapter
 		if (nextStep is 1 or 2)
 		{
 			resources.Remove(ResourcePool.InStorage, BasicSupplyId, 1);
-			resources.Add(ResourcePool.Carried, RewardResourceId, 1);
+			var search = exploration.PerformSearch($"sp.playable.{nextStep}", SearchPointState.Unlooted, "A_core");
+			lastSearchPointId = $"sp.playable.{nextStep}";
+			lastSearchMessage = search.IsEmpty
+				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
+				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
 		}
 		else if (nextStep == 3)
 		{
-			resources.Add(ResourcePool.Carried, RewardResourceId, 1);
+			var search = exploration.PerformSearch("sp.playable.3", SearchPointState.Unlooted, "A_core");
+			lastSearchPointId = "sp.playable.3";
+			lastSearchMessage = search.IsEmpty
+				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
+				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
 		}
 
 		if (nextStep == 2)
 		{
-			modules.ApplyHullDamage(6);
+			exploration.CheckThreatTrigger(2.0, "proximity");
 		}
 
 		explorationStep = nextStep;
@@ -260,6 +293,74 @@ public sealed class PlayableSliceDomainAdapter
 		return manager;
 	}
 
+	private NavigationManager BuildNavigationManager()
+	{
+		var manager = new NavigationManager();
+		manager.SetCanDepartDelegate(_ => (true, Array.Empty<string>()));
+		manager.SetGetRouteDelegate(routeId => routeId switch
+		{
+			"route.mist" => (true, new[] { "safe", "low_threat" }, "short"),
+			"route.market" => (true, new[] { "safe", "medium_threat" }, "medium"),
+			_ => (false, Array.Empty<string>(), string.Empty),
+		});
+		manager.SetGetKnowledgeStateDelegate(_ => 2);
+		manager.SetGetHullIntegrityDelegate(() => modules.GetHullState().Integrity);
+		manager.SetGetHullBandDelegate(() => modules.GetHullState().Band);
+		manager.SetGetScoutEfficiencyDelegate(() => modules.GetScoutVisibilityEfficiency());
+		manager.SetResolveEncounterDelegate(tag => tag switch
+		{
+			"medium_threat" => new[] { new EncounterEntry(tag, damage: 2, timePenaltyFlat: 0, timePenaltyTemp: 0) },
+			"low_threat" => Array.Empty<EncounterEntry>(),
+			_ => Array.Empty<EncounterEntry>(),
+		});
+		manager.SetApplyHullDamageDelegate(modules.ApplyHullDamage);
+		manager.VoyageCompleted += context => activeEncounterContext = context;
+		return manager;
+	}
+
+	private ExplorationManager BuildExplorationManager()
+	{
+		var manager = new ExplorationManager();
+		manager.SetCanAddToPoolDelegate((_, _) => true);
+		manager.SetAddLootDelegate((resourceId, quantity) => resources.Add(ResourcePool.Carried, resourceId, quantity));
+		manager.SetRandomDelegate(() => 0.10d);
+		manager.SetRandomRangeDelegate((_, _) => 1);
+		manager.SetGetScoutEfficiencyDelegate(() => modules.GetScoutVisibilityEfficiency());
+		manager.SetApplyExplorationHullDamageDelegate(_ => modules.ApplyHullDamage(6));
+		manager.SetLootPools(new Dictionary<string, Dictionary<string, List<(string, int, int)>>>(StringComparer.Ordinal)
+		{
+			["sp.playable.1"] = PlayableSearchLoot(),
+			["sp.playable.2"] = PlayableSearchLoot(),
+			["sp.playable.3"] = PlayableSearchLoot(),
+		});
+		manager.RegisterThreatPoint(new ExplorationManager.ThreatPoint(
+			"threat.playable-cloud-shear",
+			ExplorationManager.ThreatCategory.Environmental,
+			triggerRadius: 0.25d,
+			position: 2.0d));
+		return manager;
+	}
+
+	private static Dictionary<string, List<(string, int, int)>> PlayableSearchLoot() =>
+		new(StringComparer.Ordinal)
+		{
+			["poor"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
+			["common"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
+			["uncommon"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
+		};
+
+	private void StartNavigationAndExploration(string routeId, string destinationId, IReadOnlyList<string> hazardTags)
+	{
+		navigation.OnRouteCommitted(routeId, destinationId, hazardTags);
+		navigation.ProcessVoyage(240.0d);
+		activeEncounterContext ??= navigation.BuildEncounterContext();
+		if (exploration.EnterExplorationWithContext(activeEncounterContext))
+		{
+			exploration.SkipArriving();
+		}
+		lastStatus = $"NavigationManager {navigation.CurrentState}; ExplorationManager {exploration.CurrentPhase}.";
+	}
+
 	private Persistence BuildPersistence()
 	{
 		var manager = new Persistence();
@@ -269,6 +370,10 @@ public sealed class PlayableSliceDomainAdapter
 		manager.RegisterDomainDeserializer("progress.airship", package => hub.RestoreFromProgressAirship(package.Payload));
 		manager.RegisterDomainSerializer("progress.routes", BuildChartSnapshotPackage);
 		manager.RegisterDomainDeserializer("progress.routes", package => chart.RestoreFromSnapshot(package.Payload));
+		manager.RegisterDomainSerializer("progress.navigation", BuildNavigationSnapshotPackage);
+		manager.RegisterDomainDeserializer("progress.navigation", package => navigation.RestoreFromVoyageSnapshot(package.Payload));
+		manager.RegisterDomainSerializer("progress.exploration", BuildExplorationSnapshotPackage);
+		manager.RegisterDomainDeserializer("progress.exploration", RestoreExplorationSnapshotPackage);
 		manager.RegisterDomainSerializer("progress.playable_slice", BuildPlayableSliceSnapshotPackage);
 		manager.RegisterDomainDeserializer("progress.playable_slice", RestorePlayableSliceSnapshotPackage);
 		return manager;
@@ -299,6 +404,67 @@ public sealed class PlayableSliceDomainAdapter
 		return package;
 	}
 
+	private SnapshotPackage BuildNavigationSnapshotPackage()
+	{
+		var package = new SnapshotPackage
+		{
+			DomainId = "progress.navigation",
+			SnapshotSchemaVersion = 1,
+			DomainState = SnapshotDomainState.Ready,
+		};
+		package.ContentDomainVersions["navigation"] = "2026-05-09";
+		var payload = navigation.CaptureVoyageSnapshot();
+		foreach (var (key, value) in payload)
+		{
+			package.Payload[key] = value;
+		}
+		if (!string.IsNullOrWhiteSpace(activeEncounterContext?.RouteId))
+		{
+			package.StableIdRefs.Add(activeEncounterContext.RouteId);
+		}
+		if (!string.IsNullOrWhiteSpace(activeEncounterContext?.DestinationId))
+		{
+			package.StableIdRefs.Add(activeEncounterContext.DestinationId);
+		}
+		return package;
+	}
+
+	private SnapshotPackage BuildExplorationSnapshotPackage()
+	{
+		var package = new SnapshotPackage
+		{
+			DomainId = "progress.exploration",
+			SnapshotSchemaVersion = 1,
+			DomainState = SnapshotDomainState.Ready,
+		};
+		package.ContentDomainVersions["exploration"] = "2026-05-09";
+		var payload = exploration.SerializeExploration();
+		if (payload is not null)
+		{
+			foreach (var (key, value) in payload)
+			{
+				package.Payload[key] = value;
+			}
+		}
+		if (!string.IsNullOrWhiteSpace(activeEncounterContext?.DestinationId))
+		{
+			package.StableIdRefs.Add(activeEncounterContext.DestinationId);
+		}
+		return package;
+	}
+
+	private void RestoreExplorationSnapshotPackage(SnapshotPackage package)
+	{
+		var payload = package.Payload.ToDictionary(
+			pair => pair.Key,
+			pair => pair.Value?.ToString() ?? string.Empty,
+			StringComparer.Ordinal);
+		if (payload.Count > 0)
+		{
+			exploration.DeserializeExploration(payload);
+		}
+	}
+
 	private SnapshotPackage BuildPlayableSliceSnapshotPackage()
 	{
 		var state = sceneState with { ExplorationStep = explorationStep };
@@ -320,6 +486,8 @@ public sealed class PlayableSliceDomainAdapter
 		package.Payload["player_y"] = state.PlayerY;
 		package.Payload["footer"] = state.Footer;
 		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		package.Payload["last_search_point_id"] = lastSearchPointId;
+		package.Payload["last_search_message"] = lastSearchMessage;
 		return package;
 	}
 
@@ -343,6 +511,8 @@ public sealed class PlayableSliceDomainAdapter
 		{
 			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
 		}
+		lastSearchPointId = ReadString(package.Payload, "last_search_point_id", "");
+		lastSearchMessage = ReadString(package.Payload, "last_search_message", "尚未搜索");
 		lastStatus = "Playable slice scene state restored from canonical progress.";
 	}
 
@@ -392,6 +562,26 @@ public sealed class PlayableSliceDomainAdapter
 		}
 		return Convert.ToSingle(value);
 	}
+
+	private static IReadOnlyList<string> ReadStringList(IReadOnlyDictionary<string, object> payload, string key)
+	{
+		if (!payload.TryGetValue(key, out var value) || value is null)
+		{
+			return Array.Empty<string>();
+		}
+		if (value is IEnumerable<string> strings)
+		{
+			return strings.ToArray();
+		}
+		if (value is System.Collections.IEnumerable enumerable && value is not string)
+		{
+			return enumerable.Cast<object?>()
+				.Select(item => item?.ToString() ?? string.Empty)
+				.Where(item => !string.IsNullOrWhiteSpace(item))
+				.ToArray();
+		}
+		return new[] { value.ToString() ?? string.Empty };
+	}
 }
 
 public sealed record PlayableSliceSnapshot(
@@ -404,7 +594,17 @@ public sealed record PlayableSliceSnapshot(
 	string HubDockingState,
 	string HubDepartureMode,
 	string HubLastRoute,
+	string NavigationState,
+	double NavigationProgress,
+	string EncounterDestinationId,
+	string EncounterResult,
+	int EncounterDamage,
+	string ExplorationPhase,
+	string ExplorationSubstate,
+	string ExplorationPointId,
 	int ExplorationStep,
+	string LastSearchPointId,
+	string LastSearchMessage,
 	int BasicSupplyInStorage,
 	int RepairKitsInStorage,
 	int RewardInStorage,

@@ -3,8 +3,17 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hardening follow-ups
+Task: Polish Story 001 Navigation / Exploration runtime hardening complete; continue Polish backlog
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 001 Runtime Hardening Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` -- Navigation / Exploration Runtime Hardening.
+- `PlayableSliceDomainAdapter` now wires C# `NavigationManager` and `ExplorationManager` into the playable runtime path: Chart/Hub departure produces a Navigation `EncounterContext`, Exploration consumes it into `Exploring`, and runtime search/pressure records manager-owned search/threat state.
+- Canonical persistence now includes adapter-owned `progress.navigation` and `progress.exploration` snapshot wrappers alongside `progress.playable_slice`; `progress.onboarding`, resources, hull, routes, and airship persistence remain intact.
+- Remaining fixture boundaries are now content/presentation fixtures rather than runtime authority: seeded MVP routes, playable search loot pools, and greybox spatial markers.
+- Evidence created: `production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md`.
+- Verification: `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 40/40; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings.
+- Next recommended: keep Polish small-step backlog focused on authored route/search content, richer Exploration scene semantics, or windowed visual capture. Do not declare Release readiness from this story alone.
 
 ## Session Extract -- Polish #18 Story 005 and Epic Complete 2026-05-22
 - Story complete: `production/epics/onboarding-first-loop/story-005-first-loop-smoke-regression-and-qa-evidence.md` -- First-Loop Smoke Regression and QA Evidence.

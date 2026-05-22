@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Polish | Phase 0-A-F/#18 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Complete**
+> 当前状态: **Polish | Phase 0-A-F/#18 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Complete | Polish Story 001 runtime hardening Complete**
 
 ---
 
@@ -508,9 +508,9 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 - 阶段文件: `production/stage.txt` 为 `Production`
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
-- 活跃任务: Polish entry follow-ups。
+- 活跃任务: Polish backlog follow-ups after Story 001 runtime hardening。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；#18 implementation 与 fresh perf probe 已完成，Navigation/Exploration runtime hardening 已落为 Polish Story 001。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening 均已完成。剩余风险转为 authored content、视觉捕获和更丰富探索语义的普通 Polish backlog。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,11 +519,11 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | [Polish Story 001: Navigation/Exploration runtime hardening](../../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Sprint 003 + #18 evidence ✅ | Next |
+| **P0** | Authored route/search content follow-up | Polish Story 001 runtime authority hardening ✅ | Next |
 | **P1** | Windowed visual capture for onboarding/runtime if required | Headless smoke PASS ✅ | Polish |
 | **P2** | Final art/audio treatment for onboarding hints | #18 implementation slice ✅ | Polish |
 
-> 关键建议: #18 implementation 与 fresh perf probe 已完成；下一步从 Polish Story 001 开始，把当前 adapter fixture 扩展到 Navigation/Exploration runtime contract。
+> 关键建议: Polish Story 001 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract。下一步不要宣布 Release readiness；继续把 seeded MVP route/search content 与视觉证据按小步 Polish backlog 推进。
 
 ### 并行机会提醒
 
