@@ -15,6 +15,12 @@ Task: Begin Polish with #18 onboarding split, fresh perf probe, and runtime hard
 - Evidence/sign-off created: `production/qa/evidence/onboarding-first-loop-smoke-evidence.md`; `production/qa/qa-signoff-onboarding-first-loop.md` verdict APPROVED WITH CONDITIONS.
 - `/story-done` verdict: COMPLETE. Epic #18 Onboarding / First Loop is now Complete; no remaining #18 story is open. Next recommended: Navigation/Exploration runtime hardening beyond the current playable fixture, plus optional windowed visual capture during Polish.
 
+## Session Extract -- Polish Story 001 Ready 2026-05-22
+- Created next Ready story: `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md`.
+- Scope: harden `PlayableSliceDomainAdapter` / `HubRuntime` beyond the current exploration fixture by moving the next runtime contract toward Navigation/Exploration manager authority while preserving C# scene script ownership.
+- Reference docs updated: `docs/reference/production-flowchart.md`, `docs/reference/multiplayer-collaboration-plan.md`, and `docs/document-index.md`.
+- Next action: run story-readiness on Polish Story 001, then implement with focused C# adapter regression plus Godot visual/perf smoke.
+
 ## Session Extract -- Polish #18 Story 001 Complete 2026-05-22
 - Story complete: `production/epics/onboarding-first-loop/story-001-first-loop-step-state-and-hint-scoring.md` -- First-Loop Step State and Hint Scoring.
 - Added headless C# `src/presentation/OnboardingManager.cs` with stable eight-step GDD ordering, ADR-0017 states, deterministic completion generation, progress percent, hint scoring, repeat counts, and ignored-event diagnostics.

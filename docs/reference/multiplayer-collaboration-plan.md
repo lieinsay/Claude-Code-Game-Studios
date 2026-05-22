@@ -512,7 +512,7 @@ D-C: Chart / Exploration route authority + QA smoke
   ☑ 航线选择、出航从 ChartManager / HubManager domain contracts 派生
   ☑ 更新 Godot smoke probe，证明 domain-backed mutation 与 return-to-Hub sync
   ☑ 固化 PVS3-006 自动 smoke evidence
-  □ 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
+  ▣ [Polish Story 001] 将探索 step 从当前 adapter fixture 扩展到 Navigation/ExplorationManager contract
 
 共享:
   ☑ 最低灰盒场景表现升级
@@ -625,6 +625,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
 | Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-007 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Complete; Production -> Polish PASS WITH CONDITIONS |
 | #18 Onboarding | 001-005 | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | ✅ Complete — 2026-05-22 |
+| Polish Story 001 Runtime hardening | 001 | Sprint 003 + #18 Complete | Ready — Navigation/Exploration fixture hardening |
 
 ---
 

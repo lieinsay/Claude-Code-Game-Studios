@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
 - 活跃任务: Polish entry follow-ups。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；#18 implementation 与 fresh perf probe 已完成，Navigation/Exploration runtime hardening 仍保留为普通 Polish backlog。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation 与 fresh perf probe 已完成，Navigation/Exploration runtime hardening 已落为 Polish Story 001。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,12 +519,11 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Navigation/Exploration runtime hardening beyond playable fixture | Sprint 003 + #18 evidence ✅ | Next |
-| **P0** | Sprint 003: broaden Exploration/Navigation manager contract beyond fixture | Chart/Hub/Resources/Hull adapter ✅ | Next |
-| **P1** | Windowed visual capture for onboarding if required | Headless smoke PASS ✅ | Polish |
-| **P2** | Navigation/Exploration runtime hardening | Sprint 003 adapter fixture documented | Polish |
+| **P0** | [Polish Story 001: Navigation/Exploration runtime hardening](../../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Sprint 003 + #18 evidence ✅ | Next |
+| **P1** | Windowed visual capture for onboarding/runtime if required | Headless smoke PASS ✅ | Polish |
+| **P2** | Final art/audio treatment for onboarding hints | #18 implementation slice ✅ | Polish |
 
-> 关键建议: #18 implementation 与 fresh perf probe 已完成；下一步进入正式 Polish backlog，优先处理 Navigation/Exploration runtime hardening。
+> 关键建议: #18 implementation 与 fresh perf probe 已完成；下一步从 Polish Story 001 开始，把当前 adapter fixture 扩展到 Navigation/Exploration runtime contract。
 
 ### 并行机会提醒
 

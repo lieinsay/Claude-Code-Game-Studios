@@ -112,6 +112,7 @@ graph TB
 | [production/session-state/active.md](../production/session-state/active.md) | 当前会话状态 |
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 18/18 Epic 完成 (125 Stories)；#1-#18 已完成 |
 | [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18 Onboarding / First Loop — 5/5 Polish entry Stories Complete |
+| [production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Polish Story 001 — Navigation / Exploration runtime hardening beyond the playable fixture |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -697,8 +698,8 @@ graph TB
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P0 | [#16 Story 002 Modal Stack + Input Routing](../production/epics/ui-hud-interface/story-002-modal-stack-input-routing.md) | Story 001 屏幕 FSM 已完成；继续补单槽模态、S7 战斗覆盖和 4 层输入路由 |
-| P1 | [#16 Story 003 HUD Update + Panel Lifecycle](../production/epics/ui-hud-interface/story-003-hud-update-panel-lifecycle-cache.md) | 可在 Story 001 屏幕注册表基础上并行补 HUD 脏标记和面板生命周期 |
+| P0 | [Polish Story 001: Navigation / Exploration Runtime Hardening](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | #18 与 fresh perf 已完成；下一步把当前 playable adapter fixture 扩展到 Navigation/Exploration runtime contract |
+| P1 | Windowed onboarding/runtime visual capture | Headless smoke 已 PASS；如需要非 headless 像素/视频证据，在视觉 Polish 中补充 |
 
 ---
 
@@ -1405,7 +1406,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过。下一步进入 Navigation/Exploration runtime hardening 与视觉 Polish backlog。
+> **更新于 2026-05-22** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过。下一步从 `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` 开始。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。
