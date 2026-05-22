@@ -7,7 +7,7 @@
 > 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Production → Polish PASS WITH CONDITIONS**
 
 > **Readiness 基线**: 所有 125 个 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18 与 Polish Story 001 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening 已完成，后续进入 authored content / visual capture / richer Exploration semantics 的普通 Polish backlog。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-22 同步到 #18 与 Polish Story 001 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、fixture JSON 化、真实 preflight、windowed screenshot evidence 已完成，后续进入 richer Exploration semantics / final content production 的普通 Polish backlog。
 
 ---
 
@@ -625,7 +625,7 @@ D-C: Chart / Exploration route authority + QA smoke
 | #17 Feedback | 001-005 | #10+#11+#12+#13+#16 semantic events | ✅ Complete — 2026-05-16 (36/36 feedback checks PASS) |
 | Sprint 003 Domain-backed playable slice | PVS3-001..PVS3-007 | #1-#17 C# domain/story evidence + Sprint 002 greybox playable recovery | Complete; Production -> Polish PASS WITH CONDITIONS |
 | #18 Onboarding | 001-005 | #7+#9+#11+#13+#14+#16 完成 + Sprint 003 gate risk resolved | ✅ Complete — 2026-05-22 |
-| Polish Story 001 Runtime hardening | 001 | Sprint 003 + #18 Complete | ✅ Complete — NavigationManager EncounterContext + ExplorationManager search/threat contract |
+| Polish Story 001 Runtime hardening | 001 | Sprint 003 + #18 Complete | ✅ Complete — NavigationManager EncounterContext + ExplorationManager search/threat contract + fixture risk closure + windowed evidence |
 
 ---
 

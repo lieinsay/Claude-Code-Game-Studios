@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
 - 活跃任务: Polish backlog follow-ups after Story 001 runtime hardening。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening 均已完成。剩余风险转为 authored content、视觉捕获和更丰富探索语义的普通 Polish backlog。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening、fixture JSON 化、真实 preflight、windowed visual capture 均已完成。剩余风险转为更丰富探索语义和最终内容生产的普通 Polish backlog。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,11 +519,11 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Authored route/search content follow-up | Polish Story 001 runtime authority hardening ✅ | Next |
-| **P1** | Windowed visual capture for onboarding/runtime if required | Headless smoke PASS ✅ | Polish |
+| **P0** | Richer Exploration scene semantics follow-up | Polish Story 001 runtime authority + fixture risk closure ✅ | Next |
+| **P1** | Additional windowed capture/video if required | Windowed screenshot PASS ✅ | Polish |
 | **P2** | Final art/audio treatment for onboarding hints | #18 implementation slice ✅ | Polish |
 
-> 关键建议: Polish Story 001 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract。下一步不要宣布 Release readiness；继续把 seeded MVP route/search content 与视觉证据按小步 Polish backlog 推进。
+> 关键建议: Polish Story 001 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract，并完成 fixture JSON 化、真实 preflight 与 windowed screenshot 证据。下一步不要宣布 Release readiness；继续用小步 Polish backlog 推进更丰富探索语义和最终内容生产。
 
 ### 并行机会提醒
 

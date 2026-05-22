@@ -6,6 +6,14 @@ Feature: Production to Polish Gate Passed
 Task: Polish Story 001 Navigation / Exploration runtime hardening complete; continue Polish backlog
 <!-- /STATUS -->
 
+## Session Extract -- Polish Story 001 Risk Closure 2026-05-22
+- Residual risk pass complete for `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md`.
+- Moved seeded MVP route/search/startup data from adapter methods into `src/presentation/playable_slice_runtime_fixture.json`.
+- `PlayableSliceDomainAdapter` Navigation preflight now queries `ModuleHullManager.CanDepart()` after installing fixture-defined startup modules; it no longer accepts every route through an always-true preflight delegate.
+- Windowed Godot visual smoke PASS under NVIDIA OpenGL; screenshot evidence copied to `production/qa/evidence/polish-001-windowed-session-shell-hub-probe.png`.
+- Smoke now asserts final Hub screenshot state has no stale return-Hub onboarding hint.
+- Remaining scope is not a blocker: fixture JSON and greybox markers are MVP Polish content/presentation fixtures; richer authored route tables, search content, and scene semantics remain downstream Polish backlog. Do not declare Release readiness from this closure.
+
 ## Session Extract -- Polish Story 001 Runtime Hardening Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` -- Navigation / Exploration Runtime Hardening.
 - `PlayableSliceDomainAdapter` now wires C# `NavigationManager` and `ExplorationManager` into the playable runtime path: Chart/Hub departure produces a Navigation `EncounterContext`, Exploration consumes it into `Exploring`, and runtime search/pressure records manager-owned search/threat state.

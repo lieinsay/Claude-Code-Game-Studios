@@ -1,4 +1,5 @@
 using CloudWeaverVoyage.Core;
+using System.Text.Json;
 
 namespace CloudWeaverVoyage.Presentation;
 
@@ -12,6 +13,8 @@ public sealed class PlayableSliceDomainAdapter
 	private const string BasicSupplyId = ModuleHullManager.BasicSupplyId;
 	private const string RepairKitId = ModuleHullManager.RepairKitId;
 	private const string RewardResourceId = "resource.beacon_crystal";
+	private const string FixturePath = "src/presentation/playable_slice_runtime_fixture.json";
+	private readonly PlayableSliceRuntimeFixture fixture;
 	private readonly ChartManager chart;
 	private readonly HubManager hub;
 	private readonly NavigationManager navigation;
@@ -32,8 +35,10 @@ public sealed class PlayableSliceDomainAdapter
 
 	public PlayableSliceDomainAdapter()
 	{
+		fixture = PlayableSliceRuntimeFixture.Load(FixturePath);
 		resources = BuildResourcesManager();
 		modules = new ModuleHullManager(resources);
+		InstallStartingModules();
 		chart = BuildChartManager();
 		hub = BuildHubManager();
 		navigation = BuildNavigationManager();
@@ -93,7 +98,7 @@ public sealed class PlayableSliceDomainAdapter
 		RewardInStorage: resources.GetQuantity(ResourcePool.InStorage, RewardResourceId),
 		RewardCarried: resources.GetQuantity(ResourcePool.Carried, RewardResourceId),
 		CargoUsed: CargoUsed,
-		CargoCapacity: 500,
+		CargoCapacity: fixture.CargoCapacity,
 		StorageText: StorageText,
 		HullIntegrity: modules.GetHullState().Integrity,
 		ThreatText: ThreatText,
@@ -174,16 +179,18 @@ public sealed class PlayableSliceDomainAdapter
 		if (nextStep is 1 or 2)
 		{
 			resources.Remove(ResourcePool.InStorage, BasicSupplyId, 1);
-			var search = exploration.PerformSearch($"sp.playable.{nextStep}", SearchPointState.Unlooted, "A_core");
-			lastSearchPointId = $"sp.playable.{nextStep}";
+			var searchPoint = fixture.SearchPointForStep(nextStep);
+			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
+			lastSearchPointId = searchPoint.PointId;
 			lastSearchMessage = search.IsEmpty
 				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
 				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
 		}
 		else if (nextStep == 3)
 		{
-			var search = exploration.PerformSearch("sp.playable.3", SearchPointState.Unlooted, "A_core");
-			lastSearchPointId = "sp.playable.3";
+			var searchPoint = fixture.SearchPointForStep(nextStep);
+			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
+			lastSearchPointId = searchPoint.PointId;
 			lastSearchMessage = search.IsEmpty
 				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
 				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
@@ -191,7 +198,7 @@ public sealed class PlayableSliceDomainAdapter
 
 		if (nextStep == 2)
 		{
-			exploration.CheckThreatTrigger(2.0, "proximity");
+			exploration.CheckThreatTrigger(fixture.SearchPointForStep(nextStep).ThreatPosition, "proximity");
 		}
 
 		explorationStep = nextStep;
@@ -240,9 +247,26 @@ public sealed class PlayableSliceDomainAdapter
 		registry.InitializeContent();
 		var manager = new ResourcesManager(registry);
 		manager.Initialize();
-		manager.Add(ResourcePool.InStorage, BasicSupplyId, 10);
-		manager.Add(ResourcePool.InStorage, RepairKitId, 4);
+		foreach (var resource in fixture.InitialResources)
+		{
+			manager.Add(ResourcePool.InStorage, resource.ResourceId, resource.Quantity);
+		}
 		return manager;
+	}
+
+	private void InstallStartingModules()
+	{
+		foreach (var module in fixture.StartingModules)
+		{
+			if (Enum.TryParse<ModuleType>(module.ModuleType, ignoreCase: true, out var moduleType))
+			{
+				if (moduleType == ModuleType.Scout)
+				{
+					modules.UnlockScoutModule();
+				}
+				modules.InstallModule(module.SlotId, moduleType);
+			}
+		}
 	}
 
 	private ChartManager BuildChartManager()
@@ -255,19 +279,16 @@ public sealed class PlayableSliceDomainAdapter
 
 		manager.SetKnowledgeQueryDelegate(_ => 2);
 		manager.SetTraversableQueryDelegate(_ => true);
-		manager.SetDockedLocationDelegate(() => OriginId);
-		manager.RegisterRoute(new RouteStaticData(
-			"route.mist",
-			OriginId,
-			"location.mist-short",
-			"short",
-			new[] { "fog", "low_threat" }));
-		manager.RegisterRoute(new RouteStaticData(
-			"route.market",
-			OriginId,
-			"location.old-market",
-			"medium",
-			new[] { "market", "medium_threat" }));
+		manager.SetDockedLocationDelegate(() => fixture.OriginId);
+		foreach (var route in fixture.Routes)
+		{
+			manager.RegisterRoute(new RouteStaticData(
+				route.RouteId,
+				route.OriginId,
+				route.DestinationId,
+				route.DistanceBand,
+				route.ChartHazardTags));
+		}
 		manager.RouteCommitted += (routeId, destinationId, _) =>
 		{
 			lastCommittedRoute = routeId;
@@ -284,7 +305,7 @@ public sealed class PlayableSliceDomainAdapter
 			RouteKnowledgeUnlocked = () => true,
 			RouteRiskSummary = () => ThreatText,
 			CargoUsedVolume = () => CargoUsed,
-			CargoTotalCapacity = () => 500,
+			CargoTotalCapacity = () => fixture.CargoCapacity,
 			StorageUsedVolume = () => resources.GetUsedVolume(ResourcePool.InStorage),
 			StorageTotalCapacity = () => resources.GetTotalVolume(ResourcePool.InStorage),
 			ChartDepartureRequest = _ => new HubDepartureRequestResult(true, string.Empty),
@@ -296,11 +317,15 @@ public sealed class PlayableSliceDomainAdapter
 	private NavigationManager BuildNavigationManager()
 	{
 		var manager = new NavigationManager();
-		manager.SetCanDepartDelegate(_ => (true, Array.Empty<string>()));
+		manager.SetCanDepartDelegate(_ =>
+		{
+			var readiness = modules.CanDepart();
+			return (readiness.CanDepart, readiness.Reasons);
+		});
 		manager.SetGetRouteDelegate(routeId => routeId switch
 		{
-			"route.mist" => (true, new[] { "safe", "low_threat" }, "short"),
-			"route.market" => (true, new[] { "safe", "medium_threat" }, "medium"),
+			_ when fixture.RouteById.TryGetValue(routeId, out var route) =>
+				(true, route.NavigationHazardTags, route.DistanceBand),
 			_ => (false, Array.Empty<string>(), string.Empty),
 		});
 		manager.SetGetKnowledgeStateDelegate(_ => 2);
@@ -326,33 +351,34 @@ public sealed class PlayableSliceDomainAdapter
 		manager.SetRandomDelegate(() => 0.10d);
 		manager.SetRandomRangeDelegate((_, _) => 1);
 		manager.SetGetScoutEfficiencyDelegate(() => modules.GetScoutVisibilityEfficiency());
-		manager.SetApplyExplorationHullDamageDelegate(_ => modules.ApplyHullDamage(6));
-		manager.SetLootPools(new Dictionary<string, Dictionary<string, List<(string, int, int)>>>(StringComparer.Ordinal)
+		manager.SetApplyExplorationHullDamageDelegate(_ => modules.ApplyHullDamage(fixture.ThreatDamage));
+		manager.SetLootPools(fixture.SearchPoints.ToDictionary(
+			point => point.PointId,
+			point => PlayableSearchLoot(point),
+			StringComparer.Ordinal));
+		foreach (var point in fixture.SearchPoints.Where(point => !string.IsNullOrWhiteSpace(point.ThreatId)))
 		{
-			["sp.playable.1"] = PlayableSearchLoot(),
-			["sp.playable.2"] = PlayableSearchLoot(),
-			["sp.playable.3"] = PlayableSearchLoot(),
-		});
-		manager.RegisterThreatPoint(new ExplorationManager.ThreatPoint(
-			"threat.playable-cloud-shear",
-			ExplorationManager.ThreatCategory.Environmental,
-			triggerRadius: 0.25d,
-			position: 2.0d));
+			manager.RegisterThreatPoint(new ExplorationManager.ThreatPoint(
+				point.ThreatId,
+				ExplorationManager.ThreatCategory.Environmental,
+				point.ThreatTriggerRadius,
+				point.ThreatPosition));
+		}
 		return manager;
 	}
 
-	private static Dictionary<string, List<(string, int, int)>> PlayableSearchLoot() =>
+	private static Dictionary<string, List<(string, int, int)>> PlayableSearchLoot(PlayableSearchPoint point) =>
 		new(StringComparer.Ordinal)
 		{
-			["poor"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
-			["common"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
-			["uncommon"] = new List<(string, int, int)> { (RewardResourceId, 1, 1) },
+			["poor"] = new List<(string, int, int)> { (point.RewardResourceId, point.QuantityMin, point.QuantityMax) },
+			["common"] = new List<(string, int, int)> { (point.RewardResourceId, point.QuantityMin, point.QuantityMax) },
+			["uncommon"] = new List<(string, int, int)> { (point.RewardResourceId, point.QuantityMin, point.QuantityMax) },
 		};
 
 	private void StartNavigationAndExploration(string routeId, string destinationId, IReadOnlyList<string> hazardTags)
 	{
 		navigation.OnRouteCommitted(routeId, destinationId, hazardTags);
-		navigation.ProcessVoyage(240.0d);
+		navigation.ProcessVoyage(fixture.VoyageFastForwardSeconds);
 		activeEncounterContext ??= navigation.BuildEncounterContext();
 		if (exploration.EnterExplorationWithContext(activeEncounterContext))
 		{
@@ -516,12 +542,10 @@ public sealed class PlayableSliceDomainAdapter
 		lastStatus = "Playable slice scene state restored from canonical progress.";
 	}
 
-	private static string RouteName(string routeId) => routeId switch
-	{
-		"route.mist" => "雾海短程",
-		"route.market" => "旧集市航道",
-		_ => string.IsNullOrWhiteSpace(routeId) ? "未命名航线" : routeId,
-	};
+	private string RouteName(string routeId) =>
+		fixture.RouteById.TryGetValue(routeId, out var route)
+			? route.DisplayName
+			: string.IsNullOrWhiteSpace(routeId) ? "未命名航线" : routeId;
 
 	private int CargoUsed => TotalRewards * 80 + (explorationStep >= 2 ? 20 : 0);
 
@@ -626,3 +650,212 @@ public sealed record PlayableSliceSceneState(
 	float PlayerX,
 	float PlayerY,
 	string Footer);
+
+internal sealed class PlayableSliceRuntimeFixture
+{
+	public string OriginId { get; init; } = "location.cloudweaver-hub";
+	public int CargoCapacity { get; init; } = 500;
+	public double VoyageFastForwardSeconds { get; init; } = 240.0d;
+	public IReadOnlyList<PlayableInitialResource> InitialResources { get; init; } =
+	[
+		new(ModuleHullManager.BasicSupplyId, 13),
+		new(ModuleHullManager.RepairKitId, 7),
+	];
+	public IReadOnlyList<PlayableStartingModule> StartingModules { get; init; } =
+	[
+		new(ModuleHullManager.SlotA, "Cargo"),
+	];
+	public IReadOnlyList<PlayableRouteFixture> Routes { get; init; } =
+	[
+		new(
+			"route.mist",
+			"雾海短程",
+			"location.cloudweaver-hub",
+			"location.mist-short",
+			"short",
+			["fog", "low_threat"],
+			["safe", "low_threat"]),
+		new(
+			"route.market",
+			"旧集市航道",
+			"location.cloudweaver-hub",
+			"location.old-market",
+			"medium",
+			["market", "medium_threat"],
+			["safe", "medium_threat"]),
+	];
+	public IReadOnlyList<PlayableSearchPoint> SearchPoints { get; init; } =
+	[
+		new("sp.playable.1", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+		new("sp.playable.2", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
+		new("sp.playable.3", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+	];
+
+	public IReadOnlyDictionary<string, PlayableRouteFixture> RouteById =>
+		Routes.ToDictionary(route => route.RouteId, StringComparer.Ordinal);
+
+	public int ThreatDamage => SearchPoints
+		.Where(point => !string.IsNullOrWhiteSpace(point.ThreatId))
+		.Select(point => point.ThreatDamage)
+		.DefaultIfEmpty(0)
+		.Max();
+
+	public PlayableSearchPoint SearchPointForStep(int step)
+	{
+		var index = Math.Clamp(step, 1, SearchPoints.Count) - 1;
+		return SearchPoints[index];
+	}
+
+	public static PlayableSliceRuntimeFixture Load(string path)
+	{
+		var fullPath = Path.GetFullPath(path);
+		if (!File.Exists(fullPath))
+		{
+			return new PlayableSliceRuntimeFixture();
+		}
+
+		using var document = JsonDocument.Parse(File.ReadAllText(fullPath));
+		var root = document.RootElement;
+		return new PlayableSliceRuntimeFixture
+		{
+			OriginId = ReadString(root, "origin_id", "location.cloudweaver-hub"),
+			CargoCapacity = ReadInt(root, "cargo_capacity", 500),
+			VoyageFastForwardSeconds = ReadDouble(root, "voyage_fast_forward_seconds", 240.0d),
+			InitialResources = ReadInitialResources(root),
+			StartingModules = ReadStartingModules(root),
+			Routes = ReadRoutes(root),
+			SearchPoints = ReadSearchPoints(root),
+		};
+	}
+
+	private static IReadOnlyList<PlayableInitialResource> ReadInitialResources(JsonElement root)
+	{
+		if (!root.TryGetProperty("initial_resources", out var array) || array.ValueKind != JsonValueKind.Array)
+		{
+			return new PlayableSliceRuntimeFixture().InitialResources;
+		}
+		var resources = array.EnumerateArray()
+			.Select(item => new PlayableInitialResource(
+				ReadString(item, "resource_id", ""),
+				ReadInt(item, "quantity", 0)))
+			.Where(item => !string.IsNullOrWhiteSpace(item.ResourceId) && item.Quantity > 0)
+			.ToArray();
+		return resources.Length > 0
+			? resources
+			: new PlayableSliceRuntimeFixture().InitialResources;
+	}
+
+	private static IReadOnlyList<PlayableStartingModule> ReadStartingModules(JsonElement root)
+	{
+		if (!root.TryGetProperty("starting_modules", out var array) || array.ValueKind != JsonValueKind.Array)
+		{
+			return new PlayableSliceRuntimeFixture().StartingModules;
+		}
+		var modules = array.EnumerateArray()
+			.Select(item => new PlayableStartingModule(
+				ReadString(item, "slot_id", ""),
+				ReadString(item, "module_type", "")))
+			.Where(item => !string.IsNullOrWhiteSpace(item.SlotId) && !string.IsNullOrWhiteSpace(item.ModuleType))
+			.ToArray();
+		return modules.Length > 0
+			? modules
+			: new PlayableSliceRuntimeFixture().StartingModules;
+	}
+
+	private static IReadOnlyList<PlayableRouteFixture> ReadRoutes(JsonElement root)
+	{
+		if (!root.TryGetProperty("routes", out var array) || array.ValueKind != JsonValueKind.Array)
+		{
+			return new PlayableSliceRuntimeFixture().Routes;
+		}
+		var routes = array.EnumerateArray()
+			.Select(item => new PlayableRouteFixture(
+				ReadString(item, "route_id", ""),
+				ReadString(item, "display_name", ""),
+				ReadString(item, "origin_id", "location.cloudweaver-hub"),
+				ReadString(item, "destination_id", ""),
+				ReadString(item, "distance_band", "medium"),
+				ReadStringArray(item, "chart_hazard_tags"),
+				ReadStringArray(item, "navigation_hazard_tags")))
+			.Where(route => !string.IsNullOrWhiteSpace(route.RouteId) && !string.IsNullOrWhiteSpace(route.DestinationId))
+			.ToArray();
+		return routes.Length > 0
+			? routes
+			: new PlayableSliceRuntimeFixture().Routes;
+	}
+
+	private static IReadOnlyList<PlayableSearchPoint> ReadSearchPoints(JsonElement root)
+	{
+		if (!root.TryGetProperty("search_points", out var array) || array.ValueKind != JsonValueKind.Array)
+		{
+			return new PlayableSliceRuntimeFixture().SearchPoints;
+		}
+		var searchPoints = array.EnumerateArray()
+			.Select(item => new PlayableSearchPoint(
+				ReadString(item, "point_id", ""),
+				ReadString(item, "zone", "A_core"),
+				ReadString(item, "reward_resource_id", "resource.beacon_crystal"),
+				ReadInt(item, "quantity_min", 1),
+				ReadInt(item, "quantity_max", 1),
+				ReadString(item, "threat_id", ""),
+				ReadDouble(item, "threat_position", 0.0d),
+				ReadDouble(item, "threat_trigger_radius", 0.0d),
+				ReadInt(item, "threat_damage", 0)))
+			.Where(point => !string.IsNullOrWhiteSpace(point.PointId))
+			.ToArray();
+		return searchPoints.Length > 0
+			? searchPoints
+			: new PlayableSliceRuntimeFixture().SearchPoints;
+	}
+
+	private static IReadOnlyList<string> ReadStringArray(JsonElement item, string propertyName)
+	{
+		if (!item.TryGetProperty(propertyName, out var array) || array.ValueKind != JsonValueKind.Array)
+		{
+			return Array.Empty<string>();
+		}
+		return array.EnumerateArray()
+			.Select(value => value.GetString() ?? string.Empty)
+			.Where(value => !string.IsNullOrWhiteSpace(value))
+			.ToArray();
+	}
+
+	private static string ReadString(JsonElement element, string propertyName, string fallback) =>
+		element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+			? value.GetString() ?? fallback
+			: fallback;
+
+	private static int ReadInt(JsonElement element, string propertyName, int fallback) =>
+		element.TryGetProperty(propertyName, out var value) && value.TryGetInt32(out var number)
+			? number
+			: fallback;
+
+	private static double ReadDouble(JsonElement element, string propertyName, double fallback) =>
+		element.TryGetProperty(propertyName, out var value) && value.TryGetDouble(out var number)
+			? number
+			: fallback;
+}
+
+internal sealed record PlayableInitialResource(string ResourceId, int Quantity);
+
+internal sealed record PlayableStartingModule(string SlotId, string ModuleType);
+
+internal sealed record PlayableRouteFixture(
+	string RouteId,
+	string DisplayName,
+	string OriginId,
+	string DestinationId,
+	string DistanceBand,
+	IReadOnlyList<string> ChartHazardTags,
+	IReadOnlyList<string> NavigationHazardTags);
+
+internal sealed record PlayableSearchPoint(
+	string PointId,
+	string Zone,
+	string RewardResourceId,
+	int QuantityMin,
+	int QuantityMax,
+	string ThreatId,
+	double ThreatPosition,
+	double ThreatTriggerRadius,
+	int ThreatDamage);

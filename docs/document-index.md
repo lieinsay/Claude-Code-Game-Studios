@@ -113,7 +113,8 @@ graph TB
 | [production/epics/index.md](../production/epics/index.md) | Epic/Story 索引 — 18/18 Epic 完成 (125 Stories)；#1-#18 已完成 |
 | [production/epics/onboarding-first-loop/EPIC.md](../production/epics/onboarding-first-loop/EPIC.md) | Epic #18 Onboarding / First Loop — 5/5 Polish entry Stories Complete |
 | [production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md](../production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md) | Polish Story 001 — Navigation / Exploration runtime hardening Complete |
-| [production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md](../production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md) | Polish Story 001 evidence — NavigationManager EncounterContext + ExplorationManager runtime search/threat contract PASS |
+| [production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md](../production/qa/evidence/polish-001-navigation-exploration-runtime-hardening-evidence.md) | Polish Story 001 evidence — NavigationManager EncounterContext + ExplorationManager runtime search/threat contract + windowed visual capture PASS |
+| [production/qa/evidence/polish-001-windowed-session-shell-hub-probe.png](../production/qa/evidence/polish-001-windowed-session-shell-hub-probe.png) | Polish Story 001 windowed screenshot evidence |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -699,7 +700,7 @@ graph TB
 
 | 优先级 | 下一步 | 说明 |
 |--------|--------|------|
-| P0 | Polish authored route/search content follow-up | Polish Story 001 已完成 runtime authority hardening；下一步可把 seeded MVP routes/search loot pools 迁到更正式的 authored content path |
+| P0 | Richer Exploration scene semantics follow-up | Polish Story 001 已完成 runtime authority hardening、fixture JSON 化、真实 preflight 和 windowed visual capture；下一步可扩展更正式的探索场景语义 |
 | P1 | Windowed onboarding/runtime visual capture | Headless smoke 已 PASS；如需要非 headless 像素/视频证据，在视觉 Polish 中补充 |
 
 ---

@@ -1,0 +1,59 @@
+{
+  "origin_id": "location.cloudweaver-hub",
+  "cargo_capacity": 500,
+  "voyage_fast_forward_seconds": 240.0,
+  "initial_resources": [
+    { "resource_id": "resource.basic_supply", "quantity": 13 },
+    { "resource_id": "resource.repair_kit", "quantity": 7 }
+  ],
+  "starting_modules": [
+    { "slot_id": "slot_a", "module_type": "Cargo" }
+  ],
+  "routes": [
+    {
+      "route_id": "route.mist",
+      "display_name": "雾海短程",
+      "origin_id": "location.cloudweaver-hub",
+      "destination_id": "location.mist-short",
+      "distance_band": "short",
+      "chart_hazard_tags": [ "fog", "low_threat" ],
+      "navigation_hazard_tags": [ "safe", "low_threat" ]
+    },
+    {
+      "route_id": "route.market",
+      "display_name": "旧集市航道",
+      "origin_id": "location.cloudweaver-hub",
+      "destination_id": "location.old-market",
+      "distance_band": "medium",
+      "chart_hazard_tags": [ "market", "medium_threat" ],
+      "navigation_hazard_tags": [ "safe", "medium_threat" ]
+    }
+  ],
+  "search_points": [
+    {
+      "point_id": "sp.playable.1",
+      "zone": "A_core",
+      "reward_resource_id": "resource.beacon_crystal",
+      "quantity_min": 1,
+      "quantity_max": 1
+    },
+    {
+      "point_id": "sp.playable.2",
+      "zone": "A_core",
+      "reward_resource_id": "resource.beacon_crystal",
+      "quantity_min": 1,
+      "quantity_max": 1,
+      "threat_id": "threat.playable-cloud-shear",
+      "threat_position": 2.0,
+      "threat_trigger_radius": 0.25,
+      "threat_damage": 6
+    },
+    {
+      "point_id": "sp.playable.3",
+      "zone": "A_core",
+      "reward_resource_id": "resource.beacon_crystal",
+      "quantity_min": 1,
+      "quantity_max": 1
+    }
+  ]
+}
