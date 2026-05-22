@@ -9,10 +9,10 @@
 - `PlayableSliceDomainAdapter` now uses `NavigationManager` to produce the playable route `EncounterContext`.
 - `ExplorationManager` now consumes that context, owns the active exploration point, records runtime search points, and owns the threat substate after pressure.
 - Resources, carried rewards, hull pressure, route commitment, onboarding progress, and canonical save/load remain under C# manager authority.
-- Seeded MVP routes, starting modules, initial resources, and playable search loot pools now live in `src/presentation/playable_slice_runtime_fixture.json` instead of being hardcoded in adapter methods.
+- Seeded MVP routes, starting modules, initial resources, and playable search loot pools were moved out of adapter methods and later advanced to `src/presentation/playable_slice_authored_content.json`.
 - Navigation preflight now queries `ModuleHullManager.CanDepart()` after fixture-installed starting modules, instead of accepting all route departures.
 - Windowed visual evidence is captured at `production/qa/evidence/polish-001-windowed-session-shell-hub-probe.png`.
-- Remaining fixture scope is content/presentation only: the fixture JSON and greybox interaction markers are still MVP Polish content, not final authored route/exploration content.
+- Remaining content scope is presentation/content only: the authored JSON slice and greybox interaction markers are still MVP Polish content, not the final route/exploration content pipeline.
 
 ## Automated Checks
 
@@ -53,6 +53,6 @@
 
 ## Remaining Conditions
 
-- Route seeding and search loot tables are now data-backed MVP content fixtures, not adapter-local code branches.
+- Route seeding and search loot tables are now data-backed authored MVP content, not adapter-local code branches.
 - The playable route consumes real C# Navigation/Exploration managers, but broader authored route tables and richer exploration scene content remain downstream Polish scope.
 - No Release readiness claim is made by this evidence.

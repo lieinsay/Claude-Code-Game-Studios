@@ -510,7 +510,7 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
 - 活跃任务: Polish backlog follow-ups after Story 001 runtime hardening。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening、fixture JSON 化、真实 preflight、windowed visual capture、richer Exploration scene semantics 均已完成。剩余风险转为最终内容生产与美术/音频处理的普通 Polish backlog。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening、authored route/search content slice、真实 preflight、windowed visual capture、richer Exploration scene semantics 均已完成。剩余风险转为内容规模化与美术/音频处理的普通 Polish backlog。
 - 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
@@ -519,11 +519,11 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Final authored route/search content backlog slice | Polish Story 001/002 ✅ | Next |
-| **P1** | Final art/audio treatment for onboarding/runtime hints | #18 implementation slice + Story 002 visual semantics ✅ | Polish |
+| **P0** | Final art/audio treatment for onboarding/runtime hints | #18 implementation slice + Story 002/003 visual/content evidence ✅ | Next |
+| **P1** | Route/search content table scale-up | Polish Story 003 authored MVP slice ✅ | Polish |
 | **P2** | Additional windowed capture/video if required | Windowed screenshots PASS ✅ | Polish |
 
-> 关键建议: Polish Story 001/002 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract，并完成 fixture JSON 化、真实 preflight、动态探索场景语义与 windowed screenshot 证据。下一步不要宣布 Release readiness；继续用小步 Polish backlog 推进最终 route/search 内容生产或美术/音频处理。
+> 关键建议: Polish Story 001-003 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract，并完成 authored content slice、真实 preflight、动态探索场景语义与 windowed screenshot 证据。下一步不要宣布 Release readiness；继续用小步 Polish backlog 推进内容规模化或美术/音频处理。
 
 ### 并行机会提醒
 

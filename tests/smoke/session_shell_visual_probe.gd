@@ -101,6 +101,8 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-003-authored-route-search-v1", "C# HubRuntime loads authored route/search content version")
+	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
 	hub.call("OnRouteMistPressed")
@@ -150,11 +152,12 @@ func _run() -> void:
 	var search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(search_snapshot.get("exploration_step", 0)) == 1, "C# HubRuntime search advances domain adapter snapshot")
 	_expect(str(search_snapshot.get("last_search_point", "")) == "sp.playable.1", "ExplorationManager records runtime search point")
+	_expect(str(search_snapshot.get("last_search_point_name", "")) == "雾灯残骸", "Exploration runtime exposes authored search point name")
 	_expect(int(search_snapshot.get("basic_supply_in_storage", 0)) == 9, "C# HubRuntime search consumes ResourcesManager supply")
 	_expect(int(search_snapshot.get("reward_carried", 0)) == 1, "C# HubRuntime search adds carried ResourcesManager reward")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Spatial search interaction creates low threat feedback")
-	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("sp.playable.1"), "Exploration semantic label follows the first manager search point")
+	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("雾灯残骸"), "Exploration semantic label follows authored search point name")
 	_expect(_control_width(session, "ExplorationRouteProgressFill") > 250.0, "Exploration route progress strip advances after first search")
 
 	hub.call("OnExplorationAdvancePressed")
@@ -204,6 +207,7 @@ func _run() -> void:
 	var loaded_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(loaded_onboarding.get("next_hint_step", "")) == "return_hub", "Loading mid-loop onboarding progress does not replay completed save/load hint")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
+	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Loading exploration save restores authored route display name")
 	var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "Canonical load restores carried ResourcesManager rewards")
 	_expect(int(loaded_snapshot.get("reward_in_storage", 0)) == 0, "Canonical load restores pre-return ResourcesManager storage state")

@@ -13,7 +13,7 @@ public sealed class PlayableSliceDomainAdapter
 	private const string BasicSupplyId = ModuleHullManager.BasicSupplyId;
 	private const string RepairKitId = ModuleHullManager.RepairKitId;
 	private const string RewardResourceId = "resource.beacon_crystal";
-	private const string FixturePath = "src/presentation/playable_slice_runtime_fixture.json";
+	private const string ContentPath = "src/presentation/playable_slice_authored_content.json";
 	private readonly PlayableSliceRuntimeFixture fixture;
 	private readonly ChartManager chart;
 	private readonly HubManager hub;
@@ -26,6 +26,7 @@ public sealed class PlayableSliceDomainAdapter
 	private string lastCommittedDestination = string.Empty;
 	private EncounterContext? activeEncounterContext;
 	private string lastSearchPointId = string.Empty;
+	private string lastSearchPointName = string.Empty;
 	private string lastSearchMessage = "尚未搜索";
 	private string lastStatus = "Domain adapter initialized.";
 	private string lastSaveStatus = "尚未保存";
@@ -35,7 +36,7 @@ public sealed class PlayableSliceDomainAdapter
 
 	public PlayableSliceDomainAdapter()
 	{
-		fixture = PlayableSliceRuntimeFixture.Load(FixturePath);
+		fixture = PlayableSliceRuntimeFixture.Load(ContentPath);
 		resources = BuildResourcesManager();
 		modules = new ModuleHullManager(resources);
 		InstallStartingModules();
@@ -74,6 +75,8 @@ public sealed class PlayableSliceDomainAdapter
 
 	public PlayableSliceSnapshot Snapshot => new(
 		ChartState: chart.CurrentState.ToString(),
+		ContentVersion: fixture.ContentVersion,
+		ContentStatus: fixture.ContentStatus,
 		SelectedRouteId: chart.SelectedRouteId,
 		SelectedRouteName: RouteName(chart.SelectedRouteId),
 		VisibleRouteCount: chart.VisibleRoutes.Count,
@@ -92,6 +95,7 @@ public sealed class PlayableSliceDomainAdapter
 		ExplorationPointId: exploration.CurrentPointId,
 		ExplorationStep: explorationStep,
 		LastSearchPointId: lastSearchPointId,
+		LastSearchPointName: lastSearchPointName,
 		LastSearchMessage: lastSearchMessage,
 		BasicSupplyInStorage: resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId),
 		RepairKitsInStorage: resources.GetQuantity(ResourcePool.InStorage, RepairKitId),
@@ -128,6 +132,8 @@ public sealed class PlayableSliceDomainAdapter
 		return selected;
 	}
 
+	public string GetRouteDisplayName(string routeId) => RouteName(routeId);
+
 	public bool ConfirmDeparture()
 	{
 		var routeId = chart.SelectedRouteId;
@@ -149,6 +155,7 @@ public sealed class PlayableSliceDomainAdapter
 		explorationStep = 0;
 		activeEncounterContext = null;
 		lastSearchPointId = string.Empty;
+		lastSearchPointName = string.Empty;
 		lastSearchMessage = "尚未搜索";
 		lastStatus = locked
 			? $"HubManager departed via {RouteName(routeId)}."
@@ -182,6 +189,7 @@ public sealed class PlayableSliceDomainAdapter
 			var searchPoint = fixture.SearchPointForStep(nextStep);
 			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
 			lastSearchPointId = searchPoint.PointId;
+			lastSearchPointName = searchPoint.DisplayName;
 			lastSearchMessage = search.IsEmpty
 				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
 				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
@@ -191,6 +199,7 @@ public sealed class PlayableSliceDomainAdapter
 			var searchPoint = fixture.SearchPointForStep(nextStep);
 			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
 			lastSearchPointId = searchPoint.PointId;
+			lastSearchPointName = searchPoint.DisplayName;
 			lastSearchMessage = search.IsEmpty
 				? string.IsNullOrWhiteSpace(search.Message) ? "搜索无结果" : search.Message
 				: $"搜索获得 {string.Join(", ", search.Items.Select(item => $"{item.ResourceId} x{item.Quantity}"))}";
@@ -513,6 +522,7 @@ public sealed class PlayableSliceDomainAdapter
 		package.Payload["footer"] = state.Footer;
 		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
 		package.Payload["last_search_point_id"] = lastSearchPointId;
+		package.Payload["last_search_point_name"] = lastSearchPointName;
 		package.Payload["last_search_message"] = lastSearchMessage;
 		return package;
 	}
@@ -538,6 +548,7 @@ public sealed class PlayableSliceDomainAdapter
 			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
 		}
 		lastSearchPointId = ReadString(package.Payload, "last_search_point_id", "");
+		lastSearchPointName = ReadString(package.Payload, "last_search_point_name", SearchPointName(lastSearchPointId));
 		lastSearchMessage = ReadString(package.Payload, "last_search_message", "尚未搜索");
 		lastStatus = "Playable slice scene state restored from canonical progress.";
 	}
@@ -546,6 +557,9 @@ public sealed class PlayableSliceDomainAdapter
 		fixture.RouteById.TryGetValue(routeId, out var route)
 			? route.DisplayName
 			: string.IsNullOrWhiteSpace(routeId) ? "未命名航线" : routeId;
+
+	private string SearchPointName(string pointId) =>
+		fixture.SearchPoints.FirstOrDefault(point => point.PointId == pointId)?.DisplayName ?? string.Empty;
 
 	private int CargoUsed => TotalRewards * 80 + (explorationStep >= 2 ? 20 : 0);
 
@@ -610,6 +624,8 @@ public sealed class PlayableSliceDomainAdapter
 
 public sealed record PlayableSliceSnapshot(
 	string ChartState,
+	string ContentVersion,
+	string ContentStatus,
 	string SelectedRouteId,
 	string SelectedRouteName,
 	int VisibleRouteCount,
@@ -628,6 +644,7 @@ public sealed record PlayableSliceSnapshot(
 	string ExplorationPointId,
 	int ExplorationStep,
 	string LastSearchPointId,
+	string LastSearchPointName,
 	string LastSearchMessage,
 	int BasicSupplyInStorage,
 	int RepairKitsInStorage,
@@ -653,6 +670,8 @@ public sealed record PlayableSliceSceneState(
 
 internal sealed class PlayableSliceRuntimeFixture
 {
+	public string ContentVersion { get; init; } = "fallback-playable-content-v1";
+	public string ContentStatus { get; init; } = "fallback_fixture";
 	public string OriginId { get; init; } = "location.cloudweaver-hub";
 	public int CargoCapacity { get; init; } = 500;
 	public double VoyageFastForwardSeconds { get; init; } = 240.0d;
@@ -670,6 +689,7 @@ internal sealed class PlayableSliceRuntimeFixture
 		new(
 			"route.mist",
 			"雾海短程",
+			"Low-threat fallback route for the playable slice.",
 			"location.cloudweaver-hub",
 			"location.mist-short",
 			"short",
@@ -678,6 +698,7 @@ internal sealed class PlayableSliceRuntimeFixture
 		new(
 			"route.market",
 			"旧集市航道",
+			"Medium fallback route reserved for later market content.",
 			"location.cloudweaver-hub",
 			"location.old-market",
 			"medium",
@@ -686,9 +707,9 @@ internal sealed class PlayableSliceRuntimeFixture
 	];
 	public IReadOnlyList<PlayableSearchPoint> SearchPoints { get; init; } =
 	[
-		new("sp.playable.1", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
-		new("sp.playable.2", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
-		new("sp.playable.3", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+		new("sp.playable.1", "雾灯残骸", "Fallback first playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+		new("sp.playable.2", "剪云裂隙", "Fallback threat playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
+		new("sp.playable.3", "返航浮标箱", "Fallback extraction playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
 	];
 
 	public IReadOnlyDictionary<string, PlayableRouteFixture> RouteById =>
@@ -719,6 +740,8 @@ internal sealed class PlayableSliceRuntimeFixture
 		return new PlayableSliceRuntimeFixture
 		{
 			OriginId = ReadString(root, "origin_id", "location.cloudweaver-hub"),
+			ContentVersion = ReadString(root, "content_version", "fallback-playable-content-v1"),
+			ContentStatus = ReadString(root, "content_status", "fallback_fixture"),
 			CargoCapacity = ReadInt(root, "cargo_capacity", 500),
 			VoyageFastForwardSeconds = ReadDouble(root, "voyage_fast_forward_seconds", 240.0d),
 			InitialResources = ReadInitialResources(root),
@@ -772,6 +795,7 @@ internal sealed class PlayableSliceRuntimeFixture
 			.Select(item => new PlayableRouteFixture(
 				ReadString(item, "route_id", ""),
 				ReadString(item, "display_name", ""),
+				ReadString(item, "description", ""),
 				ReadString(item, "origin_id", "location.cloudweaver-hub"),
 				ReadString(item, "destination_id", ""),
 				ReadString(item, "distance_band", "medium"),
@@ -793,6 +817,8 @@ internal sealed class PlayableSliceRuntimeFixture
 		var searchPoints = array.EnumerateArray()
 			.Select(item => new PlayableSearchPoint(
 				ReadString(item, "point_id", ""),
+				ReadString(item, "display_name", ""),
+				ReadString(item, "description", ""),
 				ReadString(item, "zone", "A_core"),
 				ReadString(item, "reward_resource_id", "resource.beacon_crystal"),
 				ReadInt(item, "quantity_min", 1),
@@ -843,6 +869,7 @@ internal sealed record PlayableStartingModule(string SlotId, string ModuleType);
 internal sealed record PlayableRouteFixture(
 	string RouteId,
 	string DisplayName,
+	string Description,
 	string OriginId,
 	string DestinationId,
 	string DistanceBand,
@@ -851,6 +878,8 @@ internal sealed record PlayableRouteFixture(
 
 internal sealed record PlayableSearchPoint(
 	string PointId,
+	string DisplayName,
+	string Description,
 	string Zone,
 	string RewardResourceId,
 	int QuantityMin,

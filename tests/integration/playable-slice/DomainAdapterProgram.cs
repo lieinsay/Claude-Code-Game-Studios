@@ -20,6 +20,8 @@ var adapter = new PlayableSliceDomainAdapter();
 adapter.OpenChart();
 var opened = adapter.Snapshot;
 Check(opened.ChartState == "Browsing", "adapter opens ChartManager into Browsing");
+Check(opened.ContentVersion == "polish-003-authored-route-search-v1", "adapter loads authored playable content version");
+Check(opened.ContentStatus == "polish_authored", "adapter reports authored playable content status");
 Check(opened.VisibleRouteCount >= 2, "adapter exposes seeded visible routes");
 
 Check(adapter.SelectRoute("route.mist"), "adapter selects mist route through ChartManager");
@@ -43,6 +45,7 @@ adapter.AdvanceExploration();
 var searched = adapter.Snapshot;
 Check(searched.ExplorationStep == 1, "adapter advances hardened exploration contract to step 1");
 Check(searched.LastSearchPointId == "sp.playable.1", "ExplorationManager records the first runtime search point");
+Check(searched.LastSearchPointName == "雾灯残骸", "adapter exposes authored search point display name");
 Check(searched.BasicSupplyInStorage == 9, "ResourcesManager consumes basic supply on first search");
 Check(searched.RewardCarried == 1, "ResourcesManager carries first search reward");
 Check(searched.CargoUsed == 80, "adapter exposes cargo pressure for step 1");

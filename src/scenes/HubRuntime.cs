@@ -326,6 +326,8 @@ public partial class HubRuntime : Node2D
 		return new Godot.Collections.Dictionary
 		{
 			["chart_state"] = snapshot.ChartState,
+			["content_version"] = snapshot.ContentVersion,
+			["content_status"] = snapshot.ContentStatus,
 			["selected_route"] = snapshot.SelectedRouteId,
 			["selected_route_name"] = snapshot.SelectedRouteName,
 			["visible_route_count"] = snapshot.VisibleRouteCount,
@@ -344,6 +346,7 @@ public partial class HubRuntime : Node2D
 			["exploration_point"] = snapshot.ExplorationPointId,
 			["exploration_step"] = snapshot.ExplorationStep,
 			["last_search_point"] = snapshot.LastSearchPointId,
+			["last_search_point_name"] = snapshot.LastSearchPointName,
 			["last_search_message"] = snapshot.LastSearchMessage,
 			["scene_search_point_text"] = explorationPointSemanticLabel?.Text ?? "",
 			["scene_threat_text"] = explorationThreatSemanticLabel?.Text ?? "",
@@ -685,7 +688,7 @@ public partial class HubRuntime : Node2D
 
 		var activePoint = string.IsNullOrWhiteSpace(snapshot.LastSearchPointId)
 			? "待接近"
-			: snapshot.LastSearchPointId;
+			: string.IsNullOrWhiteSpace(snapshot.LastSearchPointName) ? snapshot.LastSearchPointId : snapshot.LastSearchPointName;
 		if (explorationPointSemanticLabel is not null)
 		{
 			explorationPointSemanticLabel.Text = $"搜索点：{activePoint} / {snapshot.ExplorationSubstate}";
@@ -764,12 +767,10 @@ public partial class HubRuntime : Node2D
 		if (cargoStationLabel is not null) cargoStationLabel.Text = cargoStationText;
 	}
 
-	private string RouteName() => selectedRoute switch
-	{
-		"route.mist" => "雾海短程",
-		"route.market" => "旧集市航道",
-		_ => "未命名航线",
-	};
+	private string RouteName() =>
+		string.IsNullOrWhiteSpace(selectedRoute)
+			? "未命名航线"
+			: domain.GetRouteDisplayName(selectedRoute);
 
 	private void SetHubControlsEnabled(bool enabled)
 	{

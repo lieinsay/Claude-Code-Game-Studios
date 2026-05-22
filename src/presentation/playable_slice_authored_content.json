@@ -1,4 +1,6 @@
 {
+  "content_version": "polish-003-authored-route-search-v1",
+  "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
   "voyage_fast_forward_seconds": 240.0,
@@ -13,6 +15,7 @@
     {
       "route_id": "route.mist",
       "display_name": "雾海短程",
+      "description": "低威胁雾带训练航线，适合验证首轮搜索、压力反馈和撤离闭环。",
       "origin_id": "location.cloudweaver-hub",
       "destination_id": "location.mist-short",
       "distance_band": "short",
@@ -22,6 +25,7 @@
     {
       "route_id": "route.market",
       "display_name": "旧集市航道",
+      "description": "通往废旧集市边缘的中程航线，保留给后续集市与修复材料内容扩展。",
       "origin_id": "location.cloudweaver-hub",
       "destination_id": "location.old-market",
       "distance_band": "medium",
@@ -32,6 +36,8 @@
   "search_points": [
     {
       "point_id": "sp.playable.1",
+      "display_name": "雾灯残骸",
+      "description": "半沉的导航灯架，能稳定产出一箱信标水晶并建立第一段载货压力。",
       "zone": "A_core",
       "reward_resource_id": "resource.beacon_crystal",
       "quantity_min": 1,
@@ -39,6 +45,8 @@
     },
     {
       "point_id": "sp.playable.2",
+      "display_name": "剪云裂隙",
+      "description": "云层剪切带中的高价值残片，搜索时触发环境威胁并压低船体完整度。",
       "zone": "A_core",
       "reward_resource_id": "resource.beacon_crystal",
       "quantity_min": 1,
@@ -50,6 +58,8 @@
     },
     {
       "point_id": "sp.playable.3",
+      "display_name": "返航浮标箱",
+      "description": "靠近返航信标的补给箱，用于完成收益锁定和撤离语义验证。",
       "zone": "A_core",
       "reward_resource_id": "resource.beacon_crystal",
       "quantity_min": 1,

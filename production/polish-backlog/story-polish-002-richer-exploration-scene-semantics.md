@@ -49,4 +49,4 @@ runtime authority in C# managers and keeping fixture content as MVP Polish data.
 - The semantic layer is refreshed from `PlayableSliceDomainAdapter.Snapshot`; it does not decide search, threat, extraction, or persistence outcomes.
 - Smoke coverage now asserts initial semantic state, first-search point binding, progress-strip advance, pressure threat-zone visibility, threat text sync, settlement-ready extraction text, and completed search marker text.
 - Windowed evidence captured at `production/qa/evidence/polish-002-exploration-semantics-probe.png` and `production/qa/evidence/polish-002-final-hub-probe.png`.
-- Remaining Polish boundary: this is still greybox presentation semantics over MVP fixture data, not final authored exploration art/content.
+- Remaining Polish boundary: this is still greybox presentation semantics over the authored MVP content slice, not final authored exploration art/content.

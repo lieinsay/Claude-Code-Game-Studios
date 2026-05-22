@@ -6,6 +6,15 @@ Feature: Production to Polish Gate Passed
 Task: Polish Story 001 Navigation / Exploration runtime hardening complete; continue Polish backlog
 <!-- /STATUS -->
 
+## Session Extract -- Polish Story 003 Authored Content Slice Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-003-authored-route-search-content-slice.md` -- Authored Route / Search Content Slice.
+- Replaced `src/presentation/playable_slice_runtime_fixture.json` with `src/presentation/playable_slice_authored_content.json`.
+- Authored content now exposes `content_version`, `content_status`, route descriptions, and search-point display/description text while preserving stable route/search IDs.
+- `PlayableSliceDomainAdapter.Snapshot` now reports content version/status and `LastSearchPointName`; `HubRuntime.DebugDomainSnapshot()` exposes the same for smoke and QA diagnostics.
+- Runtime authority remains C# / Godot .NET; authored content feeds existing Chart/Navigation/Exploration managers and presentation labels, not a second runtime authority.
+- Evidence: `production/qa/evidence/polish-003-authored-route-search-content-evidence.md`.
+- Remaining scope is not a blocker: this is an authored MVP content slice, not the final content authoring pipeline or final authored Exploration art. Do not declare Release readiness from this closure.
+
 ## Session Extract -- Polish Story 002 Exploration Semantics Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-002-richer-exploration-scene-semantics.md` -- Richer Exploration Scene Semantics.
 - `HubRuntime.cs` now adds a presentation-only dynamic Exploration semantics layer: route progress fill, active search-point label, threat-zone marker, threat semantic text, extraction cargo marker, and extraction status text.
@@ -14,15 +23,15 @@ Task: Polish Story 001 Navigation / Exploration runtime hardening complete; cont
 - Windowed evidence captured: `production/qa/evidence/polish-002-exploration-semantics-probe.png` and `production/qa/evidence/polish-002-final-hub-probe.png`.
 - Evidence: `production/qa/evidence/polish-002-richer-exploration-scene-semantics-evidence.md`.
 - Verification: `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 40/40; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `godot --path . -s tests/smoke/session_shell_visual_probe.gd` PASS with screenshots; `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd` PASS; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings.
-- Remaining scope is not a blocker: this is still greybox scene semantics over MVP fixture data; final authored Exploration art/content and route/search tables remain downstream Polish backlog. Do not declare Release readiness from this closure.
+- Remaining scope is not a blocker: this is still greybox scene semantics over the authored MVP content slice; final authored Exploration art/content and route/search table scale-up remain downstream Polish backlog. Do not declare Release readiness from this closure.
 
 ## Session Extract -- Polish Story 001 Risk Closure 2026-05-22
 - Residual risk pass complete for `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md`.
-- Moved seeded MVP route/search/startup data from adapter methods into `src/presentation/playable_slice_runtime_fixture.json`.
+- Moved seeded MVP route/search/startup data from adapter methods into a JSON data boundary; this was later superseded by `src/presentation/playable_slice_authored_content.json` in Polish Story 003.
 - `PlayableSliceDomainAdapter` Navigation preflight now queries `ModuleHullManager.CanDepart()` after installing fixture-defined startup modules; it no longer accepts every route through an always-true preflight delegate.
 - Windowed Godot visual smoke PASS under NVIDIA OpenGL; screenshot evidence copied to `production/qa/evidence/polish-001-windowed-session-shell-hub-probe.png`.
 - Smoke now asserts final Hub screenshot state has no stale return-Hub onboarding hint.
-- Remaining scope is not a blocker: fixture JSON and greybox markers are MVP Polish content/presentation fixtures; richer authored route tables, search content, and scene semantics remain downstream Polish backlog. Do not declare Release readiness from this closure.
+- Remaining scope is not a blocker: authored content JSON and greybox markers are MVP Polish content/presentation boundaries; route/search table scale-up and final scene content remain downstream Polish backlog. Do not declare Release readiness from this closure.
 
 ## Session Extract -- Polish Story 001 Runtime Hardening Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-001-navigation-exploration-runtime-hardening.md` -- Navigation / Exploration Runtime Hardening.

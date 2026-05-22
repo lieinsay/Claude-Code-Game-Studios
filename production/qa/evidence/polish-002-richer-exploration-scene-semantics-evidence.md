@@ -35,6 +35,6 @@
 
 ## Remaining Conditions
 
-- Dynamic scene semantics are greybox presentation polish over MVP fixture data.
+- Dynamic scene semantics are greybox presentation polish over the authored MVP content slice.
 - Final authored Exploration art, route tables, and richer authored search content remain downstream Polish scope.
 - No Release readiness claim is made by this evidence.
