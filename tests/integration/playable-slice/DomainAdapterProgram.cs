@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CloudWeaverVoyage.Presentation;
 
 var total = 0;
@@ -14,6 +15,116 @@ void Check(bool condition, string label)
 
 	failed++;
 	Console.Error.WriteLine($"FAIL {label}");
+}
+
+static string FindProjectRoot()
+{
+	var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+	while (directory is not null)
+	{
+		if (File.Exists(Path.Combine(directory.FullName, "CloudWeaverVoyage.csproj")))
+		{
+			return directory.FullName;
+		}
+
+		directory = directory.Parent;
+	}
+
+	throw new InvalidOperationException("Could not locate project root from current directory.");
+}
+
+static string RequiredString(JsonElement element, string propertyName)
+{
+	return element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String
+		? property.GetString() ?? string.Empty
+		: string.Empty;
+}
+
+static int RequiredInt(JsonElement element, string propertyName)
+{
+	return element.TryGetProperty(propertyName, out var property) && property.TryGetInt32(out var value)
+		? value
+		: 0;
+}
+
+static double RequiredDouble(JsonElement element, string propertyName)
+{
+	return element.TryGetProperty(propertyName, out var property) && property.TryGetDouble(out var value)
+		? value
+		: 0;
+}
+
+static JsonElement RequiredArray(JsonElement element, string propertyName)
+{
+	return element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.Array
+		? property
+		: default;
+}
+
+var contentPath = Path.Combine(FindProjectRoot(), "src", "presentation", "playable_slice_authored_content.json");
+Check(File.Exists(contentPath), "authored playable content file exists");
+using var contentDocument = JsonDocument.Parse(File.ReadAllText(contentPath));
+var contentRoot = contentDocument.RootElement;
+var routes = RequiredArray(contentRoot, "routes");
+var searchPoints = RequiredArray(contentRoot, "search_points");
+var routeIds = new HashSet<string>(StringComparer.Ordinal);
+var routeDestinations = new HashSet<string>(StringComparer.Ordinal);
+var searchPointIds = new HashSet<string>(StringComparer.Ordinal);
+var routeCount = routes.ValueKind == JsonValueKind.Array ? routes.GetArrayLength() : 0;
+var searchPointCount = searchPoints.ValueKind == JsonValueKind.Array ? searchPoints.GetArrayLength() : 0;
+var status = RequiredString(contentRoot, "content_status");
+
+Check(RequiredString(contentRoot, "content_version").StartsWith("polish-", StringComparison.Ordinal), "authored content version is explicit");
+Check(status == "polish_authored", "authored content status is an allowed Polish value");
+Check(RequiredString(contentRoot, "origin_id").StartsWith("location.", StringComparison.Ordinal), "authored content origin uses location id");
+Check(RequiredInt(contentRoot, "cargo_capacity") > 0, "authored content cargo capacity is positive");
+Check(RequiredDouble(contentRoot, "voyage_fast_forward_seconds") > 0, "authored content voyage fast-forward is positive");
+Check(routeCount >= 2, "authored content has multiple route rows");
+Check(searchPointCount >= 3, "authored content has multiple search point rows");
+
+if (routes.ValueKind == JsonValueKind.Array)
+{
+	foreach (var route in routes.EnumerateArray())
+	{
+		var routeId = RequiredString(route, "route_id");
+		var routeDestination = RequiredString(route, "destination_id");
+		var chartTags = RequiredArray(route, "chart_hazard_tags");
+		var navigationTags = RequiredArray(route, "navigation_hazard_tags");
+
+		Check(routeId.StartsWith("route.", StringComparison.Ordinal), $"route id '{routeId}' uses route namespace");
+		Check(routeIds.Add(routeId), $"route id '{routeId}' is unique");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(route, "display_name")), $"route '{routeId}' has display name");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(route, "description")), $"route '{routeId}' has authored description");
+		Check(RequiredString(route, "origin_id") == RequiredString(contentRoot, "origin_id"), $"route '{routeId}' starts at authored origin");
+		Check(routeDestination.StartsWith("location.", StringComparison.Ordinal), $"route '{routeId}' destination uses location id");
+		Check(routeDestinations.Add(routeDestination), $"route destination '{routeDestination}' is unique");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(route, "distance_band")), $"route '{routeId}' has distance band");
+		Check(chartTags.ValueKind == JsonValueKind.Array && chartTags.GetArrayLength() > 0, $"route '{routeId}' has chart hazard tags");
+		Check(navigationTags.ValueKind == JsonValueKind.Array && navigationTags.GetArrayLength() > 0, $"route '{routeId}' has navigation hazard tags");
+	}
+}
+
+if (searchPoints.ValueKind == JsonValueKind.Array)
+{
+	foreach (var searchPoint in searchPoints.EnumerateArray())
+	{
+		var pointId = RequiredString(searchPoint, "point_id");
+		var quantityMin = RequiredInt(searchPoint, "quantity_min");
+		var quantityMax = RequiredInt(searchPoint, "quantity_max");
+		var threatId = RequiredString(searchPoint, "threat_id");
+		var hasThreat = !string.IsNullOrWhiteSpace(threatId);
+
+		Check(pointId.StartsWith("sp.", StringComparison.Ordinal), $"search point id '{pointId}' uses search namespace");
+		Check(searchPointIds.Add(pointId), $"search point id '{pointId}' is unique");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "display_name")), $"search point '{pointId}' has display name");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "description")), $"search point '{pointId}' has authored description");
+		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "zone")), $"search point '{pointId}' has zone");
+		Check(RequiredString(searchPoint, "reward_resource_id").StartsWith("resource.", StringComparison.Ordinal), $"search point '{pointId}' reward uses resource id");
+		Check(quantityMin > 0 && quantityMax >= quantityMin, $"search point '{pointId}' quantity range is valid");
+		Check(!hasThreat || RequiredDouble(searchPoint, "threat_trigger_radius") > 0, $"search point '{pointId}' threat radius is valid when present");
+		Check(!hasThreat || RequiredInt(searchPoint, "threat_damage") > 0, $"search point '{pointId}' threat damage is valid when present");
+		Check(!hasThreat || RequiredDouble(searchPoint, "threat_position") >= 0, $"search point '{pointId}' threat position is valid when present");
+	}
 }
 
 var adapter = new PlayableSliceDomainAdapter();

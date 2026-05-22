@@ -3,8 +3,16 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 001 Navigation / Exploration runtime hardening complete; continue Polish backlog
+Task: Polish Story 004 authored content validation guard complete; continue Polish backlog
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 004 Authored Content Validation Guard Complete 2026-05-22
+- Story complete: `production/polish-backlog/story-polish-004-authored-content-validation-guard.md` -- Authored Content Validation Guard.
+- `tests/integration/playable-slice/DomainAdapterProgram.cs` now parses `src/presentation/playable_slice_authored_content.json` directly before the runtime adapter regression.
+- Validation covers content version/status, origin, cargo capacity, voyage timing, unique route/search IDs, route/search display and description text, route destinations, hazard tags, reward resource IDs, quantity ranges, and threat field consistency.
+- Focused playable-slice integration evidence is now `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 101/101.
+- Evidence: `production/qa/evidence/polish-004-authored-content-validation-guard-evidence.md`.
+- Remaining scope is not a blocker: this is a lightweight authored content guard, not the final content authoring pipeline, ID migration tool, final authored art/audio, or long manual play evidence. Do not declare Release readiness from this closure.
 
 ## Session Extract -- Polish Story 003 Authored Content Slice Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-003-authored-route-search-content-slice.md` -- Authored Route / Search Content Slice.
