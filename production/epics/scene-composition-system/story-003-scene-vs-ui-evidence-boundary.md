@@ -1,21 +1,24 @@
 # Story 003: Scene Versus UI Evidence Boundary
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Ready
+> **Status**: Implemented
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
+> **Estimate**: S (1 focused implementation session)
 
 ## Context
 
 **GDD**: `design/gdd/scene-composition-system.md`  
 **Requirement**: `TR-scene-composition-003`
+**Requirement Text**: UI, HUD, buttons, menus, labels, and debug overlays cannot count as physical scene units or substitute for world/playable scene evidence.
 
 **ADR Governing Implementation**: ADR-0012: UI Input Routing and Dual Focus  
 **ADR Decision Summary**: UIManager owns UI focus, modal stack, HUD updates, and screen state; world focus and physical scene evidence remain separate from UI controls.
 
 **Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
 **Engine Notes**: dual-focus behavior and UI input routing are engine-sensitive; use existing UI smoke and focus tests where possible.
+**Performance Note**: No runtime performance impact is expected for the boundary document and C# validation. Any smoke extension must reuse existing deterministic node/focus evidence and remain inside the current scene-transition and 60fps budgets.
 
 **Control Manifest Rules (this layer)**:
 - Required: UI focus and world focus are isolated.
@@ -26,10 +29,10 @@
 
 ## Acceptance Criteria
 
-- [ ] GIVEN UI or HUD exists in a scene, WHEN visual QA checks the screen, THEN UI does not dominate or hide the world identity.
-- [ ] GIVEN a UI/HUD label, button, menu or debug overlay exists, WHEN scene completion is evaluated, THEN it does not count as a physical scene unit, scene identity node, interaction anchor, or physics contract proof.
-- [ ] GIVEN automated smoke checks scene identity, WHEN UI-only evidence is present without world/playable nodes, THEN the scene fails readiness.
-- [ ] GIVEN world and UI focus both exist, WHEN modal or semi-modal UI is active, THEN world focus is isolated without deleting the underlying scene evidence.
+- [x] GIVEN UI or HUD exists in a scene, WHEN visual QA checks the screen, THEN UI does not dominate or hide the world identity.
+- [x] GIVEN a UI/HUD label, button, menu or debug overlay exists, WHEN scene completion is evaluated, THEN it does not count as a physical scene unit, scene identity node, interaction anchor, or physics contract proof.
+- [x] GIVEN automated smoke checks scene identity, WHEN UI-only evidence is present without world/playable nodes, THEN the scene fails readiness.
+- [x] GIVEN world and UI focus both exist, WHEN modal or semi-modal UI is active, THEN world focus is isolated without deleting the underlying scene evidence.
 
 ---
 
@@ -73,11 +76,21 @@ Strengthen smoke/review guidance so UI nodes are explicitly ignored for scene un
 - Updated smoke or QA evidence proving UI nodes cannot satisfy scene evidence.
 - `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing -- see `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`
+
+---
+
+## Implementation Notes
+
+- UI-vs-scene boundary contract created at `production/scene-specs/scene-vs-ui-evidence-boundary.md`.
+- Completeness gate now links the boundary contract and blocks UI-only evidence packages.
+- Coverage registry classifies `chart_table_scene` as a UI-assisted world surface anchored inside `hub_ship_interior`, not standalone scene physics proof.
+- Integration validation added at `tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj`.
+- The validation checks current smoke and UI focus evidence without starting Story 004's user readability release handoff.
 
 ---
 
 ## Dependencies
 
-- Depends on: Story 002.
+- Depends on: Story 002 implemented and pushed.
 - Unlocks: Story 004.

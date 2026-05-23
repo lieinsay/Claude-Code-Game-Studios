@@ -255,6 +255,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstLoopRegressionTest", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneCompletenessGateTest", "tests\integration\scene-composition\SceneCompletenessGateTest.csproj", "{1D6CA033-A4D7-4F76-B908-4D48FABD4112}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneVsUiBoundaryTest", "tests\integration\scene-composition\SceneVsUiBoundaryTest.csproj", "{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1585,6 +1587,18 @@ Global
 		{1D6CA033-A4D7-4F76-B908-4D48FABD4112}.Release|x64.Build.0 = Release|Any CPU
 		{1D6CA033-A4D7-4F76-B908-4D48FABD4112}.Release|x86.ActiveCfg = Release|Any CPU
 		{1D6CA033-A4D7-4F76-B908-4D48FABD4112}.Release|x86.Build.0 = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|x64.Build.0 = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|x64.ActiveCfg = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|x64.Build.0 = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1712,5 +1726,6 @@ Global
 		{F2D3031D-F4A6-4FC1-9595-0E9A556CF632} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{15160DD4-2C04-4BF7-AE9F-6D8D300731E3} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 		{1D6CA033-A4D7-4F76-B908-4D48FABD4112} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
+		{AD33C3F1-6DA8-4734-8C9E-153662D1DCC0} = {0BE27E69-089E-42C1-B659-7583DA7544D7}
 	EndGlobalSection
 EndGlobal

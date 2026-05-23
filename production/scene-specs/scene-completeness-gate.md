@@ -53,6 +53,22 @@ For a greybox or stronger runtime scene, automated smoke evidence must verify al
 
 Node existence alone is insufficient. The smoke package must pair node visibility with viewport coverage, anchor semantics, state transitions, and non-UI scene evidence.
 
+## Scene Versus UI Boundary
+
+Story 003 adds the companion boundary contract at `production/scene-specs/scene-vs-ui-evidence-boundary.md`.
+
+The completeness gate must treat the following as assistive-only evidence:
+
+- HUD labels and status panels
+- buttons, menus, modal panels, and route controls
+- save/load/delete controls
+- onboarding hint text
+- debug labels, debug overlays, and smoke-only diagnostic text
+
+These surfaces cannot satisfy `space_ready`, `scene_physics_ready`, `behavior_ready`, `presentation_ready`, or `qa_ready` unless paired with world/playable scene evidence. A UI-only evidence package fails readiness even when every UI control is visible, clickable, and correctly labelled.
+
+For readability, `hud_not_dominant = true` must be recorded before any release-readiness claim. `primary_scene_viewport_share` targets 65% and blocks when the main world identity is hidden, below 55%, or reduced to a text-only strip behind UI.
+
 ## Asset Gate Requirements
 
 Every P0 current-scene asset row must map to one of:
@@ -88,7 +104,7 @@ The technical contract must name the domain owner for every mutable gameplay con
 | --- | --- | --- | --- |
 | `hub_island_dock` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, attach Codex review, attach user readability verdict. |
 | `hub_ship_interior` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, include room state variants and P0 asset gaps, attach user readability verdict. |
-| `chart_table_scene` | `blocked-pending-classification` | Authored chart table exists as a ship-interior anchored surface, but Story 002/003 must classify whether it needs its own #20 contract or remains anchored UI-assisted scene surface. | Add explicit classification and UI-vs-scene proof. |
+| `chart_table_scene` | `blocked-ui-assisted-surface` | Authored chart table remains a ship-interior anchored surface, not a separate enterable physical scene. Chart buttons/route UI cannot count as scene evidence; the table surface can support evidence only as a world anchor inside `hub_ship_interior` until a standalone #20 contract exists. | Story 004 must attach user readability verdict if this surface is included in release handoff. |
 | `exploration_mist_island` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, attach Codex review, attach user readability verdict. |
 | `repair_node_scene` | `tracked-gap` | No current enterable scene spec or #20 contract. | Draft repair scene spec before visual completion claim. |
 | `market_scene` | `tracked-gap` | No current enterable scene spec or #20 contract. | Draft market scene spec before visual completion claim. |

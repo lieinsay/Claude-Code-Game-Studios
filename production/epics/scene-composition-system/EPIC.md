@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/scene-composition-system.md
 > **Architecture Module**: #19 Scene Composition Gate
 > **Status**: In Progress
-> **Stories**: 4 (001-002 Implemented, 003-004 Ready)
+> **Stories**: 4 (001-003 Implemented, 004 Ready)
 
 ## Overview
 
@@ -50,7 +50,7 @@ Implement the production gate that decides whether an enterable scene is actuall
 | --- | --- | --- | --- | --- |
 | 001 | [Scene Specification Template and Coverage Registry](story-001-scene-spec-template-coverage-registry.md) | Config/Data | Implemented | ADR-0001 / ADR-0019 |
 | 002 | [Scene Completeness Gate and Evidence Contract](story-002-scene-completeness-gate-evidence.md) | Integration | Implemented | ADR-0001 / ADR-0019 |
-| 003 | [Scene Versus UI Evidence Boundary](story-003-scene-vs-ui-evidence-boundary.md) | Integration | Ready | ADR-0012 |
+| 003 | [Scene Versus UI Evidence Boundary](story-003-scene-vs-ui-evidence-boundary.md) | Integration | Implemented | ADR-0012 |
 | 004 | [User Readability Review and Release Gate Handoff](story-004-user-readability-release-gate.md) | Visual/Feel | Ready | ADR-0016 / ADR-0017 |
 
 ## Definition of Done
@@ -67,4 +67,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/story-readiness production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`, then `/dev-story` for the same file.
+Run `/story-readiness production/epics/scene-composition-system/story-004-user-readability-release-gate.md`, then `/dev-story` for the same file.

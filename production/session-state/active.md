@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Composition Story 002 implemented; next story is scene-composition-system/story-003
+Task: Scene Composition Story 003 implemented; next story is scene-composition-system/story-004
 <!-- /STATUS -->
+
+## Session Extract -- Scene Composition Story 003 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 002 is implemented/pushed.
+- Story implemented: `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md` -- Scene Versus UI Evidence Boundary.
+- Boundary contract: `production/scene-specs/scene-vs-ui-evidence-boundary.md` defines `ui_boundary_passed`, UI dominance checks, assistive-only UI classifications, UI-only rejection cases, focus isolation rules, and current scene/surface classification.
+- Gate/registry updates: completeness gate now blocks UI-only evidence packages and records `hud_not_dominant` / `primary_scene_viewport_share`; registry classifies Chart as a UI-assisted world surface anchored inside `hub_ship_interior`, not standalone physics proof.
+- Test: `tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj` validates the boundary, gate, template, registry, existing Godot smoke, and UI focus evidence. Focused runner PASS 5/5.
+- Evidence: `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`.
+- Status updates: Scene Composition epic and epics index now mark Stories 001-003 Implemented, Story 004 Ready, and the epic In Progress.
+- Verification: focused integration PASS 5/5; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-composition-system/story-004-user-readability-release-gate.md`, then `/dev-story` for Story 004.
 
 ## Session Extract -- Scene Composition Story 002 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001 and #20 Stories 001-004 are implemented/pushed.
