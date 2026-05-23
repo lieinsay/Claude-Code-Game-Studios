@@ -1,21 +1,24 @@
 # Story 002: Scene Completeness Gate and Evidence Contract
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Ready
+> **Status**: Implemented
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
+> **Estimate**: S (1 focused implementation session)
 
 ## Context
 
 **GDD**: `design/gdd/scene-composition-system.md`  
 **Requirement**: `TR-scene-composition-002`
+**Requirement Text**: Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review.
 
 **ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot  
 **ADR Decision Summary**: scene evidence must fit the project scene lifecycle and be validated by desktop C# build/smoke where code is involved.
 
 **Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
 **Engine Notes**: evidence checks should be deterministic and should not depend on final art assets unless the gate is specifically checking asset readiness.
+**Performance Note**: No runtime performance impact expected for the gate itself. Any smoke extension must read existing deterministic evidence and remain within the existing scene-transition and smoke budgets.
 
 **Control Manifest Rules (this layer)**:
 - Required: physical world exploration is a bottom-layer gameplay contract.
@@ -26,11 +29,11 @@
 
 ## Acceptance Criteria
 
-- [ ] GIVEN a scene specification exists, WHEN Codex reviews it, THEN purpose, space, behavior, state, presentation, technical and QA lines are all checked for blockers.
-- [ ] GIVEN a scene reaches greybox, WHEN automated smoke runs, THEN tests verify visible scene identity nodes, main viewport coverage, interaction anchors, focus isolation and core route behavior relevant to that scene.
-- [ ] GIVEN a scene reaches asset_gate, WHEN asset requests are audited, THEN every P0 asset maps back to a scene identity, interaction, state variant or feedback requirement.
-- [ ] GIVEN release readiness is discussed, WHEN any P0 current-scene asset gap remains unresolved, THEN the release gate stays blocked or explicitly records the waiver.
-- [ ] GIVEN a scene depends on domain systems, WHEN implementation occurs, THEN the scene layer does not create a new gameplay authority or duplicate persistent state.
+- [x] GIVEN a scene specification exists, WHEN Codex reviews it, THEN purpose, space, behavior, state, presentation, technical and QA lines are all checked for blockers.
+- [x] GIVEN a scene reaches greybox, WHEN automated smoke runs, THEN tests verify visible scene identity nodes, main viewport coverage, interaction anchors, focus isolation and core route behavior relevant to that scene.
+- [x] GIVEN a scene reaches asset_gate, WHEN asset requests are audited, THEN every P0 asset maps back to a scene identity, interaction, state variant or feedback requirement.
+- [x] GIVEN release readiness is discussed, WHEN any P0 current-scene asset gap remains unresolved, THEN the release gate stays blocked or explicitly records the waiver.
+- [x] GIVEN a scene depends on domain systems, WHEN implementation occurs, THEN the scene layer does not create a new gameplay authority or duplicate persistent state.
 
 ---
 
@@ -75,11 +78,22 @@ Implement the `scene_complete` evidence contract from GDD #19 as a checklist, sc
 - Gate checklist/script output or updated smoke evidence.
 - `production/qa/evidence/scene-composition-completeness-gate-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing -- see `production/qa/evidence/scene-composition-completeness-gate-evidence.md`
+
+---
+
+## Implementation Notes
+
+- Gate contract created at `production/scene-specs/scene-completeness-gate.md`.
+- Integration validation added at `tests/integration/scene-composition/SceneCompletenessGateTest.csproj`.
+- The gate defines the full `scene_complete` dimension set and blocks on false, pending, tracked-gap, or missing evidence unless an explicit user waiver is recorded.
+- Current smoke requirements are tied to existing `tests/smoke/session_shell_visual_probe.gd` evidence for scene identity nodes, viewport coverage, spatial anchors, focus isolation, route behavior, and #20 physical contracts.
+- P0 current-scene asset gaps block release readiness unless waiver owner/date/risk/fallback evidence are recorded.
+- Scene evidence may read domain state and present it through world anchors, but may not create gameplay authority, duplicate persistent state, mutate domain-owned state, or infer collision from art.
 
 ---
 
 ## Dependencies
 
-- Depends on: Story 001; Scene Physics Stories 001-003.
+- Depends on: Story 001 implemented and pushed; Scene Physics Stories 001-004 implemented and pushed.
 - Unlocks: Story 003, Story 004.

@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Composition Story 001 implemented; next story is scene-composition-system/story-002
+Task: Scene Composition Story 002 implemented; next story is scene-composition-system/story-003
 <!-- /STATUS -->
+
+## Session Extract -- Scene Composition Story 002 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001 and #20 Stories 001-004 are implemented/pushed.
+- Story implemented: `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md` -- Scene Completeness Gate and Evidence Contract.
+- Gate contract: `production/scene-specs/scene-completeness-gate.md` now defines `scene_complete`, required readiness dimensions, smoke evidence lines, P0 asset traceability/waiver rules, and domain-authority boundaries.
+- Test: `tests/integration/scene-composition/SceneCompletenessGateTest.csproj` validates the gate, Story 001 template/registry, and existing smoke evidence requirements. Focused runner PASS 6/6.
+- Evidence: `production/qa/evidence/scene-composition-completeness-gate-evidence.md`.
+- Status updates: Scene Composition epic and epics index now mark Stories 001-002 Implemented, Stories 003-004 Ready, and the epic In Progress.
+- Verification: focused integration PASS 6/6; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`, then `/dev-story` for Story 003.
 
 ## Session Extract -- Scene Composition Story 001 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, no-runtime-performance note, and dependency note that #20 Scene Physics Stories 001-004 are implemented/pushed.
