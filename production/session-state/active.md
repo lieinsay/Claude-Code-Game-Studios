@@ -6,6 +6,13 @@ Feature: Production to Polish Gate Passed
 Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done; release handoff still BLOCKED_FOR_RELEASE pending user readability verdict or waiver
 <!-- /STATUS -->
 
+## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
+- Current goal: prepare and guide the manual user readability acceptance flow for `production/playtests/scene-composition-user-readability-checklist.md`.
+- Release handoff remains `BLOCKED_FOR_RELEASE`; no user `PASS`, `PASS_WITH_CONDITIONS`, or waiver verdict has been recorded in this session.
+- Checklist field gap fixed: blocker/waiver log now includes `Follow-up date / next story`, matching the release rule that conditional passes and waivers must have owners plus follow-up timing.
+- Scope boundary preserved: scene readability review is a hard release gate; UI/HUD/buttons/labels/debug overlays may support readability but cannot replace world/playable scene proof.
+- Next required user action: run the checklist for release-candidate scenes and provide one explicit verdict per scene (`PASS`, `PASS_WITH_CONDITIONS`, `BLOCKED`, or `WAIVED_BY_USER`) with blockers/conditions/waiver details where applicable.
+
 ## Session Extract -- Scene Physics and Scene Composition Story-Done Closeout 2026-05-24
 - Story-done order followed user request: #20 Scene Physics Stories 001-004, then #19 Scene Composition Stories 001-004.
 - #20 Story 001 `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`.

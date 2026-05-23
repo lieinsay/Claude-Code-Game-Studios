@@ -47,9 +47,9 @@ The reviewer should answer without developer explanation.
 
 ## Blocker And Waiver Log
 
-| Scene ID | Reviewer verdict | Blocker / condition | Waiver owner | Waiver date | Accepted risk | Fallback evidence | Follow-up owner |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-|  | PASS / PASS_WITH_CONDITIONS / BLOCKED / WAIVED_BY_USER |  |  |  |  |  |  |
+| Scene ID | Reviewer verdict | Blocker / condition | Waiver owner | Waiver date | Accepted risk | Fallback evidence | Follow-up owner | Follow-up date / next story |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | PASS / PASS_WITH_CONDITIONS / BLOCKED / WAIVED_BY_USER |  |  |  |  |  |  |  |
 
 ## Release Handoff Decision
 
