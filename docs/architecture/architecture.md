@@ -5,7 +5,7 @@
 - **Last Updated**: 2026-05-04
 - **Engine**: Godot 4.6.2 .NET + C#
 - **Target Platform**: Desktop-first (Windows primary, Linux secondary)
-- **GDDs Covered**: #1–#18 (16 MVP + 2 Vertical Slice)
+- **GDDs Covered**: #1–#20 (16 MVP + 2 Vertical Slice + 2 Scene Contract)
 - **ADRs Referenced**: (none yet — 17 required)
 - **Technical Director Sign-Off**: 2026-05-04 — APPROVED WITH CONCERNS (0 blockers, 4 HIGH concerns for ADR authoring)
 - **Lead Programmer Feasibility**: 2026-05-04 — FEASIBLE WITH CONCERNS (8 concerns, 0 infeasible)
@@ -89,8 +89,14 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | TR-feedback-001 | feedback-fx-audio | #17 | Semantic feedback events: route_selected, repair_completed, threat_triggered, etc. | Audio/VFX |
 | TR-feedback-002 | feedback-fx-audio | #17 | Minimum visible-repair feedback owned by #13; home-safety feedback by #7; clarity by #16 | Audio/VFX |
 | TR-onboarding-001 | onboarding-first-loop | #18 | First-loop guidance: Hub → Chart → Explore → Return → Repair | Meta |
+| TR-scene-composition-001 | scene-composition-system | #19 | Scene specifications before implementation readiness | Production / Scene Design |
+| TR-scene-composition-002 | scene-composition-system | #19 | Scene completion gate combines physics, behavior, state, assets, technical contract, automated evidence, Codex review, and user review | Production / QA |
+| TR-scene-composition-003 | scene-composition-system | #19 | UI/HUD cannot substitute for world/playable scene evidence | Production / Scene Design |
+| TR-scene-physics-001 | scene-physics-unit-system | #20 | Scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model, and Floor State | Gameplay / Scene Physics |
+| TR-scene-physics-002 | scene-physics-unit-system | #20 | Collision, occlusion, scale, special surface policy, and physical scene unit identity | Gameplay / Scene Physics |
+| TR-scene-physics-003 | scene-physics-unit-system | #20 | Dynamic physical behavior parameters, feedback, conflict priority, and recovery rules | Gameplay / Scene Physics |
 
-**Count**: 52 technical requirements across 18 systems.
+**Count**: 58 technical requirements across 20 systems.
 
 ---
 

@@ -90,8 +90,8 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 16 | UI / HUD / 航图界面 | UI | MVP | Designed | `design/gdd/ui-hud-chart-interface.md` | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
 | 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Approved | `design/gdd/feedback-fx-audio.md` | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
 | 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Approved | `design/gdd/onboarding-first-loop.md` | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
-| 19 | 完整场景构成与验收 | Production / Scene Design | Polish Gate | In Design | `design/gdd/scene-composition-system.md` | 场景单位物理设计; 飞艇家园 Hub; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面; 反馈、特效与音频语义; 新手引导与首轮闭环 |
-| 20 | 场景单位物理设计 | Gameplay / Scene Physics | MVP Foundation | In Design | `design/gdd/scene-physics-unit-system.md` | 玩家移动与交互; 飞艇家园 Hub; 探索 / 搜撤场景; 空港 / 村镇状态与集市交易; 世界修复与解锁 |
+| 19 | 完整场景构成与验收 | Production / Scene Design | Polish Gate | Approved | `design/gdd/scene-composition-system.md` | 场景单位物理设计; 飞艇家园 Hub; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面; 反馈、特效与音频语义; 新手引导与首轮闭环 |
+| 20 | 场景单位物理设计 | Gameplay / Scene Physics | MVP Foundation | Approved | `design/gdd/scene-physics-unit-system.md` | 玩家移动与交互; 飞艇家园 Hub; 探索 / 搜撤场景; 空港 / 村镇状态与集市交易; 世界修复与解锁 |
 
 ---
 
@@ -223,7 +223,7 @@ Cross-system scene composition standard for every enterable scene. Defines the r
 
 Scope boundary: this system does not own gameplay rules, resources, repair, market, exploration, feedback, persistence, or UI state. It owns the scene-completeness gate and the dual review requirement: Codex review plus user review before release-readiness claims.
 
-GDD: `design/gdd/scene-composition-system.md` - in design 2026-05-24.
+GDD: `design/gdd/scene-composition-system.md` - approved 2026-05-24.
 
 ### 20. 场景单位物理设计
 
@@ -231,7 +231,7 @@ Scene unit physics standard for authored 2D spaces. Defines horizontal vs vertic
 
 Scope boundary: this system does not own player input, interaction focus, resource rules, exploration rewards, market logic, or repair outcomes. It owns how scene units occupy space and communicate physical behavior. `完整场景构成与验收` consumes this system as its Scene Physics Contract gate.
 
-GDD: `design/gdd/scene-physics-unit-system.md` - in design 2026-05-24.
+GDD: `design/gdd/scene-physics-unit-system.md` - approved 2026-05-24.
 
 ---
 
@@ -395,11 +395,12 @@ The MVP version of each system must stay within these bounds:
 |---|---:|
 | Total systems identified | 20 |
 | Design docs started | 20 |
-| Design docs reviewed | 18 |
-| Design docs approved | 18 |
-| Design docs needing revision | 2 |
-| MVP systems designed | 16 / 17 |
+| Design docs reviewed | 20 |
+| Design docs approved | 20 |
+| Design docs needing revision | 0 |
+| MVP systems designed | 17 / 17 |
 | Vertical Slice systems designed | 2 / 2 |
+| Polish Gate systems designed | 1 / 1 |
 
 ---
 
@@ -418,7 +419,7 @@ The MVP version of each system must stay within these bounds:
 - [x] Design #18 新手引导与首轮闭环 — COMPLETE 2026-05-15.
 - [x] Design-review #18 新手引导与首轮闭环 — APPROVED 2026-05-15.
 - [x] Accept ADR-0017 新手引导与首轮闭环 — ACCEPTED 2026-05-15.
-- [ ] Review #19 完整场景构成与验收 with Codex and user before using it as a release gate.
-- [ ] Review and approve #20 场景单位物理设计 as an MVP Foundation retrofit before using physical world exploration as a bottom-layer gameplay contract.
+- [x] Review #19 完整场景构成与验收 with Codex and user before using it as a release gate — APPROVED 2026-05-24.
+- [x] Review and approve #20 场景单位物理设计 as an MVP Foundation retrofit before using physical world exploration as a bottom-layer gameplay contract — APPROVED 2026-05-24.
 - [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
 - [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.

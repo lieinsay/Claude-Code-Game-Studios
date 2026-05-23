@@ -1,6 +1,6 @@
 # Epics Index
 
-> **Last Updated**: 2026-05-22
+> **Last Updated**: 2026-05-24
 > **Engine**: Godot 4.6.2 .NET + C# (desktop-first)
 > **ADR Coverage**: 19 Accepted (ADR-0019 platform pivot active)
 
@@ -71,3 +71,10 @@ Sprint 001 scope briefs and formal GDDs now define the first Polish boundary:
 - #18 GDD: `design/gdd/onboarding-first-loop.md`
 
 Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architecture contracts; #17 and #18 implementation stories are complete under `production/epics/feedback-fx-audio/` and `production/epics/onboarding-first-loop/`.
+
+## Scene Contract / Polish Gate Layer
+
+| Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
+|------|----------|-----|----------------|-----|---------|--------|
+| [scene-composition-system](scene-composition-system/EPIC.md) | #19 | scene-composition-system.md | ADR-0001, ADR-0012, ADR-0016, ADR-0017, ADR-0019, GDD #20 | 3 | Not yet created | Ready |
+| [scene-physics-unit-system](scene-physics-unit-system/EPIC.md) | #20 | scene-physics-unit-system.md | ADR-0004, ADR-0019, GDD #19 | 3 | Not yet created | Ready |

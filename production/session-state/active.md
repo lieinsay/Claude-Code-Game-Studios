@@ -3,8 +3,22 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 016 scene physics contract refreshed for Layer / Height and Cutaway / Reveal gates; Polish Story 015 focused human QA still required before release checklist/gate
+Task: GDD #19/#20 approved and epic scope created; create-stories for scene-composition-system and scene-physics-unit-system are the next production step
 <!-- /STATUS -->
+
+## Session Extract -- GDD #19/#20 Approval and Epic Creation 2026-05-24
+- Input: user clarified that after GDD work the normal next step should be epics, and asked to fully complete GDD #19/#20.
+- GDD approval: `design/gdd/scene-composition-system.md` and `design/gdd/scene-physics-unit-system.md` are now `Status: Approved`.
+- Review logs created:
+  - `design/gdd/reviews/scene-composition-system-review-log.md`
+  - `design/gdd/reviews/scene-physics-unit-system-review-log.md`
+- Systems index updated: #19 完整场景构成与验收 and #20 场景单位物理设计 marked Approved; outstanding checklist items closed.
+- Architecture traceability updated: `docs/architecture/tr-registry.yaml` and `docs/architecture/architecture.md` now include 3 TRs for #19 and 3 TRs for #20.
+- Epics created:
+  - `production/epics/scene-composition-system/EPIC.md`
+  - `production/epics/scene-physics-unit-system/EPIC.md`
+- Epics index updated with both new Ready epics under Scene Contract / Polish Gate Layer.
+- Next production step: run `/create-stories scene-physics-unit-system` and `/create-stories scene-composition-system`; Story 015 focused human QA remains the release gate blocker until rerun or waived.
 
 ## Session Extract -- Scene Physics Contract Layer/Cutaway Refresh 2026-05-24
 - Input: after #20 added Layer / Height Model, Cutaway / Reveal Model, Floor State, and behind-object reveal as required scene physics gates, the existing Story 016 runtime debug contracts needed to match the new contract shape.

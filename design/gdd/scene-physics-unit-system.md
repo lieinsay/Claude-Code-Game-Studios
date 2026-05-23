@@ -1,6 +1,6 @@
 # 场景单位物理设计
 
-> **Status**: In Design -- awaiting Codex + User review
+> **Status**: Approved
 > **Author**: User + Codex
 > **Last Updated**: 2026-05-24
 > **Implements Pillar**: 飞艇是家，不只是载具; 规划先于冒险; 未知带来温和压力

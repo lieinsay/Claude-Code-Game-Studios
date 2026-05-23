@@ -501,3 +501,53 @@ requirements:
     created: 2026-05-05
     revised: ""
     status: active
+
+  # === System #19 — scene-composition-system ===
+  - id: TR-scene-composition-001
+    system: scene-composition-system
+    gdd: design/gdd/scene-composition-system.md
+    requirement: "Every enterable scene must provide a scene specification covering purpose, entry/exit, spatial structure, interaction anchors, state variants, assets, audio/VFX, technical contract, and QA evidence before implementation readiness"
+    created: 2026-05-24
+    revised: ""
+    status: active
+
+  - id: TR-scene-composition-002
+    system: scene-composition-system
+    gdd: design/gdd/scene-composition-system.md
+    requirement: "Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review"
+    created: 2026-05-24
+    revised: ""
+    status: active
+
+  - id: TR-scene-composition-003
+    system: scene-composition-system
+    gdd: design/gdd/scene-composition-system.md
+    requirement: "UI, HUD, buttons, menus, labels, and debug overlays cannot count as physical scene units or substitute for world/playable scene evidence"
+    created: 2026-05-24
+    revised: ""
+    status: active
+
+  # === System #20 — scene-physics-unit-system ===
+  - id: TR-scene-physics-001
+    system: scene-physics-unit-system
+    gdd: design/gdd/scene-physics-unit-system.md
+    requirement: "Every 2D enterable scene with gameplay-relevant physical units must declare horizontal or vertical scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model, and Floor State or explicit N/A true rule"
+    created: 2026-05-24
+    revised: ""
+    status: active
+
+  - id: TR-scene-physics-002
+    system: scene-physics-unit-system
+    gdd: design/gdd/scene-physics-unit-system.md
+    requirement: "Scene units must declare collision semantics, occlusion/layering, player-relative scale, special surface policy, and authored physical unit identity independent of UI"
+    created: 2026-05-24
+    revised: ""
+    status: active
+
+  - id: TR-scene-physics-003
+    system: scene-physics-unit-system
+    gdd: design/gdd/scene-physics-unit-system.md
+    requirement: "Dynamic physical behaviors such as pushable, elastic, slippery, moving-platform, one-way, breakable, mirror, glass, water, current/wind, and trigger-only units must declare parameters, feedback, conflict priority, and recovery rules"
+    created: 2026-05-24
+    revised: ""
+    status: active
