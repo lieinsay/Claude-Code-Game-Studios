@@ -222,7 +222,7 @@ Dependency note: this is a production/design gate, not a gameplay runtime system
 | --- | --- |
 | `design/gdd/game-concept.md` | Core fantasy, pillars, visual identity anchor |
 | `design/art/art-bible.md` | 航路修复主义、修补痕迹、航标化信息层、家园感 |
-| `design/gdd/scene-physics-unit-system.md` | Scene Physics Contract: scene type, movement plane, collision, occlusion, unit scale, special surfaces, physical behaviors |
+| `design/gdd/scene-physics-unit-system.md` | Scene Physics Contract: scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model, behind-object reveal, collision, occlusion, unit scale, special surfaces, physical behaviors |
 | `design/gdd/airship-hub.md` | Hub/ship interior spatial promise and home fantasy |
 | `design/gdd/exploration-scavenge-scenario.md` | Exploration template, search, threat, extraction state |
 | `design/gdd/world-repair-unlock.md` | Repair outcomes and visible world response |

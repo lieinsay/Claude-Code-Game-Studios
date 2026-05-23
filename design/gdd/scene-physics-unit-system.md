@@ -64,6 +64,15 @@
 | `behind_object_reveal` | 玩家走到楼房、大树、巨石、船体、山体前景后方 | 遮挡玩家的物体局部透明、描边、开洞或降亮；不改变该物体的碰撞和空间身份 |
 | `interior_instance` | 进入独立室内/地下/洞穴 | 外部场景保持为入口外观，内部切换为独立场景或子场景 |
 
+显隐模式必须按场景状态区分，不能互相替代：
+
+| 玩家状态 | 正确分类 | 设计含义 |
+| --- | --- | --- |
+| 玩家进入建筑、舱室、洞穴或地下空间 | `floor_cutaway` / `roof_fade` / `front_wall_removed` / `interior_instance` | 玩家已经从外部场景进入内部空间；重点是显示当前房间、楼层或子场景 |
+| 玩家在多层空间中切换楼层 | `active_floor_focus` / `vertical_slice_window` | 玩家仍在同一多层结构内；重点是当前层可读、非当前层降噪 |
+| 玩家仍在室外或同一地面层，只是走到大型物体后面 | `behind_object_reveal` | 玩家没有进入该物体；重点是遮挡物局部让位，同时保留碰撞和身份 |
+| 玩家短暂经过树冠、屋檐、桥边、门框等前景遮挡 | `occluder_peek` | 遮挡是短时局部问题；重点是避免核心单位被长时间盖住 |
+
 多层显隐不能只靠 UI 小地图或文字说明。玩家必须能从场景本身看出“我在第几层、上层为什么不挡视线、出口/楼梯/梯子在哪里、上下层是否还能交互”。如果上层隐藏会影响剧情、危险或敌人读法，必须用影子、声音、轮廓、透明楼板、楼层编号或边缘提示保留必要信息。
 
 **R1d -- 多层空间必须声明 Floor State。** 每个可到达楼层或高度段至少声明：`floor_id`、`floor_index`、`is_active_floor`、`visibility_mode`、`walkable_bounds`、`vertical_connectors`、`occluders_hidden_above`、`interactions_enabled`。楼层切换时必须原子更新这些状态，避免玩家被隐藏墙、失效碰撞或不可见交互点卡住。
@@ -227,7 +236,7 @@ physics_contract_complete =
 
 **Output Range:** true/false。任一变量为 false，则场景不能通过 `完整场景构成与验收` 的物理契约门禁。
 
-**Example:** 云织号船内声明为垂直场景，定义左右移动、楼梯上下、舱壁阻挡、货箱可推动、前景门框遮挡、玩家/门/货箱比例、无特殊表面、无动态弹性行为、卡死时回到最近安全地面，则 `physics_contract_complete = true`。
+**Example:** 云织号船内声明为垂直场景，定义左右移动、楼梯上下、楼层/平台/景深层级、`front_wall_removed + active_floor_focus` 的舱室显隐、舱壁阻挡、货箱可推动、前景门框遮挡、玩家/门/货箱比例、无特殊表面、无动态弹性行为、卡死时回到最近安全地面，则 `layer_height_model_ready = true`、`cutaway_reveal_ready = true` 且 `physics_contract_complete = true`。若一个简单码头水平场景没有多层建筑和大型前景遮挡，也必须把 `cutaway_reveal_ready` 记录为 `N/A true`，而不是省略该项。
 
 ### F-20-02 Unit Scale Ratio
 
@@ -305,9 +314,14 @@ effective_behavior = highest_priority(applicable_behavior_tags)
 
 - [ ] GIVEN a 2D scene physics contract is drafted, WHEN review begins, THEN it declares either `水平场景` or `垂直场景`.
 - [ ] GIVEN a scene is `水平场景`, WHEN movement readability is reviewed, THEN ground-plane up/down/left/right movement, jump/fly height changes, and ground-shadow or landing-height cues are specified.
+- [ ] GIVEN a `水平场景` contains buildings, mountains, bridges, caves, roofs, slopes, interiors, foreground canopies or visible height differences, WHEN implementation readiness is reviewed, THEN it declares a Layer / Height Model with `primary_walkable_layer` plus every reachable, unreachable, transition, height-only and blocked layer.
 - [ ] GIVEN a scene is `垂直场景`, WHEN movement readability is reviewed, THEN left/right movement, depth layering, foreground/background separation, and vertical traversal methods such as jump, flight, ladders or stairs are specified.
+- [ ] GIVEN a scene contains multi-floor buildings, ship compartments, towers, caves, underground spaces, tree houses, elevators or stacked rooms, WHEN design review begins, THEN it declares a Cutaway / Reveal Model that says how the active floor/room is shown and how non-active layers are hidden, faded, outlined or locked.
+- [ ] GIVEN a reachable floor or height band exists, WHEN floor switching or vertical traversal is reviewed, THEN `floor_id`, `floor_index`, `is_active_floor`, `visibility_mode`, `walkable_bounds`, `vertical_connectors`, `occluders_hidden_above` and `interactions_enabled` are specified.
 - [ ] GIVEN a scene contains gameplay-relevant units, WHEN implementation readiness is reviewed, THEN every unit declares collision behavior.
 - [ ] GIVEN units overlap visually, WHEN readability is reviewed, THEN foreground, midground, background, Y-sort/floor sorting, temporary occluders, and flying-unit shadow/body layering are specified.
+- [ ] GIVEN the player, NPCs, enemies, pushables or key interaction points can pass behind a building, tree, rock, ship body, bridge, market stall, wall or other large occluder, WHEN readability is reviewed, THEN that unit declares `behind_object_reveal` and preserves collision, interaction identity and spatial meaning while revealing the hidden subject.
+- [ ] GIVEN a foreground occluder can cover the player or a core interaction, WHEN QA reviews the scene, THEN `occluder_peek`, fade, cutout, outline or equivalent reveal keeps identity readable within `identity_occlusion_max_seconds`.
 - [ ] GIVEN a scene contains player, NPC, props, doors, passages or landmarks, WHEN asset readiness is reviewed, THEN each category has a relative size rule tied to `player_unit`.
 - [ ] GIVEN a formal asset replaces a greybox unit, WHEN QA reviews the scene, THEN the replacement preserves collision footprint, occlusion behavior, interaction radius and size readability unless the physics contract is re-reviewed.
 - [ ] GIVEN a scene contains water, mirror, glass, fog, cloud, transparent fabric, reflective metal, breakable floor, ledge or void, WHEN design review begins, THEN each special surface is marked as gameplay-affecting or `visual_only`.
