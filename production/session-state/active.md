@@ -10,6 +10,7 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - Current goal: prepare and guide the manual user readability acceptance flow for `production/playtests/scene-composition-user-readability-checklist.md`.
 - Release handoff remains `BLOCKED_FOR_RELEASE`; no user `PASS`, `PASS_WITH_CONDITIONS`, or waiver verdict has been recorded in this session.
 - Checklist field gap fixed: blocker/waiver log now includes `Follow-up date / next story`, matching the release rule that conditional passes and waivers must have owners plus follow-up timing.
+- Checklist structure updated after user review: master checklist is now a template/index, with separate per-scene user readability records for `hub_island_dock`, `hub_ship_interior`, `chart_table_scene`, and `exploration_mist_island`.
 - Scope boundary preserved: scene readability review is a hard release gate; UI/HUD/buttons/labels/debug overlays may support readability but cannot replace world/playable scene proof.
 - Next required user action: run the checklist for release-candidate scenes and provide one explicit verdict per scene (`PASS`, `PASS_WITH_CONDITIONS`, `BLOCKED`, or `WAIVED_BY_USER`) with blockers/conditions/waiver details where applicable.
 

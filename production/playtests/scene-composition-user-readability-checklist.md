@@ -64,11 +64,13 @@ Reviewer 应该在没有开发者解释的情况下回答。
 
 ## 当前场景 Review 队列
 
-| Scene ID | 当前 release-readiness 状态 | 必要用户动作 |
-| --- | --- | --- |
-| `hub_island_dock` | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后运行 checklist。 |
-| `hub_ship_interior` | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后运行 checklist。 |
-| `chart_table_scene` | `BLOCKED_PENDING_USER_REVIEW_OR_SCOPE_DECISION` | 用户必须决定当前 UI-assisted surface 是否可作为 ship-interior handoff 的一部分，或是否需要独立 scene spec。 |
-| `exploration_mist_island` | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后运行 checklist。 |
-| `repair_node_scene` | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
-| `market_scene` | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
+每个进入人工验收的 release-candidate scene 都应有独立记录文件；本文件保留为模板与索引。
+
+| Scene ID | 独立记录文件 | 当前 release-readiness 状态 | 必要用户动作 |
+| --- | --- | --- | --- |
+| `hub_island_dock` | [scene-readability-hub-island-dock.md](scene-readability-hub-island-dock.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
+| `hub_ship_interior` | [scene-readability-hub-ship-interior.md](scene-readability-hub-ship-interior.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
+| `chart_table_scene` | [scene-readability-chart-table-scene.md](scene-readability-chart-table-scene.md) | `BLOCKED_PENDING_USER_REVIEW_OR_SCOPE_DECISION` | 用户必须先决定当前 UI-assisted surface 是否可作为 ship-interior handoff 的一部分，或是否需要独立 scene spec。 |
+| `exploration_mist_island` | [scene-readability-exploration-mist-island.md](scene-readability-exploration-mist-island.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
+| `repair_node_scene` | 暂无，尚未进入人工 release review | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
+| `market_scene` | 暂无，尚未进入人工 release review | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
