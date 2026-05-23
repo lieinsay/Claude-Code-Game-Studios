@@ -201,7 +201,7 @@ func _run() -> void:
 	var saved_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(saved_onboarding.get("next_hint_step", "")) == "return_hub", "Onboarding advances to return-Hub hint after save/load awareness")
 	var saved_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
-	_expect(_label_text(session, "SaveStatusLabel").contains("canonical progress"), "Exploration state saves through canonical Persistence")
+	_expect(_label_text(session, "SaveStatusLabel").contains("本地进度"), "Exploration state saves through canonical Persistence and local durable progress")
 	_expect(int(saved_snapshot.get("persistence_generation", 0)) > 0, "Canonical Persistence records progress generation")
 
 	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))

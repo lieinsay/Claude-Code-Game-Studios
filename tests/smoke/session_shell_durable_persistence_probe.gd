@@ -27,6 +27,8 @@ func _run() -> void:
 	first_hub.call("DebugClearDurableProgress")
 	await process_frame
 	_expect(not bool(first_hub.call("DebugDurableProgressExists")), "durable progress file starts cleared")
+	_expect(_button_disabled(first_session, "LoadButton"), "Load button is disabled when no durable progress exists")
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("暂无可加载进度"), "Hub explains that no progress can be loaded")
 
 	first_hub.call("OnChartPressed")
 	await process_frame
@@ -46,6 +48,7 @@ func _run() -> void:
 	_expect(int(saved_snapshot.get("reward_carried", 0)) == 2, "first session saves carried rewards")
 	_expect(int(saved_snapshot.get("hull_integrity", 0)) == 94, "first session saves hull pressure")
 	_expect(bool(first_hub.call("DebugDurableProgressExists")), "save writes a durable progress file")
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("可加载"), "Save feedback tells the player the progress can be loaded")
 
 	first_session.queue_free()
 	await process_frame
@@ -57,6 +60,8 @@ func _run() -> void:
 	if restarted_hub == null:
 		_finish()
 		return
+	_expect(not _button_disabled(restarted_session, "LoadButton"), "restarted Hub exposes Load when durable progress is present")
+	_expect(_label_text(restarted_session, "SaveStatusLabel").contains("检测到本地进度"), "restarted Hub explains that local progress was detected")
 
 	restarted_hub.call("OnLoadPressed")
 	await process_frame
@@ -69,8 +74,25 @@ func _run() -> void:
 	_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "restarted load still goes through canonical Persistence")
 	_expect(_label_text(restarted_session, "SaveStatusLabel").contains("加载完成"), "restarted load gives visible success feedback")
 
-	restarted_hub.call("DebugClearDurableProgress")
+	restarted_hub.call("DebugWriteCorruptDurableProgress")
+	await process_frame
 	restarted_session.queue_free()
+	await process_frame
+	await process_frame
+
+	var corrupt_session := await _boot_session(packed)
+	var corrupt_hub := corrupt_session.find_child("HubRuntime", true, false)
+	_expect(corrupt_hub != null, "corrupt-save HubRuntime is mounted")
+	if corrupt_hub == null:
+		_finish()
+		return
+	_expect(_button_disabled(corrupt_session, "LoadButton"), "Load button is disabled when durable progress fails validation")
+	corrupt_hub.call("OnLoadPressed")
+	await process_frame
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("校验失败"), "Corrupt durable progress reports checksum failure and does not load")
+
+	corrupt_hub.call("DebugClearDurableProgress")
+	corrupt_session.queue_free()
 	await process_frame
 	_finish()
 
@@ -96,6 +118,11 @@ func _label_text(root_node: Node, node_name: String) -> String:
 func _is_panel_visible(root_node: Node, node_name: String) -> bool:
 	var panel := root_node.find_child(node_name, true, false) as CanvasItem
 	return panel != null and panel.visible
+
+
+func _button_disabled(root_node: Node, node_name: String) -> bool:
+	var button := root_node.find_child(node_name, true, false) as Button
+	return false if button == null else button.disabled
 
 
 func _expect(condition: bool, label: String) -> void:

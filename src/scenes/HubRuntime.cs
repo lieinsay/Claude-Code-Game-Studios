@@ -55,6 +55,8 @@ public partial class HubRuntime : Node2D
 	private int explorationStep;
 	private Vector2 playerPosition = HubPlayerStart;
 	private string nearestInteraction = "";
+	private bool hasLoadableProgress;
+	private string lastDurableImportFailure = "";
 
 	public override void _Ready()
 	{
@@ -64,6 +66,9 @@ public partial class HubRuntime : Node2D
 		CreatePlayableLayer();
 		WireButtons();
 		ShowHub();
+		SetSaveStatus(hasLoadableProgress
+			? "检测到本地进度：点击加载恢复。"
+			: "暂无可加载进度：保存后可加载。");
 		onboarding.ObserveHubVisible(inputReachable: true, ownerStateAlreadyMutated: true);
 		UpdateOnboardingHint();
 	}
@@ -234,19 +239,32 @@ public partial class HubRuntime : Node2D
 		}
 
 		var durableSaved = TryWriteDurableProgressToDisk(out var durableReason);
+		hasLoadableProgress = durableSaved;
+		lastDurableImportFailure = "";
 		SetSaveStatus(durableSaved
-			? $"保存完成：canonical progress gen {result.Generation} / 本地耐久存档"
+			? $"保存完成：本地进度 gen {result.Generation} 可加载"
 			: $"保存完成：canonical progress gen {result.Generation} / 本地写入失败 {durableReason}");
+		RefreshLoadAffordance();
 		UpdateOnboardingHint();
 	}
 
 	public void OnLoadPressed()
 	{
-		TryImportDurableProgressFromDisk(updateStatus: false);
+		var importResult = TryImportDurableProgressFromDisk(updateStatus: false);
+		if (!importResult && !hasLoadableProgress)
+		{
+			SetSaveStatus(string.IsNullOrWhiteSpace(lastDurableImportFailure)
+				? "暂无可加载进度：请先保存。"
+				: $"本地存档不可用：{lastDurableImportFailure}");
+			RefreshLoadAffordance();
+			return;
+		}
+
 		var (result, restored) = domain.LoadSceneState();
 		if (!result.Success)
 		{
 			SetSaveStatus($"加载失败：{result.Reason}");
+			RefreshLoadAffordance();
 			return;
 		}
 
@@ -254,7 +272,13 @@ public partial class HubRuntime : Node2D
 		selectedRoute = restored.Route ?? "";
 		explorationStep = Math.Max(0, restored.ExplorationStep);
 		playerPosition = new Vector2(restored.PlayerX, restored.PlayerY);
-		SetSaveStatus($"加载完成：canonical progress gen {result.Generation} / {currentScreen}");
+		var restoredScreenName = currentScreen switch
+		{
+			"chart" => "航图 HUD",
+			"exploration" => "探索 HUD",
+			_ => "Hub",
+		};
+		SetSaveStatus($"加载完成：本地进度 gen {result.Generation} / {restoredScreenName}");
 
 		if (currentScreen == "chart")
 		{
@@ -264,12 +288,13 @@ public partial class HubRuntime : Node2D
 		else if (currentScreen == "exploration")
 		{
 			ShowExplorationSurface();
-			SetSaveStatus($"加载完成：canonical progress gen {result.Generation} / 探索 HUD");
+			SetSaveStatus($"加载完成：本地进度 gen {result.Generation} / 探索 HUD");
 		}
 		else
 		{
 			ShowHub();
 		}
+		RefreshLoadAffordance();
 		UpdateOnboardingHint();
 	}
 
@@ -348,11 +373,28 @@ public partial class HubRuntime : Node2D
 	{
 		if (!Godot.FileAccess.FileExists(DurableProgressPath))
 		{
+			hasLoadableProgress = false;
+			lastDurableImportFailure = "";
+			SetSaveStatus("暂无可加载进度：保存后可加载。");
+			RefreshLoadAffordance();
 			return;
 		}
 
 		using var directory = DirAccess.Open("user://");
 		directory?.Remove(DurableProgressFileName);
+		hasLoadableProgress = false;
+		lastDurableImportFailure = "";
+		SetSaveStatus("暂无可加载进度：保存后可加载。");
+		RefreshLoadAffordance();
+	}
+
+	public void DebugWriteCorruptDurableProgress()
+	{
+		using var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Write);
+		file?.StoreString("{\"generation\":1,\"domains\":{},\"_checksum\":\"not-a-valid-checksum\"}");
+		hasLoadableProgress = false;
+		lastDurableImportFailure = "";
+		RefreshLoadAffordance();
 	}
 
 	public Godot.Collections.Dictionary DebugDomainSnapshot()
@@ -846,12 +888,14 @@ public partial class HubRuntime : Node2D
 
 	private void SetHubControlsEnabled(bool enabled)
 	{
-		foreach (var button in hubActionButtons)
+		for (var index = 0; index < hubActionButtons.Length; index++)
 		{
+			var button = hubActionButtons[index];
 			if (button is not null)
 			{
-				button.Disabled = !enabled;
-				button.FocusMode = enabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+				var buttonEnabled = enabled && (index != 2 || hasLoadableProgress);
+				button.Disabled = !buttonEnabled;
+				button.FocusMode = buttonEnabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
 			}
 		}
 	}
@@ -1045,34 +1089,61 @@ public partial class HubRuntime : Node2D
 	{
 		if (!Godot.FileAccess.FileExists(DurableProgressPath))
 		{
+			hasLoadableProgress = false;
+			lastDurableImportFailure = "";
+			if (updateStatus)
+			{
+				SetSaveStatus("暂无可加载进度：保存后可加载。");
+			}
+			RefreshLoadAffordance();
 			return false;
 		}
 
 		using var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Read);
 		if (file is null)
 		{
+			hasLoadableProgress = false;
+			lastDurableImportFailure = Godot.FileAccess.GetOpenError().ToString();
 			if (updateStatus)
 			{
-				SetSaveStatus($"本地存档读取失败：{Godot.FileAccess.GetOpenError()}");
+				SetSaveStatus($"本地存档读取失败：{lastDurableImportFailure}");
 			}
+			RefreshLoadAffordance();
 			return false;
 		}
 
 		var json = file.GetAsText();
 		if (domain.TryImportProgressJson(json, out var reason))
 		{
+			hasLoadableProgress = true;
+			lastDurableImportFailure = "";
 			if (updateStatus)
 			{
 				SetSaveStatus("本地耐久存档已导入，可加载 canonical progress。");
 			}
+			RefreshLoadAffordance();
 			return true;
 		}
 
+		hasLoadableProgress = false;
+		lastDurableImportFailure = reason == "checksum_mismatch"
+			? "存档校验失败，未加载。"
+			: reason;
 		if (updateStatus)
 		{
-			SetSaveStatus($"本地存档导入失败：{reason}");
+			SetSaveStatus($"本地存档导入失败：{lastDurableImportFailure}");
 		}
+		RefreshLoadAffordance();
 		return false;
+	}
+
+	private void RefreshLoadAffordance()
+	{
+		if (hubActionButtons[2] is Button loadButton && currentScreen == "hub")
+		{
+			loadButton.Disabled = !hasLoadableProgress;
+			loadButton.FocusMode = hasLoadableProgress ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+		}
 	}
 
 }

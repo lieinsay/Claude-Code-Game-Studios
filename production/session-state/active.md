@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 007 manual close/relaunch QA PASS recorded; continue with room/interior polish or save-slot UX
+Task: Polish Story 008 save-slot UX and continue trust complete; continue with room/interior polish or backup/quarantine UX
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 008 Save-Slot UX and Continue Trust Complete 2026-05-23
+- Story complete: `production/polish-backlog/story-polish-008-save-slot-ux-continue-trust.md` -- Save-Slot UX and Continue Trust.
+- Input was the next trust gap after Story 007: users needed visible load availability and safe failure feedback, not just a working durable bridge.
+- `HubRuntime` now tracks whether local progress is loadable and refreshes the Hub Load button affordance.
+- Boot status now reports either detected local progress or no loadable progress.
+- Successful save feedback now tells the player local progress is loadable.
+- Corrupt durable progress disables Load and reports checksum failure instead of restoring stale state.
+- Evidence: `production/qa/evidence/polish-008-save-slot-ux-continue-trust-evidence.md`.
+- Remaining scope is not a blocker: full save-slot browser, backup/quarantine UI, delete/overwrite prompts, long-session QA, room interiors, final art/audio treatment, and Release readiness remain downstream.
 
 ## Session Extract -- Polish Story 007 Manual Close/Relaunch QA PASS 2026-05-23
 - User manually tested the Story 007 close/relaunch persistence path and reported no issues.
