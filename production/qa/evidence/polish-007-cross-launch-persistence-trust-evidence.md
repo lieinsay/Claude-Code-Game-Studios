@@ -1,8 +1,8 @@
 # Polish Story 007 Evidence: Cross-Launch Persistence Trust
 
-> Date: 2026-05-22  
+> Date: 2026-05-22; manual QA update 2026-05-23
 > Story: `production/polish-backlog/story-polish-007-cross-launch-persistence-trust.md`  
-> Verdict: PASS WITH CONDITIONS
+> Verdict: PASS WITH CONDITIONS; close/relaunch manual QA PASS
 
 ## Evidence Summary
 
@@ -11,6 +11,7 @@
 - Imported durable progress now verifies the manifest checksum before domain restore.
 - `Persistence` now restores domains in registered-deserializer order, preventing canonical JSON key ordering from changing resource/playable-slice restore semantics.
 - Runtime authority remains C# / Godot .NET; no GDScript runtime authority or parallel save model was introduced.
+- 2026-05-23 manual QA report: windowed close/relaunch persistence test completed with no issues. The user confirmed save, close game, relaunch, load, and restored playable state behaved as expected.
 
 ## Automated Checks
 
@@ -40,5 +41,5 @@
 
 - This is a playable-slice durable progress bridge, not the final save-slot UX.
 - Backup/quarantine UI and full-game save migration tooling remain downstream.
-- Human QA should still re-run close/relaunch trust manually in a windowed build.
+- Close/relaunch trust has one PASS manual report for the current playable slice; longer play sessions and final save-slot UX still need downstream QA.
 - No Release readiness claim is made by this evidence.

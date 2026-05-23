@@ -3,8 +3,14 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 007 cross-launch persistence trust complete; continue with room/interior polish, save-slot UX, or manual close/relaunch QA
+Task: Polish Story 007 manual close/relaunch QA PASS recorded; continue with room/interior polish or save-slot UX
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 007 Manual Close/Relaunch QA PASS 2026-05-23
+- User manually tested the Story 007 close/relaunch persistence path and reported no issues.
+- Evidence updated: `production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md`.
+- This closes the known playable-slice cross-launch trust check for the current greybox slice.
+- Remaining scope is not a blocker: full save-slot UX, backup/quarantine UI, longer play sessions, full room interiors, final art/audio treatment, and Release readiness remain downstream.
 
 ## Session Extract -- Polish Story 007 Cross-Launch Persistence Trust Complete 2026-05-22
 - Story complete: `production/polish-backlog/story-polish-007-cross-launch-persistence-trust.md` -- Cross-Launch Persistence Trust.
