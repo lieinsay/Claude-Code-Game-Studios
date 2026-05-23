@@ -30,6 +30,11 @@ public partial class HubRuntime : Node2D
 	private ColorRect? explorationRouteProgressFill;
 	private ColorRect? explorationThreatZone;
 	private ColorRect? extractionCargoProp;
+	private ColorRect? hubCargoLoadFill;
+	private ColorRect? hubEngineWearOverlay;
+	private Label? hubCabinStatusLabel;
+	private Label? hubCargoStatusLabel;
+	private Label? hubEngineStatusLabel;
 	private readonly Godot.Collections.Array<CanvasItem> hubSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private Label? chartStatusLabel;
@@ -566,12 +571,28 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(hubSceneItems, "HubBoardingRampLabel", new Vector2(168, 544), new Vector2(104, 22), "登船坡道");
 		AddSceneRect(hubSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
 		AddSceneLabel(hubSceneItems, "HubCabinRoomLabel", new Vector2(296, 472), new Vector2(140, 22), "驾驶舱");
+		AddSceneRect(hubSceneItems, "HubCabinWindow", new Vector2(304, 490), new Vector2(124, 10), new Color(0.48f, 0.68f, 0.78f, 0.92f));
+		AddSceneRect(hubSceneItems, "HubCabinNavigationSlate", new Vector2(302, 506), new Vector2(128, 14), new Color(0.12f, 0.27f, 0.34f, 0.96f));
+		hubCabinStatusLabel = AddSceneLabel(hubSceneItems, "HubCabinStatusLabel", new Vector2(286, 528), new Vector2(162, 22), "驾驶舱：待规划");
 		AddSceneRect(hubSceneItems, "HubCargoRoom", new Vector2(506, 464), new Vector2(184, 64), new Color(0.37f, 0.30f, 0.21f, 0.94f));
 		AddSceneLabel(hubSceneItems, "HubCargoRoomLabel", new Vector2(530, 472), new Vector2(136, 22), "货舱");
+		AddSceneRect(hubSceneItems, "HubCargoShelfLeft", new Vector2(520, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubCargoShelfRight", new Vector2(642, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubCargoLoadTrack", new Vector2(560, 504), new Vector2(72, 10), new Color(0.24f, 0.21f, 0.16f, 0.96f));
+		hubCargoLoadFill = AddSceneRect(hubSceneItems, "HubCargoLoadFill", new Vector2(560, 504), new Vector2(0, 10), new Color(0.78f, 0.64f, 0.34f, 0.98f));
+		hubCargoStatusLabel = AddSceneLabel(hubSceneItems, "HubCargoStatusLabel", new Vector2(518, 528), new Vector2(160, 22), "货舱：空载");
 		AddSceneRect(hubSceneItems, "HubEngineRoom", new Vector2(766, 464), new Vector2(184, 64), new Color(0.28f, 0.30f, 0.38f, 0.94f));
 		AddSceneLabel(hubSceneItems, "HubEngineRoomLabel", new Vector2(788, 472), new Vector2(140, 22), "轮机间");
+		AddSceneRect(hubSceneItems, "HubEngineCoilLeft", new Vector2(794, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubEngineCoilRight", new Vector2(882, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubEnginePowerConduit", new Vector2(836, 504), new Vector2(46, 8), new Color(0.64f, 0.70f, 0.48f, 0.95f));
+		hubEngineWearOverlay = AddSceneRect(hubSceneItems, "HubEngineWearOverlay", new Vector2(800, 486), new Vector2(118, 36), new Color(0.64f, 0.25f, 0.21f, 0.35f));
+		hubEngineStatusLabel = AddSceneLabel(hubSceneItems, "HubEngineStatusLabel", new Vector2(778, 528), new Vector2(160, 22), "轮机间：稳定");
 		AddSceneRect(hubSceneItems, "HubDeckFloor", new Vector2(88, 526), new Vector2(1096, 112), new Color(0.18f, 0.23f, 0.24f, 0.88f));
 		AddSceneRect(hubSceneItems, "HubDeckRail", new Vector2(104, 502), new Vector2(1064, 12), new Color(0.43f, 0.55f, 0.56f, 0.95f));
+		AddSceneRect(hubSceneItems, "HubInteriorDoorLineCabinCargo", new Vector2(474, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
+		AddSceneRect(hubSceneItems, "HubInteriorDoorLineCargoEngine", new Vector2(728, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
+		AddSceneRect(hubSceneItems, "HubInteriorMainAisle", new Vector2(276, 536), new Vector2(672, 8), new Color(0.50f, 0.55f, 0.48f, 0.82f));
 		AddSceneRect(hubSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
 		AddSceneLabel(hubSceneItems, "HelmConsoleLabel", new Vector2(298, 552), new Vector2(126, 22), "航图舵台");
 		AddSceneRect(hubSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
@@ -870,6 +891,45 @@ public partial class HubRuntime : Node2D
 		{
 			SetHubLabels(snapshot.StorageText, $"{cargoText} / 收益锁定", hullText.Replace("可出航", "可返航"), $"航图：{RouteName()} 压力循环完成 3/3", $"货舱：收益锁定 {snapshot.CargoUsed}/{snapshot.CargoCapacity}");
 		}
+		UpdateHubInteriorSemantics(snapshot);
+	}
+
+	private void UpdateHubInteriorSemantics(PlayableSliceSnapshot snapshot)
+	{
+		if (hubCabinStatusLabel is not null)
+		{
+			hubCabinStatusLabel.Text = explorationStep <= 0
+				? (string.IsNullOrWhiteSpace(selectedRoute) ? "驾驶舱：待规划" : $"驾驶舱：{RouteName()}")
+				: $"驾驶舱：{RouteName()} {Math.Min(explorationStep, 3)}/3";
+		}
+
+		var totalRewards = snapshot.RewardInStorage + snapshot.RewardCarried;
+		if (hubCargoStatusLabel is not null)
+		{
+			hubCargoStatusLabel.Text = explorationStep >= 3
+				? $"货舱：收益锁定 x{totalRewards}"
+				: totalRewards > 0 ? $"货舱：信标水晶 x{totalRewards}" : "货舱：空载";
+		}
+		if (hubCargoLoadFill is not null)
+		{
+			var fillWidth = snapshot.CargoCapacity <= 0
+				? 0.0f
+				: Math.Clamp(snapshot.CargoUsed / (float)snapshot.CargoCapacity, 0.0f, 1.0f) * 72.0f;
+			hubCargoLoadFill.Visible = currentScreen == "hub" && fillWidth > 0.0f;
+			hubCargoLoadFill.Size = new Vector2(fillWidth, hubCargoLoadFill.Size.Y);
+			hubCargoLoadFill.CustomMinimumSize = hubCargoLoadFill.Size;
+		}
+
+		if (hubEngineStatusLabel is not null)
+		{
+			hubEngineStatusLabel.Text = snapshot.HullIntegrity >= 100
+				? "轮机间：稳定 100/100"
+				: $"轮机间：擦伤 {snapshot.HullIntegrity}/100";
+		}
+		if (hubEngineWearOverlay is not null)
+		{
+			hubEngineWearOverlay.Visible = currentScreen == "hub" && snapshot.HullIntegrity < 100;
+		}
 	}
 
 	private void SetHubLabels(string storageText, string cargoText, string hullText, string chartText, string cargoStationText)
@@ -904,6 +964,10 @@ public partial class HubRuntime : Node2D
 	{
 		SetSceneGroupVisible(hubSceneItems, mode == "hub");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
+		if (mode == "hub")
+		{
+			UpdateHubInteriorSemantics(domain.Snapshot);
+		}
 		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub";
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";

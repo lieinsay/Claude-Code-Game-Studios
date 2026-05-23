@@ -3,8 +3,16 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 008 save-slot UX and continue trust complete; continue with room/interior polish or backup/quarantine UX
+Task: Polish Story 009 Hub room/interior greybox polish complete; next options are room art/audio pass, backup/quarantine UX, or longer Polish QA
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 009 Hub Room Interior Greybox Polish Complete 2026-05-23
+- Story complete: `production/polish-backlog/story-polish-009-hub-room-interior-greybox-polish.md` -- Hub Room Interior Greybox Polish.
+- `HubRuntime.cs` now adds cockpit window/navigation slate, cargo shelves/load track/fill, engine coils/conduit/wear overlay, interior dividers, and a shared aisle.
+- Hub room status labels now derive from existing route progress, reward/cargo, and hull snapshot values; no parallel room state model was introduced.
+- Godot visual smoke now asserts the new interior details, hidden initial cargo/damage indicators, returned cargo fill, hull damage overlay, dynamic room labels, and the existing route/search/save/load loop.
+- Evidence: `production/qa/evidence/polish-009-hub-room-interior-greybox-polish-evidence.md`.
+- Remaining scope is not a blocker: final room art, authored props, collision/navigation mesh, room ambience/audio, backup/quarantine UX, longer play sessions, and Release readiness remain downstream.
 
 ## Session Extract -- Polish Story 008 Save-Slot UX and Continue Trust Complete 2026-05-23
 - Story complete: `production/polish-backlog/story-polish-008-save-slot-ux-continue-trust.md` -- Save-Slot UX and Continue Trust.

@@ -63,6 +63,17 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubCabinRoom"), "Hub has a cockpit room volume")
 	_expect(hub.call("DebugNodeVisible", "HubCargoRoom"), "Hub has a cargo room volume")
 	_expect(hub.call("DebugNodeVisible", "HubEngineRoom"), "Hub has an engine room volume")
+	_expect(hub.call("DebugNodeVisible", "HubCabinWindow"), "Hub cockpit has an interior window detail")
+	_expect(hub.call("DebugNodeVisible", "HubCabinNavigationSlate"), "Hub cockpit has an interior navigation slate")
+	_expect(hub.call("DebugNodeVisible", "HubCargoShelfLeft"), "Hub cargo room has shelf detail")
+	_expect(hub.call("DebugNodeVisible", "HubCargoLoadTrack"), "Hub cargo room has a load track")
+	_expect(not hub.call("DebugNodeVisible", "HubCargoLoadFill"), "Hub cargo load fill starts hidden while empty")
+	_expect(hub.call("DebugNodeVisible", "HubEngineCoilLeft"), "Hub engine room has coil detail")
+	_expect(not hub.call("DebugNodeVisible", "HubEngineWearOverlay"), "Hub engine damage overlay starts hidden at full hull")
+	_expect(hub.call("DebugNodeVisible", "HubInteriorMainAisle"), "Hub rooms share an interior aisle")
+	_expect(_label_text(session, "HubCabinStatusLabel").contains("待规划"), "Hub cockpit status starts in planning state")
+	_expect(_label_text(session, "HubCargoStatusLabel").contains("空载"), "Hub cargo status starts empty")
+	_expect(_label_text(session, "HubEngineStatusLabel").contains("稳定"), "Hub engine status starts stable")
 	_expect(hub.call("DebugNodeVisible", "HelmConsoleProp"), "Hub has an authored greybox helm console prop")
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field is hidden while in Hub")
@@ -223,6 +234,11 @@ func _run() -> void:
 	_expect(_label_text(session, "HullValue").contains("完整度 94"), "Hub hull summary syncs exploration damage")
 	_expect(_label_text(session, "StorageValue").contains("信标水晶 x2"), "Hub storage summary syncs exploration rewards")
 	_expect(_label_text(session, "ChartStation").contains("中威胁"), "Hub chart station syncs route pressure")
+	_expect(_label_text(session, "HubCabinStatusLabel").contains("雾海短程 2/3"), "Hub cockpit interior status syncs route progress")
+	_expect(_label_text(session, "HubCargoStatusLabel").contains("信标水晶 x2"), "Hub cargo interior status syncs returned rewards")
+	_expect(_control_width(session, "HubCargoLoadFill") > 20.0, "Hub cargo load fill grows after returned cargo")
+	_expect(hub.call("DebugNodeVisible", "HubEngineWearOverlay"), "Hub engine damage overlay appears after hull pressure")
+	_expect(_label_text(session, "HubEngineStatusLabel").contains("94/100"), "Hub engine interior status syncs hull pressure")
 
 	hub.call("OnLoadPressed")
 	await process_frame
@@ -251,6 +267,7 @@ func _run() -> void:
 	_expect(_label_text(session, "CargoValue").contains("收益锁定"), "Hub cargo summary syncs completed pressure loop")
 	_expect(_label_text(session, "ChartStation").contains("压力循环完成"), "Hub chart station syncs completed pressure loop")
 	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
+	_expect(_label_text(session, "HubCargoStatusLabel").contains("收益锁定"), "Hub cargo interior status syncs locked rewards")
 
 	await _save_runtime_screenshot(root, SCREENSHOT_PATH, "Runtime screenshot")
 
