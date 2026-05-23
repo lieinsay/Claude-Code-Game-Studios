@@ -3,8 +3,20 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 014 implemented and awaiting focused human QA before release checklist/gate
+Task: Polish Story 014 human QA returned CONCERN; Story 015 island/ship interior and search gameplay design is next before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 014 Human QA Concern / Story 015 Ready 2026-05-23
+- Human checklist executed: `production/playtests/playtest-checklist-polish-014-readable-space-and-movement-2026-05-23.md`.
+- Verdict: CONCERN.
+- Tester: liein; duration: 10 minutes; build/commit: `ecb1fe6`.
+- Passed: launch/start, Chart open/close, route departure, movement-gated search/return affordance behavior, save/load during Exploration, and clean exit.
+- Failed/concern: Hub still does not read as the intended place; tester saw only helm/storage color blocks rather than created rooms or distinct zones.
+- Design correction: target should be an island/dock scene with a visible ship, plus an enterable ship interior with readable cockpit/helm, cargo/storage, and engine/module spaces.
+- Exploration correction: search should become a designed gameplay interaction, not only moving to a point; the scene needs more complexity.
+- Return correction: returning should read as piloting or moving the ship back, not only touching a beacon.
+- Story 014 status: Implemented -- Human QA Concern. Do not proceed to formal release checklist/gate.
+- Next story created: `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`.
 
 ## Session Extract -- Polish Story 014 Implemented / Awaiting Human QA 2026-05-23
 - Story implemented: `production/polish-backlog/story-polish-014-playable-space-readability-and-movement-driven-interaction.md` -- Playable Space Readability and Movement-Driven Interaction.

@@ -1,7 +1,7 @@
 # Polish Story 014: Playable Space Readability and Movement-Driven Interaction
 
 > **Phase**: Polish
-> **Status**: Implemented -- Awaiting Human QA
+> **Status**: Implemented -- Human QA Concern
 > **Layer**: Godot Runtime Presentation / Playable Interaction
 > **Type**: Polish
 > **Estimate**: M / 1 day
@@ -84,6 +84,20 @@ gates work, and persistence/performance smoke still pass. The final release
 blocker remains human-readable: a tester must confirm the Hub now reads as a
 station/interior, Exploration no longer feels empty, and the search/return loop
 now requires meaningful movement.
+
+## Human QA Result
+
+- Checklist: `production/playtests/playtest-checklist-polish-014-readable-space-and-movement-2026-05-23.md`
+- Verdict: CONCERN.
+- Tester: liein.
+- Build/Commit: `ecb1fe6`.
+- Duration: 10 minutes.
+- Technical stability passed, but the release-readiness blocker remains.
+- The current greybox still does not read as the intended island/docked-ship
+  scene or as an enterable ship interior.
+- Search has movement gating, but not designed search gameplay.
+- Return should become a ship/piloting return flow rather than only a beacon.
+- Next blocking story: `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`.
 
 ## Release Triage Rule
 
