@@ -1,7 +1,7 @@
 # Story 002: Scene Completeness Gate and Evidence Contract
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-composition-system.md`  
+**GDD**: `design/gdd/scene-composition-system.md`
 **Requirement**: `TR-scene-composition-002`
 **Requirement Text**: Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review.
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot  
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: scene evidence must fit the project scene lifecycle and be validated by desktop C# build/smoke where code is involved.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH
 **Engine Notes**: evidence checks should be deterministic and should not depend on final art assets unless the gate is specifically checking asset readiness.
 **Performance Note**: No runtime performance impact expected for the gate itself. Any smoke extension must read existing deterministic evidence and remain within the existing scene-transition and smoke budgets.
 
@@ -73,7 +73,7 @@ Implement the `scene_complete` evidence contract from GDD #19 as a checklist, sc
 
 ## Test Evidence
 
-**Story Type**: Integration  
+**Story Type**: Integration
 **Required evidence**:
 - Gate checklist/script output or updated smoke evidence.
 - `production/qa/evidence/scene-composition-completeness-gate-evidence.md`
@@ -95,5 +95,15 @@ Implement the `scene_complete` evidence contract from GDD #19 as a checklist, sc
 
 ## Dependencies
 
-- Depends on: Story 001 implemented and pushed; Scene Physics Stories 001-004 implemented and pushed.
+- Depends on: Story 001 complete and pushed; Scene Physics Stories 001-004 complete and pushed.
 - Unlocks: Story 003, Story 004.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 5/5 passing.
+**Deviations**: None. The gate continues to require user readability review or explicit waiver before release readiness; automated evidence alone is not sufficient.
+**Test Evidence**: Integration evidence in `production/qa/evidence/scene-composition-completeness-gate-evidence.md`; automated coverage through `tests/integration/scene-composition/SceneCompletenessGateTest.csproj`.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: Story 001 and #20 dependencies are now formally closed in the same story-done batch.

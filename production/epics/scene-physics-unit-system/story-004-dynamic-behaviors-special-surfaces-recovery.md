@@ -1,7 +1,7 @@
 # Story 004: Dynamic Physical Behaviors Special Surfaces and Recovery
 
 > **Epic**: Scene Physics Unit System
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: MVP Foundation Retrofit / Gameplay Scene Physics
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-physics-unit-system.md`  
+**GDD**: `design/gdd/scene-physics-unit-system.md`
 **Requirement**: `TR-scene-physics-003`
 **Requirement Text**: Dynamic physical behaviors such as pushable, elastic, slippery, moving-platform, one-way, breakable, mirror, glass, water, current/wind, and trigger-only units must declare parameters, feedback, conflict priority, and recovery rules.
 
-**ADR Governing Implementation**: ADR-0004: InteractionHandler and Use Dispatch; ADR-0019: Desktop C# Platform Pivot  
+**ADR Governing Implementation**: ADR-0004: InteractionHandler and Use Dispatch; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: physical interactions can feed the shared world interaction entry point, but domain consequences stay with their owner systems; verification is desktop Godot .NET/C# first.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM
 **Engine Notes**: future Godot 2D physics bodies must be verified against pinned docs before replacing debug contracts with real collision bodies.
 **Performance Note**: This story only adds deterministic runtime contract data and smoke assertions. It must not add live physics simulation, per-frame priority solving, or new dynamic Godot bodies.
 
@@ -73,7 +73,7 @@ Implemented in `HubRuntime.DebugScenePhysicsContract(scene_id)` as deterministic
 
 ## Test Evidence
 
-**Story Type**: Integration  
+**Story Type**: Integration
 **Required evidence**:
 - Unit or smoke test for behavior priority if implemented in code.
 - QA evidence for stuck recovery and dynamic-behavior readiness.
@@ -85,5 +85,15 @@ Implemented in `HubRuntime.DebugScenePhysicsContract(scene_id)` as deterministic
 
 ## Dependencies
 
-- Depends on: Story 003 (`story-003-unit-catalog-collision-occlusion-scale.md`) implemented and pushed; formal `/story-done` closure remains downstream.
+- Depends on: Story 003 (`story-003-unit-catalog-collision-occlusion-scale.md`) complete and pushed.
 - Unlocks: Scene Composition Story 002 and future dynamic-scene implementation stories.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 4/4 passing.
+**Deviations**: None. Dynamic behavior priority, fallback, and recovery remain deterministic contract data and do not introduce hidden physics or UI-based proof.
+**Test Evidence**: Integration/smoke evidence in `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md`; automated coverage through `tests/smoke/session_shell_visual_probe.gd`.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: Story 003 dependency is now formally closed in the same story-done batch.

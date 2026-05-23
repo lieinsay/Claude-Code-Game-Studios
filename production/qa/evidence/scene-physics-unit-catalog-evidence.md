@@ -54,15 +54,14 @@ The smoke probe verifies catalog size equals `authored_physical_unit_count`, inc
 
 ## Verification
 
-- PASS: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` (0 warnings, 0 errors)
+- PASS: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` (warnings vary by run; latest surrounding closure evidence records 5 existing warnings, 0 errors)
 - PASS: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd`
 - PASS: `git diff --check` (LF/CRLF warnings only)
 
 ## Dependencies
 
-Story 001 is implemented and pushed as `d8903ad01ae8caf4431984b081f5b73c8f6ce03a`.
-Story 002 is implemented and pushed as `054b3035d10c19308216d9c30ba2cd1f7d6647e7`.
-Formal `/story-done` closure remains downstream.
+Story 001 is complete and pushed as `d8903ad01ae8caf4431984b081f5b73c8f6ce03a`.
+Story 002 is complete and pushed as `054b3035d10c19308216d9c30ba2cd1f7d6647e7`.
 
 ## Out of Scope
 

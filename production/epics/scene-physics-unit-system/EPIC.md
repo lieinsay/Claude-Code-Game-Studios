@@ -3,8 +3,8 @@
 > **Layer**: MVP Foundation Retrofit / Gameplay Scene Physics
 > **GDD**: design/gdd/scene-physics-unit-system.md
 > **Architecture Module**: #20 Scene Physics
-> **Status**: In Progress
-> **Stories**: 4 (001-004 Implemented)
+> **Status**: Complete
+> **Stories**: 4 (001-004 Complete)
 
 ## Overview
 
@@ -46,10 +46,10 @@ Implement the bottom-layer physical-world exploration contract for authored 2D s
 
 | # | Story | Type | Status | ADR |
 | --- | --- | --- | --- | --- |
-| 001 | [Scene Physics Contract Runtime Shape](story-001-runtime-contract-shape.md) | Integration | Implemented | ADR-0019 |
-| 002 | [Layer Height Cutaway and Floor State](story-002-layer-height-cutaway-floor-state.md) | Integration | Implemented | ADR-0019 |
-| 003 | [Scene Unit Catalog Collision Occlusion and Scale](story-003-unit-catalog-collision-occlusion-scale.md) | Integration | Implemented | ADR-0004 / ADR-0019 |
-| 004 | [Dynamic Physical Behaviors Special Surfaces and Recovery](story-004-dynamic-behaviors-special-surfaces-recovery.md) | Integration | Implemented | ADR-0004 / ADR-0019 |
+| 001 | [Scene Physics Contract Runtime Shape](story-001-runtime-contract-shape.md) | Integration | Complete | ADR-0019 |
+| 002 | [Layer Height Cutaway and Floor State](story-002-layer-height-cutaway-floor-state.md) | Integration | Complete | ADR-0019 |
+| 003 | [Scene Unit Catalog Collision Occlusion and Scale](story-003-unit-catalog-collision-occlusion-scale.md) | Integration | Complete | ADR-0004 / ADR-0019 |
+| 004 | [Dynamic Physical Behaviors Special Surfaces and Recovery](story-004-dynamic-behaviors-special-surfaces-recovery.md) | Integration | Complete | ADR-0004 / ADR-0019 |
 
 ## Definition of Done
 
@@ -64,4 +64,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/story-readiness production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`, then `/dev-story` for the same file.
+Scene Physics Unit System is complete. Continue with Scene Composition story closure and user readability release review; do not claim release-ready from #20 evidence alone.

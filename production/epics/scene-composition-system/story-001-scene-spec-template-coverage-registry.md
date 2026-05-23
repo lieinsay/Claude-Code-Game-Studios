@@ -1,7 +1,7 @@
 # Story 001: Scene Specification Template and Coverage Registry
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Config/Data
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-composition-system.md`  
+**GDD**: `design/gdd/scene-composition-system.md`
 **Requirement**: `TR-scene-composition-001`
 **Requirement Text**: Every enterable scene must provide a scene specification covering purpose, entry/exit, spatial structure, interaction anchors, state variants, assets, audio/VFX, technical contract, and QA evidence before implementation readiness.
 
-**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot  
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: scene lifecycle and runtime evidence must respect the established scene boot/transition contract, and new runtime validation targets desktop Godot .NET/C#.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM
 **Engine Notes**: this story is mostly documentation/data, but any runtime hooks must remain compatible with desktop smoke validation.
 **Performance Note**: No runtime performance impact expected. This story creates reusable production documentation and registry data only; future runtime hooks remain Story 002+ scope.
 
@@ -71,7 +71,7 @@ Create a reusable scene spec template or checklist that includes the GDD #19 req
 
 ## Test Evidence
 
-**Story Type**: Config/Data  
+**Story Type**: Config/Data
 **Required evidence**:
 - Scene spec template or coverage registry diff.
 - `production/qa/evidence/scene-composition-spec-coverage-evidence.md`
@@ -93,5 +93,15 @@ Create a reusable scene spec template or checklist that includes the GDD #19 req
 
 ## Dependencies
 
-- Depends on: Scene Physics Stories 001-004 implemented and pushed. Latest known #20 push: `8d0e8778407fbad061f7c55c3c75ca74ef173ebe`.
+- Depends on: Scene Physics Stories 001-004 complete and pushed. Latest known #20 implementation push: `8d0e8778407fbad061f7c55c3c75ca74ef173ebe`.
 - Unlocks: Story 002.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 4/4 passing.
+**Deviations**: None. Repair and market scene specs remain tracked gaps by design; they are not release-ready claims.
+**Test Evidence**: Config/data evidence in `production/qa/evidence/scene-composition-spec-coverage-evidence.md`. No runtime code changed in this story; `git diff --check` is the required closure verification.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: #20 Scene Physics Stories 001-004 are formally closed in the same story-done batch and remain the dependency input for scene spec coverage.

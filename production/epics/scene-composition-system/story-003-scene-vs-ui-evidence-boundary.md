@@ -1,7 +1,7 @@
 # Story 003: Scene Versus UI Evidence Boundary
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-composition-system.md`  
+**GDD**: `design/gdd/scene-composition-system.md`
 **Requirement**: `TR-scene-composition-003`
 **Requirement Text**: UI, HUD, buttons, menus, labels, and debug overlays cannot count as physical scene units or substitute for world/playable scene evidence.
 
-**ADR Governing Implementation**: ADR-0012: UI Input Routing and Dual Focus  
+**ADR Governing Implementation**: ADR-0012: UI Input Routing and Dual Focus
 **ADR Decision Summary**: UIManager owns UI focus, modal stack, HUD updates, and screen state; world focus and physical scene evidence remain separate from UI controls.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH
 **Engine Notes**: dual-focus behavior and UI input routing are engine-sensitive; use existing UI smoke and focus tests where possible.
 **Performance Note**: No runtime performance impact is expected for the boundary document and C# validation. Any smoke extension must reuse existing deterministic node/focus evidence and remain inside the current scene-transition and 60fps budgets.
 
@@ -71,7 +71,7 @@ Strengthen smoke/review guidance so UI nodes are explicitly ignored for scene un
 
 ## Test Evidence
 
-**Story Type**: Integration  
+**Story Type**: Integration
 **Required evidence**:
 - Updated smoke or QA evidence proving UI nodes cannot satisfy scene evidence.
 - `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`
@@ -92,5 +92,15 @@ Strengthen smoke/review guidance so UI nodes are explicitly ignored for scene un
 
 ## Dependencies
 
-- Depends on: Story 002 implemented and pushed.
+- Depends on: Story 002 complete and pushed.
 - Unlocks: Story 004.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 4/4 passing.
+**Deviations**: None. UI/HUD/buttons/menus/labels/debug overlays remain assistive-only and cannot substitute for world/playable scene evidence.
+**Test Evidence**: Integration evidence in `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`; automated coverage through `tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj`.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: Story 002 dependency is now formally closed in the same story-done batch.

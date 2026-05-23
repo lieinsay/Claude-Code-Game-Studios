@@ -69,7 +69,7 @@ Notes: Headless screenshot saves were skipped by the current display driver; Lay
 
 ## Dependency Note
 
-Story 001 is implemented and pushed in commit `d8903ad`. Formal `/story-done` closure remains downstream; this Story 002 implementation proceeded on the user's "continue next step" instruction with the dependency risk recorded here.
+Story 001 is complete and pushed in commit `d8903ad`.
 
 ## Out Of Scope Preserved
 

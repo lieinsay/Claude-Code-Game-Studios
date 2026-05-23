@@ -3,8 +3,24 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Composition Stories 001-004 implemented; next step is story-done or user readability release packet
+Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done; release handoff still BLOCKED_FOR_RELEASE pending user readability verdict or waiver
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics and Scene Composition Story-Done Closeout 2026-05-24
+- Story-done order followed user request: #20 Scene Physics Stories 001-004, then #19 Scene Composition Stories 001-004.
+- #20 Story 001 `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`.
+- #20 Story 002 `production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md`: COMPLETE, 7/7 AC passing, evidence `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`.
+- #20 Story 003 `production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md`: COMPLETE, 7/7 AC passing, evidence `production/qa/evidence/scene-physics-unit-catalog-evidence.md`.
+- #20 Story 004 `production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md`.
+- #20 Epic `production/epics/scene-physics-unit-system/EPIC.md`: Complete. Scope is Scene Physics Contract closure only; this does not claim release readiness.
+- #19 Story 001 `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-composition-spec-coverage-evidence.md`.
+- #19 Story 002 `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md`: COMPLETE, 5/5 AC passing, evidence `production/qa/evidence/scene-composition-completeness-gate-evidence.md`.
+- #19 Story 003 `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`.
+- #19 Story 004 `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`: COMPLETE WITH NOTES, 4/4 AC passing. Notes: checklist and handoff contract are complete, but no actual user readability verdict or explicit waiver exists.
+- #19 Epic `production/epics/scene-composition-system/EPIC.md`: Complete With Notes. Release handoff remains `BLOCKED_FOR_RELEASE`; do not declare release-ready until user readability reviews pass or the user records explicit waivers.
+- Evidence boundary preserved: scenes are world/playable spaces, not UI; UI/HUD/buttons/labels/debug overlays remain assistive-only and cannot substitute for physical scene proof.
+- Verification: `dotnet run --project tests/integration/scene-composition/SceneCompletenessGateTest.csproj` PASS 6/6; `dotnet run --project tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj` PASS 5/5; `dotnet run --project tests/integration/scene-composition/UserReadabilityReleaseGateTest.csproj` PASS 5/5; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next recommended: human-run `production/playtests/scene-composition-user-readability-checklist.md` for each current release-candidate scene, then update the release packet with verdicts or explicit waivers.
 
 ## Session Extract -- Scene Composition Story 004 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 003 plus #20 Stories 001-004 are implemented/pushed.

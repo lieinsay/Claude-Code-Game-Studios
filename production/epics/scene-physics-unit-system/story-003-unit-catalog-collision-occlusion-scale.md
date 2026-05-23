@@ -1,7 +1,7 @@
 # Story 003: Scene Unit Catalog Collision Occlusion and Scale
 
 > **Epic**: Scene Physics Unit System
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: MVP Foundation Retrofit / Gameplay Scene Physics
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-physics-unit-system.md`  
+**GDD**: `design/gdd/scene-physics-unit-system.md`
 **Requirement**: `TR-scene-physics-002`
 **Requirement Text**: Scene units must declare collision semantics, occlusion/layering, player-relative scale, special surface policy, and authored physical unit identity independent of UI.
 
-**ADR Governing Implementation**: ADR-0004: InteractionHandler and Use Dispatch; ADR-0019: Desktop C# Platform Pivot  
+**ADR Governing Implementation**: ADR-0004: InteractionHandler and Use Dispatch; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: interactable scene units integrate through world focus and Use dispatch, while runtime validation remains desktop Godot .NET/C# first.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: MEDIUM
 **Engine Notes**: collision and overlap semantics should map cleanly to `CollisionObject2D`, `Area2D`, `StaticBody2D`, and related Godot 2D bodies when implementation moves past debug contracts.
 **Performance Note**: No new physics bodies or renderer effects are expected in this story; the catalog remains deterministic debug/QA contract data and must not add per-frame work.
 
@@ -76,7 +76,7 @@ Implemented in `HubRuntime.DebugScenePhysicsContract(scene_id)` as runtime-reada
 
 ## Test Evidence
 
-**Story Type**: Integration  
+**Story Type**: Integration
 **Required evidence**:
 - Scene physics smoke or contract audit covering unit catalog fields.
 - `production/qa/evidence/scene-physics-unit-catalog-evidence.md`
@@ -87,5 +87,15 @@ Implemented in `HubRuntime.DebugScenePhysicsContract(scene_id)` as runtime-reada
 
 ## Dependencies
 
-- Depends on: Story 001 (`story-001-runtime-contract-shape.md`) and Story 002 (`story-002-layer-height-cutaway-floor-state.md`) implemented and pushed; formal `/story-done` closure remains downstream.
+- Depends on: Story 001 (`story-001-runtime-contract-shape.md`) and Story 002 (`story-002-layer-height-cutaway-floor-state.md`) complete and pushed.
 - Unlocks: Story 004, Scene Composition Story 002.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 7/7 passing.
+**Deviations**: None. Scene unit catalog, collision, occlusion, scale, special-surface, and replacement rules reject UI-only evidence and preserve world/playable scene authority.
+**Test Evidence**: Integration/smoke evidence in `production/qa/evidence/scene-physics-unit-catalog-evidence.md`; automated coverage through `tests/smoke/session_shell_visual_probe.gd`.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: Story 001 and Story 002 dependencies are now formally closed in the same story-done batch.

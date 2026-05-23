@@ -71,10 +71,9 @@ Recovery table entries cover:
 
 ## Dependencies
 
-Story 001 is implemented and pushed as `d8903ad01ae8caf4431984b081f5b73c8f6ce03a`.
-Story 002 is implemented and pushed as `054b3035d10c19308216d9c30ba2cd1f7d6647e7`.
-Story 003 is implemented and pushed as `cf141163e8fe92927dc7b583d844f7e8017ca7e5`.
-Formal `/story-done` closure remains downstream.
+Story 001 is complete and pushed as `d8903ad01ae8caf4431984b081f5b73c8f6ce03a`.
+Story 002 is complete and pushed as `054b3035d10c19308216d9c30ba2cd1f7d6647e7`.
+Story 003 is complete and pushed as `cf141163e8fe92927dc7b583d844f7e8017ca7e5`.
 
 ## Out of Scope
 

@@ -1,7 +1,7 @@
 # Story 001: Scene Physics Contract Runtime Shape
 
 > **Epic**: Scene Physics Unit System
-> **Status**: Implemented
+> **Status**: Complete
 > **Layer**: MVP Foundation Retrofit / Gameplay Scene Physics
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
@@ -9,14 +9,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/scene-physics-unit-system.md`  
+**GDD**: `design/gdd/scene-physics-unit-system.md`
 **Requirement**: `TR-scene-physics-001`
 **Requirement Text**: Every 2D enterable scene with gameplay-relevant physical units must declare horizontal or vertical scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model, and Floor State or explicit N/A true rule.
 
-**ADR Governing Implementation**: ADR-0019: Desktop C# Platform Pivot  
+**ADR Governing Implementation**: ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: new runtime work targets desktop Godot 4.6.2 .NET/C#, with C# source, project files, `dotnet build`, and Godot headless validation as the normal verification path.
 
-**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH
 **Engine Notes**: validate generated C# runtime surfaces with `dotnet build` and Godot headless smoke; do not add new Web-only requirements.
 **Performance Note**: No per-frame physics simulation or new scene instantiation is expected; runtime contract queries must remain direct debug/QA lookups and stay inside the existing scene-transition and smoke budgets.
 
@@ -72,7 +72,7 @@ Keep the runtime contract as a debug/QA surface until a dedicated data asset for
 
 ## Test Evidence
 
-**Story Type**: Integration  
+**Story Type**: Integration
 **Required evidence**:
 - `tests/smoke/session_shell_visual_probe.gd` or dedicated scene physics smoke must exist and pass.
 - `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`
@@ -94,3 +94,13 @@ Keep the runtime contract as a debug/QA surface until a dedicated data asset for
 
 - Depends on: existing Polish 016 runtime contract probe (implemented; see `production/polish-backlog/story-polish-016-scene-physics-contract-retrofit.md`).
 - Unlocks: Story 002, Story 003.
+
+## Completion Notes
+
+**Completed**: 2026-05-24
+**Verdict**: COMPLETE
+**Criteria**: 4/4 passing.
+**Deviations**: None. Contract evidence remains bound to world/playable scene state; UI/HUD/debug labels do not count as scene physics evidence.
+**Test Evidence**: Integration/smoke evidence in `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`; automated coverage through `tests/smoke/session_shell_visual_probe.gd`.
+**Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
+**Notes**: Unknown scene ids correctly remain incomplete with diagnostics rather than defaulting to a passing contract.
