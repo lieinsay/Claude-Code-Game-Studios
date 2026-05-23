@@ -7,10 +7,11 @@
 > **Implements Pillar**: 飞艇是家，不只是载具; 规划先于冒险; 未知带来温和压力
 > **System Index**: `design/gdd/systems-index.md`
 > **Platform Pivot Note**: ADR-0019 supersedes browser lifecycle assumptions. Active input implementation targets desktop Godot .NET/C#; lifecycle gates should be interpreted as shell-normalized desktop focus/pause/quit signals.
+> **Scene Physics Note**: `design/gdd/scene-physics-unit-system.md` now owns scene unit physics contracts. This system consumes those contracts when interpreting movement, collision, reachability and blocked feedback.
 
 ## Overview
 
-`玩家移动与交互` 是《云海织航》的基础玩家动作层，负责把壳层开放后的键鼠输入转化为清楚、可预期、可被阻断的角色移动、可达性判断、交互焦点和 `Use` 入口。玩家通过它在横版飞艇、起始空港、集市摊位和探索点中行走、靠近、确认目标并发起交互；但具体后果，例如购买、采集、修复、安装模块、触发探索结果或打开领域 UI，都由对应系统拥有。本系统的设计目标不是制造复杂操作技巧，而是让玩家感觉自己真的站在飞艇和世界里：能顺畅移动，能读懂什么可接近、什么可使用、当前会操作哪个对象，也能在后台恢复、壳层 overlay、距离不足或状态锁定时安全地不误触。它支撑“飞艇是家，不只是载具”的身体感，也保护“规划先于冒险”的可读操作节奏。
+`玩家移动与交互` 是《云海织航》的基础玩家动作层，负责把壳层开放后的键鼠输入转化为清楚、可预期、可被阻断的角色移动、可达性判断、交互焦点和 `Use` 入口。玩家通过它在横版飞艇、起始空港、集市摊位和探索点中行走、靠近、确认目标并发起交互；但具体后果，例如购买、采集、修复、安装模块、触发探索结果或打开领域 UI，都由对应系统拥有。本系统的设计目标不是制造复杂操作技巧，而是让玩家感觉自己真的站在有物理规则的飞艇和世界里：能顺畅移动，能被碰撞和阻挡正确限制，能读懂什么可接近、什么可使用、当前会操作哪个对象，也能在后台恢复、壳层 overlay、距离不足或状态锁定时安全地不误触。它支撑“飞艇是家，不只是载具”的身体感，也保护“规划先于冒险”的可读操作节奏。
 
 ## Player Fantasy
 
@@ -36,6 +37,7 @@
 10. 失败必须可解释。不可交互时，系统应输出明确阻断原因，例如 `input_closed`、`too_far`、`blocked`、`target_disabled`、`target_busy`、`ui_modal_blocked`。
 11. MVP 不做自动寻路、跨房间交互、靠近后自动执行、拖拽式复杂操作、连续长按式操作、gamepad、touch、指针锁依赖或战斗专用输入链。
 12. 本系统不能读取或改写货币、库存、资源数量、修复状态、市场库存、模块安装结果、探索奖励、剧情进度或存档内容。
+13. 本系统不定义场景单位物理。水平/垂直场景类型、碰撞语义、前后遮挡、单位尺度、特殊表面、弹性/滑动/可破坏等动态行为由 `场景单位物理设计` (#20) 拥有。本系统只消费这些契约并输出移动/阻断/焦点结果。
 
 ### States and Transitions
 
@@ -103,6 +105,7 @@ Transitions:
 | System | This System Receives | This System Sends | Boundary |
 |---|---|---|---|
 | `平台与会话壳` | `input_gate_open` / `input_gate_reacquire` / `input_gate_closed`, overlay and resume gate state | none required | 壳层决定玩法输入是否可进来；本系统不判断浏览器生命周期 |
+| `场景单位物理设计` | Scene Physics Contract: scene type, movement plane, collision, occlusion, scale, special surfaces, physical behaviors | movement state, blocked reasons, use reachability results | #20 拥有物理契约；本系统消费契约并执行移动/可达性判断 |
 | `飞艇家园 Hub` | walkable areas, room bounds, interaction anchors, station availability | `interaction_used`, focus events, movement state | Hub 拥有舱室与站点后果；本系统只负责抵达和使用入口 |
 | `探索 / 搜撤场景` | walkable areas, extraction anchors, loot/search anchors, threat blockers | `interaction_used`, blocked reasons, movement state | 探索系统拥有搜撤、奖励、撤离和危险后果 |
 | `空港 / 村镇状态与集市交易` | stall anchors, NPC / stall availability, market blockers | `interaction_used` for stall or NPC focus | 市集系统拥有购买、货品、价格和库存变化 |
@@ -442,6 +445,7 @@ The `use_gate` formula is defined as:
 硬依赖：
 
 - `平台与会话壳`：提供 `input_gate_open` / `input_gate_reacquire` / `input_gate_closed`，并负责加载、恢复、后台挂起、overlay 和第一下恢复输入消费。本系统不得自行判断浏览器生命周期或绕过壳层门禁。
+- `场景单位物理设计`：每个使用本系统的可进入场景必须提供 Scene Physics Contract。没有物理契约时，本系统只能使用保守阻断规则，不得猜测单位碰撞、遮挡、尺度、特殊表面或动态物理行为。
 - 场景可行走区域与碰撞边界：每个使用本系统的场景必须提供可行走区域、阻挡体、边界和临时锁定区域。没有这些数据时，本系统只能关闭移动或进入安全阻断态。
 - 交互目标契约：每个可交互对象必须提供稳定 ID、交互锚点、交互半径、可用状态、优先级、忙碌状态和阻断原因。本系统只消费这些数据，不推断领域后果。
 - 输入映射：MVP 依赖键盘移动和单一 `Use` 输入动作。gamepad、touch、指针锁、拖拽和长按不是 launch 范围。
@@ -457,6 +461,7 @@ The `use_gate` formula is defined as:
 
 | System | Depends on This System For | Must Provide Back |
 |---|---|---|
+| `场景单位物理设计` | 本系统执行其物理契约中的移动、碰撞、阻断和可达性判断 | Scene Physics Contract、恢复规则和物理行为优先级 |
 | `飞艇家园 Hub` | 舱室内移动、站点焦点、工作台/货架/舱门/伙伴驻点 `Use` 入口 | 舱室边界、站点锚点、站点可用状态、站点领域处理结果 |
 | `探索 / 搜撤场景` | 探索点移动、搜索点/撤离点/风险点焦点和 `Use` 入口 | 探索区域、可搜目标、撤离锚点、威胁阻断、领域处理结果 |
 | `空港 / 村镇状态与集市交易` | 摊位、NPC、公告点和市场入口的焦点与 `Use` 请求 | 摊位锚点、NPC 可用状态、市场忙碌/关闭原因、交易 UI 入口 |
@@ -470,6 +475,7 @@ The `use_gate` formula is defined as:
 - 本系统不拥有货币、库存、资源、修复、市场、模块安装、探索奖励、战斗、剧情或存档结果。
 - 本系统不打开领域 UI；它只发送 `interaction_used`，由领域系统决定是否打开 UI。
 - 本系统不做自动寻路、不跨场景保持焦点、不跨房间远程交互。
+- 本系统不拥有场景单位物理设计；它不决定物体是否弹性、可推动、滑动、可破坏、透视、反射或作为特殊表面。
 - 本系统不直接订阅窗口焦点、暂停、退出等平台事件；这些都由 `平台与会话壳` 归一化后传入。
 - 下游系统可以拒绝 `Use`，但必须返回可解释的原因，不能让交互静默失败。
 

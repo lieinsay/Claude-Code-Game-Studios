@@ -5,16 +5,17 @@
 > **Last Updated**: 2026-05-09
 > **Implements Pillar**: 规划先于冒险; 未知带来温和压力
 > **Platform Pivot Note**: ADR-0019 supersedes browser storage/lifecycle assumptions. Active exploration implementation targets desktop Godot .NET/C#; browser-tab edge cases should be read as desktop pause/quit/restart recovery requirements until individually refreshed.
+> **Scene Physics Note**: Exploration scenes must include a Scene Physics Contract from `design/gdd/scene-physics-unit-system.md`. Physical world exploration is a bottom-layer play contract, not presentation-only polish.
 
 ## Overview
 
-探索 / 搜撤场景是《云海织航》第一循环的第三步——玩家离开飞艇后的"短途出行"。在数据层，它消费航行系统（#10）在抵达目的地时发出的 `EncounterContext`，将其中的航线 ID、目的地 ID、航程结果和遭遇列表转化为一个可进入、可搜索、可拾取、可撤离的 2D 俯视探索点场景；在体验层，它是玩家在完成航线规划后真正"踏上未知地面"的时刻——玩家在一个手工设计的探索点中移动，观察环境、判断风险、搜索可拾取资源、在容量限制下做出"带走什么"的取舍，并在风险升级或容量满载时决定撤离。
+探索 / 搜撤场景是《云海织航》第一循环的第三步——玩家离开飞艇后的"短途出行"。在数据层，它消费航行系统（#10）在抵达目的地时发出的 `EncounterContext`，将其中的航线 ID、目的地 ID、航程结果和遭遇列表转化为一个可进入、可搜索、可拾取、可撤离的 2D 俯视探索点场景；在体验层，它是玩家在完成航线规划后真正"踏上未知地面"的时刻——玩家在一个手工设计且有物理规则的探索点中移动，观察环境、判断阻挡和可推动单位、理解特殊表面和危险区域、搜索可拾取资源、在容量限制下做出"带走什么"的取舍，并在风险升级或容量满载时决定撤离。
 
 探索点是一个可复用的模板——MVP 中使用一个核心探索点布局，通过状态变体（未搜刮 / 已搜刮 / 危险变化）来产生不同的探索体验，而非制作多个独立地牢。搜索点、资源分布、风险标记和撤离锚点均由模板定义且可配置；`EncounterContext` 中的航程结果（安全抵达 vs 迫降）和遭遇列表影响探索点的初始状态——安全抵达意味着正常的探索起点，迫降意味着从坠机点开始、船体已受损、可能面临更紧迫的撤离压力。侦察模块的效率（η_scout）影响玩家在探索点内能提前看到多少风险信息——效率越高，越多风险点在进入前就被标注。
 
 探索的产出是三类：资源 / 货物（通过 `carried` 池进入容量系统，撤离成功后归入飞艇仓库）、情报（隐藏标签被揭示，航线知识永久推进）、船体后果（探索中的威胁接触可能造成额外船体损伤或模块受损标记，在返航后结算）。探索系统不自行结算战斗——当玩家在探索点触发威胁（如遇到守卫、陷阱或环境危险），它将威胁上下文传递给战斗与威胁处理系统（#12）解决，并接收战斗结果来更新探索状态。
 
-没有这个系统，航图上的目的地就只是一个名字——永远不会变成一个玩家可以用脚丈量、用手搜索、用判断撤离的真实地方。"规划先于冒险"（Pillar 1）会在抵达后断裂——玩家做了航线规划，但没有一个场景让规划的结果被体验。"未知带来温和压力"（Pillar 4）会失去它最重要的载体——探索点是未知变成已知的地方，是传闻变成经历的空间。
+没有这个系统，航图上的目的地就只是一个名字——永远不会变成一个玩家可以用脚丈量、用手搜索、用物理空间判断撤离的真实地方。"规划先于冒险"（Pillar 1）会在抵达后断裂——玩家做了航线规划，但没有一个场景让规划的结果被体验。"未知带来温和压力"（Pillar 4）会失去它最重要的载体——探索点是未知变成已知的地方，是传闻变成经历的空间。
 
 **明确不在 MVP 范围内**：战斗规则和结算（属于 #12 战斗与威胁处理）；第二个地牢节奏或多探索点类型；对航行结果的逆向修改；复杂的环境叙事或大规模程序生成；连续开放世界探索（MVP 是离散探索点）。
 
@@ -85,6 +86,8 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 - 玩家使用 System #4（玩家移动与交互）的 2D 俯视移动能力在探索点内移动
 - 交互焦点系统用于靠近搜索点、情报点、威胁点、撤离锚点时触发交互
 - 移动到相邻区域无加载——整个探索点（50×35 单位）为一个连续场景
+- 每个探索点必须提供 System #20（场景单位物理设计）的 Scene Physics Contract。MVP 默认探索点为 `水平场景`：玩家在地面平面上下左右移动；阻挡残骸、可推动货箱、特殊表面、危险边缘、飞行/跳跃高度提示和动态物理行为必须在场景规格中明确。
+- 物理空间是探索玩法的一部分。搜索点、撤离锚点、威胁点和情报点不应只靠 HUD 按钮推进；玩家应通过路径、遮挡、碰撞、可推动物、特殊表面或安全/危险边界来理解“能否到达、是否值得继续、如何撤离”。
 
 **C5. 搜索机制**
 
@@ -188,6 +191,7 @@ MVP 使用一个探索点模板「云观站废墟」（Ruined Cloud-Watching Sta
 | 系统 | 数据流入 | 数据流出 |
 |------|---------|---------|
 | #10 航行与路线风险 | `EncounterContext` {route_id, destination_id, voyage_result, resolved_encounters[]} | — |
+| #20 场景单位物理设计 | Scene Physics Contract: horizontal scene type, collision, occlusion, unit scale, special surfaces, physical behaviors, recovery rules | — |
 | #8 飞艇模块与船体状态 | η_scout（侦察效率）, `can_depart()`（检查是否可以出发） | 船体损伤、模块受损标记（结算时写入） |
 | #5 资源/货物与容量 | Pool 5（carried，5 格）读写 | `extract_carried_to_storage()` 结算时调用 |
 | #4 玩家移动与交互 | 2D 俯视移动、交互焦点系统、Use 入口 | — |

@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
-> **最后更新**: 2026-05-23
-> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001-013 complete | Polish Story 014 playable-space readability ready
+> **最后更新**: 2026-05-24
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001-013 complete | Scene Physics / Scene Composition design gates In Design
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 18/18 Epic 完成 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 #18 | Polish Entry: #18 smoke/perf PASS
@@ -23,7 +23,7 @@ graph TB
     subgraph 设计["🎮 设计层 design/"]
         CONCEPT["game-concept.md<br/>游戏概念"]
         SYSIDX["systems-index.md<br/>系统索引"]
-        GDD["18 个 GDD 文档<br/>游戏设计文档"]
+        GDD["20 个 GDD 文档<br/>18 已批准 + 2 In Design"]
         REVIEWS["15 个 Review Logs<br/>设计审查记录"]
         ART["art-bible.md<br/>艺术圣经"]
         UX["ux/ (3)<br/>Hub·Chart·Exploration UX Spec"]
@@ -89,7 +89,7 @@ graph TB
 | 文件 | 说明 |
 |------|------|
 | [design/gdd/game-concept.md](../design/gdd/game-concept.md) | 游戏概念 — 核心幻想、MDA 分析 |
-| [design/gdd/systems-index.md](../design/gdd/systems-index.md) | 系统索引 — 18 个系统的边界与约束 |
+| [design/gdd/systems-index.md](../design/gdd/systems-index.md) | 系统索引 — 20 个系统的边界与约束（#19/#20 In Design） |
 | [design/art/art-bible.md](../design/art/art-bible.md) | 艺术圣经 (2111 行) |
 | [design/ux/hub.md](../design/ux/hub.md) | Hub UX Spec — 飞艇家园 (10 站点/4 房间/8 状态变体) |
 | [design/ux/chart.md](../design/ux/chart.md) | Chart UX Spec — 航图航线规划 (5 状态/墨水扩散出航序列) |
@@ -100,7 +100,7 @@ graph TB
 
 | 文件 | 说明 |
 |------|------|
-| [docs/architecture/architecture.md](architecture/architecture.md) | 主架构 — 54 TR / 5 层 / 18 系统 (TD+LP 双签收) |
+| [docs/architecture/architecture.md](architecture/architecture.md) | 主架构 — 54 TR / 5 层 / 20 系统（#19/#20 为设计门禁） |
 | [docs/architecture/tr-registry.yaml](architecture/tr-registry.yaml) | 技术需求注册表 |
 | [docs/architecture/architecture-traceability.md](architecture/architecture-traceability.md) | 可追溯性索引 — 54 TR 全覆盖矩阵 (100%) |
 | [docs/engine-reference/godot/VERSION.md](engine-reference/godot/VERSION.md) | Godot 4.6.2 版本锁定 |
@@ -181,8 +181,8 @@ graph TB
 
 ## 二、游戏设计文档 (GDD) — 依赖关系图
 
-> 18 个系统，5 层架构。实线箭头 = 运行时依赖，虚线 = 信号/事件订阅。
-> Feature/Presentation 主线 ADR 全部 Accepted；#17 first Polish feedback slice complete；#18 first-loop onboarding slice complete。
+> 20 个系统，5 层架构。#1-#18 已完成 Epic/Story；#19/#20 为 In Design 的场景设计门禁，不计入已完成 Epic。
+> Feature/Presentation 主线 ADR 全部 Accepted；#17 first Polish feedback slice complete；#18 first-loop onboarding slice complete；#19/#20 将“有物理的世界探索”确认为底层玩法契约。
 
 ```mermaid
 graph TB
@@ -194,6 +194,8 @@ graph TB
     subgraph Feature["⚔️ Feature 层 (5/5 ✅ 30 Stories)"]
         NAV["#10 航行与路线风险<br/>ADR-0010 ✅"]
         EXPLORE["#11 探索/搜撤场景<br/>ADR-0013 ✅ 6 Stories"]
+        SCENEPHYS["#20 场景单位物理设计<br/>In Design<br/>Scene Physics Contract"]
+        SCENE["#19 完整场景构成与验收<br/>In Design<br/>依赖 #20"]
         COMBAT["#12 战斗与威胁处理<br/>ADR-0018 ✅ 6 Stories"]
         REPAIR["#13 世界修复与解锁<br/>ADR-0011 ✅ 6 Stories"]
         SETTLE["#14 空港/村镇/集市<br/>ADR-0014 ✅ 6 Stories"]
@@ -248,6 +250,9 @@ graph TB
     NAV --> MODULE
     NAV -.->|"voyage_completed(EncounterContext)"| EXPLORE
     EXPLORE --> NAV
+    EXPLORE --> SCENE
+    SCENE --> SCENEPHYS
+    SCENEPHYS --> MOVE
     COMBAT --> EXPLORE
     COMBAT --> MODULE
     COMBAT -.->|"threat_resolved(combat_result)"| EXPLORE
@@ -315,6 +320,8 @@ graph TB
 | 16 | UI / HUD / 航图界面 | [ui-hud-chart-interface.md](../design/gdd/ui-hud-chart-interface.md) | Presentation | ADR-0012 | ✅ 已审查 |
 | 17 | 反馈、特效与音频语义 | [feedback-fx-audio.md](../design/gdd/feedback-fx-audio.md) | Presentation | ADR-0016 | ✅ GDD / ✅ ADR |
 | 18 | 新手引导与首轮闭环 | [onboarding-first-loop.md](../design/gdd/onboarding-first-loop.md) | Feature | ADR-0017 | ✅ GDD / ✅ ADR |
+| 19 | 完整场景构成与验收 | [scene-composition-system.md](../design/gdd/scene-composition-system.md) | Feature / Design Gate | — | 🟡 In Design |
+| 20 | 场景单位物理设计 | [scene-physics-unit-system.md](../design/gdd/scene-physics-unit-system.md) | Foundation / Feature Contract | — | 🟡 In Design |
 
 ### GDD 审查记录 (Review Logs)
 
@@ -1031,7 +1038,7 @@ graph LR
         SC["/scope-check<br/>范围蔓延检查"]
     end
 
-    GDD["18 个 GDD"] --> DR
+    GDD["20 个 GDD"] --> DR
     DR --> CR
     CR --> HR
     HR --> AR
@@ -1377,14 +1384,14 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 18/18 Epic 完成 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17/#18 Complete
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001-013 Complete；Polish Story 014 Ready
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001-013 Complete；Scene Physics / Scene Composition gates In Design
 ```
 
 ---
 
 ## 十二、待创建文档
 
-> 更新于 2026-05-22 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；#18 Onboarding Story 001-005 完成。
+> 更新于 2026-05-24 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；#18 Onboarding Story 001-005 完成；#19/#20 场景设计门禁已创建，等待双审。
 
 ### 已全部完成 ✅
 
@@ -1399,6 +1406,7 @@ graph TB
 - [x] **UX Specs (×3)** — `design/ux/hub.md`, `chart.md`, `exploration.md`
 - [x] **Interaction Patterns Library** — `design/ux/interaction-patterns.md`
 - [x] **Vertical Slice GDDs #17/#18** — `feedback-fx-audio.md`, `onboarding-first-loop.md` 已批准
+- [x] **Scene Design Gate GDDs #19/#20** — `scene-composition-system.md`, `scene-physics-unit-system.md` 已创建，作为 In Design 双审入口
 - [x] **Test Framework** — `tests/unit/` + `tests/integration/` (gdUnit4)
 - [x] **CI/CD Workflow** — `.github/workflows/tests.yml`
 - [x] **Foundation 层 Epic/Story 分解** — 5/5 Epic (39 Stories)
@@ -1434,10 +1442,11 @@ graph TB
 - [x] **Sprint Plan** — Sprint 001 Polish Stabilization 已创建并完成 Must/Should Have scope
 - [x] **Sprint 002 Playable Vertical Slice Recovery** — 灰盒 Hub -> Chart -> Exploration -> Return 人工可玩闭环恢复通过
 - [x] **Sprint 003 Domain-Backed Playable Slice** — C# domain managers / canonical persistence / 最低灰盒表现 / 自动 smoke evidence / 人工 QA sign-off 已完成；Production → Polish gate PASS WITH CONDITIONS
+- [ ] **#19/#20 双审与 ADR/TR 决策** — 完整场景构成与场景单位物理设计需要 Codex review + 用户 review 后再作为 release/implementation gate
 
 ---
 
-> **更新于 2026-05-23** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；Polish Story 001-013 已完成 runtime hardening、Exploration semantics、authored content slice、validation/migration guards、spatial prototype、cross-launch persistence、save-slot trust、Hub room greybox polish、backup/quarantine UX、delete/overwrite prompts、automated long-session soak 与 human release triage。Story 013 人工 QA 为 PASS WITH CONDITIONS：稳定性与持久化可信，但 Hub/Exploration 缺少可读场景身份，探索玩法过于点击 UI。下一步是 Story 014 playable-space readability and movement-driven interaction，然后再判断是否进入 formal release checklist/gate。
+> **更新于 2026-05-24** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；Polish Story 001-013 已完成 runtime hardening、Exploration semantics、authored content slice、validation/migration guards、spatial prototype、cross-launch persistence、save-slot trust、Hub room greybox polish、backup/quarantine UX、delete/overwrite prompts、automated long-session soak 与 human release triage。Story 013 人工 QA 为 PASS WITH CONDITIONS：稳定性与持久化可信，但 Hub/Exploration 缺少可读场景身份，探索玩法过于点击 UI。新增 #19/#20 后，“在有物理的世界中探索”成为底层玩法契约；下一步是双审场景构成与场景单位物理规范，再决定是否拆分 ADR/TR、Epic/Story 或 release gate。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

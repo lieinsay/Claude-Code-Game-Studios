@@ -1,7 +1,7 @@
 # Architecture Traceability Index
 
 > **Status**: Active
-> **Last Updated**: 2026-05-14
+> **Last Updated**: 2026-05-24
 > **Purpose**: 追踪每个 ADR → TR → GDD → Code 的完整链路。由 `/architecture-review` 审计覆盖率。
 
 ---
@@ -14,9 +14,11 @@
 | Core | #5-#9 | ADR-0007~0012 | 15 | 15 | 0 | 0 | 100% |
 | Feature | #10-#15 | ADR-0010, ADR-0011, ADR-0013, ADR-0014, ADR-0015, ADR-0018 | 18 | 18 | 0 | 0 | 100% |
 | Presentation | #16-#17 | ADR-0012 | 6 | 4 | 2 | 0 | 66.7% |
-| **Total** | **18 systems** | **16 ADRs** | **54** | **54** | **0** | **0** | **100%** |
+| Design Gates | #19-#20 | Pending ADR decision | 0 | 0 | 0 | 0 | N/A |
+| **Total** | **20 systems (18 ADR-covered + 2 design-gate)** | **16 ADRs** | **54** | **54** | **0** | **0** | **100% for registered TRs** |
 
 > **Note**: ADR-0016 and ADR-0017 are now Accepted. Zero TR gaps — all 54 TRs now have ADR coverage paths.
+> **Design Gate Note**: #19 Scene Composition and #20 Scene Physics Unit Design are In Design GDDs. They define the bottom-layer "physical world exploration" contract and require a future ADR/TR expansion only when implementation scope moves beyond existing Movement, Exploration, Interaction, and Presentation contracts.
 
 ---
 
@@ -63,6 +65,13 @@
 | ADR-0012 | #16 UI/HUD | `ui-hud-chart-interface.md` | TR-ui-001, TR-ui-002, TR-ui-003, TR-ui-004 | `src/presentation/UIManager.cs` + `tests/unit/ui-hud-interface/*Test.csproj` (Stories 001-003 PASS; Stories 004-006 pending) | Accepted + partial implemented |
 | ADR-0016 | #17 Feedback/VFX/Audio | `feedback-fx-audio.md` | TR-feedback-001, TR-feedback-002 | pending | **Accepted** |
 
+### Design Gate Layer
+
+| ADR | System | GDD | TR IDs | Implementation | Status |
+|-----|--------|-----|--------|---------------|--------|
+| — | #19 Scene Composition | `scene-composition-system.md` | — | pending | In Design; consumes #20 |
+| — | #20 Scene Physics Unit Design | `scene-physics-unit-system.md` | — | pending | In Design; defines Scene Physics Contract |
+
 ---
 
 ## GDD → ADR Reverse Index
@@ -89,6 +98,8 @@ For designers: given a GDD, which ADRs govern its implementation?
 | UI/HUD | #16 | ADR-0012 | ADR-0002 |
 | Feedback/VFX/Audio | #17 | ADR-0016 | ADR-0002 |
 | Onboarding | #18 | ADR-0017 | ADR-0008 |
+| Scene Composition | #19 | — | ADR-0001, ADR-0004, ADR-0012, ADR-0013 |
+| Scene Physics Unit Design | #20 | — | ADR-0001, ADR-0004, ADR-0012, ADR-0013 |
 
 ---
 
@@ -137,7 +148,8 @@ Presentation (2 Accepted)
 
 | Gap | System | Impact |
 |-----|--------|--------|
-| — | — | No non-critical ADR gaps remaining; #17/#18 implementation stories remain future work |
+| #19 | Scene Composition | No ADR/TR yet; design-gate GDD depends on #20 and should trigger ADR only when implementation expands scene authoring/runtime contracts |
+| #20 | Scene Physics Unit Design | No ADR/TR yet; foundation physics contract for physical-world exploration, movement, collision, occlusion, scale, and special surfaces |
 
 ### Partial Coverage
 
@@ -167,4 +179,5 @@ Presentation (2 Accepted)
 - [ ] Zero Foundation layer gaps (100% coverage achieved)
 - [ ] All Core layer TRs have ADR coverage (100% achieved)
 - [x] Vertical Slice ADR acceptance and implementation trigger schedule documented
-- [ ] TR Registry has 54 active entries across 18 systems
+- [ ] TR Registry has 54 active entries across 18 ADR-covered systems
+- [ ] #19/#20 design-gate GDDs reviewed before ADR/TR expansion

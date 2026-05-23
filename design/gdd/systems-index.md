@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-26
-> **Last Updated**: 2026-05-15
+> **Last Updated**: 2026-05-24
 > **Source Concept**: `design/gdd/game-concept.md`
 > **Art Bible**: `design/art/art-bible.md`
 > **Review Mode**: Full
@@ -82,7 +82,7 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 8 | 飞艇模块与船体状态 | Gameplay | MVP | Approved | `design/gdd/airship-modules-hull-state.md` | 飞艇家园 Hub; 资源、货物与容量; 本地存档与世界状态持久化 |
 | 9 | 航图与航线规划 | Gameplay | MVP | Approved | `design/gdd/chart-route-planning.md` | 内容数据与状态注册表; 本地存档与世界状态持久化; 玩家知识与情报; 飞艇家园 Hub |
 | 10 | 航行与路线风险 | Gameplay | MVP | Approved | `design/gdd/navigation-route-risk.md` | 航图与航线规划; 飞艇模块与船体状态; 玩家知识与情报; 飞艇家园 Hub; 资源、货物与容量 |
-| 11 | 探索 / 搜撤场景 | Gameplay | MVP | Approved | `design/gdd/exploration-scavenge-scenario.md` | 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互; 玩家知识与情报 |
+| 11 | 探索 / 搜撤场景 | Gameplay | MVP | Approved | `design/gdd/exploration-scavenge-scenario.md` | 场景单位物理设计; 资源、货物与容量; 飞艇模块与船体状态; 航行与路线风险; 玩家移动与交互; 玩家知识与情报 |
 | 12 | 战斗与威胁处理 | Gameplay | MVP | Approved | `design/gdd/combat-threat-handling.md` | 探索 / 搜撤场景; 飞艇模块与船体状态; 资源、货物与容量 |
 | 13 | 世界修复与解锁 | Progression | MVP | Approved | `design/gdd/world-repair-unlock.md` | 资源、货物与容量; 玩家知识与情报; 本地存档与世界状态持久化; 航图与航线规划 |
 | 14 | 空港 / 村镇状态与集市交易 | World / Economy | MVP | Approved | `design/gdd/port-village-market.md` | 世界修复与解锁; 资源、货物与容量; 玩家移动与交互; 本地存档与世界状态持久化 |
@@ -90,6 +90,8 @@ This tier preserves the product identity better than cutting the walkable airshi
 | 16 | UI / HUD / 航图界面 | UI | MVP | Designed | `design/gdd/ui-hud-chart-interface.md` | 航图与航线规划; 飞艇模块与船体状态; 资源、货物与容量; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易 |
 | 17 | 反馈、特效与音频语义 | Audio / Presentation | Vertical Slice | Approved | `design/gdd/feedback-fx-audio.md` | 航行与路线风险; 探索 / 搜撤场景; 战斗与威胁处理; 世界修复与解锁; UI / HUD / 航图界面 |
 | 18 | 新手引导与首轮闭环 | Meta | Vertical Slice | Approved | `design/gdd/onboarding-first-loop.md` | 飞艇家园 Hub; 航图与航线规划; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面 |
+| 19 | 完整场景构成与验收 | Production / Scene Design | Polish Gate | In Design | `design/gdd/scene-composition-system.md` | 场景单位物理设计; 飞艇家园 Hub; 探索 / 搜撤场景; 世界修复与解锁; 空港 / 村镇状态与集市交易; UI / HUD / 航图界面; 反馈、特效与音频语义; 新手引导与首轮闭环 |
+| 20 | 场景单位物理设计 | Gameplay / Scene Physics | MVP Foundation | In Design | `design/gdd/scene-physics-unit-system.md` | 玩家移动与交互; 飞艇家园 Hub; 探索 / 搜撤场景; 空港 / 村镇状态与集市交易; 世界修复与解锁 |
 
 ---
 
@@ -115,7 +117,7 @@ Scope boundary: persistence serializes and restores domain-owned state; it must 
 
 Movement, reachability, collision/reach checks, interaction focus, and the Use entry point for airship, settlement, market stall, and exploration interactions.
 
-Scope boundary: concrete consequences such as buying, harvesting, repairing, or installing modules belong to the owning domain system.
+Scope boundary: concrete consequences such as buying, harvesting, repairing, or installing modules belong to the owning domain system. Scene unit physics such as horizontal/vertical scene type, collision semantics, unit scale, occlusion, special surfaces, and dynamic physical behaviors belong to #20; movement consumes those contracts.
 
 ### 5. 资源、货物与容量
 
@@ -153,7 +155,7 @@ GDD: `design/gdd/navigation-route-risk.md` — CD-GDD-ALIGN (full): APPROVE WITH
 
 ### 11. 探索 / 搜撤场景
 
-Exploration-point scene consuming `EncounterContext` from #10: 4-zone radial template (云观站废墟, 50×35 units), 4-phase session (ARRIVING→EXPLORING→EXTRACTING→DEPARTED), 6 search points with free-search rule (empty results don't consume attempts), 2 intel points, 2+ threat points (environmental handled by #11, guard delegated to #12), 1 extraction anchor (player-judged, no timer). Scout efficiency η_scout maps to 3-tier threat preview (none/presence/full). 3 state variants: unlooted → looted → danger-changed. 6 formulas (search_yield, threat_trigger, scout_preview_level, extraction_loss_settlement, state_variant_transition, intel_yield). Extraction loss via λ_success/λ_forced with Unique item protection (Pillar 4). Pool 5 preserves pre-exploration contents.
+Exploration-point scene consuming `EncounterContext` from #10: 4-zone radial template (云观站废墟, 50×35 units), 4-phase session (ARRIVING→EXPLORING→EXTRACTING→DEPARTED), 6 search points with free-search rule (empty results don't consume attempts), 2 intel points, 2+ threat points (environmental handled by #11, guard delegated to #12), 1 extraction anchor (player-judged, no timer). Scout efficiency η_scout maps to 3-tier threat preview (none/presence/full). 3 state variants: unlooted → looted → danger-changed. 6 formulas (search_yield, threat_trigger, scout_preview_level, extraction_loss_settlement, state_variant_transition, intel_yield). Extraction loss via λ_success/λ_forced with Unique item protection (Pillar 4). Pool 5 preserves pre-exploration contents. Exploration now treats authored physical world exploration as bottom-layer play: paths, obstacles, pushables, special surfaces, shadows/height cues, and dynamic physical behavior are governed by #20.
 
 GDD: `design/gdd/exploration-scavenge-scenario.md` — full-mode 8-agent adversarial review (×2). Revision 2 applied (2026-05-03): 5 blockers resolved (F-11-04 atomicity, build_threat_context env guard, F-11-01 empty pool guard, registry sync, 4 GM commands) + R1 knowledge-gated descriptions. 8/8 required + Visual/Audio + UI + Test Tools sections, 6 formulas, 21 edge cases, 13 tuning knobs, 26 ACs, 6 open questions. APPROVED.
 
@@ -214,6 +216,22 @@ Scope boundary: MVP may validate this manually; vertical slice formalizes onboar
 MVP owner note: this system is not the only owner of the first loop. MVP GDDs for Hub, Route Map, Exploration, World Repair, Settlement/Market, and UI must each include their part of the first-loop handoff.
 
 GDD: `design/gdd/onboarding-first-loop.md` - approved 2026-05-15. ADR-0017 accepted 2026-05-15.
+
+### 19. 完整场景构成与验收
+
+Cross-system scene composition standard for every enterable scene. Defines the required bridge from design to implementation to QA: scene purpose, spatial layout, player behavior, scene physics contract, state variants, visual/audio assets, technical contracts, smoke evidence, and human readability review. It prevents a scene from being treated as complete merely because runtime nodes exist or UI text describes it.
+
+Scope boundary: this system does not own gameplay rules, resources, repair, market, exploration, feedback, persistence, or UI state. It owns the scene-completeness gate and the dual review requirement: Codex review plus user review before release-readiness claims.
+
+GDD: `design/gdd/scene-composition-system.md` - in design 2026-05-24.
+
+### 20. 场景单位物理设计
+
+Scene unit physics standard for authored 2D spaces. Defines horizontal vs vertical scene physics types, movement planes, collision semantics, occlusion/layering, unit scale, special surfaces, dynamic physical behavior tags, behavior conflict priority, and recovery rules for stuck or misleading physical states.
+
+Scope boundary: this system does not own player input, interaction focus, resource rules, exploration rewards, market logic, or repair outcomes. It owns how scene units occupy space and communicate physical behavior. `完整场景构成与验收` consumes this system as its Scene Physics Contract gate.
+
+GDD: `design/gdd/scene-physics-unit-system.md` - in design 2026-05-24.
 
 ---
 
@@ -320,6 +338,8 @@ Potential cycles and resolutions:
 | 世界修复与解锁 | Design | If feedback is weak, the core fantasy fails. | MVP includes 1 permanent repair outcome with visible route/settlement change. |
 | 空港 / 村镇状态与集市交易 | Scope / Design | Market can become a full economy. | MVP uses walk-up stall purchase plus fixed or repair-flag-driven stock changes. |
 | UI / HUD / 航图界面 | UX | Too much state can overwhelm desktop UI clarity. | Prioritize route, cargo, risk, repair, and market purchase clarity. |
+| 完整场景构成与验收 | Production / UX | Can become paper process if it is not tied to runtime evidence and user review. | Require smoke evidence, screenshots, asset traceability, and explicit user review before scene acceptance. |
+| 场景单位物理设计 | Gameplay / Scene Physics | Can become an uncontrolled physics sandbox or cause unreadable collision behavior. | Keep physics tags explicit, require conflict priority, and require recovery paths for stuck states. |
 
 ---
 
@@ -345,6 +365,8 @@ Potential cycles and resolutions:
 | 16 | UI / HUD / 航图界面 | MVP | Presentation | ux-designer, ui-programmer | L |
 | 17 | 反馈、特效与音频语义 | Vertical Slice | Presentation | art-director, audio-director, technical-artist | M |
 | 18 | 新手引导与首轮闭环 | Vertical Slice | Polish / Meta | ux-designer, game-designer, qa-tester | M |
+| 19 | 完整场景构成与验收 | Polish Gate | Production / Scene Design | level-designer, ux-designer, qa-tester, technical-director | M |
+| 20 | 场景单位物理设计 | MVP Foundation | Gameplay / Scene Physics | level-designer, gameplay-programmer, qa-tester, technical-director | M |
 
 Effort estimates: S = 1 focused design session; M = 2-3 sessions; L = 4+ sessions.
 
@@ -371,12 +393,12 @@ The MVP version of each system must stay within these bounds:
 
 | Metric | Count |
 |---|---:|
-| Total systems identified | 18 |
-| Design docs started | 18 |
+| Total systems identified | 20 |
+| Design docs started | 20 |
 | Design docs reviewed | 18 |
 | Design docs approved | 18 |
-| Design docs needing revision | 0 |
-| MVP systems designed | 16 / 16 |
+| Design docs needing revision | 2 |
+| MVP systems designed | 16 / 17 |
 | Vertical Slice systems designed | 2 / 2 |
 
 ---
@@ -396,5 +418,7 @@ The MVP version of each system must stay within these bounds:
 - [x] Design #18 新手引导与首轮闭环 — COMPLETE 2026-05-15.
 - [x] Design-review #18 新手引导与首轮闭环 — APPROVED 2026-05-15.
 - [x] Accept ADR-0017 新手引导与首轮闭环 — ACCEPTED 2026-05-15.
+- [ ] Review #19 完整场景构成与验收 with Codex and user before using it as a release gate.
+- [ ] Review and approve #20 场景单位物理设计 as an MVP Foundation retrofit before using physical world exploration as a bottom-layer gameplay contract.
 - [ ] Run `/gate-check technical-setup` when Systems Design artifacts are complete.
 - [ ] Prototype the highest-risk loop: `Hub -> 航图 -> 探索 -> 返回 -> 修复 -> 存档恢复`.

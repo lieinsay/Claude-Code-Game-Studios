@@ -30,6 +30,8 @@ rule, see the referenced ADR.
 - **Domain systems export state via `SnapshotPackage` with typed fields** — Persistence orchestrates but never interprets domain payload. Source: ADR-0003
 - **`settings` and `progress` artifacts must be independent** — each with own manifest, generation, checksum, and backup. One corrupt artifact must not block the other. Source: ADR-0003
 - **All interactable objects must inherit the C# `Interactable` base class and implement `HandleUse()`** — returning `UseResult` enum (ACCEPTED / REJECTED / BUSY). Source: ADR-0004, ADR-0019
+- **Every enterable 2D scene with gameplay-relevant physical units must provide a Scene Physics Contract before implementation readiness** — declare horizontal/vertical scene type, movement plane, collision semantics, occlusion/layering, unit scale, special surfaces, dynamic physical behavior tags, conflict priority, and recovery rules. Source: GDD #20, GDD #19
+- **Physical world exploration is a bottom-layer gameplay contract, not presentation polish** — scene obstacles, pushables, special surfaces, height/shadow cues, and dynamic physical behaviors must be authored and QA-verified when they shape pathing, search, threat, return, repair, or market interaction. Source: GDD #20, GDD #11, GDD #19
 - **InteractionRegistry manages focus state machine + candidate pool + Use Gate + dispatch** — scene interactables register/unregister themselves; Registry owns the 5-state focus machine. Source: ADR-0004
 - **Use dispatch is dual-channel**: `interaction_used` signal (fire-and-forget feedback) + `handle_use()` method call (request-response for domain logic). Source: ADR-0004
 - **Desktop-first: all new game code is C# unless an ADR grants an exception** — GDScript remains temporary prototype/migration evidence only. Source: ADR-0019
@@ -48,6 +50,7 @@ rule, see the referenced ADR.
 - **Never use `store_var()`/`get_var()` as authoritative save format** — Variant blob encoding is non-deterministic. Source: ADR-0003
 - **Never include `Node`, `Resource`, `Object`, `Callable`, or `RID` references in snapshot payload** — use String stable IDs. Source: ADR-0003
 - **Never bypass `Interactable` base class** — all interactable objects must inherit from it. Source: ADR-0004
+- **Never infer gameplay collision from art alone** — collision, pushability, soft overlap, one-way passage, special surface behavior, and dynamic physical behavior must come from the Scene Physics Contract. Source: GDD #20
 - **Never introduce browser-only lifecycle requirements for MVP desktop** — no `pagehide`, `visibilitychange`, `beforeunload`, or JavaScriptBridge lifecycle dependency. Source: ADR-0019
 - **Never treat C# files as Web export blockers in active MVP work** — Web export is superseded by desktop C# targeting. Source: ADR-0019
 

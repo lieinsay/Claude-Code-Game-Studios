@@ -141,6 +141,8 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | 16 | UI / HUD / 航图界面 | Presentation | 🔴 HIGH | 12 screens, modal stack, input routing — dual-focus system (4.6) |
 | 17 | 反馈、特效与音频语义 | Presentation | — | Semantic feedback — VFX, audio events (Vertical Slice) |
 | 18 | 新手引导与首轮闭环 | Feature | — | Cross-system flow orchestration (Vertical Slice) |
+| 19 | 完整场景构成与验收 | Production / Scene Design | — | Scene completeness gate — design to implementation to QA |
+| 20 | 场景单位物理设计 | Gameplay / Scene Physics | ⚠️ MEDIUM | Scene unit physics contract — movement planes, collision, occlusion, scale, special surfaces, dynamic behavior |
 
 ### Engine Risk Flags
 
@@ -148,6 +150,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 |--------|------|--------|---------|------------|
 | #4 Movement | ⚠️ MEDIUM | C# / Godot .NET | Abstract `InteractionHandler` base class pattern | Verify C# base class and typed signal pattern against `docs/engine-reference/godot/current-best-practices.md` and ADR-0019 |
 | #4 Movement | ⚠️ MEDIUM | Navigation | `NavigationServer2D` (4.5) | Verify 2D nav server API against `docs/engine-reference/godot/modules/navigation.md` |
+| #20 Scene Physics | ⚠️ MEDIUM | Physics / 2D | Scene unit physics contracts can drift from greybox/assets and cause unreadable collision | Require explicit Scene Physics Contract per scene, QA stuck-state recovery, and asset replacement checks |
 | #16 UI/HUD | 🔴 HIGH | UI/Control | Dual-focus system (4.6) | Verify modal stack + input routing against `docs/engine-reference/godot/modules/ui.md`; `Control.focus_mode` new behavior |
 
 ---
@@ -161,7 +164,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | **#1 Registry** | Static entity definitions, ID schemas, 12 content kinds, validation diagnostics | `query_entity(id) → Entity`, `validate_all() → [Diagnostic]` | — (foundational) | `Resource`, `FileAccess` |
 | **#2 Platform Shell** | Session lifecycle (15 states), loading screen, audio state, desktop focus/pause/quit state | `GetSessionState()`, `RequestAudioActivation()`, typed session state change signals | #3 (save for continue) | `SceneTree`, `DisplayServer`, Godot .NET lifecycle bindings |
 | **#3 Persistence** | Serialization format, save slots, migration registry, Staging→Verify→Promotion workflow | `save(slot, packages)`, `load(slot) → SnapshotData`, `migrate(data, from, to)` | #1 (schema validation), #2 (session lifecycle) | `FileAccess` (4.4+), `ConfigFile` |
-| **#4 Movement/Interaction** | Player position, movement state, InteractionRegistry, interaction focus, reachability checks | `RegisterInteractable(node, handler)`, `GetFocus()`, `UseFocused()`, typed interaction signals | #2 (input entry) | `CharacterBody2D`, ⚠️ `NavigationServer2D` (4.5), C# abstract base class, `Input` |
+| **#4 Movement/Interaction** | Player position, movement state, InteractionRegistry, interaction focus, reachability checks | `RegisterInteractable(node, handler)`, `GetFocus()`, `UseFocused()`, typed interaction signals | #2 (input entry), #20 (scene physics contract) | `CharacterBody2D`, ⚠️ `NavigationServer2D` (4.5), C# abstract base class, `Input` |
 
 ### CORE LAYER
 
@@ -178,7 +181,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | System | Owns | Exposes | Consumes | Engine APIs |
 |--------|------|---------|----------|-------------|
 | **#10 Navigation/Risk** | VoyageContext, encounter check state, dynamic hull band transitions, scout preview window, damage accumulation | `start_voyage(route_id) → VoyageContext`, `get_encounter() → EncounterContext`, voyage progress/completion signals | #9 (route_committed), #8 (hull state), #6 (hidden tags) | `Timer`, `signal` system |
-| **#11 Exploration** | 4-zone radial scene, 4-phase session state, search/intel/threat point states, extraction anchor | `start_exploration(ctx)`, `search(point_id) → SearchResult`, `extract(anchor) → ExtractionResult` | #10 (EncounterContext), #5 (resource yield), #8 (scout efficiency), #4 (movement), #6 (knowledge-gated descriptions) | `Node2D`, `Area2D`, `AnimationPlayer` |
+| **#11 Exploration** | 4-zone radial scene, 4-phase session state, search/intel/threat point states, extraction anchor | `start_exploration(ctx)`, `search(point_id) → SearchResult`, `extract(anchor) → ExtractionResult` | #10 (EncounterContext), #20 (scene physics contract), #5 (resource yield), #8 (scout efficiency), #4 (movement), #6 (knowledge-gated descriptions) | `Node2D`, `Area2D`, `AnimationPlayer` |
 | **#12 Combat** | Threat encounter state, player response choice, outcome resolution | `initiate_threat(ctx)`, `resolve_threat(response) → ThreatResult` | #11 (threat context), #8 (hull damage), #5 (response costs) | `signal` system (thin layer) |
 | **#13 Repair** | Repair node state machine, deposited counters, repair progress, unlock results | `get_repair_state()`, `deposit_materials()`, `repair_completed` signal, `visual_state_anchor` | #1 (node definitions), #5 (can/commit_deposit), #6 (knowledge + on_repair_completed trigger), #3 (persistence), #9 (route enhancement) | `signal` system, `AnimationPlayer` (ceremony) |
 | **#14 Settlement** | Settlement state, NPC activity, stall states, stock lists, purchase flow | `get_settlement_state()`, `get_stall_goods()`, `purchase()` | #13 (repair_completed → NPC/stock changes), #5 (resource exchange), #4 (interaction focus), #3 (persistence) | `Node2D`, `Area2D` |
@@ -191,6 +194,8 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 | **#16 UI/HUD** | 12 screens, modal stack, 4-layer input routing, HUD dirty-flag system, animation timing contracts, screen state machine | `push_screen(id)`, `push_modal(id)`, `update_hud(data)`, screen transition signals | #9 (chart data), #8 (module data), #5 (resource data), #11 (exploration data), #13 (repair data), #14 (settlement data) | `Control` hierarchy, 🔴 `dual-focus` (4.6), `AnimationPlayer`, `Theme`, `StyleBox` |
 | **#17 Feedback (VS)** | Semantic event subscriptions, VFX triggers, audio cue triggers | `emit_feedback(event_id, ctx)`, `register_feedback_handler(event_id, handler)` | #10, #11, #12, #13, #16 (semantic events) | `AudioStreamPlayer2D`, `CPUParticles2D`, `Tween` |
 | **#18 Onboarding (VS)** | First-loop sequence state, guidance triggers, step progression | `start_first_loop()`, `advance_step(id)` | #7, #9, #11, #13, #14, #16 (cross-system orchestration) | `Control` overlay, `AnimationPlayer` |
+| **#19 Scene Composition Gate** | Scene completeness gate: purpose, space, physics contract, behavior, state, presentation, technical contract, QA evidence | `scene_complete`, review checklist, asset traceability gate | #20, #7, #11, #13, #14, #16, #17, #18 | Design / QA artifact |
+| **#20 Scene Physics** | Scene unit physics contract: scene type, movement plane, collision, occlusion, scale, special surfaces, physical behavior, recovery | `physics_contract_complete`, unit scale ratio, behavior conflict resolution | #4, #7, #11, #13, #14 | `CharacterBody2D`, `CollisionObject2D`, `Area2D`, `StaticBody2D`, `AnimatableBody2D` |
 
 ### Engine API Risk Flags (Verified)
 
@@ -198,6 +203,7 @@ LLM training cutoff: ~May 2025 (Godot ~4.3). Project pinned: Godot 4.6.2.
 |------|--------|-----|---------|------|------------------|
 | 🔴 | All code | Godot C#/.NET project workflow and `[Signal]` delegate patterns | 4.6 | HIGH | `docs/architecture/adr-0019-desktop-csharp-platform-pivot.md` |
 | ⚠️ | #4 | `NavigationServer2D` | 4.5 | MEDIUM | `docs/engine-reference/godot/modules/navigation.md` |
+| ⚠️ | #20 | `CollisionObject2D` / `Area2D` / `AnimatableBody2D` scene physics contracts | 4.6 | MEDIUM | `design/gdd/scene-physics-unit-system.md`, `docs/engine-reference/godot/modules/physics.md` |
 | 🔴 | #16 | Dual-focus system / `Control.focus_mode` | 4.6 | HIGH | `docs/engine-reference/godot/modules/ui.md` |
 | ⚠️ | #1, #3 | `FileAccess` return types | 4.4 | LOW | `docs/engine-reference/godot/deprecated-apis.md` |
 
