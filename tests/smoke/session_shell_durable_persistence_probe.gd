@@ -28,6 +28,7 @@ func _run() -> void:
 	await process_frame
 	_expect(not bool(first_hub.call("DebugDurableProgressExists")), "durable progress file starts cleared")
 	_expect(_button_disabled(first_session, "LoadButton"), "Load button is disabled when no durable progress exists")
+	_expect(_button_disabled(first_session, "DeleteProgressButton"), "Delete button is disabled when no local progress exists")
 	_expect(_label_text(first_session, "SaveStatusLabel").contains("暂无可加载进度"), "Hub explains that no progress can be loaded")
 
 	first_hub.call("OnChartPressed")
@@ -49,6 +50,20 @@ func _run() -> void:
 	_expect(int(saved_snapshot.get("hull_integrity", 0)) == 94, "first session saves hull pressure")
 	_expect(bool(first_hub.call("DebugDurableProgressExists")), "save writes a durable progress file")
 	_expect(_label_text(first_session, "SaveStatusLabel").contains("可加载"), "Save feedback tells the player the progress can be loaded")
+	_expect(_button_disabled(first_session, "DeleteProgressButton"), "Delete button stays disabled outside Hub after local progress exists")
+
+	first_hub.call("OnSavePressed")
+	await process_frame
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("覆盖确认"), "second save asks for overwrite confirmation")
+	_expect(_button_text(first_session, "SaveButton").contains("确认覆盖"), "Save button switches to confirm overwrite wording")
+	first_hub.call("OnLoadPressed")
+	await process_frame
+	_expect(_button_text(first_session, "SaveButton").contains("保存"), "Load cancels pending overwrite confirmation")
+	first_hub.call("OnSavePressed")
+	await process_frame
+	first_hub.call("OnSavePressed")
+	await process_frame
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("保存完成"), "confirmed overwrite saves local progress")
 
 	first_session.queue_free()
 	await process_frame
@@ -90,6 +105,7 @@ func _run() -> void:
 	_expect(not bool(corrupt_hub.call("DebugDurableProgressExists")), "corrupt durable progress is removed from the active save path")
 	_expect(bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "corrupt durable progress is quarantined for diagnostics")
 	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("已隔离"), "Corrupt durable progress reports quarantine on boot")
+	_expect(not _button_disabled(corrupt_session, "DeleteProgressButton"), "Delete button is enabled for quarantined progress")
 	corrupt_hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("校验失败"), "Corrupt durable progress reports checksum failure and does not load")
@@ -101,9 +117,18 @@ func _run() -> void:
 	_expect(not _button_disabled(corrupt_session, "LoadButton"), "Load button is re-enabled after saving new progress")
 	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("可加载"), "new save feedback restores continue trust after quarantine")
 
-	corrupt_hub.call("DebugClearDurableProgress")
+	corrupt_hub.call("OnDeleteProgressPressed")
 	await process_frame
-	_expect(not bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "debug clear removes quarantined progress")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("删除确认"), "first delete asks for confirmation")
+	_expect(_button_text(corrupt_session, "DeleteProgressButton").contains("确认删除"), "Delete button switches to confirm delete wording")
+	_expect(bool(corrupt_hub.call("DebugDurableProgressExists")), "delete confirmation does not remove progress yet")
+	corrupt_hub.call("OnDeleteProgressPressed")
+	await process_frame
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("已删除本地进度"), "confirmed delete reports local progress removal")
+	_expect(not bool(corrupt_hub.call("DebugDurableProgressExists")), "confirmed delete removes active progress")
+	_expect(not bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "confirmed delete removes quarantined progress")
+	_expect(_button_disabled(corrupt_session, "LoadButton"), "Load button is disabled after confirmed delete")
+	_expect(_button_disabled(corrupt_session, "DeleteProgressButton"), "Delete button is disabled after confirmed delete")
 	corrupt_session.queue_free()
 	await process_frame
 	_finish()
@@ -135,6 +160,11 @@ func _is_panel_visible(root_node: Node, node_name: String) -> bool:
 func _button_disabled(root_node: Node, node_name: String) -> bool:
 	var button := root_node.find_child(node_name, true, false) as Button
 	return false if button == null else button.disabled
+
+
+func _button_text(root_node: Node, node_name: String) -> String:
+	var button := root_node.find_child(node_name, true, false) as Button
+	return "" if button == null else button.text
 
 
 func _expect(condition: bool, label: String) -> void:

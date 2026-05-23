@@ -44,6 +44,8 @@ func _run() -> void:
 	_expect(session.find_child("WorldInteractionLayer", true, false) != null, "World interaction layer is separate from scene art")
 	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
 	var hub := session.find_child("HubRuntime", true, false)
+	hub.call("DebugClearDurableProgress")
+	await process_frame
 	var initial_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	var initial_steps := initial_onboarding.get("steps", {}) as Dictionary
 	_expect(str(initial_steps.get("find_hub_hud", "")) == "Completed", "Onboarding completes Hub HUD visibility in runtime")
@@ -55,6 +57,8 @@ func _run() -> void:
 	_expect(_button_text(session, "ChartButton").contains("航图 / HUD"), "HUD and Chart entry is visible")
 	_expect(_button_text(session, "SaveButton").contains("保存"), "Save entry is visible")
 	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
+	_expect(_button_text(session, "DeleteProgressButton").contains("删除"), "Delete local progress entry is visible")
+	_expect(_button_disabled(session, "DeleteProgressButton"), "Delete local progress starts disabled with no save")
 
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub has an authored greybox deck floor")
 	_expect(hub.call("DebugNodeVisible", "HubIslandWalkBoundary"), "Hub has a walkable island boundary")
@@ -106,6 +110,7 @@ func _run() -> void:
 	hub.call("OnSavePressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("保存完成"), "Save action gives visible success feedback")
+	_expect(not _button_disabled(session, "DeleteProgressButton"), "Delete local progress enables after save")
 
 	hub.call("OnLoadPressed")
 	await process_frame
@@ -123,9 +128,11 @@ func _run() -> void:
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "LoadButton"), "Load entry is disabled while Chart panel is open")
+	_expect(_button_disabled(session, "DeleteProgressButton"), "Delete entry is disabled while Chart panel is open")
 	_expect(_button_focus_mode(session, "ChartButton") == Control.FOCUS_NONE, "Chart entry leaves focus chain while Chart panel is open")
 	_expect(_button_focus_mode(session, "SaveButton") == Control.FOCUS_NONE, "Save entry leaves focus chain while Chart panel is open")
 	_expect(_button_focus_mode(session, "LoadButton") == Control.FOCUS_NONE, "Load entry leaves focus chain while Chart panel is open")
+	_expect(_button_focus_mode(session, "DeleteProgressButton") == Control.FOCUS_NONE, "Delete entry leaves focus chain while Chart panel is open")
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
@@ -207,6 +214,9 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration semantic threat zone appears after pressure")
 	_expect(_label_text(session, "ExplorationThreatSemanticLabel").contains("中威胁"), "Exploration threat semantic label follows manager threat text")
 
+	hub.call("OnSavePressed")
+	await process_frame
+	_expect(_label_text(session, "SaveStatusLabel").contains("覆盖确认"), "Exploration save asks before overwriting local progress")
 	hub.call("OnSavePressed")
 	await process_frame
 	var saved_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary

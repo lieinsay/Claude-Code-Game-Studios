@@ -56,13 +56,16 @@ public partial class HubRuntime : Node2D
 	private Label? saveStatusLabel;
 	private Label? runtimeHintLabel;
 	private Label? footerLabel;
-	private readonly Button?[] hubActionButtons = new Button?[3];
+	private Button? deleteProgressButton;
+	private readonly Button?[] hubActionButtons = new Button?[4];
 	private string selectedRoute = "";
 	private string currentScreen = "hub";
 	private int explorationStep;
 	private Vector2 playerPosition = HubPlayerStart;
 	private string nearestInteraction = "";
 	private bool hasLoadableProgress;
+	private bool pendingOverwriteConfirmation;
+	private bool pendingDeleteConfirmation;
 	private string lastDurableImportFailure = "";
 
 	public override void _Ready()
@@ -239,6 +242,17 @@ public partial class HubRuntime : Node2D
 
 	public void OnSavePressed()
 	{
+		if (Godot.FileAccess.FileExists(DurableProgressPath) && !pendingOverwriteConfirmation)
+		{
+			pendingOverwriteConfirmation = true;
+			pendingDeleteConfirmation = false;
+			SetSaveStatus("覆盖确认：再次点击保存将覆盖当前本地进度。");
+			RefreshSaveDeleteAffordance();
+			return;
+		}
+
+		pendingOverwriteConfirmation = false;
+		pendingDeleteConfirmation = false;
 		onboarding.ObserveSaveLoadAwareness(visibleOrUsed: true, ownerStateAlreadyMutated: true);
 		var result = domain.SaveSceneState(new PlayableSliceSceneState(
 			currentScreen,
@@ -260,18 +274,20 @@ public partial class HubRuntime : Node2D
 		SetSaveStatus(durableSaved
 			? $"保存完成：本地进度 gen {result.Generation} 可加载"
 			: $"保存完成：canonical progress gen {result.Generation} / 本地写入失败 {durableReason}");
-		RefreshLoadAffordance();
+		RefreshSaveDeleteAffordance();
 		UpdateOnboardingHint();
 	}
 
 	public void OnLoadPressed()
 	{
+		pendingOverwriteConfirmation = false;
+		pendingDeleteConfirmation = false;
 		if (!Godot.FileAccess.FileExists(DurableProgressPath) && Godot.FileAccess.FileExists(QuarantinedProgressPath))
 		{
 			hasLoadableProgress = false;
 			lastDurableImportFailure = "存档校验失败，已隔离；可重新保存新进度。";
 			SetSaveStatus($"本地存档不可用：{lastDurableImportFailure}");
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return;
 		}
 
@@ -281,7 +297,7 @@ public partial class HubRuntime : Node2D
 			SetSaveStatus(string.IsNullOrWhiteSpace(lastDurableImportFailure)
 				? "暂无可加载进度：请先保存。"
 				: $"本地存档不可用：{lastDurableImportFailure}");
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return;
 		}
 
@@ -289,7 +305,7 @@ public partial class HubRuntime : Node2D
 		if (!result.Success)
 		{
 			SetSaveStatus($"加载失败：{result.Reason}");
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return;
 		}
 
@@ -319,8 +335,41 @@ public partial class HubRuntime : Node2D
 		{
 			ShowHub();
 		}
-		RefreshLoadAffordance();
+		RefreshSaveDeleteAffordance();
 		UpdateOnboardingHint();
+	}
+
+	/// <summary>Handles the two-step delete confirmation for local durable progress.</summary>
+	public void OnDeleteProgressPressed()
+	{
+		var hasAnyLocalProgress = Godot.FileAccess.FileExists(DurableProgressPath) || Godot.FileAccess.FileExists(QuarantinedProgressPath);
+		if (!hasAnyLocalProgress)
+		{
+			pendingOverwriteConfirmation = false;
+			pendingDeleteConfirmation = false;
+			SetSaveStatus("没有可删除的本地进度。");
+			RefreshSaveDeleteAffordance();
+			return;
+		}
+
+		if (!pendingDeleteConfirmation)
+		{
+			pendingOverwriteConfirmation = false;
+			pendingDeleteConfirmation = true;
+			SetSaveStatus("删除确认：再次点击删除将移除本地进度与隔离副本。");
+			RefreshSaveDeleteAffordance();
+			return;
+		}
+
+		using var directory = DirAccess.Open("user://");
+		directory?.Remove(DurableProgressFileName);
+		directory?.Remove(QuarantinedProgressFileName);
+		hasLoadableProgress = false;
+		lastDurableImportFailure = "";
+		pendingOverwriteConfirmation = false;
+		pendingDeleteConfirmation = false;
+		SetSaveStatus("已删除本地进度：保存后可再次加载。");
+		RefreshSaveDeleteAffordance();
 	}
 
 	public void ShowHub()
@@ -408,8 +457,10 @@ public partial class HubRuntime : Node2D
 			directory?.Remove(QuarantinedProgressFileName);
 			hasLoadableProgress = false;
 			lastDurableImportFailure = "";
+			pendingOverwriteConfirmation = false;
+			pendingDeleteConfirmation = false;
 			SetSaveStatus("暂无可加载进度：保存后可加载。");
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return;
 		}
 
@@ -417,8 +468,10 @@ public partial class HubRuntime : Node2D
 		directory?.Remove(QuarantinedProgressFileName);
 		hasLoadableProgress = false;
 		lastDurableImportFailure = "";
+		pendingOverwriteConfirmation = false;
+		pendingDeleteConfirmation = false;
 		SetSaveStatus("暂无可加载进度：保存后可加载。");
-		RefreshLoadAffordance();
+		RefreshSaveDeleteAffordance();
 	}
 
 	public void DebugWriteCorruptDurableProgress()
@@ -427,7 +480,9 @@ public partial class HubRuntime : Node2D
 		file?.StoreString("{\"generation\":1,\"domains\":{},\"_checksum\":\"not-a-valid-checksum\"}");
 		hasLoadableProgress = false;
 		lastDurableImportFailure = "";
-		RefreshLoadAffordance();
+		pendingOverwriteConfirmation = false;
+		pendingDeleteConfirmation = false;
+		RefreshSaveDeleteAffordance();
 	}
 
 	public Godot.Collections.Dictionary DebugDomainSnapshot()
@@ -524,6 +579,8 @@ public partial class HubRuntime : Node2D
 		hubActionButtons[0] = FindChild("ChartButton", true, false) as Button;
 		hubActionButtons[1] = FindChild("SaveButton", true, false) as Button;
 		hubActionButtons[2] = FindChild("LoadButton", true, false) as Button;
+		deleteProgressButton = CreateDeleteProgressButton();
+		hubActionButtons[3] = deleteProgressButton;
 	}
 
 	private void CreatePlayableLayer()
@@ -722,6 +779,7 @@ public partial class HubRuntime : Node2D
 		WireButton("ChartButton", OnChartPressed);
 		WireButton("SaveButton", OnSavePressed);
 		WireButton("LoadButton", OnLoadPressed);
+		WireButton("DeleteProgressButton", OnDeleteProgressPressed);
 		WireButton("RouteMistButton", OnRouteMistPressed);
 		WireButton("RouteMarketButton", OnRouteMarketPressed);
 		WireButton("DepartButton", OnDepartPressed);
@@ -982,10 +1040,15 @@ public partial class HubRuntime : Node2D
 			if (button is not null)
 			{
 				var buttonEnabled = enabled && (index != 2 || hasLoadableProgress);
+				if (index == 3)
+				{
+					buttonEnabled = enabled && HasAnyDurableProgressFile();
+				}
 				button.Disabled = !buttonEnabled;
 				button.FocusMode = buttonEnabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
 			}
 		}
+		RefreshSaveDeleteAffordance();
 	}
 
 	private void SetWorldMode(string mode)
@@ -1148,6 +1211,32 @@ public partial class HubRuntime : Node2D
 
 	private static bool IsVisible(CanvasItem? item) => item is not null && item.Visible;
 
+	private Button? CreateDeleteProgressButton()
+	{
+		if (FindChild("DeleteProgressButton", true, false) is Button existing)
+		{
+			return existing;
+		}
+		if (FindChild("ActionStack", true, false) is not VBoxContainer actionStack)
+		{
+			return null;
+		}
+
+		var button = new Button
+		{
+			Name = "DeleteProgressButton",
+			Text = "删除本地进度",
+			FocusMode = Control.FocusModeEnum.All,
+			Disabled = true,
+		};
+		actionStack.AddChild(button);
+		if (saveStatusLabel is not null)
+		{
+			actionStack.MoveChild(button, saveStatusLabel.GetIndex());
+		}
+		return button;
+	}
+
 	private static void OnButtonMouseEntered(Button button)
 	{
 		if (button.Visible && !button.Disabled)
@@ -1191,7 +1280,7 @@ public partial class HubRuntime : Node2D
 					? "暂无可加载进度：保存后可加载。"
 					: $"本地存档已隔离：{lastDurableImportFailure}");
 			}
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return false;
 		}
 
@@ -1206,7 +1295,7 @@ public partial class HubRuntime : Node2D
 				{
 					SetSaveStatus($"本地存档读取失败：{lastDurableImportFailure}");
 				}
-				RefreshLoadAffordance();
+				RefreshSaveDeleteAffordance();
 				return false;
 			}
 
@@ -1221,7 +1310,7 @@ public partial class HubRuntime : Node2D
 			{
 				SetSaveStatus("本地耐久存档已导入，可加载 canonical progress。");
 			}
-			RefreshLoadAffordance();
+			RefreshSaveDeleteAffordance();
 			return true;
 		}
 
@@ -1234,7 +1323,7 @@ public partial class HubRuntime : Node2D
 		{
 			SetSaveStatus($"本地存档导入失败：{lastDurableImportFailure}");
 		}
-		RefreshLoadAffordance();
+		RefreshSaveDeleteAffordance();
 		return false;
 	}
 
@@ -1254,12 +1343,26 @@ public partial class HubRuntime : Node2D
 		directory?.Remove(DurableProgressFileName);
 	}
 
-	private void RefreshLoadAffordance()
+	private bool HasAnyDurableProgressFile() =>
+		Godot.FileAccess.FileExists(DurableProgressPath) || Godot.FileAccess.FileExists(QuarantinedProgressPath);
+
+	private void RefreshSaveDeleteAffordance()
 	{
 		if (hubActionButtons[2] is Button loadButton && currentScreen == "hub")
 		{
 			loadButton.Disabled = !hasLoadableProgress;
 			loadButton.FocusMode = hasLoadableProgress ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+		}
+		if (hubActionButtons[1] is Button saveButton)
+		{
+			saveButton.Text = pendingOverwriteConfirmation ? "确认覆盖本地进度" : "保存  Ctrl+S";
+		}
+		if (deleteProgressButton is not null)
+		{
+			var enabled = currentScreen == "hub" && HasAnyDurableProgressFile();
+			deleteProgressButton.Disabled = !enabled;
+			deleteProgressButton.FocusMode = enabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+			deleteProgressButton.Text = pendingDeleteConfirmation ? "确认删除本地进度" : "删除本地进度";
 		}
 	}
 

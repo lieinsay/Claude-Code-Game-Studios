@@ -3,8 +3,26 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 010 backup/quarantine UX complete; next options are delete/overwrite prompts, room art/audio pass, or longer Polish QA
+Task: Polish Story 012 automated long-session save/load soak complete; next options are human long-session QA, room art/audio pass, or release-readiness scoping
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 012 Long-Session Save / Load Soak Complete 2026-05-23
+- Story complete: `production/polish-backlog/story-polish-012-long-session-save-load-soak.md` -- Long-Session Save / Load Soak.
+- Input was the remaining repeated-use risk after Story 011: save/load trust needed automated evidence across multiple route/search/return cycles.
+- Added `tests/smoke/session_shell_long_session_probe.gd`, a bounded headless soak probe.
+- The probe runs three Hub -> Chart -> Exploration -> pressure -> Save -> Load -> Return cycles and confirms overwrite prompts when required.
+- The probe verifies persistence generation advancement, canonical load status, returned reward stability, Hub Load/Delete availability, and final latest-state load.
+- Evidence: `production/qa/evidence/polish-012-long-session-save-load-soak-evidence.md`.
+- Remaining scope is not a blocker: human long-session QA, final windowed QA, release gate checklist, named save slots, full save-management UI, and final art/audio treatment remain downstream.
+
+## Session Extract -- Polish Story 011 Delete / Overwrite Prompts Complete 2026-05-23
+- Story complete: `production/polish-backlog/story-polish-011-delete-overwrite-prompts.md` -- Delete / Overwrite Prompts.
+- Input was the next save-trust gap after Story 010: players needed protection against accidental overwrite and delete actions.
+- `HubRuntime` now creates a Hub-only `DeleteProgressButton` at runtime beside the existing Save/Load actions.
+- Saving over an existing durable progress file now requires a second Save press; Load cancels pending overwrite confirmation.
+- Deleting local progress now requires a second Delete press and removes both active durable progress and the quarantine copy.
+- Evidence: `production/qa/evidence/polish-011-delete-overwrite-prompts-evidence.md`.
+- Remaining scope is not a blocker: final save-slot browser, named saves, backup selection UI, long-session QA, room art/audio treatment, and Release readiness remain downstream.
 
 ## Session Extract -- Polish Story 009 Hub Room Interior Greybox Polish Complete 2026-05-23
 - Story complete: `production/polish-backlog/story-polish-009-hub-room-interior-greybox-polish.md` -- Hub Room Interior Greybox Polish.
