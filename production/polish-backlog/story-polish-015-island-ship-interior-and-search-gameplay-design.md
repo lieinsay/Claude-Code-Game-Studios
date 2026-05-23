@@ -1,7 +1,7 @@
 # Polish Story 015: Island / Ship Interior and Search Gameplay Design
 
 > **Phase**: Polish
-> **Status**: Implemented -- Awaiting Human QA
+> **Status**: Fix Candidate -- Awaiting Human QA Rerun
 > **Layer**: Scene Structure / Gameplay Design / Godot Runtime Presentation
 > **Type**: Blocking Design + Implementation Story
 > **Estimate**: L / 2-3 days
@@ -100,7 +100,7 @@ with actual choices or timing, and a return flow that expresses ship movement.
 - Design note: `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`
 - Evidence file: `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`
 - Human QA checklist: `production/playtests/playtest-checklist-polish-015-island-ship-search-gameplay-2026-05-23.md`
-- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false`: PASS with 5 existing warnings / 0 errors.
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false`: PASS with existing warnings / 0 errors.
 - `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd`: PASS.
 - `godot --headless --path . -s tests/smoke/session_shell_durable_persistence_probe.gd`: PASS.
 - `godot --headless --path . -s tests/smoke/session_shell_long_session_probe.gd`: PASS.
@@ -113,6 +113,38 @@ search micro-game, return preheat/piloting flow, save/load, long-session, and
 performance paths are technically healthy. Human QA must still decide whether
 the scene now reads as the intended island + ship fantasy and whether the
 search/return loops are sufficiently playable for the release-readiness blocker.
+
+## Human QA Rerun 1 -- 2026-05-24
+
+- Verdict: BLOCKED.
+- Tester: liein.
+- Build/commit: `80cf299`.
+- Result: launch passed, but Hub did not read as an island/dock; boarding and
+  ship interior appeared text-only; cockpit/helm, cargo/storage, and
+  engine/module spaces could not be distinguished; all downstream checks were
+  blocked.
+- Bug filed: `production/qa/bugs/BUG-003-polish-015-world-scene-hidden-by-text-dashboard.md`.
+
+## BUG-003 Fix Candidate -- 2026-05-24
+
+- `HubRuntime` now renders the playable scene layer above the text dashboard
+  instead of allowing the HUD panel to dominate the viewport.
+- Added large island, dock, ship hull, airship envelope, and sea/sky silhouettes
+  to the Hub exterior.
+- Added large hull outline plus cockpit, cargo, and engine bay zones to the ship
+  interior.
+- Added large Exploration island, pier, return ship, and search/return landmark
+  silhouettes.
+- Visual smoke now asserts world-layer z-order and main-viewport scene area, not
+  only node existence.
+- Windowed screenshot evidence:
+  `production/qa/evidence/polish-015-fix-final-hub-probe.png` and
+  `production/qa/evidence/polish-015-fix-exploration-semantics-probe.png`.
+- Durable persistence, long-session, and perf smoke were rerun after the fix
+  candidate and passed.
+
+This is not a release-readiness pass. The focused Polish 015 checklist still
+needs a human rerun.
 
 ## Release Triage Rule
 

@@ -42,6 +42,7 @@ func _run() -> void:
 	_expect(session.find_child("PlayerMarker", true, false) != null, "Playable player marker is mounted")
 	_expect(session.find_child("WorldSceneLayer", true, false) != null, "World scene layer is separate from interaction markers")
 	_expect(session.find_child("WorldInteractionLayer", true, false) != null, "World interaction layer is separate from scene art")
+	_expect(_canvas_z_index(session, "PlayableVerticalSliceLayer") >= 12, "Playable world layer renders above the text dashboard")
 	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
 	var hub := session.find_child("HubRuntime", true, false)
 	hub.call("DebugClearDurableProgress")
@@ -62,6 +63,11 @@ func _run() -> void:
 
 	_expect(hub.call("DebugNodeVisible", "HubIslandWalkBoundary"), "Hub has a walkable island boundary")
 	_expect(hub.call("DebugHubSpace") == "exterior", "Hub starts on the island dock exterior")
+	_expect(hub.call("DebugNodeVisible", "HubPlayableSkyBackdrop"), "Hub exterior has a large visible sky backdrop")
+	_expect(hub.call("DebugNodeVisible", "HubIslandMainMass"), "Hub exterior has a large island mass")
+	_expect(hub.call("DebugNodeVisible", "HubDockedShipHullSilhouette"), "Hub exterior has a readable ship hull silhouette")
+	_expect(_control_area(session, "HubPlayableSkyBackdrop") > 500000.0, "Hub scene occupies the main viewport instead of a text-only strip")
+	_expect(_control_area(session, "HubDockPlankWalkway") > 18000.0, "Hub dock is large enough for manual visual recognition")
 	_expect(hub.call("DebugNodeVisible", "HubDockPier"), "Hub has an authored island dock pier")
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Hub shows the docked ship exterior")
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipBalloon"), "Hub shows the airship envelope above the dock")
@@ -76,6 +82,10 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubShipInteriorShell"), "Ship interior shell becomes visible after boarding")
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior has an authored deck floor")
 	_expect(not hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Dock exterior hides while inside the ship")
+	_expect(hub.call("DebugNodeVisible", "HubInteriorHullOutline"), "Ship interior has a visible hull outline")
+	_expect(hub.call("DebugNodeVisible", "HubInteriorCockpitBay"), "Ship interior cockpit bay is a large readable space")
+	_expect(hub.call("DebugNodeVisible", "HubInteriorCargoBay"), "Ship interior cargo bay is a large readable space")
+	_expect(hub.call("DebugNodeVisible", "HubInteriorEngineBay"), "Ship interior engine bay is a large readable space")
 	_expect(hub.call("DebugNodeVisible", "HubCabinRoom"), "Hub has a cockpit room volume")
 	_expect(hub.call("DebugNodeVisible", "HubCargoRoom"), "Hub has a cargo room volume")
 	_expect(hub.call("DebugNodeVisible", "HubEngineRoom"), "Hub has an engine room volume")
@@ -178,6 +188,9 @@ func _run() -> void:
 	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
 	_expect(session.find_child("ReturnInteractPoint", true, false) != null, "Exploration has a spatial return interaction point")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandWalkBoundary"), "Exploration has a walkable island boundary")
+	_expect(hub.call("DebugNodeVisible", "ExplorationPlayableIslandBody"), "Exploration has a large visible island body")
+	_expect(hub.call("DebugNodeVisible", "ExplorationReturnShipHullSilhouette"), "Exploration return point reads as a docked ship")
+	_expect(_control_area(session, "ExplorationPlayableSkyBackdrop") > 500000.0, "Exploration scene occupies the main viewport instead of only HUD text")
 	_expect(hub.call("DebugNodeVisible", "ExplorationDockedShip"), "Exploration has a docked ship spatial anchor")
 	_expect(hub.call("DebugNodeVisible", "ExplorationBoardingRamp"), "Exploration has a boarding ramp spatial anchor")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandPath"), "Exploration has a walkable island path")
@@ -357,6 +370,16 @@ func _button_focus_mode(root_node: Node, node_name: String) -> int:
 func _control_width(root_node: Node, node_name: String) -> float:
 	var control := root_node.find_child(node_name, true, false) as Control
 	return 0.0 if control == null else control.size.x
+
+
+func _control_area(root_node: Node, node_name: String) -> float:
+	var control := root_node.find_child(node_name, true, false) as Control
+	return 0.0 if control == null else control.size.x * control.size.y
+
+
+func _canvas_z_index(root_node: Node, node_name: String) -> int:
+	var item := root_node.find_child(node_name, true, false) as CanvasItem
+	return -999 if item == null else item.z_index
 
 
 func _control_mouse_filter(root_node: Node, node_name: String) -> int:

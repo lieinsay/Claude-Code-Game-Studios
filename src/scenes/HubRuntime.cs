@@ -695,7 +695,7 @@ public partial class HubRuntime : Node2D
 		{
 			Name = "PlayableVerticalSliceLayer",
 			MouseFilter = Control.MouseFilterEnum.Ignore,
-			ZIndex = 4,
+			ZIndex = 12,
 		};
 		playableLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		hubRoot.AddChild(playableLayer);
@@ -704,7 +704,7 @@ public partial class HubRuntime : Node2D
 		{
 			Name = "WorldSceneLayer",
 			MouseFilter = Control.MouseFilterEnum.Ignore,
-			ZIndex = -4,
+			ZIndex = 0,
 		};
 		sceneLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		playableLayer.AddChild(sceneLayer);
@@ -713,7 +713,7 @@ public partial class HubRuntime : Node2D
 		{
 			Name = "WorldInteractionLayer",
 			MouseFilter = Control.MouseFilterEnum.Ignore,
-			ZIndex = 2,
+			ZIndex = 20,
 		};
 		interactionLayer.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		playableLayer.AddChild(interactionLayer);
@@ -752,6 +752,27 @@ public partial class HubRuntime : Node2D
 
 	private void AddHubGreyboxSet()
 	{
+		AddSceneRect(hubSceneItems, "HubPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.12f, 0.22f, 0.27f, 0.98f));
+		AddSceneRect(hubSceneItems, "HubPlayableFarMist", new Vector2(0, 162), new Vector2(1280, 62), new Color(0.36f, 0.50f, 0.52f, 0.46f));
+		AddSceneRect(hubSceneItems, "HubPlayableSeaHorizon", new Vector2(0, 592), new Vector2(1280, 88), new Color(0.08f, 0.22f, 0.31f, 0.98f));
+		AddSceneEllipse(hubExteriorSceneItems, "HubIslandMainMass", new Vector2(468, 522), new Vector2(438, 154), new Color(0.18f, 0.36f, 0.28f, 0.98f));
+		AddSceneEllipse(hubExteriorSceneItems, "HubIslandGrassCap", new Vector2(464, 472), new Vector2(382, 78), new Color(0.34f, 0.55f, 0.42f, 0.98f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockPlankWalkway", new Vector2(120, 562), new Vector2(390, 54), new Color(0.48f, 0.40f, 0.28f, 0.98f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockPostLeft", new Vector2(144, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockPostRight", new Vector2(458, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
+		AddScenePolygon(hubExteriorSceneItems, "HubDockedShipHullSilhouette",
+			[
+				new Vector2(522, 480),
+				new Vector2(934, 470),
+				new Vector2(1016, 526),
+				new Vector2(952, 584),
+				new Vector2(558, 584),
+				new Vector2(488, 530),
+			],
+			new Color(0.16f, 0.23f, 0.30f, 0.98f));
+		AddSceneEllipse(hubExteriorSceneItems, "HubDockedShipEnvelopeSilhouette", new Vector2(756, 396), new Vector2(292, 68), new Color(0.54f, 0.68f, 0.70f, 0.96f));
+		AddSceneRect(hubExteriorSceneItems, "HubShipMastForward", new Vector2(636, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
+		AddSceneRect(hubExteriorSceneItems, "HubShipMastRear", new Vector2(846, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
 		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 0.90f));
 		AddSceneRect(hubExteriorSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
 		AddSceneRect(hubExteriorSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
@@ -763,6 +784,21 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(hubExteriorSceneItems, "HubBoardingRamp", new Vector2(236, 558), new Vector2(174, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(hubExteriorSceneItems, "HubBoardingRampLabel", new Vector2(208, 532), new Vector2(174, 22), "岛上码头 / 登船坡道");
 		AddSceneLabel(hubExteriorSceneItems, "HubIslandDockIdentityLabel", new Vector2(438, 414), new Vector2(360, 28), "停泊浮岛：云织号靠岸，可登船进入内部");
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.09f, 0.13f, 0.16f, 0.98f));
+		AddScenePolygon(hubInteriorSceneItems, "HubInteriorHullOutline",
+			[
+				new Vector2(156, 450),
+				new Vector2(248, 378),
+				new Vector2(1002, 378),
+				new Vector2(1128, 452),
+				new Vector2(1018, 632),
+				new Vector2(236, 632),
+			],
+			new Color(0.14f, 0.19f, 0.23f, 0.98f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorDeckSpine", new Vector2(214, 540), new Vector2(820, 42), new Color(0.42f, 0.48f, 0.44f, 0.92f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorCockpitBay", new Vector2(244, 408), new Vector2(248, 122), new Color(0.18f, 0.37f, 0.44f, 0.96f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorCargoBay", new Vector2(520, 408), new Vector2(250, 122), new Color(0.42f, 0.32f, 0.20f, 0.96f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorEngineBay", new Vector2(798, 408), new Vector2(250, 122), new Color(0.28f, 0.31f, 0.43f, 0.96f));
 		AddSceneLabel(hubInteriorSceneItems, "HubStationIdentityLabel", new Vector2(440, 424), new Vector2(360, 28), "云织号船内：驾驶舱 / 货舱 / 轮机间");
 		AddSceneRect(hubInteriorSceneItems, "HubShipInteriorShell", new Vector2(220, 442), new Vector2(804, 166), new Color(0.13f, 0.18f, 0.22f, 0.95f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
@@ -806,6 +842,23 @@ public partial class HubRuntime : Node2D
 
 	private void AddExplorationGreyboxSet()
 	{
+		AddSceneRect(explorationSceneItems, "ExplorationPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.10f, 0.20f, 0.25f, 0.98f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayableMistHorizon", new Vector2(0, 160), new Vector2(1280, 72), new Color(0.42f, 0.52f, 0.50f, 0.44f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayableSea", new Vector2(0, 596), new Vector2(1280, 84), new Color(0.07f, 0.22f, 0.30f, 0.98f));
+		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandBody", new Vector2(650, 510), new Vector2(468, 152), new Color(0.16f, 0.35f, 0.27f, 0.98f));
+		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandUpperTrail", new Vector2(650, 462), new Vector2(380, 68), new Color(0.34f, 0.52f, 0.39f, 0.96f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayablePier", new Vector2(122, 566), new Vector2(276, 46), new Color(0.47f, 0.38f, 0.26f, 0.98f));
+		AddScenePolygon(explorationSceneItems, "ExplorationReturnShipHullSilhouette",
+			[
+				new Vector2(102, 520),
+				new Vector2(298, 510),
+				new Vector2(354, 548),
+				new Vector2(306, 610),
+				new Vector2(130, 610),
+				new Vector2(72, 560),
+			],
+			new Color(0.16f, 0.24f, 0.31f, 0.98f));
+		AddSceneEllipse(explorationSceneItems, "ExplorationReturnShipEnvelope", new Vector2(218, 474), new Vector2(132, 42), new Color(0.52f, 0.66f, 0.68f, 0.94f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandWalkBoundary", ExplorationWalkBounds.Position, ExplorationWalkBounds.Size, new Color(0.12f, 0.27f, 0.24f, 0.90f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandUpperEdge", new Vector2(132, 390), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandLowerEdge", new Vector2(132, 624), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
@@ -878,11 +931,36 @@ public partial class HubRuntime : Node2D
 			CustomMinimumSize = size,
 			Size = size,
 			MouseFilter = Control.MouseFilterEnum.Ignore,
-			ZIndex = -2,
+			ZIndex = 0,
 		};
 		sceneLayer?.AddChild(rect);
 		group.Add(rect);
 		return rect;
+	}
+
+	private Polygon2D AddScenePolygon(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2[] points, Color color)
+	{
+		var polygon = new Polygon2D
+		{
+			Name = nodeName,
+			Polygon = points,
+			Color = color,
+			ZIndex = 0,
+		};
+		sceneLayer?.AddChild(polygon);
+		group.Add(polygon);
+		return polygon;
+	}
+
+	private Polygon2D AddSceneEllipse(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2 center, Vector2 radius, Color color)
+	{
+		var points = new Vector2[28];
+		for (var index = 0; index < points.Length; index++)
+		{
+			var angle = Mathf.Tau * index / points.Length;
+			points[index] = center + new Vector2(Mathf.Cos(angle) * radius.X, Mathf.Sin(angle) * radius.Y);
+		}
+		return AddScenePolygon(group, nodeName, points, color);
 	}
 
 	private Label AddSceneLabel(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2 position, Vector2 size, string text)
@@ -896,7 +974,7 @@ public partial class HubRuntime : Node2D
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
 			MouseFilter = Control.MouseFilterEnum.Ignore,
-			ZIndex = -1,
+			ZIndex = 2,
 		};
 		label.AddThemeFontSizeOverride("font_size", 15);
 		sceneLayer?.AddChild(label);
@@ -1381,6 +1459,7 @@ public partial class HubRuntime : Node2D
 	private void SetFooter(string text)
 	{
 		if (footerLabel is not null) footerLabel.Text = text;
+		if (interactionPromptLabel is not null) interactionPromptLabel.Text = text;
 	}
 
 	private void UpdateOnboardingHint()

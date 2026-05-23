@@ -6,6 +6,22 @@ Feature: Production to Polish Gate Passed
 Task: Polish Story 015 implemented and awaiting focused human QA before release checklist/gate
 <!-- /STATUS -->
 
+## Session Extract -- Polish Story 015 Human QA Blocked / BUG-003 Fix Candidate 2026-05-24
+- Focused human QA rerun executed against build `80cf299`.
+- Verdict: BLOCKED.
+- Passed: launch/start reached the expected entry flow.
+- Failed: Hub did not read as island/dock; tester did not discover a real island scene.
+- Failed: boarding and ship interior appeared text-only; cockpit/helm, cargo/storage, and engine/module spaces were not distinguishable.
+- Failed/blocked: exterior Chart gating, Exploration, search, return, save/load-in-Exploration, and clean route completion could not be meaningfully evaluated because the scene identity failed first.
+- Bug filed: `production/qa/bugs/BUG-003-polish-015-world-scene-hidden-by-text-dashboard.md`.
+- Fix candidate implemented: `HubRuntime` now draws the world layer above the text dashboard and adds large viewport-scale Hub island/dock/ship, ship-interior bay, Exploration island, search, and return-ship silhouettes.
+- Visual smoke strengthened: `tests/smoke/session_shell_visual_probe.gd` now asserts world-layer z-order and main-viewport scene coverage, not just node existence.
+- Screenshot evidence captured:
+  - `production/qa/evidence/polish-015-fix-final-hub-probe.png`
+  - `production/qa/evidence/polish-015-fix-exploration-semantics-probe.png`
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with existing warnings / 0 errors; Godot headless visual smoke PASS; Godot Windows-display visual smoke PASS with screenshots; durable persistence smoke PASS; long-session smoke PASS; perf smoke PASS.
+- Next: rerun the focused Polish 015 human checklist from step 1. Do not proceed to formal release checklist/gate until the rerun is PASS or PASS WITH CONDITIONS, or the user explicitly waives the blocker.
+
 ## Session Extract -- Polish Story 015 Implemented / Awaiting Human QA 2026-05-23
 - Story implemented: `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md` -- Island / Ship Interior and Search Gameplay Design.
 - Added design note: `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`.

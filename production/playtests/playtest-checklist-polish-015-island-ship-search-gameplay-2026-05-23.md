@@ -1,7 +1,7 @@
 # Playtest Checklist: Polish 015 Island / Ship Interior and Search Gameplay
 
 **Date Created:** 2026-05-23  
-**Status:** READY FOR HUMAN QA  
+**Status:** EXECUTED - BLOCKED
 **Scope:** Focused rerun for Polish Story 015 release-readiness blocker  
 **Story:** `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`  
 **Automated Evidence Target:** `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`
@@ -56,19 +56,29 @@ Duration: [fill in duration]
 
 ## Result
 
-**Verdict:** `[PASS / PASS WITH CONDITIONS / CONCERN / BLOCKED]`  
-**Tester:** `[fill in]`  
-**Build/Commit:** `[fill in]`  
-**Duration:** `[fill in]`
+**Verdict:** `BLOCKED`
+**Tester:** `liein`
+**Build/Commit:** `80cf299`
+**Duration:** `focused early-route pass`
 
 **Release Triage Decision:**
 
 - [ ] Proceed to formal release checklist/gate.
-- [ ] Open another blocking Polish story before release checklist.
+- [x] Open another blocking Polish story before release checklist.
 - [ ] Continue ordinary non-blocking Polish backlog.
 
 **Top Findings:**
 
-1. `[fill in]`
-2. `[fill in]`
-3. `[fill in]`
+1. Step 1 passed: the project launches normally in a window and reaches the entry flow.
+2. Step 2 failed: Hub still does not read as an island/dock; tester did not discover a real island scene.
+3. Steps 3-4 failed: boarding/ship interior is perceived as text-only, with no readable cockpit/helm, cargo/storage, or engine/module spaces.
+4. Step 5 failed: no island was discovered, so Chart gating cannot be meaningfully evaluated.
+5. All later route/search/return checks are blocked because the visible scene identity is still missing.
+
+## Follow-up Fix Note
+
+The first implementation pass created scene nodes that automated smoke could
+find, but the live layout still presented a text dashboard as the dominant
+surface. The follow-up fix must make the island, docked ship, boarding path,
+ship interior zones, Exploration island, search wreck, and return ship occupy
+the main viewport before release-readiness can be retested.
