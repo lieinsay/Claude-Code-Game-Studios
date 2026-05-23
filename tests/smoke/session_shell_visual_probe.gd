@@ -419,8 +419,22 @@ func _expect_scene_physics_contract(
 		"contract_complete",
 		"scene_type",
 		"movement_plane",
+		"movement_readability",
 		"layer_height_model_ready",
 		"cutaway_reveal_ready",
+		"layer_height_model",
+		"cutaway_reveal_model",
+		"floor_state",
+		"primary_walkable_layer",
+		"floor_id",
+		"floor_index",
+		"is_active_floor",
+		"visibility_mode",
+		"vertical_connectors",
+		"occluders_hidden_above",
+		"interactions_enabled",
+		"behind_object_reveal",
+		"identity_occlusion_max_seconds",
 		"walk_bounds_size",
 		"scale_reference",
 		"collision_semantics",
@@ -434,20 +448,52 @@ func _expect_scene_physics_contract(
 		_expect(contract.has(required_key), "%s physics contract exposes required key %s" % [scene_id, required_key])
 	_expect(str(contract.get("scene_type", "")) == expected_scene_type, "%s declares the expected scene type" % scene_id)
 	_expect(str(contract.get("movement_plane", "")) != "", "%s declares a movement plane" % scene_id)
+	var movement_readability := str(contract.get("movement_readability", ""))
 	_expect(bool(contract.get("layer_height_model_ready", false)), "%s declares Layer / Height readiness" % scene_id)
 	_expect(bool(contract.get("cutaway_reveal_ready", false)), "%s declares Cutaway / Reveal readiness" % scene_id)
 	var layer_model := str(contract.get("layer_height_model", ""))
 	var reveal_model := str(contract.get("cutaway_reveal_model", ""))
 	var floor_state := str(contract.get("floor_state", ""))
+	var primary_walkable_layer := str(contract.get("primary_walkable_layer", ""))
+	var floor_id := str(contract.get("floor_id", ""))
+	var visibility_mode := str(contract.get("visibility_mode", ""))
+	var behind_object_reveal := str(contract.get("behind_object_reveal", ""))
 	_expect(layer_model != "", "%s exposes a Layer / Height Model" % scene_id)
 	_expect(reveal_model != "", "%s exposes a Cutaway / Reveal Model or N/A true rule" % scene_id)
 	_expect(floor_state.contains("floor_id="), "%s declares Floor State or single-floor N/A state" % scene_id)
+	_expect(floor_state.contains("floor_index="), "%s declares floor index in Floor State" % scene_id)
+	_expect(floor_state.contains("is_active_floor="), "%s declares active floor state" % scene_id)
+	_expect(floor_state.contains("walkable_bounds="), "%s declares walkable bounds in Floor State" % scene_id)
+	_expect(floor_state.contains("vertical_connectors="), "%s declares vertical connectors in Floor State" % scene_id)
+	_expect(floor_state.contains("occluders_hidden_above="), "%s declares occluders hidden above in Floor State" % scene_id)
+	_expect(floor_state.contains("interactions_enabled="), "%s declares floor interactions enabled" % scene_id)
+	_expect(floor_id != "", "%s exposes a direct floor id" % scene_id)
+	_expect(visibility_mode != "", "%s exposes a visibility mode" % scene_id)
+	_expect(bool(contract.get("is_active_floor", false)), "%s exposes active floor true for the current playable layer" % scene_id)
+	_expect(float(contract.get("identity_occlusion_max_seconds", 99.0)) <= 1.0, "%s keeps foreground occlusion inside readability budget" % scene_id)
 	if expected_scene_type == "水平场景":
+		_expect(movement_readability.contains("up/down/left/right"), "%s declares four-direction ground-plane readability" % scene_id)
+		_expect(movement_readability.contains("height_only"), "%s declares jump/fly height cue handling" % scene_id)
 		_expect(layer_model.contains("primary_walkable_layer"), "%s declares a primary walkable layer" % scene_id)
+		_expect(primary_walkable_layer != "", "%s exposes primary_walkable_layer directly" % scene_id)
+		_expect(layer_model.contains("walkable_layer:"), "%s declares walkable layers" % scene_id)
+		_expect(layer_model.contains("transition_layer:"), "%s declares transition layers" % scene_id)
+		_expect(layer_model.contains("height_only_layer:"), "%s declares height-only layers" % scene_id)
+		_expect(layer_model.contains("blocked_layer:"), "%s declares blocked layers" % scene_id)
+		_expect(layer_model.contains("visual_layer:"), "%s declares visual layers" % scene_id)
 		_expect(reveal_model.contains("behind_object_reveal"), "%s classifies behind-object reveal behavior or N/A true" % scene_id)
+		_expect(behind_object_reveal.contains("N/A true"), "%s exposes behind-object reveal classification without entering-building confusion" % scene_id)
+		_expect(behind_object_reveal.contains("collision") or behind_object_reveal.contains("blocking_static"), "%s preserves collision identity for behind-object reveal" % scene_id)
 	else:
+		_expect(movement_readability.contains("left/right"), "%s declares left/right vertical-scene movement" % scene_id)
+		_expect(movement_readability.contains("ladders/stairs"), "%s declares vertical traversal method policy" % scene_id)
 		_expect(layer_model.contains("floor_index"), "%s declares floor index layering" % scene_id)
+		_expect(int(contract.get("floor_index", -1)) >= 0, "%s exposes a non-negative floor index" % scene_id)
+		_expect(layer_model.contains("depth_layer:"), "%s declares depth layering" % scene_id)
+		_expect(layer_model.contains("visual_layer:"), "%s declares foreground/background visual layer separation" % scene_id)
 		_expect(reveal_model.contains("active_floor_focus"), "%s declares active-floor reveal behavior" % scene_id)
+		_expect(reveal_model.contains("front_wall_removed"), "%s declares cutaway/front-wall reveal behavior" % scene_id)
+		_expect(visibility_mode == "front_wall_removed", "%s exposes front-wall removed visibility mode" % scene_id)
 	var bounds := contract.get("walk_bounds_size", Vector2.ZERO) as Vector2
 	_expect(bounds.x > 0.0 and bounds.y > 0.0, "%s declares walk bounds in scene space" % scene_id)
 	_expect(str(contract.get("scale_reference", "")).contains("player"), "%s declares unit scale against the player" % scene_id)

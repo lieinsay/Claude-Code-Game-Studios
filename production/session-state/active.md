@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: GDD #19/#20 approved, epics created, and stories split; first next story is scene-physics-unit-system/story-001
+Task: Scene Physics Story 002 implemented; next story is scene-physics-unit-system/story-003
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics Story 002 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001 is implemented/pushed but not formally `/story-done` closed.
+- Story implemented: `production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md` -- Layer Height Cutaway and Floor State.
+- Runtime: `HubRuntime.DebugScenePhysicsContract(scene_id)` now exposes direct Story 002 fields for `movement_readability`, `primary_walkable_layer`, `floor_id`, `floor_index`, `is_active_floor`, `visibility_mode`, `vertical_connectors`, `occluders_hidden_above`, `interactions_enabled`, `behind_object_reveal`, and `identity_occlusion_max_seconds`.
+- Smoke: `tests/smoke/session_shell_visual_probe.gd` now asserts horizontal four-direction movement readability, height-only cue handling, primary/walkable/transition/height-only/blocked/visual layers, vertical floor/depth/front-wall/active-floor reveal, floor state fields, behind-object reveal N/A classification, and occlusion readability budget.
+- Evidence: `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`.
+- Status updates: Scene Physics epic and epics index now mark Stories 001-002 Implemented, Stories 003-004 Ready, and the epic In Progress.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md`, then `/dev-story` for Story 003.
 
 ## Session Extract -- Scene Physics Story 001 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and implemented Polish 016 dependency status.
