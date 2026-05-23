@@ -1,7 +1,7 @@
 # 云海织航 — 文档索引
 
 > **最后更新**: 2026-05-23
-> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001 runtime hardening complete | Polish Story 002 exploration semantics complete | Polish Story 003 authored content slice complete | Polish Story 004 content validation guard complete | Polish Story 005 ID migration guard complete | Polish Story 006 spatial prototype complete | Polish Story 007 cross-launch persistence trust complete | Polish Story 008 save-slot UX complete
+> **项目阶段**: Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice 已通过 | #18 Onboarding complete | Polish Story 001-013 complete | Polish Story 014 playable-space readability ready
 > **引擎**: Godot 4.6.2 .NET / C# (Desktop-first per ADR-0019; Web-first 已弃用)
 > **ADR**: 19 Accepted (0001-0019) · TR Registry: 54 条已注册 · Control Manifest: Active
 > **Epic/Story**: 18/18 Epic 完成 — 125 Stories | Complete: #1 #2 #3 #4 #5 #6 #7 #8 #9 #10 #11 #12 #13 #14 #15 #16 #17 #18 | Polish Entry: #18 smoke/perf PASS
@@ -132,6 +132,18 @@ graph TB
 | [production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md](../production/qa/evidence/polish-007-cross-launch-persistence-trust-evidence.md) | Polish Story 007 evidence — canonical progress durable manifest, SessionShell restart load, smoke/perf PASS, manual close/relaunch QA PASS |
 | [production/polish-backlog/story-polish-008-save-slot-ux-continue-trust.md](../production/polish-backlog/story-polish-008-save-slot-ux-continue-trust.md) | Polish Story 008 — Save-slot UX and continue trust Complete |
 | [production/qa/evidence/polish-008-save-slot-ux-continue-trust-evidence.md](../production/qa/evidence/polish-008-save-slot-ux-continue-trust-evidence.md) | Polish Story 008 evidence — Load affordance, local progress detection, corrupt-save feedback, smoke PASS |
+| [production/polish-backlog/story-polish-009-hub-room-interior-greybox-polish.md](../production/polish-backlog/story-polish-009-hub-room-interior-greybox-polish.md) | Polish Story 009 — Hub room interior greybox polish Complete |
+| [production/qa/evidence/polish-009-hub-room-interior-greybox-polish-evidence.md](../production/qa/evidence/polish-009-hub-room-interior-greybox-polish-evidence.md) | Polish Story 009 evidence — cockpit/cargo/engine room readability and dynamic room semantics PASS |
+| [production/polish-backlog/story-polish-010-backup-quarantine-ux.md](../production/polish-backlog/story-polish-010-backup-quarantine-ux.md) | Polish Story 010 — Backup / quarantine UX Complete |
+| [production/qa/evidence/polish-010-backup-quarantine-ux-evidence.md](../production/qa/evidence/polish-010-backup-quarantine-ux-evidence.md) | Polish Story 010 evidence — invalid durable progress quarantine and safe replacement PASS |
+| [production/polish-backlog/story-polish-011-delete-overwrite-prompts.md](../production/polish-backlog/story-polish-011-delete-overwrite-prompts.md) | Polish Story 011 — Delete / overwrite prompts Complete |
+| [production/qa/evidence/polish-011-delete-overwrite-prompts-evidence.md](../production/qa/evidence/polish-011-delete-overwrite-prompts-evidence.md) | Polish Story 011 evidence — two-step overwrite/delete confirmation PASS |
+| [production/polish-backlog/story-polish-012-long-session-save-load-soak.md](../production/polish-backlog/story-polish-012-long-session-save-load-soak.md) | Polish Story 012 — Long-session save/load soak Complete |
+| [production/qa/evidence/polish-012-long-session-save-load-soak-evidence.md](../production/qa/evidence/polish-012-long-session-save-load-soak-evidence.md) | Polish Story 012 evidence — three automated save/load/return cycles PASS |
+| [production/polish-backlog/story-polish-013-human-long-session-release-triage.md](../production/polish-backlog/story-polish-013-human-long-session-release-triage.md) | Polish Story 013 — Human long-session release readiness triage Complete With Notes |
+| [production/playtests/playtest-checklist-polish-013-human-long-session-release-triage-2026-05-23.md](../production/playtests/playtest-checklist-polish-013-human-long-session-release-triage-2026-05-23.md) | Polish Story 013 manual checklist — EXECUTED PASS WITH CONDITIONS |
+| [production/qa/evidence/polish-013-release-readiness-automated-preflight-evidence.md](../production/qa/evidence/polish-013-release-readiness-automated-preflight-evidence.md) | Polish Story 013 automated preflight — PASS WITH NOTES |
+| [production/polish-backlog/story-polish-014-playable-space-readability-and-movement-driven-interaction.md](../production/polish-backlog/story-polish-014-playable-space-readability-and-movement-driven-interaction.md) | Polish Story 014 — Playable space readability and movement-driven interaction Ready |
 | [production/sprints/sprint-003-domain-backed-playable-slice.md](../production/sprints/sprint-003-domain-backed-playable-slice.md) | Sprint 003 Production recovery — PVS3-001..PVS3-007 完成，支撑 Production → Polish PASS WITH CONDITIONS |
 | [production/sprints/sprint-003-runtime-adapter-boundary.md](../production/sprints/sprint-003-runtime-adapter-boundary.md) | Sprint 003 PVS3-001 — Godot-to-C# runtime adapter 边界、权威状态矩阵、PVS3-002A C# 迁移记录 |
 | [production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md](../production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md) | 最新 Production → Polish recheck：PASS WITH CONDITIONS，已进入 Polish |
@@ -1365,7 +1377,7 @@ graph TB
   🏗️ ADR: 19 Accepted | TR: 54 条注册 | Control Manifest: Active | TR 覆盖路径: 100%
   📋 Epic/Story: 18/18 Epic 完成 (125 Stories) | #1/#2/#3/#4/#5/#6/#7/#8/#9/#10/#11/#12/#13/#14/#15/#16/#17/#18 Complete
   💻 源代码: Godot 4.6.2 .NET/C# 主线 (src 35 C# + 120 C# test runners)
-  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001 runtime hardening Complete；Polish Story 002 exploration semantics Complete；Polish Story 003 authored content slice Complete；Polish Story 004 content validation guard Complete；Polish Story 005 ID migration guard Complete；Polish Story 006 spatial prototype Complete；Polish Story 007 cross-launch persistence trust Complete；Polish Story 008 save-slot UX Complete
+  ✅ Polish — Production → Polish PASS WITH CONDITIONS | Sprint 003 domain-backed playable slice complete；#18 stories Complete；Polish Story 001-013 Complete；Polish Story 014 Ready
 ```
 
 ---
@@ -1425,7 +1437,7 @@ graph TB
 
 ---
 
-> **更新于 2026-05-23** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；fresh perf probe 已修复并通过；Polish Story 001 runtime hardening、Story 002 richer Exploration scene semantics、Story 003 authored route/search content slice、Story 004 authored content validation guard、Story 005 ID migration guard、Story 006 spatial scene separation/walkable prototype、Story 007 cross-launch persistence trust 与 Story 008 save-slot UX and continue trust 已完成。人工 QA checklist 为 PASS WITH CONDITIONS，并已驱动 Story 006-008；2026-05-23 windowed close/relaunch persistence QA 已报告 PASS。下一步建议继续做 full room interiors / backup-quarantine UX / final art-audio treatment。
+> **更新于 2026-05-23** — Production → Polish PASS WITH CONDITIONS 后，#18 Onboarding / First Loop 5 个 stories 已完成；Polish Story 001-013 已完成 runtime hardening、Exploration semantics、authored content slice、validation/migration guards、spatial prototype、cross-launch persistence、save-slot trust、Hub room greybox polish、backup/quarantine UX、delete/overwrite prompts、automated long-session soak 与 human release triage。Story 013 人工 QA 为 PASS WITH CONDITIONS：稳定性与持久化可信，但 Hub/Exploration 缺少可读场景身份，探索玩法过于点击 UI。下一步是 Story 014 playable-space readability and movement-driven interaction，然后再判断是否进入 formal release checklist/gate。
 
 > **提示**: 本文档使用 Mermaid 图表。在 VS Code 中安装 "Markdown Preview Mermaid Support" 插件，
 > 或在 GitHub 上直接查看以渲染图表。也可使用 `npx mermaid-cli` 生成静态图片。

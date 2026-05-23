@@ -1,7 +1,7 @@
 # 生产任务流程图 — 云海织航 MVP
 
 > 生成日期: 2026-05-17 | 基于: systems-index.md + 17 Epic 120 Story + Sprint 003 recovery plan
-> 当前状态: **Polish | Phase 0-A-F/#18 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Complete | Polish Story 001-008 Complete**
+> 当前状态: **Polish | Phase 0-A-F/#18 代码与文档证据完成 | Sprint 003 domain-backed playable slice PASS | Production → Polish PASS WITH CONDITIONS | #18 Onboarding 5 Stories Complete | Polish Story 001-013 Complete | Polish Story 014 Ready**
 
 ---
 
@@ -508,10 +508,10 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 - 阶段文件: `production/stage.txt` 为 `Production`
 - 最新 gate: `production/gate-checks/gate-check-production-to-polish-2026-05-17-sprint-003-pass.md` — **PASS WITH CONDITIONS**，已进入 Polish。
-- 活跃任务: Polish backlog follow-ups after Story 008 save-slot UX and continue trust。
+- 活跃任务: Polish Story 014 playable-space readability and movement-driven interaction；由 Story 013 human QA PASS WITH CONDITIONS 解锁。
 - 已接受证据: Sprint 002 灰盒 playable slice 恢复通过，人工可完成 Hub -> Chart -> Exploration -> Return + save/load restore。
-- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening、authored route/search content slice、authored content validation guard、route/search ID migration guard、spatial scene separation/walkable prototype、cross-launch persistence trust、save-slot UX and continue trust、真实 preflight、windowed visual capture、richer Exploration scene semantics 均已完成。剩余风险转为 full room interiors、backup/quarantine UX、美术/音频处理和长时 playtest 的普通 Polish backlog，需要人工设计/QA 判断。
-- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（5 个既有 warning，0 error）。
+- 当前 blocker: 无 Production 硬阻塞；#18 implementation、fresh perf probe、Navigation/Exploration runtime hardening、authored route/search content slice、authored content validation guard、route/search ID migration guard、spatial scene separation/walkable prototype、cross-launch persistence trust、save-slot UX and continue trust、backup/quarantine UX、delete/overwrite prompts、automated long-session soak 均已完成。Release readiness 暂不进入正式 checklist/gate；Story 013 人工 QA 将 Hub/Exploration 可读性与 movement-driven play 标为 release-readiness blocker，转入 Story 014。
+- 构建验证: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS（0 warning，0 error）。
 - 测试验证: `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，覆盖 movement、spatial interaction、Chart departure、Exploration search、return Hub、save/load restore。
 - 文档索引: `docs/document-index.md` 已同步到 Production Sprint 003 recovery 状态。
 
@@ -519,12 +519,12 @@ Phase │ Epics 并行数 │ 最大并行 Story 数 │ 等待链深度
 
 | 优先级 | 行动 | 依赖 | 预计 |
 |--------|------|------|------|
-| **P0** | Full room interiors and richer walkable ship/island spaces | Polish Story 006 spatial prototype ✅ | Needs design input |
-| **P1** | Backup-quarantine UI polish | Polish Story 008 save-slot UX ✅ | Needs design + QA input |
-| **P2** | Final art/audio treatment for onboarding/runtime hints | #18 implementation slice + Story 002/003 visual/content evidence ✅ | Needs art/audio input |
-| **P3** | Route/search content table scale-up with validation and migration guards preserved | Polish Story 003-005 ✅ | Needs design input |
+| **P0** | Polish 014 playable-space readability and movement-driven interaction | Polish 013 PASS WITH CONDITIONS ✅ | Ready |
+| **P1** | Focused human rerun for Hub/Exploration readability | Polish 014 complete | Pending |
+| **P2** | Formal release checklist / gate, only if Story 014 removes blocker | Focused rerun PASS | Pending |
+| **P3** | Final art/audio/content scale-up as non-blocking polish | Story 014 classification | Needs design/art/audio input |
 
-> 关键建议: Polish Story 001-008 已把当前 adapter fixture 的运行时权威扩展到 NavigationManager EncounterContext 与 ExplorationManager search/threat contract，并完成 authored content slice、轻量 content validation guard、route/search ID migration guard、spatial scene separation/walkable prototype、cross-launch persistence trust、save-slot UX and continue trust、真实 preflight、动态探索场景语义与 windowed screenshot 证据。下一步不要宣布 Release readiness；优先根据人工设计输入推进 full room interiors / backup-quarantine UX / final art-audio。
+> 关键建议: Polish Story 001-013 已完成并证明稳定性/持久化可信，但人工 QA 发现 Hub/Exploration 缺少可读场景身份，探索可通过点 UI 完成而不需要移动。下一步不要宣布 Release readiness；先执行 Story 014 的最小阻塞修复，再复测是否进入 release checklist/gate。
 
 ### 并行机会提醒
 

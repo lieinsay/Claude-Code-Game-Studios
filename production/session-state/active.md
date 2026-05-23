@@ -3,8 +3,28 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 012 automated long-session save/load soak complete; next options are human long-session QA, room art/audio pass, or release-readiness scoping
+Task: Polish Story 013 complete with notes; Story 014 playable-space readability and movement-driven interaction is next before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 013 Human QA Complete / Story 014 Ready 2026-05-23
+- Human checklist executed: `production/playtests/playtest-checklist-polish-013-human-long-session-release-triage-2026-05-23.md`.
+- Verdict: PASS WITH CONDITIONS.
+- Tester: liein; duration: 10 minutes; build/commit: `ee28d34`.
+- Passed: launch, movement basics, route/search/save/load/return loop, cross-launch restore, overwrite confirmation, delete confirmation, corrupt-save quarantine/recovery, final new loop, and clean exit.
+- Failed/conditional: tester could not identify cockpit, storage/cargo, module, or engine-room spaces; Hub does not read as a visible station; Exploration has no meaningful image/art treatment; current route/search content can be completed mostly by clicking UI rather than movement-driven play.
+- Story 013 status: Complete With Notes. Do not proceed to formal release checklist/gate yet.
+- Next story created: `production/polish-backlog/story-polish-014-playable-space-readability-and-movement-driven-interaction.md`.
+- Story 014 goal: make Hub/Exploration readable as authored playable spaces and require movement/proximity for core search/return progression before release readiness is checked again.
+
+## Session Extract -- Polish Story 013 Release Readiness Triage Started 2026-05-23
+- Story started: `production/polish-backlog/story-polish-013-human-long-session-release-triage.md` -- Human Long-Session Release Readiness Triage.
+- Created manual checklist: `production/playtests/playtest-checklist-polish-013-human-long-session-release-triage-2026-05-23.md`.
+- Created automated evidence: `production/qa/evidence/polish-013-release-readiness-automated-preflight-evidence.md`.
+- Automated preflight result: PASS WITH NOTES.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings / 0 errors; `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 127/127; Godot visual smoke PASS; durable persistence smoke PASS; long-session smoke PASS.
+- Perf note: first headless perf run exceeded only the worst-frame transient ceiling at 20.388ms against a 20ms limit; immediate rerun passed with worst 19.569ms, with p95/save/load/memory/transition budgets passing.
+- Known bug scan: no open S1/S2 found; historical S2 bugs are `Verified Fixed` or `Resolved - Fixed`.
+- Next: execute the windowed manual checklist before formal release checklist/gate. Do not declare Release readiness until manual findings are classified.
 
 ## Session Extract -- Polish Story 012 Long-Session Save / Load Soak Complete 2026-05-23
 - Story complete: `production/polish-backlog/story-polish-012-long-session-save-load-soak.md` -- Long-Session Save / Load Soak.

@@ -4,10 +4,10 @@
 > 基于: 18 Epic × 125 Story 完整分解
 > 用途: 分派给 3-5 名开发者并行推进的协作路线图
 > 前提: ADR-0019 (Desktop C# Pivot) 已生效，所有新代码用 C# 写
-> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001 runtime hardening 完成 | Polish Story 002 exploration semantics 完成 | Polish Story 003 authored content slice 完成 | Polish Story 004 content validation guard 完成 | Polish Story 005 ID migration guard 完成 | Polish Story 006 spatial prototype 完成 | Polish Story 007 cross-launch persistence trust 完成 | Polish Story 008 save-slot UX 完成 | Production → Polish PASS WITH CONDITIONS**
+> 当前状态: **Polish | Foundation #1-#5 完成 | Core #6-#10 完成 | Feature #11-#15 完成 | Presentation #16 UI/HUD 完成 | #17 Feedback 完成 | #18 Onboarding 完成 | Sprint 003 PVS3-001..PVS3-007 完成 | Polish Story 001-013 完成 | Polish Story 014 Ready | Production → Polish PASS WITH CONDITIONS**
 
 > **Readiness 基线**: 所有 125 个 Story 已补齐 Manifest 2026-05-09、ADR-0019 Desktop C# implementation contract、Type、Estimate、Test Evidence 与 C# test evidence 路径。多人并行实现时不得恢复旧 Web/GDScript 路径。
-> **文档索引**: `docs/document-index.md` 已于 2026-05-23 同步到 #18、Polish Story 001-008 完成状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；fresh perf probe 已修复并通过，Navigation/Exploration runtime hardening、authored route/search content slice、authored content validation guard、route/search ID migration guard、spatial scene separation/walkable prototype、cross-launch persistence trust、save-slot UX and continue trust、真实 preflight、dynamic Exploration semantics、windowed screenshot evidence 已完成，后续进入 full room interiors / backup-quarantine UX / art-audio treatment 的普通 Polish backlog，其中内容节奏、美术/音频口味和长时 playtest 需要人工判断。
+> **文档索引**: `docs/document-index.md` 已于 2026-05-23 同步到 #18、Polish Story 001-014 状态。Epic #1-#18 Complete + Sprint 003 domain-backed playable evidence 已通过 Production → Polish gate；Polish Story 001-013 已完成 runtime hardening、authored content guard、spatial prototype、cross-launch persistence、save-slot trust、backup/quarantine、delete/overwrite prompts、automated long-session soak 与 human release triage。Story 014 已创建，下一步修复 Hub/Exploration 可读性与 movement-driven play，然后再判断是否进入 formal release checklist/gate。
 
 ---
 
@@ -640,6 +640,12 @@ D-C: Chart / Exploration route authority + QA smoke
 | Polish Story 006 Spatial prototype | 006 | Human QA PASS WITH CONDITIONS | ✅ Complete — world/interaction layer split, walkable Hub/Exploration bounds, ship/room spatial anchors, smoke/perf evidence |
 | Polish Story 007 Cross-launch persistence trust | 007 | Human QA PASS WITH CONDITIONS + Polish Story 006 Complete | ✅ Complete — canonical progress durable manifest, SessionShell restart load, carried rewards/hull/search restore, smoke/perf evidence |
 | Polish Story 008 Save-slot UX and continue trust | 008 | Story 007 + manual close/relaunch QA PASS | ✅ Complete — disabled Load without save, detected local progress, corrupt-save checksum feedback, smoke evidence |
+| Polish Story 009 Hub room interior greybox polish | 009 | Story 006 + Story 007 manual QA + Story 008 | ✅ Complete — cockpit/cargo/engine room readability and dynamic room semantics |
+| Polish Story 010 Backup / quarantine UX | 010 | Story 008 + Story 009 | ✅ Complete — invalid durable progress quarantine and safe replacement flow |
+| Polish Story 011 Delete / overwrite prompts | 011 | Story 010 | ✅ Complete — two-step overwrite and delete confirmation with smoke evidence |
+| Polish Story 012 Long-session save/load soak | 012 | Story 011 | ✅ Complete — three automated route/search/save/load/return cycles |
+| Polish Story 013 Human long-session release triage | 013 | Story 012 | ✅ Complete With Notes — stability/persistence PASS; presentation/gameplay readability blocks release checklist |
+| Polish Story 014 Playable-space readability and movement-driven interaction | 014 | Story 013 PASS WITH CONDITIONS | Ready — make Hub/Exploration readable and require movement/proximity for search/return |
 
 ---
 
