@@ -33,7 +33,7 @@ offset_right = -40.0
 offset_bottom = 72.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 32
-text = "云织号空艇中枢"
+text = "云织号停泊甲板"
 horizontal_alignment = 1
 
 [node name="RuntimeHintLabel" type="Label" parent="HubCanvas/HubRoot"]
@@ -46,7 +46,7 @@ offset_right = -40.0
 offset_bottom = 108.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 18
-text = "HUD 入口：打开航图 / HUD（M）。保存 Ctrl+S，加载 Ctrl+L，也可用右侧按钮。"
+text = "登上云织号后到驾驶舱航台展开航图；航行日志可随时记录或读取。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -186,28 +186,28 @@ theme_override_constants/separation = 10
 [node name="ActionTitleLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "可发现入口"
+text = "船上操作"
 horizontal_alignment = 1
 
 [node name="ChartButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 focus_mode = 2
-text = "打开航图 / HUD  M"
+text = "打开航图桌  M"
 
 [node name="SaveButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 focus_mode = 2
-text = "保存  Ctrl+S"
+text = "记录航行  Ctrl+S"
 
 [node name="LoadButton" type="Button" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 focus_mode = 2
-text = "加载  Ctrl+L"
+text = "读取航行  Ctrl+L"
 
 [node name="SaveStatusLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/ActionStack"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "保存/加载状态：待操作"
+text = "航行日志：待记录"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -236,13 +236,13 @@ theme_override_constants/separation = 12
 [node name="ChartTitleLabel" type="Label" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "HUD / 航图界面"
+text = "航图桌"
 horizontal_alignment = 1
 
 [node name="ChartStatusLabel" type="Label" parent="HubCanvas/HubRoot/ChartPanel/ChartMargin/ChartStack"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "HUD / 航图已打开：选择一条 MVP 航线后确认出发。"
+text = "航图桌已展开：选择一条可读航线后确认离港。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -276,7 +276,7 @@ text = "确认出发"
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
-text = "返回 Hub  Esc"
+text = "收起航图  Esc"
 
 [node name="ExplorationPanel" type="PanelContainer" parent="HubCanvas/HubRoot"]
 visible = false
@@ -303,7 +303,7 @@ theme_override_constants/separation = 10
 [node name="ExplorationTitleLabel" type="Label" parent="HubCanvas/HubRoot/ExplorationPanel/ExplorationMargin/ExplorationStack"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "探索 HUD"
+text = "雾海搜撤记录"
 horizontal_alignment = 1
 
 [node name="ExplorationRouteLabel" type="Label" parent="HubCanvas/HubRoot/ExplorationPanel/ExplorationMargin/ExplorationStack"]
@@ -344,7 +344,7 @@ text = "推进探索 / 搜索"
 [node name="ExplorationReturnButton" type="Button" parent="HubCanvas/HubRoot/ExplorationPanel/ExplorationMargin/ExplorationStack"]
 layout_mode = 2
 focus_mode = 2
-text = "返回 Hub  Esc"
+text = "准备返航  Esc"
 
 [node name="Footer" type="Label" parent="HubCanvas/HubRoot"]
 layout_mode = 1
@@ -359,6 +359,6 @@ offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载可用按钮或 Ctrl+S / Ctrl+L。"
+text = "玻璃港停泊浮岛：登船后使用航台展开航图；航行日志可用按钮或 Ctrl+S / Ctrl+L。"
 horizontal_alignment = 1
 autowrap_mode = 3

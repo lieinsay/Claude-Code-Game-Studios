@@ -33,7 +33,7 @@ theme_override_constants/separation = 14
 
 [node name="LoadingTitleLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
 layout_mode = 2
-text = "正在加载会话壳"
+text = "正在整理航行日志"
 horizontal_alignment = 1
 
 [node name="LoadingPhaseLabel" type="Label" parent="ShellUiRoot/LoadingPanel/LoadingStack"]
@@ -72,7 +72,7 @@ theme_override_constants/separation = 10
 
 [node name="EntryTitleLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
 layout_mode = 2
-text = "云织航行"
+text = "云海织航"
 horizontal_alignment = 1
 
 [node name="ContinueLockReasonLabel" type="Label" parent="ShellUiRoot/EntryPanel/EntryStack"]
@@ -142,14 +142,14 @@ theme_override_constants/separation = 10
 
 [node name="AudioPromptLabel" type="Label" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
-text = "启用音频后开始。"
+text = "启用船内声场后登船。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="ConfirmAudioButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
 focus_mode = 2
-text = "启用音频  Enter"
+text = "启用声场  Enter"
 
 [node name="ContinueMutedButton" type="Button" parent="ShellUiRoot/AudioActivationPanel/AudioStack"]
 layout_mode = 2
@@ -182,14 +182,14 @@ theme_override_constants/separation = 10
 
 [node name="EphemeralMessageLabel" type="Label" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2
-text = "本地存储不可用，进度将不会保存。"
+text = "航行日志暂不可写入，当前进度不会记录。"
 horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="ContinueWithoutSavingButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2
 focus_mode = 2
-text = "不保存并继续  Enter"
+text = "继续本次航行  Enter"
 
 [node name="EphemeralReturnButton" type="Button" parent="ShellUiRoot/EphemeralWarningPanel/EphemeralStack"]
 layout_mode = 2

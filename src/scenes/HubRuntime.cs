@@ -47,7 +47,10 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> hubSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> hubExteriorSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> hubInteriorSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
+	private ColorRect? chartMistSelectionFrame;
+	private ColorRect? chartMarketSelectionFrame;
 	private Label? chartStatusLabel;
 	private Label? explorationRouteLabel;
 	private Label? explorationResourceLabel;
@@ -90,7 +93,7 @@ public partial class HubRuntime : Node2D
 		ShowHub();
 		if (hasLoadableProgress)
 		{
-			SetSaveStatus("检测到本地进度：点击加载恢复。");
+			SetSaveStatus("检测到本地航行日志：点击读取恢复。");
 		}
 		else if (!string.IsNullOrWhiteSpace(lastDurableImportFailure))
 		{
@@ -98,7 +101,7 @@ public partial class HubRuntime : Node2D
 		}
 		else
 		{
-			SetSaveStatus("暂无可加载进度：保存后可加载。");
+			SetSaveStatus("暂无可读取航行日志：记录后可读取。");
 		}
 		onboarding.ObserveHubVisible(inputReachable: true, ownerStateAlreadyMutated: true);
 		UpdateOnboardingHint();
@@ -197,7 +200,7 @@ public partial class HubRuntime : Node2D
 		currentScreen = "chart";
 		domain.OpenChart();
 		ShowChartPanel();
-		SetChartStatus("HUD / 航图已打开：选择一条 MVP 航线后确认出发。");
+		SetChartStatus("航图桌已展开：选择一条可读航线后确认离港。");
 		UpdateOnboardingHint();
 	}
 
@@ -300,7 +303,7 @@ public partial class HubRuntime : Node2D
 		{
 			pendingOverwriteConfirmation = true;
 			pendingDeleteConfirmation = false;
-			SetSaveStatus("覆盖确认：再次点击保存将覆盖当前本地进度。");
+			SetSaveStatus("覆盖确认：再次记录将覆盖当前本地航行日志。");
 			RefreshSaveDeleteAffordance();
 			return;
 		}
@@ -326,8 +329,8 @@ public partial class HubRuntime : Node2D
 		hasLoadableProgress = durableSaved;
 		lastDurableImportFailure = "";
 		SetSaveStatus(durableSaved
-			? $"保存完成：本地进度 gen {result.Generation} 可加载"
-			: $"保存完成：canonical progress gen {result.Generation} / 本地写入失败 {durableReason}");
+			? $"保存完成：本地航行日志 gen {result.Generation} 可读取"
+			: $"保存完成：核心进度 gen {result.Generation} / 本地写入失败 {durableReason}");
 		RefreshSaveDeleteAffordance();
 		UpdateOnboardingHint();
 	}
@@ -349,7 +352,7 @@ public partial class HubRuntime : Node2D
 		if (!importResult && !hasLoadableProgress)
 		{
 			SetSaveStatus(string.IsNullOrWhiteSpace(lastDurableImportFailure)
-				? "暂无可加载进度：请先保存。"
+				? "暂无可读取航行日志：请先记录。"
 				: $"本地存档不可用：{lastDurableImportFailure}");
 			RefreshSaveDeleteAffordance();
 			return;
@@ -369,11 +372,11 @@ public partial class HubRuntime : Node2D
 		playerPosition = new Vector2(restored.PlayerX, restored.PlayerY);
 		var restoredScreenName = currentScreen switch
 		{
-			"chart" => "航图 HUD",
-			"exploration" => "探索 HUD",
-			_ => "Hub",
+			"chart" => "航图桌",
+			"exploration" => "雾海搜撤记录",
+			_ => "空艇停泊区",
 		};
-		SetSaveStatus($"加载完成：本地进度 gen {result.Generation} / {restoredScreenName}");
+		SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / {restoredScreenName}");
 
 		if (currentScreen == "chart")
 		{
@@ -383,7 +386,7 @@ public partial class HubRuntime : Node2D
 		else if (currentScreen == "exploration")
 		{
 			ShowExplorationSurface();
-			SetSaveStatus($"加载完成：本地进度 gen {result.Generation} / 探索 HUD");
+			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 雾海搜撤记录");
 		}
 		else
 		{
@@ -401,7 +404,7 @@ public partial class HubRuntime : Node2D
 		{
 			pendingOverwriteConfirmation = false;
 			pendingDeleteConfirmation = false;
-			SetSaveStatus("没有可删除的本地进度。");
+			SetSaveStatus("没有可删除的本地航行日志。");
 			RefreshSaveDeleteAffordance();
 			return;
 		}
@@ -410,7 +413,7 @@ public partial class HubRuntime : Node2D
 		{
 			pendingOverwriteConfirmation = false;
 			pendingDeleteConfirmation = true;
-			SetSaveStatus("删除确认：再次点击删除将移除本地进度与隔离副本。");
+			SetSaveStatus("删除确认：再次点击删除将移除本地航行日志与隔离副本。");
 			RefreshSaveDeleteAffordance();
 			return;
 		}
@@ -422,7 +425,7 @@ public partial class HubRuntime : Node2D
 		lastDurableImportFailure = "";
 		pendingOverwriteConfirmation = false;
 		pendingDeleteConfirmation = false;
-		SetSaveStatus("已删除本地进度：保存后可再次加载。");
+		SetSaveStatus("已删除本地航行日志：记录后可再次读取。");
 		RefreshSaveDeleteAffordance();
 	}
 
@@ -441,7 +444,7 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(true);
 		UpdateHubSummary();
 		SetWorldMode("hub");
-		SetFooter("岛屿停泊区：移动到登船坡道按 E 进入飞船内部。保存/加载可用按钮或 Ctrl+S / Ctrl+L。");
+		SetFooter("玻璃港停泊浮岛：移动到登船坡道按 E 进入云织号。航行日志可用按钮或 Ctrl+S / Ctrl+L。");
 		GrabButton("SaveButton");
 		UpdateOnboardingHint();
 	}
@@ -497,7 +500,7 @@ public partial class HubRuntime : Node2D
 		hubSpace = "interior";
 		playerPosition = ShipInteriorPlayerStart;
 		SetWorldMode("hub");
-		SetFooter("已进入云织号内部：沿走廊前往驾驶舱、货舱或轮机间。");
+		SetFooter("已进入云织号船内：沿走廊前往驾驶舱、货舱或轮机间。");
 	}
 
 	public void ExitShipInterior()
@@ -560,7 +563,7 @@ public partial class HubRuntime : Node2D
 			lastDurableImportFailure = "";
 			pendingOverwriteConfirmation = false;
 			pendingDeleteConfirmation = false;
-			SetSaveStatus("暂无可加载进度：保存后可加载。");
+			SetSaveStatus("暂无可读取航行日志：记录后可读取。");
 			RefreshSaveDeleteAffordance();
 			return;
 		}
@@ -571,7 +574,7 @@ public partial class HubRuntime : Node2D
 		lastDurableImportFailure = "";
 		pendingOverwriteConfirmation = false;
 		pendingDeleteConfirmation = false;
-		SetSaveStatus("暂无可加载进度：保存后可加载。");
+		SetSaveStatus("暂无可读取航行日志：记录后可读取。");
 		RefreshSaveDeleteAffordance();
 	}
 
@@ -719,6 +722,7 @@ public partial class HubRuntime : Node2D
 		playableLayer.AddChild(interactionLayer);
 
 		AddHubGreyboxSet();
+		AddChartGreyboxSet();
 		AddExplorationGreyboxSet();
 		hubShipEntryMarker = AddWorldMarker("ShipEntryInteractPoint", new Vector2(202, 584), new Color(0.45f, 0.62f, 0.52f), "登船 E");
 		hubShipExitMarker = AddWorldMarker("ShipExitInteractPoint", new Vector2(224, 584), new Color(0.45f, 0.52f, 0.62f), "下船 E");
@@ -840,6 +844,49 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
 	}
 
+	private void AddChartGreyboxSet()
+	{
+		AddSceneRect(chartSceneItems, "ChartCabinBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.08f, 0.12f, 0.13f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartTableShadow", new Vector2(128, 210), new Vector2(1024, 398), new Color(0.05f, 0.08f, 0.08f, 0.82f));
+		AddSceneRect(chartSceneItems, "ChartTableSurface", new Vector2(150, 190), new Vector2(980, 382), new Color(0.31f, 0.24f, 0.16f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartTableBrassRimTop", new Vector2(172, 212), new Vector2(936, 10), new Color(0.70f, 0.55f, 0.31f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartTableBrassRimBottom", new Vector2(172, 548), new Vector2(936, 10), new Color(0.70f, 0.55f, 0.31f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartParchmentMap", new Vector2(242, 238), new Vector2(654, 270), new Color(0.73f, 0.66f, 0.48f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartParchmentInnerTint", new Vector2(266, 262), new Vector2(606, 222), new Color(0.60f, 0.62f, 0.50f, 0.72f));
+		AddSceneEllipse(chartSceneItems, "ChartOriginGlassHarborNode", new Vector2(342, 374), new Vector2(32, 22), new Color(0.32f, 0.50f, 0.48f, 0.98f));
+		AddSceneLabel(chartSceneItems, "ChartOriginGlassHarborLabel", new Vector2(286, 402), new Vector2(118, 24), "玻璃港");
+		AddScenePolygon(chartSceneItems, "ChartRouteMistLine",
+			[
+				new Vector2(362, 366),
+				new Vector2(640, 302),
+				new Vector2(650, 318),
+				new Vector2(370, 382),
+			],
+			new Color(0.46f, 0.66f, 0.62f, 0.92f));
+		AddScenePolygon(chartSceneItems, "ChartRouteMarketLine",
+			[
+				new Vector2(364, 382),
+				new Vector2(742, 432),
+				new Vector2(738, 450),
+				new Vector2(360, 400),
+			],
+			new Color(0.76f, 0.55f, 0.30f, 0.90f));
+		AddSceneEllipse(chartSceneItems, "ChartMistDestinationNode", new Vector2(684, 304), new Vector2(34, 22), new Color(0.40f, 0.64f, 0.56f, 0.98f));
+		AddSceneEllipse(chartSceneItems, "ChartMarketDestinationNode", new Vector2(792, 444), new Vector2(34, 22), new Color(0.70f, 0.48f, 0.28f, 0.98f));
+		chartMistSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMistSelectionFrame", new Vector2(630, 274), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
+		chartMarketSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMarketSelectionFrame", new Vector2(738, 414), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
+		chartMistSelectionFrame.Visible = false;
+		chartMarketSelectionFrame.Visible = false;
+		AddSceneLabel(chartSceneItems, "ChartMistRouteLabel", new Vector2(610, 334), new Vector2(180, 24), "雾海短程 / 雾灯残骸");
+		AddSceneLabel(chartSceneItems, "ChartMarketRouteLabel", new Vector2(702, 478), new Vector2(210, 24), "旧集市航道 / 旧集市边缘");
+		AddSceneRect(chartSceneItems, "ChartCompassPlate", new Vector2(930, 252), new Vector2(124, 124), new Color(0.18f, 0.29f, 0.30f, 0.95f));
+		AddSceneRect(chartSceneItems, "ChartCompassNeedle", new Vector2(988, 270), new Vector2(8, 88), new Color(0.76f, 0.64f, 0.38f, 0.98f));
+		AddSceneLabel(chartSceneItems, "ChartCompassLabel", new Vector2(934, 378), new Vector2(116, 24), "罗经稳定");
+		AddSceneRect(chartSceneItems, "ChartRiskNotePanel", new Vector2(918, 422), new Vector2(184, 86), new Color(0.20f, 0.22f, 0.18f, 0.92f));
+		AddSceneLabel(chartSceneItems, "ChartRiskNoteLabel", new Vector2(930, 430), new Vector2(160, 62), "可读航线：雾带低威胁 / 集市中威胁");
+		AddSceneLabel(chartSceneItems, "ChartSceneInstructionLabel", new Vector2(340, 520), new Vector2(594, 26), "选择航线后确认离港，航程会进入雾海搜撤。");
+	}
+
 	private void AddExplorationGreyboxSet()
 	{
 		AddSceneRect(explorationSceneItems, "ExplorationPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.10f, 0.20f, 0.25f, 0.98f));
@@ -875,7 +922,7 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(explorationSceneItems, "ExplorationIslandIdentityLabel", new Vector2(432, 466), new Vector2(356, 26), "雾海浮岛：沿路径接近残骸搜索");
 		AddSceneRect(explorationSceneItems, "ExplorationRouteTrail", new Vector2(176, 586), new Vector2(820, 14), new Color(0.34f, 0.54f, 0.50f, 0.95f));
 		explorationRouteProgressFill = AddSceneRect(explorationSceneItems, "ExplorationRouteProgressFill", new Vector2(176, 586), new Vector2(0, 14), new Color(0.78f, 0.70f, 0.36f, 0.98f));
-		explorationPointSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationPointSemanticLabel", new Vector2(186, 508), new Vector2(360, 24), "搜索点：待接近");
+		explorationPointSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationPointSemanticLabel", new Vector2(186, 508), new Vector2(360, 24), "搜索点：未接近残骸");
 		AddSceneRect(explorationSceneItems, "SearchWreckProp", new Vector2(558, 540), new Vector2(170, 66), new Color(0.28f, 0.42f, 0.29f, 0.96f));
 		AddSceneRect(explorationSceneItems, "SearchWreckMast", new Vector2(630, 510), new Vector2(12, 42), new Color(0.56f, 0.48f, 0.34f, 0.95f));
 		AddSceneRect(explorationSceneItems, "SearchWreckSignalGlow", new Vector2(594, 574), new Vector2(96, 10), new Color(0.78f, 0.84f, 0.46f, 0.98f));
@@ -1017,6 +1064,7 @@ public partial class HubRuntime : Node2D
 
 		selectedRoute = domain.Snapshot.SelectedRouteId;
 		SetChartStatus($"已选择航线：{RouteName()}。按“确认出发”进入探索。");
+		UpdateChartSceneSelection();
 		GrabButton("DepartButton");
 		UpdateOnboardingHint();
 	}
@@ -1033,7 +1081,8 @@ public partial class HubRuntime : Node2D
 		}
 		SetHubControlsEnabled(false);
 		SetWorldMode("chart");
-		SetFooter("HUD / 航图已接管输入：方向键仅在航图内移动，Esc 返回 Hub。");
+		UpdateChartSceneSelection();
+		SetFooter("航图桌已展开：方向键在航线控件间移动，Esc 收起航图。");
 		GrabButton("RouteMistButton");
 	}
 
@@ -1050,7 +1099,19 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(false);
 		SetWorldMode("exploration");
 		SetExplorationStatus();
-		SetFooter("探索开始：移动到残骸旁按 E 完成三段扫描，回到空艇旁按 E 预热并驾驶返航。Ctrl+S 保存，Ctrl+L 加载。");
+		SetFooter("雾海搜撤开始：移动到残骸旁按 E 完成三段扫描，回到空艇旁按 E 预热并驾驶返航。");
+	}
+
+	private void UpdateChartSceneSelection()
+	{
+		if (chartMistSelectionFrame is not null)
+		{
+			chartMistSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.mist";
+		}
+		if (chartMarketSelectionFrame is not null)
+		{
+			chartMarketSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.market";
+		}
 	}
 
 	private void SetExplorationStatus()
@@ -1116,7 +1177,7 @@ public partial class HubRuntime : Node2D
 		UpdateExplorationMicroGameSemantics();
 
 		var activePoint = string.IsNullOrWhiteSpace(snapshot.LastSearchPointId)
-			? "待接近"
+			? "未接近残骸"
 			: string.IsNullOrWhiteSpace(snapshot.LastSearchPointName) ? snapshot.LastSearchPointId : snapshot.LastSearchPointName;
 		if (explorationPointSemanticLabel is not null)
 		{
@@ -1257,7 +1318,7 @@ public partial class HubRuntime : Node2D
 
 	private string RouteName() =>
 		string.IsNullOrWhiteSpace(selectedRoute)
-			? "未命名航线"
+			? "待选择航线"
 			: domain.GetRouteDisplayName(selectedRoute);
 
 	private void SetHubControlsEnabled(bool enabled)
@@ -1284,10 +1345,15 @@ public partial class HubRuntime : Node2D
 		SetSceneGroupVisible(hubSceneItems, mode == "hub");
 		SetSceneGroupVisible(hubExteriorSceneItems, mode == "hub" && hubSpace == "exterior");
 		SetSceneGroupVisible(hubInteriorSceneItems, mode == "hub" && hubSpace == "interior");
+		SetSceneGroupVisible(chartSceneItems, mode == "chart");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
 		if (mode == "hub")
 		{
 			UpdateHubInteriorSemantics(domain.Snapshot);
+		}
+		if (mode == "chart")
+		{
+			UpdateChartSceneSelection();
 		}
 		if (hubShipEntryMarker is not null) hubShipEntryMarker.Visible = mode == "hub" && hubSpace == "exterior";
 		if (hubShipExitMarker is not null) hubShipExitMarker.Visible = mode == "hub" && hubSpace == "interior";
@@ -1479,13 +1545,13 @@ public partial class HubRuntime : Node2D
 	{
 		return stepId switch
 		{
-			OnboardingManager.FindHubHudStepId => "新手提示：查看 Hub 状态，按 M 或靠近舵台按 E 打开航图。",
+			OnboardingManager.FindHubHudStepId => "新手提示：查看船内状态，按 M 或靠近舵台按 E 打开航图桌。",
 			OnboardingManager.OpenChartStepId => "新手提示：打开航图后选择一条可见航线。",
 			OnboardingManager.SelectRouteStepId => "新手提示：选择“雾海短程”或旧集市航道，然后确认出发。",
-			OnboardingManager.DepartRouteStepId => "新手提示：确认出发会进入探索 HUD。",
+			OnboardingManager.DepartRouteStepId => "新手提示：确认出发会进入雾海搜撤。",
 			OnboardingManager.AdvancePressureStepId => "新手提示：靠近漂浮残骸按 E 搜索，观察资源、威胁和船体反馈。",
 			OnboardingManager.NoticeSaveLoadStepId => "新手提示：Ctrl+S 保存、Ctrl+L 加载；按钮也可用。",
-			OnboardingManager.ReturnHubStepId => "新手提示：靠近返航信标按 E 返回 Hub。",
+			OnboardingManager.ReturnHubStepId => "新手提示：靠近返航信标按 E 返回空艇。",
 			OnboardingManager.NoticeSummaryChangeStepId => "新手提示：返回后查看货舱、船体和航图摘要变化。",
 			_ => "新手提示：继续完成当前首轮目标。",
 		};
@@ -1519,7 +1585,7 @@ public partial class HubRuntime : Node2D
 		var button = new Button
 		{
 			Name = "DeleteProgressButton",
-			Text = "删除本地进度",
+			Text = "删除本地航行日志",
 			FocusMode = Control.FocusModeEnum.All,
 			Disabled = true,
 		};
@@ -1571,7 +1637,7 @@ public partial class HubRuntime : Node2D
 			if (updateStatus)
 			{
 				SetSaveStatus(string.IsNullOrWhiteSpace(lastDurableImportFailure)
-					? "暂无可加载进度：保存后可加载。"
+					? "暂无可读取航行日志：记录后可读取。"
 					: $"本地存档已隔离：{lastDurableImportFailure}");
 			}
 			RefreshSaveDeleteAffordance();
@@ -1602,7 +1668,7 @@ public partial class HubRuntime : Node2D
 			lastDurableImportFailure = "";
 			if (updateStatus)
 			{
-				SetSaveStatus("本地耐久存档已导入，可加载 canonical progress。");
+				SetSaveStatus("本地航行日志已导入，可读取核心进度。");
 			}
 			RefreshSaveDeleteAffordance();
 			return true;
@@ -1649,14 +1715,14 @@ public partial class HubRuntime : Node2D
 		}
 		if (hubActionButtons[1] is Button saveButton)
 		{
-			saveButton.Text = pendingOverwriteConfirmation ? "确认覆盖本地进度" : "保存  Ctrl+S";
+			saveButton.Text = pendingOverwriteConfirmation ? "确认覆盖航行日志" : "记录航行  Ctrl+S";
 		}
 		if (deleteProgressButton is not null)
 		{
 			var enabled = currentScreen == "hub" && HasAnyDurableProgressFile();
 			deleteProgressButton.Disabled = !enabled;
 			deleteProgressButton.FocusMode = enabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
-			deleteProgressButton.Text = pendingDeleteConfirmation ? "确认删除本地进度" : "删除本地进度";
+			deleteProgressButton.Text = pendingDeleteConfirmation ? "确认删除本地航行日志" : "删除本地航行日志";
 		}
 	}
 

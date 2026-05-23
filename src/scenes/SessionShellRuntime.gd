@@ -126,7 +126,7 @@ func _handle_recovery_shortcut(keycode: Key) -> bool:
 func _on_start_pressed() -> void:
 	var prompt := find_child("AudioPromptLabel", true, false) as Label
 	if prompt != null:
-		prompt.text = "启用音频后开始。"
+		prompt.text = "启用船内声场后登船。"
 
 	_show_only(_audio_panel)
 	_grab_button("ConfirmAudioButton")

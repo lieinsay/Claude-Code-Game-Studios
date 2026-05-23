@@ -29,7 +29,7 @@ func _run() -> void:
 	session.call("_on_start_pressed")
 	await process_frame
 	_expect(_is_panel_visible(session, "AudioActivationPanel"), "Audio activation panel is visible after Start")
-	_expect(_label_text(session, "AudioPromptLabel") == "启用音频后开始。", "Audio prompt uses Chinese text")
+	_expect(_label_text(session, "AudioPromptLabel") == "启用船内声场后登船。", "Audio prompt uses final scene text")
 
 	session.call("_on_audio_confirmed")
 	await process_frame
@@ -52,12 +52,12 @@ func _run() -> void:
 	_expect(str(initial_steps.get("find_hub_hud", "")) == "Completed", "Onboarding completes Hub HUD visibility in runtime")
 	_expect(str(initial_onboarding.get("next_hint_step", "")) == "open_chart", "Onboarding next hint starts at opening Chart")
 	_expect(int(initial_onboarding.get("hint_mouse_filter", -1)) == Control.MOUSE_FILTER_IGNORE, "Runtime onboarding hint ignores mouse input")
-	_expect(_label_text(session, "Header") == "云织号空艇中枢", "Hub header uses Chinese text")
+	_expect(_label_text(session, "Header") == "云织号停泊甲板", "Hub header uses final scene text")
 	_expect(_label_text(session, "CargoValue").contains("受困货物 0"), "Cargo status reports trapped goods in Chinese")
 	_expect(_label_text(session, "HullValue").contains("可出航"), "Hull status uses Chinese text")
-	_expect(_button_text(session, "ChartButton").contains("航图 / HUD"), "HUD and Chart entry is visible")
-	_expect(_button_text(session, "SaveButton").contains("保存"), "Save entry is visible")
-	_expect(_button_text(session, "LoadButton").contains("加载"), "Load entry is visible")
+	_expect(_button_text(session, "ChartButton").contains("航图桌"), "Chart table entry is visible")
+	_expect(_button_text(session, "SaveButton").contains("记录"), "Save entry is visible")
+	_expect(_button_text(session, "LoadButton").contains("读取"), "Load entry is visible")
 	_expect(_button_text(session, "DeleteProgressButton").contains("删除"), "Delete local progress entry is visible")
 	_expect(_button_disabled(session, "DeleteProgressButton"), "Delete local progress starts disabled with no save")
 
@@ -149,7 +149,11 @@ func _run() -> void:
 	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
 	var chart_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(chart_onboarding.get("next_hint_step", "")) == "select_route", "Onboarding advances to route-selection hint after Chart opens")
-	_expect(_label_text(session, "ChartTitleLabel") == "HUD / 航图界面", "Chart panel identifies the UI/HUD surface")
+	_expect(_label_text(session, "ChartTitleLabel") == "航图桌", "Chart panel identifies the authored chart table surface")
+	_expect(hub.call("DebugNodeVisible", "ChartTableSurface"), "Chart mode has a visible chart table scene")
+	_expect(hub.call("DebugNodeVisible", "ChartParchmentMap"), "Chart mode has a parchment map surface")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteMistLine"), "Chart mode shows the mist route line")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode shows the market route line")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "LoadButton"), "Load entry is disabled while Chart panel is open")
@@ -172,6 +176,7 @@ func _run() -> void:
 	var route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(route_snapshot.get("selected_route", "")) == "route.mist", "C# HubRuntime route selection is backed by ChartManager state")
 	_expect(str(route_snapshot.get("chart_state", "")) == "RouteSelected", "ChartManager enters RouteSelected after route choice")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteMistSelectionFrame"), "Chart scene highlights the selected route")
 	hub.call("OnDepartPressed")
 	await process_frame
 	var departed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -197,11 +202,11 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration has an authored greybox sky field")
 	_expect(hub.call("DebugNodeVisible", "SearchWreckProp"), "Exploration has an authored greybox search wreck prop")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconProp"), "Exploration has an authored greybox return beacon prop")
-	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("待接近"), "Exploration scene starts with dynamic search-point semantic label")
+	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("未接近残骸"), "Exploration scene starts with dynamic search-point semantic label")
 	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("携带 0/500"), "Exploration scene starts with dynamic extraction status")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration threat zone is hidden before pressure")
 	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub greybox floor is hidden while in Exploration")
-	_expect(_label_text(session, "ExplorationTitleLabel") == "探索 HUD", "Exploration surface has a clear title")
+	_expect(_label_text(session, "ExplorationTitleLabel") == "雾海搜撤记录", "Exploration surface has a clear title")
 	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Exploration surface shows selected route")
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("资源压力"), "Exploration surface shows resource pressure feedback")
 	_expect(_label_text(session, "ExplorationThreatLabel").contains("威胁反馈"), "Exploration surface shows threat feedback")
@@ -270,7 +275,7 @@ func _run() -> void:
 	var saved_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(saved_onboarding.get("next_hint_step", "")) == "return_hub", "Onboarding advances to return-Hub hint after save/load awareness")
 	var saved_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
-	_expect(_label_text(session, "SaveStatusLabel").contains("本地进度"), "Exploration state saves through canonical Persistence and local durable progress")
+	_expect(_label_text(session, "SaveStatusLabel").contains("本地航行日志"), "Exploration state saves through canonical Persistence and local durable progress")
 	_expect(int(saved_snapshot.get("persistence_generation", 0)) > 0, "Canonical Persistence records progress generation")
 
 	hub.call("DebugSetPlayerPosition", Vector2(250, 613))
