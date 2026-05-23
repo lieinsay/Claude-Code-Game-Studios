@@ -415,6 +415,20 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("source_gdd", "")).ends_with("scene-physics-unit-system.md"), "%s physics contract points to GDD #20" % scene_id)
 	_expect(str(contract.get("scene_type", "")) == expected_scene_type, "%s declares the expected scene type" % scene_id)
 	_expect(str(contract.get("movement_plane", "")) != "", "%s declares a movement plane" % scene_id)
+	_expect(bool(contract.get("layer_height_model_ready", false)), "%s declares Layer / Height readiness" % scene_id)
+	_expect(bool(contract.get("cutaway_reveal_ready", false)), "%s declares Cutaway / Reveal readiness" % scene_id)
+	var layer_model := str(contract.get("layer_height_model", ""))
+	var reveal_model := str(contract.get("cutaway_reveal_model", ""))
+	var floor_state := str(contract.get("floor_state", ""))
+	_expect(layer_model != "", "%s exposes a Layer / Height Model" % scene_id)
+	_expect(reveal_model != "", "%s exposes a Cutaway / Reveal Model or N/A true rule" % scene_id)
+	_expect(floor_state.contains("floor_id="), "%s declares Floor State or single-floor N/A state" % scene_id)
+	if expected_scene_type == "水平场景":
+		_expect(layer_model.contains("primary_walkable_layer"), "%s declares a primary walkable layer" % scene_id)
+		_expect(reveal_model.contains("behind_object_reveal"), "%s classifies behind-object reveal behavior or N/A true" % scene_id)
+	else:
+		_expect(layer_model.contains("floor_index"), "%s declares floor index layering" % scene_id)
+		_expect(reveal_model.contains("active_floor_focus"), "%s declares active-floor reveal behavior" % scene_id)
 	var bounds := contract.get("walk_bounds_size", Vector2.ZERO) as Vector2
 	_expect(bounds.x > 0.0 and bounds.y > 0.0, "%s declares walk bounds in scene space" % scene_id)
 	_expect(str(contract.get("scale_reference", "")).contains("player"), "%s declares unit scale against the player" % scene_id)

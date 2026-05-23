@@ -3,8 +3,17 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 016 scene physics contract retrofit verified; Polish Story 015 focused human QA still required before release checklist/gate
+Task: Polish Story 016 scene physics contract refreshed for Layer / Height and Cutaway / Reveal gates; Polish Story 015 focused human QA still required before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics Contract Layer/Cutaway Refresh 2026-05-24
+- Input: after #20 added Layer / Height Model, Cutaway / Reveal Model, Floor State, and behind-object reveal as required scene physics gates, the existing Story 016 runtime debug contracts needed to match the new contract shape.
+- Runtime refresh: `HubRuntime.DebugScenePhysicsContract()` now exposes `layer_height_model_ready`, `cutaway_reveal_ready`, `layer_height_model`, `cutaway_reveal_model`, and `floor_state` for `hub_island_dock`, `hub_ship_interior`, and `exploration_mist_island`.
+- Smoke refresh: `tests/smoke/session_shell_visual_probe.gd` now asserts Layer / Height readiness, Cutaway / Reveal readiness, single-floor or active-floor state, horizontal `primary_walkable_layer`, horizontal `behind_object_reveal` classification or N/A true, and vertical active-floor reveal behavior.
+- Evidence refreshed: Story 016 and `production/qa/evidence/polish-016-scene-physics-contract-retrofit-evidence.md` now record the new fields and the latest build warning count.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS.
+- Note: first parallel smoke attempt observed old C# contract fields before the build completed; sequential rerun after build passed.
+- Next: Polish Story 015 focused human QA remains the release gate blocker; do not proceed to formal release checklist/gate until the rerun is PASS or PASS WITH CONDITIONS, or the user explicitly waives the blocker.
 
 ## Session Extract -- Scene Physics Contract Retrofit Started 2026-05-24
 - User clarified the bottom-layer design change: physical-world exploration is core gameplay, and scene must be distinguished from UI.

@@ -17,9 +17,9 @@ This story retrofits the current Polish 015 slice without inventing a broad phys
 
 ## Acceptance Criteria
 
-- [x] GIVEN Hub exterior is active, WHEN smoke queries the scene physics contract, THEN it declares `水平场景`, walk bounds, blocking static units, soft-overlap boarding, water boundary policy, unit scale, occlusion policy, dynamic behavior extension rules, and stuck-state recovery.
-- [x] GIVEN ship interior is active, WHEN smoke queries the scene physics contract, THEN it declares `垂直场景`, room-scale units, hull/bay blocking semantics, soft-overlap helm/storage/engine/exit anchors, cockpit glass as visual-only surface, occlusion policy, and stuck-state recovery.
-- [x] GIVEN Exploration is active, WHEN smoke queries the scene physics contract, THEN it declares `水平场景`, island walk bounds, search wreck and return ship blocking semantics, soft-overlap search/return anchors, water boundary policy, threat/height markers, occlusion policy, and stuck-state recovery.
+- [x] GIVEN Hub exterior is active, WHEN smoke queries the scene physics contract, THEN it declares `水平场景`, Layer / Height Model, Cutaway / Reveal N/A true rule, single-floor state, walk bounds, blocking static units, soft-overlap boarding, water boundary policy, unit scale, occlusion policy, dynamic behavior extension rules, and stuck-state recovery.
+- [x] GIVEN ship interior is active, WHEN smoke queries the scene physics contract, THEN it declares `垂直场景`, floor index layering, `front_wall_removed + active_floor_focus`, Floor State, room-scale units, hull/bay blocking semantics, soft-overlap helm/storage/engine/exit anchors, cockpit glass as visual-only surface, occlusion policy, and stuck-state recovery.
+- [x] GIVEN Exploration is active, WHEN smoke queries the scene physics contract, THEN it declares `水平场景`, Layer / Height Model, Cutaway / Reveal N/A true rule, single-floor state, island walk bounds, search wreck and return ship blocking semantics, soft-overlap search/return anchors, water boundary policy, threat/height markers, occlusion policy, and stuck-state recovery.
 - [x] GIVEN the current runtime switches between Hub exterior, ship interior, and Exploration, WHEN smoke asks for the current physics contract, THEN the returned `scene_id` follows the active world scene state.
 - [x] GIVEN a UI/HUD label, button, or dashboard node exists, WHEN evaluating scene completion, THEN it does not count as a physical scene unit or as proof that the scene is complete.
 - [x] GIVEN future scene units add pushable, elastic, sliding, breakable, one-way, moving-platform, mirror, glass, or water behavior, THEN the contract must declare the behavior explicitly before implementation readiness.
@@ -30,13 +30,13 @@ This story retrofits the current Polish 015 slice without inventing a broad phys
   - `hub_island_dock`
   - `hub_ship_interior`
   - `exploration_mist_island`
-- Each contract exposes scene type, movement plane, walk bounds, player-relative scale, occlusion/layering policy, collision semantics, special surface policy, dynamic behavior extension rule, stuck-state recovery, and authored physical unit count.
+- Each contract exposes scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model or N/A true rule, Floor State, walk bounds, player-relative scale, occlusion/layering policy, collision semantics, special surface policy, dynamic behavior extension rule, stuck-state recovery, and authored physical unit count.
 - Updated the visual smoke probe to assert all three contracts and to verify the active contract follows scene state transitions.
 - Updated GDD #19 and #20 to explicitly state that scene is not UI: HUD, buttons, labels, text panels, and overlays may support scene readability, but they cannot substitute for physical scene units.
 
 ## Verification Targets
 
-- [x] `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS, 0 warnings / 0 errors on final rerun.
+- [x] `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` — PASS, 5 existing warnings / 0 errors on latest rerun.
 - [x] `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` — PASS.
 - [x] `git diff --check` — PASS, LF/CRLF warnings only.
 
