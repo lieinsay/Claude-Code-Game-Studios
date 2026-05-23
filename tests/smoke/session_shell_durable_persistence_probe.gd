@@ -87,11 +87,23 @@ func _run() -> void:
 		_finish()
 		return
 	_expect(_button_disabled(corrupt_session, "LoadButton"), "Load button is disabled when durable progress fails validation")
+	_expect(not bool(corrupt_hub.call("DebugDurableProgressExists")), "corrupt durable progress is removed from the active save path")
+	_expect(bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "corrupt durable progress is quarantined for diagnostics")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("已隔离"), "Corrupt durable progress reports quarantine on boot")
 	corrupt_hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("校验失败"), "Corrupt durable progress reports checksum failure and does not load")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("可重新保存"), "Corrupt durable progress tells the player a new safe save can replace it")
+
+	corrupt_hub.call("OnSavePressed")
+	await process_frame
+	_expect(bool(corrupt_hub.call("DebugDurableProgressExists")), "new progress can be saved after quarantine")
+	_expect(not _button_disabled(corrupt_session, "LoadButton"), "Load button is re-enabled after saving new progress")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("可加载"), "new save feedback restores continue trust after quarantine")
 
 	corrupt_hub.call("DebugClearDurableProgress")
+	await process_frame
+	_expect(not bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "debug clear removes quarantined progress")
 	corrupt_session.queue_free()
 	await process_frame
 	_finish()

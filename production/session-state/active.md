@@ -3,7 +3,7 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 009 Hub room/interior greybox polish complete; next options are room art/audio pass, backup/quarantine UX, or longer Polish QA
+Task: Polish Story 010 backup/quarantine UX complete; next options are delete/overwrite prompts, room art/audio pass, or longer Polish QA
 <!-- /STATUS -->
 
 ## Session Extract -- Polish Story 009 Hub Room Interior Greybox Polish Complete 2026-05-23
@@ -13,6 +13,15 @@ Task: Polish Story 009 Hub room/interior greybox polish complete; next options a
 - Godot visual smoke now asserts the new interior details, hidden initial cargo/damage indicators, returned cargo fill, hull damage overlay, dynamic room labels, and the existing route/search/save/load loop.
 - Evidence: `production/qa/evidence/polish-009-hub-room-interior-greybox-polish-evidence.md`.
 - Remaining scope is not a blocker: final room art, authored props, collision/navigation mesh, room ambience/audio, backup/quarantine UX, longer play sessions, and Release readiness remain downstream.
+
+## Session Extract -- Polish Story 010 Backup / Quarantine UX Complete 2026-05-23
+- Story complete: `production/polish-backlog/story-polish-010-backup-quarantine-ux.md` -- Backup / Quarantine UX for Invalid Durable Progress.
+- Input was the next persistence-trust gap after Story 008: checksum-failed durable progress needed to leave the active load path while preserving diagnostic evidence.
+- `HubRuntime` now moves invalid durable progress to `user://cloudweaver_playable_progress.quarantine.json` and removes it from `user://cloudweaver_playable_progress.json`.
+- Boot and Load feedback now explain that invalid progress was isolated and that a new safe save can replace it.
+- A fresh save after quarantine recreates the active durable progress file and re-enables Load.
+- Evidence: `production/qa/evidence/polish-010-backup-quarantine-ux-evidence.md`.
+- Remaining scope is not a blocker: final save-slot browser, delete/overwrite prompts, backup selection UI, long-session QA, room interiors, final art/audio treatment, and Release readiness remain downstream.
 
 ## Session Extract -- Polish Story 008 Save-Slot UX and Continue Trust Complete 2026-05-23
 - Story complete: `production/polish-backlog/story-polish-008-save-slot-ux-continue-trust.md` -- Save-Slot UX and Continue Trust.

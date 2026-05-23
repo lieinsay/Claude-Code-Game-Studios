@@ -10,6 +10,8 @@ public partial class HubRuntime : Node2D
 	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
 	private const string DurableProgressFileName = "cloudweaver_playable_progress.json";
 	private const string DurableProgressPath = $"user://{DurableProgressFileName}";
+	private const string QuarantinedProgressFileName = "cloudweaver_playable_progress.quarantine.json";
+	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
 
@@ -71,9 +73,18 @@ public partial class HubRuntime : Node2D
 		CreatePlayableLayer();
 		WireButtons();
 		ShowHub();
-		SetSaveStatus(hasLoadableProgress
-			? "检测到本地进度：点击加载恢复。"
-			: "暂无可加载进度：保存后可加载。");
+		if (hasLoadableProgress)
+		{
+			SetSaveStatus("检测到本地进度：点击加载恢复。");
+		}
+		else if (!string.IsNullOrWhiteSpace(lastDurableImportFailure))
+		{
+			SetSaveStatus($"本地存档已隔离：{lastDurableImportFailure}");
+		}
+		else
+		{
+			SetSaveStatus("暂无可加载进度：保存后可加载。");
+		}
 		onboarding.ObserveHubVisible(inputReachable: true, ownerStateAlreadyMutated: true);
 		UpdateOnboardingHint();
 	}
@@ -255,6 +266,15 @@ public partial class HubRuntime : Node2D
 
 	public void OnLoadPressed()
 	{
+		if (!Godot.FileAccess.FileExists(DurableProgressPath) && Godot.FileAccess.FileExists(QuarantinedProgressPath))
+		{
+			hasLoadableProgress = false;
+			lastDurableImportFailure = "存档校验失败，已隔离；可重新保存新进度。";
+			SetSaveStatus($"本地存档不可用：{lastDurableImportFailure}");
+			RefreshLoadAffordance();
+			return;
+		}
+
 		var importResult = TryImportDurableProgressFromDisk(updateStatus: false);
 		if (!importResult && !hasLoadableProgress)
 		{
@@ -374,10 +394,18 @@ public partial class HubRuntime : Node2D
 
 	public string DebugDurableProgressPath() => ProjectSettings.GlobalizePath(DurableProgressPath);
 
+	/// <summary>Returns whether invalid durable progress has been isolated for smoke-test diagnostics.</summary>
+	public bool DebugQuarantinedProgressExists() => Godot.FileAccess.FileExists(QuarantinedProgressPath);
+
+	/// <summary>Returns the OS path for the isolated invalid durable progress file.</summary>
+	public string DebugQuarantinedProgressPath() => ProjectSettings.GlobalizePath(QuarantinedProgressPath);
+
 	public void DebugClearDurableProgress()
 	{
+		using var directory = DirAccess.Open("user://");
 		if (!Godot.FileAccess.FileExists(DurableProgressPath))
 		{
+			directory?.Remove(QuarantinedProgressFileName);
 			hasLoadableProgress = false;
 			lastDurableImportFailure = "";
 			SetSaveStatus("暂无可加载进度：保存后可加载。");
@@ -385,8 +413,8 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
-		using var directory = DirAccess.Open("user://");
 		directory?.Remove(DurableProgressFileName);
+		directory?.Remove(QuarantinedProgressFileName);
 		hasLoadableProgress = false;
 		lastDurableImportFailure = "";
 		SetSaveStatus("暂无可加载进度：保存后可加载。");
@@ -1154,29 +1182,37 @@ public partial class HubRuntime : Node2D
 		if (!Godot.FileAccess.FileExists(DurableProgressPath))
 		{
 			hasLoadableProgress = false;
-			lastDurableImportFailure = "";
+			lastDurableImportFailure = Godot.FileAccess.FileExists(QuarantinedProgressPath)
+				? "存档校验失败，已隔离；可重新保存新进度。"
+				: "";
 			if (updateStatus)
 			{
-				SetSaveStatus("暂无可加载进度：保存后可加载。");
+				SetSaveStatus(string.IsNullOrWhiteSpace(lastDurableImportFailure)
+					? "暂无可加载进度：保存后可加载。"
+					: $"本地存档已隔离：{lastDurableImportFailure}");
 			}
 			RefreshLoadAffordance();
 			return false;
 		}
 
-		using var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Read);
-		if (file is null)
+		string json;
+		using (var file = Godot.FileAccess.Open(DurableProgressPath, Godot.FileAccess.ModeFlags.Read))
 		{
-			hasLoadableProgress = false;
-			lastDurableImportFailure = Godot.FileAccess.GetOpenError().ToString();
-			if (updateStatus)
+			if (file is null)
 			{
-				SetSaveStatus($"本地存档读取失败：{lastDurableImportFailure}");
+				hasLoadableProgress = false;
+				lastDurableImportFailure = Godot.FileAccess.GetOpenError().ToString();
+				if (updateStatus)
+				{
+					SetSaveStatus($"本地存档读取失败：{lastDurableImportFailure}");
+				}
+				RefreshLoadAffordance();
+				return false;
 			}
-			RefreshLoadAffordance();
-			return false;
+
+			json = file.GetAsText();
 		}
 
-		var json = file.GetAsText();
 		if (domain.TryImportProgressJson(json, out var reason))
 		{
 			hasLoadableProgress = true;
@@ -1191,14 +1227,31 @@ public partial class HubRuntime : Node2D
 
 		hasLoadableProgress = false;
 		lastDurableImportFailure = reason == "checksum_mismatch"
-			? "存档校验失败，未加载。"
+			? "存档校验失败，已隔离；可重新保存新进度。"
 			: reason;
+		QuarantineDurableProgress(json);
 		if (updateStatus)
 		{
 			SetSaveStatus($"本地存档导入失败：{lastDurableImportFailure}");
 		}
 		RefreshLoadAffordance();
 		return false;
+	}
+
+	private static void QuarantineDurableProgress(string json)
+	{
+		using var directory = DirAccess.Open("user://");
+		directory?.Remove(QuarantinedProgressFileName);
+		if (directory?.Rename(DurableProgressFileName, QuarantinedProgressFileName) == Error.Ok)
+		{
+			return;
+		}
+
+		using (var quarantineFile = Godot.FileAccess.Open(QuarantinedProgressPath, Godot.FileAccess.ModeFlags.Write))
+		{
+			quarantineFile?.StoreString(json);
+		}
+		directory?.Remove(DurableProgressFileName);
 	}
 
 	private void RefreshLoadAffordance()
