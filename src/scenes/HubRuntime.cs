@@ -539,6 +539,89 @@ public partial class HubRuntime : Node2D
 
 	public string DebugHubSpace() => hubSpace;
 
+	public Godot.Collections.Dictionary DebugCurrentScenePhysicsContract()
+	{
+		var sceneId = currentScreen == "exploration"
+			? "exploration_mist_island"
+			: hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock";
+		return DebugScenePhysicsContract(sceneId);
+	}
+
+	public Godot.Collections.Dictionary DebugScenePhysicsContract(string sceneId)
+	{
+		return sceneId switch
+		{
+			"hub_island_dock" => BuildScenePhysicsContract(
+				sceneId,
+				"水平场景",
+				HubWalkBounds,
+				"2.2m player height = 28px marker; walkable dock/island width 1016px",
+				"z_world_background < z_scene_units < z_interaction_markers < z_prompt",
+				"blocking_static: island edge, waterline, dock posts, docked ship hull; soft_overlap: boarding ramp; height_marker: airship envelope and mast silhouettes",
+				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
+				"Clamp player back into HubWalkBounds; boarding ramp remains soft_overlap so stuck states can exit through E interaction",
+				7),
+			"hub_ship_interior" => BuildScenePhysicsContract(
+				sceneId,
+				"垂直场景",
+				ShipInteriorWalkBounds,
+				"2.2m player height = 28px marker; cockpit/cargo/engine bays each read as one room-scale unit",
+				"z_world_background < z_hull_shell < z_room_volumes < z_props < z_interaction_markers",
+				"blocking_static: hull outline, bay separators, exterior door frame; soft_overlap: helm, storage, engine, exit anchors; height_marker: upper hull and window line",
+				"stairs_ladders: represented as future vertical connectors; glass: cockpit window visual-only; mirror: none; elastic: none; pushable: storage crates not pushable in current slice",
+				"Clamp player into ShipInteriorWalkBounds; exit door soft_overlap returns to hub_island_dock if pathing feels trapped",
+				10),
+			"exploration_mist_island" => BuildScenePhysicsContract(
+				sceneId,
+				"水平场景",
+				ExplorationWalkBounds,
+				"2.2m player height = 28px marker; search wreck is about 6 player-widths; return ship is about 5 player-widths",
+				"z_world_background < z_island_body_path < z_wreck_return_ship_threat_units < z_interaction_markers",
+				"blocking_static: island edge, sea, cliff edge, return ship hull, search wreck body; soft_overlap: search scan arc, return helm; height_marker: mast, beacon beam, threat zone overlay",
+				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
+				"Clamp player into ExplorationWalkBounds; search and return stay as soft_overlap anchors so failed movement cannot block progression",
+				12),
+			_ => new Godot.Collections.Dictionary
+			{
+				["scene_id"] = sceneId,
+				["contract_complete"] = false,
+				["error"] = "Unknown scene physics contract.",
+			},
+		};
+	}
+
+	private static Godot.Collections.Dictionary BuildScenePhysicsContract(
+		string sceneId,
+		string sceneType,
+		Rect2 walkBounds,
+		string scaleReference,
+		string occlusionPolicy,
+		string collisionSemantics,
+		string specialSurfaces,
+		string recoveryRule,
+		int authoredPhysicalUnitCount)
+	{
+		return new Godot.Collections.Dictionary
+		{
+			["scene_id"] = sceneId,
+			["contract_complete"] = true,
+			["scene_type"] = sceneType,
+			["movement_plane"] = sceneType == "垂直场景"
+				? "left_right_primary_with_room_depth_and_future_vertical_connectors"
+				: "ground_plane_four_directional",
+			["walk_bounds_position"] = walkBounds.Position,
+			["walk_bounds_size"] = walkBounds.Size,
+			["scale_reference"] = scaleReference,
+			["occlusion_policy"] = occlusionPolicy,
+			["collision_semantics"] = collisionSemantics,
+			["special_surfaces"] = specialSurfaces,
+			["dynamic_behaviors"] = "none_in_current_slice; future units must declare pushable, elastic, sliding, breakable, one_way, or moving_platform explicitly",
+			["recovery_rule"] = recoveryRule,
+			["authored_physical_unit_count"] = authoredPhysicalUnitCount,
+			["source_gdd"] = "design/gdd/scene-physics-unit-system.md",
+		};
+	}
+
 	public int DebugSearchPulseStage() => searchPulseStage;
 
 	public int DebugReturnPrepStage() => returnPrepStage;

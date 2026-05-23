@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 015 implemented and awaiting focused human QA before release checklist/gate
+Task: Polish Story 016 scene physics contract retrofit verified; Polish Story 015 focused human QA still required before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics Contract Retrofit Started 2026-05-24
+- User clarified the bottom-layer design change: physical-world exploration is core gameplay, and scene must be distinguished from UI.
+- Impact: existing domain managers remain valid, but Hub exterior, ship interior, and Exploration can no longer be accepted only through HUD/buttons/text/proximity evidence.
+- New story: `production/polish-backlog/story-polish-016-scene-physics-contract-retrofit.md`.
+- Runtime retrofit: `HubRuntime` now exposes Scene Physics Contracts for `hub_island_dock`, `hub_ship_interior`, and `exploration_mist_island`.
+- Smoke retrofit: `tests/smoke/session_shell_visual_probe.gd` now verifies scene type, movement plane, walk bounds, scale reference, occlusion/layering, collision semantics, special surface policy, dynamic behavior declaration, stuck-state recovery, authored physical unit count, and active scene contract switching.
+- Design gate clarification: GDD #19/#20 now explicitly state that UI/HUD/buttons/labels/text dashboards do not count as scene units or scene completion evidence.
+- Evidence: `production/qa/evidence/polish-016-scene-physics-contract-retrofit-evidence.md`.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
 
 ## Session Extract -- Polish Story 015 Human QA Blocked / BUG-003 Fix Candidate 2026-05-24
 - Focused human QA rerun executed against build `80cf299`.

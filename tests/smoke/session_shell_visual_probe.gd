@@ -73,6 +73,8 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipBalloon"), "Hub shows the airship envelope above the dock")
 	_expect(hub.call("DebugNodeVisible", "HubBoardingRamp"), "Hub has a boarding ramp spatial anchor")
 	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior floor is hidden before boarding")
+	_expect_scene_physics_contract(hub, "hub_island_dock", "水平场景", "water", "blocking_static", "soft_overlap")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "hub_island_dock", "Current physics contract follows Hub exterior state")
 	hub.call("DebugSetPlayerPosition", Vector2(248, 603))
 	await process_frame
 	_expect(hub.call("DebugInteractionPrompt").contains("登船"), "Moving near the ramp reveals ship entry prompt")
@@ -103,6 +105,8 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HelmConsoleProp"), "Hub has an authored greybox helm console prop")
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field is hidden while in Hub")
+	_expect_scene_physics_contract(hub, "hub_ship_interior", "垂直场景", "glass", "blocking_static", "soft_overlap")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "hub_ship_interior", "Current physics contract follows ship interior state")
 	var hub_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
 	_expect(hub_walk_bounds.x > 700.0 and hub_walk_bounds.y > 180.0, "Ship interior exposes a meaningful walkable bounds size")
 	hub.call("DebugSetPlayerPosition", Vector2(20, 20))
@@ -219,6 +223,8 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ExplorationSearchPathSteps"), "Exploration has authored path steps toward search")
 	_expect(hub.call("DebugNodeVisible", "SearchWreckMast"), "Exploration search landmark has a readable wreck mast")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconBeam"), "Exploration return landmark has a visible beacon beam")
+	_expect_scene_physics_contract(hub, "exploration_mist_island", "水平场景", "water", "blocking_static", "soft_overlap")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "exploration_mist_island", "Current physics contract follows Exploration state")
 	_expect(_button_disabled(session, "ExplorationAdvanceButton"), "Search button is disabled before moving near the search landmark")
 	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	hub.call("OnExplorationAdvancePressed")
@@ -395,6 +401,30 @@ func _control_mouse_filter(root_node: Node, node_name: String) -> int:
 func _is_panel_visible(root_node: Node, node_name: String) -> bool:
 	var panel := root_node.find_child(node_name, true, false) as CanvasItem
 	return panel != null and panel.visible
+
+
+func _expect_scene_physics_contract(
+		hub: Node,
+		scene_id: String,
+		expected_scene_type: String,
+		required_surface: String,
+		required_collision: String,
+		required_overlap: String) -> void:
+	var contract := hub.call("DebugScenePhysicsContract", scene_id) as Dictionary
+	_expect(bool(contract.get("contract_complete", false)), "%s physics contract is complete" % scene_id)
+	_expect(str(contract.get("source_gdd", "")).ends_with("scene-physics-unit-system.md"), "%s physics contract points to GDD #20" % scene_id)
+	_expect(str(contract.get("scene_type", "")) == expected_scene_type, "%s declares the expected scene type" % scene_id)
+	_expect(str(contract.get("movement_plane", "")) != "", "%s declares a movement plane" % scene_id)
+	var bounds := contract.get("walk_bounds_size", Vector2.ZERO) as Vector2
+	_expect(bounds.x > 0.0 and bounds.y > 0.0, "%s declares walk bounds in scene space" % scene_id)
+	_expect(str(contract.get("scale_reference", "")).contains("player"), "%s declares unit scale against the player" % scene_id)
+	_expect(str(contract.get("occlusion_policy", "")).contains("z_"), "%s declares scene occlusion/layering policy" % scene_id)
+	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
+	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
+	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
+	_expect(str(contract.get("dynamic_behaviors", "")).contains("future units must declare"), "%s declares dynamic behavior extension rule" % scene_id)
+	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
+	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _save_runtime_screenshot(viewport: Window, path: String, label: String) -> void:
