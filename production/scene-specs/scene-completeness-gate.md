@@ -38,6 +38,24 @@ scene_complete =
 | `codex_review_passed` | Codex review has no blocker across purpose, space, behavior, state, presentation, technical, and QA lines. | Any Codex blocker remains open. |
 | `user_review_passed` | User readability review has no blocker or has an explicit user waiver. | User review is missing, BLOCKED, or says the scene identity/player flow does not read. |
 
+## User Readability Release Handoff
+
+Story 004 adds the human review checklist and release handoff packet:
+
+- `production/playtests/scene-composition-user-readability-checklist.md`
+- `production/scene-specs/scene-release-gate-handoff.md`
+
+Codex review is necessary but not sufficient. A user verdict of `BLOCKED` keeps `user_review_passed = false` and prevents release handoff until the blocker is resolved or explicitly waived by the user. User review may block for missing fantasy, missing requirements, unclear identity, undesirable player flow, UI dominance, or newly discovered demands that must be written back into the scene spec.
+
+Required user readability questions:
+
+- Where am I?
+- What can I do here?
+- How do I leave or continue?
+- What changed?
+- Does UI/HUD support rather than dominate?
+- Does the scene match the intended fantasy?
+
 ## Automated Smoke Evidence Requirements
 
 For a greybox or stronger runtime scene, automated smoke evidence must verify all applicable rows:

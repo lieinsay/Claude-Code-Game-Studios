@@ -1,21 +1,24 @@
 # Story 004: User Readability Review and Release Gate Handoff
 
 > **Epic**: Complete Scene Composition and Acceptance
-> **Status**: Ready
+> **Status**: Implemented
 > **Layer**: Polish Gate / Production Scene Design
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-05-09
+> **Estimate**: S (1 focused implementation session)
 
 ## Context
 
 **GDD**: `design/gdd/scene-composition-system.md`  
 **Requirement**: `TR-scene-composition-002`
+**Requirement Text**: Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review.
 
 **ADR Governing Implementation**: ADR-0016: Feedback/VFX/Audio Semantics; ADR-0017: Onboarding First Loop; ADR-0019: Desktop C# Platform Pivot  
 **ADR Decision Summary**: feedback and onboarding can support scene clarity, but release-readiness still requires actual scene readability and desktop-validated evidence.
 
 **Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
 **Engine Notes**: human QA may use screenshots or windowed runs, but claims must include exact build/test context.
+**Performance Note**: No runtime performance impact is expected for the checklist and release handoff documents. Any optional manual capture must record the build/smoke context rather than adding runtime systems.
 
 **Control Manifest Rules (this layer)**:
 - Required: semantic feedback and onboarding must not steal gameplay ownership.
@@ -26,10 +29,10 @@
 
 ## Acceptance Criteria
 
-- [ ] GIVEN Codex review passes, WHEN the user reviews the same scene, THEN missing fantasy, missing requirements, unclear identity, or undesirable player flow can still block the scene.
-- [ ] GIVEN either Codex or user review reports BLOCKED, WHEN production planning runs, THEN the scene cannot enter release gate until the blocker is resolved or explicitly waived by the user.
-- [ ] GIVEN a scene reaches playtest_ready, WHEN human QA evaluates it, THEN the tester can answer where they are, what they can do, how to leave, and what changed without developer guidance.
-- [ ] GIVEN this GDD itself is reviewed, WHEN the user completes review, THEN any missing demand is added here before status can move from `In Design` to `Approved`.
+- [x] GIVEN Codex review passes, WHEN the user reviews the same scene, THEN missing fantasy, missing requirements, unclear identity, or undesirable player flow can still block the scene.
+- [x] GIVEN either Codex or user review reports BLOCKED, WHEN production planning runs, THEN the scene cannot enter release gate until the blocker is resolved or explicitly waived by the user.
+- [x] GIVEN a scene reaches playtest_ready, WHEN human QA evaluates it, THEN the tester can answer where they are, what they can do, how to leave, and what changed without developer guidance.
+- [x] GIVEN this GDD itself is reviewed, WHEN the user completes review, THEN any missing demand is added here before status can move from `In Design` to `Approved`.
 
 ---
 
@@ -71,11 +74,22 @@ Create or refresh the human QA checklist and release-gate handoff format for cur
 - `production/playtests/` focused checklist or release-gate handoff note.
 - `production/qa/evidence/scene-composition-user-readability-release-gate-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing -- see `production/qa/evidence/scene-composition-user-readability-release-gate-evidence.md`
+
+---
+
+## Implementation Notes
+
+- Human review checklist created at `production/playtests/scene-composition-user-readability-checklist.md`.
+- Release handoff packet created at `production/scene-specs/scene-release-gate-handoff.md`.
+- Completeness gate now links the user checklist and release handoff requirements.
+- Coverage registry now records current #19 release handoff status as `BLOCKED_FOR_RELEASE` until user readability reviews are recorded or explicitly waived.
+- Integration validation added at `tests/integration/scene-composition/UserReadabilityReleaseGateTest.csproj`.
+- The current scene release snapshot remains blocked; this story defines handoff evidence and does not waive or fix scene readability blockers.
 
 ---
 
 ## Dependencies
 
-- Depends on: Story 003; Scene Physics Stories 001-004.
+- Depends on: Story 003 implemented and pushed; Scene Physics Stories 001-004 implemented and pushed.
 - Unlocks: release checklist/gate only after current human QA blockers are resolved or waived.

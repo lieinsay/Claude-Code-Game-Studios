@@ -59,3 +59,7 @@ These surfaces can appear in the player flow but cannot be counted as scene unit
 1. Story 002 should convert these registry statuses into a concrete completeness/evidence gate without redefining #20 physics detail.
 2. Story 003 should harden UI-vs-scene evidence rejection for registry rows and release evidence.
 3. Story 004 should attach user readability review questions and verdicts to each scene row before release readiness.
+
+## Release Handoff Status
+
+Release handoff input lives in `production/scene-specs/scene-release-gate-handoff.md`. Current status is `BLOCKED_FOR_RELEASE` until user readability reviews are recorded or explicitly waived, and until repair/market tracked gaps are resolved or waived.

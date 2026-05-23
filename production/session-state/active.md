@@ -3,8 +3,20 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Composition Story 003 implemented; next story is scene-composition-system/story-004
+Task: Scene Composition Stories 001-004 implemented; next step is story-done or user readability release packet
 <!-- /STATUS -->
+
+## Session Extract -- Scene Composition Story 004 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 003 plus #20 Stories 001-004 are implemented/pushed.
+- Story implemented: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md` -- User Readability Review and Release Gate Handoff.
+- Checklist: `production/playtests/scene-composition-user-readability-checklist.md` defines concrete human QA questions, verdicts, blocker fields, waiver fields, and current scene review queue.
+- Release handoff: `production/scene-specs/scene-release-gate-handoff.md` defines `release_handoff_ready`, required packet fields, current handoff snapshot, waiver requirements, and release checklist input.
+- Gate/registry updates: completeness gate links Story 004 user review requirements; registry now records #19 release handoff status as `BLOCKED_FOR_RELEASE` until user readability reviews are recorded or explicitly waived.
+- Test: `tests/integration/scene-composition/UserReadabilityReleaseGateTest.csproj` validates checklist, handoff, gate, registry, and story acceptance coverage. Focused runner PASS 5/5.
+- Evidence: `production/qa/evidence/scene-composition-user-readability-release-gate-evidence.md`.
+- Status updates: Scene Composition epic and epics index now mark Stories 001-004 Implemented and keep the epic In Progress pending formal `/story-done` / release review.
+- Verification: focused integration PASS 5/5; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-done` for #19 stories or start the user readability release packet when the user is ready to evaluate scenes.
 
 ## Session Extract -- Scene Composition Story 003 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 002 is implemented/pushed.
