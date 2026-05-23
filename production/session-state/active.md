@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Physics Story 004 implemented; next story is scene-composition-system/story-001
+Task: Scene Composition Story 001 implemented; next story is scene-composition-system/story-002
 <!-- /STATUS -->
+
+## Session Extract -- Scene Composition Story 001 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, no-runtime-performance note, and dependency note that #20 Scene Physics Stories 001-004 are implemented/pushed.
+- Story implemented: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md` -- Scene Specification Template and Coverage Registry.
+- Template: `production/scene-specs/scene-spec-template.md` now defines the reusable #19 scene specification/checklist with identity, entry/exit, spatial layout, critical path, optional readability beats, state variants, #20 physics link/exemption, interaction contract, runtime contract, assets/audio, QA evidence, Codex review, and user review.
+- Registry: `production/scene-specs/scene-coverage-registry.md` tracks current enterable scene entries for Hub exterior, ship interior, Chart table surface, Exploration, repair node scene, and market scene.
+- Boundary: registry explicitly classifies UI/HUD/buttons/labels/debug overlays as non-scene evidence; #20 Scene Physics evidence is linked as dependency input and not redefined.
+- Evidence: `production/qa/evidence/scene-composition-spec-coverage-evidence.md`.
+- Status updates: Scene Composition epic and epics index now mark Story 001 Implemented, Stories 002-004 Ready, and the epic In Progress.
+- Verification: `git diff --check` PASS with LF/CRLF warnings only. No `dotnet build` or Godot smoke was required because no runtime code changed.
+- Next: after commit/push, run `/story-readiness production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md`, then `/dev-story` for Story 002.
 
 ## Session Extract -- Scene Physics Story 004 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 003 is implemented/pushed while formal `/story-done` closure remains downstream.
