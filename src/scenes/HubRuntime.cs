@@ -690,6 +690,8 @@ public partial class HubRuntime : Node2D
 			["occlusion_ready"] = true,
 			["scale_ready"] = true,
 			["special_surface_ready"] = true,
+			["physical_behavior_ready"] = true,
+			["recovery_ready"] = true,
 			["scene_unit_catalog"] = sceneUnitCatalog,
 			["collision_table"] = BuildCollisionTable(sceneId),
 			["occlusion_layers"] = BuildOcclusionLayers(sceneId),
@@ -698,7 +700,13 @@ public partial class HubRuntime : Node2D
 			["asset_replacement_rule"] = "Formal asset replacement must preserve collision footprint, occlusion behavior, interaction radius, and player_unit-relative size readability unless this Scene Physics Contract is re-reviewed.",
 			["physical_unit_source_layer"] = "world_playable_scene",
 			["ui_evidence_allowed"] = false,
-			["dynamic_behaviors"] = "none_in_current_slice; future units must declare pushable, elastic, sliding, breakable, one_way, or moving_platform explicitly",
+			["dynamic_behaviors"] = BuildPhysicalBehaviorCatalog(sceneId),
+			["behavior_priority_table"] = BuildBehaviorPriorityTable(sceneId),
+			["behavior_conflict_rule"] = "effective_behavior = highest_priority(applicable_behavior_tags); missing priority blocks implementation readiness",
+			["behavior_fallback_rules"] = BuildBehaviorFallbackRules(sceneId),
+			["missing_priority_blocks_readiness"] = true,
+			["stuck_recovery_seconds"] = 2.0f,
+			["recovery_table"] = BuildRecoveryTable(sceneId, recoveryRule),
 			["recovery_rule"] = recoveryRule,
 			["authored_physical_unit_count"] = authoredPhysicalUnitCount,
 			["source_gdd"] = "design/gdd/scene-physics-unit-system.md",
@@ -805,6 +813,104 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
 			_ => "",
 		};
+
+	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildPhysicalBehaviorCatalog(string sceneId)
+	{
+		return sceneId switch
+		{
+			"hub_island_dock" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("hub_waterline", "hazardous", "hazardous + blocking_static", "deep water boundary; blocks ground units; no automatic damage in current slice", "shoreline stop feedback and path clamp", "player_unit, pushable_unit", 80, "hazardous boundary wins over visual water; no passability inference", "clamp player back into HubWalkBounds", "world_playable_scene", false),
+				BuildPhysicalBehavior("hub_boarding_ramp", "trigger_only", "trigger_only + soft_overlap", "spatial Use anchor; no entity collision; requires proximity and Use dispatch", "boarding prompt near ramp", "player_unit", 30, "trigger_only never changes collision footprint", "escape interaction returns to ship interior or remains on dock if rejected", "world_playable_scene", false),
+				BuildPhysicalBehavior("hub_airship_envelope", "visual_only_height_marker", "height_marker + visual_only", "height cue only; no collision, push, hazard, or attraction", "large envelope silhouette and height cue", "player_unit readability only", 10, "visual_only loses to any gameplay-affecting behavior", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			"hub_ship_interior" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("ship_exit_threshold", "trigger_only", "trigger_only + soft_overlap", "spatial exit anchor; no entity collision; requires proximity and Use dispatch", "exit prompt at threshold", "player_unit", 30, "trigger_only never changes room collision", "escape interaction returns to hub_island_dock", "world_playable_scene", false),
+				BuildPhysicalBehavior("storage_crate_prop", "blocking_static", "blocking_static", "static crate blocks readability footprint; pushable behavior is not implemented until a later contract adds priority", "solid crate silhouette", "player_unit", 20, "blocking_static applies unless a future pushable tag with priority is declared", "clamp player into ShipInteriorWalkBounds; crate does not move", "world_playable_scene", false),
+				BuildPhysicalBehavior("cockpit_window_glass", "visual_only_glass", "glass_clear + visual_only", "transparent surface; not passable and not interactable", "window transparency, no Use prompt", "player_unit readability only", 10, "visual_only cannot imply passage or interaction", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("mist_sea_boundary", "hazardous", "hazardous + water_deep + blocking_static", "deep water/void boundary; blocks ground units; no current/wind force in current slice", "shoreline, cliff, and sea feedback", "player_unit, pushable_unit", 90, "hazardous resolves before water visual and before trigger_only", "clamp player back into ExplorationWalkBounds", "world_playable_scene", false),
+				BuildPhysicalBehavior("exploration_threat_zone", "hazardous_warning", "hazardous + height_marker + visual_warning", "world-layer threat warning only; domain threat consequences stay with ExplorationManager", "visible threat zone overlay and text synced to domain state", "player_unit", 70, "hazardous warning wins over visual height marker but does not own damage", "safe-floor return via route/return ship flow", "world_playable_scene", false),
+				BuildPhysicalBehavior("search_wreck_prop", "trigger_only", "trigger_only + soft_overlap", "three-step scan anchor; no entity collision; requires proximity and Use dispatch", "scan calibration, echo lock, salvage pulse feedback", "player_unit", 40, "trigger_only is ignored until proximity and Use gate pass", "reset scan stage by moving away or returning to Hub; no forced stuck state", "world_playable_scene", false),
+				BuildPhysicalBehavior("return_helm_anchor", "trigger_only", "trigger_only + soft_overlap", "two-step return anchor; no entity collision; requires proximity and Use dispatch", "engine preheat and piloting prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "escape interaction returns to hub_island_dock after preheat", "world_playable_scene", false),
+				BuildPhysicalBehavior("mist_horizon_fog", "visual_only_fog", "fog_or_cloud + visual_only", "atmospheric fog; no collision, slow, blindness, or current/wind force", "mist backdrop only", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			_ => [],
+		};
+	}
+
+	private static Godot.Collections.Dictionary BuildPhysicalBehavior(
+		string unitId,
+		string behaviorLabel,
+		string applicableBehaviorTags,
+		string parameters,
+		string feedback,
+		string affectedUnitTypes,
+		int conflictPriority,
+		string fallbackRule,
+		string recoveryAction,
+		string sourceLayer,
+		bool uiEvidenceAllowed)
+	{
+		return new Godot.Collections.Dictionary
+		{
+			["unit_id"] = unitId,
+			["behavior_label"] = behaviorLabel,
+			["applicable_behavior_tags"] = applicableBehaviorTags,
+			["parameters"] = parameters,
+			["feedback"] = feedback,
+			["affected_unit_types"] = affectedUnitTypes,
+			["conflict_priority"] = conflictPriority,
+			["fallback_rule"] = fallbackRule,
+			["recovery_action"] = recoveryAction,
+			["source_layer"] = sourceLayer,
+			["ui_evidence_allowed"] = uiEvidenceAllowed,
+		};
+	}
+
+	private static string BuildBehaviorPriorityTable(string sceneId) =>
+		sceneId switch
+		{
+			"hub_island_dock" => "hazardous:80 > trigger_only:30 > visual_only_height_marker:10",
+			"hub_ship_interior" => "trigger_only:30 > blocking_static:20 > visual_only_glass:10",
+			"exploration_mist_island" => "hazardous:90 > hazardous_warning:70 > trigger_only:40/35 > visual_only_fog:10",
+			_ => "",
+		};
+
+	private static string BuildBehaviorFallbackRules(string sceneId) =>
+		sceneId switch
+		{
+			"hub_island_dock" => "If a behavior tag lacks priority, implementation readiness fails; waterline clamp and ramp escape interaction are the recovery fallback.",
+			"hub_ship_interior" => "If a behavior tag lacks priority, implementation readiness fails; static crate remains non-pushable until pushable priority and recovery are declared.",
+			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; hazardous boundary clamp wins over trigger-only anchors and visual fog.",
+			_ => "",
+		};
+
+	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildRecoveryTable(string sceneId, string recoveryRule)
+	{
+		return new Godot.Collections.Array<Godot.Collections.Dictionary>
+		{
+			new()
+			{
+				["stuck_state"] = "outside_walk_bounds",
+				["recovery_action"] = recoveryRule,
+				["visible_feedback"] = "player remains in world/playable scene layer; UI may describe the recovery but cannot satisfy it",
+				["source_layer"] = "world_playable_scene",
+				["ui_evidence_allowed"] = false,
+			},
+			new()
+			{
+				["stuck_state"] = sceneId == "hub_ship_interior" ? "blocked_by_static_crate" : "blocked_by_hazard_boundary",
+				["recovery_action"] = sceneId == "hub_ship_interior" ? "clamp to nearest safe floor inside ShipInteriorWalkBounds" : "clamp to nearest safe floor inside active walk bounds",
+				["visible_feedback"] = "safe floor, boundary, or exit anchor remains visible after recovery",
+				["source_layer"] = "world_playable_scene",
+				["ui_evidence_allowed"] = false,
+			},
+		};
+	}
 
 	public int DebugSearchPulseStage() => searchPulseStage;
 

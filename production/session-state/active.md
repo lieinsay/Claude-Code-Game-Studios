@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Physics Story 003 implemented; next story is scene-physics-unit-system/story-004
+Task: Scene Physics Story 004 implemented; next story is scene-composition-system/story-001
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics Story 004 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 003 is implemented/pushed while formal `/story-done` closure remains downstream.
+- Story implemented: `production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md` -- Dynamic Physical Behaviors Special Surfaces and Recovery.
+- Runtime: `HubRuntime.DebugScenePhysicsContract(scene_id)` now exposes `physical_behavior_ready`, `recovery_ready`, `dynamic_behaviors`, `behavior_priority_table`, `behavior_conflict_rule`, `behavior_fallback_rules`, `missing_priority_blocks_readiness`, `stuck_recovery_seconds`, and `recovery_table`.
+- Behavior contract: current playable scenes declare trigger-only anchors, hazardous boundaries/warnings, visual-only surfaces/height markers, deterministic `effective_behavior = highest_priority(applicable_behavior_tags)`, missing-priority readiness failure, fallback rules, and concrete clamp/escape/safe-floor recovery actions.
+- Smoke: `tests/smoke/session_shell_visual_probe.gd` now asserts dynamic behavior labels, tags, parameters, feedback, affected unit types, conflict priorities, fallback rules, recovery actions, world/playable source layer, UI-evidence rejection, and bounded stuck recovery.
+- Evidence: `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md`.
+- Status updates: Scene Physics epic and epics index now mark Stories 001-004 Implemented and keep the epic In Progress pending formal `/story-done` closure/review.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`, then `/dev-story` for Scene Composition Story 001.
 
 ## Session Extract -- Scene Physics Story 003 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001/002 are implemented/pushed while formal `/story-done` closure remains downstream.

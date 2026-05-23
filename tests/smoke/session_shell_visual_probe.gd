@@ -454,6 +454,14 @@ func _expect_scene_physics_contract(
 		"physical_unit_source_layer",
 		"ui_evidence_allowed",
 		"dynamic_behaviors",
+		"physical_behavior_ready",
+		"recovery_ready",
+		"behavior_priority_table",
+		"behavior_conflict_rule",
+		"behavior_fallback_rules",
+		"missing_priority_blocks_readiness",
+		"stuck_recovery_seconds",
+		"recovery_table",
 		"recovery_rule",
 		"authored_physical_unit_count",
 		"source_gdd",
@@ -529,7 +537,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("scale_table", "")).contains("player_unit=1.0"), "%s exposes player-relative scale table" % scene_id)
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-	_expect(str(contract.get("dynamic_behaviors", "")).contains("future units must declare"), "%s declares dynamic behavior extension rule" % scene_id)
+	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
@@ -567,6 +575,64 @@ func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required
 	_expect(has_player_unit, "%s unit catalog includes player_unit scale basis" % scene_id)
 	_expect(has_landmark_or_prop, "%s unit catalog includes props, passages, or landmarks" % scene_id)
 	_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
+
+
+func _expect_dynamic_behavior_contract(contract: Dictionary, scene_id: String) -> void:
+	_expect(bool(contract.get("physical_behavior_ready", false)), "%s declares physical behavior readiness" % scene_id)
+	_expect(bool(contract.get("recovery_ready", false)), "%s declares recovery readiness" % scene_id)
+	_expect(str(contract.get("behavior_conflict_rule", "")).contains("highest_priority"), "%s declares highest-priority conflict rule" % scene_id)
+	_expect(bool(contract.get("missing_priority_blocks_readiness", false)), "%s blocks readiness when behavior priority is missing" % scene_id)
+	_expect(float(contract.get("stuck_recovery_seconds", 99.0)) <= 2.0, "%s exposes bounded stuck recovery timing" % scene_id)
+	_expect(str(contract.get("behavior_priority_table", "")).contains(">"), "%s exposes ordered behavior priority table" % scene_id)
+	_expect(str(contract.get("behavior_fallback_rules", "")).contains("implementation readiness fails"), "%s declares fallback for missing priority" % scene_id)
+	var behaviors := contract.get("dynamic_behaviors", []) as Array
+	_expect(behaviors.size() >= 3, "%s exposes dynamic behavior catalog entries" % scene_id)
+	var has_trigger_only := false
+	var has_gameplay_affecting := false
+	var has_visual_only := false
+	var highest_priority := -1
+	var highest_label := ""
+	for behavior in behaviors:
+		var item := behavior as Dictionary
+		var unit_id := str(item.get("unit_id", ""))
+		var behavior_label := str(item.get("behavior_label", ""))
+		var tags := str(item.get("applicable_behavior_tags", ""))
+		var parameters := str(item.get("parameters", ""))
+		var feedback := str(item.get("feedback", ""))
+		var affected_unit_types := str(item.get("affected_unit_types", ""))
+		var fallback_rule := str(item.get("fallback_rule", ""))
+		var recovery_action := str(item.get("recovery_action", ""))
+		var priority := int(item.get("conflict_priority", -1))
+		_expect(unit_id != "", "%s behavior entry has stable unit id" % scene_id)
+		_expect(behavior_label != "", "%s behavior entry %s has label" % [scene_id, unit_id])
+		_expect(tags != "", "%s behavior entry %s has tags" % [scene_id, unit_id])
+		_expect(parameters != "", "%s behavior entry %s has parameters" % [scene_id, unit_id])
+		_expect(feedback != "", "%s behavior entry %s has feedback" % [scene_id, unit_id])
+		_expect(affected_unit_types != "", "%s behavior entry %s declares affected unit types" % [scene_id, unit_id])
+		_expect(priority >= 0, "%s behavior entry %s declares conflict priority" % [scene_id, unit_id])
+		_expect(fallback_rule != "", "%s behavior entry %s declares fallback rule" % [scene_id, unit_id])
+		_expect(recovery_action != "", "%s behavior entry %s declares recovery action" % [scene_id, unit_id])
+		_expect(str(item.get("source_layer", "")) == "world_playable_scene", "%s behavior entry %s is world/playable evidence" % [scene_id, unit_id])
+		_expect(not bool(item.get("ui_evidence_allowed", true)), "%s behavior entry %s cannot be satisfied by UI" % [scene_id, unit_id])
+		has_trigger_only = has_trigger_only or tags.contains("trigger_only")
+		has_gameplay_affecting = has_gameplay_affecting or tags.contains("hazardous") or tags.contains("blocking_static")
+		has_visual_only = has_visual_only or tags.contains("visual_only")
+		if priority > highest_priority:
+			highest_priority = priority
+			highest_label = behavior_label
+	_expect(has_trigger_only, "%s dynamic behavior catalog includes trigger-only behavior" % scene_id)
+	_expect(has_gameplay_affecting, "%s dynamic behavior catalog includes gameplay-affecting behavior" % scene_id)
+	_expect(has_visual_only, "%s dynamic behavior catalog includes visual-only behavior policy" % scene_id)
+	_expect(highest_priority > 0 and highest_label != "", "%s can deterministically select highest-priority effective behavior" % scene_id)
+	var recovery_table := contract.get("recovery_table", []) as Array
+	_expect(recovery_table.size() >= 2, "%s exposes recovery table" % scene_id)
+	for recovery in recovery_table:
+		var item := recovery as Dictionary
+		_expect(str(item.get("stuck_state", "")) != "", "%s recovery entry declares stuck state" % scene_id)
+		_expect(str(item.get("recovery_action", "")) != "", "%s recovery entry declares concrete recovery action" % scene_id)
+		_expect(str(item.get("visible_feedback", "")) != "", "%s recovery entry declares visible feedback" % scene_id)
+		_expect(str(item.get("source_layer", "")) == "world_playable_scene", "%s recovery evidence comes from world/playable scene layer" % scene_id)
+		_expect(not bool(item.get("ui_evidence_allowed", true)), "%s recovery cannot be satisfied by UI" % scene_id)
 
 
 func _expect_unknown_scene_physics_contract(hub: Node) -> void:
