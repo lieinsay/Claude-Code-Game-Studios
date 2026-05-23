@@ -654,6 +654,7 @@ public partial class HubRuntime : Node2D
 		string recoveryRule,
 		int authoredPhysicalUnitCount)
 	{
+		var sceneUnitCatalog = BuildSceneUnitCatalog(sceneId);
 		return new Godot.Collections.Dictionary
 		{
 			["scene_id"] = sceneId,
@@ -684,12 +685,126 @@ public partial class HubRuntime : Node2D
 			["occlusion_policy"] = occlusionPolicy,
 			["collision_semantics"] = collisionSemantics,
 			["special_surfaces"] = specialSurfaces,
+			["unit_catalog_ready"] = true,
+			["collision_ready"] = true,
+			["occlusion_ready"] = true,
+			["scale_ready"] = true,
+			["special_surface_ready"] = true,
+			["scene_unit_catalog"] = sceneUnitCatalog,
+			["collision_table"] = BuildCollisionTable(sceneId),
+			["occlusion_layers"] = BuildOcclusionLayers(sceneId),
+			["scale_table"] = BuildScaleTable(sceneId),
+			["special_surface_table"] = BuildSpecialSurfaceTable(sceneId),
+			["asset_replacement_rule"] = "Formal asset replacement must preserve collision footprint, occlusion behavior, interaction radius, and player_unit-relative size readability unless this Scene Physics Contract is re-reviewed.",
+			["physical_unit_source_layer"] = "world_playable_scene",
+			["ui_evidence_allowed"] = false,
 			["dynamic_behaviors"] = "none_in_current_slice; future units must declare pushable, elastic, sliding, breakable, one_way, or moving_platform explicitly",
 			["recovery_rule"] = recoveryRule,
 			["authored_physical_unit_count"] = authoredPhysicalUnitCount,
 			["source_gdd"] = "design/gdd/scene-physics-unit-system.md",
 		};
 	}
+
+	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildSceneUnitCatalog(string sceneId)
+	{
+		return sceneId switch
+		{
+			"hub_island_dock" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
+				BuildSceneUnit("hub_island_main_mass", "landmark_unit", "blocking_static", "midground_floor", "landmark >= 2.0x player height", "world_playable_scene", false),
+				BuildSceneUnit("hub_dock_plank_walkway", "passage_unit", "soft_overlap", "midground_floor", "door_or_passage width >= 1.1x player", "world_playable_scene", false),
+				BuildSceneUnit("hub_docked_ship_hull", "blocking_unit", "blocking_static", "midground_object", "landmark >= 2.0x player height", "world_playable_scene", false),
+				BuildSceneUnit("hub_boarding_ramp", "door_or_passage", "soft_overlap", "midground_object", "passage clear width >= 1.1x player", "world_playable_scene", false),
+				BuildSceneUnit("hub_airship_envelope", "height_marker", "height_marker", "height_shadow", "player_unit-relative landmark visual scale; no collision footprint", "world_playable_scene", false),
+				BuildSceneUnit("hub_waterline", "special_surface", "blocking_static", "midground_floor", "blocked boundary larger than player", "world_playable_scene", false),
+			},
+			"hub_ship_interior" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
+				BuildSceneUnit("hub_interior_hull_outline", "blocking_unit", "blocking_static", "midground_object", "player_unit-relative room-scale hull boundary", "world_playable_scene", false),
+				BuildSceneUnit("hub_interior_cockpit_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
+				BuildSceneUnit("hub_interior_cargo_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
+				BuildSceneUnit("hub_interior_engine_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
+				BuildSceneUnit("helm_console_prop", "interactable_anchor", "soft_overlap", "midground_object", "npc/interactable scale 0.8-1.3x player", "world_playable_scene", false),
+				BuildSceneUnit("storage_crate_prop", "prop_unit", "blocking_static", "midground_object", "small/prop scale tied to player_unit", "world_playable_scene", false),
+				BuildSceneUnit("ship_exit_threshold", "door_or_passage", "soft_overlap", "midground_object", "passage clear width >= 1.1x player", "world_playable_scene", false),
+				BuildSceneUnit("cockpit_window_glass", "special_surface", "blocking_static", "background", "visual-only glass surface; no implied passage", "world_playable_scene", false),
+				BuildSceneUnit("upper_hull_front_wall", "foreground_occluder", "blocking_static", "foreground_occluder", "player_unit-relative front_wall_removed cutaway shell", "world_playable_scene", false),
+			},
+			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
+				BuildSceneUnit("exploration_island_mass", "landmark_unit", "blocking_static", "midground_floor", "landmark >= 2.0x player height", "world_playable_scene", false),
+				BuildSceneUnit("exploration_island_path", "passage_unit", "soft_overlap", "midground_floor", "walkable path width tied to player_unit", "world_playable_scene", false),
+				BuildSceneUnit("exploration_cliff_edge", "blocking_unit", "blocking_static", "midground_object", "blocked ledge boundary larger than player", "world_playable_scene", false),
+				BuildSceneUnit("search_wreck_prop", "interactable_anchor", "soft_overlap", "midground_object", "search wreck about 6 player-widths", "world_playable_scene", false),
+				BuildSceneUnit("search_wreck_mast", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only visual cue", "world_playable_scene", false),
+				BuildSceneUnit("return_ship_hull", "blocking_unit", "blocking_static", "midground_object", "return ship about 5 player-widths", "world_playable_scene", false),
+				BuildSceneUnit("return_helm_anchor", "interactable_anchor", "soft_overlap", "midground_object", "passage/interactable scale tied to player_unit", "world_playable_scene", false),
+				BuildSceneUnit("mist_sea_boundary", "special_surface", "blocking_static", "midground_floor", "water boundary larger than player", "world_playable_scene", false),
+				BuildSceneUnit("mist_horizon_fog", "special_surface", "soft_overlap", "background", "visual-only fog/cloud; no collision implication", "world_playable_scene", false),
+				BuildSceneUnit("return_beacon_beam", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only landing/readability cue", "world_playable_scene", false),
+				BuildSceneUnit("exploration_threat_zone", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only warning overlay in world layer", "world_playable_scene", false),
+			},
+			_ => [],
+		};
+	}
+
+	private static Godot.Collections.Dictionary BuildSceneUnit(
+		string unitId,
+		string unitType,
+		string collision,
+		string occlusionLayer,
+		string scaleRule,
+		string sourceLayer,
+		bool uiEvidenceAllowed)
+	{
+		return new Godot.Collections.Dictionary
+		{
+			["unit_id"] = unitId,
+			["unit_type"] = unitType,
+			["collision"] = collision,
+			["occlusion_layer"] = occlusionLayer,
+			["scale_rule"] = scaleRule,
+			["source_layer"] = sourceLayer,
+			["ui_evidence_allowed"] = uiEvidenceAllowed,
+		};
+	}
+
+	private static string BuildCollisionTable(string sceneId) =>
+		sceneId switch
+		{
+			"hub_island_dock" => "blocking_static: hub_island_main_mass, hub_docked_ship_hull, hub_waterline; soft_overlap: player_marker, hub_dock_plank_walkway, hub_boarding_ramp; height_marker: hub_airship_envelope",
+			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, helm_console_prop, ship_exit_threshold",
+			"exploration_mist_island" => "blocking_static: exploration_island_mass, exploration_cliff_edge, return_ship_hull, mist_sea_boundary; soft_overlap: player_marker, exploration_island_path, search_wreck_prop, return_helm_anchor, mist_horizon_fog; height_marker: search_wreck_mast, return_beacon_beam, exploration_threat_zone",
+			_ => "",
+		};
+
+	private static string BuildOcclusionLayers(string sceneId) =>
+		sceneId switch
+		{
+			"hub_ship_interior" => "background: cockpit_window_glass; midground_floor: ship_deck_01; midground_object: room volumes, props, player; foreground_occluder: upper_hull_front_wall; height_shadow: upper hull/window references; ui_overlay: not physical evidence",
+			_ => "background: horizon/fog/sky; midground_floor: walkable ground/path; midground_object: player, interactables, blockers, landmarks; foreground_occluder: only if declared with occluder_peek; height_shadow: mast/beacon/envelope cues; ui_overlay: not physical evidence",
+		};
+
+	private static string BuildScaleTable(string sceneId) =>
+		sceneId switch
+		{
+			"hub_island_dock" => "player_unit=1.0; door_or_passage hub_boarding_ramp clear width >= 1.1x player; landmark hub_docked_ship_hull >= 2.0x player; height_marker hub_airship_envelope visual-only",
+			"hub_ship_interior" => "player_unit=1.0; room bays are room-scale landmarks; helm/storage/engine anchors are 0.8-1.3x player-readable interactables; exit threshold clear width >= 1.1x player",
+			"exploration_mist_island" => "player_unit=1.0; search_wreck about 6 player-widths; return_ship about 5 player-widths; beacon/mast height markers visual-only; path clear width >= 1.1x player",
+			_ => "",
+		};
+
+	private static string BuildSpecialSurfaceTable(string sceneId) =>
+		sceneId switch
+		{
+			"hub_island_dock" => "water=gameplay_affecting blocking_static hazard boundary with no passability implication; glass=none; mirror=none; fog/cloud=visual_only sky backdrop",
+			"hub_ship_interior" => "glass=cockpit_window visual_only blocking_static, transparent but not passable/interactable; mirror=none; water=none; reflective_metal=visual_only hull trim",
+			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
+			_ => "",
+		};
 
 	public int DebugSearchPulseStage() => searchPulseStage;
 

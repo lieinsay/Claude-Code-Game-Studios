@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Physics Story 002 implemented; next story is scene-physics-unit-system/story-003
+Task: Scene Physics Story 003 implemented; next story is scene-physics-unit-system/story-004
 <!-- /STATUS -->
+
+## Session Extract -- Scene Physics Story 003 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001/002 are implemented/pushed while formal `/story-done` closure remains downstream.
+- Story implemented: `production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md` -- Scene Unit Catalog Collision Occlusion and Scale.
+- Runtime: `HubRuntime.DebugScenePhysicsContract(scene_id)` now exposes `unit_catalog_ready`, `collision_ready`, `occlusion_ready`, `scale_ready`, `special_surface_ready`, `scene_unit_catalog`, `collision_table`, `occlusion_layers`, `scale_table`, `special_surface_table`, `asset_replacement_rule`, `physical_unit_source_layer`, and `ui_evidence_allowed`.
+- Catalog: each scene unit declares stable `unit_id`, `unit_type`, `collision`, `occlusion_layer`, `scale_rule`, `source_layer`, and UI-evidence rejection. Current Hub exterior, ship interior, and Exploration catalogs match `authored_physical_unit_count`.
+- Smoke: `tests/smoke/session_shell_visual_probe.gd` now asserts unit catalog fields, collision tables, occlusion layers, player-relative scale rules, special-surface classification, asset replacement preservation, `world_playable_scene` source, and `ui_evidence_allowed == false`.
+- Evidence: `production/qa/evidence/scene-physics-unit-catalog-evidence.md`.
+- Status updates: Scene Physics epic and epics index now mark Stories 001-003 Implemented, Story 004 Ready, and the epic In Progress.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md`, then `/dev-story` for Story 004.
 
 ## Session Extract -- Scene Physics Story 002 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 001 is implemented/pushed but not formally `/story-done` closed.

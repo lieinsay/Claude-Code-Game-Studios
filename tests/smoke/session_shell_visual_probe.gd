@@ -440,6 +440,19 @@ func _expect_scene_physics_contract(
 		"collision_semantics",
 		"occlusion_policy",
 		"special_surfaces",
+		"unit_catalog_ready",
+		"collision_ready",
+		"occlusion_ready",
+		"scale_ready",
+		"special_surface_ready",
+		"scene_unit_catalog",
+		"collision_table",
+		"occlusion_layers",
+		"scale_table",
+		"special_surface_table",
+		"asset_replacement_rule",
+		"physical_unit_source_layer",
+		"ui_evidence_allowed",
 		"dynamic_behaviors",
 		"recovery_rule",
 		"authored_physical_unit_count",
@@ -501,9 +514,59 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
+	_expect(bool(contract.get("unit_catalog_ready", false)), "%s declares unit catalog readiness" % scene_id)
+	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
+	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
+	_expect(bool(contract.get("scale_ready", false)), "%s declares scale readiness" % scene_id)
+	_expect(bool(contract.get("special_surface_ready", false)), "%s declares special surface readiness" % scene_id)
+	_expect(str(contract.get("physical_unit_source_layer", "")) == "world_playable_scene", "%s physical evidence comes from the world/playable scene layer" % scene_id)
+	_expect(not bool(contract.get("ui_evidence_allowed", true)), "%s refuses UI-only scene unit evidence" % scene_id)
+	_expect(str(contract.get("asset_replacement_rule", "")).contains("preserve collision footprint"), "%s declares asset replacement preservation rule" % scene_id)
+	_expect(str(contract.get("collision_table", "")).contains(required_collision), "%s exposes a collision table" % scene_id)
+	_expect(str(contract.get("collision_table", "")).contains(required_overlap), "%s collision table distinguishes soft-overlap anchors" % scene_id)
+	_expect(str(contract.get("occlusion_layers", "")).contains("midground_object"), "%s exposes occlusion layers" % scene_id)
+	_expect(str(contract.get("occlusion_layers", "")).contains("ui_overlay: not physical evidence"), "%s excludes UI overlay from physical occlusion evidence" % scene_id)
+	_expect(str(contract.get("scale_table", "")).contains("player_unit=1.0"), "%s exposes player-relative scale table" % scene_id)
+	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
+	_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
 	_expect(str(contract.get("dynamic_behaviors", "")).contains("future units must declare"), "%s declares dynamic behavior extension rule" % scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
+
+
+func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:
+	var catalog := contract.get("scene_unit_catalog", []) as Array
+	_expect(catalog.size() == int(contract.get("authored_physical_unit_count", 0)), "%s unit catalog count matches authored physical unit count" % scene_id)
+	_expect(catalog.size() >= 6, "%s unit catalog has authored physical units" % scene_id)
+	var has_blocking := false
+	var has_overlap := false
+	var has_player_unit := false
+	var has_landmark_or_prop := false
+	var has_special_surface := false
+	for unit in catalog:
+		var item := unit as Dictionary
+		var unit_id := str(item.get("unit_id", ""))
+		var unit_type := str(item.get("unit_type", ""))
+		var collision := str(item.get("collision", ""))
+		var occlusion_layer := str(item.get("occlusion_layer", ""))
+		var scale_rule := str(item.get("scale_rule", ""))
+		_expect(unit_id != "", "%s catalog unit has stable id" % scene_id)
+		_expect(unit_type != "", "%s catalog unit %s has a unit type" % [scene_id, unit_id])
+		_expect(collision != "", "%s catalog unit %s has collision semantics" % [scene_id, unit_id])
+		_expect(occlusion_layer != "", "%s catalog unit %s has occlusion layer" % [scene_id, unit_id])
+		_expect(scale_rule.contains("player") or scale_rule.contains("player_unit") or scale_rule.contains("visual-only"), "%s catalog unit %s has player-relative scale rule" % [scene_id, unit_id])
+		_expect(str(item.get("source_layer", "")) == "world_playable_scene", "%s catalog unit %s is world/playable evidence" % [scene_id, unit_id])
+		_expect(not bool(item.get("ui_evidence_allowed", true)), "%s catalog unit %s cannot be satisfied by UI" % [scene_id, unit_id])
+		has_blocking = has_blocking or collision.contains(required_collision)
+		has_overlap = has_overlap or collision.contains(required_overlap)
+		has_player_unit = has_player_unit or unit_type == "player_unit"
+		has_landmark_or_prop = has_landmark_or_prop or unit_type.contains("landmark") or unit_type.contains("prop") or unit_type.contains("door_or_passage")
+		has_special_surface = has_special_surface or unit_type == "special_surface"
+	_expect(has_blocking, "%s unit catalog includes blocking collision units" % scene_id)
+	_expect(has_overlap, "%s unit catalog includes soft-overlap interaction anchors" % scene_id)
+	_expect(has_player_unit, "%s unit catalog includes player_unit scale basis" % scene_id)
+	_expect(has_landmark_or_prop, "%s unit catalog includes props, passages, or landmarks" % scene_id)
+	_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
 
 
 func _expect_unknown_scene_physics_contract(hub: Node) -> void:

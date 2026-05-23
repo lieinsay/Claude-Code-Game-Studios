@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/scene-physics-unit-system.md
 > **Architecture Module**: #20 Scene Physics
 > **Status**: In Progress
-> **Stories**: 4 (001-002 Implemented; 003-004 Ready)
+> **Stories**: 4 (001-003 Implemented; 004 Ready)
 
 ## Overview
 
@@ -48,7 +48,7 @@ Implement the bottom-layer physical-world exploration contract for authored 2D s
 | --- | --- | --- | --- | --- |
 | 001 | [Scene Physics Contract Runtime Shape](story-001-runtime-contract-shape.md) | Integration | Implemented | ADR-0019 |
 | 002 | [Layer Height Cutaway and Floor State](story-002-layer-height-cutaway-floor-state.md) | Integration | Implemented | ADR-0019 |
-| 003 | [Scene Unit Catalog Collision Occlusion and Scale](story-003-unit-catalog-collision-occlusion-scale.md) | Integration | Ready | ADR-0004 / ADR-0019 |
+| 003 | [Scene Unit Catalog Collision Occlusion and Scale](story-003-unit-catalog-collision-occlusion-scale.md) | Integration | Implemented | ADR-0004 / ADR-0019 |
 | 004 | [Dynamic Physical Behaviors Special Surfaces and Recovery](story-004-dynamic-behaviors-special-surfaces-recovery.md) | Integration | Ready | ADR-0004 / ADR-0019 |
 
 ## Definition of Done
@@ -64,4 +64,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/story-readiness production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md`, then `/dev-story` for the same file.
+Run `/story-readiness production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md`, then `/dev-story` for the same file.
