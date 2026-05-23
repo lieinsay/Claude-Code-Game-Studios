@@ -6,6 +6,15 @@ Feature: Production to Polish Gate Passed
 Task: GDD #19/#20 approved, epics created, and stories split; first next story is scene-physics-unit-system/story-001
 <!-- /STATUS -->
 
+## Session Extract -- Scene Physics Story 001 Implemented 2026-05-24
+- Story readiness: `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and implemented Polish 016 dependency status.
+- Story implemented: `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md` -- Scene Physics Contract Runtime Shape.
+- Runtime: `HubRuntime.DebugScenePhysicsContract(scene_id)` now has explicit unknown-scene diagnostics via `diagnostic_error`, and current scene lookup remains tied to Hub exterior, ship interior, and Exploration playable world state.
+- Smoke: `tests/smoke/session_shell_visual_probe.gd` now asserts every Story 001 required contract key for all three current playable scenes, verifies authored physical units are world/playable scene evidence, and checks unknown scene ids fail incomplete instead of defaulting to a fake horizontal/vertical contract.
+- Evidence: `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
+- Next: after commit/push, run `/story-readiness production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md`, then `/dev-story` for Story 002.
+
 ## Session Extract -- GDD #19/#20 Stories Created 2026-05-24
 - Input: user said to continue after GDD #19/#20 approval and epic creation.
 - Story split order followed dependency: #20 Scene Physics first, then #19 Scene Composition.

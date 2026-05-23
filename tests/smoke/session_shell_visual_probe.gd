@@ -74,6 +74,7 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubBoardingRamp"), "Hub has a boarding ramp spatial anchor")
 	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior floor is hidden before boarding")
 	_expect_scene_physics_contract(hub, "hub_island_dock", "水平场景", "water", "blocking_static", "soft_overlap")
+	_expect_unknown_scene_physics_contract(hub)
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "hub_island_dock", "Current physics contract follows Hub exterior state")
 	hub.call("DebugSetPlayerPosition", Vector2(248, 603))
 	await process_frame
@@ -413,6 +414,24 @@ func _expect_scene_physics_contract(
 	var contract := hub.call("DebugScenePhysicsContract", scene_id) as Dictionary
 	_expect(bool(contract.get("contract_complete", false)), "%s physics contract is complete" % scene_id)
 	_expect(str(contract.get("source_gdd", "")).ends_with("scene-physics-unit-system.md"), "%s physics contract points to GDD #20" % scene_id)
+	for required_key in [
+		"scene_id",
+		"contract_complete",
+		"scene_type",
+		"movement_plane",
+		"layer_height_model_ready",
+		"cutaway_reveal_ready",
+		"walk_bounds_size",
+		"scale_reference",
+		"collision_semantics",
+		"occlusion_policy",
+		"special_surfaces",
+		"dynamic_behaviors",
+		"recovery_rule",
+		"authored_physical_unit_count",
+		"source_gdd",
+	]:
+		_expect(contract.has(required_key), "%s physics contract exposes required key %s" % [scene_id, required_key])
 	_expect(str(contract.get("scene_type", "")) == expected_scene_type, "%s declares the expected scene type" % scene_id)
 	_expect(str(contract.get("movement_plane", "")) != "", "%s declares a movement plane" % scene_id)
 	_expect(bool(contract.get("layer_height_model_ready", false)), "%s declares Layer / Height readiness" % scene_id)
@@ -439,6 +458,15 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("dynamic_behaviors", "")).contains("future units must declare"), "%s declares dynamic behavior extension rule" % scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
+
+
+func _expect_unknown_scene_physics_contract(hub: Node) -> void:
+	var contract := hub.call("DebugScenePhysicsContract", "unknown_scene_for_story_001") as Dictionary
+	_expect(str(contract.get("scene_id", "")) == "unknown_scene_for_story_001", "Unknown physics contract echoes requested scene id")
+	_expect(not bool(contract.get("contract_complete", true)), "Unknown physics contract is incomplete")
+	_expect(str(contract.get("diagnostic_error", "")).contains("Unknown"), "Unknown physics contract returns a diagnostic error")
+	_expect(not str(contract.get("scene_type", "")).contains("水平场景"), "Unknown physics contract does not default to horizontal")
+	_expect(not str(contract.get("scene_type", "")).contains("垂直场景"), "Unknown physics contract does not default to vertical")
 
 
 func _save_runtime_screenshot(viewport: Window, path: String, label: String) -> void:

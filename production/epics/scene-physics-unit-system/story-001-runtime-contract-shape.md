@@ -1,21 +1,24 @@
 # Story 001: Scene Physics Contract Runtime Shape
 
 > **Epic**: Scene Physics Unit System
-> **Status**: Ready
+> **Status**: Implemented
 > **Layer**: MVP Foundation Retrofit / Gameplay Scene Physics
 > **Type**: Integration
 > **Manifest Version**: 2026-05-09
+> **Estimate**: S (1 focused implementation session)
 
 ## Context
 
 **GDD**: `design/gdd/scene-physics-unit-system.md`  
 **Requirement**: `TR-scene-physics-001`
+**Requirement Text**: Every 2D enterable scene with gameplay-relevant physical units must declare horizontal or vertical scene type, movement plane, Layer / Height Model, Cutaway / Reveal Model, and Floor State or explicit N/A true rule.
 
 **ADR Governing Implementation**: ADR-0019: Desktop C# Platform Pivot  
 **ADR Decision Summary**: new runtime work targets desktop Godot 4.6.2 .NET/C#, with C# source, project files, `dotnet build`, and Godot headless validation as the normal verification path.
 
 **Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
 **Engine Notes**: validate generated C# runtime surfaces with `dotnet build` and Godot headless smoke; do not add new Web-only requirements.
+**Performance Note**: No per-frame physics simulation or new scene instantiation is expected; runtime contract queries must remain direct debug/QA lookups and stay inside the existing scene-transition and smoke budgets.
 
 **Control Manifest Rules (this layer)**:
 - Required: every enterable 2D scene with gameplay-relevant physical units must provide a Scene Physics Contract before implementation readiness.
@@ -26,10 +29,10 @@
 
 ## Acceptance Criteria
 
-- [ ] GIVEN a 2D scene physics contract is drafted, WHEN review begins, THEN it declares either `水平场景` or `垂直场景`.
-- [ ] GIVEN a current playable scene exposes a runtime contract, WHEN smoke queries it, THEN `scene_type`, `movement_plane`, `layer_height_model_ready`, `cutaway_reveal_ready`, `walk_bounds`, `scale_reference`, `collision_semantics`, `occlusion_policy`, `special_surfaces`, `dynamic_behaviors`, `recovery_rule`, `authored_physical_unit_count`, and `source_gdd` are present.
-- [ ] GIVEN a current playable scene is active, WHEN smoke asks for the current scene physics contract, THEN the returned `scene_id` follows Hub exterior, ship interior, and Exploration state transitions.
-- [ ] GIVEN a scene contract is unknown, WHEN queried, THEN it returns `contract_complete=false` with a diagnostic error rather than a partial passing contract.
+- [x] GIVEN a 2D scene physics contract is drafted, WHEN review begins, THEN it declares either `水平场景` or `垂直场景`.
+- [x] GIVEN a current playable scene exposes a runtime contract, WHEN smoke queries it, THEN `scene_type`, `movement_plane`, `layer_height_model_ready`, `cutaway_reveal_ready`, `walk_bounds`, `scale_reference`, `collision_semantics`, `occlusion_policy`, `special_surfaces`, `dynamic_behaviors`, `recovery_rule`, `authored_physical_unit_count`, and `source_gdd` are present.
+- [x] GIVEN a current playable scene is active, WHEN smoke asks for the current scene physics contract, THEN the returned `scene_id` follows Hub exterior, ship interior, and Exploration state transitions.
+- [x] GIVEN a scene contract is unknown, WHEN queried, THEN it returns `contract_complete=false` with a diagnostic error rather than a partial passing contract.
 
 ---
 
@@ -74,11 +77,20 @@ Keep the runtime contract as a debug/QA surface until a dedicated data asset for
 - `tests/smoke/session_shell_visual_probe.gd` or dedicated scene physics smoke must exist and pass.
 - `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing -- see `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`
+
+---
+
+## Implementation Notes
+
+- `HubRuntime.DebugScenePhysicsContract(scene_id)` exposes runtime-readable debug contracts for `hub_island_dock`, `hub_ship_interior`, and `exploration_mist_island`.
+- `HubRuntime.DebugCurrentScenePhysicsContract()` follows playable world state: Hub exterior, ship interior, and Exploration.
+- Unknown scene ids return `contract_complete=false` with `diagnostic_error`; they do not default to a passing horizontal or vertical contract.
+- Smoke evidence checks the contract shape from the world/playable scene layer. UI, HUD, buttons, labels, and debug overlay text are not counted as physical scene units.
 
 ---
 
 ## Dependencies
 
-- Depends on: existing Polish 016 runtime contract probe.
+- Depends on: existing Polish 016 runtime contract probe (implemented; see `production/polish-backlog/story-polish-016-scene-physics-contract-retrofit.md`).
 - Unlocks: Story 002, Story 003.

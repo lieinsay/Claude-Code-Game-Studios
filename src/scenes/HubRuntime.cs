@@ -594,6 +594,7 @@ public partial class HubRuntime : Node2D
 			{
 				["scene_id"] = sceneId,
 				["contract_complete"] = false,
+				["diagnostic_error"] = "Unknown scene physics contract.",
 				["error"] = "Unknown scene physics contract.",
 			},
 		};
