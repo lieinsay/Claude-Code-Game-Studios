@@ -3,8 +3,24 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: GDD #19/#20 approved and epic scope created; create-stories for scene-composition-system and scene-physics-unit-system are the next production step
+Task: GDD #19/#20 approved, epics created, and stories split; first next story is scene-physics-unit-system/story-001
 <!-- /STATUS -->
+
+## Session Extract -- GDD #19/#20 Stories Created 2026-05-24
+- Input: user said to continue after GDD #19/#20 approval and epic creation.
+- Story split order followed dependency: #20 Scene Physics first, then #19 Scene Composition.
+- Scene Physics stories created:
+  - `production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md`
+  - `production/epics/scene-physics-unit-system/story-002-layer-height-cutaway-floor-state.md`
+  - `production/epics/scene-physics-unit-system/story-003-unit-catalog-collision-occlusion-scale.md`
+  - `production/epics/scene-physics-unit-system/story-004-dynamic-behaviors-special-surfaces-recovery.md`
+- Scene Composition stories created:
+  - `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`
+  - `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md`
+  - `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`
+  - `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`
+- Epic files and `production/epics/index.md` now show 4 Ready stories for each epic.
+- Next implementation step: `/story-readiness production/epics/scene-physics-unit-system/story-001-runtime-contract-shape.md`, then `/dev-story` for the same file.
 
 ## Session Extract -- GDD #19/#20 Approval and Epic Creation 2026-05-24
 - Input: user clarified that after GDD work the normal next step should be epics, and asked to fully complete GDD #19/#20.

@@ -76,5 +76,5 @@ Both GDDs are reviewed and approved. ADR-0016 and ADR-0017 are accepted architec
 
 | Epic | System # | GDD | Governing ADRs | TRs | Stories | Status |
 |------|----------|-----|----------------|-----|---------|--------|
-| [scene-composition-system](scene-composition-system/EPIC.md) | #19 | scene-composition-system.md | ADR-0001, ADR-0012, ADR-0016, ADR-0017, ADR-0019, GDD #20 | 3 | Not yet created | Ready |
-| [scene-physics-unit-system](scene-physics-unit-system/EPIC.md) | #20 | scene-physics-unit-system.md | ADR-0004, ADR-0019, GDD #19 | 3 | Not yet created | Ready |
+| [scene-composition-system](scene-composition-system/EPIC.md) | #19 | scene-composition-system.md | ADR-0001, ADR-0012, ADR-0016, ADR-0017, ADR-0019, GDD #20 | 3 | 4 (001-004) | Ready |
+| [scene-physics-unit-system](scene-physics-unit-system/EPIC.md) | #20 | scene-physics-unit-system.md | ADR-0004, ADR-0019, GDD #19 | 3 | 4 (001-004) | Ready |

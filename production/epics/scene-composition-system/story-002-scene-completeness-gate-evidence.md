@@ -1,0 +1,85 @@
+# Story 002: Scene Completeness Gate and Evidence Contract
+
+> **Epic**: Complete Scene Composition and Acceptance
+> **Status**: Ready
+> **Layer**: Polish Gate / Production Scene Design
+> **Type**: Integration
+> **Manifest Version**: 2026-05-09
+
+## Context
+
+**GDD**: `design/gdd/scene-composition-system.md`  
+**Requirement**: `TR-scene-composition-002`
+
+**ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot  
+**ADR Decision Summary**: scene evidence must fit the project scene lifecycle and be validated by desktop C# build/smoke where code is involved.
+
+**Engine**: Godot 4.6.2 .NET + C# | **Risk**: HIGH  
+**Engine Notes**: evidence checks should be deterministic and should not depend on final art assets unless the gate is specifically checking asset readiness.
+
+**Control Manifest Rules (this layer)**:
+- Required: physical world exploration is a bottom-layer gameplay contract.
+- Forbidden: never infer gameplay collision or scene completeness from art alone.
+- Guardrail: scene transition and smoke evidence must remain bounded.
+
+---
+
+## Acceptance Criteria
+
+- [ ] GIVEN a scene specification exists, WHEN Codex reviews it, THEN purpose, space, behavior, state, presentation, technical and QA lines are all checked for blockers.
+- [ ] GIVEN a scene reaches greybox, WHEN automated smoke runs, THEN tests verify visible scene identity nodes, main viewport coverage, interaction anchors, focus isolation and core route behavior relevant to that scene.
+- [ ] GIVEN a scene reaches asset_gate, WHEN asset requests are audited, THEN every P0 asset maps back to a scene identity, interaction, state variant or feedback requirement.
+- [ ] GIVEN release readiness is discussed, WHEN any P0 current-scene asset gap remains unresolved, THEN the release gate stays blocked or explicitly records the waiver.
+- [ ] GIVEN a scene depends on domain systems, WHEN implementation occurs, THEN the scene layer does not create a new gameplay authority or duplicate persistent state.
+
+---
+
+## Implementation Notes
+
+Implement the `scene_complete` evidence contract from GDD #19 as a checklist, script, smoke extension, or production evidence format. The gate must require `scene_physics_ready`, behavior, state variants, visual/audio readiness, technical contract, automated evidence, Codex review, and user review. It should not mutate domain state.
+
+---
+
+## Out of Scope
+
+- Story 001 owns scene spec template and registry.
+- Story 003 owns UI/HUD exclusion checks.
+- Story 004 owns user review workflow and release handoff.
+
+---
+
+## QA Test Cases
+
+- **AC-1**: completeness gate.
+  - Given: a scene evidence package.
+  - When: gate is evaluated.
+  - Then: all GDD #19 readiness dimensions are checked.
+  - Edge cases: any false dimension blocks completion.
+- **AC-2**: smoke evidence.
+  - Given: a greybox scene.
+  - When: smoke runs.
+  - Then: scene identity, viewport coverage, anchors, focus, and route behavior are verified.
+  - Edge cases: node existence alone is insufficient.
+- **AC-3**: asset traceability.
+  - Given: P0 current-scene asset list.
+  - When: audited.
+  - Then: every asset maps to identity, interaction, state, or feedback need.
+  - Edge cases: unresolved P0 gaps must block or record explicit waiver.
+
+---
+
+## Test Evidence
+
+**Story Type**: Integration  
+**Required evidence**:
+- Gate checklist/script output or updated smoke evidence.
+- `production/qa/evidence/scene-composition-completeness-gate-evidence.md`
+
+**Status**: [ ] Not yet created
+
+---
+
+## Dependencies
+
+- Depends on: Story 001; Scene Physics Stories 001-003.
+- Unlocks: Story 003, Story 004.
