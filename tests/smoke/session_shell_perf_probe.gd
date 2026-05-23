@@ -71,6 +71,8 @@ func _run() -> void:
 	await _sample_frames(2)
 	var route_departure_ms := _elapsed_ms(departure_start)
 
+	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
+	await _sample_frames(1)
 	hub.call("OnExplorationAdvancePressed")
 	await _sample_frames(1)
 	hub.call("OnExplorationAdvancePressed")
@@ -87,6 +89,8 @@ func _run() -> void:
 		await _sample_frames(1)
 		_load_ms.append(_elapsed_ms(load_start))
 
+	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
+	await _sample_frames(1)
 	hub.call("OnExplorationAdvancePressed")
 	await _sample_frames(1)
 

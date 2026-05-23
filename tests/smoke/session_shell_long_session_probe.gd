@@ -48,6 +48,8 @@ func _run() -> void:
 		await process_frame
 		_expect(_is_panel_visible(session, "ExplorationPanel"), "cycle %d reaches Exploration HUD" % [cycle + 1])
 
+		hub.call("DebugSetPlayerPosition", Vector2(638, 613))
+		await process_frame
 		hub.call("OnExplorationAdvancePressed")
 		await process_frame
 		hub.call("OnExplorationAdvancePressed")
@@ -70,6 +72,8 @@ func _run() -> void:
 		_expect(int(loaded_snapshot.get("exploration_step", 0)) == 2, "cycle %d load restores pressure step" % [cycle + 1])
 		_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "cycle %d load uses canonical Persistence" % [cycle + 1])
 
+		hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
+		await process_frame
 		hub.call("OnExplorationReturnPressed")
 		await process_frame
 		var return_snapshot := hub.call("DebugDomainSnapshot") as Dictionary

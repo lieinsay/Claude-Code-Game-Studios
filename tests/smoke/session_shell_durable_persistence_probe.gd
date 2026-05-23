@@ -37,6 +37,8 @@ func _run() -> void:
 	await process_frame
 	first_hub.call("OnDepartPressed")
 	await process_frame
+	first_hub.call("DebugSetPlayerPosition", Vector2(638, 613))
+	await process_frame
 	first_hub.call("OnExplorationAdvancePressed")
 	await process_frame
 	first_hub.call("OnExplorationAdvancePressed")

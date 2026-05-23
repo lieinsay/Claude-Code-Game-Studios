@@ -3,8 +3,19 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 013 complete with notes; Story 014 playable-space readability and movement-driven interaction is next before release checklist/gate
+Task: Polish Story 014 implemented and awaiting focused human QA before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 014 Implemented / Awaiting Human QA 2026-05-23
+- Story implemented: `production/polish-backlog/story-polish-014-playable-space-readability-and-movement-driven-interaction.md` -- Playable Space Readability and Movement-Driven Interaction.
+- Hub now adds stronger station/interior greybox identity for cockpit/helm, cargo/storage, and engine/module areas with distinct geometry, glow bands, room labels, and a deck identity cue.
+- Exploration now adds visible authored landmarks for island mass, cliff edge, path steps, search wreck signal, and return beacon.
+- Search and return progression now require player proximity to the relevant Exploration landmark; disabled UI labels and footer feedback explain the movement requirement.
+- Evidence: `production/qa/evidence/polish-014-playable-space-readability-and-movement-driven-interaction-evidence.md`.
+- Focused human rerun checklist: `production/playtests/playtest-checklist-polish-014-readable-space-and-movement-2026-05-23.md`.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 0 warnings / 0 errors; Godot visual smoke PASS; durable persistence smoke PASS; long-session smoke PASS; perf smoke PASS.
+- Test isolation note: durable and long-session probes must be run sequentially because they share `user://` durable progress state; sequential reruns passed after an earlier parallel false failure.
+- Next: run the focused Polish 014 human QA checklist before deciding whether to proceed to a formal release checklist/gate.
 
 ## Session Extract -- Polish Story 013 Human QA Complete / Story 014 Ready 2026-05-23
 - Human checklist executed: `production/playtests/playtest-checklist-polish-013-human-long-session-release-triage-2026-05-23.md`.

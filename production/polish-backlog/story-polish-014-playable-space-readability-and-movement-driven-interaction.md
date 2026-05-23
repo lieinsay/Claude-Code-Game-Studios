@@ -1,7 +1,7 @@
 # Polish Story 014: Playable Space Readability and Movement-Driven Interaction
 
 > **Phase**: Polish
-> **Status**: Ready
+> **Status**: Implemented -- Awaiting Human QA
 > **Layer**: Godot Runtime Presentation / Playable Interaction
 > **Type**: Polish
 > **Estimate**: M / 1 day
@@ -49,10 +49,41 @@ system.
 
 ## Evidence Targets
 
-- Updated `tests/smoke/session_shell_visual_probe.gd` coverage for distinct Hub
+- [x] Updated `tests/smoke/session_shell_visual_probe.gd` coverage for distinct Hub
   room identity, Exploration landmarks, and movement-required search/return.
-- Updated or new manual focused checklist under `production/playtests/`.
-- Evidence file under `production/qa/evidence/`.
+- [x] Updated or new manual focused checklist under `production/playtests/`.
+- [x] Evidence file under `production/qa/evidence/`.
+
+## Implementation Summary
+
+- Added stronger Hub greybox identity: station deck title, brighter cockpit/helm
+  glow, cargo/storage glow, engine/module glow, room-specific labels, and a
+  movement cue that points players through the authored spaces.
+- Added stronger Exploration greybox identity: island mass, cliff edge, path
+  steps, search wreck mast/signal, return beacon beam, and island identity text.
+- Changed Exploration search and return actions so UI buttons and direct action
+  calls require the player to stand near the search wreck or return beacon.
+- Kept keyboard-only play intact: `E` still performs the nearest valid spatial
+  interaction, while disabled UI labels explain that the player must move close
+  first.
+
+## Automated Evidence
+
+- Evidence file: `production/qa/evidence/polish-014-playable-space-readability-and-movement-driven-interaction-evidence.md`
+- Manual focused checklist: `production/playtests/playtest-checklist-polish-014-readable-space-and-movement-2026-05-23.md`
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false`: PASS, 0 warnings / 0 errors.
+- `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_durable_persistence_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_long_session_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd`: PASS; draw-call budget skipped under headless display driver.
+
+## Human QA Boundary
+
+Automated checks prove the presentation nodes exist, the movement/proximity
+gates work, and persistence/performance smoke still pass. The final release
+blocker remains human-readable: a tester must confirm the Hub now reads as a
+station/interior, Exploration no longer feels empty, and the search/return loop
+now requires meaningful movement.
 
 ## Release Triage Rule
 

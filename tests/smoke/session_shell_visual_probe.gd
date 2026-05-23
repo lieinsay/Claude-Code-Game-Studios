@@ -181,10 +181,21 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
 	var exploration_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
 	_expect(exploration_walk_bounds.x > 900.0 and exploration_walk_bounds.y > 200.0, "Exploration exposes a meaningful walkable bounds size")
+	_expect(hub.call("DebugNodeVisible", "ExplorationIslandMass"), "Exploration has a visible island mass")
+	_expect(hub.call("DebugNodeVisible", "ExplorationCliffEdge"), "Exploration has a visible island cliff edge")
+	_expect(hub.call("DebugNodeVisible", "ExplorationSearchPathSteps"), "Exploration has authored path steps toward search")
+	_expect(hub.call("DebugNodeVisible", "SearchWreckMast"), "Exploration search landmark has a readable wreck mast")
+	_expect(hub.call("DebugNodeVisible", "ReturnBeaconBeam"), "Exploration return landmark has a visible beacon beam")
+	_expect(_button_disabled(session, "ExplorationAdvanceButton"), "Search button is disabled before moving near the search landmark")
+	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	hub.call("OnExplorationAdvancePressed")
+	await process_frame
+	_expect(int((hub.call("DebugDomainSnapshot") as Dictionary).get("exploration_step", 0)) == int(pre_search_snapshot.get("exploration_step", 0)), "Direct search command cannot progress before spatial proximity")
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
 	_expect(hub.call("DebugInteractionPrompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
+	_expect(not _button_disabled(session, "ExplorationAdvanceButton"), "Search button enables only near the search landmark")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	var pressure_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -263,7 +274,9 @@ func _run() -> void:
 	_expect(str(loaded_snapshot.get("exploration_phase", "")) == "Exploring", "Canonical load restores ExplorationManager active session")
 	_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "Canonical load status is exposed in domain snapshot")
 
-	hub.call("OnExplorationAdvancePressed")
+	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
+	await process_frame
+	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
@@ -271,7 +284,9 @@ func _run() -> void:
 	_expect(_label_text(session, "SearchInteractPointLabel").contains("已搜索"), "Exploration search marker reflects completed search semantics")
 	await _save_runtime_screenshot(root, EXPLORATION_SEMANTICS_SCREENSHOT_PATH, "Exploration semantics screenshot")
 
-	hub.call("OnExplorationReturnPressed")
+	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
+	await process_frame
+	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(str((hub.call("DebugOnboardingSnapshot") as Dictionary).get("next_hint_step", "")) == "", "Final Hub screenshot state has no stale return-Hub onboarding hint")
 	_expect(_label_text(session, "CargoValue").contains("收益锁定"), "Hub cargo summary syncs completed pressure loop")
