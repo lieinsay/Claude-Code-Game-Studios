@@ -31,6 +31,8 @@ func _run() -> void:
 	_expect(_button_disabled(first_session, "DeleteProgressButton"), "Delete button is disabled when no local progress exists")
 	_expect(_label_text(first_session, "SaveStatusLabel").contains("暂无可加载进度"), "Hub explains that no progress can be loaded")
 
+	first_hub.call("EnterShipInterior")
+	await process_frame
 	first_hub.call("OnChartPressed")
 	await process_frame
 	first_hub.call("OnRouteMistPressed")
@@ -39,10 +41,9 @@ func _run() -> void:
 	await process_frame
 	first_hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
-	first_hub.call("OnExplorationAdvancePressed")
-	await process_frame
-	first_hub.call("OnExplorationAdvancePressed")
-	await process_frame
+	for i in range(6):
+		first_hub.call("OnExplorationAdvancePressed")
+		await process_frame
 	first_hub.call("OnSavePressed")
 	await process_frame
 

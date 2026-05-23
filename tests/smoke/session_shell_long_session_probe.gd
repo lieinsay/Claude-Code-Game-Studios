@@ -40,6 +40,8 @@ func _run() -> void:
 
 	var last_generation := 0
 	for cycle in range(CYCLE_COUNT):
+		hub.call("EnterShipInterior")
+		await process_frame
 		hub.call("OnChartPressed")
 		await process_frame
 		hub.call("OnRouteMistPressed")
@@ -50,10 +52,9 @@ func _run() -> void:
 
 		hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 		await process_frame
-		hub.call("OnExplorationAdvancePressed")
-		await process_frame
-		hub.call("OnExplorationAdvancePressed")
-		await process_frame
+		for i in range(6):
+			hub.call("OnExplorationAdvancePressed")
+			await process_frame
 		var pressure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 		_expect(int(pressure_snapshot.get("exploration_step", 0)) == 2, "cycle %d reaches mid-exploration pressure" % [cycle + 1])
 		_expect(int(pressure_snapshot.get("hull_integrity", 0)) > 0, "cycle %d keeps hull above failure state" % [cycle + 1])
@@ -72,7 +73,9 @@ func _run() -> void:
 		_expect(int(loaded_snapshot.get("exploration_step", 0)) == 2, "cycle %d load restores pressure step" % [cycle + 1])
 		_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "cycle %d load uses canonical Persistence" % [cycle + 1])
 
-		hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
+		hub.call("DebugSetPlayerPosition", Vector2(250, 613))
+		await process_frame
+		hub.call("OnExplorationReturnPressed")
 		await process_frame
 		hub.call("OnExplorationReturnPressed")
 		await process_frame

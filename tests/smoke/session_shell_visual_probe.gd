@@ -60,10 +60,22 @@ func _run() -> void:
 	_expect(_button_text(session, "DeleteProgressButton").contains("删除"), "Delete local progress entry is visible")
 	_expect(_button_disabled(session, "DeleteProgressButton"), "Delete local progress starts disabled with no save")
 
-	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub has an authored greybox deck floor")
 	_expect(hub.call("DebugNodeVisible", "HubIslandWalkBoundary"), "Hub has a walkable island boundary")
-	_expect(hub.call("DebugNodeVisible", "HubShipHull"), "Hub has a ship hull spatial anchor")
+	_expect(hub.call("DebugHubSpace") == "exterior", "Hub starts on the island dock exterior")
+	_expect(hub.call("DebugNodeVisible", "HubDockPier"), "Hub has an authored island dock pier")
+	_expect(hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Hub shows the docked ship exterior")
+	_expect(hub.call("DebugNodeVisible", "HubDockedShipBalloon"), "Hub shows the airship envelope above the dock")
 	_expect(hub.call("DebugNodeVisible", "HubBoardingRamp"), "Hub has a boarding ramp spatial anchor")
+	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior floor is hidden before boarding")
+	hub.call("DebugSetPlayerPosition", Vector2(248, 603))
+	await process_frame
+	_expect(hub.call("DebugInteractionPrompt").contains("登船"), "Moving near the ramp reveals ship entry prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(hub.call("DebugHubSpace") == "interior", "Ship entry moves the player into the interior")
+	_expect(hub.call("DebugNodeVisible", "HubShipInteriorShell"), "Ship interior shell becomes visible after boarding")
+	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior has an authored deck floor")
+	_expect(not hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Dock exterior hides while inside the ship")
 	_expect(hub.call("DebugNodeVisible", "HubCabinRoom"), "Hub has a cockpit room volume")
 	_expect(hub.call("DebugNodeVisible", "HubCargoRoom"), "Hub has a cargo room volume")
 	_expect(hub.call("DebugNodeVisible", "HubEngineRoom"), "Hub has an engine room volume")
@@ -82,13 +94,13 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field is hidden while in Hub")
 	var hub_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
-	_expect(hub_walk_bounds.x > 900.0 and hub_walk_bounds.y > 200.0, "Hub exposes a meaningful walkable bounds size")
+	_expect(hub_walk_bounds.x > 700.0 and hub_walk_bounds.y > 180.0, "Ship interior exposes a meaningful walkable bounds size")
 	hub.call("DebugSetPlayerPosition", Vector2(20, 20))
 	await process_frame
 	var clamped_hub_position := hub.call("DebugPlayerPosition") as Vector2
 	_expect(bool(hub.call("DebugPlayerWithinWalkBounds")), "Hub clamps debug player position inside walkable bounds")
-	_expect(clamped_hub_position.x >= 132.0 and clamped_hub_position.y >= 380.0, "Hub walkable boundary prevents leaving the island/ship space")
-	hub.call("DebugSetPlayerPosition", Vector2(158, 610))
+	_expect(clamped_hub_position.x >= 196.0 and clamped_hub_position.y >= 424.0, "Ship interior boundary prevents leaving the hull space")
+	hub.call("DebugSetPlayerPosition", Vector2(246, 610))
 	await process_frame
 	var start_position := hub.call("DebugPlayerPosition") as Vector2
 	Input.action_press(&"move_right")
@@ -115,10 +127,13 @@ func _run() -> void:
 	hub.call("OnLoadPressed")
 	await process_frame
 	_expect(_label_text(session, "SaveStatusLabel").contains("加载完成"), "Load action gives visible success feedback")
+	hub.call("EnterShipInterior")
+	await process_frame
+	_expect(hub.call("DebugHubSpace") == "interior", "Loaded Hub state can re-enter the ship interior")
 
 	hub.call("DebugSetPlayerPosition", Vector2(362, 613))
 	await process_frame
-	_expect(hub.call("DebugInteractionPrompt").contains("使用舵台"), "Moving near the helm reveals a spatial interaction prompt")
+	_expect(hub.call("DebugInteractionPrompt").contains("驾驶舱航台"), "Moving near the helm reveals a spatial interaction prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
@@ -194,8 +209,16 @@ func _run() -> void:
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
-	_expect(hub.call("DebugInteractionPrompt").contains("搜索事件点"), "Moving near the search point reveals a spatial search prompt")
+	_expect(hub.call("DebugInteractionPrompt").contains("搜索微交互"), "Moving near the search point reveals a spatial search prompt")
 	_expect(not _button_disabled(session, "ExplorationAdvanceButton"), "Search button enables only near the search landmark")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugSearchPulseStage")) == 1, "First search interaction starts scan calibration instead of instant reward")
+	_expect(int((hub.call("DebugDomainSnapshot") as Dictionary).get("exploration_step", 0)) == int(pre_search_snapshot.get("exploration_step", 0)), "Search scan stage does not settle rewards yet")
+	_expect(_control_width(session, "SearchPulseFill") > 0.0, "Search micro-game shows scan progress after first stage")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugSearchPulseStage")) == 2, "Second search interaction locks the scan echo")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	var pressure_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -212,8 +235,9 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("雾灯残骸"), "Exploration semantic label follows authored search point name")
 	_expect(_control_width(session, "ExplorationRouteProgressFill") > 250.0, "Exploration route progress strip advances after first search")
 
-	hub.call("OnExplorationAdvancePressed")
-	await process_frame
+	for i in range(3):
+		hub.call("OnExplorationAdvancePressed")
+		await process_frame
 	var damage_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(damage_snapshot.get("basic_supply_in_storage", 0)) == 8, "C# HubRuntime second advance consumes another ResourcesManager supply")
 	_expect(int(damage_snapshot.get("reward_carried", 0)) == 2, "C# HubRuntime second advance keeps rewards in carried pool before return")
@@ -236,9 +260,14 @@ func _run() -> void:
 	_expect(_label_text(session, "SaveStatusLabel").contains("本地进度"), "Exploration state saves through canonical Persistence and local durable progress")
 	_expect(int(saved_snapshot.get("persistence_generation", 0)) > 0, "Canonical Persistence records progress generation")
 
-	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
+	hub.call("DebugSetPlayerPosition", Vector2(250, 613))
 	await process_frame
-	_expect(hub.call("DebugInteractionPrompt").contains("返回 Hub"), "Moving near the return point reveals a spatial return prompt")
+	_expect(hub.call("DebugInteractionPrompt").contains("预热空艇返航引擎"), "Moving near the return ship reveals a piloting prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugReturnPrepStage")) == 1, "First return interaction preheats the ship instead of teleporting")
+	_expect(_is_panel_visible(session, "ExplorationPanel"), "Return preheat keeps the player in Exploration")
+	_expect(_control_width(session, "ExplorationReturnPrepFill") > 0.0, "Return flow shows engine preheat progress")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	var completed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -248,7 +277,8 @@ func _run() -> void:
 	_expect(int(return_snapshot.get("reward_carried", 0)) == 0, "ResourcesManager clears carried rewards after spatial Hub return")
 	_expect(int(return_snapshot.get("reward_in_storage", 0)) == 2, "ResourcesManager extracts rewards to storage after spatial Hub return")
 	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on spatial Hub return")
-	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub greybox floor returns after Exploration")
+	_expect(hub.call("DebugHubSpace") == "exterior", "Returning from Exploration lands on the island dock exterior")
+	_expect(hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Docked ship exterior returns after Exploration")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field hides after Hub return")
 	_expect(not _button_disabled(session, "ChartButton"), "Hub Chart entry is enabled after Exploration return")
 	_expect(_label_text(session, "CargoValue").contains("已用 180"), "Hub cargo summary syncs exploration cargo")
@@ -276,15 +306,18 @@ func _run() -> void:
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
-	hub.call("TrySpatialInteraction")
-	await process_frame
+	for i in range(3):
+		hub.call("TrySpatialInteraction")
+		await process_frame
 	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
 	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
 	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("收益锁定 260/500"), "Exploration extraction semantic label switches to settlement-ready state")
 	_expect(_label_text(session, "SearchInteractPointLabel").contains("已搜索"), "Exploration search marker reflects completed search semantics")
 	await _save_runtime_screenshot(root, EXPLORATION_SEMANTICS_SCREENSHOT_PATH, "Exploration semantics screenshot")
 
-	hub.call("DebugSetPlayerPosition", Vector2(1058, 613))
+	hub.call("DebugSetPlayerPosition", Vector2(250, 613))
+	await process_frame
+	hub.call("TrySpatialInteraction")
 	await process_frame
 	hub.call("TrySpatialInteraction")
 	await process_frame

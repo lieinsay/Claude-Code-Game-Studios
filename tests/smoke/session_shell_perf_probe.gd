@@ -55,12 +55,16 @@ func _run() -> void:
 
 	for index in range(10):
 		var chart_start := Time.get_ticks_usec()
+		hub.call("EnterShipInterior")
+		await _sample_frames(1)
 		hub.call("OnChartPressed")
 		await _sample_frames(1)
 		hub.call("ShowHub")
 		await _sample_frames(1)
 		_chart_cycle_ms.append(_elapsed_ms(chart_start))
 
+	hub.call("EnterShipInterior")
+	await _sample_frames(1)
 	hub.call("OnChartPressed")
 	await _sample_frames(1)
 	hub.call("OnRouteMistPressed")
@@ -73,10 +77,9 @@ func _run() -> void:
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await _sample_frames(1)
-	hub.call("OnExplorationAdvancePressed")
-	await _sample_frames(1)
-	hub.call("OnExplorationAdvancePressed")
-	await _sample_frames(1)
+	for index in range(6):
+		hub.call("OnExplorationAdvancePressed")
+		await _sample_frames(1)
 
 	for index in range(10):
 		var save_start := Time.get_ticks_usec()
@@ -91,8 +94,9 @@ func _run() -> void:
 
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await _sample_frames(1)
-	hub.call("OnExplorationAdvancePressed")
-	await _sample_frames(1)
+	for index in range(3):
+		hub.call("OnExplorationAdvancePressed")
+		await _sample_frames(1)
 
 	var return_start := Time.get_ticks_usec()
 	hub.call("ShowHub")

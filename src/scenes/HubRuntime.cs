@@ -5,8 +5,10 @@ using CloudWeaverVoyage.Presentation;
 public partial class HubRuntime : Node2D
 {
 	private static readonly Vector2 HubPlayerStart = new(158, 610);
+	private static readonly Vector2 ShipInteriorPlayerStart = new(246, 610);
 	private static readonly Vector2 ExplorationPlayerStart = new(168, 610);
 	private static readonly Rect2 HubWalkBounds = new(new Vector2(132, 380), new Vector2(1016, 252));
+	private static readonly Rect2 ShipInteriorWalkBounds = new(new Vector2(196, 424), new Vector2(836, 208));
 	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
 	private const string DurableProgressFileName = "cloudweaver_playable_progress.json";
 	private const string DurableProgressPath = $"user://{DurableProgressFileName}";
@@ -25,12 +27,17 @@ public partial class HubRuntime : Node2D
 	private Control? interactionLayer;
 	private ColorRect? playerMarker;
 	private Label? interactionPromptLabel;
+	private ColorRect? hubShipEntryMarker;
+	private ColorRect? hubShipExitMarker;
 	private ColorRect? hubHelmMarker;
 	private ColorRect? hubStorageMarker;
+	private ColorRect? hubEngineMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
 	private ColorRect? explorationRouteProgressFill;
 	private ColorRect? explorationThreatZone;
+	private ColorRect? explorationSearchPulseFill;
+	private ColorRect? explorationReturnPrepFill;
 	private ColorRect? extractionCargoProp;
 	private ColorRect? hubCargoLoadFill;
 	private ColorRect? hubEngineWearOverlay;
@@ -38,6 +45,8 @@ public partial class HubRuntime : Node2D
 	private Label? hubCargoStatusLabel;
 	private Label? hubEngineStatusLabel;
 	private readonly Godot.Collections.Array<CanvasItem> hubSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> hubExteriorSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> hubInteriorSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private Label? chartStatusLabel;
 	private Label? explorationRouteLabel;
@@ -60,7 +69,10 @@ public partial class HubRuntime : Node2D
 	private readonly Button?[] hubActionButtons = new Button?[4];
 	private string selectedRoute = "";
 	private string currentScreen = "hub";
+	private string hubSpace = "exterior";
 	private int explorationStep;
+	private int searchPulseStage;
+	private int returnPrepStage;
 	private Vector2 playerPosition = HubPlayerStart;
 	private string nearestInteraction = "";
 	private bool hasLoadableProgress;
@@ -176,6 +188,12 @@ public partial class HubRuntime : Node2D
 
 	public void OnChartPressed()
 	{
+		if (currentScreen == "hub" && hubSpace != "interior")
+		{
+			SetFooter("需要先从岛上登船，进入驾驶舱航台后再打开航图。");
+			return;
+		}
+
 		currentScreen = "chart";
 		domain.OpenChart();
 		ShowChartPanel();
@@ -205,6 +223,8 @@ public partial class HubRuntime : Node2D
 
 		currentScreen = "exploration";
 		explorationStep = 0;
+		searchPulseStage = 0;
+		returnPrepStage = 0;
 		playerPosition = ExplorationPlayerStart;
 		ShowExplorationSurface();
 		UpdateOnboardingHint();
@@ -224,18 +244,29 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
+		if (searchPulseStage < 2)
+		{
+			searchPulseStage += 1;
+			UpdateExplorationMicroGameSemantics();
+			SetFooter(searchPulseStage == 1
+				? "扫描 1/3：校准雾灯残骸角度，再按 E 读取回声。"
+				: "扫描 2/3：回声已锁定，再按 E 执行打捞脉冲。");
+			return;
+		}
+
 		domain.AdvanceExploration();
 		explorationStep = domain.Snapshot.ExplorationStep;
+		searchPulseStage = 0;
 		SetExplorationStatus();
 		UpdateOnboardingHint();
 		if (explorationStep >= 3)
 		{
-			SetFooter("一轮探索压力循环完成：返回 Hub 后可继续复测闭环。Ctrl+S 保存，Ctrl+L 加载。");
+			SetFooter("一轮探索压力循环完成：回到空艇旁预热并驾驶返航。Ctrl+S 保存，Ctrl+L 加载。");
 			GrabButton("ExplorationReturnButton");
 		}
 		else
 		{
-			SetFooter("探索推进：压力、威胁、船体反馈已更新。Ctrl+S 保存，Ctrl+L 加载，Esc 返回 Hub。");
+			SetFooter("打捞完成：压力、威胁、船体反馈已更新；再次靠近残骸可启动下一轮扫描。Ctrl+S 保存，Ctrl+L 加载。");
 			GrabButton("ExplorationAdvanceButton");
 		}
 	}
@@ -245,10 +276,19 @@ public partial class HubRuntime : Node2D
 		UpdateSpatialInteraction();
 		if (currentScreen == "exploration" && nearestInteraction != "exploration_return")
 		{
-			SetFooter("需要移动到返航信标旁边再按 E 返回 Hub。");
+			SetFooter("需要移动到空艇返航舵旁边再按 E 准备返航。");
 			return;
 		}
 
+		if (currentScreen == "exploration" && returnPrepStage < 1)
+		{
+			returnPrepStage += 1;
+			UpdateExplorationMicroGameSemantics();
+			SetFooter("返航 1/2：空艇引擎已预热，再按 E 驾驶返航。");
+			return;
+		}
+
+		returnPrepStage = 0;
 		domain.ReturnToHub();
 		ShowHub();
 		UpdateOnboardingHint();
@@ -389,6 +429,7 @@ public partial class HubRuntime : Node2D
 	public void ShowHub()
 	{
 		currentScreen = "hub";
+		hubSpace = "exterior";
 		if (chartPanel is not null)
 		{
 			chartPanel.Visible = false;
@@ -400,15 +441,23 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(true);
 		UpdateHubSummary();
 		SetWorldMode("hub");
-		SetFooter("HUD 入口：点击“打开航图 / HUD”或按 M。保存/加载可用按钮或 Ctrl+S / Ctrl+L。");
-		GrabButton("ChartButton");
+		SetFooter("岛屿停泊区：移动到登船坡道按 E 进入飞船内部。保存/加载可用按钮或 Ctrl+S / Ctrl+L。");
+		GrabButton("SaveButton");
 		UpdateOnboardingHint();
 	}
 
 	public void TrySpatialInteraction()
 	{
 		UpdateSpatialInteraction();
-		if (nearestInteraction == "hub_helm")
+		if (nearestInteraction == "hub_enter_ship")
+		{
+			EnterShipInterior();
+		}
+		else if (nearestInteraction == "hub_exit_ship")
+		{
+			ExitShipInterior();
+		}
+		else if (nearestInteraction == "hub_helm")
 		{
 			OnChartPressed();
 		}
@@ -416,6 +465,12 @@ public partial class HubRuntime : Node2D
 		{
 			SetFooter("仓储已检查：基础补给、信标水晶和修理包状态已同步。");
 			SetSaveStatus("交互完成：仓储状态可见");
+			UpdateOnboardingHint();
+		}
+		else if (nearestInteraction == "hub_engine")
+		{
+			SetFooter("轮机间已检查：引擎、模块台和返航推进器状态可见。");
+			SetSaveStatus("交互完成：轮机间状态可见");
 			UpdateOnboardingHint();
 		}
 		else if (nearestInteraction == "exploration_search")
@@ -430,6 +485,32 @@ public partial class HubRuntime : Node2D
 		{
 			SetFooter("附近没有可交互点：移动到标记旁按 E。");
 		}
+	}
+
+	public void EnterShipInterior()
+	{
+		if (currentScreen != "hub")
+		{
+			return;
+		}
+
+		hubSpace = "interior";
+		playerPosition = ShipInteriorPlayerStart;
+		SetWorldMode("hub");
+		SetFooter("已进入云织号内部：沿走廊前往驾驶舱、货舱或轮机间。");
+	}
+
+	public void ExitShipInterior()
+	{
+		if (currentScreen != "hub")
+		{
+			return;
+		}
+
+		hubSpace = "exterior";
+		playerPosition = HubPlayerStart;
+		SetWorldMode("hub");
+		SetFooter("已回到岛上停泊区：飞船停在码头，可再次登船。");
 	}
 
 	public void DebugSetPlayerPosition(Vector2 position)
@@ -452,6 +533,12 @@ public partial class HubRuntime : Node2D
 
 	public bool DebugNodeVisible(string nodeName) =>
 		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
+
+	public string DebugHubSpace() => hubSpace;
+
+	public int DebugSearchPulseStage() => searchPulseStage;
+
+	public int DebugReturnPrepStage() => returnPrepStage;
 
 	public bool DebugDurableProgressExists() => Godot.FileAccess.FileExists(DurableProgressPath);
 
@@ -633,10 +720,13 @@ public partial class HubRuntime : Node2D
 
 		AddHubGreyboxSet();
 		AddExplorationGreyboxSet();
+		hubShipEntryMarker = AddWorldMarker("ShipEntryInteractPoint", new Vector2(202, 584), new Color(0.45f, 0.62f, 0.52f), "登船 E");
+		hubShipExitMarker = AddWorldMarker("ShipExitInteractPoint", new Vector2(224, 584), new Color(0.45f, 0.52f, 0.62f), "下船 E");
 		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
+		hubEngineMarker = AddWorldMarker("EngineInteractPoint", new Vector2(844, 594), new Color(0.45f, 0.48f, 0.70f), "轮机 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
-		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(1012, 594), new Color(0.64f, 0.39f, 0.28f), "返航 E");
+		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(204, 594), new Color(0.64f, 0.39f, 0.28f), "驾驶返航 E");
 
 		playerMarker = new ColorRect
 		{
@@ -663,48 +753,55 @@ public partial class HubRuntime : Node2D
 	private void AddHubGreyboxSet()
 	{
 		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 0.90f));
-		AddSceneRect(hubSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubShipHull", new Vector2(236, 448), new Vector2(772, 174), new Color(0.19f, 0.26f, 0.31f, 0.92f));
-		AddSceneRect(hubSceneItems, "HubBoardingRamp", new Vector2(168, 568), new Vector2(96, 34), new Color(0.48f, 0.42f, 0.31f, 0.96f));
-		AddSceneLabel(hubSceneItems, "HubBoardingRampLabel", new Vector2(168, 544), new Vector2(104, 22), "登船坡道");
-		AddSceneLabel(hubSceneItems, "HubStationIdentityLabel", new Vector2(440, 424), new Vector2(360, 28), "云织号枢纽甲板：驾驶舱 / 货舱 / 轮机间");
-		AddSceneRect(hubSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
-		AddSceneRect(hubSceneItems, "HubCabinGlow", new Vector2(278, 456), new Vector2(176, 6), new Color(0.56f, 0.82f, 0.92f, 0.98f));
-		AddSceneLabel(hubSceneItems, "HubCabinRoomLabel", new Vector2(288, 470), new Vector2(154, 24), "驾驶舱 / 航台");
-		AddSceneRect(hubSceneItems, "HubCabinWindow", new Vector2(304, 490), new Vector2(124, 10), new Color(0.48f, 0.68f, 0.78f, 0.92f));
-		AddSceneRect(hubSceneItems, "HubCabinNavigationSlate", new Vector2(302, 506), new Vector2(128, 14), new Color(0.12f, 0.27f, 0.34f, 0.96f));
-		hubCabinStatusLabel = AddSceneLabel(hubSceneItems, "HubCabinStatusLabel", new Vector2(286, 528), new Vector2(162, 22), "驾驶舱：待规划");
-		AddSceneRect(hubSceneItems, "HubCargoRoom", new Vector2(506, 464), new Vector2(184, 64), new Color(0.37f, 0.30f, 0.21f, 0.94f));
-		AddSceneRect(hubSceneItems, "HubCargoGlow", new Vector2(510, 456), new Vector2(176, 6), new Color(0.86f, 0.66f, 0.34f, 0.98f));
-		AddSceneLabel(hubSceneItems, "HubCargoRoomLabel", new Vector2(530, 472), new Vector2(136, 22), "货舱");
-		AddSceneRect(hubSceneItems, "HubCargoShelfLeft", new Vector2(520, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubCargoShelfRight", new Vector2(642, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubCargoLoadTrack", new Vector2(560, 504), new Vector2(72, 10), new Color(0.24f, 0.21f, 0.16f, 0.96f));
-		hubCargoLoadFill = AddSceneRect(hubSceneItems, "HubCargoLoadFill", new Vector2(560, 504), new Vector2(0, 10), new Color(0.78f, 0.64f, 0.34f, 0.98f));
-		hubCargoStatusLabel = AddSceneLabel(hubSceneItems, "HubCargoStatusLabel", new Vector2(518, 528), new Vector2(160, 22), "货舱：空载");
-		AddSceneRect(hubSceneItems, "HubEngineRoom", new Vector2(766, 464), new Vector2(184, 64), new Color(0.28f, 0.30f, 0.38f, 0.94f));
-		AddSceneRect(hubSceneItems, "HubEngineGlow", new Vector2(770, 456), new Vector2(176, 6), new Color(0.72f, 0.76f, 0.96f, 0.98f));
-		AddSceneLabel(hubSceneItems, "HubEngineRoomLabel", new Vector2(788, 472), new Vector2(140, 22), "轮机间");
-		AddSceneRect(hubSceneItems, "HubEngineCoilLeft", new Vector2(794, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubEngineCoilRight", new Vector2(882, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubEnginePowerConduit", new Vector2(836, 504), new Vector2(46, 8), new Color(0.64f, 0.70f, 0.48f, 0.95f));
-		hubEngineWearOverlay = AddSceneRect(hubSceneItems, "HubEngineWearOverlay", new Vector2(800, 486), new Vector2(118, 36), new Color(0.64f, 0.25f, 0.21f, 0.35f));
-		hubEngineStatusLabel = AddSceneLabel(hubSceneItems, "HubEngineStatusLabel", new Vector2(778, 528), new Vector2(160, 22), "轮机间：稳定");
-		AddSceneRect(hubSceneItems, "HubDeckFloor", new Vector2(88, 526), new Vector2(1096, 112), new Color(0.18f, 0.23f, 0.24f, 0.88f));
-		AddSceneRect(hubSceneItems, "HubDeckRail", new Vector2(104, 502), new Vector2(1064, 12), new Color(0.43f, 0.55f, 0.56f, 0.95f));
-		AddSceneRect(hubSceneItems, "HubInteriorDoorLineCabinCargo", new Vector2(474, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
-		AddSceneRect(hubSceneItems, "HubInteriorDoorLineCargoEngine", new Vector2(728, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
-		AddSceneRect(hubSceneItems, "HubInteriorMainAisle", new Vector2(276, 536), new Vector2(672, 8), new Color(0.50f, 0.55f, 0.48f, 0.82f));
-		AddSceneRect(hubSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
-		AddSceneLabel(hubSceneItems, "HelmConsoleLabel", new Vector2(298, 552), new Vector2(126, 22), "航图舵台");
-		AddSceneRect(hubSceneItems, "HelmConsoleArrow", new Vector2(344, 528), new Vector2(28, 16), new Color(0.74f, 0.88f, 0.92f, 0.95f));
-		AddSceneRect(hubSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
-		AddSceneRect(hubSceneItems, "StorageCrateBand", new Vector2(536, 564), new Vector2(100, 10), new Color(0.68f, 0.59f, 0.39f, 0.95f));
-		AddSceneLabel(hubSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
-		AddSceneRect(hubSceneItems, "ModuleBenchProp", new Vector2(792, 548), new Vector2(156, 56), new Color(0.26f, 0.30f, 0.38f, 0.92f));
-		AddSceneLabel(hubSceneItems, "ModuleBenchLabel", new Vector2(806, 552), new Vector2(128, 22), "模块检修台");
-		AddSceneLabel(hubSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "沿甲板移动到房间与交互点");
+		AddSceneRect(hubExteriorSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
+		AddSceneRect(hubExteriorSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockWaterline", new Vector2(72, 632), new Vector2(1136, 18), new Color(0.10f, 0.26f, 0.34f, 0.78f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockPier", new Vector2(156, 568), new Vector2(224, 34), new Color(0.42f, 0.36f, 0.27f, 0.96f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockedShipExterior", new Vector2(382, 448), new Vector2(448, 126), new Color(0.18f, 0.25f, 0.31f, 0.95f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockedShipBalloon", new Vector2(446, 390), new Vector2(320, 54), new Color(0.43f, 0.58f, 0.62f, 0.90f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockedShipCabinDoor", new Vector2(410, 536), new Vector2(56, 38), new Color(0.54f, 0.48f, 0.34f, 0.98f));
+		AddSceneRect(hubExteriorSceneItems, "HubBoardingRamp", new Vector2(236, 558), new Vector2(174, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
+		AddSceneLabel(hubExteriorSceneItems, "HubBoardingRampLabel", new Vector2(208, 532), new Vector2(174, 22), "岛上码头 / 登船坡道");
+		AddSceneLabel(hubExteriorSceneItems, "HubIslandDockIdentityLabel", new Vector2(438, 414), new Vector2(360, 28), "停泊浮岛：云织号靠岸，可登船进入内部");
+		AddSceneLabel(hubInteriorSceneItems, "HubStationIdentityLabel", new Vector2(440, 424), new Vector2(360, 28), "云织号船内：驾驶舱 / 货舱 / 轮机间");
+		AddSceneRect(hubInteriorSceneItems, "HubShipInteriorShell", new Vector2(220, 442), new Vector2(804, 166), new Color(0.13f, 0.18f, 0.22f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
+		AddSceneRect(hubInteriorSceneItems, "HubCabinGlow", new Vector2(278, 456), new Vector2(176, 6), new Color(0.56f, 0.82f, 0.92f, 0.98f));
+		AddSceneLabel(hubInteriorSceneItems, "HubCabinRoomLabel", new Vector2(288, 470), new Vector2(154, 24), "驾驶舱 / 航台");
+		AddSceneRect(hubInteriorSceneItems, "HubCabinWindow", new Vector2(304, 490), new Vector2(124, 10), new Color(0.48f, 0.68f, 0.78f, 0.92f));
+		AddSceneRect(hubInteriorSceneItems, "HubCabinNavigationSlate", new Vector2(302, 506), new Vector2(128, 14), new Color(0.12f, 0.27f, 0.34f, 0.96f));
+		hubCabinStatusLabel = AddSceneLabel(hubInteriorSceneItems, "HubCabinStatusLabel", new Vector2(286, 528), new Vector2(162, 22), "驾驶舱：待规划");
+		AddSceneRect(hubInteriorSceneItems, "HubCargoRoom", new Vector2(506, 464), new Vector2(184, 64), new Color(0.37f, 0.30f, 0.21f, 0.94f));
+		AddSceneRect(hubInteriorSceneItems, "HubCargoGlow", new Vector2(510, 456), new Vector2(176, 6), new Color(0.86f, 0.66f, 0.34f, 0.98f));
+		AddSceneLabel(hubInteriorSceneItems, "HubCargoRoomLabel", new Vector2(530, 472), new Vector2(136, 22), "货舱");
+		AddSceneRect(hubInteriorSceneItems, "HubCargoShelfLeft", new Vector2(520, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubCargoShelfRight", new Vector2(642, 490), new Vector2(34, 30), new Color(0.55f, 0.46f, 0.29f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubCargoLoadTrack", new Vector2(560, 504), new Vector2(72, 10), new Color(0.24f, 0.21f, 0.16f, 0.96f));
+		hubCargoLoadFill = AddSceneRect(hubInteriorSceneItems, "HubCargoLoadFill", new Vector2(560, 504), new Vector2(0, 10), new Color(0.78f, 0.64f, 0.34f, 0.98f));
+		hubCargoStatusLabel = AddSceneLabel(hubInteriorSceneItems, "HubCargoStatusLabel", new Vector2(518, 528), new Vector2(160, 22), "货舱：空载");
+		AddSceneRect(hubInteriorSceneItems, "HubEngineRoom", new Vector2(766, 464), new Vector2(184, 64), new Color(0.28f, 0.30f, 0.38f, 0.94f));
+		AddSceneRect(hubInteriorSceneItems, "HubEngineGlow", new Vector2(770, 456), new Vector2(176, 6), new Color(0.72f, 0.76f, 0.96f, 0.98f));
+		AddSceneLabel(hubInteriorSceneItems, "HubEngineRoomLabel", new Vector2(788, 472), new Vector2(140, 22), "轮机间");
+		AddSceneRect(hubInteriorSceneItems, "HubEngineCoilLeft", new Vector2(794, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubEngineCoilRight", new Vector2(882, 492), new Vector2(42, 28), new Color(0.34f, 0.43f, 0.56f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubEnginePowerConduit", new Vector2(836, 504), new Vector2(46, 8), new Color(0.64f, 0.70f, 0.48f, 0.95f));
+		hubEngineWearOverlay = AddSceneRect(hubInteriorSceneItems, "HubEngineWearOverlay", new Vector2(800, 486), new Vector2(118, 36), new Color(0.64f, 0.25f, 0.21f, 0.35f));
+		hubEngineStatusLabel = AddSceneLabel(hubInteriorSceneItems, "HubEngineStatusLabel", new Vector2(778, 528), new Vector2(160, 22), "轮机间：稳定");
+		AddSceneRect(hubInteriorSceneItems, "HubDeckFloor", new Vector2(196, 526), new Vector2(836, 112), new Color(0.18f, 0.23f, 0.24f, 0.88f));
+		AddSceneRect(hubInteriorSceneItems, "HubDeckRail", new Vector2(216, 502), new Vector2(780, 12), new Color(0.43f, 0.55f, 0.56f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorDoorLineCabinCargo", new Vector2(474, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorDoorLineCargoEngine", new Vector2(728, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorMainAisle", new Vector2(276, 536), new Vector2(672, 8), new Color(0.50f, 0.55f, 0.48f, 0.82f));
+		AddSceneRect(hubInteriorSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
+		AddSceneLabel(hubInteriorSceneItems, "HelmConsoleLabel", new Vector2(298, 552), new Vector2(126, 22), "航图舵台");
+		AddSceneRect(hubInteriorSceneItems, "HelmConsoleArrow", new Vector2(344, 528), new Vector2(28, 16), new Color(0.74f, 0.88f, 0.92f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "StorageCrateBand", new Vector2(536, 564), new Vector2(100, 10), new Color(0.68f, 0.59f, 0.39f, 0.95f));
+		AddSceneLabel(hubInteriorSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
+		AddSceneRect(hubInteriorSceneItems, "ModuleBenchProp", new Vector2(792, 548), new Vector2(156, 56), new Color(0.26f, 0.30f, 0.38f, 0.92f));
+		AddSceneLabel(hubInteriorSceneItems, "ModuleBenchLabel", new Vector2(806, 552), new Vector2(128, 22), "模块检修台");
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorExitDoor", new Vector2(218, 552), new Vector2(42, 48), new Color(0.48f, 0.42f, 0.31f, 0.96f));
+		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
 	}
 
 	private void AddExplorationGreyboxSet()
@@ -713,6 +810,8 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(explorationSceneItems, "ExplorationIslandUpperEdge", new Vector2(132, 390), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandLowerEdge", new Vector2(132, 624), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationDockedShip", new Vector2(156, 546), new Vector2(154, 74), new Color(0.20f, 0.27f, 0.33f, 0.96f));
+		AddSceneRect(explorationSceneItems, "ExplorationReturnShipHelm", new Vector2(196, 558), new Vector2(68, 34), new Color(0.18f, 0.38f, 0.48f, 0.96f));
+		explorationReturnPrepFill = AddSceneRect(explorationSceneItems, "ExplorationReturnPrepFill", new Vector2(202, 586), new Vector2(0, 8), new Color(0.86f, 0.66f, 0.40f, 0.98f));
 		AddSceneRect(explorationSceneItems, "ExplorationBoardingRamp", new Vector2(290, 580), new Vector2(92, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(explorationSceneItems, "ExplorationBoardingRampLabel", new Vector2(166, 522), new Vector2(132, 22), "靠岸空艇");
 		AddSceneRect(explorationSceneItems, "ExplorationIslandPath", new Vector2(342, 584), new Vector2(610, 20), new Color(0.32f, 0.44f, 0.36f, 0.95f));
@@ -728,6 +827,10 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(explorationSceneItems, "SearchWreckMast", new Vector2(630, 510), new Vector2(12, 42), new Color(0.56f, 0.48f, 0.34f, 0.95f));
 		AddSceneRect(explorationSceneItems, "SearchWreckSignalGlow", new Vector2(594, 574), new Vector2(96, 10), new Color(0.78f, 0.84f, 0.46f, 0.98f));
 		AddSceneRect(explorationSceneItems, "SearchWreckHighlight", new Vector2(590, 556), new Vector2(104, 12), new Color(0.62f, 0.75f, 0.42f, 0.98f));
+		AddSceneRect(explorationSceneItems, "SearchClueLeft", new Vector2(526, 536), new Vector2(24, 24), new Color(0.68f, 0.62f, 0.38f, 0.95f));
+		AddSceneRect(explorationSceneItems, "SearchClueRight", new Vector2(706, 572), new Vector2(24, 24), new Color(0.68f, 0.62f, 0.38f, 0.95f));
+		AddSceneRect(explorationSceneItems, "SearchScanArc", new Vector2(548, 526), new Vector2(196, 8), new Color(0.54f, 0.74f, 0.68f, 0.90f));
+		explorationSearchPulseFill = AddSceneRect(explorationSceneItems, "SearchPulseFill", new Vector2(584, 604), new Vector2(0, 8), new Color(0.72f, 0.88f, 0.50f, 0.98f));
 		AddSceneLabel(explorationSceneItems, "SearchWreckLabel", new Vector2(574, 548), new Vector2(138, 22), "漂浮残骸");
 		explorationThreatZone = AddSceneRect(explorationSceneItems, "ExplorationThreatZone", new Vector2(768, 528), new Vector2(150, 68), new Color(0.62f, 0.25f, 0.22f, 0.52f));
 		explorationThreatSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationThreatSemanticLabel", new Vector2(756, 506), new Vector2(190, 24), "威胁区：未触发");
@@ -869,7 +972,7 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(false);
 		SetWorldMode("exploration");
 		SetExplorationStatus();
-		SetFooter("探索开始：移动到漂浮残骸旁按 E 搜索，移动到返航信标旁按 E 返回。Ctrl+S 保存，Ctrl+L 加载。");
+		SetFooter("探索开始：移动到残骸旁按 E 完成三段扫描，回到空艇旁按 E 预热并驾驶返航。Ctrl+S 保存，Ctrl+L 加载。");
 	}
 
 	private void SetExplorationStatus()
@@ -887,7 +990,7 @@ public partial class HubRuntime : Node2D
 				$"资源压力：补给稳定；载货 {snapshot.CargoUsed}/{snapshot.CargoCapacity}",
 				$"威胁反馈：{snapshot.ThreatText}；侦察 100%",
 				$"船体状态：{snapshot.HullIntegrity}/100 完整，可继续探索",
-				"恢复提示：点击“推进探索 / 搜索”开始压力循环");
+				"恢复提示：靠近残骸后完成扫描、回声、打捞三段搜索");
 		}
 		else if (explorationStep == 1)
 		{
@@ -895,7 +998,7 @@ public partial class HubRuntime : Node2D
 				$"资源压力：搜索消耗 1 补给；发现信标水晶 {snapshot.RewardCarried} 箱，载货 {snapshot.CargoUsed}/{snapshot.CargoCapacity}",
 				$"威胁反馈：{snapshot.ThreatText}；云影扰动已标记",
 				$"船体状态：{snapshot.HullIntegrity}/100 完整，暂无损伤",
-				"恢复提示：可继续搜索，或返回 Hub 保留收益");
+				"恢复提示：可继续扫描搜索，或回到空艇准备返航");
 		}
 		else if (explorationStep == 2)
 		{
@@ -903,7 +1006,7 @@ public partial class HubRuntime : Node2D
 				$"资源压力：补给继续消耗；载货 {snapshot.CargoUsed}/{snapshot.CargoCapacity}",
 				$"威胁反馈：{snapshot.ThreatText}；遭遇警报，侦察 72%",
 				$"船体状态：{snapshot.HullIntegrity}/100 轻微擦伤",
-				"恢复提示：建议返回 Hub 检查船体，或继续承担风险");
+				"恢复提示：建议驾驶空艇返航检查船体，或继续承担风险");
 		}
 		else
 		{
@@ -911,7 +1014,7 @@ public partial class HubRuntime : Node2D
 				$"资源压力：载货 {snapshot.CargoUsed}/{snapshot.CargoCapacity}；收益已锁定",
 				$"威胁反馈：{snapshot.ThreatText}；可安全撤离",
 				$"船体状态：{snapshot.HullIntegrity}/100，可返航",
-				"恢复提示：一轮压力循环完成，点击返回 Hub 闭环");
+				"恢复提示：一轮压力循环完成，回到空艇驾驶返航闭环");
 		}
 	}
 
@@ -932,6 +1035,7 @@ public partial class HubRuntime : Node2D
 			explorationRouteProgressFill.Size = new Vector2(width, explorationRouteProgressFill.Size.Y);
 			explorationRouteProgressFill.CustomMinimumSize = explorationRouteProgressFill.Size;
 		}
+		UpdateExplorationMicroGameSemantics();
 
 		var activePoint = string.IsNullOrWhiteSpace(snapshot.LastSearchPointId)
 			? "待接近"
@@ -967,8 +1071,28 @@ public partial class HubRuntime : Node2D
 				: $"撤离：携带 {snapshot.CargoUsed}/{snapshot.CargoCapacity}";
 		}
 
-		SetMarkerLabel(explorationSearchMarker, step >= 3 ? "已搜索" : $"搜索 {Math.Min(step + 1, 3)}/3");
-		SetMarkerLabel(explorationReturnMarker, step >= 3 ? "结算 E" : "返航 E");
+		SetMarkerLabel(explorationSearchMarker, step >= 3 ? "已搜索" : searchPulseStage <= 0 ? "扫描 E" : $"扫描 {searchPulseStage + 1}/3");
+		SetMarkerLabel(explorationReturnMarker, step >= 3 ? "驾驶返航 E" : returnPrepStage <= 0 ? "预热返航 E" : "起航 E");
+	}
+
+	private void UpdateExplorationMicroGameSemantics()
+	{
+		if (explorationSearchPulseFill is not null)
+		{
+			var width = 120.0f * (Math.Clamp(searchPulseStage, 0, 2) / 2.0f);
+			explorationSearchPulseFill.Size = new Vector2(width, explorationSearchPulseFill.Size.Y);
+			explorationSearchPulseFill.CustomMinimumSize = explorationSearchPulseFill.Size;
+			explorationSearchPulseFill.Visible = currentScreen == "exploration";
+		}
+		if (explorationReturnPrepFill is not null)
+		{
+			var width = returnPrepStage > 0 ? 56.0f : 0.0f;
+			explorationReturnPrepFill.Size = new Vector2(width, explorationReturnPrepFill.Size.Y);
+			explorationReturnPrepFill.CustomMinimumSize = explorationReturnPrepFill.Size;
+			explorationReturnPrepFill.Visible = currentScreen == "exploration";
+		}
+		SetMarkerLabel(explorationSearchMarker, searchPulseStage <= 0 ? "扫描 E" : $"扫描 {searchPulseStage + 1}/3");
+		SetMarkerLabel(explorationReturnMarker, returnPrepStage <= 0 ? "预热返航 E" : "起航 E");
 	}
 
 	private static void SetMarkerLabel(Control? marker, string text)
@@ -1080,13 +1204,18 @@ public partial class HubRuntime : Node2D
 	private void SetWorldMode(string mode)
 	{
 		SetSceneGroupVisible(hubSceneItems, mode == "hub");
+		SetSceneGroupVisible(hubExteriorSceneItems, mode == "hub" && hubSpace == "exterior");
+		SetSceneGroupVisible(hubInteriorSceneItems, mode == "hub" && hubSpace == "interior");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
 		if (mode == "hub")
 		{
 			UpdateHubInteriorSemantics(domain.Snapshot);
 		}
-		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub";
-		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub";
+		if (hubShipEntryMarker is not null) hubShipEntryMarker.Visible = mode == "hub" && hubSpace == "exterior";
+		if (hubShipExitMarker is not null) hubShipExitMarker.Visible = mode == "hub" && hubSpace == "interior";
+		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub" && hubSpace == "interior";
+		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub" && hubSpace == "interior";
+		if (hubEngineMarker is not null) hubEngineMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
 		if (explorationReturnMarker is not null) explorationReturnMarker.Visible = mode == "exploration";
 		if (playerMarker is not null)
@@ -1123,17 +1252,42 @@ public partial class HubRuntime : Node2D
 		var prompt = "WASD / 方向键移动，靠近可交互点按 E。";
 		if (currentScreen == "hub")
 		{
-			var helmDistance = DistanceToMarker(hubHelmMarker);
-			var storageDistance = DistanceToMarker(hubStorageMarker);
-			if (helmDistance <= InteractionRadius && helmDistance <= storageDistance)
+			if (hubSpace == "exterior")
 			{
-				nearestInteraction = "hub_helm";
-				prompt = "按 E 使用舵台：打开航图并选择航线。";
+				var entryDistance = DistanceToMarker(hubShipEntryMarker);
+				if (entryDistance <= InteractionRadius)
+				{
+					nearestInteraction = "hub_enter_ship";
+					prompt = "按 E 从岛上码头登船，进入云织号内部。";
+				}
 			}
-			else if (storageDistance <= InteractionRadius)
+			else
 			{
-				nearestInteraction = "hub_storage";
-				prompt = "按 E 检查仓储：确认资源与货舱状态。";
+				var exitDistance = DistanceToMarker(hubShipExitMarker);
+				var helmDistance = DistanceToMarker(hubHelmMarker);
+				var storageDistance = DistanceToMarker(hubStorageMarker);
+				var engineDistance = DistanceToMarker(hubEngineMarker);
+				var nearestHubDistance = Math.Min(Math.Min(exitDistance, helmDistance), Math.Min(storageDistance, engineDistance));
+				if (exitDistance <= InteractionRadius && exitDistance <= nearestHubDistance)
+				{
+					nearestInteraction = "hub_exit_ship";
+					prompt = "按 E 下船回到岛上码头。";
+				}
+				else if (helmDistance <= InteractionRadius && helmDistance <= nearestHubDistance)
+				{
+					nearestInteraction = "hub_helm";
+					prompt = "按 E 使用驾驶舱航台：打开航图并选择航线。";
+				}
+				else if (storageDistance <= InteractionRadius && storageDistance <= nearestHubDistance)
+				{
+					nearestInteraction = "hub_storage";
+					prompt = "按 E 检查货舱：确认资源与货物状态。";
+				}
+				else if (engineDistance <= InteractionRadius)
+				{
+					nearestInteraction = "hub_engine";
+					prompt = "按 E 检查轮机间：确认模块和返航推进器。";
+				}
 			}
 		}
 		else if (currentScreen == "exploration")
@@ -1143,12 +1297,16 @@ public partial class HubRuntime : Node2D
 			if (searchDistance <= InteractionRadius && searchDistance <= returnDistance)
 			{
 				nearestInteraction = "exploration_search";
-				prompt = "按 E 搜索事件点：获得资源或压力反馈。";
+				prompt = searchPulseStage <= 0
+					? "按 E 开始搜索微交互：扫描残骸角度。"
+					: $"按 E 继续搜索微交互：扫描 {searchPulseStage + 1}/3。";
 			}
 			else if (returnDistance <= InteractionRadius)
 			{
 				nearestInteraction = "exploration_return";
-				prompt = "按 E 返回 Hub：结算当前探索反馈。";
+				prompt = returnPrepStage <= 0
+					? "按 E 预热空艇返航引擎。"
+					: "按 E 驾驶空艇返航。";
 			}
 		}
 
@@ -1166,14 +1324,18 @@ public partial class HubRuntime : Node2D
 			var canSearch = currentScreen == "exploration" && nearestInteraction == "exploration_search";
 			advanceButton.Disabled = !canSearch;
 			advanceButton.FocusMode = canSearch ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
-			advanceButton.Text = canSearch ? "搜索当前残骸  E" : "靠近残骸后搜索";
+			advanceButton.Text = canSearch
+				? searchPulseStage <= 0 ? "扫描残骸  E" : $"继续扫描 {searchPulseStage + 1}/3  E"
+				: "靠近残骸后扫描";
 		}
 		if (FindChild("ExplorationReturnButton", true, false) is Button returnButton)
 		{
 			var canReturn = currentScreen == "exploration" && nearestInteraction == "exploration_return";
 			returnButton.Disabled = !canReturn;
 			returnButton.FocusMode = canReturn ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
-			returnButton.Text = canReturn ? "返回 Hub  E" : "靠近信标后返航";
+			returnButton.Text = canReturn
+				? returnPrepStage <= 0 ? "预热返航引擎  E" : "驾驶返航  E"
+				: "靠近空艇后返航";
 		}
 	}
 
@@ -1184,7 +1346,15 @@ public partial class HubRuntime : Node2D
 			: playerPosition.DistanceTo(marker.Position + (marker.Size * 0.5f));
 	}
 
-	private Rect2 CurrentWalkBounds() => currentScreen == "exploration" ? ExplorationWalkBounds : HubWalkBounds;
+	private Rect2 CurrentWalkBounds()
+	{
+		if (currentScreen == "exploration")
+		{
+			return ExplorationWalkBounds;
+		}
+
+		return hubSpace == "interior" ? ShipInteriorWalkBounds : HubWalkBounds;
+	}
 
 	private Vector2 ClampToCurrentWalkBounds(Vector2 position)
 	{

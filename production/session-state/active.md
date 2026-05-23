@@ -3,8 +3,22 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Polish Story 014 human QA returned CONCERN; Story 015 island/ship interior and search gameplay design is next before release checklist/gate
+Task: Polish Story 015 implemented and awaiting focused human QA before release checklist/gate
 <!-- /STATUS -->
+
+## Session Extract -- Polish Story 015 Implemented / Awaiting Human QA 2026-05-23
+- Story implemented: `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md` -- Island / Ship Interior and Search Gameplay Design.
+- Added design note: `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`.
+- Hub now starts as an island/dock exterior with visible docked ship, airship envelope, pier, boarding ramp, and boarding interaction.
+- Player can enter a separate ship interior state and exit back to the dock.
+- Ship interior now separates cockpit/helm, cargo/storage, and engine/module areas through topology, corridor, door thresholds, and props.
+- Chart access is gated to the ship interior helm path; exterior Chart attempts produce feedback instead of opening the panel.
+- Search now requires a three-step micro-interaction before domain rewards/pressure advance: scan calibration, echo lock, and salvage pulse.
+- Return now requires a two-step ship flow: engine preheat, then piloting back to the island dock.
+- Evidence: `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`.
+- Focused human rerun checklist: `production/playtests/playtest-checklist-polish-015-island-ship-search-gameplay-2026-05-23.md`.
+- Verification: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; Godot visual smoke PASS; durable persistence smoke PASS; long-session smoke PASS; perf smoke PASS.
+- Next: run the focused Polish 015 human QA checklist before deciding whether to proceed to a formal release checklist/gate.
 
 ## Session Extract -- Polish Story 014 Human QA Concern / Story 015 Ready 2026-05-23
 - Human checklist executed: `production/playtests/playtest-checklist-polish-014-readable-space-and-movement-2026-05-23.md`.

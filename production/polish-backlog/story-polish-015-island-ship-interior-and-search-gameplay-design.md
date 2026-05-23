@@ -1,7 +1,7 @@
 # Polish Story 015: Island / Ship Interior and Search Gameplay Design
 
 > **Phase**: Polish
-> **Status**: Ready
+> **Status**: Implemented -- Awaiting Human QA
 > **Layer**: Scene Structure / Gameplay Design / Godot Runtime Presentation
 > **Type**: Blocking Design + Implementation Story
 > **Estimate**: L / 2-3 days
@@ -69,13 +69,50 @@ with actual choices or timing, and a return flow that expresses ship movement.
 
 ## Evidence Targets
 
-- Updated or new design note under `production/polish-backlog/` if the search
+- [x] Updated or new design note under `production/polish-backlog/` if the search
   micro-game needs explicit rules before implementation.
-- Updated `tests/smoke/session_shell_visual_probe.gd` coverage for island/dock,
+- [x] Updated `tests/smoke/session_shell_visual_probe.gd` coverage for island/dock,
   ship entry, interior topology, search micro-game affordance, and ship-return
   flow.
-- Automated evidence file under `production/qa/evidence/`.
-- Focused manual checklist under `production/playtests/`.
+- [x] Automated evidence file under `production/qa/evidence/`.
+- [x] Focused manual checklist under `production/playtests/`.
+
+## Implementation Summary
+
+- Split Hub presentation into an exterior island/dock state and an interior ship
+  state.
+- The default Hub now starts on a docked-island exterior with the visible ship,
+  airship envelope, pier, ramp, and boarding interaction.
+- The player can enter and leave the ship; ship interior visibility is separate
+  from exterior visibility.
+- Ship interior now contains connected cockpit/helm, cargo/storage, and
+  engine/module areas with a shared corridor, door thresholds, and distinct
+  props.
+- Chart access is gated to the interior helm path; direct Chart activation from
+  the island exterior gives feedback instead of opening the panel.
+- Search now requires a three-step micro-interaction: scan calibration, echo
+  lock, and salvage pulse before the domain search/reward state advances.
+- Return now requires a ship-based two-step interaction: preheat return engines,
+  then pilot back to Hub.
+
+## Automated Evidence
+
+- Design note: `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`
+- Evidence file: `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`
+- Human QA checklist: `production/playtests/playtest-checklist-polish-015-island-ship-search-gameplay-2026-05-23.md`
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false`: PASS with 5 existing warnings / 0 errors.
+- `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_durable_persistence_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_long_session_probe.gd`: PASS.
+- `godot --headless --path . -s tests/smoke/session_shell_perf_probe.gd`: PASS; draw-call budget skipped under headless display driver.
+
+## Human QA Boundary
+
+Automated checks prove that the island/dock, ship entry, interior topology,
+search micro-game, return preheat/piloting flow, save/load, long-session, and
+performance paths are technically healthy. Human QA must still decide whether
+the scene now reads as the intended island + ship fantasy and whether the
+search/return loops are sufficiently playable for the release-readiness blocker.
 
 ## Release Triage Rule
 
