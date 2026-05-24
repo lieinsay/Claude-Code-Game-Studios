@@ -6,7 +6,7 @@
 
 ## 设计前置说明
 
-该场景合并“初始岛屿 → 雾灯残骸”和“初始岛屿 → 旧集市边缘”两条航道，作为当前 demo 的航行大场景。独立规格见 [voyage-open-world-scene.md](../scene-specs/voyage-open-world-scene.md)；仍需 #20 contract、运行证据、Codex review 后再进入正式人工 readability review。
+该场景合并“初始岛屿 → 雾灯残骸”和“初始岛屿 → 赭石岛”两条航道，作为当前 demo 的航行大场景。独立规格见 [voyage-open-world-scene.md](../scene-specs/voyage-open-world-scene.md)；仍需 #20 contract、运行证据、Codex review 后再进入正式人工 readability review。
 
 核心要求：玩家视角始终与飞船前进方向保持一致；飞船可以拐弯、前进、后退；运动表现应主要来自世界、云层、航标、风险物、远近岛屿轮廓的变化。第一版遭遇战不做主动开火，只做规避、甩脱、干扰、硬抗或撤退。
 
@@ -15,7 +15,7 @@
 | 字段 | 填写值 |
 | --- | --- |
 | Scene ID | `voyage_open_world_scene` |
-| 包含航道 | 初始岛屿→雾灯残骸；初始岛屿→旧集市边缘 |
+| 包含航道 | 初始岛屿→雾灯残骸；初始岛屿→赭石岛 |
 | 玩家可见场景名 | 航行大场景 |
 | 测试的 build 或 commit |  |
 | 测试的 runtime path |  |

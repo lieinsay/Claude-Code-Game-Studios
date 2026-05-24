@@ -128,7 +128,7 @@ bool test_current_scene_snapshot_blocks_release()
 		"`ship_interior_layered`",
 		"`voyage_open_world_scene`",
 		"`mist_lamp_wreck_scene`",
-		"`old_market_edge_scene`",
+		"`ochre_island_scene`",
 	];
 
 	return scenes.All(term => ContainsText(checklist, term))

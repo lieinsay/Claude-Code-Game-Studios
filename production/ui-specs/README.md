@@ -63,6 +63,7 @@
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
 | `runtime-ui-surface-registry.md` | `src/presentation/UIManager.cs` 当前注册的 `S1`-`S12` 与诊断 UI | 已补真实规格 |
+| `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | 规格草案，待用户二审 |
 | `ui-spec-template.md` | 新 UI 规格模板 | 模板 |
 
 ## 后续可拆分规格文件
@@ -71,7 +72,6 @@
 | --- | --- | --- |
 | Hub 常驻 HUD | `hub-persistent-hud.md` | `persistent_hud` |
 | 探索常驻 HUD | `exploration-persistent-hud.md` | `persistent_hud` |
-| 航图屏幕 | `chart-full-screen-surface.md` | `full_screen_surface` |
 | 出航确认 | `departure-confirmation-modal.md` | `modal_dialog` |
 | 修复面板 | `repair-anchored-modal.md` | `modal_dialog` |
 | 仓库 / 货舱整理 | `storage-anchored-panel.md` | `anchored_panel` |

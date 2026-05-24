@@ -100,7 +100,8 @@ ADR-0012 仍是输入权威。模态或半模态 UI 激活时：
 | `ship_interior_layered` | 可进入的水平分层船内场景，房间 / 状态 UI 只辅助；历史证据可能仍使用 `hub_ship_interior` | UI 不能计入；船内单位、层级、遮挡、behind-object reveal 和 #20 合同仍必需 |
 | `voyage_open_world_scene` | 当前 demo 必需航行场景，不是航线按钮 UI 或进度条 | UI / 进度条不能计入；伪 3D 世界运动、航线边界、风险物、目的地剪影和 #20 合同必需 |
 | `mist_lamp_wreck_scene` | 可进入世界 / 可玩目的地场景；历史证据可能仍使用 `exploration_mist_island` | UI 不能计入；残骸主体、雾 / 灯身份、搜索锚点、返航信标和 #20 合同仍必需 |
-| `old_market_edge_scene` | 当前 demo 必需目的地场景，从未来市场缺口提升而来 | 市场 UI 不能计入；市场边缘几何、摊位 / 建筑 / NPC 锚点、可通行性和 #20 合同必需 |
+| `ochre_island_scene` | 当前 demo 第二小型资源岛，证明航行大场景可抵达第二个非市场目的地 | UI 不能计入；赭色岛体、条带状铁矿、采集锚点、返航点和 #20 合同必需 |
+| `old_market_edge_scene` | 后续市场内容候选，不属于当前 demo 第二岛屿 | 市场 UI 不能计入；若后续进入 demo，市场边缘几何、摊位 / 建筑 / NPC 锚点、可通行性和 #20 合同必需 |
 | `repair_node_scene` | 未来可进入修复地点 | 修复 UI 面板不能计入；修复点 / 工作站 / NPC / 世界锚点和 #20 合同在视觉完成前必需 |
 
 ## 审核清单

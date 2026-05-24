@@ -21,6 +21,8 @@
 | --- | --- | --- |
 | `dynamic-entities/authored-playable-slice-entities.md` | `playable_slice_authored_content.json` 中已存在的动态实体原型 | 已补真实规格 |
 | `fixed-scene-objects/authored-playable-slice-units.md` | `playable_slice_authored_content.json` 中已存在的固定单位原型 | 已补真实规格 |
+| `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，待用户二审 |
+| `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，待用户二审 |
 | `dynamic-entities/physics-ball-example.md` | 示例动态实体 | 示例 |
 | `fixed-scene-objects/tree-regenerating-example.md` | 示例固定单位 | 示例 |
 

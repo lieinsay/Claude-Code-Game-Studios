@@ -72,4 +72,4 @@ Reviewer 应该在没有开发者解释的情况下回答。
 | `ship_interior_layered` | [scene-readability-ship-interior-layered.md](scene-readability-ship-interior-layered.md) | `BLOCKED_PENDING_USER_REVIEW` | 作为水平分层船内场景填写；必须检查舱段、层级、前景遮挡和 behind-object reveal。 |
 | `voyage_open_world_scene` | [scene-readability-voyage-open-world.md](scene-readability-voyage-open-world.md) | `BLOCKED_PENDING_SCENE_DESIGN` | 需要先独立设计航行大场景，再进入人工 readability review。 |
 | `mist_lamp_wreck_scene` | [scene-readability-mist-lamp-wreck.md](scene-readability-mist-lamp-wreck.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上雾灯残骸 scene spec / Codex review 后填写该场景记录。 |
-| `old_market_edge_scene` | [scene-readability-old-market-edge.md](scene-readability-old-market-edge.md) | `BLOCKED_PENDING_SCENE_SPEC` | 需要先从旧集市 future gap 提升为当前 demo 目的地场景规格，再填写记录。 |
+| `ochre_island_scene` | [scene-readability-ochre-island.md](scene-readability-ochre-island.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上赭石岛 scene spec / Codex review 后填写该场景记录；确认资源岛身份、条带状铁矿和返航路径。 |

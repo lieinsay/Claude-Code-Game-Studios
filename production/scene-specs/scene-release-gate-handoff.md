@@ -45,7 +45,8 @@ release_handoff_ready =
 | `ship_interior_layered` | 船内作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；水平分层、剖切、P0 资产缺口需要进入交接包。 |
 | `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据、Codex 审核和用户可读性 verdict 仍缺失。 | `NOT_READY` | `BLOCKED` | 场景设计存在，但实现 / 证据 / 可读性门禁尚未完成。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；需确认目的地岛身份和残骸搜索空间是否符合预期。 |
-| `old_market_edge_scene` | `TRACKED_GAP`，已从未来市场场景提升为当前 demo 目的地。 | `NOT_READY` | `BLOCKED` | 尚无独立场景规格、#20 合同或用户可读性 verdict。 |
+| `ochre_island_scene` | 赭石岛已通过创建适合性审查并起草规格；仍无 #20 合同、作者化数据或运行时证据。 | `PENDING` | `BLOCKED` | 尚无独立场景规格、#20 合同或用户可读性 verdict；独立场景规格还需二审通过，且缺作者化单位和运行时证据。 |
+| `old_market_edge_scene` | `TRACKED_GAP`，保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `NOT_READY` | `BLOCKED` | 后续市场阶段再补独立场景规格、#20 合同和用户可读性 verdict。 |
 
 ## Waiver 要求
 
@@ -66,6 +67,6 @@ waiver 不能让 UI-only 证据计入场景证据。它只能承认某个已知�
 在 release checklist 或 gate-check 中使用以下摘要：
 
 - Scene Composition #19: `BLOCKED_FOR_RELEASE`
-- 原因: 当前 demo 场景集已修正为初始岛屿、分层船内、航行大场景、雾灯残骸和旧集市边缘。用户可读性 verdict 待补，旧市场景规格以及航行 #20 / 运行时证据仍缺失。
+- 原因: 当前 demo 场景集已修正为初始岛屿、分层船内、航行大场景、雾灯残骸和赭石岛。用户可读性 verdict 待补，赭石岛规格二审、航行 #20 / 运行时证据仍缺失；旧集市边缘已降为后续市场内容缺口。
 - release-ready 声明前必需: 在独立场景规格 / Codex 审核附上后，对每个当前 demo release candidate 运行 `production/playtests/scene-composition-user-readability-checklist.md`，然后解决或明确 waiver blocker。
 - 本交接不处理: 修复可读性缺陷、制作最终美术 / 音频、替换全局 release checklist。
