@@ -168,6 +168,15 @@ evidence for scene, UI, or unit work:
   the matching concrete file in `production/ui-specs/`. README/template references
   are not enough for implementation stories; stop before coding unless the story
   is explicitly drafting that UI spec.
+- If the story creates or changes a scene, UI, or reusable unit, verify that the
+  target object has an independent implementation, independent asset, or a named
+  asset/data/runtime group that can be tracked as that object. Do not implement
+  new content by scattering nodes into legacy Godot scenes or large runtime
+  scripts; those files may only mount or reference approved independent objects.
+- If implementation requires deleting non-compliant legacy Godot nodes, ask the
+  user before deletion with the file path, node names, reason, and replacement
+  path. If the user wants to keep a legacy concept, route it back through
+  `production/content-creation-review-gate.md` as a new scene/UI/unit proposal.
 - UI/HUD/buttons/labels/menus/modals/debug overlays cannot be used as scene
   identity, scene-unit, interaction-anchor, or #20 physics-contract proof. If an
   acceptance criterion tries to close scene/unit readiness with UI-only evidence,
@@ -235,6 +244,8 @@ The agent should:
 - Respect all Required and Forbidden patterns from the control manifest
 - Respect the loaded scene/UI/unit specifications; do not substitute UI evidence
   for scene or scene-unit proof
+- Preserve independent scene/UI/unit boundaries; large runtime files may compose
+  approved objects, not become their hidden implementation
 - Stay within the story's Out of Scope boundaries (do not touch unrelated files)
 - Write clean, doc-commented public APIs
 

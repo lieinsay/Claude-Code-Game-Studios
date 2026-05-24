@@ -32,6 +32,10 @@
 
 **R1 -- 场景规格先于实现。** 每个可进入场景在进入 runtime 实现前，必须有一份场景规格文档或等价章节，至少包含：场景目的、玩家入口/出口、空间结构、关键路径、交互锚点、状态变体、资产清单、音频/VFX 清单、技术接入、验收标准。短期 Polish story 可以先写在 `production/polish-backlog/`，但 release gate 前必须回写或链接到长期设计源。
 
+**R1-0 -- 创建适合性是唯一人工前置硬门。** 新场景必须先通过 `production/content-creation-review-gate.md` 的人工适合性审查；结论为 `APPROVED` 或 `APPROVED_WITH_NOTES` 后，Codex 将备注写回规格即可进入实现准备。规格二次人工审核不是实现硬门；实现后仍需要用户体验验收，且验收通过后仍可继续定向修改。
+
+**R1-0a -- 场景必须有独立实现或独立资产边界。** 每个独立可进入场景必须能作为一个对象被追踪、替换和删除：通常是独立 `.tscn`，或一组清楚命名的场景资产、作者化数据和 runtime 文件。旧大场景、大脚本或临时节点只能装配引用，不能承载新场景本体。
+
 **R1a -- 先定场景物理契约，再细化布局。** 每个 2D 可进入场景在布局、镜头、碰撞、交互、资产规格之前，必须按 `design/gdd/scene-physics-unit-system.md` 声明 Scene Physics Contract。未声明物理场景类型、移动平面、单位碰撞、遮挡、尺度和特殊行为的规格不得进入 `implementation_ready`。
 
 **R1b -- 场景单位先定义，再验收场景。** 场景规格必须列出 world/playable scene layer 中的 `场景单位`：可移动角色、NPC、阻挡物、门、箱子、残骸、摊位、梯子、楼梯、平台、水面、玻璃、镜子、影子、高度标记、危险边界、可推动物、弹性物或可破坏物等。UI 控件、HUD 文本、按钮、菜单和调试标签不属于场景单位，不得作为场景构成或物理验收证据。
@@ -87,22 +91,21 @@
 | State | Meaning | Allowed Next |
 | --- | --- | --- |
 | `concept_needed` | 只有系统需求，尚无场景规格 | `spec_drafted` |
-| `spec_drafted` | 已写场景规格，未审查或未补齐 | `codex_review`, `user_review`, `blocked` |
-| `codex_review` | Codex 检查结构、依赖、技术与 QA | `user_review`, `blocked`, `implementation_ready` |
-| `user_review` | 用户检查体验、想象、遗漏需求 | `codex_review`, `blocked`, `implementation_ready` |
-| `implementation_ready` | 双审通过，允许进入实现 story | `greybox`, `blocked` |
+| `spec_drafted` | 已写场景规格，创建适合性备注已回写或仍待补齐 | `implementation_ready`, `blocked` |
+| `implementation_ready` | 创建适合性通过、规格完整、独立实现 / 资产边界明确，允许进入实现 story | `greybox`, `blocked` |
 | `greybox` | 灰盒可运行，空间和交互锚点存在 | `asset_gate`, `blocked` |
 | `asset_gate` | 资产清单与缺口门禁已建立 | `playtest_ready`, `blocked` |
 | `playtest_ready` | 自动 smoke 通过，具备人工 QA 清单 | `accepted`, `blocked` |
-| `accepted` | 自动 + 人工验收通过 | downstream release / polish |
+| `accepted` | 自动 + 人工体验验收通过；仍可通过定向修改继续调整 | downstream release / polish / directed modification |
 | `blocked` | 缺关键需求、表现、资产、技术或 QA 证据 | return to relevant prior state |
 
 状态推进规则：
 
 1. `implementation_ready` 之前不得把场景当作最终需求执行，只能做探索性原型。
-2. `greybox` 通过只证明空间和锚点存在，不证明 release readiness。
-3. `asset_gate` 不要求所有 final art 已完成，但必须列出 P0 缺口和替换路径。
-4. `accepted` 必须有人工 QA 结论，且结论不能是 BLOCKED。
+2. 不需要等待规格二次人工审核才能从 `spec_drafted` 推进到 `implementation_ready`；但创建适合性结论和用户备注必须已经写回。
+3. `greybox` 通过只证明空间和锚点存在，不证明 release readiness。
+4. `asset_gate` 不要求所有 final art 已完成，但必须列出 P0 缺口和替换路径。
+5. `accepted` 必须有人工 QA 结论，且结论不能是 BLOCKED；通过后仍可按定向修改流程继续改规格和实现。
 
 ### Required Scene Specification Shape
 

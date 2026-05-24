@@ -135,7 +135,7 @@ bool test_current_scene_snapshot_blocks_release()
 		&& scenes.All(term => ContainsText(handoff, term))
 		&& ContainsText(handoff, "Scene Composition #19: `BLOCKED_FOR_RELEASE`")
 		&& ContainsText(registry, "`BLOCKED_FOR_RELEASE`，直到用户可读性审核被记录或明确豁免")
-		&& ContainsText(handoff, "尚无独立场景规格、#20 合同或用户可读性 verdict");
+		&& ContainsText(handoff, "尚无 #20 合同、用户可读性 verdict");
 }
 
 string Read(string relativePath)

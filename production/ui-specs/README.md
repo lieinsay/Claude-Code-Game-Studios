@@ -45,11 +45,19 @@
 - UI 绑定世界锚点、场景单位、快捷键或某个系统事件。
 - UI 有显示优先级、遮挡风险、无障碍要求或截图 / QA 证据要求。
 
+## 独立实现 / 资产边界
+
+每个通过创建适合性审查的新 UI 表面必须有独立边界：独立 `.tscn`、独立组件、明确注册表条目，或一组能作为该 UI 整体追踪的资产 / 脚本 / 数据。大型 shell、旧 UI 容器或 UIManager 可以负责装配和显示，但不能把新 UI 本体散落混入其中。
+
+若 UI 只是某个场景的纯装饰文本且无焦点、输入、生命周期、状态提交、显示优先级或验收责任，可以内嵌；一旦它承担解释、选择、确认、反馈、无障碍补充、调试证据或系统状态显示，就必须有规格和独立边界。
+
 ## 创建适合性人工审查
 
 任何新 UI 表面在进入实现或 `implementation_ready` 前，必须先按 `production/content-creation-review-gate.md` 记录人工适合性审查。结论只有 `APPROVED` 或 `APPROVED_WITH_NOTES` 时才允许继续；`PENDING`、`REVISE`、`REJECTED` 都会阻塞 story-readiness 和 `/dev-story`。
 
 人工审查重点不是布局细节，而是判断是否应该创建这个 UI：能否复用现有表面、是否会替代世界对象、是否适合当前输入 / 焦点流程、是否造成玩家只点 UI 而不理解场景。
+
+规格二次人工审核不是进入实现的硬门。人工批准备注写回规格、独立实现 / 资产边界明确、测试和体验验收路径已命名后，可进入实现；用户后续修改走 `directed-content-modification`。
 
 ## 与场景和单位的关系
 
@@ -63,7 +71,7 @@
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
 | `runtime-ui-surface-registry.md` | `src/presentation/UIManager.cs` 当前注册的 `S1`-`S12` 与诊断 UI | 已补真实规格 |
-| `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | 规格草案，待用户二审 |
+| `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | 规格草案，创建适合性已通过，待实现证据 |
 | `ui-spec-template.md` | 新 UI 规格模板 | 模板 |
 
 ## 后续可拆分规格文件

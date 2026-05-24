@@ -13,6 +13,7 @@
 ```text
 scene_complete =
     creation_review_passed
+    AND independent_boundary_ready
     AND purpose_ready
     AND scene_physics_ready
     AND space_ready
@@ -30,6 +31,7 @@ scene_complete =
 | 维度 | 必需证据 | 阻塞条件 |
 | --- | --- | --- |
 | `creation_review_passed` | 新建场景在进入 implementation readiness 或 release-readiness 前，已按 `production/content-creation-review-gate.md` 记录人工适合性审查，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。 | 人工适合性审查缺失、`PENDING`、`REVISE`、`REJECTED`，或用户备注未写回规格。 |
+| `independent_boundary_ready` | 场景有独立 Godot 场景、独立资产组、作者化数据和 / 或 runtime 边界；大型旧场景 / 大脚本只负责装配引用。 | 场景本体只散落在旧 Godot 节点、大脚本或临时灰盒中，无法作为独立对象追踪、替换或删除。 |
 | `purpose_ready` | 场景身份、循环角色、情绪目标和 3 秒识别目标已记录。 | 目的含糊、只命名 UI 屏幕，或没有说明玩家为什么进入。 |
 | `scene_physics_ready` | #20 Scene Physics Contract 通过，或场景明确记录 `N/A true` 因为没有玩法相关物理单位。 | #20 合同缺失、pending、failed 或被静默跳过。 |
 | `space_ready` | 进入、离开、可行走区域、边界、地标、交互锚点均来自世界 / 可玩场景证据。 | 只有节点存在或 HUD 文本作为空间证明。 |
@@ -50,7 +52,7 @@ Story 004 增加人工审核清单和 release handoff 包：
 
 Codex 审核是必要条件，但不足以单独通过。用户 verdict 为 `BLOCKED` 时，`user_review_passed = false`，直到 blocker 解决或用户明确 waiver。用户可以因为幻想缺失、需求缺失、身份不清、玩家流程不理想、UI 过强，或新发现需求需要写回场景规格而阻塞。
 
-创建适合性审查早于用户可读性 release handoff。它回答“是否应该创建这个场景”；release handoff 回答“这个场景现在是否足够可读、可交付”。任何新场景没有人工适合性 `APPROVED` / `APPROVED_WITH_NOTES` 时，不得进入实现或 release readiness。
+创建适合性审查早于用户可读性 release handoff。它回答“是否应该创建这个场景”；release handoff 回答“这个场景现在是否足够可读、可交付”。任何新场景没有人工适合性 `APPROVED` / `APPROVED_WITH_NOTES` 时，不得进入实现或 release readiness。规格二次人工审核不是进入实现的硬门；体验验收通过后仍可通过 `directed-content-modification` 定向修改。
 
 必答用户可读性问题：
 
@@ -129,7 +131,7 @@ Story 003 的配套边界合同位于 `production/scene-specs/scene-vs-ui-eviden
 | `ship_interior_layered` | `user-review-pending` | 独立规格和作者化单位数据已存在，但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/ship-interior-layered-scene.md` 的清单，之后补 release packet。 |
 | `voyage_open_world_scene` | `spec-drafted-blocked-for-evidence` | 独立规格已存在，但 #20 合同、运行时证据、Codex 审核和用户可读性 verdict 仍缺失。 | 用户先审航行方向，再起草 #20 合同和证据计划。 |
 | `mist_lamp_wreck_scene` | `user-review-pending` | 独立规格和作者化单位数据已存在，并已明确为雾灯残骸浮岛目的地；但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/mist-lamp-wreck-scene.md` 的清单，之后补 release packet。 |
-| `ochre_island_scene` | `user-review-pending` | 用户已批准赭石岛作为当前 demo 第二小型资源岛，规格草案已起草；仍需二审、#20 合同、作者化数据和运行时证据。 | 用户审核 `production/scene-specs/ochre-island-scene.md`，之后补 #20 合同和 release packet。 |
+| `ochre_island_scene` | `spec-drafted-blocked-for-evidence` | 用户已批准赭石岛作为当前 demo 第二小型资源岛，规格草案已起草；仍需 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据。 | 补 #20 合同、独立 Godot / 资产边界、作者化数据和 release packet。 |
 | `old_market_edge_scene` | `tracked-gap-future-market` | 旧集市边缘保留为后续市场内容缺口，不再作为当前 demo 第二岛屿。 | 后续市场阶段再起草旧集市场景规格和 #20 合同。 |
 | `repair_node_scene` | `tracked-gap-future` | 尚无当前可进入场景规格或 #20 合同；除非明确加入，否则不属于修正后的当前 demo 场景集。 | 视觉完成声明前起草修复场景规格。 |
 

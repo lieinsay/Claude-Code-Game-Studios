@@ -10,6 +10,8 @@
 
 - 场景是玩家可进入的世界 / 可玩空间，不是 UI 面板。
 - 新增场景登记前必须先有 `production/content-creation-review-gate.md` 要求的人工适合性审查，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`；否则只能登记为 `tracked-gap` 或审查草案，不能进入实现。
+- 通过创建适合性审查后，不再要求规格二次人工审核作为实现硬门；人工备注写回规格、独立实现 / 资产边界明确、证据路径命名后即可进入实现。
+- 每个独立可进入场景必须有独立实现、独立资产，或一组可整体追踪的场景资产 / 数据 / runtime 文件；不能只散落在旧 Godot 大场景或大脚本中。
 - UI/HUD/按钮/标签/调试覆盖层可以辅助证据，但不能满足场景单位、物理单位或可读性证据。
 - #19 登记行可以摘要 #20 状态，但 #20 仍是物理单位细节的唯一来源。
 - 修复点和市场场景即使尚未完整实现，也必须追踪，因为 #19 要求它们在被视为视觉完成前具备规格。
@@ -33,15 +35,15 @@
 | `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `spec_drafted` | 运行时合同位于 `hub_ship_interior`；第一条原型 / 摆放实例作者化切片已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/ship-interior-layered-scene.md` | `design/gdd/airship-hub.md`; `production/scene-specs/ship-interior-layered-scene.md`; `production/qa/evidence/scene-unit-placement-taxonomy-evidence.md`; `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md` | 等待用户按场景规格中的审核清单确认；之后再进入 release handoff。 |
 | `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `spec_drafted` | implementation readiness 前需要 #20 合同：伪 3D 相机对齐飞行、航线边界、风险物、云 / 雾特殊表面、恢复规则 | `production/scene-specs/voyage-open-world-scene.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 用户先审航行场景方向；通过后再起草 #20 合同和运行时证据计划。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | 运行时合同位于 `exploration_mist_island`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/mist-lamp-wreck-scene.md` | `design/gdd/exploration-scavenge-scenario.md`; `production/scene-specs/mist-lamp-wreck-scene.md`; `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 等待用户按场景规格中的审核清单确认；之后再进入 release handoff。 |
-| `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | implementation readiness 前需要 #20 合同：小型资源岛地形、条带状铁矿、采集锚点、返航点、边界和恢复规则 | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md` | 等待用户二审；通过后再起草 #20 合同、作者化数据和运行时证据计划。 |
+| `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | implementation readiness 前需要 #20 合同：小型资源岛地形、条带状铁矿、采集锚点、返航点、边界和恢复规则 | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md` | 创建适合性已通过；下一步是补 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据计划。 |
 | `old_market_edge_scene` | 旧集市边缘 | 后续市场内容候选 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 当前 demo 第二岛屿改为 `ochre_island_scene`；旧集市保留为后续市场缺口，不进入本轮 runtime 替换。 |
 | `repair_node_scene` | 世界修复 / 解锁点 | 未来修复地点入口 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为修复点会包含玩法相关物理单位 | `design/gdd/world-repair-unlock.md`; `design/gdd/scene-composition-system.md` | 在任何修复场景被视为视觉完成前起草规格；除非明确加入，否则不属于当前 demo 可读性队列。 |
 
 ## Godot 旧运行时删除规则
 
-不另设独立旧运行时门禁文件。门禁出现前已经存在的错误 Godot runtime 设计不能被当作规格保留，也不能补写 legacy 规格。触碰 `src/scenes/ShellUi.tscn`、`src/scenes/HubRuntime.tscn` 或 `src/scenes/HubRuntime.cs` 时，必须删除旧实现，或用已经通过人工适合性审查的 scene/ui/unit 设计替换。
+门禁出现前已经存在的错误 Godot runtime 设计不能被当作规格保留，也不能补写 legacy 规格。触碰 `src/scenes/ShellUi.tscn`、`src/scenes/HubRuntime.tscn` 或 `src/scenes/HubRuntime.cs` 时，必须先识别不合规旧节点；删除前向用户确认，或用已经通过人工适合性审查且具备独立实现 / 资产边界的 scene/ui/unit 设计替换。
 
-正确替换入口只能是 `production/content-creation-review-gate.md`、`production/ui-specs/runtime-ui-surface-registry.md`、`production/unit-specs/fixed-scene-objects/docked-airship-entity.md`、`production/unit-specs/dynamic-entities/player-controlled-entity.md` 和 `src/presentation/playable_slice_authored_content.json`；旧 runtime 节点存在本身不能作为创建或验收证据。
+正确替换入口只能是 `production/content-creation-review-gate.md`、`production/ui-specs/runtime-ui-surface-registry.md`、`production/unit-specs/fixed-scene-objects/docked-airship-entity.md`、`production/unit-specs/dynamic-entities/player-controlled-entity.md`、对应独立 Godot / 资产边界和 `src/presentation/playable_slice_authored_content.json`；旧 runtime 节点存在本身不能作为创建或验收证据。
 
 ## 非场景 / UI 表面
 

@@ -21,8 +21,8 @@
 | --- | --- | --- |
 | `dynamic-entities/player-controlled-entity.md` | 玩家操作实体 / `scene_unit.prototype.player_marker` | 规格草案 |
 | `fixed-scene-objects/docked-airship-entity.md` | 停靠飞船实体 / 船体与气囊轮廓 | 规格草案 |
-| `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，待用户二审 |
-| `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，待用户二审 |
+| `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，创建适合性已通过，待实现证据 |
+| `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，创建适合性已通过，待实现证据 |
 | `dynamic-entities/physics-ball-example.md` | 示例动态实体 | 示例 |
 | `fixed-scene-objects/tree-regenerating-example.md` | 示例固定单位 | 示例 |
 
@@ -58,11 +58,21 @@
 - 单位属于关键路径、核心幻想或用户需要审核的世界对象。
 - 单位看起来像背景，但实际会阻挡、可砍伐、可拾取、可推动、可开关、可修复或可变化。
 
+## 独立实现 / 资产边界
+
+每个通过创建适合性审查的新单位原型必须有独立边界：独立 `.tscn`、独立 `.tres`、数据原型，或一组能作为该单位整体追踪的资产 / 脚本 / 碰撞配置 / 音频 / VFX。场景摆放实例只引用单位原型，不静默改变本体规则。
+
+大型场景、旧灰盒节点或运行时脚本可以装配和实例化单位，但不能成为单位本体。禁止把新单位只写成某个旧 Godot 场景里的局部节点或某个大脚本里的临时节点生成逻辑。
+
+纯装饰物只有在完全无交互、无碰撞、无遮挡规则、无状态、无验收责任时可以作为场景内部装饰；一旦影响玩家读法、通行、碰撞、遮挡、状态或 QA，就必须进入单位规格和独立边界。
+
 ## 创建适合性人工审查
 
 任何新固定单位、动态实体、NPC、障碍物、门、资源点、带碰撞 / 遮挡 / 状态的 prop，或 `scene_unit.prototype.*`，在进入实现或 `implementation_ready` 前，必须先按 `production/content-creation-review-gate.md` 记录人工适合性审查。结论只有 `APPROVED` 或 `APPROVED_WITH_NOTES` 时才允许继续；`PENDING`、`REVISE`、`REJECTED` 都会阻塞 story-readiness 和 `/dev-story`。
 
 人工审查重点是判断是否应该创建独立单位：能否复用已有单位、是否符合当前场景和核心幻想、是否带来新的物理 / 状态 / 资产复杂度，以及固定单位或动态实体分类是否清楚。
+
+规格二次人工审核不是进入实现的硬门。人工批准备注写回规格、独立实现 / 资产边界明确、测试和体验验收路径已命名后，可进入实现；用户后续修改走 `directed-content-modification`。
 
 ## 最低规格要求
 

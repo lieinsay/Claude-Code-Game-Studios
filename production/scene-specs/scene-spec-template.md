@@ -19,13 +19,23 @@
 | Scene ID |  |
 | 玩家可见场景名 |  |
 | 所属循环节点 | Hub / Chart / Exploration / Repair / Market / Settlement / Other |
-| 当前生命周期状态 | concept_needed / spec_drafted / codex_review / user_review / implementation_ready / greybox / asset_gate / playtest_ready / accepted / blocked |
+| 当前生命周期状态 | concept_needed / spec_drafted / implementation_ready / greybox / asset_gate / playtest_ready / accepted / blocked |
 | 来源 GDD |  |
 | 来源 story 或设计说明 |  |
 | 创建适合性人工审查 | PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED |
 | 创建审查记录 | 链接 `production/content-creation-review-gate.md` 格式记录或填写本规格第 12 节 |
 | 最近审核日期 |  |
 | 审核负责人 | Codex / user / QA |
+
+## 0. 独立实现 / 资产边界
+
+| 字段 | 内容 |
+| --- | --- |
+| 独立 Godot 场景 | 独立可进入场景通常填写目标 `.tscn`；若暂为数据驱动或灰盒，说明替代边界。 |
+| 配套脚本 / runtime | 独立 C# / GDScript / presenter / runtime 文件，或明确 `N/A true`。 |
+| 作者化数据 | 场景 ID、摆放实例、原型引用的数据来源。 |
+| 资产组 | 本场景专属或共享的一组可追踪资产 / 音频 / VFX。 |
+| 禁止混入位置 | 不允许把本场景本体散落写入的旧大场景、大脚本或临时节点。 |
 
 ## 1. 场景身份
 
@@ -140,9 +150,9 @@
 - 相关动作之后发生了什么变化？
 - UI/HUD 是否只是辅助场景，而不是主导或替代场景？
 
-## 12. 创建适合性与用户审核清单
+## 12. 创建适合性与体验验收清单
 
-用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
+创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核才能进入实现；但实现后仍需要用户体验验收，且验收通过后内容仍可继续定向修改。
 
 - [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
 - [ ] 审查人确认这个场景适合当前核心幻想、循环节点和项目阶段。
@@ -156,11 +166,11 @@
 - [ ] UI/HUD 只是辅助，没有替代场景本体。
 - [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
 
-用户审核结论: `PENDING` / `PASS` / `PASS_WITH_NOTES` / `BLOCKED`
+体验验收结论: `PENDING` / `PASS` / `PASS_WITH_NOTES` / `BLOCKED`
 
 创建适合性结论: `PENDING` / `APPROVED` / `APPROVED_WITH_NOTES` / `REVISE` / `REJECTED`
 
-用户备注:
+用户备注 / 后续定向修改需求:
 
 - 待用户填写。
 
@@ -168,6 +178,7 @@
 
 - [ ] 场景目的、循环角色和情绪目标明确。
 - [ ] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
+- [ ] 独立实现 / 资产边界已明确，不能只散落在旧 Godot 节点、大脚本或临时灰盒中。
 - [ ] 进入、离开、失败和返回路径明确。
 - [ ] 空间布局列出可行走区域、边界、地标和交互锚点。
 - [ ] Scene Physics Contract 已链接并通过，或 #20 豁免明确。

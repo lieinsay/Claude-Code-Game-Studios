@@ -226,6 +226,13 @@ items pass or are explicitly marked N/A with a stated reason.
   `production/scene-specs/scene-coverage-registry.md`. If a required scene spec is
   missing or marked `tracked-gap`, the story is **BLOCKED** until the spec exists
   or the story explicitly limits itself to drafting the missing spec.
+- [ ] **Independent implementation or asset boundary required**: If a story creates
+  or changes a scene, UI, or reusable unit, it must name the independent `.tscn`,
+  component, asset group, data prototype, or runtime boundary that owns that
+  object. A large legacy scene/script may mount or reference the object, but cannot
+  be the object's only implementation. If the story only adds scattered nodes to a
+  legacy Godot scene or hand-built nodes in a large runtime script, it is
+  **BLOCKED** until the boundary is defined.
 - [ ] **Unit specs required for reusable world units**: If a story creates or changes
   a gameplay-relevant scene unit prototype, physical object, NPC, obstacle, door,
   resource point, prop with collision/occlusion/state, pushable/moving entity, or
@@ -244,6 +251,10 @@ items pass or are explicitly marked N/A with a stated reason.
   labels, menus, modals, debug overlays, or screenshot text as scene identity,
   interaction anchor, physical unit, or #20 contract evidence is **NEEDS WORK** or
   **BLOCKED** depending on whether the missing world/playable evidence exists.
+- [ ] **Legacy Godot deletion requires user confirmation**: If a story touches
+  non-compliant legacy Godot nodes, it must either replace them with approved
+  scene/UI/unit objects or record that deletion requires explicit user confirmation
+  before edits. Keeping the old node because it already exists does not pass.
 
 ---
 

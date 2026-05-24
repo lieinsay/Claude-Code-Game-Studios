@@ -68,6 +68,7 @@ bool test_gate_checks_every_readiness_dimension()
 		"technical_ready",
 		"qa_ready",
 		"creation_review_passed",
+		"independent_boundary_ready",
 		"codex_review_passed",
 		"user_review_passed",
 	];
@@ -82,6 +83,7 @@ bool test_gate_checks_every_readiness_dimension()
 		"场景层创建新玩法权威",
 		"smoke 只证明节点存在",
 		"人工适合性审查缺失",
+		"场景本体只散落在旧 Godot 节点",
 		"任一 Codex blocker 未解决",
 		"用户审核缺失",
 	];
@@ -97,6 +99,7 @@ bool test_any_false_dimension_blocks_completion()
 	return gate.Contains("任何 `fail`、`pending`、`tracked-gap` 或缺失证据都会阻塞完成", StringComparison.Ordinal)
 		&& gate.Contains("scene_complete =")
 		&& gate.Contains("creation_review_passed")
+		&& gate.Contains("AND independent_boundary_ready")
 		&& gate.Contains("AND scene_physics_ready")
 		&& gate.Contains("AND user_review_passed")
 		&& registry.Contains("tracked-gap")
@@ -189,6 +192,8 @@ bool test_workflows_enforce_specs_before_implementation()
 		"Unit specs required for reusable world units",
 		"UI specs required before UI work",
 		"UI cannot satisfy scene/unit readiness",
+		"Independent implementation or asset boundary required",
+		"Legacy Godot deletion requires user confirmation",
 	];
 	string[] devStoryGates =
 	[
@@ -197,6 +202,8 @@ bool test_workflows_enforce_specs_before_implementation()
 		"stop before coding",
 		"README/template references",
 		"are not enough for implementation stories",
+		"independent implementation",
+		"user before deletion",
 		"UI/HUD/buttons/labels/menus/modals/debug overlays cannot be used as scene",
 	];
 
@@ -275,14 +282,14 @@ bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
 	];
 	string[] registryRules =
 	[
-		"不另设独立旧运行时门禁文件",
 		"不能被当作规格保留",
 		"不能补写 legacy 规格",
 		"src/scenes/ShellUi.tscn",
 		"src/scenes/HubRuntime.tscn",
 		"src/scenes/HubRuntime.cs",
-		"必须删除旧实现",
+		"删除前向用户确认",
 		"已经通过人工适合性审查",
+		"独立实现 / 资产边界",
 		"旧 runtime 节点存在本身不能作为创建或验收证据",
 	];
 

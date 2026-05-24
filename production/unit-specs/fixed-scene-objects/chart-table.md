@@ -58,13 +58,13 @@
 
 - 领域负责人: Chart / Hub。
 - 可调用 UI: `S4_chart`，后续独立规格 `production/ui-specs/chart-full-screen-surface.md`。
-- 作者化数据: 二审通过后才允许新增到 `src/presentation/playable_slice_authored_content.json`。
+- 作者化数据: 创建适合性已通过；补独立实现 / 资产边界后可新增到 `src/presentation/playable_slice_authored_content.json`。
 - 不允许写入的状态: 航图台不直接写资源、战斗、市场或修复状态。
 
-## 5. QA / 用户审核
+## 5. QA / 体验验收
 
-- [ ] 二审确认航图台和 `helm_console` 的职责分离。
-- [ ] 二审确认航图台作为世界对象触发 UI，而不是 UI 替代世界对象。
-- [ ] 二审确认本轮不实现驾驶模拟、维修或模块台功能。
+- [ ] 体验验收确认航图台和 `helm_console` 的职责分离。
+- [ ] 体验验收确认航图台作为世界对象触发 UI，而不是 UI 替代世界对象。
+- [ ] 体验验收确认本轮不实现驾驶模拟、维修或模块台功能。
 
-用户二审结论: `PENDING`
+体验验收结论: `PENDING`

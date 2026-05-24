@@ -4,7 +4,7 @@
 > **UI 名称**:
 > **UI 分类**: `persistent_hud` / `anchored_panel` / `modal_dialog` / `semi_modal_overlay` / `full_screen_surface` / `toast_or_hint` / `debug_only`
 > **显示优先级**: P0 / P1 / P2 / P3 / P4
-> **生命周期状态**: concept_needed / spec_drafted / user_review / implementation_ready / greybox / accepted / blocked
+> **生命周期状态**: concept_needed / spec_drafted / implementation_ready / greybox / accepted / blocked
 > **创建适合性人工审查**: PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED
 > **来源 GDD**: `design/gdd/ui-hud-chart-interface.md`
 > **最后更新**:
@@ -15,6 +15,16 @@
 - 玩家为什么需要它:
 - 它服务哪个系统 / 场景 / 单位:
 - 它不是什么:
+
+## 1a. 独立实现 / 资产边界
+
+| 字段 | 内容 |
+| --- | --- |
+| 独立 UI 场景 / 组件 | 目标 `.tscn`、独立组件、注册表条目或 `N/A true`。 |
+| 配套脚本 / presenter | 独立 runtime / presenter / controller 文件，或明确 `N/A true`。 |
+| 资产组 | 本 UI 专属或共享的一组图标、字体、音频、样式资源。 |
+| 装配入口 | 哪个场景、autoload、UIManager 或 shell 只负责引用 / 挂载它。 |
+| 禁止混入位置 | 不允许把 UI 本体散落写入的旧 UI 容器、大脚本或临时节点。 |
 
 ## 2. 显示分类与打开方式
 
@@ -106,11 +116,14 @@ UI 的作用必须限定为解释、选择、确认、反馈或无障碍补充�
 | 截图 / 视觉证明 |  | pending |
 | 用户审核 |  | pending |
 
-## 11. 用户审核清单
+## 11. 创建适合性与体验验收清单
+
+创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核才能进入实现；但实现后仍需要用户体验验收，且验收通过后内容仍可继续定向修改。
 
 - [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
 - [ ] 审查人确认不能复用现有 HUD / 面板 / 模态解决。
 - [ ] 人工备注已写回本规格、story 或后续任务。
+- [ ] 独立实现 / 资产边界已明确，不能只混入旧 UI 容器、大脚本或临时节点。
 - [ ] 这个 UI 是否真的需要常驻或弹出。
 - [ ] 打开方式是否符合直觉：自动、绑定世界锚点、快捷键或系统事件。
 - [ ] 显示优先级是否合理，不会抢走更重要的信息。
@@ -118,10 +131,10 @@ UI 的作用必须限定为解释、选择、确认、反馈或无障碍补充�
 - [ ] 关闭、取消、失败和禁用反馈是否清楚。
 - [ ] 不看这个 UI 时，核心场景身份和世界锚点仍然成立。
 
-用户审核结论: `PENDING`
+体验验收结论: `PENDING` / `PASS` / `PASS_WITH_NOTES` / `BLOCKED`
 
 创建适合性结论: `PENDING` / `APPROVED` / `APPROVED_WITH_NOTES` / `REVISE` / `REJECTED`
 
-用户备注:
+用户备注 / 后续定向修改需求:
 
 - 待用户填写。

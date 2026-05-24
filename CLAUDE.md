@@ -43,6 +43,23 @@ Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
 
 See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
+### Scene / UI / Unit Creation Exception
+
+For new scene, UI, or unit content, the project uses a lighter two-step gate:
+
+1. Ask the user for creation suitability approval.
+2. If approved, write the specification, record user notes, confirm independent
+   implementation / asset boundaries, and proceed to implementation without a
+   second formal spec approval gate.
+
+Non-compliant legacy Godot nodes cannot be kept as de facto specs. Ask before
+deleting them; if the user wants to preserve the concept, route it through the
+same creation suitability gate as a new scene/UI/unit.
+
+Accepted scene/UI/unit content remains modifiable. Use
+`directed-content-modification` for targeted user changes to an existing object,
+updating the spec, independent implementation/assets, and evidence together.
+
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
 

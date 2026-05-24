@@ -262,6 +262,13 @@ phases:
           note: "Check src/ for active code and production/epics/**/*.md for In Progress stories"
         description: "Pick the next ready story and implement it with /dev-story [story-path]. Routes to the correct programmer agent."
 
+      - id: directed-content-modification
+        name: "Directed Scene/UI/Unit Modification"
+        command: /directed-content-modification
+        required: false
+        repeatable: true
+        description: "Modify an already-approved scene, UI surface, or scene unit by updating its production spec, independent implementation/assets, and verification evidence together. Use for user-requested targeted changes that do not create a new object."
+
       - id: code-review
         name: "Code Review"
         command: /code-review
