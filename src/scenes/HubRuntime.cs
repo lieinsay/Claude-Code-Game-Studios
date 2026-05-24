@@ -14,8 +14,10 @@ public partial class HubRuntime : Node2D
 	private const string DurableProgressPath = $"user://{DurableProgressFileName}";
 	private const string QuarantinedProgressFileName = "cloudweaver_playable_progress.quarantine.json";
 	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
+	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
+	private static readonly SceneUnitAuthoringFixture SceneUnitAuthoring = SceneUnitAuthoringFixture.Load(AuthoredContentPath);
 
 	private readonly PlayableSliceDomainAdapter domain = new();
 	private readonly OnboardingManager onboarding = new();
@@ -655,6 +657,8 @@ public partial class HubRuntime : Node2D
 		int authoredPhysicalUnitCount)
 	{
 		var sceneUnitCatalog = BuildSceneUnitCatalog(sceneId);
+		var authoringDiagnostics = BuildAuthoringDiagnostics(sceneId);
+		var authoringApplies = sceneId == "hub_ship_interior";
 		return new Godot.Collections.Dictionary
 		{
 			["scene_id"] = sceneId,
@@ -693,6 +697,12 @@ public partial class HubRuntime : Node2D
 			["physical_behavior_ready"] = true,
 			["recovery_ready"] = true,
 			["scene_unit_catalog"] = sceneUnitCatalog,
+			["scene_unit_authoring_source"] = authoringApplies
+				? AuthoredContentPath
+				: "not_migrated_first_slice",
+			["scene_unit_authoring_ready"] = !authoringApplies || authoringDiagnostics.Count == 0,
+			["prototype_instance_linkage_ready"] = authoringApplies && authoringDiagnostics.Count == 0,
+			["scene_unit_authoring_diagnostics"] = authoringDiagnostics,
 			["collision_table"] = BuildCollisionTable(sceneId),
 			["occlusion_layers"] = BuildOcclusionLayers(sceneId),
 			["scale_table"] = BuildScaleTable(sceneId),
@@ -717,6 +727,7 @@ public partial class HubRuntime : Node2D
 	{
 		return sceneId switch
 		{
+			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_island_dock" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
 				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
@@ -726,19 +737,6 @@ public partial class HubRuntime : Node2D
 				BuildSceneUnit("hub_boarding_ramp", "door_or_passage", "soft_overlap", "midground_object", "passage clear width >= 1.1x player", "world_playable_scene", false),
 				BuildSceneUnit("hub_airship_envelope", "height_marker", "height_marker", "height_shadow", "player_unit-relative landmark visual scale; no collision footprint", "world_playable_scene", false),
 				BuildSceneUnit("hub_waterline", "special_surface", "blocking_static", "midground_floor", "blocked boundary larger than player", "world_playable_scene", false),
-			},
-			"hub_ship_interior" => new Godot.Collections.Array<Godot.Collections.Dictionary>
-			{
-				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
-				BuildSceneUnit("hub_interior_hull_outline", "blocking_unit", "blocking_static", "midground_object", "player_unit-relative room-scale hull boundary", "world_playable_scene", false),
-				BuildSceneUnit("hub_interior_cockpit_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
-				BuildSceneUnit("hub_interior_cargo_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
-				BuildSceneUnit("hub_interior_engine_bay", "landmark_unit", "blocking_static", "midground_object", "player_unit-relative room-scale unit", "world_playable_scene", false),
-				BuildSceneUnit("helm_console_prop", "interactable_anchor", "soft_overlap", "midground_object", "npc/interactable scale 0.8-1.3x player", "world_playable_scene", false),
-				BuildSceneUnit("storage_crate_prop", "prop_unit", "blocking_static", "midground_object", "small/prop scale tied to player_unit", "world_playable_scene", false),
-				BuildSceneUnit("ship_exit_threshold", "door_or_passage", "soft_overlap", "midground_object", "passage clear width >= 1.1x player", "world_playable_scene", false),
-				BuildSceneUnit("cockpit_window_glass", "special_surface", "blocking_static", "background", "visual-only glass surface; no implied passage", "world_playable_scene", false),
-				BuildSceneUnit("upper_hull_front_wall", "foreground_occluder", "blocking_static", "foreground_occluder", "player_unit-relative front_wall_removed cutaway shell", "world_playable_scene", false),
 			},
 			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
@@ -757,6 +755,59 @@ public partial class HubRuntime : Node2D
 			},
 			_ => [],
 		};
+	}
+
+	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
+	{
+		var catalog = new Godot.Collections.Array<Godot.Collections.Dictionary>();
+		foreach (var instance in SceneUnitAuthoring.InstancesForScene(sceneId))
+		{
+			if (!SceneUnitAuthoring.Prototypes.TryGetValue(instance.PrototypeId, out var prototype))
+			{
+				continue;
+			}
+
+			var item = BuildSceneUnit(
+				instance.UnitId,
+				prototype.UnitType,
+				prototype.Collision,
+				prototype.OcclusionLayer,
+				prototype.ScaleRule,
+				prototype.SourceLayer,
+				prototype.UiEvidenceAllowed);
+			item["prototype_id"] = prototype.PrototypeId;
+			item["prototype_classification"] = prototype.PrototypeClassification;
+			item["instance_id"] = instance.InstanceId;
+			item["scene_spec"] = instance.SceneSpec;
+			item["godot_node_path"] = instance.GodotNodePath;
+			item["floor_id"] = instance.FloorId;
+			item["floor_index"] = instance.FloorIndex;
+			item["placement_layer"] = instance.Layer;
+			item["placement_position"] = new Vector2(instance.X, instance.Y);
+			item["source_gdd"] = prototype.SourceGdd;
+			item["domain_owner"] = prototype.DomainOwner;
+			item["state_hook"] = instance.StateHook;
+			item["interaction_anchor_id"] = instance.InteractionAnchorId;
+			catalog.Add(item);
+		}
+
+		return catalog;
+	}
+
+	private static Godot.Collections.Array<string> BuildAuthoringDiagnostics(string sceneId)
+	{
+		var diagnostics = new Godot.Collections.Array<string>();
+		if (sceneId != "hub_ship_interior")
+		{
+			return diagnostics;
+		}
+
+		foreach (var diagnostic in SceneUnitAuthoring.ValidateScene(sceneId))
+		{
+			diagnostics.Add(diagnostic);
+		}
+
+		return diagnostics;
 	}
 
 	private static Godot.Collections.Dictionary BuildSceneUnit(

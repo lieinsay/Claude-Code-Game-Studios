@@ -46,6 +46,8 @@ Link to the #20 contract source instead of restating physics detail.
 | Layer / Height Model | link or summary |
 | Cutaway / Reveal Model | link or summary |
 | Unit catalog | link or summary |
+| Unit prototypes | link or summary |
+| Placed unit instances | link or summary |
 | Collision / occlusion / scale | link or summary |
 | Special surfaces / dynamic behaviors / recovery | link or summary |
 | Exemption reason, if no gameplay-relevant physical units |  |

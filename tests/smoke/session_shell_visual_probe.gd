@@ -537,6 +537,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("scale_table", "")).contains("player_unit=1.0"), "%s exposes player-relative scale table" % scene_id)
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
+	if scene_id == "hub_ship_interior":
+		_expect_ship_interior_authoring_linkage(contract)
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
@@ -575,6 +577,27 @@ func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required
 	_expect(has_player_unit, "%s unit catalog includes player_unit scale basis" % scene_id)
 	_expect(has_landmark_or_prop, "%s unit catalog includes props, passages, or landmarks" % scene_id)
 	_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
+
+
+func _expect_ship_interior_authoring_linkage(contract: Dictionary) -> void:
+	_expect(bool(contract.get("scene_unit_authoring_ready", false)), "hub_ship_interior authored scene-unit data validates")
+	_expect(bool(contract.get("prototype_instance_linkage_ready", false)), "hub_ship_interior exposes prototype-instance linkage")
+	_expect(str(contract.get("scene_unit_authoring_source", "")).contains("playable_slice_authored_content.json"), "hub_ship_interior names authored content source")
+	var diagnostics := contract.get("scene_unit_authoring_diagnostics", []) as Array
+	_expect(diagnostics.size() == 0, "hub_ship_interior has no scene-unit authoring diagnostics")
+	var catalog := contract.get("scene_unit_catalog", []) as Array
+	var linked_count := 0
+	for unit in catalog:
+		var item := unit as Dictionary
+		var unit_id := str(item.get("unit_id", ""))
+		_expect(str(item.get("prototype_id", "")).begins_with("scene_unit.prototype."), "ship interior unit %s has prototype id" % unit_id)
+		_expect(str(item.get("instance_id", "")).begins_with("scene_unit.instance."), "ship interior unit %s has placed instance id" % unit_id)
+		_expect(str(item.get("prototype_classification", "")) in ["dynamic_entity", "fixed_scene_object"], "ship interior unit %s has prototype classification" % unit_id)
+		_expect(str(item.get("scene_spec", "")) == "production/scene-specs/ship-interior-layered-scene.md", "ship interior unit %s traces to scene spec" % unit_id)
+		_expect(str(item.get("godot_node_path", "")) != "", "ship interior unit %s has Godot placement reference" % unit_id)
+		_expect(str(item.get("floor_id", "")) == "ship_deck_01", "ship interior unit %s has floor assignment" % unit_id)
+		linked_count += 1
+	_expect(linked_count == int(contract.get("authored_physical_unit_count", 0)), "ship interior authored linkage covers every physical unit")
 
 
 func _expect_dynamic_behavior_contract(contract: Dictionary, scene_id: String) -> void:

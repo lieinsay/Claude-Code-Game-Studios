@@ -229,7 +229,7 @@ GDD: `design/gdd/scene-composition-system.md` - approved 2026-05-24.
 
 Scene unit physics standard for authored 2D spaces. Defines horizontal vs vertical scene physics types, movement planes, collision semantics, occlusion/layering, unit scale, special surfaces, dynamic physical behavior tags, behavior conflict priority, and recovery rules for stuck or misleading physical states.
 
-Scope boundary: this system does not own player input, interaction focus, resource rules, exploration rewards, market logic, or repair outcomes. It owns how scene units occupy space and communicate physical behavior. `完整场景构成与验收` consumes this system as its Scene Physics Contract gate.
+Scope boundary: this system does not own player input, interaction focus, resource rules, exploration rewards, market logic, or repair outcomes. It owns how scene units occupy space and communicate physical behavior, including reusable unit prototypes and per-scene placed instances. `完整场景构成与验收` consumes this system as its Scene Physics Contract gate.
 
 GDD: `design/gdd/scene-physics-unit-system.md` - approved 2026-05-24.
 
