@@ -537,6 +537,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("scale_table", "")).contains("player_unit=1.0"), "%s exposes player-relative scale table" % scene_id)
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
+	if scene_id == "hub_island_dock":
+		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/initial-island-scene.md", "hub_dock_ground")
 	if scene_id == "hub_ship_interior":
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ship-interior-layered-scene.md", "ship_deck_01")
 	if scene_id == "exploration_mist_island":

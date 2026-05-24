@@ -87,6 +87,7 @@ var searchPointIds = new HashSet<string>(StringComparer.Ordinal);
 var sceneUnitPrototypeIds = new HashSet<string>(StringComparer.Ordinal);
 var sceneUnitPrototypeAllowedSceneIds = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 var sceneUnitInstanceIds = new HashSet<string>(StringComparer.Ordinal);
+var hubIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var shipInteriorUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
@@ -174,7 +175,7 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 				.ToHashSet(StringComparer.Ordinal)
 			: new HashSet<string>(StringComparer.Ordinal);
 		sceneUnitPrototypeAllowedSceneIds[prototypeId] = allowedScenes;
-		Check(allowedScenes.Contains("hub_ship_interior") || allowedScenes.Contains("exploration_mist_island"), $"scene-unit prototype '{prototypeId}' is allowed in an authored scene-unit slice");
+		Check(allowedScenes.Contains("hub_island_dock") || allowedScenes.Contains("hub_ship_interior") || allowedScenes.Contains("exploration_mist_island"), $"scene-unit prototype '{prototypeId}' is allowed in an authored scene-unit slice");
 	}
 }
 
@@ -190,16 +191,31 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		Check(instanceId.StartsWith("scene_unit.instance.", StringComparison.Ordinal), $"scene-unit instance id '{instanceId}' uses instance namespace");
 		Check(sceneUnitInstanceIds.Add(instanceId), $"scene-unit instance id '{instanceId}' is unique");
 		Check(sceneUnitPrototypeIds.Contains(prototypeId), $"scene-unit instance '{instanceId}' references known prototype");
+		var isHubIsland = sceneId == "hub_island_dock";
 		var isShipInterior = sceneId == "hub_ship_interior";
 		var isMistWreck = sceneId == "exploration_mist_island";
-		var expectedFloorId = isShipInterior ? "ship_deck_01" : "mist_wreck_ground_01";
-		var expectedSceneSpec = isShipInterior
-			? "production/scene-specs/ship-interior-layered-scene.md"
-			: "production/scene-specs/mist-lamp-wreck-scene.md";
+		var expectedFloorId = sceneId switch
+		{
+			"hub_island_dock" => "hub_dock_ground",
+			"hub_ship_interior" => "ship_deck_01",
+			"exploration_mist_island" => "mist_wreck_ground_01",
+			_ => string.Empty,
+		};
+		var expectedSceneSpec = sceneId switch
+		{
+			"hub_island_dock" => "production/scene-specs/initial-island-scene.md",
+			"hub_ship_interior" => "production/scene-specs/ship-interior-layered-scene.md",
+			"exploration_mist_island" => "production/scene-specs/mist-lamp-wreck-scene.md",
+			_ => string.Empty,
+		};
 
-		Check(isShipInterior || isMistWreck, $"scene-unit instance '{instanceId}' belongs to an authored scene-unit slice");
+		Check(isHubIsland || isShipInterior || isMistWreck, $"scene-unit instance '{instanceId}' belongs to an authored scene-unit slice");
 		Check(sceneUnitPrototypeAllowedSceneIds.TryGetValue(prototypeId, out var allowedScenes) && allowedScenes.Contains(sceneId), $"scene-unit instance '{instanceId}' uses prototype allowed in its scene");
 		Check(!string.IsNullOrWhiteSpace(unitId), $"scene-unit instance '{instanceId}' has runtime unit id");
+		if (isHubIsland)
+		{
+			Check(hubIslandUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in hub island dock");
+		}
 		if (isShipInterior)
 		{
 			Check(shipInteriorUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ship interior");
@@ -209,6 +225,20 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		Check(RequiredString(instance, "scene_spec") == expectedSceneSpec, $"scene-unit instance '{instanceId}' traces to scene spec");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "layer")), $"scene-unit instance '{instanceId}' has placement layer");
 	}
+}
+
+foreach (var expectedHubIslandUnit in new[]
+{
+	"player_marker",
+	"hub_island_main_mass",
+	"hub_dock_plank_walkway",
+	"hub_docked_ship_hull",
+	"hub_boarding_ramp",
+	"hub_airship_envelope",
+	"hub_waterline",
+})
+{
+	Check(hubIslandUnitIds.Contains(expectedHubIslandUnit), $"hub-island placed units cover runtime catalog unit '{expectedHubIslandUnit}'");
 }
 
 foreach (var expectedShipUnit in new[]
@@ -229,6 +259,8 @@ foreach (var expectedShipUnit in new[]
 }
 
 var sceneUnitAuthoring = SceneUnitAuthoringFixture.Load(contentPath);
+var hubIslandUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_island_dock");
+Check(hubIslandUnitDiagnostics.Count == 0, $"scene-unit authoring validates for initial island ({string.Join("; ", hubIslandUnitDiagnostics)})");
 var sceneUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_ship_interior");
 Check(sceneUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ship interior ({string.Join("; ", sceneUnitDiagnostics)})");
 var explorationUnitDiagnostics = sceneUnitAuthoring.ValidateScene("exploration_mist_island");

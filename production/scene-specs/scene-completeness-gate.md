@@ -121,10 +121,10 @@ Story 003 的配套边界合同位于 `production/scene-specs/scene-vs-ui-eviden
 
 | Scene ID | 门禁状态 | 阻塞原因 | 必要下一步 |
 | --- | --- | --- | --- |
-| `initial_island_scene` | `blocked-for-release` | 当前说明和历史 `hub_island_dock` #20 证据覆盖部分内容，但还没有独立初始岛屿规格或用户 release-readiness 审核。 | 抽取独立场景规格，明确运行时 / 规格 ID 映射，附 Codex 审核和用户可读性 verdict。 |
+| `initial_island_scene` | `user-review-pending` | 独立规格和作者化单位数据已存在，但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/initial-island-scene.md` 的清单，之后补 release packet。 |
 | `ship_interior_layered` | `user-review-pending` | 独立规格和作者化单位数据已存在，但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/ship-interior-layered-scene.md` 的清单，之后补 release packet。 |
 | `voyage_open_world_scene` | `spec-drafted-blocked-for-evidence` | 独立规格已存在，但 #20 合同、运行时证据、Codex 审核和用户可读性 verdict 仍缺失。 | 用户先审航行方向，再起草 #20 合同和证据计划。 |
-| `mist_lamp_wreck_scene` | `user-review-pending` | 独立规格和作者化单位数据已存在，但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/mist-lamp-wreck-scene.md` 的清单，之后补 release packet。 |
+| `mist_lamp_wreck_scene` | `user-review-pending` | 独立规格和作者化单位数据已存在，并已明确为雾灯残骸浮岛目的地；但用户可读性 verdict、截图刷新和 P0 资产状态仍未完成。 | 用户审核 `production/scene-specs/mist-lamp-wreck-scene.md` 的清单，之后补 release packet。 |
 | `old_market_edge_scene` | `tracked-gap-current-demo` | 当前 demo 需要旧集市边缘作为目的地，但尚无独立规格和 #20 合同。 | 起草旧集市边缘场景规格和 #20 合同。 |
 | `repair_node_scene` | `tracked-gap-future` | 尚无当前可进入场景规格或 #20 合同；除非明确加入，否则不属于修正后的当前 demo 场景集。 | 视觉完成声明前起草修复场景规格。 |
 

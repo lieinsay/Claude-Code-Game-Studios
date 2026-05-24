@@ -41,10 +41,10 @@ release_handoff_ready =
 
 | Scene ID | Codex / 自动状态 | 用户审核状态 | Release handoff 状态 | 原因 |
 | --- | --- | --- | --- | --- |
-| `initial_island_scene` | 历史 `hub_island_dock` 下已有自动证据；仍需独立初始岛屿 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；运行时 / 规格 ID 映射需明确。 |
+| `initial_island_scene` | 初始岛屿作者化单位链路已实现；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；P0 资产缺口需要进入交接包。 |
 | `ship_interior_layered` | 船内作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；水平分层、剖切、P0 资产缺口需要进入交接包。 |
 | `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据、Codex 审核和用户可读性 verdict 仍缺失。 | `NOT_READY` | `BLOCKED` | 场景设计存在，但实现 / 证据 / 可读性门禁尚未完成。 |
-| `mist_lamp_wreck_scene` | 雾灯残骸作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；需确认场景身份已从通用雾岛收窄为雾灯残骸。 |
+| `mist_lamp_wreck_scene` | 雾灯残骸浮岛作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `PENDING` | `BLOCKED` | 缺用户可读性 verdict；需确认目的地岛身份和残骸搜索空间是否符合预期。 |
 | `old_market_edge_scene` | `TRACKED_GAP`，已从未来市场场景提升为当前 demo 目的地。 | `NOT_READY` | `BLOCKED` | 尚无独立场景规格、#20 合同或用户可读性 verdict。 |
 
 ## Waiver 要求
