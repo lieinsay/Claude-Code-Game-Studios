@@ -1,127 +1,145 @@
 # 云织号船内分层场景规格
 
 > **Scene ID**: `ship_interior_layered`
-> **Runtime Contract ID**: `hub_ship_interior`
-> **Status**: spec_drafted
-> **Owner**: Scene Composition System (#19) + Scene Physics Unit System (#20)
-> **Last Updated**: 2026-05-24
+> **运行时合同 ID**: `hub_ship_interior`
+> **状态**: spec_drafted
+> **负责人**: Scene Composition System (#19) + Scene Physics Unit System (#20)
+> **最后更新**: 2026-05-24
 
-## 1. Scene Identity
+## 1. 场景身份
 
-- Purpose: Let the player read Cloudweaver as a home-like airship interior where route planning, storage, engine state, and exit affordances live in physical space.
-- Emotional target: Safe, lived-in, repairable, and legible.
-- Core fantasy / pillars served: 飞艇是家，不只是载具; 规划先于冒险; 世界会回应照料.
-- 3-second read: The player is inside the airship, with cockpit, cargo, engine, exit, and foreground hull structure visible.
-- What this scene is not: It is not a HUD dashboard, route menu, or final-art claim.
+- 场景目的: 让玩家把云织号读成一个像家的飞艇内部：航线规划、仓储、引擎状态和离开路径都存在于物理空间里。
+- 情绪目标: 安全、有生活痕迹、可修复、可读。
+- 服务的核心幻想 / 支柱: 飞艇是家，不只是载具；规划先于冒险；世界会回应照料。
+- 3 秒识别: 玩家位于飞艇内部，能看到驾驶舱、货舱、引擎区、出口和前景船体结构。
+- 本场景不是什么: 不是 HUD 仪表盘、航线菜单，也不是最终美术完成声明。
 
-## 2. Scene Physics Contract
+## 2. 场景物理合同
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Physics source | Runtime contract + authored prototype/instance data |
-| Contract scene ID | `hub_ship_interior` |
-| `physics_contract_complete` status | pass for current greybox contract |
-| Scene physics type | Current runtime says `垂直场景`; design authority tracks this as layered ship interior pending future horizontal-layered reclassification |
-| Movement plane | left/right primary with room depth and future vertical connectors |
-| Layer / Height Model | `ship_deck_01` active floor; cockpit/cargo/engine room-scale bays as midground objects |
-| Cutaway / Reveal Model | `front_wall_removed + active_floor_focus`; upper hull front wall is foreground occluder |
-| Unit catalog | `HubRuntime.DebugScenePhysicsContract("hub_ship_interior").scene_unit_catalog` |
-| Unit prototypes | `src/presentation/playable_slice_authored_content.json::scene_unit_prototypes` |
-| Placed unit instances | `src/presentation/playable_slice_authored_content.json::scene_unit_instances` filtered to `hub_ship_interior` |
-| Collision / occlusion / scale | #20 runtime contract + prototype data |
-| Special surfaces / dynamic behaviors / recovery | cockpit glass is `visual_only_glass`; static blockers and trigger-only anchors use existing priority/recovery rules |
+| 物理来源 | 运行时合同 + 作者化原型 / 实例数据 |
+| 合同场景 ID | `hub_ship_interior` |
+| `physics_contract_complete` 状态 | 当前灰盒合同通过 |
+| 场景物理类型 | 当前运行时标记为 `垂直场景`；设计权威按分层船内场景追踪，等待后续水平分层重分类 |
+| 移动平面 | 左 / 右为主，带房间深度和未来垂直连接点 |
+| Layer / Height Model | `ship_deck_01` 活动地面；驾驶舱 / 货舱 / 引擎舱是中景房间尺度对象 |
+| Cutaway / Reveal Model | `front_wall_removed + active_floor_focus`；上层船体前墙是前景遮挡物 |
+| 单位目录 | `HubRuntime.DebugScenePhysicsContract("hub_ship_interior").scene_unit_catalog` |
+| 单位原型 | `src/presentation/playable_slice_authored_content.json::scene_unit_prototypes` |
+| 摆放实例 | `src/presentation/playable_slice_authored_content.json::scene_unit_instances` 中 `hub_ship_interior` 过滤结果 |
+| 碰撞 / 遮挡 / 比例 | #20 运行时合同 + 原型数据 |
+| 特殊表面 / 动态行为 / 恢复规则 | 驾驶舱玻璃是 `visual_only_glass`；静态阻挡和触发锚点使用现有优先级 / 恢复规则 |
 
-## 3. Entry / Exit
+## 3. 进入 / 离开
 
-- Entry source: Boarding from initial island / hub exterior.
-- Spawn / arrival position: `ShipInteriorPlayerStart` / placed instance `scene_unit.instance.hub_ship_interior.player_marker`.
-- Exit or return path: `ship_exit_threshold` placed instance returns to exterior/hub flow.
-- Cancel / failure path: Input gate blocks transitions while modal panels own focus.
-- Saved-state return behavior: `PlayableSliceSceneState` restores screen, route, exploration step, player position, and footer.
-- Scene transition cleanup expectations: No stale chart/exploration panels remain mounted as physical scene evidence.
+- 进入来源: 从初始岛屿 / Hub 外部登船。
+- 出生 / 抵达位置: `ShipInteriorPlayerStart` / 摆放实例 `scene_unit.instance.hub_ship_interior.player_marker`。
+- 离开或返回路径: `ship_exit_threshold` 摆放实例返回外部 / Hub 流程。
+- 取消 / 失败路径: 模态面板拥有焦点时，输入门禁阻止场景切换。
+- 存档状态返回行为: `PlayableSliceSceneState` 恢复屏幕、航线、探索步骤、玩家位置和页脚。
+- 场景切换清理预期: 不允许残留航图 / 探索面板被当成物理场景证据。
 
-## 4. Spatial Layout
+## 4. 空间布局
 
-- Main viewport composition: ship hull and three room-scale zones across the playable layer.
-- Walkable area: `ShipInteriorWalkBounds`.
-- Boundaries: hull outline, upper front wall, cockpit glass, room bays.
-- Landmarks: cockpit bay, cargo bay, engine bay.
-- Interaction anchors: helm console, storage crate, exit threshold.
-- Occlusion risks: upper hull front wall and cockpit glass must never hide the player or core anchor beyond #20 limits.
-- Minimum greybox readability requirement: cockpit/cargo/engine areas remain distinguishable without reading HUD text.
+- 主视口构图: 船体和三个房间尺度区域横向铺在可玩层中。
+- 可行走区域: `ShipInteriorWalkBounds`。
+- 边界: 船体轮廓、上层前墙、驾驶舱玻璃、房间舱室。
+- 地标: 驾驶舱、货舱、引擎舱。
+- 交互锚点: 舵台控制台、储物箱、出口阈值。
+- 遮挡风险: 上层前墙和驾驶舱玻璃不能超过 #20 限制而遮住玩家或核心锚点。
+- 最低灰盒可读性要求: 不读 HUD 文本也能区分驾驶舱 / 货舱 / 引擎区。
 
-## 5. Critical Path
+## 5. 关键路径
 
-1. Enter ship interior from the dock/exterior.
-2. Approach cockpit, cargo, or engine anchor.
-3. Use helm/exit/storage affordance or return to the exterior flow.
+1. 从码头 / 外部进入船内。
+2. 靠近驾驶舱、货舱或引擎锚点。
+3. 使用舵台 / 出口 / 储物交互，或返回外部流程。
 
-## 6. Optional / Readability Beats
+## 6. 可选内容 / 可读性节拍
 
-- Optional observation points: cockpit window, cargo load display, engine wear overlay.
-- Local identity details: hull outline, room bay shapes, foreground wall cutaway.
-- Life / repair / damage traces: cargo load and engine wear state hooks.
-- Player guidance embedded in the world: console, crates, exit threshold, and room bays act as spatial anchors.
-- UI assistance: HUD may summarize storage/hull/route state but cannot count as scene units.
+- 可选观察点: 驾驶舱窗、货物装载显示、引擎磨损覆盖层。
+- 本地身份细节: 船体轮廓、房间舱室形状、前景墙剖切。
+- 生活 / 修复 / 损伤痕迹: 货物装载和引擎磨损状态 hook。
+- 嵌入世界中的玩家引导: 控制台、箱子、出口阈值和房间舱室作为空间锚点。
+- UI 辅助: HUD 可以总结仓储 / 船体 / 航线状态，但不能计入场景单位。
 
-## 7. State Variants
+## 7. 状态变体
 
-| Variant | Trigger / source state | World/playable scene evidence | UI assistance allowed |
+| 变体 | 触发 / 来源状态 | 世界 / 可玩场景证据 | 允许的 UI 辅助 |
 | --- | --- | --- | --- |
-| Initial | Start or normal hub entry | hull, cockpit, cargo, engine, helm, crate, exit units visible | brief prompt/status only |
-| Progressed / completed | Cargo gained or route planned | cargo load fill / storage crate state hook; helm remains route anchor | cargo/hull numbers |
-| Blocked / abnormal | damaged hull or input modal active | engine wear overlay / disabled route use feedback | modal explanation allowed |
+| 初始 | 开局或正常进入 Hub | 船体、驾驶舱、货舱、引擎、舵台、箱子、出口单位可见 | 仅短提示 / 状态 |
+| 进展 / 完成 | 获得货物或规划航线后 | 货物装载填充 / 储物箱状态 hook；舵台仍是航线锚点 | 货物 / 船体数字 |
+| 阻塞 / 异常 | 船体受损或输入模态激活 | 引擎磨损覆盖层 / 航线使用禁用反馈 | 允许模态解释 |
 
-## 8. Interaction Contract
+## 8. 交互合同
 
-| Anchor ID | Player action | Input / focus rule | Domain owner | Disabled / failure feedback | World evidence |
+| 锚点 ID | 玩家动作 | 输入 / 焦点规则 | 领域负责人 | 禁用 / 失败反馈 | 世界证据 |
 | --- | --- | --- | --- | --- | --- |
-| `helm_console_prop` | Open chart / route planning | Approach + use, blocked by modal focus | Chart / Hub | route not available feedback | helm console instance |
-| `storage_crate_prop` | Read cargo/storage state | Approach + use or passive readable state | Resources | capacity feedback | storage crate instance |
-| `ship_exit_threshold` | Leave ship interior | Approach + use | Hub | blocked while modal focus owns input | exit threshold instance |
+| `helm_console_prop` | 打开航图 / 航线规划 | 靠近 + 使用；被模态焦点阻止 | Chart / Hub | 航线不可用反馈 | 舵台控制台实例 |
+| `storage_crate_prop` | 读取货物 / 仓储状态 | 靠近 + 使用，或被动可读状态 | Resources | 容量反馈 | 储物箱实例 |
+| `ship_exit_threshold` | 离开船内 | 靠近 + 使用 | Hub | 模态焦点拥有输入时阻止 | 出口阈值实例 |
 
-## 9. Data / Runtime Contract
+## 9. 数据 / 运行时合同
 
-- Godot scene or runtime surface: `src/scenes/HubRuntime.cs`.
-- Stable IDs: `scene_unit_prototypes` and `scene_unit_instances` in `src/presentation/playable_slice_authored_content.json`.
-- Domain managers read: Hub, Chart, Resources, ModuleHull through existing `PlayableSliceDomainAdapter`.
-- Domain managers mutated: none by scene-unit authoring data.
-- Persistence fields: no new persistent gameplay authority.
-- Signals / semantic events: existing route, cargo, save/load, and hub signals.
-- Focus and modal boundaries: ADR-0012 remains authoritative.
-- Runtime debug/smoke hooks: `DebugScenePhysicsContract("hub_ship_interior")`.
+- Godot 场景或运行时表面: `src/scenes/HubRuntime.cs`。
+- 稳定 ID: `src/presentation/playable_slice_authored_content.json` 中的 `scene_unit_prototypes` 和 `scene_unit_instances`。
+- 读取的领域管理器: 通过现有 `PlayableSliceDomainAdapter` 读取 Hub、Chart、Resources、ModuleHull。
+- 会变更的领域管理器: 场景单位作者数据不变更任何领域管理器。
+- 持久化字段: 不新增持久化玩法权威。
+- 信号 / 语义事件: 现有航线、货物、保存 / 读取和 Hub 信号。
+- 焦点和模态边界: ADR-0012 仍是权威。
+- 运行时 debug / smoke hook: `DebugScenePhysicsContract("hub_ship_interior")`。
 
-## 10. Asset And Audio Needs
+## 10. 资产与音频需求
 
-| Priority | Need | Supports identity / interaction / state / feedback | Current source | Gap owner |
+| 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | airship interior background | identity | greybox | art |
-| P0 | helm console | interaction | greybox marker | art |
-| P0 | storage crates | state / interaction | greybox marker | art |
-| P0 | engine bench / wear overlay | state | greybox overlay | art |
-| P1 | cabin ambience | feedback | fallback / missing | audio |
+| P0 | 飞艇内部背景 | 身份 | 灰盒 | 美术 |
+| P0 | 舵台控制台 | 交互 | 灰盒标记 | 美术 |
+| P0 | 储物箱 | 状态 / 交互 | 灰盒标记 | 美术 |
+| P0 | 引擎台 / 磨损覆盖层 | 状态 | 灰盒覆盖层 | 美术 |
+| P1 | 舱室氛围音 | 反馈 | fallback / 缺失 | 音频 |
 
-## 11. QA Evidence
+## 11. QA 证据
 
-| Evidence type | Required artifact | Status |
+| 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| Automated smoke | `tests/smoke/session_shell_visual_probe.gd` | pending rerun |
-| Focused data validation | `tests/integration/playable-slice/DomainAdapterTest.csproj` | pending rerun |
-| Screenshot / visual proof | existing visual probe evidence | pending refresh |
-| Codex review | implementation review | pending |
-| User readability review | manual checklist | pending |
+| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd` | 已通过，等待截图刷新 |
+| 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj` | 已通过 |
+| 截图 / 视觉证明 | 既有 visual probe 证据 | 待刷新 |
+| Codex 审核 | 实现审查 | 数据链路通过 |
+| 用户可读性审核 | 本文件用户审核清单 | pending |
 
-## Readiness Checklist
+## 12. 用户审核清单
 
-- [x] Scene purpose, loop role, and emotional target are explicit.
-- [x] Entry, exit, failure, and return paths are explicit.
-- [x] Spatial layout names walkable space, boundaries, landmarks, and interaction anchors.
-- [x] Scene Physics Contract is linked and passing for the current runtime contract.
-- [x] Unit prototypes and placed instances are linked.
-- [x] Scene units come from world/playable scene layer, not UI/HUD/buttons/labels/debug overlays.
-- [x] Critical path and optional readability beats are documented.
-- [x] At least three state variants are documented.
-- [x] Interaction anchors name input/focus behavior and domain owner.
-- [x] Runtime/state contract does not create a new gameplay authority.
-- [ ] P0 asset/audio needs are resolved with final assets.
-- [ ] Automated evidence, screenshot evidence, Codex review, and user review are refreshed after implementation.
+用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
+
+- [ ] 船内场景是否符合“云织号是家，不只是载具”的幻想。
+- [ ] 玩家 3 秒内能否看出自己在飞艇内部，而不是在 HUD 面板里。
+- [ ] 驾驶舱、货舱、引擎区、出口、储物箱这些单位是否应该作为世界对象存在。
+- [ ] 舵台、储物箱、出口阈值的摆放和交互关系是否合理。
+- [ ] 不看 UI 时，玩家是否仍能知道可规划航线、查看货物、离开船内。
+- [ ] UI/HUD 是否只是辅助，没有替代船内空间。
+- [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
+
+用户审核结论: `PENDING`
+
+用户备注:
+
+- 待用户填写。
+
+## 13. 就绪检查清单
+
+- [x] 场景目的、循环角色和情绪目标明确。
+- [x] 进入、离开、失败和返回路径明确。
+- [x] 空间布局列出可行走区域、边界、地标和交互锚点。
+- [x] Scene Physics Contract 已链接，并通过当前运行时合同。
+- [x] 单位原型和摆放实例已链接。
+- [x] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
+- [x] 关键路径和可选可读性节拍已记录。
+- [x] 至少三个状态变体已记录。
+- [x] 交互锚点说明输入 / 焦点行为和领域负责人。
+- [x] 运行时 / 状态合同没有创建新的玩法权威。
+- [ ] P0 资产 / 音频需求已用最终资产解决。
+- [ ] 截图证据和用户审核在实现后刷新。

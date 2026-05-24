@@ -57,6 +57,15 @@ back to the same canonical source.
 - Do not commit generated local state, session logs, engine caches, build
   output, secrets, or machine-local settings.
 
+## 项目文档语言
+
+- 面向项目的设计、生产、QA、场景规格和索引文档默认使用中文。
+- 只有为了精确性必需时才保留英文：文件路径、命令、代码符号、稳定
+  ID、状态枚举值、ADR/TR 编号、引擎/API 名称，以及必须逐字引用的上游
+  模板名。
+- 当文档同时包含用户可读性审核和技术证明时，说明文字、表头和审核问题
+  使用中文；机器可读 ID 和命令保持原样。
+
 ## Maintenance Commands
 
 ```bash

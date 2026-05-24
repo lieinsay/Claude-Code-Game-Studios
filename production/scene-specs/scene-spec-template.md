@@ -1,151 +1,170 @@
-# Scene Specification Template and Checklist
+# 场景规格模板与检查清单
 
-> **Owner**: Scene Composition System (#19)
-> **Applies To**: every enterable scene before production implementation readiness
-> **Depends On**: Scene Physics Unit System (#20) for all physical-unit details
-> **Evidence Boundary**: UI, HUD, buttons, labels, menus, and debug overlays can assist but never count as scene units or physical acceptance evidence.
+> **负责人**: Scene Composition System (#19)
+> **适用范围**: 每个可进入场景在进入生产实现就绪前都必须使用
+> **依赖**: Scene Physics Unit System (#20) 负责所有物理单位细节
+> **证据边界**: UI、HUD、按钮、标签、菜单、调试覆盖层只能辅助理解，不能计入场景单位或物理验收证据。
+> **语言规则**: 除路径、代码符号、命令、稳定 ID、状态枚举、ADR/TR 编号等必要内容外，场景规格正文、表头说明、审核问题必须使用中文。
 
-## How To Use
+## 使用方式
 
-Copy this template for each proposed enterable scene or link an equivalent complete design note from the coverage registry. A scene can enter `implementation_ready` only when every required line below is filled or explicitly marked `N/A true` with a reason.
+为每个拟议的可进入场景复制本模板，或在覆盖登记表中链接等价完整的设计说明。只有当下列必填项全部填写，或明确标注 `N/A true` 并说明原因时，场景才能进入 `implementation_ready`。
 
-Do not redefine #20 physics rules here. Link the current Scene Physics Contract, smoke evidence, or exemption. #19 owns scene completeness; #20 owns physical-unit details.
+不要在本文件中重新定义 #20 物理规则。这里应链接当前 Scene Physics Contract、smoke 证据或豁免说明。#19 负责场景完整性，#20 负责物理单位细节。
 
-## Header
+## 文件头
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
 | Scene ID |  |
-| Player-facing scene name |  |
-| Owning loop node | Hub / Chart / Exploration / Repair / Market / Settlement / Other |
-| Current lifecycle state | concept_needed / spec_drafted / codex_review / user_review / implementation_ready / greybox / asset_gate / playtest_ready / accepted / blocked |
-| Source GDDs |  |
-| Source story or design note |  |
-| Last reviewed |  |
-| Review owners | Codex / user / QA |
+| 玩家可见场景名 |  |
+| 所属循环节点 | Hub / Chart / Exploration / Repair / Market / Settlement / Other |
+| 当前生命周期状态 | concept_needed / spec_drafted / codex_review / user_review / implementation_ready / greybox / asset_gate / playtest_ready / accepted / blocked |
+| 来源 GDD |  |
+| 来源 story 或设计说明 |  |
+| 最近审核日期 |  |
+| 审核负责人 | Codex / user / QA |
 
-## 1. Scene Identity
+## 1. 场景身份
 
-- Purpose:
-- Emotional target:
-- Core fantasy / pillars served:
-- What the player should understand within 3 seconds:
-- What this scene is not:
+- 场景目的:
+- 情绪目标:
+- 服务的核心幻想 / 支柱:
+- 玩家 3 秒内应理解:
+- 本场景不是什么:
 
-## 2. Scene Physics Contract
+## 2. 场景物理合同
 
-Link to the #20 contract source instead of restating physics detail.
+链接 #20 合同来源，不要在这里重复物理细节。
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Physics source | Runtime contract / design spec / evidence doc / exemption |
-| Contract scene ID |  |
-| `physics_contract_complete` status | pass / fail / pending / exempt |
-| Scene physics type | `水平场景` / `垂直场景` / N/A true |
-| Movement plane | link or summary |
-| Layer / Height Model | link or summary |
-| Cutaway / Reveal Model | link or summary |
-| Unit catalog | link or summary |
-| Unit prototypes | link or summary |
-| Placed unit instances | link or summary |
-| Collision / occlusion / scale | link or summary |
-| Special surfaces / dynamic behaviors / recovery | link or summary |
-| Exemption reason, if no gameplay-relevant physical units |  |
+| 物理来源 | Runtime contract / design spec / evidence doc / exemption |
+| 合同场景 ID |  |
+| `physics_contract_complete` 状态 | pass / fail / pending / exempt |
+| 场景物理类型 | `水平场景` / `垂直场景` / N/A true |
+| 移动平面 | 链接或摘要 |
+| Layer / Height Model | 链接或摘要 |
+| Cutaway / Reveal Model | 链接或摘要 |
+| 单位目录 | 链接或摘要 |
+| 单位原型 | 链接或摘要 |
+| 摆放实例 | 链接或摘要 |
+| 碰撞 / 遮挡 / 比例 | 链接或摘要 |
+| 特殊表面 / 动态行为 / 恢复规则 | 链接或摘要 |
+| 无玩法相关物理单位时的豁免原因 |  |
 
-## 3. Entry / Exit
+## 3. 进入 / 离开
 
-- Entry source:
-- Spawn / arrival position:
-- Exit or return path:
-- Cancel / failure path:
-- Saved-state return behavior:
-- Scene transition cleanup expectations:
+- 进入来源:
+- 出生 / 抵达位置:
+- 离开或返回路径:
+- 取消 / 失败路径:
+- 存档状态返回行为:
+- 场景切换清理预期:
 
-## 4. Spatial Layout
+## 4. 空间布局
 
-- Main viewport composition:
-- Walkable area:
-- Boundaries:
-- Landmarks:
-- Interaction anchors:
-- Occlusion risks:
-- Minimum greybox readability requirement:
+- 主视口构图:
+- 可行走区域:
+- 边界:
+- 地标:
+- 交互锚点:
+- 遮挡风险:
+- 最低灰盒可读性要求:
 
-## 5. Critical Path
+## 5. 关键路径
 
-1. [First scene action]
-2. [Second scene action]
-3. [Completion or exit action]
+1. [第一个场景动作]
+2. [第二个场景动作]
+3. [完成或离开动作]
 
-## 6. Optional / Readability Beats
+## 6. 可选内容 / 可读性节拍
 
-- Optional observation points:
-- Local identity details:
-- Life / repair / damage traces:
-- Player guidance embedded in the world:
-- UI assistance, if any:
+- 可选观察点:
+- 本地身份细节:
+- 生活 / 修复 / 损伤痕迹:
+- 嵌入世界中的玩家引导:
+- UI 辅助（如有）:
 
-## 7. State Variants
+## 7. 状态变体
 
-At least three variants are required unless the scene is explicitly exempt.
+除非明确豁免，否则至少需要三个状态变体。
 
-| Variant | Trigger / source state | World/playable scene evidence | UI assistance allowed |
+| 变体 | 触发 / 来源状态 | 世界 / 可玩场景证据 | 允许的 UI 辅助 |
 | --- | --- | --- | --- |
-| Initial |  |  |  |
-| Progressed / completed |  |  |  |
-| Blocked / abnormal |  |  |  |
+| 初始 |  |  |  |
+| 进展 / 完成 |  |  |  |
+| 阻塞 / 异常 |  |  |  |
 
-## 8. Interaction Contract
+## 8. 交互合同
 
-| Anchor ID | Player action | Input / focus rule | Domain owner | Disabled / failure feedback | World evidence |
+| 锚点 ID | 玩家动作 | 输入 / 焦点规则 | 领域负责人 | 禁用 / 失败反馈 | 世界证据 |
 | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |
 
-## 9. Data / Runtime Contract
+## 9. 数据 / 运行时合同
 
-- Godot scene or runtime surface:
-- Stable IDs:
-- Domain managers read:
-- Domain managers mutated:
-- Persistence fields:
-- Signals / semantic events:
-- Focus and modal boundaries:
-- Runtime debug/smoke hooks:
+- Godot 场景或运行时表面:
+- 稳定 ID:
+- 读取的领域管理器:
+- 会变更的领域管理器:
+- 持久化字段:
+- 信号 / 语义事件:
+- 焦点和模态边界:
+- 运行时 debug / smoke hook:
 
-## 10. Asset And Audio Needs
+## 10. 资产与音频需求
 
-| Priority | Need | Supports identity / interaction / state / feedback | Current source | Gap owner |
+| 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
 | P0 |  |  |  |  |
 | P1 |  |  |  |  |
 
-## 11. QA Evidence
+## 11. QA 证据
 
-| Evidence type | Required artifact | Status |
+| 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| Automated smoke |  | pending |
-| Screenshot / visual proof |  | pending |
-| Codex review |  | pending |
-| User readability review |  | pending |
+| 自动 smoke |  | pending |
+| 截图 / 视觉证明 |  | pending |
+| Codex 审核 |  | pending |
+| 用户可读性审核 |  | pending |
 
-Human QA must answer:
+人工 QA 必须回答:
 
-- Where am I?
-- What can I do here without reading a developer explanation?
-- How do I leave or continue?
-- What changed after the relevant action?
-- Does UI/HUD support the scene without dominating or replacing it?
+- 我在哪里？
+- 不看开发说明，我能在这里做什么？
+- 我如何离开或继续？
+- 相关动作之后发生了什么变化？
+- UI/HUD 是否只是辅助场景，而不是主导或替代场景？
 
-## Readiness Checklist
+## 12. 用户审核清单
 
-- [ ] Scene purpose, loop role, and emotional target are explicit.
-- [ ] Entry, exit, failure, and return paths are explicit.
-- [ ] Spatial layout names walkable space, boundaries, landmarks, and interaction anchors.
-- [ ] Scene Physics Contract is linked and passing, or #20 exemption is explicit.
-- [ ] Scene units come from world/playable scene layer, not UI/HUD/buttons/labels/debug overlays.
-- [ ] Critical path and optional readability beats are documented.
-- [ ] At least three state variants are documented or explicitly exempt.
-- [ ] Interaction anchors name input/focus behavior and domain owner.
-- [ ] Runtime/state contract does not create a new gameplay authority.
-- [ ] P0 asset/audio needs are traceable to identity, interaction, state, or feedback.
-- [ ] Automated evidence, screenshot evidence, Codex review, and user review paths are named.
+用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
+
+- [ ] 场景身份符合预期幻想与情绪。
+- [ ] 玩家 3 秒内能看出自己在哪里。
+- [ ] 关键场景单位、边界、地标和交互锚点是合理的世界对象。
+- [ ] 摆放实例的位置、层级、遮挡和交互关系符合设计直觉。
+- [ ] 不看 UI 时，玩家仍能大致知道能做什么、如何继续或离开。
+- [ ] UI/HUD 只是辅助，没有替代场景本体。
+- [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
+
+用户审核结论: `PENDING` / `PASS` / `PASS_WITH_NOTES` / `BLOCKED`
+
+用户备注:
+
+- 待用户填写。
+
+## 13. 就绪检查清单
+
+- [ ] 场景目的、循环角色和情绪目标明确。
+- [ ] 进入、离开、失败和返回路径明确。
+- [ ] 空间布局列出可行走区域、边界、地标和交互锚点。
+- [ ] Scene Physics Contract 已链接并通过，或 #20 豁免明确。
+- [ ] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
+- [ ] 关键路径和可选可读性节拍已记录。
+- [ ] 至少三个状态变体已记录，或明确豁免。
+- [ ] 交互锚点说明输入 / 焦点行为和领域负责人。
+- [ ] 运行时 / 状态合同没有创建新的玩法权威。
+- [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
+- [ ] 自动证据、截图证据、Codex 审核和用户审核路径已命名。

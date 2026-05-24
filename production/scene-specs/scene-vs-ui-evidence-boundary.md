@@ -1,15 +1,16 @@
-# Scene Versus UI Evidence Boundary
+# 场景与 UI 证据边界
 
 > **Epic**: #19 Complete Scene Composition and Acceptance
 > **Story**: `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`
-> **Last Updated**: 2026-05-24
-> **Purpose**: define which evidence is allowed to prove a scene, and which UI/HUD evidence must be ignored.
+> **最后更新**: 2026-05-24
+> **目的**: 定义哪些证据可以证明场景，哪些 UI/HUD 证据必须被忽略。
+> **语言规则**: 除路径、代码符号、命令、稳定 ID、状态枚举、ADR/TR 编号等必要内容外，本目录文档必须使用中文。
 
-## Boundary Rule
+## 边界规则
 
-Scene evidence must originate from the `world_playable_scene` layer or from a documented #20 Scene Physics Contract that itself rejects UI evidence. UI/HUD may assist comprehension, but it cannot satisfy scene completeness.
+场景证据必须来自 `world_playable_scene` 层，或来自明确拒绝 UI 证据的 #20 Scene Physics Contract。UI/HUD 可以辅助理解，但不能满足场景完整性。
 
-`ui_boundary_passed` is true only when all rows below pass:
+只有下列所有行通过时，`ui_boundary_passed` 才为 true：
 
 ```text
 ui_boundary_passed =
@@ -23,78 +24,78 @@ ui_boundary_passed =
     AND world_evidence_remains_mounted
 ```
 
-## Evidence Classification
+## 证据分类
 
-| Evidence source | Allowed use | Forbidden use |
+| 证据来源 | 允许用途 | 禁止用途 |
 | --- | --- | --- |
-| World/playable terrain, walkable bounds, landmarks, props, doors, ramps, wrecks, stalls, NPCs, and return beacons | Scene identity, physical units, interaction anchors, state variants, viewport readability, #20 contract evidence | None when authored as world/playable evidence and linked to a domain owner |
-| Scene Physics Contract fields | Physical scene proof when `physical_unit_source_layer = world_playable_scene` and `ui_evidence_allowed = false` | Proof of scene completion if the contract is missing, pending, failed, or inferred from art alone |
-| HUD labels, status panels, route text, save/load text, onboarding hints, buttons, menus, modal panels, debug labels, and smoke-only overlay text | Assistive text, accessibility support, focus-routing proof, debug diagnostics | Physical scene units, scene identity nodes, interaction anchors, viewport identity, physical contract proof, or human readability replacement |
+| 世界 / 可玩地形、可行走边界、地标、道具、门、坡道、残骸、摊位、NPC、返航信标 | 场景身份、物理单位、交互锚点、状态变体、视口可读性、#20 合同证据 | 当它们已作为世界 / 可玩证据作者化且链接领域负责人时，不额外禁止 |
+| Scene Physics Contract 字段 | 当 `physical_unit_source_layer = world_playable_scene` 且 `ui_evidence_allowed = false` 时，可作为物理场景证明 | 合同缺失、pending、failed 或仅从美术推断时，不能证明场景完成 |
+| HUD 标签、状态面板、航线文字、保存 / 读取文字、新手提示、按钮、菜单、模态面板、调试标签、smoke-only 覆盖文本 | 辅助文字、可访问性支持、焦点路由证明、调试诊断 | 物理场景单位、场景身份节点、交互锚点、视口身份、物理合同证明或人工可读性替代 |
 
-## UI Dominance Gate
+## UI 主导门禁
 
-Visual QA must record `hud_not_dominant = true` before a scene can pass release readiness.
+视觉 QA 必须在场景通过 release readiness 前记录 `hud_not_dominant = true`。
 
-| Check | Pass threshold | Blocks when |
+| 检查 | 通过阈值 | 阻塞条件 |
 | --- | --- | --- |
-| `primary_scene_viewport_share` | Target 65%; acceptable range 55-85% for MVP greybox scenes | Main world identity is below 55%, hidden, or only visible as a narrow strip behind UI |
-| `world_identity_visible_with_hud` | At least one world/playable identity node is visible while HUD is present | Only labels, panels, buttons, or debug overlays identify the place |
-| `core_anchor_visible_with_hud` | At least one relevant spatial anchor is visible for the active scene | The only available action is a UI button with no world/playable anchor |
+| `primary_scene_viewport_share` | 目标 65%；MVP 灰盒场景可接受范围为 55-85% | 主要世界身份低于 55%、被隐藏，或只剩 UI 后方的一条窄带 |
+| `world_identity_visible_with_hud` | HUD 存在时至少一个世界 / 可玩身份节点可见 | 只有标签、面板、按钮或调试覆盖层能说明玩家在哪里 |
+| `core_anchor_visible_with_hud` | 当前场景至少一个相关空间锚点可见 | 唯一可用动作是 UI 按钮，没有世界 / 可玩锚点 |
 
-Temporary modals may cover the scene while active. They do not erase existing world evidence, but their open state cannot be used as scene completion evidence.
+临时模态可以在激活时覆盖场景。它们不会抹掉既有世界证据，但打开状态不能被用作场景完成证据。
 
-## Automated Rejection Cases
+## 自动拒绝案例
 
-The following synthetic cases must fail scene readiness:
+以下合成案例必须使场景就绪失败：
 
-| Case ID | Evidence package | Expected result |
+| Case ID | 证据包 | 预期结果 |
 | --- | --- | --- |
-| `ui_only_surface` | HUD title, save/load buttons, route button, debug label; no world/playable scene nodes | `scene_readiness = fail` |
-| `debug_overlay_only` | Debug current-scene label and smoke hook text; no visible scene identity node | `scene_readiness = fail` |
-| `button_only_interaction` | Clickable route/search/return button; no helm/table/wreck/return-ship/repair/stall/NPC anchor | `scene_readiness = fail` |
-| `ui_physics_contract` | Any physics contract or unit catalog row with `physical_unit_source_layer != world_playable_scene` or `ui_evidence_allowed = true` | `scene_readiness = fail` |
+| `ui_only_surface` | HUD 标题、保存 / 读取按钮、航线按钮、调试标签；没有世界 / 可玩场景节点 | `scene_readiness = fail` |
+| `debug_overlay_only` | 调试当前场景标签和 smoke hook 文本；没有可见场景身份节点 | `scene_readiness = fail` |
+| `button_only_interaction` | 可点击的航线 / 搜索 / 返回按钮；没有 helm、table、wreck、return ship、repair、stall 或 NPC 锚点 | `scene_readiness = fail` |
+| `ui_physics_contract` | 任意物理合同或单位目录行出现 `physical_unit_source_layer != world_playable_scene` 或 `ui_evidence_allowed = true` | `scene_readiness = fail` |
 
-## Automated Smoke Evidence Requirements
+## 自动 smoke 证据要求
 
-Smoke or integration evidence for scene identity must prove:
+用于场景身份的 smoke 或 integration 证据必须证明：
 
-- visible world/playable identity nodes
-- main viewport coverage through world/playable scene nodes
-- spatial interaction anchors, not buttons alone
-- current #20 physical contract fields with `physical_unit_source_layer = world_playable_scene`
-- `ui_evidence_allowed = false` for every physical unit, dynamic behavior, and recovery row
-- focus isolation when a modal or semi-modal UI is active
-- underlying world evidence remains mounted while UI is active
+- 可见的世界 / 可玩身份节点
+- 通过世界 / 可玩场景节点证明主视口覆盖
+- 空间交互锚点，而不是只有按钮
+- 当前 #20 物理合同字段包含 `physical_unit_source_layer = world_playable_scene`
+- 每个物理单位、动态行为、恢复行都有 `ui_evidence_allowed = false`
+- 模态或半模态 UI 激活时焦点隔离正确
+- UI 激活时底层世界证据仍然挂载
 
-Current runtime smoke already includes world evidence for Hub exterior, ship interior, Chart table surface, and Exploration. UI evidence in the same smoke remains assistive only.
+当前运行时 smoke 已包含 Hub 外部、船内、航图桌面表面和探索场景的世界证据。同一 smoke 中的 UI 证据仍然只是辅助。
 
-## Focus Isolation Boundary
+## 焦点隔离边界
 
-ADR-0012 remains the input authority. When modal or semi-modal UI is active:
+ADR-0012 仍是输入权威。模态或半模态 UI 激活时：
 
-- UIManager owns UI focus, modal stack, and input routing.
-- World movement/use input is blocked or isolated according to the active input layer.
-- Disabled or unavailable UI controls must leave the focus chain or reject activation.
-- Underlying world/playable scene evidence must remain mounted and visible when the UI mode is a panel overlay rather than a full scene transition.
-- Focus isolation cannot be used to delete, hide, or replace the scene evidence required by #19.
+- UIManager 拥有 UI 焦点、模态栈和输入路由。
+- 世界移动 / 使用输入根据当前输入层被阻止或隔离。
+- 禁用或不可用 UI 控件必须离开焦点链，或拒绝激活。
+- 当 UI 模式是面板覆盖而不是完整场景切换时，底层世界 / 可玩场景证据必须保持挂载和可见。
+- 焦点隔离不能被用来删除、隐藏或替代 #19 要求的场景证据。
 
-## Current Scene Classification
+## 当前场景分类
 
-| Scene / surface | Classification | Boundary result |
+| 场景 / 表面 | 分类 | 边界结果 |
 | --- | --- | --- |
-| `initial_island_scene` | Enterable world/playable scene with HUD assistance; historical evidence may still use `hub_island_dock` | UI cannot count; island, dock, airship exterior, boarding path, and #20 contract remain required |
-| `ship_interior_layered` | Enterable horizontal layered ship-interior scene with room/status UI assistance; historical evidence may still use `hub_ship_interior` | UI cannot count; ship interior units, layers, occluders, behind-object reveal, and #20 contract remain required |
-| `voyage_open_world_scene` | Required current-demo voyage scene, not a route button UI or progress bar | UI/progress bars cannot count; pseudo-3D world motion, route boundaries, risk objects, destination silhouettes, and #20 contract are required |
-| `mist_lamp_wreck_scene` | Enterable world/playable destination scene; historical evidence may still use `exploration_mist_island` | UI cannot count; wreck body, fog/light identity, search anchors, return beacon, and #20 contract remain required |
-| `old_market_edge_scene` | Required current-demo destination scene, promoted from future market gap | Market UI cannot count; market edge geometry, stalls/buildings/NPC anchors, passability, and #20 contract are required before visual completion |
-| `repair_node_scene` | Future enterable repair site | UI repair panel cannot count; repair point/station/NPC/world anchor and #20 contract are required before visual completion |
+| `initial_island_scene` | 可进入世界 / 可玩场景，HUD 只辅助；历史证据可能仍使用 `hub_island_dock` | UI 不能计入；岛屿、码头、飞艇外部、登船路径和 #20 合同仍必需 |
+| `ship_interior_layered` | 可进入的水平分层船内场景，房间 / 状态 UI 只辅助；历史证据可能仍使用 `hub_ship_interior` | UI 不能计入；船内单位、层级、遮挡、behind-object reveal 和 #20 合同仍必需 |
+| `voyage_open_world_scene` | 当前 demo 必需航行场景，不是航线按钮 UI 或进度条 | UI / 进度条不能计入；伪 3D 世界运动、航线边界、风险物、目的地剪影和 #20 合同必需 |
+| `mist_lamp_wreck_scene` | 可进入世界 / 可玩目的地场景；历史证据可能仍使用 `exploration_mist_island` | UI 不能计入；残骸主体、雾 / 灯身份、搜索锚点、返航信标和 #20 合同仍必需 |
+| `old_market_edge_scene` | 当前 demo 必需目的地场景，从未来市场缺口提升而来 | 市场 UI 不能计入；市场边缘几何、摊位 / 建筑 / NPC 锚点、可通行性和 #20 合同必需 |
+| `repair_node_scene` | 未来可进入修复地点 | 修复 UI 面板不能计入；修复点 / 工作站 / NPC / 世界锚点和 #20 合同在视觉完成前必需 |
 
-## Review Checklist
+## 审核清单
 
-- [ ] UI/HUD does not dominate or hide the active world identity.
-- [ ] UI/HUD/buttons/menus/labels/debug overlays are ignored for scene unit counts.
-- [ ] UI/HUD/buttons/menus/labels/debug overlays are ignored for identity nodes and interaction anchors.
-- [ ] UI/HUD/buttons/menus/labels/debug overlays are ignored for #20 physical contract proof.
-- [ ] UI-only evidence packages fail readiness.
-- [ ] Modal or semi-modal focus isolates world input without deleting underlying scene evidence.
-- [ ] Any exception is an explicit user waiver, not an automated pass.
+- [ ] UI/HUD 没有主导或隐藏当前世界身份。
+- [ ] UI/HUD/按钮/菜单/标签/调试覆盖层被排除在场景单位计数之外。
+- [ ] UI/HUD/按钮/菜单/标签/调试覆盖层被排除在身份节点和交互锚点之外。
+- [ ] UI/HUD/按钮/菜单/标签/调试覆盖层被排除在 #20 物理合同证明之外。
+- [ ] UI-only 证据包会失败。
+- [ ] 模态或半模态焦点能隔离世界输入，但不会删除底层场景证据。
+- [ ] 任何例外都是明确用户 waiver，而不是自动通过。

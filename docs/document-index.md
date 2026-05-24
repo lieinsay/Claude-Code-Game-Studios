@@ -9,7 +9,70 @@
 
 ---
 
-## 一、文档全景图
+## 一、目录用途速查
+
+这张表回答“我该去哪个目录找哪类文档”。如果一个内容跨多个目录，优先遵循“设计意图放 `design/`，技术决策放 `docs/architecture/`，执行与证据放 `production/`，实现说明放靠近代码的 `src/` 或 `tests/`”。
+
+| 目录 / 文件 | 主要用途 | 什么时候看 | 不应该放什么 |
+| --- | --- | --- | --- |
+| [README.md](../README.md) | 项目入口、当前游戏是什么、怎么启动、当前状态摘要。 | 新开会话、给新人快速介绍项目、找运行命令。 | 详细 GDD、ADR、长测试证据。 |
+| [AGENTS.md](../AGENTS.md) | Codex/OMX 工作契约、自动化约束、提交规范、协作方式。 | 让代理改代码或文档前确认工作规则。 | 游戏设计正文、产品决策细节。 |
+| [CLAUDE.md](../CLAUDE.md) | Claude Code 侧主配置和项目技术栈约束。 | 需要保持 Claude/Codex 双代理兼容时。 | 单次任务计划、临时状态。 |
+| [.agentlens/](../.agentlens/) | 仓库导航索引，帮助代理快速理解代码和文档分布。 | 需要快速定位模块、入口、责任边界。 | 权威设计或实现源文件。 |
+| [.claude/](../.claude/) | Claude Code canonical studio 系统：agents、skills、rules、templates、hooks。 | 修改工作流、技能、代理定义、模板或 Claude 规则时。 | 游戏项目内容本身，除非是在改流程系统。 |
+| [.agents/](../.agents/) | Codex 适配层，通常从 `.claude/` 生成，用来把 Claude skills 暴露给 Codex。 | 检查 Codex skill 入口或适配是否同步。 | 手写业务逻辑；不要直接改生成适配，改 `.claude/` 后同步。 |
+| [.codex/](../.codex/) | Codex-native 项目配置、规则、skills、hooks、模板镜像。 | 调整 Codex 专用工作环境或同步结果时。 | GDD、ADR、生产证据。 |
+| [.github/](../.github/) | GitHub workflow、Issue/PR 模板。 | CI、PR 模板、自动检查出问题时。 | 本地会话记录、设计正文。 |
+| [.omx/](../.omx/) | OMX 运行时状态、访谈、计划、临时上下文和工作树。 | 查当前代理访谈/计划/状态；多数内容是本地运行痕迹。 | 需要长期审阅的正式项目文档；正式化后迁移到 `design/`、`docs/` 或 `production/`。 |
+| [design/](../design/) | 游戏设计权威层：GDD、UX、Art Bible、实体/内容注册。 | 讨论“游戏应该是什么、规则是什么、体验是什么”。 | 实现细节、测试日志、一次性会话状态。 |
+| [design/gdd/](../design/gdd/) | 系统级 GDD。每个系统的玩家目标、规则、数据、边界和验收。 | 改玩法、系统规则、场景物理、资源/航行/探索等设计前。 | C# API 细节、story 执行日志。 |
+| [design/gdd/reviews/](../design/gdd/reviews/) | GDD 审查记录，记录一致性、缺口和复审结果。 | 判断一个 GDD 是否已审过、还有哪些设计风险。 | 新规则的唯一来源；规则应回写到对应 GDD。 |
+| [design/art/](../design/art/) | Art Bible，视觉语言、风格、材质、色彩、资产方向。 | 做美术、场景可读性、视觉替换、资产规格前。 | 技术实现计划和 QA 证据。 |
+| [design/ux/](../design/ux/) | 具体界面/流程/交互规格，如 Hub、Chart、Exploration。 | 改 UI 流程、输入、HUD、屏幕状态、可访问性体验。 | 底层架构决策；应放 ADR。 |
+| [design/registry/](../design/registry/) | 设计侧实体/ID 注册，帮助跨文档保持命名一致。 | 新增系统实体、场景单位、内容 ID 前查重。 | 临时实验 ID 或测试夹具。 |
+| [docs/](.) | 项目工程文档总区：架构、引擎参考、流程指南、示例、索引。 | 找技术决策、工作流、引擎版本、跨系统索引。 | 具体 sprint story 执行记录。 |
+| [docs/architecture/](architecture/) | 主架构、ADR、TR Registry、Control Manifest、可追溯性。 | 改技术边界、模块责任、状态机、持久化、输入路由、跨系统 contract。 | 玩家体验描述的唯一来源；那应放 GDD/UX。 |
+| [docs/engine-reference/](engine-reference/) | Godot/Unity/Unreal 的版本锁定、API 参考和弃用/变更说明。 | 使用引擎 API 前，尤其是 Godot 4.6.2 .NET/C#。 | 项目自定义设计规则。 |
+| [docs/examples/](examples/) | CCGS 工作流示例、会话样例、流程演示。 | 学习怎么跑某类 studio workflow。 | 当前项目正式计划或证据。 |
+| [docs/reference/](reference/) | 参考图、协作计划、生产流程资料。 | 查辅助说明或长线参考，不作为当前实现 gate。 | 最新权威状态。 |
+| [docs/registry/](registry/) | 文档/注册类辅助索引。 | 查跨文档登记信息或生成索引。 | 玩法规则正文。 |
+| [production/](../production/) | 制作执行层：epic/story、sprint、gate、playtest、QA 证据、场景规格。 | 判断“现在做什么、是否完成、证据在哪里”。 | 抽象架构原则或长期设计源头。 |
+| [production/epics/](../production/epics/) | Epic 和 Story 分解，每个系统的实现任务与验收路径。 | 开发某个系统 story、查完成状态、做 story-done/readiness。 | GDD 原始设计意图。 |
+| [production/sprints/](../production/sprints/) | Sprint 计划、范围、恢复计划、执行节奏。 | 看当前/历史 sprint 的目标与范围控制。 | 单条测试输出和截图证据。 |
+| [production/polish-backlog/](../production/polish-backlog/) | Polish 阶段故事队列和可玩性修复任务。 | 做打磨、可读性、保存体验、空间交互等阶段性改进。 | 已接受的底层架构决策。 |
+| [production/scene-specs/](../production/scene-specs/) | 场景规格：场景身份、物理单位、布局、状态、交互、QA 入口。 | 设计或实现具体场景前，尤其是当前 #19/#20 场景构成/物理单位工作。 | 通用系统规则；应在 GDD #19/#20。 |
+| [production/qa/](../production/qa/) | QA 计划、签核、缺陷、验证材料入口。 | 准备验证、复查质量、判断是否可交付。 | 新玩法设计正文。 |
+| [production/qa/evidence/](../production/qa/evidence/) | 自动/人工测试证据、截图、命令结果、验收映射。 | 声明完成前找 proof；回溯某个 story 为什么算通过。 | 未来计划或未验证承诺。 |
+| [production/playtests/](../production/playtests/) | 人工游玩检查表和可读性/体验评审记录。 | 需要人眼确认空间、节奏、可读性和体验质量时。 | 自动测试 runner 代码。 |
+| [production/gate-checks/](../production/gate-checks/) | 阶段门禁结果，如 Production → Polish。 | 判断项目是否能进入下一阶段，或为什么被条件通过/阻塞。 | 日常任务拆分。 |
+| [production/asset-requests/](../production/asset-requests/) | 资产需求和美术/音频请求。 | 需要正式请求或追踪资产缺口时。 | 已完成资产文件本体。 |
+| [production/session-state/](../production/session-state/) | 当前人工/代理会话状态摘要。 | 接续项目时快速看“现在在哪里”。 | 长期设计或架构决策。 |
+| [production/session-logs/](../production/session-logs/) | 历史会话记录。 | 回溯某次决策或执行过程。 | 最新权威状态；应同步到正式文档。 |
+| [src/](../src/) | Godot/.NET C# 实现，少量 README/迁移说明靠近代码。 | 需要理解运行时代码、数据加载、管理器职责时。 | GDD、ADR、QA evidence。 |
+| [tests/](../tests/) | 单元、集成、smoke 测试代码。 | 验证行为、补回归、查某个 gate 怎么证明。 | 设计解释正文；测试意图可在测试名和 evidence 中说明。 |
+| [prototypes/](../prototypes/) | P3/历史原型和架构验证参考。 | 迁移或理解旧路线时。 | 新主线功能实现。 |
+| [tools/](../tools/) | 同步、生成、维护脚本。 | 更新 Claude/Codex 适配层、批量维护仓库结构。 | 手工写的项目文档正文。 |
+| [CCGS Skill Testing Framework/](../CCGS%20Skill%20Testing%20Framework/) | 上游/测试框架参考：agents、skills、templates 的验证素材。 | 修改 studio skill 系统或对照原始框架时。 | 当前游戏的生产状态。 |
+
+### 常见问题怎么找
+
+| 你想知道 | 先看 | 再看 |
+| --- | --- | --- |
+| 游戏到底是什么 | [README.md](../README.md) | [design/gdd/game-concept.md](../design/gdd/game-concept.md) |
+| 某系统规则是什么 | [design/gdd/systems-index.md](../design/gdd/systems-index.md) | 对应 [design/gdd/](../design/gdd/) 文件 |
+| 场景、单位、摆放、物理证据怎么管 | [design/gdd/scene-composition-system.md](../design/gdd/scene-composition-system.md) 与 [design/gdd/scene-physics-unit-system.md](../design/gdd/scene-physics-unit-system.md) | [production/scene-specs/](../production/scene-specs/) 与 [production/qa/evidence/](../production/qa/evidence/) |
+| 技术上为什么这么做 | [docs/architecture/architecture.md](architecture/architecture.md) | 相关 ADR 与 [docs/architecture/control-manifest.md](architecture/control-manifest.md) |
+| 当前能不能算完成 | [production/qa/evidence/](../production/qa/evidence/) | [production/gate-checks/](../production/gate-checks/) 与 [production/playtests/](../production/playtests/) |
+| 下一个任务从哪里来 | [production/session-state/active.md](../production/session-state/active.md) | [production/polish-backlog/](../production/polish-backlog/) 或 [production/sprints/](../production/sprints/) |
+| 改代码前该遵守什么 | [AGENTS.md](../AGENTS.md) | [CLAUDE.md](../CLAUDE.md)、对应目录 `CLAUDE.md`、[docs/architecture/control-manifest.md](architecture/control-manifest.md) |
+
+### 文档语言规则
+
+项目面向设计、生产、QA、场景规格和索引的文档默认使用中文。只有以下内容为了精确性可以保留英文或代码原文：文件路径、命令、代码符号、稳定 ID、状态枚举值、ADR/TR 编号、引擎/API 名称、上游模板名和必须逐字引用的外部名词。
+
+特别是 [production/scene-specs/](../production/scene-specs/) 下的场景规格、场景单位、用户审核清单和证据说明，正文、表头和问题必须使用中文；`Scene ID`、`Runtime Contract ID`、`scene_unit.*`、命令和路径保持原样。
+
+## 二、文档全景图
 
 ```mermaid
 graph TB
@@ -179,7 +242,7 @@ graph TB
 
 ---
 
-## 二、游戏设计文档 (GDD) — 依赖关系图
+## 三、游戏设计文档 (GDD) — 依赖关系图
 
 > 20 个系统，5 层架构。#1-#18 已完成 Epic/Story；#19/#20 为 In Design 的场景设计门禁，不计入已完成 Epic。
 > Feature/Presentation 主线 ADR 全部 Accepted；#17 first Polish feedback slice complete；#18 first-loop onboarding slice complete；#19/#20 将“有物理的世界探索”确认为底层玩法契约。
@@ -348,7 +411,7 @@ graph TB
 
 ---
 
-## 三、架构决策记录 (ADR) 全景
+## 四、架构决策记录 (ADR) 全景
 
 > **状态**: 19 ADRs Accepted ✅ (2026-05-15)
 > **TR Registry**: 54 条技术需求已录入 `docs/architecture/tr-registry.yaml`
@@ -520,7 +583,7 @@ stateDiagram-v2
 
 ---
 
-## 四、Epic/Story 生产框架
+## 五、Epic/Story 生产框架
 
 > **Foundation 5/5 + Core 5/5 + Feature 5/5 + Presentation 3/3 — 18 个 Epic 全部 Story 完成；#1-#18 Complete**
 > **125 个 Story**: 67 Logic + 53 Integration + 4 UI + 1 Config
@@ -636,7 +699,7 @@ graph TB
 
 ---
 
-## 五、C# 实现进度
+## 六、C# 实现进度
 
 > **当前状态**: Foundation #1/#2/#3/#4/#5 完成；Core #6 Intel、#7 Hub、#8 Modules/Hull、#9 Chart、#10 Navigation 完成；Feature #11 Exploration、#12 Combat、#13 WorldRepair、#14 Settlement、#15 Partner 完成；Presentation #16 UI/HUD、#17 Feedback、#18 Onboarding 完成；BUG-005 scene reachability 已修复；125 个 Story 已补齐 ADR-0019 / Manifest / C# test evidence readiness 元数据；旧 GDScript P3 原型保留为历史验证参考。
 > **验证方式**: `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS；Epic #16 Story 001-006 runners PASS；Epic #17 Story 001-005 runners PASS；Epic #18 Story 001-005 runners PASS；FoundationParity 70/70 PASS；Chart/UI/Feedback/Onboarding smoke and accessibility checks PASS。
@@ -741,7 +804,7 @@ graph TB
 
 ---
 
-## 六、P3 架构原型 — 源代码架构
+## 七、P3 架构原型 — 源代码架构
 
 > **完成日期**: 2026-05-09 · **文件数**: 15 `.gd` + 1 `.tscn` + 7 test files + `project.godot`
 > **9 个 Autoload** (Foundation 5 + Core 1 + Feature 1 + Presentation 2) · **39 个测试用例 + 49 verification checks** (Unit 21 + Integration 18 + Verification 49)
@@ -1013,7 +1076,7 @@ graph LR
 
 ---
 
-## 七、审查与质量门禁流程
+## 八、审查与质量门禁流程
 
 ```mermaid
 graph LR
@@ -1195,7 +1258,7 @@ UX SPECS             --      --      --     --      --      --      --     █�
 
 ---
 
-## 八、Studio 基础设施
+## 九、Studio 基础设施
 
 ### Agent 体系 (49 个)
 
@@ -1304,7 +1367,7 @@ graph LR
 
 ---
 
-## 九、规范与模板
+## 十、规范与模板
 
 ### 路径规则 (11 个)
 
@@ -1339,7 +1402,7 @@ graph LR
 
 ---
 
-## 十、文档阅读路线图
+## 十一、文档阅读路线图
 
 ### 新成员入门路径
 
@@ -1366,7 +1429,7 @@ graph TB
 
 ---
 
-## 十一、统计概览
+## 十二、统计概览
 
 ```
 文档分布 (按目录)
@@ -1389,7 +1452,7 @@ graph TB
 
 ---
 
-## 十二、待创建文档
+## 十三、待创建文档
 
 > 更新于 2026-05-24 — Production → Polish PASS WITH CONDITIONS；Sprint 003 PVS3-001..PVS3-007 完成；#18 Onboarding Story 001-005 完成；#19/#20 场景设计门禁已创建，等待双审。
 

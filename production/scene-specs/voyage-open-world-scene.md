@@ -1,55 +1,55 @@
 # 航行大场景规格
 
 > **Scene ID**: `voyage_open_world_scene`
-> **Player-facing scene name**: 航行大场景
-> **Status**: `spec_drafted`
-> **Last Updated**: 2026-05-24
-> **Source GDDs**: `design/gdd/navigation-route-risk.md`, `design/gdd/scene-composition-system.md`, `design/gdd/scene-physics-unit-system.md`
+> **玩家可见场景名**: 航行大场景
+> **状态**: `spec_drafted`
+> **最后更新**: 2026-05-24
+> **来源 GDD**: `design/gdd/navigation-route-risk.md`, `design/gdd/scene-composition-system.md`, `design/gdd/scene-physics-unit-system.md`
 
-## 1. Scene Identity
+## 1. 场景身份
 
-- Purpose: 让当前 demo 的两条航道成为可玩、可读、可验收的航行场景，而不是航图确认后的等待条。
-- Emotional target: 空海中的判断、轻压力、孤航感；玩家觉得自己在读风、读云、读风险，而不是被随机事件扣血。
-- Core fantasy / pillars served: 规划先于冒险；未知带来温和压力；飞艇是家，不只是载具。
-- What the player should understand within 3 seconds: 我正在驾驶云织号穿过空海，前方有航道、云层、航标、目的地方向和可判断的风险。
-- What this scene is not: 不是平面地图 UI，不是单纯进度条，不是主动开火射击战，也不是真实 3D 飞行模拟。
+- 场景目的: 让当前 demo 的两条航道成为可玩、可读、可验收的航行场景，而不是航图确认后的等待条。
+- 情绪目标: 空海中的判断、轻压力、孤航感；玩家觉得自己在读风、读云、读风险，而不是被随机事件扣血。
+- 服务的核心幻想 / 支柱: 规划先于冒险；未知带来温和压力；飞艇是家，不只是载具。
+- 玩家 3 秒内应理解: 我正在驾驶云织号穿过空海，前方有航道、云层、航标、目的地方向和可判断的风险。
+- 本场景不是什么: 不是平面地图 UI，不是单纯进度条，不是主动开火射击战，也不是真实 3D 飞行模拟。
 
-## 2. Scene Physics Contract
+## 2. 场景物理合同
 
-| Field | Value |
+| 字段 | 内容 |
 | --- | --- |
-| Physics source | design spec |
-| Contract scene ID | `voyage_open_world_scene` |
-| `physics_contract_complete` status | pending |
-| Scene physics type | `水平场景` with pseudo-3D presentation |
-| Movement plane | 飞船在航道平面内前进、后退、转向；玩家视角与当前前进方向一致 |
+| 物理来源 | 设计规格 |
+| 合同场景 ID | `voyage_open_world_scene` |
+| `physics_contract_complete` 状态 | pending |
+| 场景物理类型 | `水平场景`，使用伪 3D 表现 |
+| 移动平面 | 飞船在航道平面内前进、后退、转向；玩家视角与当前前进方向一致 |
 | Layer / Height Model | 近景云雾 / 中景航标和残骸 / 远景目的地轮廓 / UI overlay 分层 |
 | Cutaway / Reveal Model | N/A true；无建筑剖切，但云雾和大型生物遮挡必须保留航向与飞船可读性 |
-| Unit catalog | 飞船前景轮廓、云层、航标、漂浮残骸、浓雾带、飞行大鸟、目的地轮廓；后续可扩展风暴边缘、空盗追击影、失控无人浮标 |
-| Collision / occlusion / scale | pending；残骸、浓雾边界、大鸟靠近/离开路径、云层遮挡需要可读边界 |
-| Special surfaces / dynamic behaviors / recovery | 云雾、残骸、飞行大鸟临时避险、返航点标记；卡死或迷航时必须能撤退或回到最近安全航向 |
-| Exemption reason, if no gameplay-relevant physical units | N/A |
+| 单位目录 | 飞船前景轮廓、云层、航标、漂浮残骸、浓雾带、飞行大鸟、目的地轮廓；后续可扩展风暴边缘、空盗追击影、失控无人浮标 |
+| 碰撞 / 遮挡 / 比例 | pending；残骸、浓雾边界、大鸟靠近 / 离开路径、云层遮挡需要可读边界 |
+| 特殊表面 / 动态行为 / 恢复规则 | 云雾、残骸、飞行大鸟临时避险、返航点标记；卡死或迷航时必须能撤退或回到最近安全航向 |
+| 无玩法相关物理单位时的豁免原因 | N/A |
 
-## 3. Entry / Exit
+## 3. 进入 / 离开
 
-- Entry source: 初始岛屿或船内航行准备完成后进入。
-- Spawn / arrival position: 飞船进入航道起点，船首/视角对准已选航线方向。
-- Exit or return path: 抵达 `mist_lamp_wreck_scene` 或 `old_market_edge_scene`；也可撤退返回初始岛屿/船内。
-- Cancel / failure path: 航行中可撤退；船体或模块状态过差时可被迫改道或迫降，具体结算由 #10/#8/#11 后续定义。
-- Saved-state return behavior: 航行中断应恢复至最近安全航向、当前风险状态和已揭示信息；不能恢复到无上下文的 UI 面板。
-- Scene transition cleanup expectations: 离开航行大场景时清理临时大鸟遭遇、扫描、云雾遮挡和航向反馈，不清除已写入的航线知识或船体后果。
+- 进入来源: 初始岛屿或船内航行准备完成后进入。
+- 出生 / 抵达位置: 飞船进入航道起点，船首 / 视角对准已选航线方向。
+- 离开或返回路径: 抵达 `mist_lamp_wreck_scene` 或 `old_market_edge_scene`；也可撤退返回初始岛屿 / 船内。
+- 取消 / 失败路径: 航行中可撤退；船体或模块状态过差时可被迫改道或迫降，具体结算由 #10/#8/#11 后续定义。
+- 存档状态返回行为: 航行中断应恢复至最近安全航向、当前风险状态和已揭示信息；不能恢复到无上下文的 UI 面板。
+- 场景切换清理预期: 离开航行大场景时清理临时大鸟遭遇、扫描、云雾遮挡和航向反馈，不清除已写入的航线知识或船体后果。
 
-## 4. Spatial Layout
+## 4. 空间布局
 
-- Main viewport composition: 前景保留少量船首/舱窗/仪表边缘；中景显示航道、航标、残骸、云层；远景显示目的地轮廓、大鸟剪影或旧集市边缘方向。
-- Walkable area: 飞船可控航道平面，表现为前进方向上的可读通路，而不是角色步行区域。
-- Boundaries: 浓雾核心、漂浮残骸密集区、大鸟靠近警戒区、航道外深云区；风暴边缘和扫描锁定区为后续边界。
-- Landmarks: 初始岛屿远离轮廓、雾灯残骸灯影、旧集市边缘轮廓、航标链、远处生物剪影。
-- Interaction anchors: 航向、速度、撤退点、扫描/观察、云层临时避险、残骸穿缝、大鸟避让窗口。
-- Occlusion risks: 浓雾和云层不能长时间遮住航向、目的地提示或飞船状态；遮挡必须服务风险读法。
-- Minimum greybox readability requirement: 不用文字说明也能看出正在航行、正在接近目的地、前方风险可规避或可处理。
+- 主视口构图: 前景保留少量船首 / 舱窗 / 仪表边缘；中景显示航道、航标、残骸、云层；远景显示目的地轮廓、大鸟剪影或旧集市边缘方向。
+- 可行走区域: 飞船可控航道平面，表现为前进方向上的可读通路，而不是角色步行区域。
+- 边界: 浓雾核心、漂浮残骸密集区、大鸟靠近警戒区、航道外深云区；风暴边缘和扫描锁定区为后续边界。
+- 地标: 初始岛屿远离轮廓、雾灯残骸灯影、旧集市边缘轮廓、航标链、远处生物剪影。
+- 交互锚点: 航向、速度、撤退点、扫描 / 观察、云层临时避险、残骸穿缝、大鸟避让窗口。
+- 遮挡风险: 浓雾和云层不能长时间遮住航向、目的地提示或飞船状态；遮挡必须服务风险读法。
+- 最低灰盒可读性要求: 不用文字说明也能看出正在航行、正在接近目的地、前方风险可规避或可处理。
 
-## 5. Critical Path
+## 5. 关键路径
 
 1. 玩家从初始岛屿/船内确认航线，进入航行大场景。
 2. 玩家观察前方航道和风险信号，选择绕行、减速、转向、后退、扫描、等待或撤退。
@@ -159,25 +159,25 @@
 | 空盗拦截 | 非射击对抗遭遇：云层断锁、急转甩脱、残骸阻挡 | 用户确认第一版空盗可以先没有；主动开火也不在第一版 |
 | 失控无人浮标 | 谜题型扫描节奏和校准关闭 | 需要更明确的模块/扫描/航图联动 |
 
-## 6. Optional / Readability Beats
+## 6. 可选内容 / 可读性节拍
 
-- Optional observation points: 远处目的地轮廓、旧航标、漂浮小地标、大鸟远景剪影。
-- Local identity details: 雾灯残骸方向有灯影和雾；旧集市边缘方向有破旧棚架/灯笼/码头残影。
-- Life / repair / damage traces: 船体受损时前景结构抖动或仪表报警；模块异常时显示在船内/前景反馈。
-- Player guidance embedded in the world: 航标链、风向云纹、残骸缝隙、云层/残骸遮蔽区域。
-- UI assistance, if any: 可显示简短航向、船体、模块、风险提示；不得替代世界风险物和目的地轮廓。
+- 可选观察点: 远处目的地轮廓、旧航标、漂浮小地标、大鸟远景剪影。
+- 本地身份细节: 雾灯残骸方向有灯影和雾；旧集市边缘方向有破旧棚架 / 灯笼 / 码头残影。
+- 生活 / 修复 / 损伤痕迹: 船体受损时前景结构抖动或仪表报警；模块异常时显示在船内 / 前景反馈。
+- 嵌入世界中的玩家引导: 航标链、风向云纹、残骸缝隙、云层 / 残骸遮蔽区域。
+- UI 辅助（如有）: 可显示简短航向、船体、模块、风险提示；不得替代世界风险物和目的地轮廓。
 
-## 7. State Variants
+## 7. 状态变体
 
-| Variant | Trigger / source state | World/playable scene evidence | UI assistance allowed |
+| 变体 | 触发 / 来源状态 | 世界 / 可玩场景证据 | 允许的 UI 辅助 |
 | --- | --- | --- | --- |
-| Initial | 正常出航 | 清晰航标链、低密度云层、目的地方向轮廓 | 航向/距离简条 |
-| Progressed / completed | 接近目的地或解决一个航行问题 | 目的地轮廓变大，风险物远离或被甩脱，航标更清晰 | 航程摘要 |
-| Blocked / abnormal | 迷航、大鸟靠近、残骸碰撞、船体/模块异常 | 云层压近、大鸟剪影压近、残骸擦碰、船体反馈 | 警报和处理提示 |
+| 初始 | 正常出航 | 清晰航标链、低密度云层、目的地方向轮廓 | 航向 / 距离简条 |
+| 进展 / 完成 | 接近目的地或解决一个航行问题 | 目的地轮廓变大，风险物远离或被甩脱，航标更清晰 | 航程摘要 |
+| 阻塞 / 异常 | 迷航、大鸟靠近、残骸碰撞、船体 / 模块异常 | 云层压近、大鸟剪影压近、残骸擦碰、船体反馈 | 警报和处理提示 |
 
-## 8. Interaction Contract
+## 8. 交互合同
 
-| Anchor ID | Player action | Input / focus rule | Domain owner | Disabled / failure feedback | World evidence |
+| 锚点 ID | 玩家动作 | 输入 / 焦点规则 | 领域负责人 | 禁用 / 失败反馈 | 世界证据 |
 | --- | --- | --- | --- | --- | --- |
 | `voyage.heading` | 转向 | 航行中持续输入 | #10 / movement implementation TBD | 航向受浓雾、残骸碰撞或大鸟风压干扰时反馈偏移 | 世界层级围绕新航向重排 |
 | `voyage.throttle` | 前进 / 后退 / 减速 | 航行中持续输入 | #10 | 残骸密度过高或大鸟靠近时速度受限 | 云层和残骸运动方向变化 |
@@ -185,39 +185,39 @@
 | `voyage.evade` | 规避 / 避险 | 遭遇生态压迫或环境问题时可用 | #10 | 时机错误导致损伤或偏航 | 大鸟被云层/残骸遮蔽隔开 |
 | `voyage.retreat` | 撤退 | 航行中可用 | #10 / #3 | 返航窗口差时撤退更慢或代价更高 | 返航航标亮起，世界运动反向 |
 
-## 9. Data / Runtime Contract
+## 9. 数据 / 运行时合同
 
-- Godot scene or runtime surface: TBD；应为独立航行大场景，而非 Chart UI 子面板。
-- Stable IDs: `voyage_open_world_scene`, `route.sky-reef-arc-01`, `route.storm-cut-01`, `mist_lamp_wreck_scene`, `old_market_edge_scene`。
-- Domain managers read: #9 航图、#10 航行风险、#8 船体/模块、#6 情报、#3 存档。
-- Domain managers mutated: #10 航程状态；#8 船体/模块后果；#6 航线知识；#3 航程快照。
-- Persistence fields: 航线 ID、航向、进度、已解决问题、已揭示风险、船体/模块后果、撤退状态。
-- Signals / semantic events: voyage_state_changed, encounter_triggered, hull_band_changed, route_travel_completed。
-- Focus and modal boundaries: 航行操控不应被常驻 UI 抢焦点；警报和提示为辅助。
-- Runtime debug/smoke hooks: TBD；至少暴露当前航线、航向、问题类型、解决状态、UI 是否主导、目的地接近状态。
+- Godot 场景或运行时表面: TBD；应为独立航行大场景，而非 Chart UI 子面板。
+- 稳定 ID: `voyage_open_world_scene`, `route.sky-reef-arc-01`, `route.storm-cut-01`, `mist_lamp_wreck_scene`, `old_market_edge_scene`。
+- 读取的领域管理器: #9 航图、#10 航行风险、#8 船体 / 模块、#6 情报、#3 存档。
+- 会变更的领域管理器: #10 航程状态；#8 船体 / 模块后果；#6 航线知识；#3 航程快照。
+- 持久化字段: 航线 ID、航向、进度、已解决问题、已揭示风险、船体 / 模块后果、撤退状态。
+- 信号 / 语义事件: `voyage_state_changed`, `encounter_triggered`, `hull_band_changed`, `route_travel_completed`。
+- 焦点和模态边界: 航行操控不应被常驻 UI 抢焦点；警报和提示为辅助。
+- 运行时 debug / smoke hook: TBD；至少暴露当前航线、航向、问题类型、解决状态、UI 是否主导、目的地接近状态。
 
-## 10. Asset And Audio Needs
+## 10. 资产与音频需求
 
-| Priority | Need | Supports identity / interaction / state / feedback | Current source | Gap owner |
+| 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 近景云雾与视差层 | 航行运动感、浓雾问题 | tracked gap | Art |
-| P0 | 航标链 | 导航判断、目的地方向 | tracked gap | Art / Design |
-| P0 | 漂浮残骸群 | 驾驶规避、穿缝、损伤风险 | tracked gap | Art / Design |
-| P0 | 飞行大鸟剪影 / 靠近动画 | 生态压迫、临时避险、世界身份 | tracked gap | Art / Animation / Audio |
-| P0 | 雾灯残骸 / 旧集市边缘远景轮廓 | 目的地接近和场景身份 | tracked gap | Art |
-| P1 | 船首/舱窗/仪表前景 | 飞船存在感、船长视角 | tracked gap | Art / UI |
-| P1 | 航行环境音、雾中风声、残骸擦碰、大鸟翼振 | 氛围和风险反馈 | tracked gap | Audio |
+| P0 | 近景云雾与视差层 | 航行运动感、浓雾问题 | tracked gap | 美术 |
+| P0 | 航标链 | 导航判断、目的地方向 | tracked gap | 美术 / 设计 |
+| P0 | 漂浮残骸群 | 驾驶规避、穿缝、损伤风险 | tracked gap | 美术 / 设计 |
+| P0 | 飞行大鸟剪影 / 靠近动画 | 生态压迫、临时避险、世界身份 | tracked gap | 美术 / 动画 / 音频 |
+| P0 | 雾灯残骸 / 旧集市边缘远景轮廓 | 目的地接近和场景身份 | tracked gap | 美术 |
+| P1 | 船首 / 舱窗 / 仪表前景 | 飞船存在感、船长视角 | tracked gap | 美术 / UI |
+| P1 | 航行环境音、雾中风声、残骸擦碰、大鸟翼振 | 氛围和风险反馈 | tracked gap | 音频 |
 
-## 11. QA Evidence
+## 11. QA 证据
 
-| Evidence type | Required artifact | Status |
+| 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| Automated smoke | 航行大场景 runtime contract / debug hook | pending |
-| Screenshot / visual proof | 初始航行、浓雾/残骸/大鸟临时避险、抵达目的地 | pending |
-| Codex review | Scene spec + #19/#20 gate review | pending |
-| User readability review | `production/playtests/scene-readability-voyage-open-world.md` | pending |
+| 自动 smoke | 航行大场景 runtime contract / debug hook | pending |
+| 截图 / 视觉证明 | 初始航行、浓雾 / 残骸 / 大鸟临时避险、抵达目的地 | pending |
+| Codex 审核 | 场景规格 + #19/#20 gate review | pending |
+| 用户可读性审核 | `production/playtests/scene-readability-voyage-open-world.md` 与本文件用户审核清单 | pending |
 
-Human QA must answer:
+人工 QA 必须回答:
 
 - 我是否能在 3 秒内看出自己正在空海航行？
 - 我是否能从世界变化读出前进、转向、后退？
@@ -225,16 +225,34 @@ Human QA must answer:
 - 我是否知道可以规避、借遮蔽避险、减速、硬抗或撤退？
 - UI 是否只是辅助，而不是把航行变成进度条？
 
-## Readiness Checklist
+## 12. 用户审核清单
 
-- [x] Scene purpose, loop role, and emotional target are explicit.
-- [x] Entry, exit, failure, and return paths are explicit at design level.
-- [x] Spatial layout names航道、云层、航标、残骸、风险物、目的地轮廓。
-- [ ] Scene Physics Contract is linked and passing.
-- [x] Scene units come from world/playable scene layer, not UI/HUD/buttons/labels/debug overlays.
-- [x] Critical path and optional readability beats are documented.
-- [x] At least three state variants are documented.
-- [x] Interaction anchors name input/focus behavior and domain owner.
-- [x] Runtime/state contract does not create a new gameplay authority.
-- [x] P0 asset/audio needs are traceable to identity, interaction, state, or feedback.
-- [ ] Automated evidence, screenshot evidence, Codex review, and user review paths are complete.
+用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
+
+- [ ] 航行大场景是否符合“空海判断、轻压力、孤航感”的体验。
+- [ ] 玩家 3 秒内能否看出自己正在驾驶云织号航行，而不是看进度条。
+- [ ] 航标、云层、残骸、浓雾、大鸟、目的地轮廓是否都应该作为世界对象存在。
+- [ ] 浓雾、残骸、大鸟三个第一版问题的预警、处理窗口和失败后果是否合理。
+- [ ] 不看 UI 时，玩家是否能判断前进、转向、减速、规避、撤退。
+- [ ] UI/HUD 是否只是辅助，没有替代航行场景本体。
+- [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
+
+用户审核结论: `PENDING`
+
+用户备注:
+
+- 待用户填写。
+
+## 13. 就绪检查清单
+
+- [x] 场景目的、循环角色和情绪目标明确。
+- [x] 进入、离开、失败和返回路径在设计层明确。
+- [x] 空间布局列出航道、云层、航标、残骸、风险物、目的地轮廓。
+- [ ] Scene Physics Contract 已链接并通过。
+- [x] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
+- [x] 关键路径和可选可读性节拍已记录。
+- [x] 至少三个状态变体已记录。
+- [x] 交互锚点说明输入 / 焦点行为和领域负责人。
+- [x] 运行时 / 状态合同没有创建新的玩法权威。
+- [x] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
+- [ ] 自动证据、截图证据、Codex 审核和用户审核路径完整。
