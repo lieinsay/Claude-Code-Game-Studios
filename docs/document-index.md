@@ -41,6 +41,9 @@
 | [production/sprints/](../production/sprints/) | Sprint 计划、范围、恢复计划、执行节奏。 | 看当前/历史 sprint 的目标与范围控制。 | 单条测试输出和截图证据。 |
 | [production/polish-backlog/](../production/polish-backlog/) | Polish 阶段故事队列和可玩性修复任务。 | 做打磨、可读性、保存体验、空间交互等阶段性改进。 | 已接受的底层架构决策。 |
 | [production/scene-specs/](../production/scene-specs/) | 场景规格：场景身份、物理单位、布局、状态、交互、QA 入口。 | 设计或实现具体场景前，尤其是当前 #19/#20 场景构成/物理单位工作。 | 通用系统规则；应在 GDD #19/#20。 |
+| [production/unit-specs/](../production/unit-specs/) | 可复用场景单位的本体规格，分为固定单位和实体单位。 | 设计树、球、门、残骸、摊位、NPC、资源点等真实世界对象前；场景规格需要引用单位原型时。 | 某个场景的摆放位置和动线；应放 `production/scene-specs/`。 |
+| [production/unit-specs/fixed-scene-objects/](../production/unit-specs/fixed-scene-objects/) | 固定单位规格：默认不自行移动，但可有交互、状态、破坏、再生、开关或遮挡变化。 | 设计可砍伐树、门、坡道、残骸、摊位、灯塔、资源矿点等对象时。 | 运行时会移动、弹开、AI 驱动或同步速度的位置实体。 |
+| [production/unit-specs/dynamic-entities/](../production/unit-specs/dynamic-entities/) | 实体单位规格：会移动、被推动、弹开、巡逻、飞行，或需要运行时位置/速度/AI/物理响应。 | 设计物理球、可推动箱、NPC、敌人、移动平台等对象时。 | 固定地形、门、树、残骸、摊位等稳定场景结构。 |
 | [production/qa/](../production/qa/) | QA 计划、签核、缺陷、验证材料入口。 | 准备验证、复查质量、判断是否可交付。 | 新玩法设计正文。 |
 | [production/qa/evidence/](../production/qa/evidence/) | 自动/人工测试证据、截图、命令结果、验收映射。 | 声明完成前找 proof；回溯某个 story 为什么算通过。 | 未来计划或未验证承诺。 |
 | [production/playtests/](../production/playtests/) | 人工游玩检查表和可读性/体验评审记录。 | 需要人眼确认空间、节奏、可读性和体验质量时。 | 自动测试 runner 代码。 |
@@ -60,7 +63,7 @@
 | --- | --- | --- |
 | 游戏到底是什么 | [README.md](../README.md) | [design/gdd/game-concept.md](../design/gdd/game-concept.md) |
 | 某系统规则是什么 | [design/gdd/systems-index.md](../design/gdd/systems-index.md) | 对应 [design/gdd/](../design/gdd/) 文件 |
-| 场景、单位、摆放、物理证据怎么管 | [design/gdd/scene-composition-system.md](../design/gdd/scene-composition-system.md) 与 [design/gdd/scene-physics-unit-system.md](../design/gdd/scene-physics-unit-system.md) | [production/scene-specs/](../production/scene-specs/) 与 [production/qa/evidence/](../production/qa/evidence/) |
+| 场景、单位、摆放、物理证据怎么管 | [design/gdd/scene-composition-system.md](../design/gdd/scene-composition-system.md) 与 [design/gdd/scene-physics-unit-system.md](../design/gdd/scene-physics-unit-system.md) | [production/unit-specs/](../production/unit-specs/)、[production/scene-specs/](../production/scene-specs/) 与 [production/qa/evidence/](../production/qa/evidence/) |
 | 技术上为什么这么做 | [docs/architecture/architecture.md](architecture/architecture.md) | 相关 ADR 与 [docs/architecture/control-manifest.md](architecture/control-manifest.md) |
 | 当前能不能算完成 | [production/qa/evidence/](../production/qa/evidence/) | [production/gate-checks/](../production/gate-checks/) 与 [production/playtests/](../production/playtests/) |
 | 下一个任务从哪里来 | [production/session-state/active.md](../production/session-state/active.md) | [production/polish-backlog/](../production/polish-backlog/) 或 [production/sprints/](../production/sprints/) |
@@ -71,6 +74,8 @@
 项目面向设计、生产、QA、场景规格和索引的文档默认使用中文。只有以下内容为了精确性可以保留英文或代码原文：文件路径、命令、代码符号、稳定 ID、状态枚举值、ADR/TR 编号、引擎/API 名称、上游模板名和必须逐字引用的外部名词。
 
 特别是 [production/scene-specs/](../production/scene-specs/) 下的场景规格、场景单位、用户审核清单和证据说明，正文、表头和问题必须使用中文；`Scene ID`、`Runtime Contract ID`、`scene_unit.*`、命令和路径保持原样。
+
+[production/unit-specs/](../production/unit-specs/) 下的单位规格也遵循同一语言规则。单位规格必须按固定单位与实体单位分开存放：固定单位进入 `fixed-scene-objects/`，实体单位进入 `dynamic-entities/`。
 
 ## 二、文档全景图
 

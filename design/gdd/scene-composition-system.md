@@ -38,6 +38,8 @@
 
 **R1b-1 -- 场景单位必须区分原型与实例。** 当一个场景进入 `implementation_ready` 或后续状态时，场景规格必须链接 `单位原型` 与 `摆放实例` 的数据来源：原型负责复用规则，实例负责本场景摆放。一个场景可以先用灰盒 Godot 节点摆放，但 release gate 前必须能追踪每个 gameplay-relevant 实例引用了哪个原型、位于哪个 floor/layer、来自哪个 scene spec，并且通过 #20 的 UI-evidence rejection。
 
+**R1b-2 -- 固定单位与实体单位必须分开设计。** `fixed_scene_object` 的本体规格必须放在 `production/unit-specs/fixed-scene-objects/`，`dynamic_entity` 的本体规格必须放在 `production/unit-specs/dynamic-entities/`。场景规格只负责引用这些单位并说明摆放、状态覆盖和场景语义，不能把“树会砍伐再生”“球碰到会弹开”这类单位本体规则散落在单个场景文档里。若一个对象同时包含固定载体和移动实体，必须拆成两个单位规格。
+
 **R1c -- 复杂水平场景必须先拆层。** 如果水平场景中出现楼房、屋顶、山体、桥、洞口、坡道、室内外、河岸、飞船、多层地貌或明显高低差，场景规格必须引用 #20 的 Layer / Height Model，标明每一层是可走层、视觉层、转移层、高度层还是阻挡层。未拆层的复杂水平场景不得进入 `implementation_ready`，因为玩家无法可靠判断哪里能走、哪里会挡、哪里只是背景。
 
 **R1d -- 多层场景必须声明显隐剖切。** 如果玩家可以进入多层楼房、塔、山洞、地下空间、飞船舱段、树屋、桥下空间或任何上下层遮挡空间，场景规格必须引用 #20 的 Cutaway / Reveal Model。玩家到达第 N 层时，N 层以上如何隐藏、剖开、半透明或降亮，N 层以下如何保留参照，非当前层是否可交互，都必须写清楚。否则即使场景节点存在，也不得通过场景验收。
@@ -107,7 +109,7 @@
 每个具体场景规格必须至少包含下列小节：
 
 1. **Scene Identity**: 场景名、所属循环节点、情绪目标、服务的 Pillars。
-2. **Scene Physics Contract**: 链接或嵌入 `场景单位物理设计` 要求的物理契约，包含场景物理类型、移动平面、Layer / Height Model、Cutaway / Reveal Model、单位目录、碰撞、遮挡、尺度、特殊表面、动态行为和恢复规则。
+2. **Scene Physics Contract**: 链接或嵌入 `场景单位物理设计` 要求的物理契约，包含场景物理类型、移动平面、Layer / Height Model、Cutaway / Reveal Model、单位目录、固定单位 / 实体单位来源、碰撞、遮挡、尺度、特殊表面、动态行为和恢复规则。
 3. **Entry / Exit**: 进入来源、生成位置、出口、失败/取消路径、返回路径。
 4. **Spatial Layout**: 主视口构图、玩家可走区域、地标、交互锚点、遮挡风险。
 5. **Critical Path**: 玩家完成本场景的最短路径。
