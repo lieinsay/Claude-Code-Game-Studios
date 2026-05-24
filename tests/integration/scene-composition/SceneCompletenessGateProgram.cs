@@ -6,7 +6,6 @@ var total = 0;
 var repoRoot = FindRepoRoot();
 var gate = Read("production/scene-specs/scene-completeness-gate.md");
 var creationGate = Read("production/content-creation-review-gate.md");
-var godotRuntimeReplacementGate = Read("production/scene-specs/godot-runtime-replacement-gate.md");
 var template = Read("production/scene-specs/scene-spec-template.md");
 var registry = Read("production/scene-specs/scene-coverage-registry.md");
 var smoke = Read("tests/smoke/session_shell_visual_probe.gd");
@@ -262,28 +261,38 @@ bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
 	string[] replacementEntryPoints =
 	[
 		"production/ui-specs/runtime-ui-surface-registry.md",
-		"production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
-		"production/unit-specs/dynamic-entities/authored-playable-slice-entities.md",
+		"production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
+		"production/unit-specs/dynamic-entities/player-controlled-entity.md",
 		"src/presentation/playable_slice_authored_content.json",
 		"production/content-creation-review-gate.md",
 	];
 	string[] noLegacySpecFiles =
 	[
+		"production/scene-specs/godot-runtime-replacement-gate.md",
 		"production/scene-specs/godot-runtime-legacy-scene-audit.md",
 		"production/ui-specs/godot-runtime-legacy-ui-surfaces.md",
 		"production/unit-specs/fixed-scene-objects/godot-runtime-legacy-greybox-units.md",
 	];
+	string[] registryRules =
+	[
+		"不另设独立旧运行时门禁文件",
+		"不能被当作规格保留",
+		"不能补写 legacy 规格",
+		"src/scenes/ShellUi.tscn",
+		"src/scenes/HubRuntime.tscn",
+		"src/scenes/HubRuntime.cs",
+		"必须删除旧实现",
+		"已经通过人工适合性审查",
+		"旧 runtime 节点存在本身不能作为创建或验收证据",
+	];
 
-	return invalidShellPanels.All(panel => shellUi.Contains($"name=\"{panel}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(panel, StringComparison.Ordinal))
-		&& invalidHubUiNodes.All(node => !hubRuntime.Contains($"\"{node}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
-		&& removedHubWorldNodes.All(node => !hubRuntime.Contains(node, StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
-		&& replacementEntryPoints.All(path => godotRuntimeReplacementGate.Contains(path, StringComparison.Ordinal))
+	return invalidShellPanels.All(panel => shellUi.Contains($"name=\"{panel}\"", StringComparison.Ordinal))
+		&& invalidHubUiNodes.All(node => !hubRuntime.Contains($"\"{node}\"", StringComparison.Ordinal))
+		&& removedHubWorldNodes.All(node => !hubRuntime.Contains(node, StringComparison.Ordinal))
+		&& replacementEntryPoints.All(path => registry.Contains(path, StringComparison.Ordinal))
 		&& noLegacySpecFiles.All(path => !File.Exists(Path.Combine(repoRoot, path.Replace('/', Path.DirectorySeparatorChar))))
-		&& godotRuntimeReplacementGate.Contains("invalid_legacy_runtime_design", StringComparison.Ordinal)
-		&& godotRuntimeReplacementGate.Contains("delete_or_replace", StringComparison.Ordinal)
-		&& godotRuntimeReplacementGate.Contains("不能作为规格保留", StringComparison.Ordinal)
-		&& godotRuntimeReplacementGate.Contains("旧节点补写成“规格文档”", StringComparison.Ordinal)
-		&& registry.Contains("godot-runtime-replacement-gate.md", StringComparison.Ordinal)
+		&& registryRules.All(term => registry.Contains(term, StringComparison.Ordinal))
+		&& !registry.Contains("godot-runtime-replacement-gate.md", StringComparison.Ordinal)
 		&& !registry.Contains("godot-runtime-legacy-scene-audit.md", StringComparison.Ordinal);
 }
 

@@ -171,21 +171,29 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 		Check(!prototype.TryGetProperty("ui_evidence_allowed", out var uiEvidence) || uiEvidence.ValueKind == JsonValueKind.False, $"scene-unit prototype '{prototypeId}' rejects UI evidence");
 		Check(RequiredString(prototype, "source_gdd") == "design/gdd/scene-physics-unit-system.md", $"scene-unit prototype '{prototypeId}' traces to #20 GDD");
 		var unitSpecPath = RequiredString(prototype, "unit_spec");
+		var legacyReplacementStatus = RequiredString(prototype, "legacy_replacement_status");
 		var expectedUnitSpecRoot = classification == "dynamic_entity"
 			? "production/unit-specs/dynamic-entities/"
 			: "production/unit-specs/fixed-scene-objects/";
-		var unitSpecFullPath = Path.Combine(projectRoot, unitSpecPath.Replace('/', Path.DirectorySeparatorChar));
-		Check(unitSpecPath.StartsWith(expectedUnitSpecRoot, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' points to the expected unit spec directory");
-		Check(File.Exists(unitSpecFullPath), $"scene-unit prototype '{prototypeId}' unit spec file exists");
-		if (File.Exists(unitSpecFullPath))
+		if (!string.IsNullOrWhiteSpace(unitSpecPath))
 		{
-			if (!unitSpecContentByPath.TryGetValue(unitSpecFullPath, out var unitSpecContent))
+			var unitSpecFullPath = Path.Combine(projectRoot, unitSpecPath.Replace('/', Path.DirectorySeparatorChar));
+			Check(unitSpecPath.StartsWith(expectedUnitSpecRoot, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' points to the expected unit spec directory");
+			Check(File.Exists(unitSpecFullPath), $"scene-unit prototype '{prototypeId}' unit spec file exists");
+			if (File.Exists(unitSpecFullPath))
 			{
-				unitSpecContent = File.ReadAllText(unitSpecFullPath);
-				unitSpecContentByPath[unitSpecFullPath] = unitSpecContent;
-			}
+				if (!unitSpecContentByPath.TryGetValue(unitSpecFullPath, out var unitSpecContent))
+				{
+					unitSpecContent = File.ReadAllText(unitSpecFullPath);
+					unitSpecContentByPath[unitSpecFullPath] = unitSpecContent;
+				}
 
-			Check(unitSpecContent.Contains(prototypeId, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' is listed in its unit spec");
+				Check(unitSpecContent.Contains(prototypeId, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' is listed in its unit spec");
+			}
+		}
+		else
+		{
+			Check(legacyReplacementStatus == "pending_spec_replacement", $"scene-unit prototype '{prototypeId}' without a unit spec is marked for legacy replacement");
 		}
 		var allowedScenes = allowedSceneIds.ValueKind == JsonValueKind.Array
 			? allowedSceneIds.EnumerateArray()

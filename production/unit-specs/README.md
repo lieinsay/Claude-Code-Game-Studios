@@ -19,8 +19,8 @@
 
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
-| `dynamic-entities/authored-playable-slice-entities.md` | `playable_slice_authored_content.json` 中已存在的动态实体原型 | 已补真实规格 |
-| `fixed-scene-objects/authored-playable-slice-units.md` | `playable_slice_authored_content.json` 中已存在的固定单位原型 | 已补真实规格 |
+| `dynamic-entities/player-controlled-entity.md` | 玩家操作实体 / `scene_unit.prototype.player_marker` | 规格草案 |
+| `fixed-scene-objects/docked-airship-entity.md` | 停靠飞船实体 / 船体与气囊轮廓 | 规格草案 |
 | `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，待用户二审 |
 | `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，待用户二审 |
 | `dynamic-entities/physics-ball-example.md` | 示例动态实体 | 示例 |

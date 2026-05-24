@@ -37,9 +37,11 @@
 | `old_market_edge_scene` | 旧集市边缘 | 后续市场内容候选 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 当前 demo 第二岛屿改为 `ochre_island_scene`；旧集市保留为后续市场缺口，不进入本轮 runtime 替换。 |
 | `repair_node_scene` | 世界修复 / 解锁点 | 未来修复地点入口 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为修复点会包含玩法相关物理单位 | `design/gdd/world-repair-unlock.md`; `design/gdd/scene-composition-system.md` | 在任何修复场景被视为视觉完成前起草规格；除非明确加入，否则不属于当前 demo 可读性队列。 |
 
-## Godot 旧运行时替换门禁
+## Godot 旧运行时删除规则
 
-门禁出现前已经存在的错误 Godot runtime 设计由 `production/scene-specs/godot-runtime-replacement-gate.md` 管理。这些内容不能被当作规格保留；触碰 `ShellUi.tscn`、`HubRuntime.tscn` 或 `HubRuntime.cs` 时，必须删除旧实现，或用已经通过人工适合性审查的 scene/ui/unit 设计替换。
+不另设独立旧运行时门禁文件。门禁出现前已经存在的错误 Godot runtime 设计不能被当作规格保留，也不能补写 legacy 规格。触碰 `src/scenes/ShellUi.tscn`、`src/scenes/HubRuntime.tscn` 或 `src/scenes/HubRuntime.cs` 时，必须删除旧实现，或用已经通过人工适合性审查的 scene/ui/unit 设计替换。
+
+正确替换入口只能是 `production/content-creation-review-gate.md`、`production/ui-specs/runtime-ui-surface-registry.md`、`production/unit-specs/fixed-scene-objects/docked-airship-entity.md`、`production/unit-specs/dynamic-entities/player-controlled-entity.md` 和 `src/presentation/playable_slice_authored_content.json`；旧 runtime 节点存在本身不能作为创建或验收证据。
 
 ## 非场景 / UI 表面
 
