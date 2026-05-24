@@ -37,6 +37,7 @@
 | [docs/reference/](reference/) | 参考图、协作计划、生产流程资料。 | 查辅助说明或长线参考，不作为当前实现 gate。 | 最新权威状态。 |
 | [docs/registry/](registry/) | 文档/注册类辅助索引。 | 查跨文档登记信息或生成索引。 | 玩法规则正文。 |
 | [production/](../production/) | 制作执行层：epic/story、sprint、gate、playtest、QA 证据、场景规格。 | 判断“现在做什么、是否完成、证据在哪里”。 | 抽象架构原则或长期设计源头。 |
+| [production/content-creation-review-gate.md](../production/content-creation-review-gate.md) | 场景 / UI / 单位创建适合性人工审查门禁。 | 任何 story、规格或实现想新建场景、UI 表面或单位原型前。 | 具体规格细节；通过此门禁后仍要写对应 scene/ui/unit spec。 |
 | [production/epics/](../production/epics/) | Epic 和 Story 分解，每个系统的实现任务与验收路径。 | 开发某个系统 story、查完成状态、做 story-done/readiness。 | GDD 原始设计意图。 |
 | [production/sprints/](../production/sprints/) | Sprint 计划、范围、恢复计划、执行节奏。 | 看当前/历史 sprint 的目标与范围控制。 | 单条测试输出和截图证据。 |
 | [production/polish-backlog/](../production/polish-backlog/) | Polish 阶段故事队列和可玩性修复任务。 | 做打磨、可读性、保存体验、空间交互等阶段性改进。 | 已接受的底层架构决策。 |
@@ -80,6 +81,8 @@
 [production/unit-specs/](../production/unit-specs/) 下的单位规格也遵循同一语言规则。单位规格必须按固定单位与实体单位分开存放：固定单位进入 `fixed-scene-objects/`，实体单位进入 `dynamic-entities/`。
 
 [production/ui-specs/](../production/ui-specs/) 下的 UI 规格也遵循同一语言规则。UI 必须声明分类、打开方式、绑定对象、显示优先级、输入 / 焦点影响和是否可常驻；不能用 UI 规格替代场景或场景单位规格。
+
+新增场景、UI 表面或单位原型前，还必须先通过 [production/content-creation-review-gate.md](../production/content-creation-review-gate.md) 的人工适合性审查。该审查只判断“是否应该创建”，不能替代具体规格完整性检查。
 
 ## 二、文档全景图
 

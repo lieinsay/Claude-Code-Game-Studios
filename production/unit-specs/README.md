@@ -15,6 +15,15 @@
 
 不要把两类规格混放在根目录。根目录只放 README、模板、目录级索引或未来自动生成的总表。
 
+## 当前真实规格文件
+
+| 文件 | 覆盖范围 | 状态 |
+| --- | --- | --- |
+| `dynamic-entities/authored-playable-slice-entities.md` | `playable_slice_authored_content.json` 中已存在的动态实体原型 | 已补真实规格 |
+| `fixed-scene-objects/authored-playable-slice-units.md` | `playable_slice_authored_content.json` 中已存在的固定单位原型 | 已补真实规格 |
+| `dynamic-entities/physics-ball-example.md` | 示例动态实体 | 示例 |
+| `fixed-scene-objects/tree-regenerating-example.md` | 示例固定单位 | 示例 |
+
 ## 这个目录解决什么
 
 `production/scene-specs/` 回答“某个场景里放了什么、放在哪里、为什么这样放”。
@@ -46,6 +55,12 @@
 - 单位会影响碰撞、遮挡、通行、视线、尺度、玩家读法或 QA 验收。
 - 单位属于关键路径、核心幻想或用户需要审核的世界对象。
 - 单位看起来像背景，但实际会阻挡、可砍伐、可拾取、可推动、可开关、可修复或可变化。
+
+## 创建适合性人工审查
+
+任何新固定单位、动态实体、NPC、障碍物、门、资源点、带碰撞 / 遮挡 / 状态的 prop，或 `scene_unit.prototype.*`，在进入实现或 `implementation_ready` 前，必须先按 `production/content-creation-review-gate.md` 记录人工适合性审查。结论只有 `APPROVED` 或 `APPROVED_WITH_NOTES` 时才允许继续；`PENDING`、`REVISE`、`REJECTED` 都会阻塞 story-readiness 和 `/dev-story`。
+
+人工审查重点是判断是否应该创建独立单位：能否复用已有单位、是否符合当前场景和核心幻想、是否带来新的物理 / 状态 / 资产复杂度，以及固定单位或动态实体分类是否清楚。
 
 ## 最低规格要求
 

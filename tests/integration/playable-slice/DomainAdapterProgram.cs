@@ -71,7 +71,8 @@ static JsonElement OptionalMigrationArray(JsonElement element, string propertyNa
 	return RequiredArray(migrations, propertyName);
 }
 
-var contentPath = Path.Combine(FindProjectRoot(), "src", "presentation", "playable_slice_authored_content.json");
+var projectRoot = FindProjectRoot();
+var contentPath = Path.Combine(projectRoot, "src", "presentation", "playable_slice_authored_content.json");
 Check(File.Exists(contentPath), "authored playable content file exists");
 using var contentDocument = JsonDocument.Parse(File.ReadAllText(contentPath));
 var contentRoot = contentDocument.RootElement;
@@ -91,6 +92,7 @@ var hubIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var shipInteriorUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
+var unitSpecContentByPath = new Dictionary<string, string>(StringComparer.Ordinal);
 var routeCount = routes.ValueKind == JsonValueKind.Array ? routes.GetArrayLength() : 0;
 var searchPointCount = searchPoints.ValueKind == JsonValueKind.Array ? searchPoints.GetArrayLength() : 0;
 var status = RequiredString(contentRoot, "content_status");
@@ -168,6 +170,23 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 		Check(RequiredString(prototype, "source_layer") == "world_playable_scene", $"scene-unit prototype '{prototypeId}' is world/playable evidence");
 		Check(!prototype.TryGetProperty("ui_evidence_allowed", out var uiEvidence) || uiEvidence.ValueKind == JsonValueKind.False, $"scene-unit prototype '{prototypeId}' rejects UI evidence");
 		Check(RequiredString(prototype, "source_gdd") == "design/gdd/scene-physics-unit-system.md", $"scene-unit prototype '{prototypeId}' traces to #20 GDD");
+		var unitSpecPath = RequiredString(prototype, "unit_spec");
+		var expectedUnitSpecRoot = classification == "dynamic_entity"
+			? "production/unit-specs/dynamic-entities/"
+			: "production/unit-specs/fixed-scene-objects/";
+		var unitSpecFullPath = Path.Combine(projectRoot, unitSpecPath.Replace('/', Path.DirectorySeparatorChar));
+		Check(unitSpecPath.StartsWith(expectedUnitSpecRoot, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' points to the expected unit spec directory");
+		Check(File.Exists(unitSpecFullPath), $"scene-unit prototype '{prototypeId}' unit spec file exists");
+		if (File.Exists(unitSpecFullPath))
+		{
+			if (!unitSpecContentByPath.TryGetValue(unitSpecFullPath, out var unitSpecContent))
+			{
+				unitSpecContent = File.ReadAllText(unitSpecFullPath);
+				unitSpecContentByPath[unitSpecFullPath] = unitSpecContent;
+			}
+
+			Check(unitSpecContent.Contains(prototypeId, StringComparison.Ordinal), $"scene-unit prototype '{prototypeId}' is listed in its unit spec");
+		}
 		var allowedScenes = allowedSceneIds.ValueKind == JsonValueKind.Array
 			? allowedSceneIds.EnumerateArray()
 				.Select(scene => scene.GetString() ?? string.Empty)

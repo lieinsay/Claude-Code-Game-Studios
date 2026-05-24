@@ -74,6 +74,7 @@ Before checking any stories, load reference documents once (not per-story):
 - Scene/UI/unit spec rules — load these once so implementation readiness cannot
   bypass production specifications:
   - `docs/document-index.md`
+  - `production/content-creation-review-gate.md`
   - `production/scene-specs/scene-coverage-registry.md`
   - `production/scene-specs/scene-completeness-gate.md`
   - `production/scene-specs/scene-vs-ui-evidence-boundary.md`
@@ -200,6 +201,18 @@ items pass or are explicitly marked N/A with a stated reason.
 
 ### Production Specification Gates
 
+- [ ] **Human creation suitability review required before new scene/UI/unit creation**:
+  If a story creates or introduces a new enterable scene, route destination,
+  runtime UI surface, persistent HUD/panel/modal/overlay, reusable scene unit,
+  authored `scene_unit.prototype.*`, NPC, obstacle, door, resource point, or
+  world object with collision/occlusion/state, it must include a human
+  suitability review record following `production/content-creation-review-gate.md`.
+  The verdict must be `APPROVED` or `APPROVED_WITH_NOTES`, and any notes must be
+  written back into the story or target spec. If the review is missing,
+  `PENDING`, `REVISE`, or `REJECTED`, the story is **BLOCKED** unless the story's
+  only scope is to draft the review packet or a non-implementation spec draft.
+  Codex review, generated rationale, or asking the user during implementation
+  does not satisfy this gate.
 - [ ] **Scene specs required before scene work**: If a story creates, changes, claims
   readiness for, or adds evidence for any enterable scene, world/playable scene
   surface, route destination, level area, repair point, market area, or scene

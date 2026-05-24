@@ -23,6 +23,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/dynamic-entities/authored-playable-slice-entities.md",
       "allowed_scene_ids": [ "hub_island_dock", "hub_ship_interior", "exploration_mist_island" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "player-movement-interaction"
@@ -38,6 +39,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -53,6 +55,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "player-movement-interaction"
@@ -68,6 +71,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "airship-hub"
@@ -83,6 +87,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "airship-hub"
@@ -98,6 +103,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "visual_only_height_marker" ],
       "domain_owner": "scene-physics"
@@ -113,6 +119,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_island_dock" ],
       "behavior_tags": [ "gameplay_affecting_boundary" ],
       "domain_owner": "scene-physics"
@@ -128,6 +135,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -143,6 +151,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -158,6 +167,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "chart-route-planning"
@@ -173,6 +183,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "resources-goods-capacity"
@@ -188,6 +199,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "airship-hub"
@@ -203,6 +215,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "visual_only_glass" ],
       "domain_owner": "scene-physics"
@@ -218,6 +231,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "hub_ship_interior" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -233,6 +247,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -248,6 +263,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "player-movement-interaction"
@@ -263,6 +279,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "scene-physics"
@@ -278,6 +295,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "exploration-scavenge"
@@ -293,6 +311,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "visual_only_height_marker" ],
       "domain_owner": "scene-physics"
@@ -308,6 +327,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "blocking_static" ],
       "domain_owner": "airship-hub"
@@ -323,6 +343,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "airship-hub"
@@ -338,6 +359,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "gameplay_affecting_boundary" ],
       "domain_owner": "scene-physics"
@@ -353,6 +375,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "visual_only_fog" ],
       "domain_owner": "scene-physics"
@@ -368,6 +391,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "visual_only_height_marker" ],
       "domain_owner": "scene-physics"
@@ -383,6 +407,7 @@
       "source_layer": "world_playable_scene",
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/dynamic-entities/authored-playable-slice-entities.md",
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "hazardous", "trigger_only" ],
       "domain_owner": "combat-threat-handling"

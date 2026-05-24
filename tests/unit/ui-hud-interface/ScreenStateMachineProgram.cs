@@ -24,6 +24,7 @@ Run("AC-17: Esc cannot reverse chart departure confirmed", Ac17ConfirmedIrrevers
 Run("AC-18: Esc cannot cancel extracting", Ac18ExtractingEscBlocked);
 Run("AC-19: S1-S12 registry contains expected types and owners", Ac19ScreenRegistry);
 Run("AC-20: S2 non-modal panel does not block movement", Ac20NonModalMovement);
+Run("AC-21: Runtime UI registry has production UI spec coverage", Ac21RuntimeUiSpecCoverage);
 
 if (failed > 0)
 {
@@ -277,6 +278,19 @@ static bool Ac20NonModalMovement()
         && !ui.IsMovementInputBlocked();
 }
 
+static bool Ac21RuntimeUiSpecCoverage()
+{
+    var ui = CreateUi();
+    var specPath = Path.Combine(FindProjectRoot(), "production", "ui-specs", "runtime-ui-surface-registry.md");
+    if (!File.Exists(specPath))
+    {
+        return false;
+    }
+
+    var spec = File.ReadAllText(specPath);
+    return ui.ScreenRegistry.Keys.All(screenId => spec.Contains(screenId, StringComparison.Ordinal));
+}
+
 static UIManager CreateUi()
 {
     var ui = new UIManager();
@@ -346,4 +360,20 @@ static UIManager HubArrivingUi()
     var ui = SettlementUi();
     ui.SettlementConfirmed();
     return ui;
+}
+
+static string FindProjectRoot()
+{
+    var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (directory is not null)
+    {
+        if (File.Exists(Path.Combine(directory.FullName, "CloudWeaverVoyage.csproj")))
+        {
+            return directory.FullName;
+        }
+
+        directory = directory.Parent;
+    }
+
+    throw new InvalidOperationException("Could not locate project root from current directory.");
 }

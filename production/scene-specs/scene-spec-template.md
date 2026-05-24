@@ -22,6 +22,8 @@
 | 当前生命周期状态 | concept_needed / spec_drafted / codex_review / user_review / implementation_ready / greybox / asset_gate / playtest_ready / accepted / blocked |
 | 来源 GDD |  |
 | 来源 story 或设计说明 |  |
+| 创建适合性人工审查 | PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED |
+| 创建审查记录 | 链接 `production/content-creation-review-gate.md` 格式记录或填写本规格第 12 节 |
 | 最近审核日期 |  |
 | 审核负责人 | Codex / user / QA |
 
@@ -138,10 +140,14 @@
 - 相关动作之后发生了什么变化？
 - UI/HUD 是否只是辅助场景，而不是主导或替代场景？
 
-## 12. 用户审核清单
+## 12. 创建适合性与用户审核清单
 
 用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
 
+- [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
+- [ ] 审查人确认这个场景适合当前核心幻想、循环节点和项目阶段。
+- [ ] 审查人确认不能用已有场景或 UI 合理替代。
+- [ ] 人工备注已写回本规格、story 或后续任务。
 - [ ] 场景身份符合预期幻想与情绪。
 - [ ] 玩家 3 秒内能看出自己在哪里。
 - [ ] 关键场景单位、边界、地标和交互锚点是合理的世界对象。
@@ -152,6 +158,8 @@
 
 用户审核结论: `PENDING` / `PASS` / `PASS_WITH_NOTES` / `BLOCKED`
 
+创建适合性结论: `PENDING` / `APPROVED` / `APPROVED_WITH_NOTES` / `REVISE` / `REJECTED`
+
 用户备注:
 
 - 待用户填写。
@@ -159,6 +167,7 @@
 ## 13. 就绪检查清单
 
 - [ ] 场景目的、循环角色和情绪目标明确。
+- [ ] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
 - [ ] 进入、离开、失败和返回路径明确。
 - [ ] 空间布局列出可行走区域、边界、地标和交互锚点。
 - [ ] Scene Physics Contract 已链接并通过，或 #20 豁免明确。

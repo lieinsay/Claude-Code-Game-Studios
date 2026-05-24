@@ -5,6 +5,7 @@ var total = 0;
 
 var repoRoot = FindRepoRoot();
 var gate = Read("production/scene-specs/scene-completeness-gate.md");
+var creationGate = Read("production/content-creation-review-gate.md");
 var template = Read("production/scene-specs/scene-spec-template.md");
 var registry = Read("production/scene-specs/scene-coverage-registry.md");
 var smoke = Read("tests/smoke/session_shell_visual_probe.gd");
@@ -18,6 +19,7 @@ Run("AC-3: asset gate maps P0 assets to identity interaction state or feedback",
 Run("AC-4: unresolved P0 current-scene asset gaps block or record waiver", test_unresolved_p0_gaps_block_or_require_waiver);
 Run("AC-5: scene layer cannot create gameplay authority or duplicate persistent state", test_domain_authority_boundary_is_explicit);
 Run("Regression: implementation workflows enforce production specs before work starts", test_workflows_enforce_specs_before_implementation);
+Run("Regression: new scene UI and unit creation requires human suitability review", test_new_content_creation_requires_human_review);
 
 if (failed > 0)
 {
@@ -62,6 +64,7 @@ bool test_gate_checks_every_readiness_dimension()
 		"presentation_ready",
 		"technical_ready",
 		"qa_ready",
+		"creation_review_passed",
 		"codex_review_passed",
 		"user_review_passed",
 	];
@@ -75,6 +78,7 @@ bool test_gate_checks_every_readiness_dimension()
 		"当前场景存在未解决 P0 资产缺口",
 		"场景层创建新玩法权威",
 		"smoke 只证明节点存在",
+		"人工适合性审查缺失",
 		"任一 Codex blocker 未解决",
 		"用户审核缺失",
 	];
@@ -89,6 +93,7 @@ bool test_any_false_dimension_blocks_completion()
 {
 	return gate.Contains("任何 `fail`、`pending`、`tracked-gap` 或缺失证据都会阻塞完成", StringComparison.Ordinal)
 		&& gate.Contains("scene_complete =")
+		&& gate.Contains("creation_review_passed")
 		&& gate.Contains("AND scene_physics_ready")
 		&& gate.Contains("AND user_review_passed")
 		&& registry.Contains("tracked-gap")
@@ -168,6 +173,7 @@ bool test_workflows_enforce_specs_before_implementation()
 	string[] specPaths =
 	[
 		"production/scene-specs/scene-coverage-registry.md",
+		"production/content-creation-review-gate.md",
 		"production/scene-specs/scene-completeness-gate.md",
 		"production/scene-specs/scene-vs-ui-evidence-boundary.md",
 		"production/ui-specs/README.md",
@@ -176,6 +182,7 @@ bool test_workflows_enforce_specs_before_implementation()
 	string[] readinessGates =
 	[
 		"Scene specs required before scene work",
+		"Human creation suitability review required before new scene/UI/unit creation",
 		"Unit specs required for reusable world units",
 		"UI specs required before UI work",
 		"UI cannot satisfy scene/unit readiness",
@@ -183,6 +190,7 @@ bool test_workflows_enforce_specs_before_implementation()
 	string[] devStoryGates =
 	[
 		"Production scene/UI/unit specifications",
+		"human suitability",
 		"stop before coding",
 		"README/template references",
 		"are not enough for implementation stories",
@@ -192,6 +200,36 @@ bool test_workflows_enforce_specs_before_implementation()
 	return specPaths.All(path => storyReadiness.Contains(path, StringComparison.Ordinal) && devStory.Contains(path, StringComparison.Ordinal))
 		&& readinessGates.All(term => storyReadiness.Contains(term, StringComparison.Ordinal))
 		&& devStoryGates.All(term => devStory.Contains(term, StringComparison.Ordinal));
+}
+
+bool test_new_content_creation_requires_human_review()
+{
+	string[] requiredVerdicts =
+	[
+		"`APPROVED`",
+		"`APPROVED_WITH_NOTES`",
+		"`PENDING`",
+		"`REVISE`",
+		"`REJECTED`",
+	];
+	string[] creationScopes =
+	[
+		"新的可进入场景",
+		"新的持久 HUD",
+		"新的固定单位",
+		"`scene_unit.prototype.*`",
+	];
+
+	return File.Exists(Path.Combine(repoRoot, "production", "content-creation-review-gate.md"))
+		&& requiredVerdicts.All(term => creationGate.Contains(term, StringComparison.Ordinal))
+		&& creationScopes.All(term => creationGate.Contains(term, StringComparison.Ordinal))
+		&& creationGate.Contains("Codex 可以起草、整理证据和提出建议；不能替代人工适合性批准", StringComparison.Ordinal)
+		&& creationGate.Contains("只有 `APPROVED` 和 `APPROVED_WITH_NOTES` 解除创建门禁", StringComparison.Ordinal)
+		&& gate.Contains("任何新场景没有人工适合性 `APPROVED` / `APPROVED_WITH_NOTES` 时，不得进入实现或 release readiness", StringComparison.Ordinal)
+		&& template.Contains("创建适合性人工审查已通过", StringComparison.Ordinal)
+		&& storyReadiness.Contains("asking the user during implementation", StringComparison.Ordinal)
+		&& devStory.Contains("asking the user during the", StringComparison.Ordinal)
+		&& devStory.Contains("implementation turn", StringComparison.Ordinal);
 }
 
 string Read(string relativePath)

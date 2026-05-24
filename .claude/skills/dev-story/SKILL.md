@@ -127,6 +127,7 @@ Read `.claude/docs/technical-preferences.md`:
 Read the production specification rules before routing or implementation:
 
 - `docs/document-index.md`
+- `production/content-creation-review-gate.md`
 - `production/scene-specs/scene-coverage-registry.md`
 - `production/scene-specs/scene-completeness-gate.md`
 - `production/scene-specs/scene-vs-ui-evidence-boundary.md`
@@ -136,6 +137,17 @@ Read the production specification rules before routing or implementation:
 Then inspect the story text, acceptance criteria, implementation notes, and test
 evidence for scene, UI, or unit work:
 
+- If the story creates or introduces a new enterable scene, route destination,
+  runtime UI surface, persistent HUD/panel/modal/overlay, reusable scene unit,
+  authored `scene_unit.prototype.*`, NPC, obstacle, door, resource point, or
+  world object with collision/occlusion/state, require a human suitability
+  review record following `production/content-creation-review-gate.md`. The
+  verdict must be `APPROVED` or `APPROVED_WITH_NOTES`, and any notes must already
+  be reflected in the story or target spec. If the review is missing, `PENDING`,
+  `REVISE`, or `REJECTED`, stop before coding and mark the story BLOCKED unless
+  the story's only scope is drafting the review packet or a non-implementation
+  spec draft. Codex review, generated rationale, or asking the user during the
+  implementation turn does not satisfy this gate.
 - If the story creates, changes, or claims evidence/readiness for an enterable
   scene, world/playable surface, route destination, repair point, market area,
   transition, scene identity, spatial layout, or scene physics contract, read the

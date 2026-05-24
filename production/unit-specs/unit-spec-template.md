@@ -5,6 +5,7 @@
 > **单位分类**: `fixed_scene_object` / `dynamic_entity`
 > **存放目录**: `production/unit-specs/fixed-scene-objects/` 或 `production/unit-specs/dynamic-entities/`
 > **生命周期状态**: concept_needed / spec_drafted / user_review / implementation_ready / greybox / accepted / blocked
+> **创建适合性人工审查**: PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED
 > **来源 GDD**: `design/gdd/scene-physics-unit-system.md`
 > **最后更新**:
 
@@ -28,6 +29,7 @@
 | 领域 owner |  |
 | 表现 owner |  |
 | UI 是否可替代本体 | 必须为否 |
+| 创建审查记录 | 链接 `production/content-creation-review-gate.md` 格式记录 |
 
 ## 3. 物理合同
 
@@ -112,6 +114,9 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 
 ## 11. 用户审核清单
 
+- [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
+- [ ] 审查人确认这个单位需要独立原型，而不是已有单位的状态、皮肤或摆放实例。
+- [ ] 人工备注已写回本规格、story 或后续任务。
 - [ ] 玩家能否看出这个单位是什么。
 - [ ] 这个单位的分类是否符合直觉：实体 / 固定单位 / 特殊表面 / 交互锚点。
 - [ ] 碰撞、遮挡、比例和可通过性是否符合玩家预期。
@@ -120,6 +125,8 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 - [ ] 放到具体场景时，是否还需要额外摆放限制或状态覆盖。
 
 用户审核结论: `PENDING`
+
+创建适合性结论: `PENDING` / `APPROVED` / `APPROVED_WITH_NOTES` / `REVISE` / `REJECTED`
 
 用户备注:
 

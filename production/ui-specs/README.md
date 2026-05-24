@@ -45,6 +45,12 @@
 - UI 绑定世界锚点、场景单位、快捷键或某个系统事件。
 - UI 有显示优先级、遮挡风险、无障碍要求或截图 / QA 证据要求。
 
+## 创建适合性人工审查
+
+任何新 UI 表面在进入实现或 `implementation_ready` 前，必须先按 `production/content-creation-review-gate.md` 记录人工适合性审查。结论只有 `APPROVED` 或 `APPROVED_WITH_NOTES` 时才允许继续；`PENDING`、`REVISE`、`REJECTED` 都会阻塞 story-readiness 和 `/dev-story`。
+
+人工审查重点不是布局细节，而是判断是否应该创建这个 UI：能否复用现有表面、是否会替代世界对象、是否适合当前输入 / 焦点流程、是否造成玩家只点 UI 而不理解场景。
+
 ## 与场景和单位的关系
 
 - 场景规格可以引用 UI 规格，但不能把 UI 当作场景本体。
@@ -52,7 +58,14 @@
 - UI 规格必须声明绑定对象：系统状态、世界锚点、场景单位、快捷键、自动事件或开发调试。
 - UI 常驻不代表 UI 永远可见；常驻 HUD 也必须有场景 / 状态 / 优先级门控。
 
-## 当前建议规格文件
+## 当前规格文件
+
+| 文件 | 覆盖范围 | 状态 |
+| --- | --- | --- |
+| `runtime-ui-surface-registry.md` | `src/presentation/UIManager.cs` 当前注册的 `S1`-`S12` 与诊断 UI | 已补真实规格 |
+| `ui-spec-template.md` | 新 UI 规格模板 | 模板 |
+
+## 后续可拆分规格文件
 
 | UI | 建议文件 | 分类 |
 | --- | --- | --- |
@@ -63,4 +76,4 @@
 | 修复面板 | `repair-anchored-modal.md` | `modal_dialog` |
 | 仓库 / 货舱整理 | `storage-anchored-panel.md` | `anchored_panel` |
 
-本次只建立规则和模板；具体 UI 面板可按实现优先级逐个补规格。
+当前运行时已有 UI 先由 `runtime-ui-surface-registry.md` 兜底约束。后续某个面板进入详细 UX / 视觉 / 无障碍实现时，再拆成独立文件，并从总表保留追踪链接。

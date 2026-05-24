@@ -12,7 +12,8 @@
 
 ```text
 scene_complete =
-    purpose_ready
+    creation_review_passed
+    AND purpose_ready
     AND scene_physics_ready
     AND space_ready
     AND behavior_ready
@@ -28,6 +29,7 @@ scene_complete =
 
 | 维度 | 必需证据 | 阻塞条件 |
 | --- | --- | --- |
+| `creation_review_passed` | 新建场景在进入 implementation readiness 或 release-readiness 前，已按 `production/content-creation-review-gate.md` 记录人工适合性审查，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。 | 人工适合性审查缺失、`PENDING`、`REVISE`、`REJECTED`，或用户备注未写回规格。 |
 | `purpose_ready` | 场景身份、循环角色、情绪目标和 3 秒识别目标已记录。 | 目的含糊、只命名 UI 屏幕，或没有说明玩家为什么进入。 |
 | `scene_physics_ready` | #20 Scene Physics Contract 通过，或场景明确记录 `N/A true` 因为没有玩法相关物理单位。 | #20 合同缺失、pending、failed 或被静默跳过。 |
 | `space_ready` | 进入、离开、可行走区域、边界、地标、交互锚点均来自世界 / 可玩场景证据。 | 只有节点存在或 HUD 文本作为空间证明。 |
@@ -47,6 +49,8 @@ Story 004 增加人工审核清单和 release handoff 包：
 - `production/scene-specs/scene-release-gate-handoff.md`
 
 Codex 审核是必要条件，但不足以单独通过。用户 verdict 为 `BLOCKED` 时，`user_review_passed = false`，直到 blocker 解决或用户明确 waiver。用户可以因为幻想缺失、需求缺失、身份不清、玩家流程不理想、UI 过强，或新发现需求需要写回场景规格而阻塞。
+
+创建适合性审查早于用户可读性 release handoff。它回答“是否应该创建这个场景”；release handoff 回答“这个场景现在是否足够可读、可交付”。任何新场景没有人工适合性 `APPROVED` / `APPROVED_WITH_NOTES` 时，不得进入实现或 release readiness。
 
 必答用户可读性问题：
 
