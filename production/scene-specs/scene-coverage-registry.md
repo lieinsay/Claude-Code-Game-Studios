@@ -36,6 +36,10 @@
 | `old_market_edge_scene` | 旧集市边缘 | 从 `voyage_open_world_scene` 抵达 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 将旧集市从未来市场缺口提升为当前 demo 目的地；视觉完成声明前需起草场景规格。 |
 | `repair_node_scene` | 世界修复 / 解锁点 | 未来修复地点入口 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为修复点会包含玩法相关物理单位 | `design/gdd/world-repair-unlock.md`; `design/gdd/scene-composition-system.md` | 在任何修复场景被视为视觉完成前起草规格；除非明确加入，否则不属于当前 demo 可读性队列。 |
 
+## Godot 旧运行时替换门禁
+
+门禁出现前已经存在的错误 Godot runtime 设计由 `production/scene-specs/godot-runtime-replacement-gate.md` 管理。这些内容不能被当作规格保留；触碰 `ShellUi.tscn`、`HubRuntime.tscn` 或 `HubRuntime.cs` 时，必须删除旧实现，或用已经通过人工适合性审查的 scene/ui/unit 设计替换。
+
 ## 非场景 / UI 表面
 
 这些表面可以出现在玩家流程中，但不能计入场景单位或物理验收证据。

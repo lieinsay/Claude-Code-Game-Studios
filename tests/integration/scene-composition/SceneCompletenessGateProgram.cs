@@ -6,9 +6,12 @@ var total = 0;
 var repoRoot = FindRepoRoot();
 var gate = Read("production/scene-specs/scene-completeness-gate.md");
 var creationGate = Read("production/content-creation-review-gate.md");
+var godotRuntimeReplacementGate = Read("production/scene-specs/godot-runtime-replacement-gate.md");
 var template = Read("production/scene-specs/scene-spec-template.md");
 var registry = Read("production/scene-specs/scene-coverage-registry.md");
 var smoke = Read("tests/smoke/session_shell_visual_probe.gd");
+var hubRuntime = Read("src/scenes/HubRuntime.cs");
+var shellUi = Read("src/scenes/ShellUi.tscn");
 var storyReadiness = Read(".claude/skills/story-readiness/SKILL.md");
 var devStory = Read(".claude/skills/dev-story/SKILL.md");
 
@@ -20,6 +23,7 @@ Run("AC-4: unresolved P0 current-scene asset gaps block or record waiver", test_
 Run("AC-5: scene layer cannot create gameplay authority or duplicate persistent state", test_domain_authority_boundary_is_explicit);
 Run("Regression: implementation workflows enforce production specs before work starts", test_workflows_enforce_specs_before_implementation);
 Run("Regression: new scene UI and unit creation requires human suitability review", test_new_content_creation_requires_human_review);
+Run("Regression: pre-gate Godot runtime designs are blocked for deletion or replacement", test_pregate_godot_runtime_designs_are_blocked_for_replacement);
 
 if (failed > 0)
 {
@@ -230,6 +234,57 @@ bool test_new_content_creation_requires_human_review()
 		&& storyReadiness.Contains("asking the user during implementation", StringComparison.Ordinal)
 		&& devStory.Contains("asking the user during the", StringComparison.Ordinal)
 		&& devStory.Contains("implementation turn", StringComparison.Ordinal);
+}
+
+bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
+{
+	string[] invalidShellPanels =
+	[
+		"LoadingPanel",
+		"EntryPanel",
+		"AudioActivationPanel",
+		"EphemeralWarningPanel",
+		"ResumePanel",
+		"RecoveryPanel",
+		"FatalPanel",
+	];
+	string[] invalidHubUiNodes =
+	[
+		"ChartPanel",
+		"ExplorationPanel",
+	];
+	string[] removedHubWorldNodes =
+	[
+		"ModuleBenchProp",
+		"EngineInteractPoint",
+		"ExtractionCargoProp",
+	];
+	string[] replacementEntryPoints =
+	[
+		"production/ui-specs/runtime-ui-surface-registry.md",
+		"production/unit-specs/fixed-scene-objects/authored-playable-slice-units.md",
+		"production/unit-specs/dynamic-entities/authored-playable-slice-entities.md",
+		"src/presentation/playable_slice_authored_content.json",
+		"production/content-creation-review-gate.md",
+	];
+	string[] noLegacySpecFiles =
+	[
+		"production/scene-specs/godot-runtime-legacy-scene-audit.md",
+		"production/ui-specs/godot-runtime-legacy-ui-surfaces.md",
+		"production/unit-specs/fixed-scene-objects/godot-runtime-legacy-greybox-units.md",
+	];
+
+	return invalidShellPanels.All(panel => shellUi.Contains($"name=\"{panel}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(panel, StringComparison.Ordinal))
+		&& invalidHubUiNodes.All(node => hubRuntime.Contains($"\"{node}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
+		&& removedHubWorldNodes.All(node => !hubRuntime.Contains(node, StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
+		&& replacementEntryPoints.All(path => godotRuntimeReplacementGate.Contains(path, StringComparison.Ordinal))
+		&& noLegacySpecFiles.All(path => !File.Exists(Path.Combine(repoRoot, path.Replace('/', Path.DirectorySeparatorChar))))
+		&& godotRuntimeReplacementGate.Contains("invalid_legacy_runtime_design", StringComparison.Ordinal)
+		&& godotRuntimeReplacementGate.Contains("delete_or_replace", StringComparison.Ordinal)
+		&& godotRuntimeReplacementGate.Contains("不能作为规格保留", StringComparison.Ordinal)
+		&& godotRuntimeReplacementGate.Contains("旧节点补写成“规格文档”", StringComparison.Ordinal)
+		&& registry.Contains("godot-runtime-replacement-gate.md", StringComparison.Ordinal)
+		&& !registry.Contains("godot-runtime-legacy-scene-audit.md", StringComparison.Ordinal);
 }
 
 string Read(string relativePath)

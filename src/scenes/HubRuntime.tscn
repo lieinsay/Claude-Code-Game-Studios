@@ -96,13 +96,6 @@ theme_override_font_sizes/font_size = 20
 text = "货舱：可进入"
 horizontal_alignment = 1
 
-[node name="ModuleStation" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StationRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-text = "模块台：已启用"
-horizontal_alignment = 1
-
 [node name="StatusAndActions" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -145,22 +138,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "已用 0 / 有效容量 500 / 受困货物 0"
-
-[node name="ModuleRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="ModuleLabel" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/ModuleRow"]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "模块"
-
-[node name="ModuleValue" type="Label" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList/ModuleRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-text = "槽位 A 空置 / 槽位 B 货舱模块已安装"
 
 [node name="HullRow" type="HBoxContainer" parent="HubCanvas/HubRoot/Deck/DeckMargin/DeckStack/StatusAndActions/StatusList"]
 layout_mode = 2

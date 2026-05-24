@@ -33,14 +33,12 @@ public partial class HubRuntime : Node2D
 	private ColorRect? hubShipExitMarker;
 	private ColorRect? hubHelmMarker;
 	private ColorRect? hubStorageMarker;
-	private ColorRect? hubEngineMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
 	private ColorRect? explorationRouteProgressFill;
 	private ColorRect? explorationThreatZone;
 	private ColorRect? explorationSearchPulseFill;
 	private ColorRect? explorationReturnPrepFill;
-	private ColorRect? extractionCargoProp;
 	private ColorRect? hubCargoLoadFill;
 	private ColorRect? hubEngineWearOverlay;
 	private Label? hubCabinStatusLabel;
@@ -470,12 +468,6 @@ public partial class HubRuntime : Node2D
 		{
 			SetFooter("仓储已检查：基础补给、信标水晶和修理包状态已同步。");
 			SetSaveStatus("交互完成：仓储状态可见");
-			UpdateOnboardingHint();
-		}
-		else if (nearestInteraction == "hub_engine")
-		{
-			SetFooter("轮机间已检查：引擎、模块台和返航推进器状态可见。");
-			SetSaveStatus("交互完成：轮机间状态可见");
 			UpdateOnboardingHint();
 		}
 		else if (nearestInteraction == "exploration_search")
@@ -1132,7 +1124,6 @@ public partial class HubRuntime : Node2D
 		hubShipExitMarker = AddWorldMarker("ShipExitInteractPoint", new Vector2(224, 584), new Color(0.45f, 0.52f, 0.62f), "下船 E");
 		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
-		hubEngineMarker = AddWorldMarker("EngineInteractPoint", new Vector2(844, 594), new Color(0.45f, 0.48f, 0.70f), "轮机 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
 		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(204, 594), new Color(0.64f, 0.39f, 0.28f), "驾驶返航 E");
 
@@ -1242,8 +1233,6 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(hubInteriorSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
 		AddSceneRect(hubInteriorSceneItems, "StorageCrateBand", new Vector2(536, 564), new Vector2(100, 10), new Color(0.68f, 0.59f, 0.39f, 0.95f));
 		AddSceneLabel(hubInteriorSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
-		AddSceneRect(hubInteriorSceneItems, "ModuleBenchProp", new Vector2(792, 548), new Vector2(156, 56), new Color(0.26f, 0.30f, 0.38f, 0.92f));
-		AddSceneLabel(hubInteriorSceneItems, "ModuleBenchLabel", new Vector2(806, 552), new Vector2(128, 22), "模块检修台");
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorExitDoor", new Vector2(218, 552), new Vector2(42, 48), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
 	}
@@ -1342,7 +1331,6 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(explorationSceneItems, "ReturnBeaconBeam", new Vector2(1032, 478), new Vector2(12, 52), new Color(0.86f, 0.66f, 0.40f, 0.72f));
 		AddSceneRect(explorationSceneItems, "ReturnBeaconCore", new Vector2(1024, 540), new Vector2(28, 52), new Color(0.78f, 0.62f, 0.42f, 0.98f));
 		AddSceneLabel(explorationSceneItems, "ReturnBeaconLabel", new Vector2(990, 532), new Vector2(96, 22), "返航信标");
-		extractionCargoProp = AddSceneRect(explorationSceneItems, "ExtractionCargoProp", new Vector2(930, 602), new Vector2(110, 24), new Color(0.68f, 0.58f, 0.34f, 0.94f));
 		explorationExtractionSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationExtractionSemanticLabel", new Vector2(924, 508), new Vector2(246, 24), "撤离：可随时返航");
 	}
 
@@ -1601,12 +1589,6 @@ public partial class HubRuntime : Node2D
 			explorationThreatSemanticLabel.Visible = currentScreen == "exploration";
 		}
 
-		if (extractionCargoProp is not null)
-		{
-			extractionCargoProp.Color = step >= 3
-				? new Color(0.84f, 0.70f, 0.32f, 0.98f)
-				: new Color(0.68f, 0.58f, 0.34f, 0.94f);
-		}
 		if (explorationExtractionSemanticLabel is not null)
 		{
 			explorationExtractionSemanticLabel.Text = step >= 3
@@ -1763,7 +1745,6 @@ public partial class HubRuntime : Node2D
 		if (hubShipExitMarker is not null) hubShipExitMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub" && hubSpace == "interior";
-		if (hubEngineMarker is not null) hubEngineMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
 		if (explorationReturnMarker is not null) explorationReturnMarker.Visible = mode == "exploration";
 		if (playerMarker is not null)
@@ -1814,8 +1795,7 @@ public partial class HubRuntime : Node2D
 				var exitDistance = DistanceToMarker(hubShipExitMarker);
 				var helmDistance = DistanceToMarker(hubHelmMarker);
 				var storageDistance = DistanceToMarker(hubStorageMarker);
-				var engineDistance = DistanceToMarker(hubEngineMarker);
-				var nearestHubDistance = Math.Min(Math.Min(exitDistance, helmDistance), Math.Min(storageDistance, engineDistance));
+				var nearestHubDistance = Math.Min(exitDistance, Math.Min(helmDistance, storageDistance));
 				if (exitDistance <= InteractionRadius && exitDistance <= nearestHubDistance)
 				{
 					nearestInteraction = "hub_exit_ship";
@@ -1830,11 +1810,6 @@ public partial class HubRuntime : Node2D
 				{
 					nearestInteraction = "hub_storage";
 					prompt = "按 E 检查货舱：确认资源与货物状态。";
-				}
-				else if (engineDistance <= InteractionRadius)
-				{
-					nearestInteraction = "hub_engine";
-					prompt = "按 E 检查轮机间：确认模块和返航推进器。";
 				}
 			}
 		}
