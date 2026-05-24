@@ -8,6 +8,12 @@
 
 实体单位和固定单位必须分开存放。共同模板保留在本目录，具体单位规格进入对应子目录。
 
+## 模板与示例边界
+
+`unit-spec-template.md` 是本目录唯一可复制的新单位规格模板。新增单位必须从这个模板开始填写，不要复制 `*-example.md` 文件。
+
+`dynamic-entities/physics-ball-example.md` 和 `fixed-scene-objects/tree-regenerating-example.md` 只用于说明旧示例结构和设计语义，不能作为进入实现的规格模板，也不能替代创建适合性人工审查。若示例中的单位要变成真实内容，必须重新从 `unit-spec-template.md` 建立规格，并补齐独立实现 / 资产边界、删除旧节点确认、QA 证据和体验验收字段。
+
 | 子目录 | 放什么 | 示例 |
 | --- | --- | --- |
 | `fixed-scene-objects/` | 默认不自行移动、位置由场景摆放决定，但可能有交互、状态、破坏、再生、开关、遮挡变化的单位 | 树、门、坡道、残骸、摊位、灯塔、资源矿点 |
@@ -23,8 +29,8 @@
 | `fixed-scene-objects/docked-airship-entity.md` | 停靠飞船实体 / 船体与气囊轮廓 | 规格草案 |
 | `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，创建适合性已通过，待实现证据 |
 | `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，创建适合性已通过，待实现证据 |
-| `dynamic-entities/physics-ball-example.md` | 示例动态实体 | 示例 |
-| `fixed-scene-objects/tree-regenerating-example.md` | 示例固定单位 | 示例 |
+| `dynamic-entities/physics-ball-example.md` | 非模板参考文件 | 示例，仅参考 |
+| `fixed-scene-objects/tree-regenerating-example.md` | 非模板参考文件 | 示例，仅参考 |
 
 ## 这个目录解决什么
 

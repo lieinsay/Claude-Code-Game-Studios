@@ -6,6 +6,21 @@
 > **负责人**: Scene Composition System (#19) + Scene Physics Unit System (#20)
 > **最后更新**: 2026-05-24
 
+## 0. 文件头
+
+| 字段 | 内容 |
+| --- | --- |
+| Scene ID | `mist_lamp_wreck_scene` |
+| 玩家可见场景名 | 雾灯残骸浮岛 |
+| 所属循环节点 | Exploration |
+| 当前生命周期状态 | `spec_drafted` |
+| 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md` |
+| 来源 story 或设计说明 | `N/A true` |
+| 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
+| 创建审查记录 | 本文件“创建适合性人工审查”和“创建适合性记录” |
+| 最近更新日期 | 2026-05-24 |
+| 负责人 | Codex / user / QA |
+
 ## 创建适合性人工审查
 
 | 字段 | 内容 |
@@ -23,6 +38,18 @@
 - 不复用已有场景 / UI / 单位的原因: 探索 HUD 不能替代残骸、路径、搜索锚点、返航船等世界对象。
 - 主要范围风险: 不得把岛屿本体设计成危险场或战斗场；航行风险应归属 `voyage_open_world_scene`。
 - 必须写回规格的调整: 移除“岛上威胁区”作为场景本体目标；返航从本场景起飞并经航行过程回到初始岛屿。
+
+## 独立实现 / 资产边界
+
+| 字段 | 内容 |
+| --- | --- |
+| 独立 Godot 场景 | `pending`；当前灰盒由 `src/scenes/HubRuntime.*` 装配，不能作为新增永久探索岛边界。 |
+| 配套脚本 / runtime | 当前为 `src/scenes/HubRuntime.cs`；后续独立化需拆出 `mist_lamp_wreck_scene` 专属运行时或数据驱动入口。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `exploration_mist_island` 原型与实例。 |
+| 资产组 | 雾灯残骸岛体、残骸、桅杆、线索、返航船、雾 / 水边界。 |
+| 装配入口 | Exploration / Hub shell 只负责挂载或切换，不拥有场景本体规则。 |
+| 禁止混入位置 | 不得把新增探索岛规则继续散落进旧 `HubRuntime.tscn`、`HubRuntime.cs` 或 UI 容器。 |
+| 删除旧节点要求 | 若替换旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
 ## 1. 场景身份
 
@@ -128,7 +155,27 @@
 | Codex 审核 | 实现审查 | 追踪性 / 数据链路 PASS |
 | 用户可读性审核 | `production/playtests/scene-readability-mist-lamp-wreck.md` 与本文件用户审核清单 | pending |
 
-## 12. 用户审核清单
+## 13. 创建适合性记录
+
+本文件顶部“创建适合性人工审查”是权威记录；本节用于对齐当前场景模板。
+
+- 审查问题: 是否应该创建 `mist_lamp_wreck_scene`，而不是用探索 HUD 或通用雾场替代。
+- 用户结论: `APPROVED_WITH_NOTES`
+- 用户要求: 岛屿本体没有威胁；危险发生在航行过程；返航必须表现为起飞并飞回初始岛屿。
+- 删除旧 Godot 节点确认: `N/A true`
+- 进入实现条件: 创建适合性已通过；独立实现 / 资产边界、QA 证据和体验验收路径已记录。
+
+## 14. 体验验收与后续修改
+
+| 字段 | 内容 |
+| --- | --- |
+| 体验验收结论 | `PENDING` |
+| 创建适合性结论 | `APPROVED_WITH_NOTES` |
+| 保持可修改状态 | `true` |
+| 定向修改入口 | `directed-content-modification` |
+| 用户备注 / 后续定向修改需求 | None |
+
+体验验收清单:
 
 用户审核只判断玩家体验和设计方向，不需要逐项审查技术实现。
 
@@ -140,13 +187,9 @@
 - [ ] UI/HUD 是否只是辅助，没有替代残骸场景本体。
 - [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
 
-用户审核结论: `PENDING`
+用户备注 / 后续定向修改需求: None
 
-用户备注:
-
-- 待用户填写。
-
-## 13. 就绪检查清单
+## 15. 就绪检查清单
 
 - [x] 场景目的、循环角色和情绪目标明确。
 - [x] 进入、离开、失败和返回路径明确。

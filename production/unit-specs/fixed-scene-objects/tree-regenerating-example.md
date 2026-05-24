@@ -1,5 +1,9 @@
 # 可砍伐再生树单位规格示例
 
+> 本文件是非模板参考文件，只说明一种旧示例写法和设计语义。
+> 新建真实单位规格时，不要复制本文件；必须复制 `production/unit-specs/unit-spec-template.md` 并完整填写。
+> 若本示例要转为真实可实现单位，必须先补齐创建适合性记录、独立实现 / 资产边界、删除旧节点确认、QA 证据和体验验收字段。
+
 > **Unit ID**: `scene_unit.prototype.example_tree_regenerating`
 > **单位名称**: 可砍伐再生树
 > **单位分类**: `fixed_scene_object`
