@@ -70,7 +70,6 @@ bool test_gate_checks_every_readiness_dimension()
 		"creation_review_passed",
 		"independent_boundary_ready",
 		"codex_review_passed",
-		"user_review_passed",
 	];
 	string[] blockerLines =
 	[
@@ -85,13 +84,12 @@ bool test_gate_checks_every_readiness_dimension()
 		"人工适合性审查缺失",
 		"场景本体只散落在旧 Godot 节点",
 		"任一 Codex blocker 未解决",
-		"用户审核缺失",
 	];
 
 	return dimensions.All(gate.Contains)
 		&& blockerLines.All(gate.Contains)
 		&& gate.Contains("Codex 对目的、空间、行为、状态、表现、技术、QA 线无 blocker", StringComparison.Ordinal)
-		&& gate.Contains("用户可读性审核无 blocker", StringComparison.Ordinal);
+		&& gate.Contains("实现后反馈不是二次审核门", StringComparison.Ordinal);
 }
 
 bool test_any_false_dimension_blocks_completion()
@@ -101,7 +99,6 @@ bool test_any_false_dimension_blocks_completion()
 		&& gate.Contains("creation_review_passed")
 		&& gate.Contains("AND independent_boundary_ready")
 		&& gate.Contains("AND scene_physics_ready")
-		&& gate.Contains("AND user_review_passed")
 		&& registry.Contains("tracked-gap")
 		&& registry.Contains("BLOCKED_FOR_RELEASE");
 }

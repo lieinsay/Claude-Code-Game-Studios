@@ -1,28 +1,30 @@
-Console.WriteLine("=== Epic #19 Story 004: User Readability Review and Release Gate Handoff ===");
+Console.WriteLine("=== Epic #19 Story 004: Post-Implementation Feedback Routing ===");
 
 var failed = 0;
 var total = 0;
 
 var repoRoot = FindRepoRoot();
-var story = Read("production/epics/scene-composition-system/story-004-user-readability-release-gate.md");
 var checklist = Read("production/playtests/scene-composition-user-readability-checklist.md");
 var handoff = Read("production/scene-specs/scene-release-gate-handoff.md");
 var gate = Read("production/scene-specs/scene-completeness-gate.md");
 var registry = Read("production/scene-specs/scene-coverage-registry.md");
+var sceneTemplate = Read("production/scene-specs/scene-spec-template.md");
+var uiTemplate = Read("production/ui-specs/ui-spec-template.md");
+var unitTemplate = Read("production/unit-specs/unit-spec-template.md");
 
-Run("AC-1: user review can block even after Codex review passes", test_user_review_can_block_after_codex_pass);
-Run("AC-2: blocked Codex or user review prevents release gate unless waived", test_blocked_verdict_prevents_release_handoff);
-Run("AC-3: human QA questions force concrete readability answers", test_readability_questions_are_concrete);
-Run("AC-4: missing user demands are written back before approval", test_missing_demands_write_back_to_spec);
-Run("Release snapshot: current scenes remain blocked until user review or waiver", test_current_scene_snapshot_blocks_release);
+Run("AC-1: creation review remains the only human gate", test_creation_review_is_only_human_gate);
+Run("AC-2: post-implementation feedback routes to directed modification", test_feedback_routes_to_directed_modification);
+Run("AC-3: release handoff no longer waits for user verdict", test_release_handoff_no_user_verdict);
+Run("AC-4: templates do not contain second-review verdict fields", test_templates_drop_second_review_verdicts);
+Run("Release snapshot: current scenes are blocked by evidence, not second review", test_current_scene_snapshot_blocks_on_evidence);
 
 if (failed > 0)
 {
-	Console.Error.WriteLine($"User readability release gate validation failed: {failed}/{total} checks failed.");
+	Console.Error.WriteLine($"Post-implementation feedback routing validation failed: {failed}/{total} checks failed.");
 	return 1;
 }
 
-Console.WriteLine($"User readability release gate validation passed: {total}/{total} checks passed.");
+Console.WriteLine($"Post-implementation feedback routing validation passed: {total}/{total} checks passed.");
 return 0;
 
 void Run(string label, Func<bool> test)
@@ -47,80 +49,46 @@ void Run(string label, Func<bool> test)
 	Console.Error.WriteLine($"[FAIL] {label}");
 }
 
-bool test_user_review_can_block_after_codex_pass()
+bool test_creation_review_is_only_human_gate()
 {
-	string[] blockers =
-	[
-		"幻想缺失",
-		"需求缺失",
-		"身份不清",
-		"玩家流程不理想",
-	];
-
-	return ContainsText(checklist, "用户 review 仍然可以阻塞该场景")
-		&& ContainsText(handoff, "`Codex PASS` 是必要条件，但不足以单独通过")
-		&& blockers.All(term => ContainsText(handoff, term))
-		&& ContainsText(gate, "Codex 审核是必要条件，但不足以单独通过")
-		&& ContainsText(story, "missing fantasy, missing requirements, unclear identity, or undesirable player flow");
+	return ContainsText(gate, "创建适合性审查回答“是否应该创建这个场景”，是唯一人工前置硬门")
+		&& ContainsText(sceneTemplate, "创建适合性是进入规格和实现的唯一人工前置硬门")
+		&& ContainsText(uiTemplate, "创建适合性是进入规格和实现的唯一人工前置硬门")
+		&& ContainsText(unitTemplate, "创建适合性是进入规格和实现的唯一人工前置硬门");
 }
 
-bool test_blocked_verdict_prevents_release_handoff()
+bool test_feedback_routes_to_directed_modification()
 {
-	string[] waiverFields =
-	[
-		"waiver owner",
-		"waiver date",
-		"被豁免的具体 blocker",
-		"接受的玩家可见风险",
-		"fallback 证据",
-		"follow-up owner",
-	];
+	string[] requiredDocs = [gate, handoff, registry, sceneTemplate, uiTemplate, unitTemplate];
 
-	return ContainsText(checklist, "`BLOCKED` 会阻止 release gate handoff")
-		&& ContainsText(handoff, "release_handoff_ready =")
-		&& ContainsText(handoff, "user_review_passed OR user_waiver_recorded")
-		&& ContainsText(handoff, "no_unresolved_p0_scene_blockers")
-		&& waiverFields.All(term => ContainsText(handoff, term))
-		&& ContainsText(gate, "直到 blocker 解决或用户明确 waiver");
+	return requiredDocs.All(doc => ContainsText(doc, "directed-content-modification"))
+		&& ContainsText(gate, "实现后反馈不是二次审核门")
+		&& ContainsText(handoff, "用户实现后反馈只记录为后续修改需求")
+		&& ContainsText(registry, "实现后反馈不进入登记门禁");
 }
 
-bool test_readability_questions_are_concrete()
+bool test_release_handoff_no_user_verdict()
 {
-	string[] checklistQuestions =
-	[
-		"我在哪里？",
-		"我在这里能做什么？",
-		"我如何离开或继续？",
-		"什么发生了变化？",
-		"UI/HUD 是辅助而不是主导吗？",
-		"场景是否符合预期幻想？",
-	];
-	string[] gateQuestions =
-	[
-		"我在哪里？",
-		"我能在这里做什么？",
-		"我如何离开或继续？",
-		"发生了什么变化？",
-		"UI/HUD 是否只是辅助，而不是主导？",
-		"场景是否符合预期幻想？",
-	];
-
-	return checklistQuestions.All(term => ContainsText(checklist, term))
-		&& gateQuestions.All(term => ContainsText(gate, term))
-		&& ContainsText(checklist, "没有开发者解释")
-		&& ContainsText(checklist, "PASS_WITH_CONDITIONS")
-		&& ContainsText(checklist, "BLOCKED");
+	return ContainsText(handoff, "release_handoff_ready =")
+		&& !ContainsText(handoff, "user_review_passed")
+		&& !ContainsText(handoff, "用户可读性 verdict")
+		&& !ContainsText(handoff, "用户审核状态")
+		&& ContainsText(handoff, "后续反馈入口");
 }
 
-bool test_missing_demands_write_back_to_spec()
+bool test_templates_drop_second_review_verdicts()
 {
-	return ContainsText(checklist, "新增诉求都被记录")
-		&& ContainsText(handoff, "新需求需要写回场景规格")
-		&& ContainsText(story, "any missing demand is added here before status can move")
-		&& ContainsText(handoff, "场景规格或等价来源说明");
+	string joinedTemplates = string.Join("\n", sceneTemplate, uiTemplate, unitTemplate);
+
+	return !ContainsText(joinedTemplates, "体验验收结论")
+		&& !ContainsText(joinedTemplates, "用户可读性审核")
+		&& !ContainsText(joinedTemplates, "用户体验验收")
+		&& !ContainsText(joinedTemplates, "用户审核")
+		&& !ContainsText(joinedTemplates, "PASS_WITH_NOTES")
+		&& ContainsText(joinedTemplates, "后续反馈");
 }
 
-bool test_current_scene_snapshot_blocks_release()
+bool test_current_scene_snapshot_blocks_on_evidence()
 {
 	string[] scenes =
 	[
@@ -131,11 +99,11 @@ bool test_current_scene_snapshot_blocks_release()
 		"`ochre_island_scene`",
 	];
 
-	return scenes.All(term => ContainsText(checklist, term))
-		&& scenes.All(term => ContainsText(handoff, term))
+	return scenes.All(term => ContainsText(handoff, term))
 		&& ContainsText(handoff, "Scene Composition #19: `BLOCKED_FOR_RELEASE`")
-		&& ContainsText(registry, "`BLOCKED_FOR_RELEASE`，直到用户可读性审核被记录或明确豁免")
-		&& ContainsText(handoff, "尚无 #20 合同、用户可读性 verdict");
+		&& ContainsText(registry, "直到自动证据、截图证据、#20 合同、P0 缺口处理")
+		&& ContainsText(handoff, "尚无 #20 合同、作者化单位和运行时证据")
+		&& !ContainsText(registry, "直到用户可读性审核");
 }
 
 string Read(string relativePath)

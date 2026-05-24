@@ -139,7 +139,7 @@
 | 输入 / 焦点测试 | `<test path or command>` | pending / pass / fail / N/A true |
 | 显示优先级测试 | `<test path or command>` | pending / pass / fail / N/A true |
 | 截图 / 视觉证明 | `<evidence path>` | pending / pass / fail / N/A true |
-| 用户体验验收 | `<checklist or note>` | pending / pass / blocked |
+| 后续反馈记录 | `<notes or task link>` / `N/A true` | pending / recorded / N/A true |
 
 ## 12. 创建适合性记录
 
@@ -159,24 +159,21 @@
 - 主要范围风险: `<risk>`
 - 必须写回规格的调整: `<required changes>` / None
 
-## 13. 体验验收与后续修改
+## 13. 后续反馈与定向修改
 
-创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核才能进入实现；但实现后仍需要用户体验验收，且验收通过后内容仍可继续定向修改。
+创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核，也不要求实现后再做一次人工判定；实现后若用户提出反馈，只作为后续定向修改需求记录。
 
 | 字段 | 内容 |
 | --- | --- |
-| 体验验收结论 | PENDING / PASS / PASS_WITH_NOTES / BLOCKED |
 | 创建适合性结论 | PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED |
-| 用户备注 / 后续定向修改需求 | `<notes>` / None |
+| 保持可修改状态 | `true` |
+| 定向修改入口 | `directed-content-modification` |
+| 用户反馈 / 后续定向修改需求 | `<notes>` / None |
 
-体验验收清单:
+后续反馈记录规则:
 
 - [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
 - [ ] 人工备注已写回本规格、story 或后续任务。
 - [ ] 独立实现 / 资产边界已明确，不能只混入旧 UI 容器、大脚本或临时节点。
-- [ ] 这个 UI 是否真的需要常驻或弹出。
-- [ ] 打开方式是否符合直觉：自动、绑定世界锚点、快捷键或系统事件。
-- [ ] 显示优先级是否合理，不会抢走更重要的信息。
-- [ ] UI 是否只做解释、选择、确认、反馈，没有替代世界对象或场景本体。
-- [ ] 关闭、取消、失败和禁用反馈是否清楚。
-- [ ] 不看这个 UI 时，核心场景身份和世界锚点仍然成立。
+- [ ] 实现后的反馈不得阻塞本规格既有一审结论。
+- [ ] 新需求或调整通过 `directed-content-modification` 修改对应文档和实现。

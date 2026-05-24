@@ -11,7 +11,7 @@
 2. 将所有 `<...>` 占位符替换为真实内容。
 3. 不适用字段写 `N/A true`，并说明原因。
 4. 创建适合性结论必须为 `APPROVED` 或 `APPROVED_WITH_NOTES`，且备注已写回，才能进入 `implementation_ready`。
-5. 规格二次人工审核不是实现硬门；实现后仍需要体验验收。
+5. 规格二次人工审核不是实现硬门；实现后反馈只记录为后续定向修改需求。
 
 ## 0. 文件头
 
@@ -154,9 +154,9 @@
 | 自动 smoke | `<command or test path>` | pending / pass / fail / N/A true |
 | 截图 / 视觉证明 | `<evidence path>` | pending / pass / fail / N/A true |
 | Codex 审核 | `<review path or note>` | pending / pass / blocked |
-| 用户可读性审核 | `<playtest/checklist path>` | pending / pass / blocked |
+| 后续反馈记录 | `<notes or task link>` / `N/A true` | pending / recorded / N/A true |
 
-人工 QA 必须回答:
+实现后自检问题:
 
 - 我在哪里？
 - 不看开发说明，我能在这里做什么？
@@ -182,28 +182,25 @@
 - 主要范围风险: `<risk>`
 - 必须写回规格的调整: `<required changes>` / None
 
-## 14. 体验验收与后续修改
+## 14. 后续反馈与定向修改
 
-创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核才能进入实现；但实现后仍需要用户体验验收，且验收通过后内容仍可继续定向修改。
+创建适合性是进入规格和实现的唯一人工前置硬门。规格不再要求二次人工审核，也不要求实现后再做一次人工判定；实现后若用户提出反馈，只作为后续定向修改需求记录。
 
 | 字段 | 内容 |
 | --- | --- |
-| 体验验收结论 | PENDING / PASS / PASS_WITH_NOTES / BLOCKED |
 | 创建适合性结论 | PENDING / APPROVED / APPROVED_WITH_NOTES / REVISE / REJECTED |
-| 用户备注 / 后续定向修改需求 | `<notes>` / None |
+| 保持可修改状态 | `true` |
+| 定向修改入口 | `directed-content-modification` |
+| 用户反馈 / 后续定向修改需求 | `<notes>` / None |
 
-体验验收清单:
+后续反馈记录规则:
 
 - [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
 - [ ] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
 - [ ] 人工备注已写回本规格、story 或后续任务。
 - [ ] 独立实现 / 资产边界已明确，不能只散落在旧 Godot 节点、大脚本或临时灰盒中。
-- [ ] 场景身份符合预期幻想与情绪。
-- [ ] 玩家 3 秒内能看出自己在哪里。
-- [ ] 关键场景单位、边界、地标和交互锚点是合理的世界对象。
-- [ ] 不看 UI 时，玩家仍能大致知道能做什么、如何继续或离开。
-- [ ] UI/HUD 只是辅助，没有替代场景本体。
-- [ ] 需要调整的单位分类、摆放、节奏或缺失需求已记录回本规格。
+- [ ] 实现后的反馈不得阻塞本规格既有一审结论。
+- [ ] 新需求或调整通过 `directed-content-modification` 修改对应文档和实现。
 
 ## 15. 就绪检查清单
 
@@ -218,4 +215,4 @@
 - [ ] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [ ] 运行时 / 状态合同没有创建新的玩法权威。
 - [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
-- [ ] 自动证据、截图证据、Codex 审核和用户审核路径已命名。
+- [ ] 自动证据、截图证据和规格一致性检查路径已命名。

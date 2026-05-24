@@ -96,12 +96,12 @@
 
 ## 8. 场景使用规则
 
-| 场景 | 使用方式 | 实例要求 | 是否需要用户审核 |
+| 场景 | 使用方式 | 实例要求 | 后续反馈记录 |
 | --- | --- | --- | --- |
-| `initial_island_scene` / `hub_island_dock` | 玩家出生、移动、登船交互 | 必须有合法出生点和登船锚点 | 不再审核“是否需要玩家”；只审核规格是否忠实记录范围 |
-| `ship_interior_layered` / `hub_ship_interior` | 船内移动、航图台 / 出口交互 | 必须有合法恢复点和交互锚点 | 不再审核“是否需要玩家”；只审核规格是否忠实记录范围 |
-| `mist_lamp_wreck_scene` / `exploration_mist_island` | 搜索岛移动与返航交互 | 必须有合法出生点和返航锚点 | 不再审核“是否需要玩家”；只审核规格是否忠实记录范围 |
-| `ochre_island_scene` | 资源岛移动与采集交互 | 后续新增实例前需对应场景规格、独立边界和运行证据 | 不再审核“是否需要玩家”；体验验收只确认规格是否忠实记录范围 |
+| `initial_island_scene` / `hub_island_dock` | 玩家出生、移动、登船交互 | 必须有合法出生点和登船锚点 | `directed-content-modification` |
+| `ship_interior_layered` / `hub_ship_interior` | 船内移动、航图台 / 出口交互 | 必须有合法恢复点和交互锚点 | `directed-content-modification` |
+| `mist_lamp_wreck_scene` / `exploration_mist_island` | 搜索岛移动与返航交互 | 必须有合法出生点和返航锚点 | `directed-content-modification` |
+| `ochre_island_scene` | 资源岛移动与采集交互 | 后续新增实例前需对应场景规格、独立边界和运行证据 | `directed-content-modification` |
 
 ## 9. 作者化数据要求
 
@@ -125,7 +125,7 @@
 | 截图 / 视觉证明 | 玩家实体在目标场景内可见 | pending |
 | 数据 / 规格复核 | 实现 story 中命名复核证据 | pending |
 
-体验验收检查项:
+实现范围记录:
 
 - [ ] 本轮只做移动、交互触发、场景切换恢复。
 - [ ] 移动动画、交互动画、战斗功能是后续范围，不在本轮实现。
@@ -137,15 +137,14 @@
 - 用户结论: `APPROVED_WITH_NOTES`
 - 用户要求: 本轮只覆盖移动、交互触发和场景切换恢复。
 - 删除旧 Godot 节点确认: `N/A true`
-- 进入实现条件: 创建适合性已通过；独立实现 / 资产边界、QA 证据和体验验收路径已记录。
+- 进入实现条件: 创建适合性已通过；独立实现 / 资产边界和 QA 证据路径已记录。
 
-## 13. 体验验收与后续修改
+## 13. 后续反馈与定向修改
 
-- 体验验收结论: `PENDING`
 - 保持可修改状态: `true`
 - 定向修改入口: `directed-content-modification`
 - 后续修改目标: 移动动画、交互动画、战斗能力或角色美术需要另行审批。
-- 用户备注: None
+- 用户反馈: None
 
 ## 14. 就绪检查清单
 

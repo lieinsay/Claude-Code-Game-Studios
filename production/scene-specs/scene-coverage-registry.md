@@ -25,16 +25,16 @@
 | `template-ready` | 可复用模板已存在；具体场景规格仍需起草。 |
 | `tracked-gap` | 场景已知且需要，但尚无完整可进入场景规格。 |
 | `exempt-no-physical-units` | 场景没有玩法相关物理单位，并明确说明 #20 不适用。 |
-| `spec_drafted` | 独立场景规格已起草；仍可能需要 Codex 审核、用户审核、运行时证据或截图证据。 |
+| `spec_drafted` | 独立场景规格已起草；仍可能需要 Codex 规格一致性检查、运行时证据或截图证据。 |
 
 ## 当前可进入场景覆盖
 
 | Scene ID | 玩家可见场景 | 当前进入来源 | 场景规格状态 | #20 物理输入 | 当前证据 / 来源 | 必要下一步 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `initial_island_scene` | 初始岛屿 | 新游戏开始 / 返回原点 | `spec_drafted` | 运行时合同位于 `hub_island_dock`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/initial-island-scene.md` | `production/scene-specs/initial-island-scene.md`; `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`; `production/qa/evidence/scene-unit-placement-initial-island-evidence.md`; `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`; `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 等待用户按场景规格中的审核清单确认；之后再进入 release handoff。 |
-| `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `spec_drafted` | 运行时合同位于 `hub_ship_interior`；第一条原型 / 摆放实例作者化切片已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/ship-interior-layered-scene.md` | `design/gdd/airship-hub.md`; `production/scene-specs/ship-interior-layered-scene.md`; `production/qa/evidence/scene-unit-placement-taxonomy-evidence.md`; `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md` | 等待用户按场景规格中的审核清单确认；之后再进入 release handoff。 |
-| `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `spec_drafted` | implementation readiness 前需要 #20 合同：伪 3D 相机对齐飞行、航线边界、风险物、云 / 雾特殊表面、恢复规则 | `production/scene-specs/voyage-open-world-scene.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 用户先审航行场景方向；通过后再起草 #20 合同和运行时证据计划。 |
-| `mist_lamp_wreck_scene` | 雾灯残骸浮岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | 运行时合同位于 `exploration_mist_island`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/mist-lamp-wreck-scene.md` | `design/gdd/exploration-scavenge-scenario.md`; `production/scene-specs/mist-lamp-wreck-scene.md`; `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 等待用户按场景规格中的审核清单确认；之后再进入 release handoff。 |
+| `initial_island_scene` | 初始岛屿 | 新游戏开始 / 返回原点 | `spec_drafted` | 运行时合同位于 `hub_island_dock`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/initial-island-scene.md` | `production/scene-specs/initial-island-scene.md`; `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`; `production/qa/evidence/scene-unit-placement-initial-island-evidence.md`; `production/qa/evidence/polish-015-island-ship-interior-and-search-gameplay-evidence.md`; `production/qa/evidence/scene-physics-runtime-contract-shape-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 补 release handoff、截图刷新和规格一致性检查。 |
+| `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `spec_drafted` | 运行时合同位于 `hub_ship_interior`；第一条原型 / 摆放实例作者化切片已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/ship-interior-layered-scene.md` | `design/gdd/airship-hub.md`; `production/scene-specs/ship-interior-layered-scene.md`; `production/qa/evidence/scene-unit-placement-taxonomy-evidence.md`; `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md` | 补 release handoff、截图刷新和规格一致性检查。 |
+| `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `spec_drafted` | implementation readiness 前需要 #20 合同：伪 3D 相机对齐飞行、航线边界、风险物、云 / 雾特殊表面、恢复规则 | `production/scene-specs/voyage-open-world-scene.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 起草 #20 合同和运行时证据计划。 |
+| `mist_lamp_wreck_scene` | 雾灯残骸浮岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | 运行时合同位于 `exploration_mist_island`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/mist-lamp-wreck-scene.md` | `design/gdd/exploration-scavenge-scenario.md`; `production/scene-specs/mist-lamp-wreck-scene.md`; `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 补 release handoff、截图刷新和规格一致性检查。 |
 | `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | implementation readiness 前需要 #20 合同：小型资源岛地形、条带状铁矿、采集锚点、返航点、边界和恢复规则 | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md` | 创建适合性已通过；下一步是补 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据计划。 |
 | `old_market_edge_scene` | 旧集市边缘 | 后续市场内容候选 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 当前 demo 第二岛屿改为 `ochre_island_scene`；旧集市保留为后续市场缺口，不进入本轮 runtime 替换。 |
 | `repair_node_scene` | 世界修复 / 解锁点 | 未来修复地点入口 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为修复点会包含玩法相关物理单位 | `design/gdd/world-repair-unlock.md`; `design/gdd/scene-composition-system.md` | 在任何修复场景被视为视觉完成前起草规格；除非明确加入，否则不属于当前 demo 可读性队列。 |
@@ -71,8 +71,8 @@
 
 1. Story 002 应把这些登记状态转换为具体完整性 / 证据门禁，不重新定义 #20 物理细节。
 2. Story 003 应强化登记行和 release 证据中的 UI-vs-scene 证据拒绝规则。
-3. Story 004 应在 release readiness 前，把用户可读性审核问题和结论挂到每个当前 demo 场景：初始岛屿、船内、航行大场景、雾灯残骸、赭石岛。
+3. 实现后反馈不进入登记门禁；如用户提出修改，统一走 `directed-content-modification`。
 
 ## Release Handoff 状态
 
-Release handoff 输入位于 `production/scene-specs/scene-release-gate-handoff.md`。当前状态为 `BLOCKED_FOR_RELEASE`，直到用户可读性审核被记录或明确豁免，并且修复 / 市场追踪缺口被解决或豁免。
+Release handoff 输入位于 `production/scene-specs/scene-release-gate-handoff.md`。当前状态为 `BLOCKED_FOR_RELEASE`，直到自动证据、截图证据、#20 合同、P0 缺口处理和修复 / 市场追踪缺口被解决或豁免。
