@@ -24,7 +24,7 @@ Run("AC-17: Esc cannot reverse chart departure confirmed", Ac17ConfirmedIrrevers
 Run("AC-18: Esc cannot cancel extracting", Ac18ExtractingEscBlocked);
 Run("AC-19: S1-S12 registry contains expected types and owners", Ac19ScreenRegistry);
 Run("AC-20: S2 non-modal panel does not block movement", Ac20NonModalMovement);
-Run("AC-21: Runtime UI registry has production UI spec coverage", Ac21RuntimeUiSpecCoverage);
+Run("AC-21: Runtime UI aggregate registry is not used as production spec coverage", Ac21NoRuntimeUiAggregateRegistry);
 
 if (failed > 0)
 {
@@ -278,17 +278,17 @@ static bool Ac20NonModalMovement()
         && !ui.IsMovementInputBlocked();
 }
 
-static bool Ac21RuntimeUiSpecCoverage()
+static bool Ac21NoRuntimeUiAggregateRegistry()
 {
-    var ui = CreateUi();
     var specPath = Path.Combine(FindProjectRoot(), "production", "ui-specs", "runtime-ui-surface-registry.md");
-    if (!File.Exists(specPath))
-    {
-        return false;
-    }
+    var readmePath = Path.Combine(FindProjectRoot(), "production", "ui-specs", "README.md");
+    var readme = File.ReadAllText(readmePath);
 
-    var spec = File.ReadAllText(specPath);
-    return ui.ScreenRegistry.Keys.All(screenId => spec.Contains(screenId, StringComparison.Ordinal));
+    return !File.Exists(specPath)
+        && !readme.Contains("runtime-ui-surface-registry.md", StringComparison.Ordinal)
+        && readme.Contains("不得创建“当前运行时 UI 总表”", StringComparison.Ordinal)
+        && readme.Contains("ui-spec-template.md", StringComparison.Ordinal)
+        && readme.Contains("content-creation-review-gate.md", StringComparison.Ordinal);
 }
 
 static UIManager CreateUi()

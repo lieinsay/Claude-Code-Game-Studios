@@ -267,7 +267,7 @@ bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
 	];
 	string[] replacementEntryPoints =
 	[
-		"production/ui-specs/runtime-ui-surface-registry.md",
+		"production/ui-specs/ui-spec-template.md",
 		"production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
 		"production/unit-specs/dynamic-entities/player-controlled-entity.md",
 		"src/presentation/playable_slice_authored_content.json",
@@ -276,6 +276,7 @@ bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
 	string[] noLegacySpecFiles =
 	[
 		"production/scene-specs/godot-runtime-replacement-gate.md",
+		"production/ui-specs/runtime-ui-surface-registry.md",
 		"production/scene-specs/godot-runtime-legacy-scene-audit.md",
 		"production/ui-specs/godot-runtime-legacy-ui-surfaces.md",
 		"production/unit-specs/fixed-scene-objects/godot-runtime-legacy-greybox-units.md",

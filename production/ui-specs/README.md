@@ -70,7 +70,6 @@
 
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
-| `runtime-ui-surface-registry.md` | `src/presentation/UIManager.cs` 当前注册的 `S1`-`S12` 与诊断 UI | 已补真实规格 |
 | `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | 规格草案，创建适合性已通过，待实现证据 |
 | `ui-spec-template.md` | 新 UI 规格模板 | 模板 |
 
@@ -84,4 +83,4 @@
 | 修复面板 | `repair-anchored-modal.md` | `modal_dialog` |
 | 仓库 / 货舱整理 | `storage-anchored-panel.md` | `anchored_panel` |
 
-当前运行时已有 UI 先由 `runtime-ui-surface-registry.md` 兜底约束。后续某个面板进入详细 UX / 视觉 / 无障碍实现时，再拆成独立文件，并从总表保留追踪链接。
+不得创建“当前运行时 UI 总表”来兜底旧 UI。后续某个面板进入详细 UX / 视觉 / 无障碍实现时，必须按 `ui-spec-template.md` 起草独立规格，并由 `content-creation-review-gate.md` 记录人工适合性审查；未通过审查的旧 UI 只能删除或替换，不能补登记表变成规格。

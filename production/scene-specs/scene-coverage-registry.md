@@ -43,7 +43,7 @@
 
 门禁出现前已经存在的错误 Godot runtime 设计不能被当作规格保留，也不能补写 legacy 规格。触碰 `src/scenes/ShellUi.tscn`、`src/scenes/HubRuntime.tscn` 或 `src/scenes/HubRuntime.cs` 时，必须先识别不合规旧节点；删除前向用户确认，或用已经通过人工适合性审查且具备独立实现 / 资产边界的 scene/ui/unit 设计替换。
 
-正确替换入口只能是 `production/content-creation-review-gate.md`、`production/ui-specs/runtime-ui-surface-registry.md`、`production/unit-specs/fixed-scene-objects/docked-airship-entity.md`、`production/unit-specs/dynamic-entities/player-controlled-entity.md`、对应独立 Godot / 资产边界和 `src/presentation/playable_slice_authored_content.json`；旧 runtime 节点存在本身不能作为创建或验收证据。
+正确替换入口只能是 `production/content-creation-review-gate.md`、通过 `production/ui-specs/ui-spec-template.md` 起草的独立 UI 规格、`production/unit-specs/fixed-scene-objects/docked-airship-entity.md`、`production/unit-specs/dynamic-entities/player-controlled-entity.md`、对应独立 Godot / 资产边界和 `src/presentation/playable_slice_authored_content.json`；旧 runtime 节点存在本身不能作为创建或验收证据。
 
 ## 非场景 / UI 表面
 
