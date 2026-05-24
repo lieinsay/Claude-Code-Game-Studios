@@ -11,7 +11,7 @@
 
 **GDD**: `design/gdd/scene-composition-system.md`
 **Requirement**: `TR-scene-composition-002`
-**Requirement Text**: Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review.
+**Requirement Text**: Scene completion requires creation suitability approval where applicable, independent implementation / asset boundary, scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and implementation-feedback routing.
 
 **ADR Governing Implementation**: ADR-0001: Autoload/Scene Boot Order; ADR-0019: Desktop C# Platform Pivot
 **ADR Decision Summary**: scene evidence must fit the project scene lifecycle and be validated by desktop C# build/smoke where code is involved.
@@ -39,7 +39,7 @@
 
 ## Implementation Notes
 
-Implement the `scene_complete` evidence contract from GDD #19 as a checklist, script, smoke extension, or production evidence format. The gate must require `scene_physics_ready`, behavior, state variants, visual/audio readiness, technical contract, automated evidence, Codex review, and user review. It should not mutate domain state.
+Implement the `scene_complete` evidence contract from GDD #19 as a checklist, script, smoke extension, or production evidence format. The gate must require creation suitability approval where applicable, independent implementation / asset boundary, `scene_physics_ready`, behavior, state variants, visual/audio readiness, technical contract, automated evidence, Codex review, and implementation-feedback routing. It should not mutate domain state.
 
 ---
 
@@ -47,7 +47,7 @@ Implement the `scene_complete` evidence contract from GDD #19 as a checklist, sc
 
 - Story 001 owns scene spec template and registry.
 - Story 003 owns UI/HUD exclusion checks.
-- Story 004 owns user review workflow and release handoff.
+- Story 004 owns implementation-feedback routing and release handoff.
 
 ---
 
@@ -103,7 +103,7 @@ Implement the `scene_complete` evidence contract from GDD #19 as a checklist, sc
 **Completed**: 2026-05-24
 **Verdict**: COMPLETE
 **Criteria**: 5/5 passing.
-**Deviations**: None. The gate continues to require user readability review or explicit waiver before release readiness; automated evidence alone is not sufficient.
+**Deviations**: None. The gate requires implementation evidence, Codex consistency review, #20 contract coverage, asset gap handling, and release handoff evidence before release readiness; automated evidence alone is not sufficient.
 **Test Evidence**: Integration evidence in `production/qa/evidence/scene-composition-completeness-gate-evidence.md`; automated coverage through `tests/integration/scene-composition/SceneCompletenessGateTest.csproj`.
 **Code Review**: Full-mode closure review performed during story-done; no new code edits were made in the closure pass.
 **Notes**: Story 001 and #20 dependencies are now formally closed in the same story-done batch.

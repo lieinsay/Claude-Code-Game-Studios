@@ -7,7 +7,7 @@
 
 ## Scope
 
-Story 003 hardens the #19 boundary that scenes are world/playable spaces, not UI/HUD surfaces. It does not redesign UI layout, add final scene art, alter #20 physics internals, or implement Story 004's user readability handoff.
+Story 003 hardens the #19 boundary that scenes are world/playable spaces, not UI/HUD surfaces. It does not redesign UI layout, add final scene art, alter #20 physics internals, or implement Story 004's feedback-routing handoff.
 
 ## Created Artifacts
 
@@ -63,4 +63,4 @@ Notes: LF/CRLF warnings may appear for existing files; no whitespace errors.
 - UI/HUD/buttons/menus/labels/debug overlays remain assistive-only.
 - Current runtime smoke may use debug hooks to inspect evidence, but debug text itself cannot satisfy scene readiness.
 - Chart route UI remains UI; only the authored chart table surface can support scene evidence as a ship-interior world anchor until a standalone #20 contract exists.
-- Story 004 still owns human readability verdicts and release handoff.
+- Story 004 owns implementation-feedback routing and release handoff.

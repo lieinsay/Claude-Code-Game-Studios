@@ -3,12 +3,12 @@
 > **Layer**: Polish Gate / Production Scene Design
 > **GDD**: design/gdd/scene-composition-system.md
 > **Architecture Module**: #19 Scene Composition Gate
-> **Status**: Complete With Notes
-> **Stories**: 4 (001-003 Complete, 004 Complete With Notes)
+> **Status**: Complete
+> **Stories**: 4 (001-004 Complete)
 
 ## Overview
 
-Implement the production gate that decides whether an enterable scene is actually complete. The epic turns GDD #19 into reusable scene-spec templates, scene readiness checks, traceable asset/evidence requirements, and a dual-review workflow where automated evidence and Codex review are necessary but not sufficient without user readability review. Its central boundary is that UI text, buttons, HUD panels, and debug overlays may support a scene but cannot substitute for world/playable scene evidence.
+Implement the production gate that decides whether an enterable scene is actually complete. The epic turns GDD #19 into reusable scene-spec templates, scene readiness checks, traceable asset/evidence requirements, and a Codex consistency review workflow. Its central boundary is that UI text, buttons, HUD panels, and debug overlays may support a scene but cannot substitute for world/playable scene evidence. User feedback after a real implementation remains always modifiable through `directed-content-modification`; it is not a second release verdict.
 
 ## Governing ADRs
 
@@ -26,7 +26,7 @@ Implement the production gate that decides whether an enterable scene is actuall
 | TR-ID | Requirement | ADR Coverage |
 | --- | --- | --- |
 | TR-scene-composition-001 | Every enterable scene must provide a scene specification covering purpose, entry/exit, spatial structure, interaction anchors, state variants, assets, audio/VFX, technical contract, and QA evidence before implementation readiness | GDD #19 gate + ADR-0001 / ADR-0019 |
-| TR-scene-composition-002 | Scene completion requires scene physics readiness, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and user readability review | GDD #19 gate + GDD #20 + ADR-0012 / ADR-0016 / ADR-0017 |
+| TR-scene-composition-002 | Scene completion requires creation suitability approval where applicable, scene physics readiness, independent implementation / asset boundary, behavior readiness, state variant readiness, visual/audio readiness, technical contract readiness, automated evidence, Codex review, and implementation-feedback routing | GDD #19 gate + GDD #20 + ADR-0012 / ADR-0016 / ADR-0017 |
 | TR-scene-composition-003 | UI, HUD, buttons, menus, labels, and debug overlays cannot count as physical scene units or substitute for world/playable scene evidence | GDD #19 gate + ADR-0012 |
 
 ## Epic Scope
@@ -51,7 +51,7 @@ Implement the production gate that decides whether an enterable scene is actuall
 | 001 | [Scene Specification Template and Coverage Registry](story-001-scene-spec-template-coverage-registry.md) | Config/Data | Complete | ADR-0001 / ADR-0019 |
 | 002 | [Scene Completeness Gate and Evidence Contract](story-002-scene-completeness-gate-evidence.md) | Integration | Complete | ADR-0001 / ADR-0019 |
 | 003 | [Scene Versus UI Evidence Boundary](story-003-scene-vs-ui-evidence-boundary.md) | Integration | Complete | ADR-0012 |
-| 004 | [User Readability Review and Release Gate Handoff](story-004-user-readability-release-gate.md) | Visual/Feel | Complete With Notes | ADR-0016 / ADR-0017 |
+| 004 | [Post-Implementation Feedback Routing and Release Gate Handoff](story-004-user-readability-release-gate.md) | Visual/Feel | Complete | ADR-0016 / ADR-0017 |
 
 ## Definition of Done
 
@@ -62,9 +62,9 @@ This epic is complete when:
 - Every current scene spec either passes GDD #20's `physics_contract_complete` gate or explains why no gameplay-relevant physical units exist.
 - Scene readiness cannot pass on UI/HUD text, buttons, labels, or debug overlays alone.
 - Automated smoke evidence covers runtime mounting, scene identity, contract fields, and no stale state after transitions.
-- Human QA checklists record user readability verdicts before release-readiness claims.
+- Implemented scenes provide release evidence, Codex consistency review, and a `directed-content-modification` route for post-implementation user feedback.
 - `production/qa/evidence/` contains current scene evidence with build/test commands and remaining risk.
 
 ## Next Step
 
-All Story 001-004 closure slices are complete. Next run the user readability checklist and release packet for current release-candidate scenes; release handoff remains `BLOCKED_FOR_RELEASE` until user readability verdicts pass or explicit user waivers are recorded.
+All Story 001-004 closure slices are complete. Next continue implementation/evidence closure for approved independent scene specs; release handoff remains `BLOCKED_FOR_RELEASE` until implementation evidence, #20 contract gaps, screenshots, P0 asset gaps, and tracked waivers are resolved.

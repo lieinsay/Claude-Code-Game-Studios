@@ -44,4 +44,4 @@ This evidence covers the first scene-unit authoring slice requested after the sc
 
 ## Recommended Next Step
 
-Use this first slice as the pattern for either `initial_island_scene` or `mist_lamp_wreck_scene` only after user review confirms the ship-interior workflow is understandable and useful.
+Use this first slice as the pattern for either `initial_island_scene` or `mist_lamp_wreck_scene`; post-implementation user feedback should enter `directed-content-modification` rather than a second review gate.

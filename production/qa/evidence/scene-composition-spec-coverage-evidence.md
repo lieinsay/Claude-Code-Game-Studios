@@ -7,13 +7,13 @@
 
 ## Scope
 
-Story 001 creates the reusable #19 scene-spec structure and the current coverage registry. It does not implement the Story 002 computed completeness gate, the Story 003 UI-vs-scene enforcement layer, or the Story 004 human readability release handoff.
+Story 001 creates the reusable #19 scene-spec structure and the current coverage registry. It does not implement the Story 002 computed completeness gate, the Story 003 UI-vs-scene enforcement layer, or the Story 004 implementation-feedback release handoff.
 
 ## Created Artifacts
 
 - `production/scene-specs/scene-spec-template.md`
   - Reusable scene specification template and checklist.
-  - Requires identity, entry/exit, spatial layout, critical path, behavior, state variants, #20 Scene Physics Contract link/exemption, assets/audio, technical contract, QA evidence, Codex review, and user review.
+  - Requires identity, entry/exit, spatial layout, critical path, behavior, state variants, #20 Scene Physics Contract link/exemption, assets/audio, technical contract, QA evidence, Codex review, and implementation-feedback routing.
   - Explicitly states that UI/HUD/buttons/labels/debug overlays cannot count as scene units or physical evidence.
 - `production/scene-specs/scene-coverage-registry.md`
   - Current enterable scene coverage registry.

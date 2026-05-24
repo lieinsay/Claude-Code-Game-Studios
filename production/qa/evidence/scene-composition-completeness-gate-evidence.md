@@ -7,13 +7,13 @@
 
 ## Scope
 
-Story 002 defines and validates the #19 `scene_complete` evidence contract. It does not implement Story 003's UI/HUD exclusion enforcement beyond the current gate boundary, and it does not implement Story 004's user readability handoff workflow.
+Story 002 defines and validates the #19 `scene_complete` evidence contract. It does not implement Story 003's UI/HUD exclusion enforcement beyond the current gate boundary, and it does not implement Story 004's feedback-routing handoff workflow.
 
 ## Created Artifacts
 
 - `production/scene-specs/scene-completeness-gate.md`
   - Defines the `scene_complete` formula and required evidence dimensions.
-  - Requires purpose, scene physics, space, behavior, state, presentation, technical, QA, Codex review, and user review readiness.
+  - Requires purpose, independent implementation / asset boundary, scene physics, space, behavior, state, presentation, technical, QA, Codex review, and implementation-feedback routing.
   - Defines smoke evidence requirements for visible scene identity nodes, main viewport coverage, interaction anchors, focus isolation, core route behavior, and #20 physical contract evidence.
   - Defines asset-gate rules: every P0 current-scene asset must trace to identity, interaction, state variant, or feedback; unresolved P0 gaps block release unless explicitly waived.
   - Defines domain authority boundaries so scene evidence cannot create gameplay authority or duplicate persistent state.
@@ -61,6 +61,6 @@ Notes: Headless screenshot saves were skipped by the current display driver; run
 ## Boundary Notes
 
 - Story 002 does not mark current scenes release-ready.
-- Hub exterior, ship interior, Chart table surface, and Exploration remain blocked for release until standalone specs and user readability review are attached.
+- Hub exterior, ship interior, voyage, current destination scenes, and tracked gaps remain blocked for release until standalone specs, implementation evidence, #20 contract coverage, screenshots, Codex consistency checks, and P0 asset handling are complete.
 - Repair and market scene entries remain tracked gaps.
 - #20 Scene Physics contracts are consumed as dependency evidence and not redefined here.

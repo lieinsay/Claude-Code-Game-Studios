@@ -1,10 +1,10 @@
-# old_market_edge_scene 用户可读性验收记录
+# old_market_edge_scene 实现后反馈记录
 
-> **父清单**: [scene-composition-user-readability-checklist.md](scene-composition-user-readability-checklist.md)
-> **当前状态**: `PENDING_SCENE_SPEC`
-> **Release handoff**: `BLOCKED_FOR_RELEASE`
+> **父表**: [scene-composition-user-readability-checklist.md](scene-composition-user-readability-checklist.md)
+> **当前状态**: `tracked-gap-feedback-template`
+> **Release handoff**: `BLOCKED_FOR_RELEASE`，原因见 release handoff；本文件不产生发布判决。
 
-## 必填上下文
+## 上下文
 
 | 字段 | 填写值 |
 | --- | --- |
@@ -13,34 +13,24 @@
 | 测试的 build 或 commit |  |
 | 测试的 runtime path |  |
 | 自动化证据链接 |  |
-| Codex review verdict | PASS / PASS_WITH_CONDITIONS / BLOCKED |
-| 用户 reviewer |  |
-| Review 日期 |  |
-| 截图 / 录屏路径（如有视觉结论） |  |
+| Codex 规格一致性结果 |  |
+| 反馈提出者 |  |
+| 反馈日期 |  |
+| 截图 / 录屏路径 |  |
 
-## 可读性问题
+## 体验反馈问题
 
-Reviewer 应该在没有开发者解释的情况下回答。
+| 问题 | 期望 | 反馈 / 修改点 |
+| --- | --- | --- |
+| 我在哪里？ | 能快速读出这是旧集市边缘，而不是通用市场 UI 或空岛背景。 |  |
+| 我在这里能做什么？ | 探路、接近摊位/建筑/NPC、准备交易或返回的核心行动能从场景锚点读出。 |  |
+| 我如何离开或继续？ | 回到航行大场景、进入集市内部或返回飞船的路径可见。 |  |
+| 什么发生了变化？ | 摊位开放、NPC 活跃、货物或修复后变化能在场景中看见。 |  |
+| UI/HUD 是否只是辅助？ | 交易 UI 不替代旧集市场景身份。 |  |
+| 场景是否符合预期幻想？ | 旧集市边缘像一个可抵达、可观察、可进入交易生活的地方。 |  |
 
-| 问题 | 通过标准 | Verdict | 备注 / blocker |
-| --- | --- | --- | --- |
-| 我在哪里？ | 约 3 秒内能读出这是旧集市边缘，而不是通用市场 UI 或空岛背景。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
-| 我在这里能做什么？ | 探路、接近摊位/建筑/NPC、准备交易或返回的核心行动能从场景锚点读出。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
-| 我如何离开或继续？ | 回到航行大场景、进入集市内部或返回飞船的路径可见。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
-| 什么发生了变化？ | 摊位开放、NPC 活跃、货物或修复后变化能在场景中看见。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
-| UI/HUD 是辅助而不是主导吗？ | `hud_not_dominant = true`；交易 UI 不替代旧集市场景身份。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
-| 场景是否符合预期幻想？ | 旧集市边缘应像一个可抵达、可观察、可进入交易生活的地方。 | PASS / PASS_WITH_CONDITIONS / BLOCKED |  |
+## 定向修改记录
 
-## Verdict
-
-| 字段 | 填写值 |
-| --- | --- |
-| 用户最终 verdict | PENDING / PASS / PASS_WITH_CONDITIONS / BLOCKED / WAIVED_BY_USER |
-| Blocker / condition |  |
-| Waiver owner |  |
-| Waiver date |  |
-| 接受的风险 |  |
-| Fallback evidence |  |
-| Follow-up owner |  |
-| Follow-up date / next story |  |
-
+| 修改目标 | 文档更新 | 实现更新 | Owner | Follow-up story / commit |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |

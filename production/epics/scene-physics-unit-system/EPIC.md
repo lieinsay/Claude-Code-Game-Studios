@@ -64,4 +64,4 @@ This epic is complete when:
 
 ## Next Step
 
-Scene Physics Unit System is complete. Continue with Scene Composition story closure and user readability release review; do not claim release-ready from #20 evidence alone.
+Scene Physics Unit System is complete. Continue with Scene Composition implementation/evidence closure and release handoff; do not claim release-ready from #20 evidence alone.

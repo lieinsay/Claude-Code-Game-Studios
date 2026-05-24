@@ -1,4 +1,4 @@
-# Scene Composition User Readability Release Gate Evidence
+# Scene Composition Feedback Routing Release Gate Evidence
 
 > **Story**: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`
 > **Date**: 2026-05-24
@@ -7,15 +7,14 @@
 
 ## Scope
 
-Story 004 creates the human readability checklist and release-gate handoff packet for #19. It does not fix readability defects, produce final art/audio, replace the global release checklist, or mark current scenes release-ready.
+Story 004 creates the implementation-feedback prompt and release-gate handoff packet for #19. It does not fix feedback items, produce final art/audio, replace the global release checklist, or mark current scenes release-ready.
 
 ## Created Artifacts
 
 - `production/playtests/scene-composition-user-readability-checklist.md`
-  - Records user reviewer, build/commit, automated evidence, Codex review, screenshot/capture context, and exact verdict.
-  - Forces the reviewer to answer where they are, what they can do, how to leave/continue, what changed, whether UI/HUD dominates, and whether the scene matches the intended fantasy.
-  - Defines `PASS`, `PASS_WITH_CONDITIONS`, `BLOCKED`, and `WAIVED_BY_USER`.
-  - Requires waiver owner, date, accepted risk, fallback evidence, and follow-up owner.
+  - Records feedback context, build/commit, automated evidence, Codex consistency result, screenshot/capture context, and directed modification target.
+  - Helps the user describe where they are, what they can do, how to leave/continue, what changed, whether UI/HUD dominates, and whether the scene matches the intended fantasy.
+  - Routes concrete changes through `directed-content-modification`.
 - `production/scene-specs/scene-release-gate-handoff.md`
   - Defines `release_handoff_ready`.
   - Lists required release packet fields.
@@ -29,10 +28,10 @@ Story 004 creates the human readability checklist and release-gate handoff packe
 
 | AC | Result | Evidence |
 | --- | --- | --- |
-| User review can block after Codex review passes | PASS | Checklist and handoff state that Codex PASS is necessary but not sufficient; integration test verifies missing fantasy/requirements/identity/flow blockers. |
-| Either Codex or user BLOCKED prevents release gate unless waived | PASS | Handoff formula requires `user_review_passed OR user_waiver_recorded` and no unresolved P0 blockers; integration test verifies waiver fields. |
-| Human QA can answer concrete readability questions | PASS | Checklist requires where/what/how-leave/what-changed/UI-dominance/fantasy answers; integration test verifies all questions. |
-| Missing user demand is written back before approval | PASS | Checklist records new demand; handoff requires write-back into scene spec; integration test verifies this rule. |
+| No second human verdict gate | PASS | Checklist and handoff no longer require post-implementation `PASS` / `BLOCKED` verdicts before implementation can proceed. |
+| Codex blockers or missing evidence prevent release gate unless waived | PASS | Handoff formula requires `codex_review_passed`, no unresolved P0 blockers, and complete implementation evidence; integration test verifies waiver fields. |
+| Feedback questions remain concrete | PASS | Checklist preserves where/what/how-leave/what-changed/UI-dominance/fantasy prompts as non-gating feedback questions. |
+| Missing user demand becomes directed modification | PASS | Checklist records new demand as `directed-content-modification`; handoff requires write-back into scene spec when a change is accepted. |
 
 ## Verification
 
@@ -64,6 +63,6 @@ Notes: LF/CRLF warnings may appear for existing files; no whitespace errors.
 ## Release Status
 
 - Scene Composition #19 remains `BLOCKED_FOR_RELEASE` for release checklist purposes.
-- Hub exterior, ship interior, Chart table surface, and Exploration need standalone release packets and user readability verdicts.
+- Current demo scenes need standalone release packets, implementation evidence, #20 contract coverage, screenshots, Codex consistency checks, and P0 asset handling.
 - Repair and market remain tracked gaps requiring scene specs and #20 contracts before release review.
-- No user waiver was recorded by this story.
+- No post-implementation user verdict is required by this story.

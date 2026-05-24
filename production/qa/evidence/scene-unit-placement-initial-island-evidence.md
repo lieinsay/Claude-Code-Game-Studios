@@ -3,7 +3,7 @@
 > **日期**: 2026-05-24
 > **范围**: 初始岛屿场景 (`initial_island_scene` / runtime `hub_island_dock`)
 > **来源计划**: `.omx/plans/prd-scene-unit-placement-taxonomy.md`
-> **结果**: PASS，仍保留用户可读性和最终视觉证明风险
+> **结果**: PASS，仍保留最终视觉证明、截图和 P0 资产风险
 
 ## 变更内容
 
@@ -13,7 +13,7 @@
 - `src/presentation/playable_slice_authored_content.json` 新增初始岛屿可复用单位原型和摆放实例。
 - `HubRuntime.DebugScenePhysicsContract("hub_island_dock")` 现在从作者化原型 / 实例数据构建 `scene_unit_catalog`，不再依赖独立硬编码目录分支。
 - 集成测试和 Godot smoke 检查新增 `hub_island_dock` 作者化单位链路验证。
-- `production/scene-specs/scene-coverage-registry.md`、`scene-completeness-gate.md` 和 `scene-release-gate-handoff.md` 已把初始岛屿状态推进到待用户审核。
+- `production/scene-specs/scene-coverage-registry.md`、`scene-completeness-gate.md` 和 `scene-release-gate-handoff.md` 已把初始岛屿状态推进到待 release evidence 刷新。
 
 ## 验证命令
 
@@ -40,8 +40,8 @@
 
 - 这次迁移证明数据链路和灰盒合同，不等于最终美术、音频或截图审核已经完成。
 - Godot node path 是稳定作者化引用，但本切片仍没有逐个反查 `.tscn` 序列化节点。
-- 用户仍需要按 `production/scene-specs/initial-island-scene.md` 的审核清单确认起点岛屿是否清楚、舒服、符合“登船出发”的体验。
+- 若用户体验后提出调整，按 `directed-content-modification` 写回 `production/scene-specs/initial-island-scene.md` 并同步实现。
 
 ## 建议下一步
 
-让用户审核初始岛屿规格与实际灰盒画面；通过后再补 release handoff 截图包，或继续迁移 `voyage_open_world_scene`。
+补初始岛屿 release handoff 截图包和规格一致性检查，或继续迁移 `voyage_open_world_scene`。

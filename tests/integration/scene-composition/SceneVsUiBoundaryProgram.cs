@@ -96,7 +96,7 @@ bool test_ui_evidence_is_rejected_for_scene_proof()
 		"交互锚点",
 		"物理合同证明",
 		"视口身份",
-		"人工可读性替代",
+		"世界场景证据替代",
 	];
 	string[] runtimeRejection =
 	[
@@ -110,7 +110,7 @@ bool test_ui_evidence_is_rejected_for_scene_proof()
 		&& forbiddenUses.All(term => ContainsText(boundary, term))
 		&& runtimeRejection.All(term => ContainsText(smoke, term))
 		&& ContainsText(template, "不是 UI/HUD/按钮/标签/调试覆盖层")
-		&& ContainsText(registry, "不能满足场景单位、物理单位或可读性证据");
+		&& ContainsText(registry, "不能满足世界场景可读性或场景单位证据");
 }
 
 bool test_ui_only_evidence_fails_readiness()

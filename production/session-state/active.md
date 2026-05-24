@@ -3,21 +3,27 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done; release handoff still BLOCKED_FOR_RELEASE pending user readability verdict or waiver
+Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done; release handoff remains BLOCKED_FOR_RELEASE for implementation evidence, #20 contract gaps, screenshots, and P0 asset gaps. Post-implementation user feedback is no longer a release gate.
 <!-- /STATUS -->
 
+## Session Extract -- Scene Composition Flow Correction 2026-05-25
+- Current goal: follow the approved scene/UI/unit creation flow without a second human verdict gate.
+- Release handoff remains `BLOCKED_FOR_RELEASE` because some current scene specs still need implementation evidence, #20 contract coverage, screenshot evidence, P0 asset handling, or explicit tracked waivers. It is not waiting for post-implementation user feedback verdicts.
+- Creation suitability review is the only human front gate: the agent asks whether a scene/UI/unit should be created, the user approves or rejects, then the specification is generated and edited as needed.
+- After implementation, user feedback is always modifiable and must enter `directed-content-modification`, which updates the target scene/UI/unit document and implementation instead of producing another PASS/BLOCKED verdict.
+- Each scene/UI/unit must stay independently traceable as its own implementation, asset, or asset group. Old non-compliant Godot nodes may not be silently preserved; if deletion is needed, ask before deletion.
+- `production/playtests/scene-composition-user-readability-checklist.md` is now a non-gating feedback prompt/index, not a release-readiness judgment form.
+- Next recommended implementation path: close the smallest current evidence loop for an approved independent content item, such as `ochre_island_scene` plus `banded_iron_ore`, or refresh release packets/screenshots for already implemented current scenes.
+
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
-- Current goal: prepare and guide the manual user readability acceptance flow for `production/playtests/scene-composition-user-readability-checklist.md`.
-- Release handoff remains `BLOCKED_FOR_RELEASE`; no user `PASS`, `PASS_WITH_CONDITIONS`, or waiver verdict has been recorded in this session.
-- Checklist field gap fixed: blocker/waiver log now includes `Follow-up date / next story`, matching the release rule that conditional passes and waivers must have owners plus follow-up timing.
-- Checklist structure updated after user review: master checklist is now a template/index, with separate per-scene user readability records for `initial_island_scene`, `ship_interior_layered`, `voyage_open_world_scene`, `mist_lamp_wreck_scene`, and `old_market_edge_scene`.
+- Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.
 - User corrected the current demo scene set: initial island, layered horizontal ship interior, combined voyage open-world scene, mist-lamp wreck, and old market edge. Prior `chart_table_scene` / generic `exploration_mist_island` queue was too implementation-derived.
 - GDD update recorded: voyage open-world scene is a required pseudo-3D scene where the camera stays aligned with airship heading, the airship can turn / move forward / reverse, and motion readability comes from world-layer changes. It is now part of #19/#20 scene-gate scope, not only UI/HUD presentation.
 - Voyage design clarification: first-pass core fun is navigation judgment, with driving feel and atmosphere as support. Voyage problems include environmental hazards and ecological pressure, but first pass has no active firing; players solve encounters by avoiding, using cover, slowing down, tanking risk, or retreating.
 - Voyage pacing refined: short line to mist-lamp wreck is a 60-75s teaching voyage with 1 main problem + 1 light background issue; old-market-edge line is a 110-140s fuller voyage with 2 main problems + 1 light background issue. Failure escalates to damaged/pressure states before forced retreat/landing.
 - Voyage problem scope confirmed via user interview: first-pass demo problems are dense fog, floating wreckage, and flying-bird temporary evasion; storm edge, miscalibrated beacon, pirate interception, and rogue buoy are follow-up pool items, with active firing still out of scope.
-- Scope boundary preserved: scene readability review is a hard release gate; UI/HUD/buttons/labels/debug overlays may support readability but cannot replace world/playable scene proof.
-- Next required user action: run the checklist for release-candidate scenes and provide one explicit verdict per scene (`PASS`, `PASS_WITH_CONDITIONS`, `BLOCKED`, or `WAIVED_BY_USER`) with blockers/conditions/waiver details where applicable.
+- Scope boundary preserved: UI/HUD/buttons/labels/debug overlays may support readability but cannot replace world/playable scene proof.
+- Current next action is implementation/evidence completion, not a user verdict pass.
 
 ## Session Extract -- Scene Physics and Scene Composition Story-Done Closeout 2026-05-24
 - Story-done order followed user request: #20 Scene Physics Stories 001-004, then #19 Scene Composition Stories 001-004.
@@ -29,8 +35,8 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - #19 Story 001 `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-composition-spec-coverage-evidence.md`.
 - #19 Story 002 `production/epics/scene-composition-system/story-002-scene-completeness-gate-evidence.md`: COMPLETE, 5/5 AC passing, evidence `production/qa/evidence/scene-composition-completeness-gate-evidence.md`.
 - #19 Story 003 `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md`: COMPLETE, 4/4 AC passing, evidence `production/qa/evidence/scene-composition-scene-vs-ui-boundary-evidence.md`.
-- #19 Story 004 `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`: COMPLETE WITH NOTES, 4/4 AC passing. Notes: checklist and handoff contract are complete, but no actual user readability verdict or explicit waiver exists.
-- #19 Epic `production/epics/scene-composition-system/EPIC.md`: Complete With Notes. Release handoff remains `BLOCKED_FOR_RELEASE`; do not declare release-ready until user readability reviews pass or the user records explicit waivers.
+- #19 Story 004 `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`: COMPLETE, 4/4 AC passing after the 2026-05-25 flow correction. Notes: checklist and handoff contract are now non-gating feedback/implementation handoff documents.
+- #19 Epic `production/epics/scene-composition-system/EPIC.md`: Complete. Release handoff remains `BLOCKED_FOR_RELEASE` only for unresolved implementation evidence, #20 contract gaps, screenshot evidence, P0 asset gaps, or explicit tracked waivers.
 - Evidence boundary preserved: scenes are world/playable spaces, not UI; UI/HUD/buttons/labels/debug overlays remain assistive-only and cannot substitute for physical scene proof.
 - Verification: `dotnet run --project tests/integration/scene-composition/SceneCompletenessGateTest.csproj` PASS 6/6; `dotnet run --project tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj` PASS 5/5; `dotnet run --project tests/integration/scene-composition/UserReadabilityReleaseGateTest.csproj` PASS 5/5; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
 - Next recommended: human-run `production/playtests/scene-composition-user-readability-checklist.md` for each current release-candidate scene, then update the release packet with verdicts or explicit waivers.
@@ -40,12 +46,12 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - Story implemented: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md` -- User Readability Review and Release Gate Handoff.
 - Checklist: `production/playtests/scene-composition-user-readability-checklist.md` defines concrete human QA questions, verdicts, blocker fields, waiver fields, and current scene review queue.
 - Release handoff: `production/scene-specs/scene-release-gate-handoff.md` defines `release_handoff_ready`, required packet fields, current handoff snapshot, waiver requirements, and release checklist input.
-- Gate/registry updates: completeness gate links Story 004 user review requirements; registry now records #19 release handoff status as `BLOCKED_FOR_RELEASE` until user readability reviews are recorded or explicitly waived.
+- Gate/registry updates: completeness gate links Story 004 feedback routing and release evidence requirements; registry records #19 release handoff status as `BLOCKED_FOR_RELEASE` until implementation evidence, #20 contract gaps, screenshot evidence, and P0 asset gaps are resolved or explicitly waived.
 - Test: `tests/integration/scene-composition/UserReadabilityReleaseGateTest.csproj` validates checklist, handoff, gate, registry, and story acceptance coverage. Focused runner PASS 5/5.
 - Evidence: `production/qa/evidence/scene-composition-user-readability-release-gate-evidence.md`.
 - Status updates: Scene Composition epic and epics index now mark Stories 001-004 Implemented and keep the epic In Progress pending formal `/story-done` / release review.
 - Verification: focused integration PASS 5/5; `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS with 5 existing warnings / 0 errors; `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS; `git diff --check` PASS with LF/CRLF warnings only.
-- Next: after commit/push, run `/story-done` for #19 stories or start the user readability release packet when the user is ready to evaluate scenes.
+- Next: after commit/push, continue implementation/evidence closure for approved independent scene/UI/unit specs; implementation feedback should use `directed-content-modification`.
 
 ## Session Extract -- Scene Composition Story 003 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-003-scene-vs-ui-evidence-boundary.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, performance note, and dependency note that Story 002 is implemented/pushed.
@@ -71,7 +77,7 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 ## Session Extract -- Scene Composition Story 001 Implemented 2026-05-24
 - Story readiness: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md` checked first. Gap found and fixed before implementation: explicit estimate, TR requirement text, no-runtime-performance note, and dependency note that #20 Scene Physics Stories 001-004 are implemented/pushed.
 - Story implemented: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md` -- Scene Specification Template and Coverage Registry.
-- Template: `production/scene-specs/scene-spec-template.md` now defines the reusable #19 scene specification/checklist with identity, entry/exit, spatial layout, critical path, optional readability beats, state variants, #20 physics link/exemption, interaction contract, runtime contract, assets/audio, QA evidence, Codex review, and user review.
+- Template: `production/scene-specs/scene-spec-template.md` now defines the reusable #19 scene specification/checklist with identity, entry/exit, spatial layout, critical path, optional readability beats, state variants, #20 physics link/exemption, interaction contract, runtime contract, assets/audio, QA evidence, Codex review, and implementation-feedback routing.
 - Registry: `production/scene-specs/scene-coverage-registry.md` tracks current enterable scene entries for Hub exterior, ship interior, Chart table surface, Exploration, repair node scene, and market scene.
 - Boundary: registry explicitly classifies UI/HUD/buttons/labels/debug overlays as non-scene evidence; #20 Scene Physics evidence is linked as dependency input and not redefined.
 - Evidence: `production/qa/evidence/scene-composition-spec-coverage-evidence.md`.

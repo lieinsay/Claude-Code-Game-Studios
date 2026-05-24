@@ -86,7 +86,7 @@ Strengthen smoke/review guidance so UI nodes are explicitly ignored for scene un
 - Completeness gate now links the boundary contract and blocks UI-only evidence packages.
 - Coverage registry classifies `chart_table_scene` as a UI-assisted world surface anchored inside `hub_ship_interior`, not standalone scene physics proof.
 - Integration validation added at `tests/integration/scene-composition/SceneVsUiBoundaryTest.csproj`.
-- The validation checks current smoke and UI focus evidence without starting Story 004's user readability release handoff.
+- The validation checks current smoke and UI focus evidence without starting Story 004's implementation-feedback and release handoff.
 
 ---
 
