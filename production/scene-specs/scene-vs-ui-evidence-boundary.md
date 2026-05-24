@@ -82,12 +82,12 @@ ADR-0012 remains the input authority. When modal or semi-modal UI is active:
 
 | Scene / surface | Classification | Boundary result |
 | --- | --- | --- |
-| `hub_island_dock` | Enterable world/playable scene with HUD assistance | UI cannot count; world nodes and #20 contract remain required |
-| `hub_ship_interior` | Enterable world/playable scene with room/status UI assistance | UI cannot count; ship interior units and #20 contract remain required |
-| `chart_table_scene` | Authored chart table surface anchored inside ship interior; UI-assisted but not a separate enterable physical scene yet | Chart buttons/route UI do not count; the table surface can support scene evidence only as a world anchor inside `hub_ship_interior` until a standalone #20 contract exists |
-| `exploration_mist_island` | Enterable world/playable scene with HUD pressure/readout assistance | UI cannot count; island body, wreck, return beacon, and #20 contract remain required |
+| `initial_island_scene` | Enterable world/playable scene with HUD assistance; historical evidence may still use `hub_island_dock` | UI cannot count; island, dock, airship exterior, boarding path, and #20 contract remain required |
+| `ship_interior_layered` | Enterable horizontal layered ship-interior scene with room/status UI assistance; historical evidence may still use `hub_ship_interior` | UI cannot count; ship interior units, layers, occluders, behind-object reveal, and #20 contract remain required |
+| `voyage_open_world_scene` | Required current-demo voyage scene, not a route button UI or progress bar | UI/progress bars cannot count; pseudo-3D world motion, route boundaries, risk objects, destination silhouettes, and #20 contract are required |
+| `mist_lamp_wreck_scene` | Enterable world/playable destination scene; historical evidence may still use `exploration_mist_island` | UI cannot count; wreck body, fog/light identity, search anchors, return beacon, and #20 contract remain required |
+| `old_market_edge_scene` | Required current-demo destination scene, promoted from future market gap | Market UI cannot count; market edge geometry, stalls/buildings/NPC anchors, passability, and #20 contract are required before visual completion |
 | `repair_node_scene` | Future enterable repair site | UI repair panel cannot count; repair point/station/NPC/world anchor and #20 contract are required before visual completion |
-| `market_scene` | Future enterable market/settlement scene | Market UI cannot count; stall/NPC/goods/passability anchors and #20 contract are required before visual completion |
 
 ## Review Checklist
 

@@ -40,12 +40,11 @@ Each scene release handoff must include:
 
 | Scene ID | Codex / automated status | User review status | Release handoff status | Reason |
 | --- | --- | --- | --- | --- |
-| `hub_island_dock` | Automated world/physics smoke evidence exists; standalone scene spec and Codex release review still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; standalone release packet incomplete. |
-| `hub_ship_interior` | Automated world/physics smoke evidence exists; standalone scene spec and Codex release review still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; room/state/P0 asset gaps need release packet. |
-| `chart_table_scene` | Classified as UI-assisted world surface anchored inside `hub_ship_interior`; route buttons cannot count as scene proof. | `PENDING_SCOPE_DECISION` | `BLOCKED` | User must decide whether current surface is acceptable within ship-interior handoff or requires standalone scene work. |
-| `exploration_mist_island` | Automated world/physics smoke evidence exists; standalone scene spec and Codex release review still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; release packet incomplete. |
-| `repair_node_scene` | `TRACKED_GAP` | `NOT_READY` | `BLOCKED` | No scene spec or #20 contract yet. |
-| `market_scene` | `TRACKED_GAP` | `NOT_READY` | `BLOCKED` | No scene spec or #20 contract yet. |
+| `initial_island_scene` | Automated evidence exists under historical `hub_island_dock`; standalone initial-island release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; runtime/spec ID mapping must be clarified. |
+| `ship_interior_layered` | Automated evidence exists under historical `hub_ship_interior`; standalone horizontal-layered ship interior release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; horizontal layer/cutaway/P0 asset gaps need release packet. |
+| `voyage_open_world_scene` | `TRACKED_GAP` promoted from route/UI flow to required current demo scene. | `NOT_READY` | `BLOCKED` | Independent scene design and #20 contract are missing; user will provide design direction. |
+| `mist_lamp_wreck_scene` | Automated exploration evidence exists under historical `exploration_mist_island`; standalone mist-lamp-wreck release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; scene identity must be narrowed from generic mist-island to mist-lamp wreck. |
+| `old_market_edge_scene` | `TRACKED_GAP` promoted from future market scene to current demo destination. | `NOT_READY` | `BLOCKED` | No standalone scene spec, #20 contract, or user readability verdict yet. |
 
 ## Waiver Requirements
 
@@ -66,6 +65,6 @@ Waivers cannot make UI-only evidence count as scene evidence. They only acknowle
 Use this summary in release checklist or gate-check:
 
 - Scene Composition #19: `BLOCKED_FOR_RELEASE`
-- Reason: current scenes have automated/Codex evidence foundations, but user readability verdicts are pending and repair/market remain tracked gaps.
-- Required before release-ready claim: run `production/playtests/scene-composition-user-readability-checklist.md` for each current release candidate, attach standalone scene specs / Codex review, and resolve or explicitly waive blockers.
+- Reason: current demo scene set has been corrected to initial island, layered ship interior, voyage open world, mist-lamp wreck, and old market edge. User readability verdicts are pending, and voyage/old-market scene specs remain missing.
+- Required before release-ready claim: run `production/playtests/scene-composition-user-readability-checklist.md` for each current demo release candidate after standalone scene specs / Codex review are attached, then resolve or explicitly waive blockers.
 - Out of scope for this handoff: fixing readability defects, producing final art/audio, or replacing the global release checklist.

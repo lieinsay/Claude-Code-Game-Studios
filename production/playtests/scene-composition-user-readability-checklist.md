@@ -68,9 +68,8 @@ Reviewer 应该在没有开发者解释的情况下回答。
 
 | Scene ID | 独立记录文件 | 当前 release-readiness 状态 | 必要用户动作 |
 | --- | --- | --- | --- |
-| `hub_island_dock` | [scene-readability-hub-island-dock.md](scene-readability-hub-island-dock.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
-| `hub_ship_interior` | [scene-readability-hub-ship-interior.md](scene-readability-hub-ship-interior.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
-| `chart_table_scene` | [scene-readability-chart-table-scene.md](scene-readability-chart-table-scene.md) | `BLOCKED_PENDING_USER_REVIEW_OR_SCOPE_DECISION` | 用户必须先决定当前 UI-assisted surface 是否可作为 ship-interior handoff 的一部分，或是否需要独立 scene spec。 |
-| `exploration_mist_island` | [scene-readability-exploration-mist-island.md](scene-readability-exploration-mist-island.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。 |
-| `repair_node_scene` | 暂无，尚未进入人工 release review | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
-| `market_scene` | 暂无，尚未进入人工 release review | `BLOCKED_TRACKED_GAP` | 用户 release review 前，需要先起草 scene spec 和 #20 contract。 |
+| `initial_island_scene` | [scene-readability-initial-island.md](scene-readability-initial-island.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上独立 scene spec / Codex review 后填写该场景记录。旧 `hub_island_dock` 资料只作为历史来源。 |
+| `ship_interior_layered` | [scene-readability-ship-interior-layered.md](scene-readability-ship-interior-layered.md) | `BLOCKED_PENDING_USER_REVIEW` | 作为水平分层船内场景填写；必须检查舱段、层级、前景遮挡和 behind-object reveal。 |
+| `voyage_open_world_scene` | [scene-readability-voyage-open-world.md](scene-readability-voyage-open-world.md) | `BLOCKED_PENDING_SCENE_DESIGN` | 需要先独立设计航行大场景，再进入人工 readability review。 |
+| `mist_lamp_wreck_scene` | [scene-readability-mist-lamp-wreck.md](scene-readability-mist-lamp-wreck.md) | `BLOCKED_PENDING_USER_REVIEW` | 附上雾灯残骸 scene spec / Codex review 后填写该场景记录。 |
+| `old_market_edge_scene` | [scene-readability-old-market-edge.md](scene-readability-old-market-edge.md) | `BLOCKED_PENDING_SCENE_SPEC` | 需要先从旧集市 future gap 提升为当前 demo 目的地场景规格，再填写记录。 |

@@ -10,7 +10,9 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - Current goal: prepare and guide the manual user readability acceptance flow for `production/playtests/scene-composition-user-readability-checklist.md`.
 - Release handoff remains `BLOCKED_FOR_RELEASE`; no user `PASS`, `PASS_WITH_CONDITIONS`, or waiver verdict has been recorded in this session.
 - Checklist field gap fixed: blocker/waiver log now includes `Follow-up date / next story`, matching the release rule that conditional passes and waivers must have owners plus follow-up timing.
-- Checklist structure updated after user review: master checklist is now a template/index, with separate per-scene user readability records for `hub_island_dock`, `hub_ship_interior`, `chart_table_scene`, and `exploration_mist_island`.
+- Checklist structure updated after user review: master checklist is now a template/index, with separate per-scene user readability records for `initial_island_scene`, `ship_interior_layered`, `voyage_open_world_scene`, `mist_lamp_wreck_scene`, and `old_market_edge_scene`.
+- User corrected the current demo scene set: initial island, layered horizontal ship interior, combined voyage open-world scene, mist-lamp wreck, and old market edge. Prior `chart_table_scene` / generic `exploration_mist_island` queue was too implementation-derived.
+- GDD update recorded: voyage open-world scene is a required pseudo-3D scene where the camera stays aligned with airship heading, the airship can turn / move forward / reverse, and motion readability comes from world-layer changes. It is now part of #19/#20 scene-gate scope, not only UI/HUD presentation.
 - Scope boundary preserved: scene readability review is a hard release gate; UI/HUD/buttons/labels/debug overlays may support readability but cannot replace world/playable scene proof.
 - Next required user action: run the checklist for release-candidate scenes and provide one explicit verdict per scene (`PASS`, `PASS_WITH_CONDITIONS`, `BLOCKED`, or `WAIVED_BY_USER`) with blockers/conditions/waiver details where applicable.
 

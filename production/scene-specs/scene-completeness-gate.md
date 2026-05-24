@@ -120,12 +120,12 @@ The technical contract must name the domain owner for every mutable gameplay con
 
 | Scene ID | Gate status | Blocking reason | Required next evidence |
 | --- | --- | --- | --- |
-| `hub_island_dock` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, attach Codex review, attach user readability verdict. |
-| `hub_ship_interior` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, include room state variants and P0 asset gaps, attach user readability verdict. |
-| `chart_table_scene` | `blocked-ui-assisted-surface` | Authored chart table remains a ship-interior anchored surface, not a separate enterable physical scene. Chart buttons/route UI cannot count as scene evidence; the table surface can support evidence only as a world anchor inside `hub_ship_interior` until a standalone #20 contract exists. | Story 004 must attach user readability verdict if this surface is included in release handoff. |
-| `exploration_mist_island` | `blocked-for-release` | Covered by current notes and #20 runtime evidence, but no standalone scene spec or user release-readiness review yet. | Extract standalone scene spec, attach Codex review, attach user readability verdict. |
-| `repair_node_scene` | `tracked-gap` | No current enterable scene spec or #20 contract. | Draft repair scene spec before visual completion claim. |
-| `market_scene` | `tracked-gap` | No current enterable scene spec or #20 contract. | Draft market scene spec before visual completion claim. |
+| `initial_island_scene` | `blocked-for-release` | Covered by current notes and historical `hub_island_dock` #20 runtime evidence, but no standalone initial-island scene spec or user release-readiness review yet. | Extract standalone scene spec, clarify runtime/spec ID mapping, attach Codex review, attach user readability verdict. |
+| `ship_interior_layered` | `blocked-for-release` | Covered by current notes and historical `hub_ship_interior` runtime evidence, but design now requires horizontal layered ship-interior treatment rather than vertical-only assumptions. | Extract standalone spec, include room state variants, layer/cutaway/behind-object rules, P0 asset gaps, and user readability verdict. |
+| `voyage_open_world_scene` | `tracked-gap-current-demo` | Current demo requires a combined voyage open-world scene for both destination routes; no standalone scene spec or #20 contract exists yet. | Draft voyage open-world scene spec before implementation readiness or readability review. |
+| `mist_lamp_wreck_scene` | `blocked-for-release` | Covered only indirectly by historical `exploration_mist_island` notes and #20 runtime evidence; standalone identity as mist-lamp wreck is not yet extracted. | Extract standalone mist-lamp-wreck spec, attach Codex review, attach user readability verdict. |
+| `old_market_edge_scene` | `tracked-gap-current-demo` | Current demo requires old market edge as a destination scene; old market was previously tracked only as a future market gap. | Draft old-market-edge scene spec and #20 contract before visual completion claim. |
+| `repair_node_scene` | `tracked-gap-future` | No current enterable scene spec or #20 contract; not part of the corrected current demo scene set unless explicitly added. | Draft repair scene spec before visual completion claim. |
 
 ## Story Boundary
 
