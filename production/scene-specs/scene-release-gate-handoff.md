@@ -42,7 +42,7 @@ Each scene release handoff must include:
 | --- | --- | --- | --- | --- |
 | `initial_island_scene` | Automated evidence exists under historical `hub_island_dock`; standalone initial-island release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; runtime/spec ID mapping must be clarified. |
 | `ship_interior_layered` | Automated evidence exists under historical `hub_ship_interior`; standalone horizontal-layered ship interior release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; horizontal layer/cutaway/P0 asset gaps need release packet. |
-| `voyage_open_world_scene` | `TRACKED_GAP` promoted from route/UI flow to required current demo scene. | `NOT_READY` | `BLOCKED` | Independent scene design and #20 contract are missing; user will provide design direction. |
+| `voyage_open_world_scene` | Standalone scene spec drafted; #20 contract, runtime evidence, Codex review, and user readability verdict still needed. | `NOT_READY` | `BLOCKED` | Scene design exists, but implementation/evidence/readability gates are still missing. |
 | `mist_lamp_wreck_scene` | Automated exploration evidence exists under historical `exploration_mist_island`; standalone mist-lamp-wreck release packet still needed. | `PENDING` | `BLOCKED` | User readability verdict missing; scene identity must be narrowed from generic mist-island to mist-lamp wreck. |
 | `old_market_edge_scene` | `TRACKED_GAP` promoted from future market scene to current demo destination. | `NOT_READY` | `BLOCKED` | No standalone scene spec, #20 contract, or user readability verdict yet. |
 
@@ -65,6 +65,6 @@ Waivers cannot make UI-only evidence count as scene evidence. They only acknowle
 Use this summary in release checklist or gate-check:
 
 - Scene Composition #19: `BLOCKED_FOR_RELEASE`
-- Reason: current demo scene set has been corrected to initial island, layered ship interior, voyage open world, mist-lamp wreck, and old market edge. User readability verdicts are pending, and voyage/old-market scene specs remain missing.
+- Reason: current demo scene set has been corrected to initial island, layered ship interior, voyage open world, mist-lamp wreck, and old market edge. User readability verdicts are pending, and old-market scene spec plus voyage #20/runtime evidence remain missing.
 - Required before release-ready claim: run `production/playtests/scene-composition-user-readability-checklist.md` for each current demo release candidate after standalone scene specs / Codex review are attached, then resolve or explicitly waive blockers.
 - Out of scope for this handoff: fixing readability defects, producing final art/audio, or replacing the global release checklist.
