@@ -85,6 +85,7 @@ var routeIds = new HashSet<string>(StringComparer.Ordinal);
 var routeDestinations = new HashSet<string>(StringComparer.Ordinal);
 var searchPointIds = new HashSet<string>(StringComparer.Ordinal);
 var sceneUnitPrototypeIds = new HashSet<string>(StringComparer.Ordinal);
+var sceneUnitPrototypeAllowedSceneIds = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 var sceneUnitInstanceIds = new HashSet<string>(StringComparer.Ordinal);
 var shipInteriorUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
@@ -166,7 +167,14 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 		Check(RequiredString(prototype, "source_layer") == "world_playable_scene", $"scene-unit prototype '{prototypeId}' is world/playable evidence");
 		Check(!prototype.TryGetProperty("ui_evidence_allowed", out var uiEvidence) || uiEvidence.ValueKind == JsonValueKind.False, $"scene-unit prototype '{prototypeId}' rejects UI evidence");
 		Check(RequiredString(prototype, "source_gdd") == "design/gdd/scene-physics-unit-system.md", $"scene-unit prototype '{prototypeId}' traces to #20 GDD");
-		Check(allowedSceneIds.ValueKind == JsonValueKind.Array && allowedSceneIds.EnumerateArray().Any(scene => scene.GetString() == "hub_ship_interior"), $"scene-unit prototype '{prototypeId}' is allowed in ship interior");
+		var allowedScenes = allowedSceneIds.ValueKind == JsonValueKind.Array
+			? allowedSceneIds.EnumerateArray()
+				.Select(scene => scene.GetString() ?? string.Empty)
+				.Where(scene => !string.IsNullOrWhiteSpace(scene))
+				.ToHashSet(StringComparer.Ordinal)
+			: new HashSet<string>(StringComparer.Ordinal);
+		sceneUnitPrototypeAllowedSceneIds[prototypeId] = allowedScenes;
+		Check(allowedScenes.Contains("hub_ship_interior") || allowedScenes.Contains("exploration_mist_island"), $"scene-unit prototype '{prototypeId}' is allowed in an authored scene-unit slice");
 	}
 }
 
@@ -182,12 +190,23 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		Check(instanceId.StartsWith("scene_unit.instance.", StringComparison.Ordinal), $"scene-unit instance id '{instanceId}' uses instance namespace");
 		Check(sceneUnitInstanceIds.Add(instanceId), $"scene-unit instance id '{instanceId}' is unique");
 		Check(sceneUnitPrototypeIds.Contains(prototypeId), $"scene-unit instance '{instanceId}' references known prototype");
-		Check(sceneId == "hub_ship_interior", $"scene-unit instance '{instanceId}' belongs to first-slice scene");
+		var isShipInterior = sceneId == "hub_ship_interior";
+		var isMistWreck = sceneId == "exploration_mist_island";
+		var expectedFloorId = isShipInterior ? "ship_deck_01" : "mist_wreck_ground_01";
+		var expectedSceneSpec = isShipInterior
+			? "production/scene-specs/ship-interior-layered-scene.md"
+			: "production/scene-specs/mist-lamp-wreck-scene.md";
+
+		Check(isShipInterior || isMistWreck, $"scene-unit instance '{instanceId}' belongs to an authored scene-unit slice");
+		Check(sceneUnitPrototypeAllowedSceneIds.TryGetValue(prototypeId, out var allowedScenes) && allowedScenes.Contains(sceneId), $"scene-unit instance '{instanceId}' uses prototype allowed in its scene");
 		Check(!string.IsNullOrWhiteSpace(unitId), $"scene-unit instance '{instanceId}' has runtime unit id");
-		Check(shipInteriorUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ship interior");
+		if (isShipInterior)
+		{
+			Check(shipInteriorUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ship interior");
+		}
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "godot_node_path")), $"scene-unit instance '{instanceId}' has Godot placement reference");
-		Check(RequiredString(instance, "floor_id") == "ship_deck_01", $"scene-unit instance '{instanceId}' has ship floor id");
-		Check(RequiredString(instance, "scene_spec") == "production/scene-specs/ship-interior-layered-scene.md", $"scene-unit instance '{instanceId}' traces to ship-interior scene spec");
+		Check(RequiredString(instance, "floor_id") == expectedFloorId, $"scene-unit instance '{instanceId}' has expected floor id");
+		Check(RequiredString(instance, "scene_spec") == expectedSceneSpec, $"scene-unit instance '{instanceId}' traces to scene spec");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "layer")), $"scene-unit instance '{instanceId}' has placement layer");
 	}
 }
@@ -212,6 +231,8 @@ foreach (var expectedShipUnit in new[]
 var sceneUnitAuthoring = SceneUnitAuthoringFixture.Load(contentPath);
 var sceneUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_ship_interior");
 Check(sceneUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ship interior ({string.Join("; ", sceneUnitDiagnostics)})");
+var explorationUnitDiagnostics = sceneUnitAuthoring.ValidateScene("exploration_mist_island");
+Check(explorationUnitDiagnostics.Count == 0, $"scene-unit authoring validates for mist-lamp wreck ({string.Join("; ", explorationUnitDiagnostics)})");
 
 Check(routeMigrations.ValueKind == JsonValueKind.Array, "route id migration map is explicit");
 if (routeMigrations.ValueKind == JsonValueKind.Array)

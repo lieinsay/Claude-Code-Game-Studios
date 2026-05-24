@@ -658,7 +658,7 @@ public partial class HubRuntime : Node2D
 	{
 		var sceneUnitCatalog = BuildSceneUnitCatalog(sceneId);
 		var authoringDiagnostics = BuildAuthoringDiagnostics(sceneId);
-		var authoringApplies = sceneId == "hub_ship_interior";
+		var authoringApplies = HasSceneUnitAuthoring(sceneId);
 		return new Godot.Collections.Dictionary
 		{
 			["scene_id"] = sceneId,
@@ -728,6 +728,7 @@ public partial class HubRuntime : Node2D
 		return sceneId switch
 		{
 			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
+			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_island_dock" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
 				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
@@ -738,24 +739,12 @@ public partial class HubRuntime : Node2D
 				BuildSceneUnit("hub_airship_envelope", "height_marker", "height_marker", "height_shadow", "player_unit-relative landmark visual scale; no collision footprint", "world_playable_scene", false),
 				BuildSceneUnit("hub_waterline", "special_surface", "blocking_static", "midground_floor", "blocked boundary larger than player", "world_playable_scene", false),
 			},
-			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
-			{
-				BuildSceneUnit("player_marker", "player_unit", "soft_overlap", "midground_object", "1.0x player_unit", "world_playable_scene", false),
-				BuildSceneUnit("exploration_island_mass", "landmark_unit", "blocking_static", "midground_floor", "landmark >= 2.0x player height", "world_playable_scene", false),
-				BuildSceneUnit("exploration_island_path", "passage_unit", "soft_overlap", "midground_floor", "walkable path width tied to player_unit", "world_playable_scene", false),
-				BuildSceneUnit("exploration_cliff_edge", "blocking_unit", "blocking_static", "midground_object", "blocked ledge boundary larger than player", "world_playable_scene", false),
-				BuildSceneUnit("search_wreck_prop", "interactable_anchor", "soft_overlap", "midground_object", "search wreck about 6 player-widths", "world_playable_scene", false),
-				BuildSceneUnit("search_wreck_mast", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only visual cue", "world_playable_scene", false),
-				BuildSceneUnit("return_ship_hull", "blocking_unit", "blocking_static", "midground_object", "return ship about 5 player-widths", "world_playable_scene", false),
-				BuildSceneUnit("return_helm_anchor", "interactable_anchor", "soft_overlap", "midground_object", "passage/interactable scale tied to player_unit", "world_playable_scene", false),
-				BuildSceneUnit("mist_sea_boundary", "special_surface", "blocking_static", "midground_floor", "water boundary larger than player", "world_playable_scene", false),
-				BuildSceneUnit("mist_horizon_fog", "special_surface", "soft_overlap", "background", "visual-only fog/cloud; no collision implication", "world_playable_scene", false),
-				BuildSceneUnit("return_beacon_beam", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only landing/readability cue", "world_playable_scene", false),
-				BuildSceneUnit("exploration_threat_zone", "height_marker", "height_marker", "height_shadow", "player_unit-relative height-only warning overlay in world layer", "world_playable_scene", false),
-			},
 			_ => [],
 		};
 	}
+
+	private static bool HasSceneUnitAuthoring(string sceneId) =>
+		sceneId is "hub_ship_interior" or "exploration_mist_island";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -797,7 +786,7 @@ public partial class HubRuntime : Node2D
 	private static Godot.Collections.Array<string> BuildAuthoringDiagnostics(string sceneId)
 	{
 		var diagnostics = new Godot.Collections.Array<string>();
-		if (sceneId != "hub_ship_interior")
+		if (!HasSceneUnitAuthoring(sceneId))
 		{
 			return diagnostics;
 		}
