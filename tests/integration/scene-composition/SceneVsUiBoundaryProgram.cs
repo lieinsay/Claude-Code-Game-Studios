@@ -54,8 +54,8 @@ bool test_ui_dominance_gate_is_explicit_and_backed_by_smoke()
 	[
 		"hud_not_dominant = true",
 		"primary_scene_viewport_share",
-		"Target 65%",
-		"below 55%",
+		"目标 65%",
+		"低于 55%",
 		"world_identity_visible_with_hud",
 		"core_anchor_visible_with_hud",
 	];
@@ -71,32 +71,32 @@ bool test_ui_dominance_gate_is_explicit_and_backed_by_smoke()
 
 	return boundaryTerms.All(term => ContainsText(boundary, term))
 		&& smokeProof.All(term => ContainsText(smoke, term))
-		&& ContainsText(gate, "`hud_not_dominant = true` must be recorded")
-		&& ContainsText(gate, "`primary_scene_viewport_share` targets 65%");
+		&& ContainsText(gate, "必须记录 `hud_not_dominant = true`")
+		&& ContainsText(gate, "`primary_scene_viewport_share` 目标为 65%");
 }
 
 bool test_ui_evidence_is_rejected_for_scene_proof()
 {
 	string[] uiSurfaces =
 	[
-		"HUD labels",
-		"status panels",
-		"buttons",
-		"menus",
-		"modal panels",
-		"save/load/delete controls",
-		"onboarding hint text",
-		"debug labels",
-		"debug overlays",
+		"HUD 标签",
+		"状态面板",
+		"按钮",
+		"菜单",
+		"模态面板",
+		"保存 / 读取 / 删除控件",
+		"新手引导提示文本",
+		"调试标签",
+		"调试覆盖层",
 	];
 	string[] forbiddenUses =
 	[
-		"Physical scene units",
-		"scene identity nodes",
-		"interaction anchors",
-		"physical contract proof",
-		"viewport identity",
-		"human readability replacement",
+		"物理场景单位",
+		"场景身份节点",
+		"交互锚点",
+		"物理合同证明",
+		"视口身份",
+		"人工可读性替代",
 	];
 	string[] runtimeRejection =
 	[
@@ -109,8 +109,8 @@ bool test_ui_evidence_is_rejected_for_scene_proof()
 	return uiSurfaces.All(term => ContainsText(gate, term))
 		&& forbiddenUses.All(term => ContainsText(boundary, term))
 		&& runtimeRejection.All(term => ContainsText(smoke, term))
-		&& ContainsText(template, "not UI/HUD/buttons/labels/debug overlays")
-		&& ContainsText(registry, "cannot be counted as scene units or physical acceptance evidence");
+		&& ContainsText(template, "不是 UI/HUD/按钮/标签/调试覆盖层")
+		&& ContainsText(registry, "不能满足场景单位、物理单位或可读性证据");
 }
 
 bool test_ui_only_evidence_fails_readiness()
@@ -125,21 +125,21 @@ bool test_ui_only_evidence_fails_readiness()
 	];
 
 	return rejectionCases.All(term => ContainsText(boundary, term))
-		&& ContainsText(boundary, "no world/playable scene nodes")
-		&& ContainsText(boundary, "no visible scene identity node")
-		&& ContainsText(boundary, "no helm/table/wreck/return-ship/repair/stall/NPC anchor")
-		&& ContainsText(gate, "A UI-only evidence package fails readiness");
+		&& ContainsText(boundary, "没有世界 / 可玩场景节点")
+		&& ContainsText(boundary, "没有可见场景身份节点")
+		&& ContainsText(boundary, "没有 helm、table、wreck、return ship、repair、stall 或 NPC 锚点")
+		&& ContainsText(gate, "UI-only 证据包也会失败");
 }
 
 bool test_focus_isolation_preserves_world_evidence()
 {
 	string[] boundaryFocus =
 	[
-		"UIManager owns UI focus",
-		"World movement/use input is blocked or isolated",
-		"leave the focus chain",
-		"underlying world/playable scene evidence must remain mounted",
-		"cannot be used to delete, hide, or replace the scene evidence",
+		"UIManager 拥有 UI 焦点",
+		"世界移动 / 使用输入根据当前输入层被阻止或隔离",
+		"离开焦点链",
+		"底层世界 / 可玩场景证据必须保持挂载和可见",
+		"不能被用来删除、隐藏或替代 #19 要求的场景证据",
 	];
 	string[] smokeFocus =
 	[
@@ -163,12 +163,12 @@ bool test_focus_isolation_preserves_world_evidence()
 
 bool test_chart_table_classification_is_explicit()
 {
-	return ContainsText(boundary, "`chart_table_scene`")
-		&& ContainsText(boundary, "Authored chart table surface anchored inside ship interior")
-		&& ContainsText(boundary, "Chart buttons/route UI do not count")
-		&& ContainsText(gate, "`blocked-ui-assisted-surface`")
-		&& ContainsText(registry, "authored UI-assisted surface anchored inside `hub_ship_interior`")
-		&& ContainsText(registry, "Do not count Chart buttons/route UI as scene evidence");
+	return ContainsText(boundary, "`voyage_open_world_scene`")
+		&& ContainsText(boundary, "不是航线按钮 UI 或进度条")
+		&& ContainsText(boundary, "UI / 进度条不能计入")
+		&& ContainsText(gate, "`voyage_open_world_scene`")
+		&& ContainsText(registry, "航行大场景")
+		&& ContainsText(registry, "implementation readiness 前需要 #20 合同");
 }
 
 static bool ContainsText(string haystack, string needle) =>

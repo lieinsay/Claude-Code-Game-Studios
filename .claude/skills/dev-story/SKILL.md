@@ -122,6 +122,45 @@ Read `.claude/docs/technical-preferences.md`:
 - Performance budgets (frame budget, memory ceiling)
 - Forbidden patterns
 
+### Production scene/UI/unit specifications
+
+Read the production specification rules before routing or implementation:
+
+- `docs/document-index.md`
+- `production/scene-specs/scene-coverage-registry.md`
+- `production/scene-specs/scene-completeness-gate.md`
+- `production/scene-specs/scene-vs-ui-evidence-boundary.md`
+- `production/ui-specs/README.md`
+- `production/unit-specs/README.md`
+
+Then inspect the story text, acceptance criteria, implementation notes, and test
+evidence for scene, UI, or unit work:
+
+- If the story creates, changes, or claims evidence/readiness for an enterable
+  scene, world/playable surface, route destination, repair point, market area,
+  transition, scene identity, spatial layout, or scene physics contract, read the
+  linked `production/scene-specs/*.md` file before implementation. If the linked
+  scene is missing, `tracked-gap`, or the story does not name a scene spec, stop
+  before coding and mark the story BLOCKED unless the story's only scope is to
+  draft or update that scene spec.
+- If the story creates or changes a reusable physical unit, authored
+  `scene_unit.prototype.*`, NPC, obstacle, door, prop with collision/occlusion,
+  resource point, pushable/moving entity, or stateful world object, read the
+  matching `production/unit-specs/fixed-scene-objects/*.md` or
+  `production/unit-specs/dynamic-entities/*.md` file. If no concrete unit spec
+  exists, stop before runtime implementation unless the story is explicitly a
+  unit-spec authoring/migration story.
+- If the story creates or changes a persistent HUD, anchored panel, modal,
+  semi-modal overlay, full-screen UI surface, toast/hint, debug overlay, display
+  priority, input/focus rule, or UI bound to a world anchor or system state, read
+  the matching concrete file in `production/ui-specs/`. README/template references
+  are not enough for implementation stories; stop before coding unless the story
+  is explicitly drafting that UI spec.
+- UI/HUD/buttons/labels/menus/modals/debug overlays cannot be used as scene
+  identity, scene-unit, interaction-anchor, or #20 physics-contract proof. If an
+  acceptance criterion tries to close scene/unit readiness with UI-only evidence,
+  stop and surface the mismatch instead of implementing around it.
+
 ---
 
 ## Phase 3: Route to the Right Programmer
@@ -175,11 +214,15 @@ Provide the agent with:
 5. The engine naming conventions and performance budgets
 6. Any engine-specific notes from the ADR Engine Compatibility section
 7. The test file path that must be created
-8. Explicit instruction: **implement this story and write the test**
+8. Any loaded `production/scene-specs/`, `production/ui-specs/`, or
+   `production/unit-specs/` documents that govern this story
+9. Explicit instruction: **implement this story and write the test**
 
 The agent should:
 - Create or modify files in `src/` following the ADR guidelines
 - Respect all Required and Forbidden patterns from the control manifest
+- Respect the loaded scene/UI/unit specifications; do not substitute UI evidence
+  for scene or scene-unit proof
 - Stay within the story's Out of Scope boundaries (do not touch unrelated files)
 - Write clean, doc-commented public APIs
 

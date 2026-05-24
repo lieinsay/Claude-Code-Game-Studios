@@ -51,17 +51,17 @@ bool test_user_review_can_block_after_codex_pass()
 {
 	string[] blockers =
 	[
-		"missing fantasy",
-		"missing requirements",
-		"unclear identity",
-		"undesirable player flow",
+		"幻想缺失",
+		"需求缺失",
+		"身份不清",
+		"玩家流程不理想",
 	];
 
-	return ContainsText(checklist, "A user review can still block a scene even when Codex review passes")
-		&& ContainsText(handoff, "`Codex PASS` is necessary but not sufficient")
+	return ContainsText(checklist, "用户 review 仍然可以阻塞该场景")
+		&& ContainsText(handoff, "`Codex PASS` 是必要条件，但不足以单独通过")
 		&& blockers.All(term => ContainsText(handoff, term))
-		&& ContainsText(gate, "Codex review is necessary but not sufficient")
-		&& ContainsText(story, "missing fantasy, missing requirements, unclear identity, or undesirable player flow can still block");
+		&& ContainsText(gate, "Codex 审核是必要条件，但不足以单独通过")
+		&& ContainsText(story, "missing fantasy, missing requirements, unclear identity, or undesirable player flow");
 }
 
 bool test_blocked_verdict_prevents_release_handoff()
@@ -70,64 +70,72 @@ bool test_blocked_verdict_prevents_release_handoff()
 	[
 		"waiver owner",
 		"waiver date",
-		"exact blocker waived",
-		"accepted player-facing risk",
-		"fallback evidence",
+		"被豁免的具体 blocker",
+		"接受的玩家可见风险",
+		"fallback 证据",
 		"follow-up owner",
 	];
 
-	return ContainsText(checklist, "`BLOCKED` prevents release gate handoff")
+	return ContainsText(checklist, "`BLOCKED` 会阻止 release gate handoff")
 		&& ContainsText(handoff, "release_handoff_ready =")
 		&& ContainsText(handoff, "user_review_passed OR user_waiver_recorded")
 		&& ContainsText(handoff, "no_unresolved_p0_scene_blockers")
 		&& waiverFields.All(term => ContainsText(handoff, term))
-		&& ContainsText(gate, "prevents release handoff until the blocker is resolved or explicitly waived by the user");
+		&& ContainsText(gate, "直到 blocker 解决或用户明确 waiver");
 }
 
 bool test_readability_questions_are_concrete()
 {
-	string[] questions =
+	string[] checklistQuestions =
 	[
-		"Where am I?",
-		"What can I do here?",
-		"How do I leave or continue?",
-		"What changed?",
-		"Does UI/HUD support rather than dominate?",
-		"Does the scene match the intended fantasy?",
+		"我在哪里？",
+		"我在这里能做什么？",
+		"我如何离开或继续？",
+		"什么发生了变化？",
+		"UI/HUD 是辅助而不是主导吗？",
+		"场景是否符合预期幻想？",
+	];
+	string[] gateQuestions =
+	[
+		"我在哪里？",
+		"我能在这里做什么？",
+		"我如何离开或继续？",
+		"发生了什么变化？",
+		"UI/HUD 是否只是辅助，而不是主导？",
+		"场景是否符合预期幻想？",
 	];
 
-	return questions.All(term => ContainsText(checklist, term))
-		&& questions.All(term => ContainsText(gate, term))
-		&& ContainsText(checklist, "without developer explanation")
+	return checklistQuestions.All(term => ContainsText(checklist, term))
+		&& gateQuestions.All(term => ContainsText(gate, term))
+		&& ContainsText(checklist, "没有开发者解释")
 		&& ContainsText(checklist, "PASS_WITH_CONDITIONS")
 		&& ContainsText(checklist, "BLOCKED");
 }
 
 bool test_missing_demands_write_back_to_spec()
 {
-	return ContainsText(checklist, "new demand is recorded")
-		&& ContainsText(handoff, "new demands that must be written back into the scene spec")
+	return ContainsText(checklist, "新增诉求都被记录")
+		&& ContainsText(handoff, "新需求需要写回场景规格")
 		&& ContainsText(story, "any missing demand is added here before status can move")
-		&& ContainsText(handoff, "scene spec or equivalent source note");
+		&& ContainsText(handoff, "场景规格或等价来源说明");
 }
 
 bool test_current_scene_snapshot_blocks_release()
 {
 	string[] scenes =
 	[
-		"`hub_island_dock`",
-		"`hub_ship_interior`",
-		"`chart_table_scene`",
-		"`exploration_mist_island`",
-		"`repair_node_scene`",
-		"`market_scene`",
+		"`initial_island_scene`",
+		"`ship_interior_layered`",
+		"`voyage_open_world_scene`",
+		"`mist_lamp_wreck_scene`",
+		"`old_market_edge_scene`",
 	];
 
 	return scenes.All(term => ContainsText(checklist, term))
 		&& scenes.All(term => ContainsText(handoff, term))
 		&& ContainsText(handoff, "Scene Composition #19: `BLOCKED_FOR_RELEASE`")
-		&& ContainsText(registry, "`BLOCKED_FOR_RELEASE` until user readability reviews are recorded or explicitly waived")
-		&& ContainsText(handoff, "No scene spec or #20 contract yet");
+		&& ContainsText(registry, "`BLOCKED_FOR_RELEASE`，直到用户可读性审核被记录或明确豁免")
+		&& ContainsText(handoff, "尚无独立场景规格、#20 合同或用户可读性 verdict");
 }
 
 string Read(string relativePath)

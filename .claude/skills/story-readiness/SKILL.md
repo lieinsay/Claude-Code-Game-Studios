@@ -71,6 +71,14 @@ Before checking any stories, load reference documents once (not per-story):
   don't re-read the same ADR for every story.
 - The current sprint file (if scope is `sprint`) — to identify Must Have /
   Should Have priority for escalation decisions
+- Scene/UI/unit spec rules — load these once so implementation readiness cannot
+  bypass production specifications:
+  - `docs/document-index.md`
+  - `production/scene-specs/scene-coverage-registry.md`
+  - `production/scene-specs/scene-completeness-gate.md`
+  - `production/scene-specs/scene-vs-ui-evidence-boundary.md`
+  - `production/ui-specs/README.md`
+  - `production/unit-specs/README.md`
 
 ---
 
@@ -189,6 +197,35 @@ items pass or are explicitly marked N/A with a stated reason.
   includes a `## Test Evidence` section stating where evidence will be stored
   (test file path for Logic/Integration, or evidence doc path for Visual/Feel/UI).
   Fix: Add `## Test Evidence` with the expected evidence location for the story's type.
+
+### Production Specification Gates
+
+- [ ] **Scene specs required before scene work**: If a story creates, changes, claims
+  readiness for, or adds evidence for any enterable scene, world/playable scene
+  surface, route destination, level area, repair point, market area, or scene
+  transition, it must reference the relevant file under `production/scene-specs/`.
+  Current demo release-candidate scenes must also appear in
+  `production/scene-specs/scene-coverage-registry.md`. If a required scene spec is
+  missing or marked `tracked-gap`, the story is **BLOCKED** until the spec exists
+  or the story explicitly limits itself to drafting the missing spec.
+- [ ] **Unit specs required for reusable world units**: If a story creates or changes
+  a gameplay-relevant scene unit prototype, physical object, NPC, obstacle, door,
+  resource point, prop with collision/occlusion/state, pushable/moving entity, or
+  authored `scene_unit.prototype.*`, it must reference a unit spec under
+  `production/unit-specs/fixed-scene-objects/` or
+  `production/unit-specs/dynamic-entities/`. Do not accept unit rules that only
+  live inside a scene spec or runtime data file unless the story is explicitly a
+  migration/authoring story to create those specs.
+- [ ] **UI specs required before UI work**: If a story creates or changes a persistent
+  HUD, anchored panel, modal/semi-modal overlay, full-screen UI surface, toast/hint,
+  debug overlay, input/focus rule, display priority, or UI that binds to a world
+  anchor/system state, it must reference a concrete file in `production/ui-specs/`
+  or explicitly state that the first task is to draft that UI spec. Template or
+  README references alone do not satisfy this gate for implementation stories.
+- [ ] **UI cannot satisfy scene/unit readiness**: Any story that uses UI/HUD/buttons,
+  labels, menus, modals, debug overlays, or screenshot text as scene identity,
+  interaction anchor, physical unit, or #20 contract evidence is **NEEDS WORK** or
+  **BLOCKED** depending on whether the missing world/playable evidence exists.
 
 ---
 
