@@ -19,7 +19,7 @@ Run("Regression: shell UI releases mouse input during gameplay", ShellRuntimeRel
 Run("Regression: audio confirmation mounts Hub runtime instead of recovery placeholder", AudioConfirmationMountsHubRuntime);
 Run("Regression: Hub runtime exposes discoverable UI and save/load controls", HubRuntimeExposesSmokeControls);
 Run("Regression: Hub runtime wires UI and save/load controls", HubRuntimeWiresSmokeControls);
-Run("Regression: Chart panel traps focus away from Hub controls", ChartPanelTrapsFocusAwayFromHubControls);
+Run("Regression: Chart world surface isolates Hub controls without legacy panel", ChartWorldSurfaceIsolatesHubControls);
 Run("Regression: route departure opens exploration HUD surface", RouteDepartureOpensExplorationSurface);
 Run("Regression: exploration pressure loop mutates and persists", ExplorationPressureLoopMutatesAndPersists);
 Run("Regression: Hub summary syncs exploration pressure state", HubSummarySyncsExplorationPressureState);
@@ -313,28 +313,14 @@ static bool HubRuntimeExposesSmokeControls()
 		&& HasNode(hubScene, "SaveButton", "Button")
 		&& HasNode(hubScene, "LoadButton", "Button")
 		&& HasNode(hubScene, "SaveStatusLabel", "Label")
-		&& HasNode(hubScene, "ChartPanel", "PanelContainer")
-		&& HasNode(hubScene, "ChartTitleLabel", "Label")
-		&& HasNode(hubScene, "ChartStatusLabel", "Label")
-		&& HasNode(hubScene, "RouteMistButton", "Button")
-		&& HasNode(hubScene, "RouteMarketButton", "Button")
-		&& HasNode(hubScene, "DepartButton", "Button")
-		&& HasNode(hubScene, "ChartCloseButton", "Button")
-		&& HasNode(hubScene, "ExplorationPanel", "PanelContainer")
-		&& HasNode(hubScene, "ExplorationTitleLabel", "Label")
-		&& HasNode(hubScene, "ExplorationRouteLabel", "Label")
-		&& HasNode(hubScene, "ExplorationResourceLabel", "Label")
-		&& HasNode(hubScene, "ExplorationThreatLabel", "Label")
-		&& HasNode(hubScene, "ExplorationHullLabel", "Label")
-		&& HasNode(hubScene, "ExplorationRecoveryLabel", "Label")
-		&& HasNode(hubScene, "ExplorationAdvanceButton", "Button")
-		&& HasNode(hubScene, "ExplorationReturnButton", "Button")
+		&& !HasNode(hubScene, "ChartPanel", "PanelContainer")
+		&& !HasNode(hubScene, "RouteMarketButton", "Button")
+		&& !HasNode(hubScene, "ExplorationPanel", "PanelContainer")
 		&& hubScene.Contains("打开航图桌  M", StringComparison.Ordinal)
 		&& hubScene.Contains("记录航行  Ctrl+S", StringComparison.Ordinal)
 		&& hubScene.Contains("读取航行  Ctrl+L", StringComparison.Ordinal)
-		&& hubScene.Contains("航图桌", StringComparison.Ordinal)
-		&& hubScene.Contains("推进探索 / 搜索", StringComparison.Ordinal)
-		&& hubScene.Contains("雾海搜撤记录", StringComparison.Ordinal);
+		&& !hubScene.Contains("推进探索 / 搜索", StringComparison.Ordinal)
+		&& !hubScene.Contains("雾海搜撤记录", StringComparison.Ordinal);
 }
 
 static bool HubRuntimeWiresSmokeControls()
@@ -346,11 +332,11 @@ static bool HubRuntimeWiresSmokeControls()
 	return script.Contains("WireButton(\"ChartButton\", OnChartPressed)", StringComparison.Ordinal)
 		&& script.Contains("WireButton(\"SaveButton\", OnSavePressed)", StringComparison.Ordinal)
 		&& script.Contains("WireButton(\"LoadButton\", OnLoadPressed)", StringComparison.Ordinal)
-		&& script.Contains("WireButton(\"RouteMistButton\", OnRouteMistPressed)", StringComparison.Ordinal)
-		&& script.Contains("WireButton(\"RouteMarketButton\", OnRouteMarketPressed)", StringComparison.Ordinal)
-		&& script.Contains("WireButton(\"DepartButton\", OnDepartPressed)", StringComparison.Ordinal)
-		&& script.Contains("WireButton(\"ExplorationAdvanceButton\", OnExplorationAdvancePressed)", StringComparison.Ordinal)
-		&& script.Contains("WireButton(\"ExplorationReturnButton\", OnExplorationReturnPressed)", StringComparison.Ordinal)
+		&& !script.Contains("WireButton(\"RouteMistButton\"", StringComparison.Ordinal)
+		&& !script.Contains("WireButton(\"RouteMarketButton\"", StringComparison.Ordinal)
+		&& !script.Contains("WireButton(\"DepartButton\"", StringComparison.Ordinal)
+		&& !script.Contains("WireButton(\"ExplorationAdvanceButton\"", StringComparison.Ordinal)
+		&& !script.Contains("WireButton(\"ExplorationReturnButton\"", StringComparison.Ordinal)
 		&& script.Contains("Key.M", StringComparison.Ordinal)
 		&& script.Contains("IsSaveShortcut(key)", StringComparison.Ordinal)
 		&& script.Contains("IsLoadShortcut(key)", StringComparison.Ordinal)
@@ -360,23 +346,30 @@ static bool HubRuntimeWiresSmokeControls()
 		&& script.Contains("domain.ExportProgressJson()", StringComparison.Ordinal)
 		&& script.Contains("domain.TryImportProgressJson(json, out var reason)", StringComparison.Ordinal)
 		&& script.Contains("cloudweaver_playable_progress.json", StringComparison.Ordinal)
+		&& !script.Contains("OnRouteMarketPressed", StringComparison.Ordinal)
+		&& !script.Contains("ChartRouteMarketLine", StringComparison.Ordinal)
+		&& !script.Contains("ChartMarketDestinationNode", StringComparison.Ordinal)
+		&& !script.Contains("ChartRouteMarketSelectionFrame", StringComparison.Ordinal)
+		&& !script.Contains("SelectDomainRoute(\"route.market\")", StringComparison.Ordinal)
 		&& !script.Contains("ModuleBenchProp", StringComparison.Ordinal)
 		&& !script.Contains("EngineInteractPoint", StringComparison.Ordinal)
 		&& !script.Contains("ExtractionCargoProp", StringComparison.Ordinal);
 }
 
-static bool ChartPanelTrapsFocusAwayFromHubControls()
+static bool ChartWorldSurfaceIsolatesHubControls()
 {
 	var repoRoot = FindRepoRoot();
 	var runtimeScriptPath = Path.Combine(repoRoot, "src", "scenes", "HubRuntime.cs");
 	var script = File.ReadAllText(runtimeScriptPath);
 
-	return script.Contains("if (IsVisible(chartPanel))", StringComparison.Ordinal)
+	return script.Contains("if (currentScreen == \"chart\")", StringComparison.Ordinal)
 		&& script.Contains("if (key.Keycode == Key.Escape)", StringComparison.Ordinal)
 		&& script.Contains("SetHubControlsEnabled(false)", StringComparison.Ordinal)
 		&& script.Contains("SetHubControlsEnabled(true)", StringComparison.Ordinal)
 		&& script.Contains("button.Disabled = !buttonEnabled", StringComparison.Ordinal)
-		&& script.Contains("button.FocusMode = buttonEnabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None", StringComparison.Ordinal);
+		&& script.Contains("button.FocusMode = buttonEnabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None", StringComparison.Ordinal)
+		&& !script.Contains("ChartPanel", StringComparison.Ordinal)
+		&& !script.Contains("ExplorationPanel", StringComparison.Ordinal);
 }
 
 static bool RouteDepartureOpensExplorationSurface()
@@ -387,12 +380,12 @@ static bool RouteDepartureOpensExplorationSurface()
 	var script = File.ReadAllText(runtimeScriptPath);
 	var scene = File.ReadAllText(hubScenePath);
 
-	return HasNode(scene, "ExplorationPanel", "PanelContainer")
-		&& HasNode(scene, "ExplorationAdvanceButton", "Button")
-		&& HasNode(scene, "ExplorationReturnButton", "Button")
+	return !HasNode(scene, "ExplorationPanel", "PanelContainer")
+		&& !HasNode(scene, "ExplorationAdvanceButton", "Button")
+		&& !HasNode(scene, "ExplorationReturnButton", "Button")
 		&& script.Contains("private void ShowExplorationSurface()", StringComparison.Ordinal)
-		&& script.Contains("chartPanel.Visible = false", StringComparison.Ordinal)
-		&& script.Contains("explorationPanel.Visible = true", StringComparison.Ordinal)
+		&& !script.Contains("chartPanel.Visible", StringComparison.Ordinal)
+		&& !script.Contains("explorationPanel.Visible", StringComparison.Ordinal)
 		&& script.Contains("SetExplorationStatus()", StringComparison.Ordinal)
 		&& script.Contains("资源压力：", StringComparison.Ordinal)
 		&& script.Contains("威胁反馈：", StringComparison.Ordinal)
@@ -413,7 +406,7 @@ static bool ExplorationPressureLoopMutatesAndPersists()
 		&& script.Contains("new PlayableSliceSceneState(", StringComparison.Ordinal)
 		&& script.Contains("Math.Max(0, restored.ExplorationStep)", StringComparison.Ordinal)
 		&& script.Contains("搜索消耗 1", StringComparison.Ordinal)
-		&& script.Contains("中威胁", StringComparison.Ordinal)
+		&& script.Contains("snapshot.ThreatText", StringComparison.Ordinal)
 		&& script.Contains("snapshot.HullIntegrity", StringComparison.Ordinal)
 		&& script.Contains("一轮压力循环完成", StringComparison.Ordinal)
 		&& script.Contains("Ctrl+S 保存，Ctrl+L 加载", StringComparison.Ordinal);

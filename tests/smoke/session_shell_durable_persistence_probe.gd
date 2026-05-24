@@ -29,7 +29,7 @@ func _run() -> void:
 	_expect(not bool(first_hub.call("DebugDurableProgressExists")), "durable progress file starts cleared")
 	_expect(_button_disabled(first_session, "LoadButton"), "Load button is disabled when no durable progress exists")
 	_expect(_button_disabled(first_session, "DeleteProgressButton"), "Delete button is disabled when no local progress exists")
-	_expect(_label_text(first_session, "SaveStatusLabel").contains("暂无可加载进度"), "Hub explains that no progress can be loaded")
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("暂无可读取航行日志"), "Hub explains that no progress can be loaded")
 
 	first_hub.call("EnterShipInterior")
 	await process_frame
@@ -52,7 +52,7 @@ func _run() -> void:
 	_expect(int(saved_snapshot.get("reward_carried", 0)) == 2, "first session saves carried rewards")
 	_expect(int(saved_snapshot.get("hull_integrity", 0)) == 94, "first session saves hull pressure")
 	_expect(bool(first_hub.call("DebugDurableProgressExists")), "save writes a durable progress file")
-	_expect(_label_text(first_session, "SaveStatusLabel").contains("可加载"), "Save feedback tells the player the progress can be loaded")
+	_expect(_label_text(first_session, "SaveStatusLabel").contains("可读取"), "Save feedback tells the player the progress can be loaded")
 	_expect(_button_disabled(first_session, "DeleteProgressButton"), "Delete button stays disabled outside Hub after local progress exists")
 
 	first_hub.call("OnSavePressed")
@@ -61,7 +61,7 @@ func _run() -> void:
 	_expect(_button_text(first_session, "SaveButton").contains("确认覆盖"), "Save button switches to confirm overwrite wording")
 	first_hub.call("OnLoadPressed")
 	await process_frame
-	_expect(_button_text(first_session, "SaveButton").contains("保存"), "Load cancels pending overwrite confirmation")
+	_expect(_button_text(first_session, "SaveButton").contains("记录"), "Load cancels pending overwrite confirmation")
 	first_hub.call("OnSavePressed")
 	await process_frame
 	first_hub.call("OnSavePressed")
@@ -79,12 +79,12 @@ func _run() -> void:
 		_finish()
 		return
 	_expect(not _button_disabled(restarted_session, "LoadButton"), "restarted Hub exposes Load when durable progress is present")
-	_expect(_label_text(restarted_session, "SaveStatusLabel").contains("检测到本地进度"), "restarted Hub explains that local progress was detected")
+	_expect(_label_text(restarted_session, "SaveStatusLabel").contains("检测到本地航行日志"), "restarted Hub explains that local progress was detected")
 
 	restarted_hub.call("OnLoadPressed")
 	await process_frame
 	var loaded_snapshot := restarted_hub.call("DebugDomainSnapshot") as Dictionary
-	_expect(_is_panel_visible(restarted_session, "ExplorationPanel"), "restarted session loads back into Exploration HUD")
+	_expect(str(restarted_hub.call("DebugCurrentScreen")) == "exploration", "restarted session loads back into Exploration scene")
 	_expect(int(loaded_snapshot.get("exploration_step", 0)) == 2, "restarted session restores exploration step from durable progress")
 	_expect(str(loaded_snapshot.get("last_search_point", "")) == "sp.playable.2", "restarted session restores authored search point from durable progress")
 	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "restarted session restores carried reward state from durable progress")
@@ -118,7 +118,7 @@ func _run() -> void:
 	await process_frame
 	_expect(bool(corrupt_hub.call("DebugDurableProgressExists")), "new progress can be saved after quarantine")
 	_expect(not _button_disabled(corrupt_session, "LoadButton"), "Load button is re-enabled after saving new progress")
-	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("可加载"), "new save feedback restores continue trust after quarantine")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("可读取"), "new save feedback restores continue trust after quarantine")
 
 	corrupt_hub.call("OnDeleteProgressPressed")
 	await process_frame
@@ -127,7 +127,7 @@ func _run() -> void:
 	_expect(bool(corrupt_hub.call("DebugDurableProgressExists")), "delete confirmation does not remove progress yet")
 	corrupt_hub.call("OnDeleteProgressPressed")
 	await process_frame
-	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("已删除本地进度"), "confirmed delete reports local progress removal")
+	_expect(_label_text(corrupt_session, "SaveStatusLabel").contains("已删除本地航行日志"), "confirmed delete reports local progress removal")
 	_expect(not bool(corrupt_hub.call("DebugDurableProgressExists")), "confirmed delete removes active progress")
 	_expect(not bool(corrupt_hub.call("DebugQuarantinedProgressExists")), "confirmed delete removes quarantined progress")
 	_expect(_button_disabled(corrupt_session, "LoadButton"), "Load button is disabled after confirmed delete")

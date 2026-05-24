@@ -275,7 +275,7 @@ bool test_pregate_godot_runtime_designs_are_blocked_for_replacement()
 	];
 
 	return invalidShellPanels.All(panel => shellUi.Contains($"name=\"{panel}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(panel, StringComparison.Ordinal))
-		&& invalidHubUiNodes.All(node => hubRuntime.Contains($"\"{node}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
+		&& invalidHubUiNodes.All(node => !hubRuntime.Contains($"\"{node}\"", StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
 		&& removedHubWorldNodes.All(node => !hubRuntime.Contains(node, StringComparison.Ordinal) && godotRuntimeReplacementGate.Contains(node, StringComparison.Ordinal))
 		&& replacementEntryPoints.All(path => godotRuntimeReplacementGate.Contains(path, StringComparison.Ordinal))
 		&& noLegacySpecFiles.All(path => !File.Exists(Path.Combine(repoRoot, path.Replace('/', Path.DirectorySeparatorChar))))

@@ -48,7 +48,7 @@ func _run() -> void:
 		await process_frame
 		hub.call("OnDepartPressed")
 		await process_frame
-		_expect(_is_panel_visible(session, "ExplorationPanel"), "cycle %d reaches Exploration HUD" % [cycle + 1])
+		_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "cycle %d reaches Exploration scene" % [cycle + 1])
 
 		hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 		await process_frame
@@ -69,7 +69,7 @@ func _run() -> void:
 		hub.call("OnLoadPressed")
 		await process_frame
 		var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
-		_expect(_is_panel_visible(session, "ExplorationPanel"), "cycle %d load restores Exploration HUD" % [cycle + 1])
+		_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "cycle %d load restores Exploration scene" % [cycle + 1])
 		_expect(int(loaded_snapshot.get("exploration_step", 0)) == 2, "cycle %d load restores pressure step" % [cycle + 1])
 		_expect(str(loaded_snapshot.get("last_load_status", "")).contains("canonical progress loaded"), "cycle %d load uses canonical Persistence" % [cycle + 1])
 
@@ -80,7 +80,7 @@ func _run() -> void:
 		hub.call("OnExplorationReturnPressed")
 		await process_frame
 		var return_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
-		_expect(not _is_panel_visible(session, "ExplorationPanel"), "cycle %d returns to Hub" % [cycle + 1])
+		_expect(str(hub.call("DebugCurrentScreen")) == "hub", "cycle %d returns to Hub" % [cycle + 1])
 		_expect(int(return_snapshot.get("reward_carried", 0)) == 0, "cycle %d clears carried rewards after Hub return" % [cycle + 1])
 		_expect(int(return_snapshot.get("reward_in_storage", 0)) >= 2, "cycle %d preserves returned rewards in storage" % [cycle + 1])
 		_expect(not _button_disabled(session, "LoadButton"), "cycle %d keeps Load available in Hub" % [cycle + 1])
@@ -89,7 +89,7 @@ func _run() -> void:
 	hub.call("OnLoadPressed")
 	await process_frame
 	var final_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
-	_expect(_is_panel_visible(session, "ExplorationPanel"), "final load restores the latest saved Exploration HUD")
+	_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "final load restores the latest saved Exploration scene")
 	_expect(int(final_snapshot.get("exploration_step", 0)) == 2, "final load restores latest saved pressure step")
 	_expect(int(final_snapshot.get("persistence_generation", 0)) == last_generation, "final load keeps latest persistence generation")
 

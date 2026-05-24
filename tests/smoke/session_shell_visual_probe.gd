@@ -151,14 +151,13 @@ func _run() -> void:
 	_expect(hub.call("DebugInteractionPrompt").contains("驾驶舱航台"), "Moving near the helm reveals a spatial interaction prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
-	_expect(_is_panel_visible(session, "ChartPanel"), "Chart panel is visible after spatial helm interaction")
+	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "Chart world surface is active after spatial helm interaction")
 	var chart_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(chart_onboarding.get("next_hint_step", "")) == "select_route", "Onboarding advances to route-selection hint after Chart opens")
-	_expect(_label_text(session, "ChartTitleLabel") == "航图桌", "Chart panel identifies the authored chart table surface")
 	_expect(hub.call("DebugNodeVisible", "ChartTableSurface"), "Chart mode has a visible chart table scene")
 	_expect(hub.call("DebugNodeVisible", "ChartParchmentMap"), "Chart mode has a parchment map surface")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteMistLine"), "Chart mode shows the mist route line")
-	_expect(hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode shows the market route line")
+	_expect(not hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode does not expose tracked-gap old market route")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "LoadButton"), "Load entry is disabled while Chart panel is open")
@@ -193,8 +192,7 @@ func _run() -> void:
 	_expect(str(departure_snapshot.get("navigation_state", "")) == "Arrived", "NavigationManager produces a completed route contract")
 	_expect(str(departure_snapshot.get("encounter_destination", "")) == "location.mist-short", "NavigationManager produces EncounterContext destination")
 	_expect(str(departure_snapshot.get("exploration_phase", "")) == "Exploring", "ExplorationManager consumes EncounterContext before Exploration HUD opens")
-	_expect(not _is_panel_visible(session, "ChartPanel"), "Chart panel closes after departure")
-	_expect(_is_panel_visible(session, "ExplorationPanel"), "Exploration HUD surface is visible after departure")
+	_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "Exploration scene is active after departure")
 	_expect(session.find_child("SearchInteractPoint", true, false) != null, "Exploration has a spatial search interaction point")
 	_expect(session.find_child("ReturnInteractPoint", true, false) != null, "Exploration has a spatial return interaction point")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandWalkBoundary"), "Exploration has a walkable island boundary")
@@ -211,12 +209,6 @@ func _run() -> void:
 	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("携带 0/500"), "Exploration scene starts with dynamic extraction status")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration threat zone is hidden before pressure")
 	_expect(not hub.call("DebugNodeVisible", "HubDeckFloor"), "Hub greybox floor is hidden while in Exploration")
-	_expect(_label_text(session, "ExplorationTitleLabel") == "雾海搜撤记录", "Exploration surface has a clear title")
-	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Exploration surface shows selected route")
-	_expect(_label_text(session, "ExplorationResourceLabel").contains("资源压力"), "Exploration surface shows resource pressure feedback")
-	_expect(_label_text(session, "ExplorationThreatLabel").contains("威胁反馈"), "Exploration surface shows threat feedback")
-	_expect(_label_text(session, "ExplorationHullLabel").contains("船体状态"), "Exploration surface shows hull feedback")
-	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("恢复提示"), "Exploration surface shows recovery feedback")
 	var exploration_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
 	_expect(exploration_walk_bounds.x > 900.0 and exploration_walk_bounds.y > 200.0, "Exploration exposes a meaningful walkable bounds size")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandMass"), "Exploration has a visible island mass")
@@ -226,7 +218,6 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconBeam"), "Exploration return landmark has a visible beacon beam")
 	_expect_scene_physics_contract(hub, "exploration_mist_island", "水平场景", "water", "blocking_static", "soft_overlap")
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "exploration_mist_island", "Current physics contract follows Exploration state")
-	_expect(_button_disabled(session, "ExplorationAdvanceButton"), "Search button is disabled before moving near the search landmark")
 	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	hub.call("OnExplorationAdvancePressed")
 	await process_frame
@@ -235,7 +226,6 @@ func _run() -> void:
 	hub.call("DebugSetPlayerPosition", Vector2(638, 613))
 	await process_frame
 	_expect(hub.call("DebugInteractionPrompt").contains("搜索微交互"), "Moving near the search point reveals a spatial search prompt")
-	_expect(not _button_disabled(session, "ExplorationAdvanceButton"), "Search button enables only near the search landmark")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(int(hub.call("DebugSearchPulseStage")) == 1, "First search interaction starts scan calibration instead of instant reward")
@@ -255,8 +245,6 @@ func _run() -> void:
 	_expect(str(search_snapshot.get("last_search_point_name", "")) == "雾灯残骸", "Exploration runtime exposes authored search point name")
 	_expect(int(search_snapshot.get("basic_supply_in_storage", 0)) == 9, "C# HubRuntime search consumes ResourcesManager supply")
 	_expect(int(search_snapshot.get("reward_carried", 0)) == 1, "C# HubRuntime search adds carried ResourcesManager reward")
-	_expect(_label_text(session, "ExplorationResourceLabel").contains("搜索消耗 1"), "Spatial search interaction creates resource pressure")
-	_expect(_label_text(session, "ExplorationThreatLabel").contains("低威胁"), "Spatial search interaction creates low threat feedback")
 	_expect(_label_text(session, "ExplorationPointSemanticLabel").contains("雾灯残骸"), "Exploration semantic label follows authored search point name")
 	_expect(_control_width(session, "ExplorationRouteProgressFill") > 250.0, "Exploration route progress strip advances after first search")
 
@@ -268,9 +256,6 @@ func _run() -> void:
 	_expect(int(damage_snapshot.get("reward_carried", 0)) == 2, "C# HubRuntime second advance keeps rewards in carried pool before return")
 	_expect(int(damage_snapshot.get("hull_integrity", 0)) == 94, "C# HubRuntime second advance applies ModuleHullManager damage")
 	_expect(str(damage_snapshot.get("exploration_substate", "")) == "Threatened", "ExplorationManager owns the threat substate after pressure")
-	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 180/500"), "Exploration second advance changes carried cargo")
-	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Exploration second advance escalates threat feedback")
-	_expect(_label_text(session, "ExplorationHullLabel").contains("94/100"), "Exploration second advance changes hull feedback")
 	_expect(hub.call("DebugNodeVisible", "ExplorationThreatZone"), "Exploration semantic threat zone appears after pressure")
 	_expect(_label_text(session, "ExplorationThreatSemanticLabel").contains("中威胁"), "Exploration threat semantic label follows manager threat text")
 
@@ -291,7 +276,7 @@ func _run() -> void:
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(int(hub.call("DebugReturnPrepStage")) == 1, "First return interaction preheats the ship instead of teleporting")
-	_expect(_is_panel_visible(session, "ExplorationPanel"), "Return preheat keeps the player in Exploration")
+	_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "Return preheat keeps the player in Exploration")
 	_expect(_control_width(session, "ExplorationReturnPrepFill") > 0.0, "Return flow shows engine preheat progress")
 	hub.call("TrySpatialInteraction")
 	await process_frame
@@ -301,7 +286,7 @@ func _run() -> void:
 	_expect(str(return_snapshot.get("hub_docking_state", "")) == "Landed", "HubManager returns to Landed after spatial Hub return")
 	_expect(int(return_snapshot.get("reward_carried", 0)) == 0, "ResourcesManager clears carried rewards after spatial Hub return")
 	_expect(int(return_snapshot.get("reward_in_storage", 0)) == 2, "ResourcesManager extracts rewards to storage after spatial Hub return")
-	_expect(not _is_panel_visible(session, "ExplorationPanel"), "Exploration panel closes on spatial Hub return")
+	_expect(str(hub.call("DebugCurrentScreen")) == "hub", "Exploration scene closes on spatial Hub return")
 	_expect(hub.call("DebugHubSpace") == "exterior", "Returning from Exploration lands on the island dock exterior")
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Docked ship exterior returns after Exploration")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field hides after Hub return")
@@ -318,11 +303,9 @@ func _run() -> void:
 
 	hub.call("OnLoadPressed")
 	await process_frame
-	_expect(_is_panel_visible(session, "ExplorationPanel"), "Loading exploration save restores Exploration HUD")
+	_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "Loading exploration save restores Exploration scene")
 	var loaded_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(loaded_onboarding.get("next_hint_step", "")) == "return_hub", "Loading mid-loop onboarding progress does not replay completed save/load hint")
-	_expect(_label_text(session, "ExplorationThreatLabel").contains("中威胁"), "Loading exploration save restores pressure step")
-	_expect(_label_text(session, "ExplorationRouteLabel").contains("雾海短程"), "Loading exploration save restores authored route display name")
 	var loaded_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(int(loaded_snapshot.get("reward_carried", 0)) == 2, "Canonical load restores carried ResourcesManager rewards")
 	_expect(int(loaded_snapshot.get("reward_in_storage", 0)) == 0, "Canonical load restores pre-return ResourcesManager storage state")
@@ -334,8 +317,9 @@ func _run() -> void:
 	for i in range(3):
 		hub.call("TrySpatialInteraction")
 		await process_frame
-	_expect(_label_text(session, "ExplorationResourceLabel").contains("载货 260/500"), "Exploration third advance locks in rewards")
-	_expect(_label_text(session, "ExplorationRecoveryLabel").contains("一轮压力循环完成"), "Exploration third advance completes pressure loop")
+	var third_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(third_snapshot.get("exploration_step", 0)) == 3, "Exploration third advance completes pressure loop")
+	_expect(int(third_snapshot.get("cargo_used", 0)) == 260, "Exploration third advance locks in rewards")
 	_expect(_label_text(session, "ExplorationExtractionSemanticLabel").contains("收益锁定 260/500"), "Exploration extraction semantic label switches to settlement-ready state")
 	_expect(_label_text(session, "SearchInteractPointLabel").contains("已搜索"), "Exploration search marker reflects completed search semantics")
 	await _save_runtime_screenshot(root, EXPLORATION_SEMANTICS_SCREENSHOT_PATH, "Exploration semantics screenshot")

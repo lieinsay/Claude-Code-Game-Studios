@@ -21,8 +21,6 @@ public partial class HubRuntime : Node2D
 
 	private readonly PlayableSliceDomainAdapter domain = new();
 	private readonly OnboardingManager onboarding = new();
-	private Control? chartPanel;
-	private Control? explorationPanel;
 	private Control? hubRoot;
 	private Control? playableLayer;
 	private Control? sceneLayer;
@@ -50,13 +48,6 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private ColorRect? chartMistSelectionFrame;
-	private ColorRect? chartMarketSelectionFrame;
-	private Label? chartStatusLabel;
-	private Label? explorationRouteLabel;
-	private Label? explorationResourceLabel;
-	private Label? explorationThreatLabel;
-	private Label? explorationHullLabel;
-	private Label? explorationRecoveryLabel;
 	private Label? explorationPointSemanticLabel;
 	private Label? explorationThreatSemanticLabel;
 	private Label? explorationExtractionSemanticLabel;
@@ -132,7 +123,7 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
-		if (IsVisible(explorationPanel))
+		if (currentScreen == "exploration")
 		{
 			if (key.Keycode == Key.Escape)
 			{
@@ -157,7 +148,7 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
-		if (IsVisible(chartPanel))
+		if (currentScreen == "chart")
 		{
 			if (key.Keycode == Key.Escape)
 			{
@@ -199,28 +190,24 @@ public partial class HubRuntime : Node2D
 
 		currentScreen = "chart";
 		domain.OpenChart();
-		ShowChartPanel();
+		ShowChartSurface();
 		SetChartStatus("航图桌已展开：选择一条可读航线后确认离港。");
 		UpdateOnboardingHint();
 	}
 
 	public void OnRouteMistPressed() => SelectDomainRoute("route.mist");
 
-	public void OnRouteMarketPressed() => SelectDomainRoute("route.market");
-
 	public void OnDepartPressed()
 	{
 		if (string.IsNullOrEmpty(selectedRoute))
 		{
 			SetChartStatus("请选择航线后再确认出发。");
-			GrabButton("RouteMistButton");
 			return;
 		}
 
 		if (!domain.ConfirmDeparture())
 		{
 			SetChartStatus($"出航失败：{domain.Snapshot.LastStatus}");
-			GrabButton("DepartButton");
 			return;
 		}
 
@@ -265,12 +252,10 @@ public partial class HubRuntime : Node2D
 		if (explorationStep >= 3)
 		{
 			SetFooter("一轮探索压力循环完成：回到空艇旁预热并驾驶返航。Ctrl+S 保存，Ctrl+L 加载。");
-			GrabButton("ExplorationReturnButton");
 		}
 		else
 		{
 			SetFooter("打捞完成：压力、威胁、船体反馈已更新；再次靠近残骸可启动下一轮扫描。Ctrl+S 保存，Ctrl+L 加载。");
-			GrabButton("ExplorationAdvanceButton");
 		}
 	}
 
@@ -380,7 +365,7 @@ public partial class HubRuntime : Node2D
 
 		if (currentScreen == "chart")
 		{
-			ShowChartPanel();
+			ShowChartSurface();
 			SetChartStatus($"已从存档恢复航线：{selectedRoute}");
 		}
 		else if (currentScreen == "exploration")
@@ -433,14 +418,6 @@ public partial class HubRuntime : Node2D
 	{
 		currentScreen = "hub";
 		hubSpace = "exterior";
-		if (chartPanel is not null)
-		{
-			chartPanel.Visible = false;
-		}
-		if (explorationPanel is not null)
-		{
-			explorationPanel.Visible = false;
-		}
 		SetHubControlsEnabled(true);
 		UpdateHubSummary();
 		SetWorldMode("hub");
@@ -532,6 +509,8 @@ public partial class HubRuntime : Node2D
 		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
 
 	public string DebugHubSpace() => hubSpace;
+
+	public string DebugCurrentScreen() => currentScreen;
 
 	public Godot.Collections.Dictionary DebugCurrentScenePhysicsContract()
 	{
@@ -1055,14 +1034,6 @@ public partial class HubRuntime : Node2D
 	private void CacheNodes()
 	{
 		hubRoot = FindControl("HubRoot");
-		chartPanel = FindControl("ChartPanel");
-		explorationPanel = FindControl("ExplorationPanel");
-		chartStatusLabel = FindChild("ChartStatusLabel", true, false) as Label;
-		explorationRouteLabel = FindChild("ExplorationRouteLabel", true, false) as Label;
-		explorationResourceLabel = FindChild("ExplorationResourceLabel", true, false) as Label;
-		explorationThreatLabel = FindChild("ExplorationThreatLabel", true, false) as Label;
-		explorationHullLabel = FindChild("ExplorationHullLabel", true, false) as Label;
-		explorationRecoveryLabel = FindChild("ExplorationRecoveryLabel", true, false) as Label;
 		storageValueLabel = FindChild("StorageValue", true, false) as Label;
 		cargoValueLabel = FindChild("CargoValue", true, false) as Label;
 		hullValueLabel = FindChild("HullValue", true, false) as Label;
@@ -1256,27 +1227,15 @@ public partial class HubRuntime : Node2D
 				new Vector2(370, 382),
 			],
 			new Color(0.46f, 0.66f, 0.62f, 0.92f));
-		AddScenePolygon(chartSceneItems, "ChartRouteMarketLine",
-			[
-				new Vector2(364, 382),
-				new Vector2(742, 432),
-				new Vector2(738, 450),
-				new Vector2(360, 400),
-			],
-			new Color(0.76f, 0.55f, 0.30f, 0.90f));
 		AddSceneEllipse(chartSceneItems, "ChartMistDestinationNode", new Vector2(684, 304), new Vector2(34, 22), new Color(0.40f, 0.64f, 0.56f, 0.98f));
-		AddSceneEllipse(chartSceneItems, "ChartMarketDestinationNode", new Vector2(792, 444), new Vector2(34, 22), new Color(0.70f, 0.48f, 0.28f, 0.98f));
 		chartMistSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMistSelectionFrame", new Vector2(630, 274), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
-		chartMarketSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMarketSelectionFrame", new Vector2(738, 414), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
 		chartMistSelectionFrame.Visible = false;
-		chartMarketSelectionFrame.Visible = false;
 		AddSceneLabel(chartSceneItems, "ChartMistRouteLabel", new Vector2(610, 334), new Vector2(180, 24), "雾海短程 / 雾灯残骸");
-		AddSceneLabel(chartSceneItems, "ChartMarketRouteLabel", new Vector2(702, 478), new Vector2(210, 24), "旧集市航道 / 旧集市边缘");
 		AddSceneRect(chartSceneItems, "ChartCompassPlate", new Vector2(930, 252), new Vector2(124, 124), new Color(0.18f, 0.29f, 0.30f, 0.95f));
 		AddSceneRect(chartSceneItems, "ChartCompassNeedle", new Vector2(988, 270), new Vector2(8, 88), new Color(0.76f, 0.64f, 0.38f, 0.98f));
 		AddSceneLabel(chartSceneItems, "ChartCompassLabel", new Vector2(934, 378), new Vector2(116, 24), "罗经稳定");
 		AddSceneRect(chartSceneItems, "ChartRiskNotePanel", new Vector2(918, 422), new Vector2(184, 86), new Color(0.20f, 0.22f, 0.18f, 0.92f));
-		AddSceneLabel(chartSceneItems, "ChartRiskNoteLabel", new Vector2(930, 430), new Vector2(160, 62), "可读航线：雾带低威胁 / 集市中威胁");
+		AddSceneLabel(chartSceneItems, "ChartRiskNoteLabel", new Vector2(930, 430), new Vector2(160, 62), "当前航线：雾带低威胁；其他目的地待审查后开放");
 		AddSceneLabel(chartSceneItems, "ChartSceneInstructionLabel", new Vector2(340, 520), new Vector2(594, 26), "选择航线后确认离港，航程会进入雾海搜撤。");
 	}
 
@@ -1427,12 +1386,6 @@ public partial class HubRuntime : Node2D
 		WireButton("SaveButton", OnSavePressed);
 		WireButton("LoadButton", OnLoadPressed);
 		WireButton("DeleteProgressButton", OnDeleteProgressPressed);
-		WireButton("RouteMistButton", OnRouteMistPressed);
-		WireButton("RouteMarketButton", OnRouteMarketPressed);
-		WireButton("DepartButton", OnDepartPressed);
-		WireButton("ChartCloseButton", ShowHub);
-		WireButton("ExplorationAdvanceButton", OnExplorationAdvancePressed);
-		WireButton("ExplorationReturnButton", OnExplorationReturnPressed);
 	}
 
 	private void WireButton(string nodeName, Action callback)
@@ -1457,37 +1410,19 @@ public partial class HubRuntime : Node2D
 		selectedRoute = domain.Snapshot.SelectedRouteId;
 		SetChartStatus($"已选择航线：{RouteName()}。按“确认出发”进入探索。");
 		UpdateChartSceneSelection();
-		GrabButton("DepartButton");
 		UpdateOnboardingHint();
 	}
 
-	private void ShowChartPanel()
+	private void ShowChartSurface()
 	{
-		if (chartPanel is not null)
-		{
-			chartPanel.Visible = true;
-		}
-		if (explorationPanel is not null)
-		{
-			explorationPanel.Visible = false;
-		}
 		SetHubControlsEnabled(false);
 		SetWorldMode("chart");
 		UpdateChartSceneSelection();
-		SetFooter("航图桌已展开：方向键在航线控件间移动，Esc 收起航图。");
-		GrabButton("RouteMistButton");
+		SetFooter("航图世界表面已展开：当前仅保留作者化航图场景和调试入口；Esc 返回船内。");
 	}
 
 	private void ShowExplorationSurface()
 	{
-		if (chartPanel is not null)
-		{
-			chartPanel.Visible = false;
-		}
-		if (explorationPanel is not null)
-		{
-			explorationPanel.Visible = true;
-		}
 		SetHubControlsEnabled(false);
 		SetWorldMode("exploration");
 		SetExplorationStatus();
@@ -1500,19 +1435,11 @@ public partial class HubRuntime : Node2D
 		{
 			chartMistSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.mist";
 		}
-		if (chartMarketSelectionFrame is not null)
-		{
-			chartMarketSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.market";
-		}
 	}
 
 	private void SetExplorationStatus()
 	{
 		var snapshot = domain.Snapshot;
-		if (explorationRouteLabel is not null)
-		{
-			explorationRouteLabel.Text = $"路线：{RouteName()}；探索进度 {snapshot.ExplorationStep}/3";
-		}
 		UpdateExplorationSceneSemantics(snapshot);
 
 		if (explorationStep <= 0)
@@ -1551,10 +1478,7 @@ public partial class HubRuntime : Node2D
 
 	private void SetExplorationLabels(string resourceText, string threatText, string hullText, string recoveryText)
 	{
-		if (explorationResourceLabel is not null) explorationResourceLabel.Text = resourceText;
-		if (explorationThreatLabel is not null) explorationThreatLabel.Text = threatText;
-		if (explorationHullLabel is not null) explorationHullLabel.Text = hullText;
-		if (explorationRecoveryLabel is not null) explorationRecoveryLabel.Text = recoveryText;
+		SetFooter($"{RouteName()} | {resourceText} | {threatText} | {hullText} | {recoveryText}");
 	}
 
 	private void UpdateExplorationSceneSemantics(PlayableSliceSnapshot snapshot)
@@ -1842,24 +1766,6 @@ public partial class HubRuntime : Node2D
 
 	private void RefreshExplorationActionAffordance()
 	{
-		if (FindChild("ExplorationAdvanceButton", true, false) is Button advanceButton)
-		{
-			var canSearch = currentScreen == "exploration" && nearestInteraction == "exploration_search";
-			advanceButton.Disabled = !canSearch;
-			advanceButton.FocusMode = canSearch ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
-			advanceButton.Text = canSearch
-				? searchPulseStage <= 0 ? "扫描残骸  E" : $"继续扫描 {searchPulseStage + 1}/3  E"
-				: "靠近残骸后扫描";
-		}
-		if (FindChild("ExplorationReturnButton", true, false) is Button returnButton)
-		{
-			var canReturn = currentScreen == "exploration" && nearestInteraction == "exploration_return";
-			returnButton.Disabled = !canReturn;
-			returnButton.FocusMode = canReturn ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
-			returnButton.Text = canReturn
-				? returnPrepStage <= 0 ? "预热返航引擎  E" : "驾驶返航  E"
-				: "靠近空艇后返航";
-		}
 	}
 
 	private float DistanceToMarker(Control? marker)
@@ -1893,7 +1799,7 @@ public partial class HubRuntime : Node2D
 
 	private void SetChartStatus(string text)
 	{
-		if (chartStatusLabel is not null) chartStatusLabel.Text = text;
+		SetFooter(text);
 	}
 
 	private void SetSaveStatus(string text)
@@ -1926,7 +1832,7 @@ public partial class HubRuntime : Node2D
 		{
 			OnboardingManager.FindHubHudStepId => "新手提示：查看船内状态，按 M 或靠近舵台按 E 打开航图桌。",
 			OnboardingManager.OpenChartStepId => "新手提示：打开航图后选择一条可见航线。",
-			OnboardingManager.SelectRouteStepId => "新手提示：选择“雾海短程”或旧集市航道，然后确认出发。",
+			OnboardingManager.SelectRouteStepId => "新手提示：选择“雾海短程”，然后确认出发。",
 			OnboardingManager.DepartRouteStepId => "新手提示：确认出发会进入雾海搜撤。",
 			OnboardingManager.AdvancePressureStepId => "新手提示：靠近漂浮残骸按 E 搜索，观察资源、威胁和船体反馈。",
 			OnboardingManager.NoticeSaveLoadStepId => "新手提示：Ctrl+S 保存、Ctrl+L 加载；按钮也可用。",
