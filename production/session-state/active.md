@@ -3,8 +3,17 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: 赭石岛灰盒运行时与自动证据已补齐；Scene Physics #20 / Scene Composition #19 story-done 已关闭；release handoff 仍因截图、P0 资产 / 音频、航行大场景 #20 / runtime 证据等缺口保持 BLOCKED_FOR_RELEASE。实现后用户反馈不再作为 release gate。
+Task: 赭石岛与航行大场景灰盒运行时 / 自动证据已补齐；Scene Physics #20 / Scene Composition #19 story-done 已关闭；release handoff 仍因窗口化截图 / 视觉证明、P0 资产 / 音频、release packet / waiver 等缺口保持 BLOCKED_FOR_RELEASE。实现后用户反馈不再作为 release gate。
 <!-- /STATUS -->
+
+## Session Extract -- Voyage Open World Greybox Runtime Evidence 2026-05-25
+- 当前分支: `codex/ochre-island-scene`。
+- 已按 `directed-content-modification production/scene-specs/voyage-open-world-scene.md` 补齐批准场景 `voyage_open_world_scene` 的 #20 灰盒合同、作者化数据、runtime debug 边界和自动证据；没有新增新场景对象，也没有删除旧 Godot 节点。
+- 运行时: `HubRuntime` 暴露 `voyageSceneItems`、`DebugShowVoyageOpenWorldScene(route_id)`、`DebugVoyageSceneSnapshot()`、`DebugScenePhysicsContract("voyage_open_world_scene")`，覆盖船首前景、航标链、雾带、残骸、大鸟剪影、目的地轮廓和撤退信标。
+- 内容: `src/presentation/playable_slice_authored_content.json` 包含 `voyage_open_world_scene` 的 scene-unit 原型 / 实例，并链接 `production/scene-specs/voyage-open-world-scene.md` 与 `voyage_air_lane_01`。
+- 证据: `production/qa/evidence/scene-unit-placement-voyage-open-world-evidence.md`；同步更新 `production/scene-specs/voyage-open-world-scene.md`、`production/scene-specs/scene-coverage-registry.md` 和 `production/scene-specs/scene-release-gate-handoff.md`。
+- 当前验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj --no-restore -p:UseSharedCompilation=false` PASS `1192/1192`；Godot 4.6 headless `tests/smoke/session_shell_visual_probe.gd` PASS，截图保存因 headless 显示驱动限制被脚本跳过；`git diff --check` PASS，只有 LF/CRLF 工作区提示。
+- Release handoff 仍为 `BLOCKED_FOR_RELEASE`: 航行大场景和赭石岛灰盒自动证据已补齐，但窗口化截图 / 视觉证明、P0 最终美术 / 音频资产或 waiver、release packet 汇总仍未完成。
 
 ## Session Extract -- Ochre Island Greybox Runtime Evidence 2026-05-25
 - 当前分支: `codex/ochre-island-scene`。

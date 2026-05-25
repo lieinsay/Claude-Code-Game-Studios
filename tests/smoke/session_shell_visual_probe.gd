@@ -358,6 +358,30 @@ func _run() -> void:
 	_expect(str(ochre_route_snapshot.get("selected_route_name", "")) == "赭石岛航线", "Ochre route display name is exposed to Godot UI")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreSelectionFrame"), "Chart scene highlights the selected ochre route")
 	_expect(_button_text(session, "ChartRouteOchreButton").contains("已选"), "Ochre route button reflects selected state")
+	_expect_scene_physics_contract(hub, "voyage_open_world_scene", "水平场景", "fog_or_cloud", "blocking_static", "soft_overlap")
+	hub.call("DebugShowVoyageOpenWorldScene", "route.ochre")
+	await process_frame
+	_expect(str(hub.call("DebugCurrentScreen")) == "voyage", "Debug voyage preview opens the voyage open-world scene")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "voyage_open_world_scene", "Current physics contract follows voyage open-world preview")
+	var voyage_snapshot := hub.call("DebugVoyageSceneSnapshot") as Dictionary
+	_expect(str(voyage_snapshot.get("scene_id", "")) == "voyage_open_world_scene", "Voyage debug snapshot identifies the scene")
+	_expect(str(voyage_snapshot.get("selected_route", "")) == "route.ochre", "Voyage debug snapshot keeps the selected ochre route")
+	_expect(bool(voyage_snapshot.get("departure_transition_ready", false)), "Voyage debug snapshot declares departure transition readiness")
+	_expect(bool(voyage_snapshot.get("active_pilot_view_ready", false)), "Voyage debug snapshot declares active pilot view readiness")
+	_expect(bool(voyage_snapshot.get("destination_silhouette_ready", false)), "Voyage debug snapshot declares destination silhouette readiness")
+	_expect(int(voyage_snapshot.get("risk_window_count", 0)) >= 3, "Voyage debug snapshot exposes fog, debris, and bird risk windows")
+	_expect(hub.call("DebugNodeVisible", "VoyageShipProwForeground"), "Voyage scene shows ship prow foreground")
+	_expect(hub.call("DebugNodeVisible", "VoyageBeaconChain"), "Voyage scene shows navigation beacon chain")
+	_expect(hub.call("DebugNodeVisible", "VoyageFogBank"), "Voyage scene shows fog bank readability pressure")
+	_expect(hub.call("DebugNodeVisible", "VoyageDebrisField"), "Voyage scene shows floating debris obstacle")
+	_expect(hub.call("DebugNodeVisible", "VoyageBirdShadow"), "Voyage scene shows bird evasion silhouette")
+	_expect(hub.call("DebugNodeVisible", "VoyageDestinationSilhouette"), "Voyage scene shows destination approach silhouette")
+	_expect(not bool(voyage_snapshot.get("ui_evidence_allowed", true)), "Voyage runtime evidence refuses UI-only proof")
+	hub.call("OnChartPressed")
+	await process_frame
+	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "Chart can reopen after voyage debug preview")
+	_press_button(session, "ChartRouteOchreButton")
+	await process_frame
 	_press_button(session, "ChartDepartButton")
 	await process_frame
 	var ochre_departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
@@ -623,6 +647,8 @@ func _expect_scene_physics_contract(
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/initial-island-scene.md", "hub_dock_ground")
 	if scene_id == "hub_ship_interior":
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ship-interior-layered-scene.md", "ship_deck_01")
+	if scene_id == "voyage_open_world_scene":
+		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/voyage-open-world-scene.md", "voyage_air_lane_01")
 	if scene_id == "exploration_mist_island":
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/mist-lamp-wreck-scene.md", "mist_wreck_ground_01")
 	if scene_id == "ochre_island_scene":

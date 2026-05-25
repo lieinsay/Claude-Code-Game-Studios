@@ -10,6 +10,7 @@ public partial class HubRuntime : Node2D
 	private static readonly Vector2 OchreIslandPlayerStart = new(214, 608);
 	private static readonly Rect2 HubWalkBounds = new(new Vector2(132, 380), new Vector2(1016, 252));
 	private static readonly Rect2 ShipInteriorWalkBounds = new(new Vector2(196, 424), new Vector2(836, 208));
+	private static readonly Rect2 VoyageOpenWorldBounds = new(new Vector2(96, 252), new Vector2(1088, 312));
 	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
 	private static readonly Rect2 OchreIslandWalkBounds = new(new Vector2(116, 404), new Vector2(1032, 232));
 	private const string DurableProgressFileName = "cloudweaver_playable_progress.json";
@@ -51,6 +52,7 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> hubExteriorSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> hubInteriorSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> voyageSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
 	private ColorRect? chartMistSelectionFrame;
@@ -145,6 +147,26 @@ public partial class HubRuntime : Node2D
 			else if (key.Keycode == Key.E)
 			{
 				TrySpatialInteraction();
+				GetViewport().SetInputAsHandled();
+			}
+			else if (IsSaveShortcut(key))
+			{
+				OnSavePressed();
+				GetViewport().SetInputAsHandled();
+			}
+			else if (IsLoadShortcut(key))
+			{
+				OnLoadPressed();
+				GetViewport().SetInputAsHandled();
+			}
+			return;
+		}
+
+		if (currentScreen == "voyage")
+		{
+			if (key.Keycode == Key.Escape)
+			{
+				ShowHub();
 				GetViewport().SetInputAsHandled();
 			}
 			else if (IsSaveShortcut(key))
@@ -389,6 +411,7 @@ public partial class HubRuntime : Node2D
 		var restoredScreenName = currentScreen switch
 		{
 			"chart" => "航图桌",
+			"voyage" => "航行大场景记录",
 			"exploration" => "雾海搜撤记录",
 			_ => "空艇停泊区",
 		};
@@ -398,6 +421,11 @@ public partial class HubRuntime : Node2D
 		{
 			ShowChartSurface();
 			SetChartStatus($"已从存档恢复航线：{selectedRoute}");
+		}
+		else if (currentScreen == "voyage")
+		{
+			ShowVoyageSurface();
+			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 航行大场景记录");
 		}
 		else if (currentScreen == "exploration")
 		{
@@ -543,11 +571,45 @@ public partial class HubRuntime : Node2D
 
 	public string DebugCurrentScreen() => currentScreen;
 
+	public void DebugShowVoyageOpenWorldScene(string routeId)
+	{
+		if (!string.IsNullOrWhiteSpace(routeId))
+		{
+			selectedRoute = routeId;
+		}
+		currentScreen = "voyage";
+		playerPosition = new Vector2(640, 540);
+		ShowVoyageSurface();
+		UpdateOnboardingHint();
+	}
+
+	public Godot.Collections.Dictionary DebugVoyageSceneSnapshot()
+	{
+		var routeId = string.IsNullOrWhiteSpace(selectedRoute) ? "route.mist" : selectedRoute;
+		return new Godot.Collections.Dictionary
+		{
+			["scene_id"] = "voyage_open_world_scene",
+			["current_screen"] = currentScreen,
+			["selected_route"] = routeId,
+			["selected_route_name"] = domain.GetRouteDisplayName(routeId),
+			["runtime_boundary"] = "data_driven_voyage_open_world_greybox",
+			["departure_transition_ready"] = true,
+			["active_pilot_view_ready"] = true,
+			["destination_silhouette_ready"] = true,
+			["risk_window_count"] = 3,
+			["risk_windows"] = "fog_band,debris_field,bird_shadow",
+			["ui_evidence_allowed"] = false,
+		};
+	}
+
 	public Godot.Collections.Dictionary DebugCurrentScenePhysicsContract()
 	{
-		var sceneId = currentScreen == "exploration"
-			? ActiveExplorationSceneId()
-			: hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock";
+		var sceneId = currentScreen switch
+		{
+			"voyage" => "voyage_open_world_scene",
+			"exploration" => ActiveExplorationSceneId(),
+			_ => hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock",
+		};
 		return DebugScenePhysicsContract(sceneId);
 	}
 
@@ -601,6 +663,29 @@ public partial class HubRuntime : Node2D
 				"stairs_ladders: represented as future vertical connectors; glass: cockpit window visual-only; mirror: none; elastic: none; pushable: storage crates not pushable in current slice",
 				"Clamp player into ShipInteriorWalkBounds; exit door soft_overlap returns to hub_island_dock if pathing feels trapped",
 				10),
+			"voyage_open_world_scene" => BuildScenePhysicsContract(
+				sceneId,
+				"水平场景",
+				VoyageOpenWorldBounds,
+				"air-lane plane supports up/down/left/right piloting readability; ship prow and bird silhouettes are height_only cues while fog, beacon chain, and destination silhouettes preserve heading and depth",
+				"primary_walkable_layer=voyage_air_lane_01; walkable_layer: safe_air_lane, beacon_chain_lane, retreat_vector; transition_layer: departure_from_hub_to_destination_scene; height_only_layer: ship_prow_foreground, bird_shadow, destination_silhouette; blocked_layer: debris_field, deep_cloud_wall; visual_layer: fog_bank, far_cloud_horizon",
+				"behind_object_reveal=N/A true for floor_cutaway/interior_instance; fog and bird shadow may occlude for under 1s but debris keeps blocking_static collision identity and never becomes a hidden behind-object passage",
+				"N/A true: single exterior flight lane; floor_id=voyage_air_lane_01; floor_index=0; is_active_floor=true; visibility_mode=full_visible; walkable_bounds=VoyageOpenWorldBounds; vertical_connectors=departure_to_destination_scene; occluders_hidden_above=none; interactions_enabled=heading,throttle,scan,evade,retreat",
+				"voyage_air_lane_01",
+				"voyage_air_lane_01",
+				0,
+				true,
+				"full_visible",
+				"departure_to_destination_scene",
+				"none",
+				"heading,throttle,scan,evade,retreat",
+				"N/A true: no passable behind-object route in current Voyage slice; debris remains blocking_static and fog/cloud remains declared visual or temporary readability pressure",
+				"2.2m player height = 28px marker; ship prow foreground spans about 8 player-widths; debris gaps stay >= 1.1x player clear width in greybox evidence",
+				"z_far_cloud_horizon < z_voyage_air_lane < z_risk_units < z_ship_prow_foreground < z_prompt",
+				"blocking_static: voyage_debris_field, deep_cloud_wall; soft_overlap: player_marker, voyage_air_lane, voyage_beacon_chain, voyage_retreat_beacon, destination_silhouette; height_marker: ship_prow_foreground, bird_shadow",
+				"fog_or_cloud: visual_only readability pressure in current greybox; debris_field: blocking_static hazard; bird_shadow: hazardous_warning height marker; retreat_beacon: trigger_only escape vector",
+				"Clamp player into VoyageOpenWorldBounds; retreat beacon and safe air lane remain visible so lost-heading or occlusion states can recover within 2 seconds",
+				9),
 			"exploration_mist_island" => BuildScenePhysicsContract(
 				sceneId,
 				"水平场景",
@@ -754,6 +839,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
+			"voyage_open_world_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
@@ -761,7 +847,7 @@ public partial class HubRuntime : Node2D
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "hub_island_dock" or "hub_ship_interior" or "exploration_mist_island" or "ochre_island_scene";
+		sceneId is "hub_island_dock" or "hub_ship_interior" or "voyage_open_world_scene" or "exploration_mist_island" or "ochre_island_scene";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -842,6 +928,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "blocking_static: hub_island_main_mass, hub_docked_ship_hull, hub_waterline; soft_overlap: player_marker, hub_dock_plank_walkway, hub_boarding_ramp; height_marker: hub_airship_envelope",
 			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, helm_console_prop, ship_exit_threshold",
+			"voyage_open_world_scene" => "blocking_static: voyage_debris_field, deep_cloud_wall; soft_overlap: player_marker, voyage_air_lane, voyage_beacon_chain, voyage_retreat_beacon, destination_silhouette; height_marker: ship_prow_foreground, bird_shadow",
 			"exploration_mist_island" => "blocking_static: exploration_island_mass, exploration_cliff_edge, return_ship_hull, mist_sea_boundary; soft_overlap: player_marker, exploration_island_path, search_wreck_prop, return_helm_anchor, mist_horizon_fog; height_marker: search_wreck_mast, return_beacon_beam, exploration_threat_zone",
 			"ochre_island_scene" => "blocking_static: ochre_island_mass, ochre_island_boundary; soft_overlap: player_marker, ochre_walk_path, banded_iron_ore, ochre_return_anchor, ochre_cloud_horizon; height_marker: ochre_ridge_shadow",
 			_ => "",
@@ -859,6 +946,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "player_unit=1.0; door_or_passage hub_boarding_ramp clear width >= 1.1x player; landmark hub_docked_ship_hull >= 2.0x player; height_marker hub_airship_envelope visual-only",
 			"hub_ship_interior" => "player_unit=1.0; room bays are room-scale landmarks; helm/storage/engine anchors are 0.8-1.3x player-readable interactables; exit threshold clear width >= 1.1x player",
+			"voyage_open_world_scene" => "player_unit=1.0; safe air-lane clear width >= 1.1x player; debris gaps readable before contact; ship prow foreground about 8x player width visual reference; destination silhouette is visual-only landmark",
 			"exploration_mist_island" => "player_unit=1.0; search_wreck about 6 player-widths; return_ship about 5 player-widths; beacon/mast height markers visual-only; path clear width >= 1.1x player",
 			"ochre_island_scene" => "player_unit=1.0; banded_iron_ore 1.5-2.5x player width resource node; return_anchor clear width >= 1.1x player; island mass >= 2.0x player height",
 			_ => "",
@@ -869,6 +957,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "water=gameplay_affecting blocking_static hazard boundary with no passability implication; glass=none; mirror=none; fog/cloud=visual_only sky backdrop",
 			"hub_ship_interior" => "glass=cockpit_window visual_only blocking_static, transparent but not passable/interactable; mirror=none; water=none; reflective_metal=visual_only hull trim",
+			"voyage_open_world_scene" => "fog_or_cloud=visual_only readability pressure in current greybox; debris_field=gameplay_affecting blocking_static hazard; bird_shadow=hazardous_warning height marker; retreat_beacon=trigger_only escape vector; water=none; glass=none; mirror=none",
 			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
 			"ochre_island_scene" => "ledge_or_void=gameplay_affecting blocking_static island edge; ore_vein=resource_node trigger_only breakable state; fog/cloud=visual_only cloud horizon; water=none; glass=none; mirror=none",
 			_ => "",
@@ -889,6 +978,13 @@ public partial class HubRuntime : Node2D
 				BuildPhysicalBehavior("ship_exit_threshold", "trigger_only", "trigger_only + soft_overlap", "spatial exit anchor; no entity collision; requires proximity and Use dispatch", "exit prompt at threshold", "player_unit", 30, "trigger_only never changes room collision", "escape interaction returns to hub_island_dock", "world_playable_scene", false),
 				BuildPhysicalBehavior("storage_crate_prop", "blocking_static", "blocking_static", "static crate blocks readability footprint; pushable behavior is not implemented until a later contract adds priority", "solid crate silhouette", "player_unit", 20, "blocking_static applies unless a future pushable tag with priority is declared", "clamp player into ShipInteriorWalkBounds; crate does not move", "world_playable_scene", false),
 				BuildPhysicalBehavior("cockpit_window_glass", "visual_only_glass", "glass_clear + visual_only", "transparent surface; not passable and not interactable", "window transparency, no Use prompt", "player_unit readability only", 10, "visual_only cannot imply passage or interaction", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			"voyage_open_world_scene" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("voyage_debris_field", "hazardous_obstacle", "hazardous + blocking_static", "floating debris blocks the unsafe center line; no pushable physics in current greybox", "debris silhouettes, impact warning, and safe gap readability", "player_unit, ship_prow_foreground", 85, "hazardous debris resolves before fog/cloud visuals and before retreat trigger", "clamp heading back into safe air lane or retreat vector", "world_playable_scene", false),
+				BuildPhysicalBehavior("bird_shadow", "hazardous_warning", "hazardous + height_marker + visual_warning", "large bird is a temporary evasion cue; it does not create shooting or enemy targeting", "bird silhouette approach, wing-pressure warning, and departure cue", "player_unit, ship_prow_foreground", 70, "hazardous warning can override visual-only fog but does not own damage", "shift to safe air lane or hold until the shadow leaves", "world_playable_scene", false),
+				BuildPhysicalBehavior("voyage_retreat_beacon", "trigger_only", "trigger_only + soft_overlap", "retreat vector remains available during pressure travel; no entity collision", "return beacon brightens and world motion reverses when retreat is selected", "player_unit", 40, "trigger_only cannot override hazardous debris collision", "escape interaction returns to hub_ship_interior or the last safe route state", "world_playable_scene", false),
+				BuildPhysicalBehavior("voyage_fog_bank", "visual_only_fog", "fog_or_cloud + visual_only", "fog bank reduces readability only in current greybox; no hidden collision or slow field is implemented without a later contract", "destination silhouette fades and beacon chain stays visible", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "clear fog overlay within 1s or clamp to safe heading", "world_playable_scene", false),
 			},
 			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
@@ -943,6 +1039,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "hazardous:80 > trigger_only:30 > visual_only_height_marker:10",
 			"hub_ship_interior" => "trigger_only:30 > blocking_static:20 > visual_only_glass:10",
+			"voyage_open_world_scene" => "hazardous_obstacle:85 > hazardous_warning:70 > trigger_only:40 > visual_only_fog:10",
 			"exploration_mist_island" => "hazardous:90 > hazardous_warning:70 > trigger_only:40/35 > visual_only_fog:10",
 			"ochre_island_scene" => "hazardous_boundary:80 > resource_node:55 > trigger_only:35 > visual_only_fog:10",
 			_ => "",
@@ -953,6 +1050,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "If a behavior tag lacks priority, implementation readiness fails; waterline clamp and ramp escape interaction are the recovery fallback.",
 			"hub_ship_interior" => "If a behavior tag lacks priority, implementation readiness fails; static crate remains non-pushable until pushable priority and recovery are declared.",
+			"voyage_open_world_scene" => "If a behavior tag lacks priority, implementation readiness fails; debris collision and bird warning cannot be inferred from UI text, and retreat vector remains the recovery fallback.",
 			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; hazardous boundary clamp wins over trigger-only anchors and visual fog.",
 			"ochre_island_scene" => "If a behavior tag lacks priority, implementation readiness fails; resource-node harvest cannot override island-edge clamp and visual cloud never proves physics.",
 			_ => "",
@@ -1163,6 +1261,7 @@ public partial class HubRuntime : Node2D
 
 		AddHubGreyboxSet();
 		AddChartGreyboxSet();
+		AddVoyageOpenWorldGreyboxSet();
 		AddExplorationGreyboxSet();
 		AddOchreIslandGreyboxSet();
 		hubShipEntryMarker = AddWorldMarker("ShipEntryInteractPoint", new Vector2(202, 584), new Color(0.45f, 0.62f, 0.52f), "登船 E");
@@ -1326,6 +1425,38 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(chartSceneItems, "ChartRiskNoteLabel", new Vector2(930, 430), new Vector2(160, 62), "当前航线：雾带低威胁；其他目的地待审查后开放");
 		chartDepartButton = AddSceneButton(chartSceneItems, "ChartDepartButton", new Vector2(922, 518), new Vector2(184, 40), "确认出发", OnDepartPressed);
 		AddSceneLabel(chartSceneItems, "ChartSceneInstructionLabel", new Vector2(340, 520), new Vector2(594, 26), "选择航线后确认离港，航程会进入雾海搜撤。");
+	}
+
+	private void AddVoyageOpenWorldGreyboxSet()
+	{
+		AddSceneRect(voyageSceneItems, "VoyageSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.09f, 0.18f, 0.23f, 0.98f));
+		AddSceneRect(voyageSceneItems, "VoyageFarCloudHorizon", new Vector2(0, 168), new Vector2(1280, 86), new Color(0.40f, 0.54f, 0.55f, 0.42f));
+		AddSceneRect(voyageSceneItems, "VoyageAirLane", VoyageOpenWorldBounds.Position, VoyageOpenWorldBounds.Size, new Color(0.13f, 0.30f, 0.32f, 0.52f));
+		AddSceneRect(voyageSceneItems, "VoyageBeaconChain", new Vector2(214, 402), new Vector2(780, 12), new Color(0.82f, 0.70f, 0.38f, 0.92f));
+		AddSceneRect(voyageSceneItems, "VoyageFogBank", new Vector2(124, 260), new Vector2(316, 186), new Color(0.66f, 0.72f, 0.68f, 0.36f));
+		AddSceneRect(voyageSceneItems, "VoyageDeepCloudWall", new Vector2(64, 528), new Vector2(1160, 44), new Color(0.20f, 0.28f, 0.34f, 0.82f));
+		AddSceneRect(voyageSceneItems, "VoyageDebrisField", new Vector2(622, 410), new Vector2(212, 82), new Color(0.34f, 0.26f, 0.20f, 0.94f));
+		AddSceneRect(voyageSceneItems, "VoyageDebrisSafeGap", new Vector2(704, 430), new Vector2(58, 34), new Color(0.13f, 0.30f, 0.32f, 0.95f));
+		AddScenePolygon(voyageSceneItems, "VoyageBirdShadow",
+			[
+				new Vector2(910, 296),
+				new Vector2(1000, 340),
+				new Vector2(930, 356),
+				new Vector2(842, 338),
+			],
+			new Color(0.08f, 0.10f, 0.12f, 0.80f));
+		AddSceneEllipse(voyageSceneItems, "VoyageDestinationSilhouette", new Vector2(1032, 392), new Vector2(96, 38), new Color(0.64f, 0.44f, 0.26f, 0.86f));
+		AddSceneRect(voyageSceneItems, "VoyageRetreatBeacon", new Vector2(158, 462), new Vector2(72, 92), new Color(0.74f, 0.58f, 0.30f, 0.92f));
+		AddScenePolygon(voyageSceneItems, "VoyageShipProwForeground",
+			[
+				new Vector2(384, 614),
+				new Vector2(640, 548),
+				new Vector2(896, 614),
+				new Vector2(826, 652),
+				new Vector2(454, 652),
+			],
+			new Color(0.15f, 0.21f, 0.27f, 0.98f));
+		AddSceneLabel(voyageSceneItems, "VoyageSceneIdentityLabel", new Vector2(416, 212), new Vector2(448, 28), "航行大场景：主动驾驶空海航线");
 	}
 
 	private void AddExplorationGreyboxSet()
@@ -1556,6 +1687,13 @@ public partial class HubRuntime : Node2D
 		UpdateChartSceneSelection();
 		GrabButton(selectedRoute == "route.ochre" ? "ChartRouteOchreButton" : "ChartRouteMistButton");
 		SetFooter("航图世界表面已展开：当前仅保留作者化航图场景和调试入口；Esc 返回船内。");
+	}
+
+	private void ShowVoyageSurface()
+	{
+		SetHubControlsEnabled(false);
+		SetWorldMode("voyage");
+		SetFooter("航行大场景灰盒：船首、航标链、雾带、残骸、大鸟剪影和目的地轮廓已作为世界层证据显示。Esc 返回 Hub。");
 	}
 
 	private void ShowExplorationSurface()
@@ -1924,6 +2062,7 @@ public partial class HubRuntime : Node2D
 		SetSceneGroupVisible(hubExteriorSceneItems, mode == "hub" && hubSpace == "exterior");
 		SetSceneGroupVisible(hubInteriorSceneItems, mode == "hub" && hubSpace == "interior");
 		SetSceneGroupVisible(chartSceneItems, mode == "chart");
+		SetSceneGroupVisible(voyageSceneItems, mode == "voyage");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration" && ActiveExplorationSceneId() == "exploration_mist_island");
 		SetSceneGroupVisible(ochreSceneItems, mode == "exploration" && ActiveExplorationSceneId() == "ochre_island_scene");
 		UpdateChartSceneSelection();
@@ -2039,6 +2178,10 @@ public partial class HubRuntime : Node2D
 					: "按 E 驾驶空艇返航。";
 			}
 		}
+		else if (currentScreen == "voyage")
+		{
+			prompt = "航行大场景灰盒：WASD 验证航道平面，观察雾带、残骸、大鸟和目的地轮廓。";
+		}
 
 		if (interactionPromptLabel is not null)
 		{
@@ -2060,6 +2203,10 @@ public partial class HubRuntime : Node2D
 
 	private Rect2 CurrentWalkBounds()
 	{
+		if (currentScreen == "voyage")
+		{
+			return VoyageOpenWorldBounds;
+		}
 		if (currentScreen == "exploration")
 		{
 			return ActiveExplorationSceneId() == "ochre_island_scene"
