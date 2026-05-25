@@ -12,7 +12,7 @@ public sealed class PlayableSliceDomainAdapter
 	private const string OriginId = "location.cloudweaver-hub";
 	private const string BasicSupplyId = ModuleHullManager.BasicSupplyId;
 	private const string RepairKitId = ModuleHullManager.RepairKitId;
-	private const string RewardResourceId = "resource.beacon_crystal";
+	private const string DefaultRewardResourceId = "resource.beacon_crystal";
 	private const string ContentPath = "src/presentation/playable_slice_authored_content.json";
 	private readonly PlayableSliceRuntimeFixture fixture;
 	private readonly ChartManager chart;
@@ -89,6 +89,7 @@ public sealed class PlayableSliceDomainAdapter
 		NavigationProgress: navigation.GetVoyageProgress(),
 		EncounterDestinationId: activeEncounterContext?.DestinationId ?? string.Empty,
 		EncounterResult: activeEncounterContext?.VoyageResult ?? string.Empty,
+		ExplorationSceneId: fixture.SceneIdForRoute(string.IsNullOrWhiteSpace(lastCommittedRoute) ? chart.SelectedRouteId : lastCommittedRoute),
 		EncounterDamage: activeEncounterContext?.AccumulatedDamage ?? 0,
 		ExplorationPhase: exploration.CurrentPhase.ToString(),
 		ExplorationSubstate: exploration.CurrentSubstate.ToString(),
@@ -99,8 +100,8 @@ public sealed class PlayableSliceDomainAdapter
 		LastSearchMessage: lastSearchMessage,
 		BasicSupplyInStorage: resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId),
 		RepairKitsInStorage: resources.GetQuantity(ResourcePool.InStorage, RepairKitId),
-		RewardInStorage: resources.GetQuantity(ResourcePool.InStorage, RewardResourceId),
-		RewardCarried: resources.GetQuantity(ResourcePool.Carried, RewardResourceId),
+		RewardInStorage: resources.GetQuantity(ResourcePool.InStorage, CurrentRewardResourceId),
+		RewardCarried: resources.GetQuantity(ResourcePool.Carried, CurrentRewardResourceId),
 		CargoUsed: CargoUsed,
 		CargoCapacity: fixture.CargoCapacity,
 		StorageText: StorageText,
@@ -187,8 +188,8 @@ public sealed class PlayableSliceDomainAdapter
 		if (nextStep is 1 or 2)
 		{
 			resources.Remove(ResourcePool.InStorage, BasicSupplyId, 1);
-			var searchPoint = fixture.SearchPointForStep(nextStep);
-			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
+			var searchPoint = fixture.SearchPointForStep(lastCommittedRoute, nextStep);
+			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, SearchFormulaZone(searchPoint));
 			lastSearchPointId = searchPoint.PointId;
 			lastSearchPointName = searchPoint.DisplayName;
 			lastSearchMessage = search.IsEmpty
@@ -197,8 +198,8 @@ public sealed class PlayableSliceDomainAdapter
 		}
 		else if (nextStep == 3)
 		{
-			var searchPoint = fixture.SearchPointForStep(nextStep);
-			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, searchPoint.Zone);
+			var searchPoint = fixture.SearchPointForStep(lastCommittedRoute, nextStep);
+			var search = exploration.PerformSearch(searchPoint.PointId, SearchPointState.Unlooted, SearchFormulaZone(searchPoint));
 			lastSearchPointId = searchPoint.PointId;
 			lastSearchPointName = searchPoint.DisplayName;
 			lastSearchMessage = search.IsEmpty
@@ -208,7 +209,7 @@ public sealed class PlayableSliceDomainAdapter
 
 		if (nextStep == 2)
 		{
-			exploration.CheckThreatTrigger(fixture.SearchPointForStep(nextStep).ThreatPosition, "proximity");
+			exploration.CheckThreatTrigger(fixture.SearchPointForStep(lastCommittedRoute, nextStep).ThreatPosition, "proximity");
 		}
 
 		explorationStep = nextStep;
@@ -412,8 +413,16 @@ public sealed class PlayableSliceDomainAdapter
 			["uncommon"] = new List<(string, int, int)> { (point.RewardResourceId, point.QuantityMin, point.QuantityMax) },
 		};
 
+	private static string SearchFormulaZone(PlayableSearchPoint point) =>
+		// 赭石岛保留场景作者化区段，但复用探索系统已批准的安全核心区搜索公式。
+		point.Zone is "ore_core" or "ore_return" ? "A_core" : point.Zone;
+
 	private void StartNavigationAndExploration(string routeId, string destinationId, IReadOnlyList<string> hazardTags)
 	{
+		if (navigation.CurrentState != VoyageState.Idle)
+		{
+			navigation.ResetToIdleForNextVoyage();
+		}
 		navigation.OnRouteCommitted(routeId, destinationId, hazardTags);
 		navigation.ProcessVoyage(fixture.VoyageFastForwardSeconds);
 		activeEncounterContext ??= navigation.BuildEncounterContext();
@@ -548,7 +557,8 @@ public sealed class PlayableSliceDomainAdapter
 		package.Payload["player_x"] = state.PlayerX;
 		package.Payload["player_y"] = state.PlayerY;
 		package.Payload["footer"] = state.Footer;
-		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		package.Payload["reward_resource_id"] = CurrentRewardResourceId;
+		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, CurrentRewardResourceId);
 		package.Payload["last_search_point_id"] = lastSearchPointId;
 		package.Payload["last_search_point_name"] = lastSearchPointName;
 		package.Payload["last_search_message"] = lastSearchMessage;
@@ -566,15 +576,16 @@ public sealed class PlayableSliceDomainAdapter
 			ReadFloat(package.Payload, "player_y", 610.0f),
 			ReadString(package.Payload, "footer", ""));
 		explorationStep = Math.Max(0, sceneState.ExplorationStep);
-		var currentCarried = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		var restoredRewardResourceId = ReadString(package.Payload, "reward_resource_id", CurrentRewardResourceId);
+		var currentCarried = resources.GetQuantity(ResourcePool.Carried, restoredRewardResourceId);
 		if (currentCarried > 0)
 		{
-			resources.Remove(ResourcePool.Carried, RewardResourceId, currentCarried);
+			resources.Remove(ResourcePool.Carried, restoredRewardResourceId, currentCarried);
 		}
 		var restoredCarried = Math.Max(0, ReadInt(package.Payload, "reward_carried", 0));
 		if (restoredCarried > 0)
 		{
-			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
+			resources.Add(ResourcePool.Carried, restoredRewardResourceId, restoredCarried);
 		}
 		lastSearchPointId = fixture.ResolveSearchPointId(ReadString(package.Payload, "last_search_point_id", ""));
 		lastSearchPointName = ReadString(package.Payload, "last_search_point_name", SearchPointName(lastSearchPointId));
@@ -593,8 +604,11 @@ public sealed class PlayableSliceDomainAdapter
 	private int CargoUsed => TotalRewards * 80 + (explorationStep >= 2 ? 20 : 0);
 
 	private int TotalRewards =>
-		resources.GetQuantity(ResourcePool.InStorage, RewardResourceId)
-		+ resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		resources.GetQuantity(ResourcePool.InStorage, CurrentRewardResourceId)
+		+ resources.GetQuantity(ResourcePool.Carried, CurrentRewardResourceId);
+
+	private string CurrentRewardResourceId =>
+		fixture.SearchPointForStep(lastCommittedRoute, Math.Max(1, explorationStep)).RewardResourceId;
 
 	private string ThreatText => explorationStep switch
 	{
@@ -606,7 +620,8 @@ public sealed class PlayableSliceDomainAdapter
 
 	private string StorageText =>
 		$"基础补给 x{resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId)} / "
-		+ $"信标水晶 x{TotalRewards} / "
+		+ $"信标水晶 x{resources.GetQuantity(ResourcePool.InStorage, DefaultRewardResourceId) + resources.GetQuantity(ResourcePool.Carried, DefaultRewardResourceId)} / "
+		+ $"条带状铁矿 x{resources.GetQuantity(ResourcePool.InStorage, "resource.iron-ore") + resources.GetQuantity(ResourcePool.Carried, "resource.iron-ore")} / "
 		+ $"修理包 x{resources.GetQuantity(ResourcePool.InStorage, RepairKitId)}";
 
 	private static string ReadString(IReadOnlyDictionary<string, object?> payload, string key, string fallback) =>
@@ -667,6 +682,7 @@ public sealed record PlayableSliceSnapshot(
 	double NavigationProgress,
 	string EncounterDestinationId,
 	string EncounterResult,
+	string ExplorationSceneId,
 	int EncounterDamage,
 	string ExplorationPhase,
 	string ExplorationSubstate,
@@ -736,9 +752,9 @@ internal sealed class PlayableSliceRuntimeFixture
 	];
 	public IReadOnlyList<PlayableSearchPoint> SearchPoints { get; init; } =
 	[
-		new("sp.playable.1", "雾灯残骸", "Fallback first playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
-		new("sp.playable.2", "剪云裂隙", "Fallback threat playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
-		new("sp.playable.3", "返航浮标箱", "Fallback extraction playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+		new("sp.playable.1", "route.mist", "雾灯残骸", "Fallback first playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
+		new("sp.playable.2", "route.mist", "剪云裂隙", "Fallback threat playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "threat.playable-cloud-shear", 2.0d, 0.25d, 6),
+		new("sp.playable.3", "route.mist", "返航浮标箱", "Fallback extraction playable search point.", "A_core", "resource.beacon_crystal", 1, 1, "", 0.0d, 0.0d, 0),
 	];
 	public IReadOnlyDictionary<string, string> RouteIdMigrations { get; init; } =
 		new Dictionary<string, string>(StringComparer.Ordinal);
@@ -754,16 +770,30 @@ internal sealed class PlayableSliceRuntimeFixture
 	public string ResolveSearchPointId(string pointId) =>
 		SearchPointIdMigrations.TryGetValue(pointId, out var currentPointId) ? currentPointId : pointId;
 
+	public string SceneIdForRoute(string routeId)
+	{
+		var resolvedRouteId = ResolveRouteId(routeId);
+		return resolvedRouteId == "route.ochre" ? "ochre_island_scene" : "exploration_mist_island";
+	}
+
 	public int ThreatDamage => SearchPoints
 		.Where(point => !string.IsNullOrWhiteSpace(point.ThreatId))
 		.Select(point => point.ThreatDamage)
 		.DefaultIfEmpty(0)
 		.Max();
 
-	public PlayableSearchPoint SearchPointForStep(int step)
+	public PlayableSearchPoint SearchPointForStep(string routeId, int step)
 	{
-		var index = Math.Clamp(step, 1, SearchPoints.Count) - 1;
-		return SearchPoints[index];
+		var resolvedRouteId = ResolveRouteId(routeId);
+		var routePoints = SearchPoints
+			.Where(point => string.IsNullOrWhiteSpace(point.RouteId) || point.RouteId == resolvedRouteId)
+			.ToArray();
+		if (routePoints.Length == 0)
+		{
+			routePoints = SearchPoints.ToArray();
+		}
+		var index = Math.Clamp(step, 1, routePoints.Length) - 1;
+		return routePoints[index];
 	}
 
 	public static PlayableSliceRuntimeFixture Load(string path)
@@ -858,6 +888,7 @@ internal sealed class PlayableSliceRuntimeFixture
 		var searchPoints = array.EnumerateArray()
 			.Select(item => new PlayableSearchPoint(
 				ReadString(item, "point_id", ""),
+				ReadString(item, "route_id", ""),
 				ReadString(item, "display_name", ""),
 				ReadString(item, "description", ""),
 				ReadString(item, "zone", "A_core"),
@@ -942,6 +973,7 @@ internal sealed record PlayableRouteFixture(
 
 internal sealed record PlayableSearchPoint(
 	string PointId,
+	string RouteId,
 	string DisplayName,
 	string Description,
 	string Zone,

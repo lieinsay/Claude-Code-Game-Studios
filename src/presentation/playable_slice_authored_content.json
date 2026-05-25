@@ -24,7 +24,7 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "unit_spec": "production/unit-specs/dynamic-entities/player-controlled-entity.md",
-      "allowed_scene_ids": [ "hub_island_dock", "hub_ship_interior", "exploration_mist_island" ],
+      "allowed_scene_ids": [ "hub_island_dock", "hub_ship_interior", "exploration_mist_island", "ochre_island_scene" ],
       "behavior_tags": [ "trigger_only" ],
       "domain_owner": "player-movement-interaction"
     },
@@ -411,6 +411,102 @@
       "allowed_scene_ids": [ "exploration_mist_island" ],
       "behavior_tags": [ "hazardous", "trigger_only" ],
       "domain_owner": "combat-threat-handling"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.ochre_island_mass",
+      "display_name": "Ochre island main mass",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "small resource island >= 2.0x player height",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "blocking_static" ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.ochre_walk_path",
+      "display_name": "Ochre island walk path",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "passage_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "walkable resource path width >= 1.1x player",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "trigger_only" ],
+      "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.banded_iron_ore",
+      "display_name": "Banded iron ore vein",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "interactable_anchor",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "ore vein readable as 1.5-2.5x player width resource node",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/banded-iron-ore.md",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "trigger_only", "resource_node", "breakable" ],
+      "domain_owner": "resources-goods-capacity"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.ochre_return_anchor",
+      "display_name": "Ochre island return anchor",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "interactable_anchor",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "return anchor clear width >= 1.1x player",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "trigger_only" ],
+      "domain_owner": "airship-hub"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.ochre_island_boundary",
+      "display_name": "Ochre island edge boundary",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "blocked island edge larger than player",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "gameplay_affecting_boundary" ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.ochre_cloud_horizon",
+      "display_name": "Ochre island cloud horizon",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "soft_overlap",
+      "occlusion_layer": "background",
+      "scale_rule": "visual-only cloud horizon; no collision implication",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [ "ochre_island_scene" ],
+      "behavior_tags": [ "visual_only_fog" ],
+      "domain_owner": "scene-physics"
     }
   ],
   "scene_unit_instances": [
@@ -776,6 +872,94 @@
       "layer": "height_shadow",
       "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
       "state_hook": "threat_text"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.player_marker",
+      "prototype_id": "scene_unit.prototype.player_marker",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "player_marker",
+      "godot_node_path": "HubRoot/PlayableLayer/PlayerMarker",
+      "position": { "x": 214, "y": 608 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md",
+      "state_hook": "player_position"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.island_mass",
+      "prototype_id": "scene_unit.prototype.ochre_island_mass",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "ochre_island_mass",
+      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/OchreIslandMass",
+      "position": { "x": 596, "y": 510 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.walk_path",
+      "prototype_id": "scene_unit.prototype.ochre_walk_path",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "ochre_walk_path",
+      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/OchreWalkPath",
+      "position": { "x": 314, "y": 584 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.banded_iron_ore",
+      "prototype_id": "scene_unit.prototype.banded_iron_ore",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "banded_iron_ore",
+      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/BandedIronOreVein",
+      "position": { "x": 654, "y": 530 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md",
+      "state_hook": "ore_harvest_state",
+      "interaction_anchor_id": "banded_iron_ore_anchor"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.return_anchor",
+      "prototype_id": "scene_unit.prototype.ochre_return_anchor",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "ochre_return_anchor",
+      "godot_node_path": "HubRoot/PlayableLayer/InteractionLayer/OchreReturnInteractPoint",
+      "position": { "x": 214, "y": 594 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md",
+      "interaction_anchor_id": "ochre_return_anchor"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.edge_boundary",
+      "prototype_id": "scene_unit.prototype.ochre_island_boundary",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "ochre_island_boundary",
+      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/OchreIslandBoundary",
+      "position": { "x": 116, "y": 624 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md"
+    },
+    {
+      "instance_id": "scene_unit.instance.ochre_island_scene.cloud_horizon",
+      "prototype_id": "scene_unit.prototype.ochre_cloud_horizon",
+      "scene_id": "ochre_island_scene",
+      "unit_id": "ochre_cloud_horizon",
+      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/OchreCloudHorizon",
+      "position": { "x": 0, "y": 164 },
+      "floor_id": "ochre_island_ground_01",
+      "floor_index": 0,
+      "layer": "background",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md"
     }
   ],
   "id_migrations": {
@@ -806,6 +990,16 @@
       "navigation_hazard_tags": [ "safe", "low_threat" ]
     },
     {
+      "route_id": "route.ochre",
+      "display_name": "赭石岛航线",
+      "description": "通往小型资源岛的短程航线，用于验证第二目的地、条带状铁矿采集和返航闭环。",
+      "origin_id": "location.cloudweaver-hub",
+      "destination_id": "location.ochre-island",
+      "distance_band": "short",
+      "chart_hazard_tags": [ "resource", "low_threat" ],
+      "navigation_hazard_tags": [ "safe", "resource" ]
+    },
+    {
       "route_id": "route.market",
       "display_name": "旧集市航道",
       "description": "通往废旧集市边缘的中程航线，保留给后续集市与修复材料内容扩展。",
@@ -819,6 +1013,7 @@
   "search_points": [
     {
       "point_id": "sp.playable.1",
+      "route_id": "route.mist",
       "display_name": "雾灯残骸",
       "description": "半沉的导航灯架，能稳定产出一箱信标水晶并建立第一段载货压力。",
       "zone": "A_core",
@@ -828,6 +1023,7 @@
     },
     {
       "point_id": "sp.playable.2",
+      "route_id": "route.mist",
       "display_name": "剪云裂隙",
       "description": "云层剪切带中的高价值残片，搜索时触发环境威胁并压低船体完整度。",
       "zone": "A_core",
@@ -841,10 +1037,41 @@
     },
     {
       "point_id": "sp.playable.3",
+      "route_id": "route.mist",
       "display_name": "返航浮标箱",
       "description": "靠近返航信标的补给箱，用于完成收益锁定和撤离语义验证。",
       "zone": "A_core",
       "reward_resource_id": "resource.beacon_crystal",
+      "quantity_min": 1,
+      "quantity_max": 1
+    },
+    {
+      "point_id": "sp.ochre.1",
+      "route_id": "route.ochre",
+      "display_name": "条带状铁矿露头",
+      "description": "靠近赭色岩面确认可采矿脉，建立资源岛身份和采集焦点。",
+      "zone": "ore_core",
+      "reward_resource_id": "resource.iron-ore",
+      "quantity_min": 1,
+      "quantity_max": 1
+    },
+    {
+      "point_id": "sp.ochre.2",
+      "route_id": "route.ochre",
+      "display_name": "可采铁矿带",
+      "description": "完成一次靠近 + Use 采集，矿脉状态转为已采集并给出容量反馈。",
+      "zone": "ore_core",
+      "reward_resource_id": "resource.iron-ore",
+      "quantity_min": 1,
+      "quantity_max": 1
+    },
+    {
+      "point_id": "sp.ochre.3",
+      "route_id": "route.ochre",
+      "display_name": "返航矿样包",
+      "description": "锁定本轮基础铁矿收益，证明采集后状态和返航路径仍可读。",
+      "zone": "ore_return",
+      "reward_resource_id": "resource.iron-ore",
       "quantity_min": 1,
       "quantity_max": 1
     }

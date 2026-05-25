@@ -2,7 +2,7 @@
 
 > **Epic**: #19 Complete Scene Composition and Acceptance
 > **Story**: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-25
 > **登记规则**: 每个可进入场景在被视为 production-ready 前，必须链接场景规格、等价完整来源说明、待补规格缺口，或明确的 #20 豁免。
 > **语言规则**: 除路径、代码符号、命令、稳定 ID、状态枚举、ADR/TR 编号等必要内容外，本目录文档必须使用中文。
 
@@ -26,6 +26,7 @@
 | `tracked-gap` | 场景已知且需要，但尚无完整可进入场景规格。 |
 | `exempt-no-physical-units` | 场景没有玩法相关物理单位，并明确说明 #20 不适用。 |
 | `spec_drafted` | 独立场景规格已起草；仍可能需要 Codex 规格一致性检查、运行时证据或截图证据。 |
+| `runtime_greybox_evidence_added` | 独立规格、作者化数据、灰盒运行时和自动证据已建立；release-ready 仍取决于截图、P0 资产 / 音频、Codex release packet 或 waiver。 |
 
 ## 当前可进入场景覆盖
 
@@ -35,7 +36,7 @@
 | `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `spec_drafted` | 运行时合同位于 `hub_ship_interior`；第一条原型 / 摆放实例作者化切片已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/ship-interior-layered-scene.md` | `design/gdd/airship-hub.md`; `production/scene-specs/ship-interior-layered-scene.md`; `production/qa/evidence/scene-unit-placement-taxonomy-evidence.md`; `production/qa/evidence/scene-physics-layer-cutaway-floor-state-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md` | 补 release handoff、截图刷新和规格一致性检查。 |
 | `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `spec_drafted` | implementation readiness 前需要 #20 合同：伪 3D 相机对齐飞行、航线边界、风险物、云 / 雾特殊表面、恢复规则 | `production/scene-specs/voyage-open-world-scene.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 起草 #20 合同和运行时证据计划。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | 运行时合同位于 `exploration_mist_island`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json` 和 `production/scene-specs/mist-lamp-wreck-scene.md` | `design/gdd/exploration-scavenge-scenario.md`; `production/scene-specs/mist-lamp-wreck-scene.md`; `production/polish-backlog/story-polish-015-search-return-microgame-design-note.md`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `production/qa/evidence/scene-physics-unit-catalog-evidence.md`; `production/qa/evidence/scene-physics-dynamic-behavior-recovery-evidence.md` | 补 release handoff、截图刷新和规格一致性检查。 |
-| `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | implementation readiness 前需要 #20 合同：小型资源岛地形、条带状铁矿、采集锚点、返航点、边界和恢复规则 | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md` | 创建适合性已通过；下一步是补 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据计划。 |
+| `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `runtime_greybox_evidence_added` | 运行时合同位于 `ochre_island_scene`；原型 / 摆放实例作者化已链接 `src/presentation/playable_slice_authored_content.json`、`production/scene-specs/ochre-island-scene.md` 和 `production/unit-specs/fixed-scene-objects/banded-iron-ore.md` | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `production/qa/evidence/scene-unit-placement-ochre-island-evidence.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md` | 补窗口化截图 / 视觉证明、P0 最终美术 / 音频资产或 waiver，并纳入 release packet。 |
 | `old_market_edge_scene` | 旧集市边缘 | 后续市场内容候选 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 当前 demo 第二岛屿改为 `ochre_island_scene`；旧集市保留为后续市场缺口，不进入本轮 runtime 替换。 |
 | `repair_node_scene` | 世界修复 / 解锁点 | 未来修复地点入口 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为修复点会包含玩法相关物理单位 | `design/gdd/world-repair-unlock.md`; `design/gdd/scene-composition-system.md` | 在任何修复场景被视为视觉完成前起草规格；除非明确加入，否则不属于当前 demo 可读性队列。 |
 
@@ -75,4 +76,4 @@
 
 ## Release Handoff 状态
 
-Release handoff 输入位于 `production/scene-specs/scene-release-gate-handoff.md`。当前状态为 `BLOCKED_FOR_RELEASE`，直到自动证据、截图证据、#20 合同、P0 缺口处理和修复 / 市场追踪缺口被解决或豁免。
+Release handoff 输入位于 `production/scene-specs/scene-release-gate-handoff.md`。当前状态为 `BLOCKED_FOR_RELEASE`，直到自动证据、截图证据、#20 合同、P0 缺口处理和修复 / 市场追踪缺口被解决或豁免。赭石岛的灰盒运行时和自动证据已补齐，但截图 / P0 资产仍阻塞 release-ready 声明。

@@ -2,7 +2,7 @@
 
 > **Epic**: #19 Complete Scene Composition and Acceptance
 > **Story**: `production/epics/scene-composition-system/story-004-user-readability-release-gate.md`
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-25
 > **目的**: 提供场景就绪度的 release checklist / gate-check 输入。
 > **语言规则**: 除路径、代码符号、命令、稳定 ID、状态枚举、ADR/TR 编号等必要内容外，本目录文档必须使用中文。
 
@@ -43,9 +43,9 @@ release_handoff_ready =
 | --- | --- | --- | --- | --- |
 | `initial_island_scene` | 初始岛屿作者化单位链路已实现；仍需截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | P0 资产缺口需要进入交接包。 |
 | `ship_interior_layered` | 船内作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | 水平分层、剖切、P0 资产缺口需要进入交接包。 |
-| `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据和 Codex 规格一致性检查仍缺失。 | `directed-content-modification` | `BLOCKED` | 场景设计存在，但实现和证据门禁尚未完成。 |
+| `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据和 Codex 规格一致性检查仍缺失。 | `directed-content-modification` | `BLOCKED` | 尚无 #20 合同、作者化单位和运行时证据；场景设计存在，但实现和证据门禁尚未完成。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | P0 资产缺口和截图刷新需要进入交接包。 |
-| `ochre_island_scene` | 赭石岛已通过创建适合性审查并起草规格；仍无 #20 合同、独立实现 / 资产边界、作者化数据或运行时证据。 | `directed-content-modification` | `BLOCKED` | 尚无 #20 合同、作者化单位和运行时证据；规格二次人工审核不是实现硬门。 |
+| `ochre_island_scene` | 赭石岛规格、作者化数据、#20 灰盒运行时合同、铁矿采集和返航自动证据已通过；headless 截图因显示驱动跳过。 | `directed-content-modification` | `BLOCKED` | 自动证据已补齐，但 release packet 仍缺窗口化截图 / 视觉证明、P0 最终美术 / 音频资产处理或明确 waiver。 |
 | `old_market_edge_scene` | `TRACKED_GAP`，保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `directed-content-modification` | `BLOCKED` | 后续市场阶段再补独立场景规格和 #20 合同。 |
 
 ## Waiver 要求
@@ -67,6 +67,6 @@ waiver 不能让 UI-only 证据计入场景证据。它只能承认某个已知�
 在 release checklist 或 gate-check 中使用以下摘要：
 
 - Scene Composition #19: `BLOCKED_FOR_RELEASE`
-- 原因: 当前 demo 场景集已修正为初始岛屿、分层船内、航行大场景、雾灯残骸和赭石岛。赭石岛 #20 / 独立实现边界 / 运行时证据、航行 #20 / 运行时证据仍缺失；旧集市边缘已降为后续市场内容缺口。
-- release-ready 声明前必需: 在独立场景规格 / Codex 审核附上后，补齐自动证据、截图证据、#20 合同和 P0 资产缺口处理。
+- 原因: 当前 demo 场景集已修正为初始岛屿、分层船内、航行大场景、雾灯残骸和赭石岛。赭石岛灰盒自动证据已补齐；航行大场景 #20 / 运行时证据仍缺失，当前场景集的截图证据和 P0 最终资产 / 音频缺口仍未进入 release packet 或 waiver。
+- release-ready 声明前必需: 在独立场景规格 / Codex 审核附上后，补齐自动证据、截图证据、#20 合同和 P0 资产缺口处理；赭石岛下一步重点是窗口化截图 / 视觉证明与 P0 资产 / 音频处理。
 - 本交接不处理: 修复可读性缺陷、制作最终美术 / 音频、替换全局 release checklist。

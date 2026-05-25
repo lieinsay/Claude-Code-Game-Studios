@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CloudWeaverVoyage.Core;
 using CloudWeaverVoyage.Presentation;
 
 var total = 0;
@@ -90,6 +91,7 @@ var sceneUnitPrototypeAllowedSceneIds = new Dictionary<string, HashSet<string>>(
 var sceneUnitInstanceIds = new HashSet<string>(StringComparer.Ordinal);
 var hubIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var shipInteriorUnitIds = new HashSet<string>(StringComparer.Ordinal);
+var ochreIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var unitSpecContentByPath = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -106,6 +108,14 @@ Check(routeCount >= 2, "authored content has multiple route rows");
 Check(searchPointCount >= 3, "authored content has multiple search point rows");
 Check(sceneUnitPrototypes.ValueKind == JsonValueKind.Array && sceneUnitPrototypes.GetArrayLength() >= 8, "authored content has reusable scene-unit prototypes");
 Check(sceneUnitInstances.ValueKind == JsonValueKind.Array && sceneUnitInstances.GetArrayLength() >= 10, "authored content has placed scene-unit instances");
+
+var registryProbe = new Registry();
+registryProbe.InitializeContent();
+Check(registryProbe.QueryById("resource.iron-ore").Status == RegistryQueryStatus.Found, "registry exposes banded iron ore resource");
+var resourcesProbe = new ResourcesManager(registryProbe);
+resourcesProbe.Initialize();
+Check(resourcesProbe.Add(ResourcePool.Carried, "resource.iron-ore", 1).Success
+	&& resourcesProbe.GetQuantity(ResourcePool.Carried, "resource.iron-ore") == 1, "ResourcesManager accepts carried banded iron ore");
 
 if (routes.ValueKind == JsonValueKind.Array)
 {
@@ -142,6 +152,7 @@ if (searchPoints.ValueKind == JsonValueKind.Array)
 		Check(pointId.StartsWith("sp.", StringComparison.Ordinal), $"search point id '{pointId}' uses search namespace");
 		Check(searchPointIds.Add(pointId), $"search point id '{pointId}' is unique");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "display_name")), $"search point '{pointId}' has display name");
+		Check(RequiredString(searchPoint, "route_id") is "route.mist" or "route.ochre", $"search point '{pointId}' is bound to an authored route");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "description")), $"search point '{pointId}' has authored description");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(searchPoint, "zone")), $"search point '{pointId}' has zone");
 		Check(RequiredString(searchPoint, "reward_resource_id").StartsWith("resource.", StringComparison.Ordinal), $"search point '{pointId}' reward uses resource id");
@@ -202,7 +213,11 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 				.ToHashSet(StringComparer.Ordinal)
 			: new HashSet<string>(StringComparer.Ordinal);
 		sceneUnitPrototypeAllowedSceneIds[prototypeId] = allowedScenes;
-		Check(allowedScenes.Contains("hub_island_dock") || allowedScenes.Contains("hub_ship_interior") || allowedScenes.Contains("exploration_mist_island"), $"scene-unit prototype '{prototypeId}' is allowed in an authored scene-unit slice");
+		Check(allowedScenes.Contains("hub_island_dock")
+			|| allowedScenes.Contains("hub_ship_interior")
+			|| allowedScenes.Contains("exploration_mist_island")
+			|| allowedScenes.Contains("ochre_island_scene"),
+			$"scene-unit prototype '{prototypeId}' is allowed in an authored scene-unit slice");
 	}
 }
 
@@ -221,11 +236,13 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		var isHubIsland = sceneId == "hub_island_dock";
 		var isShipInterior = sceneId == "hub_ship_interior";
 		var isMistWreck = sceneId == "exploration_mist_island";
+		var isOchreIsland = sceneId == "ochre_island_scene";
 		var expectedFloorId = sceneId switch
 		{
 			"hub_island_dock" => "hub_dock_ground",
 			"hub_ship_interior" => "ship_deck_01",
 			"exploration_mist_island" => "mist_wreck_ground_01",
+			"ochre_island_scene" => "ochre_island_ground_01",
 			_ => string.Empty,
 		};
 		var expectedSceneSpec = sceneId switch
@@ -233,10 +250,11 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 			"hub_island_dock" => "production/scene-specs/initial-island-scene.md",
 			"hub_ship_interior" => "production/scene-specs/ship-interior-layered-scene.md",
 			"exploration_mist_island" => "production/scene-specs/mist-lamp-wreck-scene.md",
+			"ochre_island_scene" => "production/scene-specs/ochre-island-scene.md",
 			_ => string.Empty,
 		};
 
-		Check(isHubIsland || isShipInterior || isMistWreck, $"scene-unit instance '{instanceId}' belongs to an authored scene-unit slice");
+		Check(isHubIsland || isShipInterior || isMistWreck || isOchreIsland, $"scene-unit instance '{instanceId}' belongs to an authored scene-unit slice");
 		Check(sceneUnitPrototypeAllowedSceneIds.TryGetValue(prototypeId, out var allowedScenes) && allowedScenes.Contains(sceneId), $"scene-unit instance '{instanceId}' uses prototype allowed in its scene");
 		Check(!string.IsNullOrWhiteSpace(unitId), $"scene-unit instance '{instanceId}' has runtime unit id");
 		if (isHubIsland)
@@ -246,6 +264,10 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		if (isShipInterior)
 		{
 			Check(shipInteriorUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ship interior");
+		}
+		if (isOchreIsland)
+		{
+			Check(ochreIslandUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ochre island");
 		}
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "godot_node_path")), $"scene-unit instance '{instanceId}' has Godot placement reference");
 		Check(RequiredString(instance, "floor_id") == expectedFloorId, $"scene-unit instance '{instanceId}' has expected floor id");
@@ -285,6 +307,20 @@ foreach (var expectedShipUnit in new[]
 	Check(shipInteriorUnitIds.Contains(expectedShipUnit), $"ship-interior placed units cover runtime catalog unit '{expectedShipUnit}'");
 }
 
+foreach (var expectedOchreUnit in new[]
+{
+	"player_marker",
+	"ochre_island_mass",
+	"ochre_walk_path",
+	"banded_iron_ore",
+	"ochre_return_anchor",
+	"ochre_island_boundary",
+	"ochre_cloud_horizon",
+})
+{
+	Check(ochreIslandUnitIds.Contains(expectedOchreUnit), $"ochre-island placed units cover runtime catalog unit '{expectedOchreUnit}'");
+}
+
 var sceneUnitAuthoring = SceneUnitAuthoringFixture.Load(contentPath);
 var hubIslandUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_island_dock");
 Check(hubIslandUnitDiagnostics.Count == 0, $"scene-unit authoring validates for initial island ({string.Join("; ", hubIslandUnitDiagnostics)})");
@@ -292,6 +328,8 @@ var sceneUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_ship_interior")
 Check(sceneUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ship interior ({string.Join("; ", sceneUnitDiagnostics)})");
 var explorationUnitDiagnostics = sceneUnitAuthoring.ValidateScene("exploration_mist_island");
 Check(explorationUnitDiagnostics.Count == 0, $"scene-unit authoring validates for mist-lamp wreck ({string.Join("; ", explorationUnitDiagnostics)})");
+var ochreUnitDiagnostics = sceneUnitAuthoring.ValidateScene("ochre_island_scene");
+Check(ochreUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ochre island ({string.Join("; ", ochreUnitDiagnostics)})");
 
 Check(routeMigrations.ValueKind == JsonValueKind.Array, "route id migration map is explicit");
 if (routeMigrations.ValueKind == JsonValueKind.Array)
@@ -413,6 +451,37 @@ var legacyLoad = adapter.LoadSceneState();
 Check(legacySave.Success, "Persistence saves scene state containing legacy route id");
 Check(legacyLoad.Result.Success, "Persistence reloads scene state containing legacy route id");
 Check(legacyLoad.State.Route == "route.mist", "Persistence migrates legacy route id to current route id on restore");
+
+var ochreAdapter = new PlayableSliceDomainAdapter();
+ochreAdapter.OpenChart();
+Check(ochreAdapter.SelectRoute("route.ochre"), "adapter accepts approved ochre island route");
+var ochreSelected = ochreAdapter.Snapshot;
+Check(ochreSelected.SelectedRouteId == "route.ochre", "ochre route selection resolves to route.ochre");
+Check(ochreSelected.SelectedRouteName == "赭石岛航线", "ochre route display name is mapped for Godot UI");
+Check(ochreAdapter.ConfirmDeparture(), "adapter confirms departure to ochre island through domain managers");
+var ochreDeparted = ochreAdapter.Snapshot;
+Check(ochreDeparted.CommittedRouteId == "route.ochre", "ChartManager committed ochre route is recorded");
+Check(ochreDeparted.EncounterDestinationId == "location.ochre-island", "NavigationManager produces ochre island EncounterContext destination");
+Check(ochreDeparted.ExplorationSceneId == "ochre_island_scene", "adapter maps ochre route to independent ochre island scene id");
+ochreAdapter.AdvanceExploration();
+var ochreHarvestOne = ochreAdapter.Snapshot;
+Check(ochreHarvestOne.LastSearchPointId == "sp.ochre.1", "ochre route uses its first ore harvest point");
+Check(ochreHarvestOne.LastSearchPointName == "条带状铁矿露头", "adapter exposes authored ore point name");
+Check(ochreHarvestOne.RewardCarried == 1, "ResourcesManager carries first iron ore reward");
+Check(ochreHarvestOne.StorageText.Contains("条带状铁矿 x1", StringComparison.Ordinal), "storage summary includes carried banded iron ore");
+ochreAdapter.AdvanceExploration();
+var ochreHarvestTwo = ochreAdapter.Snapshot;
+Check(ochreHarvestTwo.LastSearchPointId == "sp.ochre.2", "ochre route uses its second ore harvest point");
+Check(ochreHarvestTwo.RewardCarried == 2, "ResourcesManager carries second iron ore reward");
+Check(ochreHarvestTwo.HullIntegrity == 100, "ochre island harvest does not apply mist-wreck hull pressure");
+ochreAdapter.AdvanceExploration();
+var ochreHarvestDone = ochreAdapter.Snapshot;
+Check(ochreHarvestDone.LastSearchPointId == "sp.ochre.3", "ochre route locks return ore sample as third harvest point");
+Check(ochreHarvestDone.RewardCarried == 3, "ResourcesManager carries completed ochre iron ore rewards");
+ochreAdapter.ReturnToHub();
+var ochreReturned = ochreAdapter.Snapshot;
+Check(ochreReturned.RewardCarried == 0, "ResourcesManager clears carried iron ore on Hub return");
+Check(ochreReturned.RewardInStorage == 3, "ResourcesManager extracts iron ore to storage on Hub return");
 
 Console.WriteLine($"RESULT {total - failed}/{total} passing");
 return failed == 0 ? 0 : 1;

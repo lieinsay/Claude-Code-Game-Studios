@@ -3,8 +3,18 @@
 <!-- STATUS -->
 Epic: Polish Entry
 Feature: Production to Polish Gate Passed
-Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done; release handoff remains BLOCKED_FOR_RELEASE for implementation evidence, #20 contract gaps, screenshots, and P0 asset gaps. Post-implementation user feedback is no longer a release gate.
+Task: 赭石岛灰盒运行时与自动证据已补齐；Scene Physics #20 / Scene Composition #19 story-done 已关闭；release handoff 仍因截图、P0 资产 / 音频、航行大场景 #20 / runtime 证据等缺口保持 BLOCKED_FOR_RELEASE。实现后用户反馈不再作为 release gate。
 <!-- /STATUS -->
+
+## Session Extract -- Ochre Island Greybox Runtime Evidence 2026-05-25
+- 当前分支: `codex/ochre-island-scene`。
+- 已实现批准的小证据闭环: `ochre_island_scene` + `scene_unit.prototype.banded_iron_ore`；没有改变“实现后反馈走 directed-content-modification，不作为二次 release gate”的流程。
+- 运行时: `HubRuntime` 暴露 `route.ochre`、独立 `ochreSceneItems`、可见 `BandedIronOreVein`、采集 / 返航微交互、`ochre_island_scene` #20 合同，以及赭石岛当前 debug 快照字段。
+- 领域: `PlayableSliceDomainAdapter` 将 `route.ochre` 映射到 `ochre_island_scene`，使用路线绑定 search point，把矿脉作者化区段映射到已批准的 `A_core` 搜索公式，并负责 `resource.iron-ore` carried / storage 流；`NavigationManager.ResetToIdleForNextVoyage()` 支持连续两段 playable 航程。
+- 内容: `src/presentation/playable_slice_authored_content.json` 包含赭石岛场景单位、航线、搜索点和 scene spec 链接；`Registry` 包含 active `resource.iron-ore`。
+- 证据: `production/qa/evidence/scene-unit-placement-ochre-island-evidence.md`；同步更新 `production/scene-specs/ochre-island-scene.md`、`production/unit-specs/fixed-scene-objects/banded-iron-ore.md`、覆盖登记表和 release handoff。
+- 当前验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj --no-restore -p:UseSharedCompilation=false` PASS `987/987`；Godot 4.6 headless `tests/smoke/session_shell_visual_probe.gd` PASS，截图保存因 headless 显示驱动限制被脚本跳过。
+- Release handoff 仍为 `BLOCKED_FOR_RELEASE`: 赭石岛灰盒自动证据已补齐，但窗口化截图 / 视觉证明、P0 最终美术 / 音频资产或 waiver、以及 `voyage_open_world_scene` #20 / 运行时证据仍未完成。
 
 ## Session Extract -- Scene Composition Flow Correction 2026-05-25
 - Current goal: follow the approved scene/UI/unit creation flow without a second human verdict gate.

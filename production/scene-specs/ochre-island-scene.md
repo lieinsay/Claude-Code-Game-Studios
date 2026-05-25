@@ -11,21 +11,21 @@
 | Scene ID | `ochre_island_scene` |
 | 玩家可见场景名 | 赭石岛 |
 | 所属循环节点 | Exploration / Resource |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `runtime_greybox_evidence_added` |
 | 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md`; `design/gdd/resources-goods-capacity.md` |
 | 来源 story 或设计说明 | 用户 2026-05-24 指定：赭石岛是可采条带状铁矿的小型资源岛 |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 创建审查记录 | 本文件“创建适合性人工审查” |
-| 最近审核日期 | 2026-05-24 |
+| 最近审核日期 | 2026-05-25 |
 | 审核负责人 | 用户 / Codex |
 
 ## 独立实现 / 资产边界
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；必须建立独立 `ochre_island_scene` 场景或等价作者化数据边界，不能复用旧市场或探索面板。 |
-| 配套脚本 / runtime | `pending`；仅承载资源岛移动、采集和返航触发，不拥有完整经济链。 |
-| 作者化数据 | 待建立 `ochre_island_scene` 场景实例、`banded_iron_ore` 实例和返航点实例。 |
+| 独立 Godot 场景 | `runtime_greybox_evidence_added`；当前以 `HubRuntime` 的 `ochreSceneItems` 灰盒表面 + `src/presentation/playable_slice_authored_content.json` 等价作者化数据边界实现，未复用旧市场或探索面板。 |
+| 配套脚本 / runtime | `HubRuntime` 支持 `route.ochre`、`ochre_island_scene`、矿脉采集微交互、返航预热和 #20 debug 合同；`PlayableSliceDomainAdapter` 将赭石岛路线映射到独立场景和铁矿奖励流。 |
+| 作者化数据 | 已建立 `ochre_island_scene` 场景实例、`banded_iron_ore` 实例、返航点、边界、路径、云海和玩家标记实例。 |
 | 资产组 | 赭色岛体、条带状铁矿、返航点、岛屿边界、采集反馈。 |
 | 装配入口 | 航行大场景只负责抵达；赭石岛拥有自身场景本体和资源点实例。 |
 | 禁止混入位置 | 不得把赭石岛只写成旧市场场景、探索面板或无独立边界的临时节点。 |
@@ -61,19 +61,19 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 物理来源 | 设计规格草案；运行时合同 pending |
+| 物理来源 | `HubRuntime.DebugScenePhysicsContract("ochre_island_scene")` + 作者化 scene-unit 原型 / 摆放实例 |
 | 合同场景 ID | `ochre_island_scene` |
-| `physics_contract_complete` 状态 | pending |
+| `physics_contract_complete` 状态 | PASS；Godot smoke 覆盖完整合同形状、Layer / Height、Cutaway / Reveal、Floor State、单位目录、行为优先级和恢复规则 |
 | 场景物理类型 | `水平场景` |
 | 移动平面 | 小型岛屿地面平面四方向移动 |
 | Layer / Height Model | 岛体地面、矿脉前景、边界、返航点 |
 | Cutaway / Reveal Model | N/A true；第一版不包含建筑剖切 |
-| 单位目录 | 玩家位置、岛体、路径、条带状铁矿、返航点、边界 |
+| 单位目录 | `player_marker`、`ochre_island_mass`、`ochre_walk_path`、`banded_iron_ore`、`ochre_return_anchor`、`ochre_island_boundary`、`ochre_cloud_horizon` |
 | 固定单位原型 | `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`；其余岛体 / 路径 / 返航点待单体规格 |
 | 实体单位原型 | `production/unit-specs/dynamic-entities/player-controlled-entity.md` |
-| 摆放实例 | pending；不得引用 runtime scaffold |
-| 碰撞 / 遮挡 / 比例 | pending；矿脉必须可读为资源点，不能只是纹理 |
-| 特殊表面 / 动态行为 / 恢复规则 | 矿脉采集状态、岛屿边界、返航点恢复 |
+| 摆放实例 | 已在 `src/presentation/playable_slice_authored_content.json` 记录 `scene_unit.instance.ochre_island_scene.*`；Godot smoke 校验原型、实例、场景规格、floor 和 Godot placement reference。 |
+| 碰撞 / 遮挡 / 比例 | `blocking_static` 岛体 / 边界，`soft_overlap` 玩家、路径、矿脉、返航点和云海；比例以玩家单位为基准，矿脉必须读作资源点。 |
+| 特殊表面 / 动态行为 / 恢复规则 | `ore_vein` resource node、`ledge_or_void` 边界、`visual_only` 云海；恢复规则为 clamp 回 `OchreIslandWalkBounds` 且不阻断采集 / 返航。 |
 | 无玩法相关物理单位时的豁免原因 | N/A true |
 
 ## 3. 进入 / 离开
@@ -128,30 +128,30 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: pending；不得复用旧市场或探索面板作为场景本体。
+- Godot 场景或运行时表面: `HubRuntime` 中独立 `ochreSceneItems` 灰盒表面；只在 `ActiveExplorationSceneId() == "ochre_island_scene"` 时显示，不复用旧市场或雾岛探索物件。
 - 稳定 ID: `ochre_island_scene`。
-- 读取的领域管理器: Resources、Navigation、Scene。
-- 会变更的领域管理器: Resources（采集结果）、Navigation / Hub（返航）。
-- 持久化字段: 玩家位置、矿脉采集状态、携带资源、返航状态。
-- 信号 / 语义事件: ore_harvested、resource_collected、return_departure_requested。
+- 读取的领域管理器: Resources、Navigation、Chart、Hub、Exploration、Scene。
+- 会变更的领域管理器: Resources（`resource.iron-ore` 采集结果）、Navigation / Hub（抵达与返航）、Exploration（采集步数和 search point）。
+- 持久化字段: 玩家位置、探索步数、携带铁矿、返航状态；当前灰盒证据验证 canonical progress 仍可恢复既有探索状态。
+- 信号 / 语义事件: `route.ochre` selection / departure、`sp.ochre.1/2/3` search point、`resource.iron-ore` carried / storage transition、return departure requested。
 - 焦点和模态边界: 场景交互不得被常驻 UI 替代；采集提示不抢占世界输入。
-- 运行时 debug / smoke hook: pending；需要验证矿脉和返航点均来自 authored scene units。
+- 运行时 debug / smoke hook: `DebugDomainSnapshot`、`DebugScenePhysicsContract("ochre_island_scene")`、`DebugCurrentScenePhysicsContract`、`DebugNodeVisible`、`DebugSearchPulseStage`、`DebugReturnPrepStage`；Godot smoke 已验证矿脉和返航点均来自 world/playable scene units。
 
 ## 10. 资产与音频需求
 
 | 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 赭色小岛灰盒 | 场景身份、边界、移动平面 | 待制作 | Scene / Art |
-| P0 | 条带状铁矿灰盒 / 图标 | 资源点身份、采集状态 | `banded-iron-ore.md` | Unit / Art |
+| P0 | 赭色小岛灰盒 | 场景身份、边界、移动平面 | `HubRuntime` 灰盒已实现；最终美术资产待制作 | Scene / Art |
+| P0 | 条带状铁矿灰盒 / 图标 | 资源点身份、采集状态 | `banded-iron-ore.md` + `BandedIronOreVein` 灰盒已实现；最终资产待制作 | Unit / Art |
 | P1 | 采集反馈音 / 视觉反馈 | 成功、失败、容量不足 | 待制作 | Audio / UX |
 
 ## 11. QA 证据
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | pending |
-| 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending |
-| Codex 审核 | 规格与 authored content 对齐检查 | pending |
+| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | PASS；`tests/smoke/session_shell_visual_probe.gd` 覆盖赭石岛路线、#20 合同、三段采集和返航。 |
+| 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending；headless driver 当前跳过截图保存，需要窗口化截图或人工视觉包。 |
+| Codex 审核 | 规格与 authored content 对齐检查 | PASS；`tests/integration/playable-slice/DomainAdapterTest.csproj` 校验作者化数据、scene-unit 链路和铁矿奖励流。 |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 实现后自检问题:
@@ -186,16 +186,24 @@
 
 ## 15. 就绪检查清单
 
-- [ ] 场景目的、循环角色和情绪目标明确。
-- [ ] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
-- [ ] 进入、离开、失败和返回路径明确。
-- [ ] 空间布局列出可行走区域、边界、地标和交互锚点。
-- [ ] Scene Physics Contract 已链接并通过，或 #20 豁免明确。
-- [ ] 固定单位与实体单位已分开引用；单位本体规则不只散落在本场景规格中。
-- [ ] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
-- [ ] 关键路径和可选可读性节拍已记录。
-- [ ] 至少三个状态变体已记录，或明确豁免。
-- [ ] 交互锚点说明输入 / 焦点行为和领域负责人。
-- [ ] 运行时 / 状态合同没有创建新的玩法权威。
-- [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
-- [ ] 自动证据、截图证据和规格一致性检查路径已命名。
+- [x] 场景目的、循环角色和情绪目标明确。
+- [x] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
+- [x] 进入、离开、失败和返回路径明确。
+- [x] 空间布局列出可行走区域、边界、地标和交互锚点。
+- [x] Scene Physics Contract 已链接并通过，或 #20 豁免明确。
+- [x] 固定单位与实体单位已分开引用；单位本体规则不只散落在本场景规格中。
+- [x] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
+- [x] 关键路径和可选可读性节拍已记录。
+- [x] 至少三个状态变体已记录，或明确豁免。
+- [x] 交互锚点说明输入 / 焦点行为和领域负责人。
+- [x] 运行时 / 状态合同没有创建新的玩法权威。
+- [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈；最终资产 / 音频仍待制作或豁免。
+- [x] 自动证据、截图证据和规格一致性检查路径已命名；截图本身仍待窗口化捕获。
+
+## 16. 2026-05-25 灰盒运行时证据
+
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 增加 `ochre_island_scene` 原型 / 实例、`route.ochre` 和 `sp.ochre.1/2/3`。
+- 运行时: `src/scenes/HubRuntime.cs` 增加赭石岛灰盒场景、航图选择、独立 #20 合同、矿脉采集微交互和返航流程。
+- 领域: `src/presentation/PlayableSliceDomainAdapter.cs` 将 `route.ochre` 映射到 `ochre_island_scene`，并按路线发放 `resource.iron-ore`。
+- 自动证据: `production/qa/evidence/scene-unit-placement-ochre-island-evidence.md`。
+- release 风险: 自动证据通过不等于 release-ready；截图证据、窗口化视觉证明和 P0 最终美术 / 音频资产仍未完成或未豁免。

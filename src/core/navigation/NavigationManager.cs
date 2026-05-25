@@ -355,6 +355,15 @@ public sealed class NavigationManager
 		_getKnowledgeStateFn = fn;
 
 	/// <summary>
+	/// 将已完成或中止的航程重置为可再次接收 ChartManager 提交的空闲状态。
+	/// </summary>
+	public void ResetToIdleForNextVoyage()
+	{
+		ResetVoyageState();
+		_voyageState = VoyageState.Idle;
+	}
+
+	/// <summary>
 	/// 注入船体完整度查询委托（来自 #8 ModuleHullManager）。
 	/// </summary>
 	/// <param name="fn">委托：返回当前船体完整度。</param>

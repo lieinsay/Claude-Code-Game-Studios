@@ -3,10 +3,10 @@
 > **Prototype ID**: `scene_unit.prototype.banded_iron_ore`
 > **中文名称**: 条带状铁矿
 > **单位分类**: `fixed_scene_object`
-> **生命周期状态**: `spec_drafted`
+> **生命周期状态**: `runtime_greybox_evidence_added`
 > **创建适合性人工审查**: `APPROVED_WITH_NOTES`
 > **来源 GDD**: `design/gdd/scene-physics-unit-system.md`, `design/gdd/resources-goods-capacity.md`
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-25
 
 ## 0. 文件头
 
@@ -16,21 +16,21 @@
 | 单位名称 | 条带状铁矿 |
 | 单位分类 | `fixed_scene_object` |
 | 存放目录 | `production/unit-specs/fixed-scene-objects/` |
-| 生命周期状态 | `spec_drafted` |
+| 生命周期状态 | `runtime_greybox_evidence_added` |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 来源 GDD | `design/gdd/scene-physics-unit-system.md`; `design/gdd/resources-goods-capacity.md` |
 | 关联场景 / UI | `ochre_island_scene` |
-| 独立实现入口 | `pending`；目标为独立固定资源点原型和资产组 |
-| 最后更新 | 2026-05-24 |
+| 独立实现入口 | `src/presentation/playable_slice_authored_content.json` 原型 / 实例 + `HubRuntime` 灰盒 `BandedIronOreVein` / `BandedIronOreHarvestedOverlay` |
+| 最后更新 | 2026-05-25 |
 
 ## 1. 独立实现 / 资产边界
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立原型实现 | `scene_unit.prototype.banded_iron_ore`；后续进入 authored content 和独立 `.tscn` / `.tres` 或等价原型。 |
-| 配套脚本 / 行为 | 最小采集 / 获取资源行为；复杂采矿工具、再生、冶炼和经济链为后续范围。 |
-| 资产组 | 条带状矿脉、采集前 / 后状态、禁用反馈、采集音效。 |
-| 摆放实例来源 | `ochre_island_scene` 只引用矿脉原型，不静默改变本体规则。 |
+| 独立原型实现 | `scene_unit.prototype.banded_iron_ore` 已进入 authored content；当前使用灰盒等价原型，后续可替换独立 `.tscn` / `.tres` 或最终资产。 |
+| 配套脚本 / 行为 | `HubRuntime` 三段采集微交互 + `PlayableSliceDomainAdapter` 路线搜索点发放 `resource.iron-ore`；复杂采矿工具、再生、冶炼和经济链为后续范围。 |
+| 资产组 | 条带状矿脉、采集前 / 后状态灰盒已实现；禁用反馈和采集音效仍待制作。 |
+| 摆放实例来源 | `scene_unit.instance.ochre_island_scene.banded_iron_ore` 引用矿脉原型，不静默改变本体规则。 |
 | 禁止混入位置 | 不得把矿脉只画成地面纹理、市场商品或 UI 按钮。 |
 | 删除旧节点要求 | 若替代旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
@@ -61,12 +61,12 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 碰撞类型 | `blocking_static` 或贴地 / 贴壁资源体；交互范围为 `soft_overlap` |
+| 碰撞类型 | 原型合同记录为 `soft_overlap` 采集锚点；场景合同将矿体 / 岛体整体阻挡语义归入 `blocking_static` 环境，交互范围保持 `soft_overlap` |
 | 遮挡层 | `midground_object` |
 | 比例规则 | 玩家能读出“矿脉 / 资源点”，不能像普通地面纹理。 |
 | 可通过性 | 本体可阻挡或贴壁；采集范围可 soft-overlap |
-| 特殊表面 | `N/A true` |
-| 动态行为标签 | `breakable` / `resource_node` |
+| 特殊表面 | `ore_vein`；资源节点、trigger-only、采集后状态可读 |
+| 动态行为标签 | `resource_node` / `trigger_only` / `breakable_state` |
 | 恢复规则 | 已采集或容量不足时保持世界对象可见，只改变状态和反馈。 |
 
 ## 5. 状态与生命周期
@@ -122,16 +122,16 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 
 | 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 条带状铁矿本体灰盒或资产 | 资源点身份 | 待制作 | Unit / Art |
-| P0 | 采集成功、已采集和容量不足反馈 | 交互和失败反馈 | 待制作 | UI / Audio |
+| P0 | 条带状铁矿本体灰盒或资产 | 资源点身份 | `HubRuntime` 灰盒已实现；最终资产待制作 | Unit / Art |
+| P0 | 采集成功、已采集和容量不足反馈 | 交互和失败反馈 | 采集 / 已采集灰盒反馈已实现；容量不足特化反馈和音效待制作 | UI / Audio |
 | P1 | 采集粒子或矿脉状态变化 | 状态可读性 | 待制作 | Art |
 
 ## 11. QA 证据
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 数据验证 | 条带状铁矿原型和实例字段完整 | pending |
-| 运行时 smoke | 靠近 + Use 采集；容量不足给禁用反馈；采集后状态改变 | pending |
+| 数据验证 | 条带状铁矿原型和实例字段完整 | PASS；`DomainAdapterProgram` 校验原型、实例、spec、floor、resource 注册和 carried 池可用性。 |
+| 运行时 smoke | 靠近 + Use 采集；容量不足给禁用反馈；采集后状态改变 | PASS；Godot smoke 覆盖三段采集、`sp.ochre.1/2/3`、`resource.iron-ore` carried / storage 和采集后 overlay。 |
 | 截图 / 视觉证明 | 矿脉首屏、采集后状态和返航路径 | pending |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
@@ -152,9 +152,17 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 
 ## 14. 就绪检查清单
 
-- [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
-- [ ] 独立实现 / 资产边界已明确，不能只混入旧大场景、大脚本或临时节点。
-- [ ] 单位分类、目录、物理合同和 UI 边界一致。
-- [ ] 状态变化可读，不需要靠 UI 独自解释。
-- [ ] 场景实例只引用原型，不静默改变本体规则。
-- [ ] 最终状态保持可修改，后续需求走 `directed-content-modification`。
+- [x] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
+- [x] 独立实现 / 资产边界已明确，不能只混入旧大场景、大脚本或临时节点。
+- [x] 单位分类、目录、物理合同和 UI 边界一致。
+- [x] 状态变化可读，不需要靠 UI 独自解释。
+- [x] 场景实例只引用原型，不静默改变本体规则。
+- [x] 最终状态保持可修改，后续需求走 `directed-content-modification`。
+
+## 15. 2026-05-25 灰盒运行时证据
+
+- 作者化原型: `src/presentation/playable_slice_authored_content.json` 中的 `scene_unit.prototype.banded_iron_ore`。
+- 摆放实例: `scene_unit.instance.ochre_island_scene.banded_iron_ore`，floor 为 `ochre_island_ground_01`，scene spec 为 `production/scene-specs/ochre-island-scene.md`。
+- 运行时对象: `BandedIronOreVein`、条带视觉块、`BandedIronOreHarvestedOverlay`、`OchreHarvestPulseFill`。
+- 领域资源: `src/core/content/Registry.cs` 注册 `resource.iron-ore`，`PlayableSliceDomainAdapter` 在赭石岛路线按 search point 发放并返航入库。
+- 证据: `production/qa/evidence/scene-unit-placement-ochre-island-evidence.md`。

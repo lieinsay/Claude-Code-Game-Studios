@@ -336,6 +336,88 @@ func _run() -> void:
 	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
 	_expect(_label_text(session, "HubCargoStatusLabel").contains("收益锁定"), "Hub cargo interior status syncs locked rewards")
 
+	hub.call("EnterShipInterior")
+	await process_frame
+	hub.call("OnChartPressed")
+	await process_frame
+	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "Hub can reopen Chart after the mist route loop")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreLine"), "Chart mode shows the approved ochre island route line")
+	hub.call("OnRouteOchrePressed")
+	await process_frame
+	var ochre_route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(ochre_route_snapshot.get("selected_route", "")) == "route.ochre", "C# HubRuntime route selection accepts the ochre island route")
+	_expect(str(ochre_route_snapshot.get("selected_route_name", "")) == "赭石岛航线", "Ochre route display name is exposed to Godot UI")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreSelectionFrame"), "Chart scene highlights the selected ochre route")
+	hub.call("OnDepartPressed")
+	await process_frame
+	var ochre_departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	var ochre_departure_hull := int(ochre_departure_snapshot.get("hull_integrity", 0))
+	_expect(str(ochre_departure_snapshot.get("committed_route", "")) == "route.ochre", "Ochre departure commits through ChartManager")
+	_expect(str(ochre_departure_snapshot.get("encounter_destination", "")) == "location.ochre-island", "NavigationManager produces the ochre island destination")
+	_expect(str(ochre_departure_snapshot.get("exploration_scene_id", "")) == "ochre_island_scene", "Ochre route opens the independent ochre island scene")
+	_expect(str(hub.call("DebugCurrentScreen")) == "exploration", "Ochre route opens Exploration screen")
+	_expect(hub.call("DebugNodeVisible", "OchrePlayableSkyBackdrop"), "Ochre island scene has its own visible sky backdrop")
+	_expect(hub.call("DebugNodeVisible", "OchreIslandMass"), "Ochre island scene has a readable island mass")
+	_expect(hub.call("DebugNodeVisible", "BandedIronOreVein"), "Ochre island scene has the banded iron ore harvest object")
+	_expect(hub.call("DebugNodeVisible", "OchreReturnPad"), "Ochre island scene has a return pad anchor")
+	_expect(not hub.call("DebugNodeVisible", "SearchWreckProp"), "Mist wreck search prop is hidden during ochre island scene")
+	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Mist exploration sky field is hidden during ochre island scene")
+	_expect(_label_text(session, "OchreOreSemanticLabel").contains("未采集"), "Ochre ore semantic label starts unharvested")
+	_expect(_label_text(session, "OchreReturnSemanticLabel").contains("携带"), "Ochre return semantic label reports carried load")
+	_expect_scene_physics_contract(hub, "ochre_island_scene", "水平场景", "ore_vein", "blocking_static", "soft_overlap")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "ochre_island_scene", "Current physics contract follows the ochre island scene")
+	var ochre_walk_bounds := hub.call("DebugWalkBoundsSize") as Vector2
+	_expect(ochre_walk_bounds.x > 900.0 and ochre_walk_bounds.y > 200.0, "Ochre island exposes meaningful walkable bounds")
+	hub.call("OnExplorationAdvancePressed")
+	await process_frame
+	_expect(int((hub.call("DebugDomainSnapshot") as Dictionary).get("exploration_step", 0)) == 0, "Direct ochre harvest command cannot progress before ore proximity")
+
+	hub.call("DebugSetPlayerPosition", Vector2(684, 605))
+	await process_frame
+	_expect(hub.call("DebugInteractionPrompt").contains("采集微交互"), "Moving near the ore vein reveals a spatial harvest prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugSearchPulseStage")) == 1, "First ochre interaction starts harvest confirmation")
+	_expect(_control_width(session, "OchreHarvestPulseFill") > 0.0, "Ochre harvest micro-game shows progress after first stage")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugSearchPulseStage")) == 2, "Second ochre interaction locks the harvest point")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	var ochre_harvest_one := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(ochre_harvest_one.get("exploration_step", 0)) == 1, "Ochre harvest advances to step 1")
+	_expect(str(ochre_harvest_one.get("last_search_point", "")) == "sp.ochre.1", "Ochre harvest uses the first ore search point")
+	_expect(int(ochre_harvest_one.get("reward_carried", 0)) == 1, "Ochre harvest carries the first banded iron ore reward")
+	_expect(str(ochre_harvest_one.get("scene_search_point_text", "")).contains("条带状铁矿露头"), "Ochre scene semantic label follows the authored ore point")
+
+	for i in range(6):
+		hub.call("TrySpatialInteraction")
+		await process_frame
+	var ochre_harvest_done := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(int(ochre_harvest_done.get("exploration_step", 0)) == 3, "Ochre harvest completes three collection steps")
+	_expect(str(ochre_harvest_done.get("last_search_point", "")) == "sp.ochre.3", "Ochre harvest locks the return ore sample point")
+	_expect(int(ochre_harvest_done.get("reward_carried", 0)) == 3, "Ochre harvest carries three banded iron ore rewards")
+	_expect(int(ochre_harvest_done.get("hull_integrity", 0)) == ochre_departure_hull, "Ochre resource route does not add mist-wreck hull damage")
+	_expect(str(ochre_harvest_done.get("scene_search_point_text", "")).contains("已采集"), "Ochre scene semantic label reflects harvested state")
+	_expect(str(ochre_harvest_done.get("scene_extraction_text", "")).contains("矿样锁定"), "Ochre return semantic label locks ore sample load")
+	_expect(_control_width(session, "BandedIronOreHarvestedOverlay") > 100.0, "Banded iron ore overlay marks the harvested vein")
+
+	hub.call("DebugSetPlayerPosition", Vector2(250, 613))
+	await process_frame
+	_expect(hub.call("DebugInteractionPrompt").contains("预热空艇返航引擎"), "Ochre return point exposes the spatial return prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugReturnPrepStage")) == 1, "Ochre return interaction preheats before leaving")
+	_expect(_control_width(session, "OchreReturnPrepFill") > 0.0, "Ochre return micro-game shows preheat progress")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	var ochre_returned := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(ochre_returned.get("hub_docking_state", "")) == "Landed", "HubManager lands after ochre island return")
+	_expect(int(ochre_returned.get("reward_carried", 0)) == 0, "ResourcesManager clears carried iron ore after ochre return")
+	_expect(int(ochre_returned.get("reward_in_storage", 0)) == 3, "ResourcesManager extracts banded iron ore to storage after ochre return")
+	_expect(_label_text(session, "StorageValue").contains("条带状铁矿 x3"), "Hub storage summary includes returned banded iron ore")
+	_expect(not hub.call("DebugNodeVisible", "OchreIslandMass"), "Ochre island scene hides after returning to Hub")
+
 	await _save_runtime_screenshot(root, SCREENSHOT_PATH, "Runtime screenshot")
 
 	session.queue_free()
@@ -527,6 +609,8 @@ func _expect_scene_physics_contract(
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ship-interior-layered-scene.md", "ship_deck_01")
 	if scene_id == "exploration_mist_island":
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/mist-lamp-wreck-scene.md", "mist_wreck_ground_01")
+	if scene_id == "ochre_island_scene":
+		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ochre-island-scene.md", "ochre_island_ground_01")
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
