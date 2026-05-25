@@ -7,7 +7,7 @@
 > **生命周期状态**: `spec_drafted`  
 > **创建适合性人工审查**: `APPROVED`  
 > **来源 GDD**: `design/gdd/ui-hud-chart-interface.md`  
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-25
 
 ## 0. 文件头
 
@@ -20,7 +20,7 @@
 | 生命周期状态 | `spec_drafted` |
 | 创建适合性人工审查 | `APPROVED` |
 | 来源 GDD | `design/gdd/ui-hud-chart-interface.md` |
-| 最近更新日期 | 2026-05-24 |
+| 最近更新日期 | 2026-05-25 |
 | 负责人 | Codex / user / QA |
 
 ## 创建适合性人工审查
@@ -107,6 +107,8 @@
 - Tab 顺序: 目的地 -> 风险摘要 -> 确认 -> 返回。
 - Esc 行为: 可逆状态返回船内。
 - 模态时焦点是否锁定: 是。
+- 2026-05-25 定向修改: 灰盒实现必须在航线线条/标签之外提供真实 `Button` 热区；玩家点击航线或用键盘聚焦后按 Enter 都必须调用 Chart 领域选择 API。
+- 2026-05-25 定向修改: 选中航线后确认按钮必须启用并接收焦点；未选航线时确认按钮禁用或给出“先选择航线”的反馈。
 
 ## 7. 布局与遮挡边界
 
@@ -145,7 +147,7 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 输入 / 焦点测试 | UI 状态机和 Godot smoke | pending |
+| 输入 / 焦点测试 | UI 状态机和 Godot smoke | PASS；2026-05-25 `Godot_v4.6.2-stable_mono_win64_console.exe --headless --path . -s tests/smoke/session_shell_visual_probe.gd` 验证航线按钮和确认按钮真实触发 |
 | 显示优先级测试 | UIManager 注册表测试 | pending |
 | 截图 / 视觉证明 | 航图 UI 截图 | pending |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
@@ -166,6 +168,6 @@
 | 创建适合性结论 | `APPROVED` |
 | 保持可修改状态 | `true` |
 | 定向修改入口 | `directed-content-modification` |
-| 用户反馈 / 后续定向修改需求 | None |
+| 用户反馈 / 后续定向修改需求 | 2026-05-25: 用户反馈航图桌无法选择航线；需要补齐真实按钮热区、焦点入口和 smoke 覆盖。 |
 
 后续反馈只记录新的修改需求，不作为本规格的二次审核门。

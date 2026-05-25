@@ -55,6 +55,9 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
 	private ColorRect? chartMistSelectionFrame;
 	private ColorRect? chartOchreSelectionFrame;
+	private Button? chartRouteMistButton;
+	private Button? chartRouteOchreButton;
+	private Button? chartDepartButton;
 	private Label? explorationPointSemanticLabel;
 	private Label? explorationThreatSemanticLabel;
 	private Label? explorationExtractionSemanticLabel;
@@ -1302,6 +1305,7 @@ public partial class HubRuntime : Node2D
 		chartMistSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMistSelectionFrame", new Vector2(630, 274), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
 		chartMistSelectionFrame.Visible = false;
 		AddSceneLabel(chartSceneItems, "ChartMistRouteLabel", new Vector2(610, 334), new Vector2(180, 24), "雾海短程 / 雾灯残骸");
+		chartRouteMistButton = AddSceneButton(chartSceneItems, "ChartRouteMistButton", new Vector2(604, 358), new Vector2(210, 38), "选择：雾海短程", OnRouteMistPressed);
 		AddScenePolygon(chartSceneItems, "ChartRouteOchreLine",
 			[
 				new Vector2(362, 386),
@@ -1314,11 +1318,13 @@ public partial class HubRuntime : Node2D
 		chartOchreSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteOchreSelectionFrame", new Vector2(728, 404), new Vector2(124, 66), new Color(0.90f, 0.62f, 0.34f, 0.36f));
 		chartOchreSelectionFrame.Visible = false;
 		AddSceneLabel(chartSceneItems, "ChartOchreRouteLabel", new Vector2(734, 464), new Vector2(196, 24), "赭石岛航线 / 条带铁矿");
+		chartRouteOchreButton = AddSceneButton(chartSceneItems, "ChartRouteOchreButton", new Vector2(726, 490), new Vector2(226, 38), "选择：赭石岛航线", OnRouteOchrePressed);
 		AddSceneRect(chartSceneItems, "ChartCompassPlate", new Vector2(930, 252), new Vector2(124, 124), new Color(0.18f, 0.29f, 0.30f, 0.95f));
 		AddSceneRect(chartSceneItems, "ChartCompassNeedle", new Vector2(988, 270), new Vector2(8, 88), new Color(0.76f, 0.64f, 0.38f, 0.98f));
 		AddSceneLabel(chartSceneItems, "ChartCompassLabel", new Vector2(934, 378), new Vector2(116, 24), "罗经稳定");
 		AddSceneRect(chartSceneItems, "ChartRiskNotePanel", new Vector2(918, 422), new Vector2(184, 86), new Color(0.20f, 0.22f, 0.18f, 0.92f));
 		AddSceneLabel(chartSceneItems, "ChartRiskNoteLabel", new Vector2(930, 430), new Vector2(160, 62), "当前航线：雾带低威胁；其他目的地待审查后开放");
+		chartDepartButton = AddSceneButton(chartSceneItems, "ChartDepartButton", new Vector2(922, 518), new Vector2(184, 40), "确认出发", OnDepartPressed);
 		AddSceneLabel(chartSceneItems, "ChartSceneInstructionLabel", new Vector2(340, 520), new Vector2(594, 26), "选择航线后确认离港，航程会进入雾海搜撤。");
 	}
 
@@ -1488,6 +1494,27 @@ public partial class HubRuntime : Node2D
 		return label;
 	}
 
+	private Button AddSceneButton(Godot.Collections.Array<CanvasItem> group, string nodeName, Vector2 position, Vector2 size, string text, Action callback)
+	{
+		var button = new Button
+		{
+			Name = nodeName,
+			Position = position,
+			CustomMinimumSize = size,
+			Size = size,
+			Text = text,
+			FocusMode = Control.FocusModeEnum.All,
+			MouseFilter = Control.MouseFilterEnum.Stop,
+			ZIndex = 6,
+		};
+		button.AddThemeFontSizeOverride("font_size", 16);
+		button.Pressed += callback;
+		button.MouseEntered += () => OnButtonMouseEntered(button);
+		sceneLayer?.AddChild(button);
+		group.Add(button);
+		return button;
+	}
+
 	private void WireButtons()
 	{
 		WireButton("ChartButton", OnChartPressed);
@@ -1518,6 +1545,7 @@ public partial class HubRuntime : Node2D
 		selectedRoute = domain.Snapshot.SelectedRouteId;
 		SetChartStatus($"已选择航线：{RouteName()}。按“确认出发”进入探索。");
 		UpdateChartSceneSelection();
+		GrabButton("ChartDepartButton");
 		UpdateOnboardingHint();
 	}
 
@@ -1526,6 +1554,7 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(false);
 		SetWorldMode("chart");
 		UpdateChartSceneSelection();
+		GrabButton(selectedRoute == "route.ochre" ? "ChartRouteOchreButton" : "ChartRouteMistButton");
 		SetFooter("航图世界表面已展开：当前仅保留作者化航图场景和调试入口；Esc 返回船内。");
 	}
 
@@ -1541,13 +1570,36 @@ public partial class HubRuntime : Node2D
 
 	private void UpdateChartSceneSelection()
 	{
+		var chartVisible = currentScreen == "chart";
 		if (chartMistSelectionFrame is not null)
 		{
-			chartMistSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.mist";
+			chartMistSelectionFrame.Visible = chartVisible && selectedRoute == "route.mist";
 		}
 		if (chartOchreSelectionFrame is not null)
 		{
-			chartOchreSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.ochre";
+			chartOchreSelectionFrame.Visible = chartVisible && selectedRoute == "route.ochre";
+		}
+		if (chartRouteMistButton is not null)
+		{
+			chartRouteMistButton.Visible = chartVisible;
+			chartRouteMistButton.Disabled = !chartVisible;
+			chartRouteMistButton.FocusMode = chartVisible ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+			chartRouteMistButton.Text = selectedRoute == "route.mist" ? "已选：雾海短程" : "选择：雾海短程";
+		}
+		if (chartRouteOchreButton is not null)
+		{
+			chartRouteOchreButton.Visible = chartVisible;
+			chartRouteOchreButton.Disabled = !chartVisible;
+			chartRouteOchreButton.FocusMode = chartVisible ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+			chartRouteOchreButton.Text = selectedRoute == "route.ochre" ? "已选：赭石岛航线" : "选择：赭石岛航线";
+		}
+		if (chartDepartButton is not null)
+		{
+			var canDepart = chartVisible && !string.IsNullOrEmpty(selectedRoute);
+			chartDepartButton.Visible = chartVisible;
+			chartDepartButton.Disabled = !canDepart;
+			chartDepartButton.FocusMode = canDepart ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
+			chartDepartButton.Text = canDepart ? $"确认出发：{RouteName()}" : "先选择航线";
 		}
 	}
 
@@ -1874,13 +1926,10 @@ public partial class HubRuntime : Node2D
 		SetSceneGroupVisible(chartSceneItems, mode == "chart");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration" && ActiveExplorationSceneId() == "exploration_mist_island");
 		SetSceneGroupVisible(ochreSceneItems, mode == "exploration" && ActiveExplorationSceneId() == "ochre_island_scene");
+		UpdateChartSceneSelection();
 		if (mode == "hub")
 		{
 			UpdateHubInteriorSemantics(domain.Snapshot);
-		}
-		if (mode == "chart")
-		{
-			UpdateChartSceneSelection();
 		}
 		if (hubShipEntryMarker is not null) hubShipEntryMarker.Visible = mode == "hub" && hubSpace == "exterior";
 		if (hubShipExitMarker is not null) hubShipExitMarker.Visible = mode == "hub" && hubSpace == "interior";

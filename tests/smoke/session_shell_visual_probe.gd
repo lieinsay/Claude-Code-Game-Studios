@@ -157,6 +157,11 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ChartTableSurface"), "Chart mode has a visible chart table scene")
 	_expect(hub.call("DebugNodeVisible", "ChartParchmentMap"), "Chart mode has a parchment map surface")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteMistLine"), "Chart mode shows the mist route line")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteMistButton"), "Chart mode exposes a clickable mist route button")
+	_expect(hub.call("DebugNodeVisible", "ChartDepartButton"), "Chart mode exposes a departure confirmation button")
+	_expect(not _button_disabled(session, "ChartRouteMistButton"), "Mist route button is clickable while Chart is open")
+	_expect(_button_disabled(session, "ChartDepartButton"), "Departure button stays disabled before route selection")
+	_expect(_button_focus_mode(session, "ChartRouteMistButton") == Control.FOCUS_ALL, "Mist route button is keyboard-focusable")
 	_expect(not hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode does not expose tracked-gap old market route")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
@@ -173,7 +178,7 @@ func _run() -> void:
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
-	hub.call("OnRouteMistPressed")
+	_press_button(session, "ChartRouteMistButton")
 	await process_frame
 	var selected_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(selected_onboarding.get("next_hint_step", "")) == "depart_route", "Onboarding advances to departure hint after route selection")
@@ -181,7 +186,9 @@ func _run() -> void:
 	_expect(str(route_snapshot.get("selected_route", "")) == "route.mist", "C# HubRuntime route selection is backed by ChartManager state")
 	_expect(str(route_snapshot.get("chart_state", "")) == "RouteSelected", "ChartManager enters RouteSelected after route choice")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteMistSelectionFrame"), "Chart scene highlights the selected route")
-	hub.call("OnDepartPressed")
+	_expect(_button_text(session, "ChartRouteMistButton").contains("已选"), "Mist route button reflects selected state")
+	_expect(not _button_disabled(session, "ChartDepartButton"), "Departure button enables after route selection")
+	_press_button(session, "ChartDepartButton")
 	await process_frame
 	var departed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(departed_onboarding.get("next_hint_step", "")) == "advance_pressure", "Onboarding advances to pressure hint after departure")
@@ -342,13 +349,16 @@ func _run() -> void:
 	await process_frame
 	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "Hub can reopen Chart after the mist route loop")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreLine"), "Chart mode shows the approved ochre island route line")
-	hub.call("OnRouteOchrePressed")
+	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreButton"), "Chart mode exposes a clickable ochre route button")
+	_expect(not _button_disabled(session, "ChartRouteOchreButton"), "Ochre route button is clickable while Chart is open")
+	_press_button(session, "ChartRouteOchreButton")
 	await process_frame
 	var ochre_route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(ochre_route_snapshot.get("selected_route", "")) == "route.ochre", "C# HubRuntime route selection accepts the ochre island route")
 	_expect(str(ochre_route_snapshot.get("selected_route_name", "")) == "赭石岛航线", "Ochre route display name is exposed to Godot UI")
 	_expect(hub.call("DebugNodeVisible", "ChartRouteOchreSelectionFrame"), "Chart scene highlights the selected ochre route")
-	hub.call("OnDepartPressed")
+	_expect(_button_text(session, "ChartRouteOchreButton").contains("已选"), "Ochre route button reflects selected state")
+	_press_button(session, "ChartDepartButton")
 	await process_frame
 	var ochre_departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	var ochre_departure_hull := int(ochre_departure_snapshot.get("hull_integrity", 0))
@@ -443,6 +453,12 @@ func _button_disabled(root_node: Node, node_name: String) -> bool:
 func _button_focus_mode(root_node: Node, node_name: String) -> int:
 	var button := root_node.find_child(node_name, true, false) as Button
 	return -1 if button == null else button.focus_mode
+
+
+func _press_button(root_node: Node, node_name: String) -> void:
+	var button := root_node.find_child(node_name, true, false) as Button
+	if button != null and button.visible and not button.disabled:
+		button.emit_signal("pressed")
 
 
 func _control_width(root_node: Node, node_name: String) -> float:
