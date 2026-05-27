@@ -199,7 +199,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ochre-formal-route-v1", "C# HubRuntime loads asset-reset route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-old-market-edge-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -297,6 +297,7 @@ func _run() -> void:
 	_expect_scene_physics_contract(hub, "exploration_mist_island", "水平场景", "water", "blocking_static", "soft_overlap")
 	_expect_scene_physics_contract(hub, "voyage_open_world_scene", "水平场景", "fog", "blocking_static", "soft_overlap")
 	_expect_scene_physics_contract(hub, "ochre_island_scene", "水平场景", "cloudsea", "blocking_static", "soft_overlap")
+	_expect_scene_physics_contract(hub, "old_market_edge_scene", "水平场景", "cloudsea", "blocking_static", "soft_overlap")
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "exploration_mist_island", "Current physics contract follows Exploration state")
 	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	hub.call("OnExplorationAdvancePressed")
@@ -675,7 +676,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
-	var production_asset_scene := scene_id == "hub_island_dock" or scene_id == "exploration_mist_island" or scene_id == "voyage_open_world_scene" or scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
+	var production_asset_scene := scene_id == "hub_island_dock" or scene_id == "exploration_mist_island" or scene_id == "voyage_open_world_scene" or scene_id == "ochre_island_scene" or scene_id == "old_market_edge_scene" or scene_id == "hub_ship_interior"
 	_expect(bool(contract.get("unit_catalog_ready", false)) == production_asset_scene, "%s unit catalog readiness matches approved asset status" % scene_id)
 	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
 	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
@@ -692,8 +693,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	if production_asset_scene:
 		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-		var expected_spec := "production/scene-specs/initial-island-scene.md" if scene_id == "hub_island_dock" else ("production/scene-specs/mist-lamp-wreck-scene.md" if scene_id == "exploration_mist_island" else ("production/scene-specs/voyage-open-world-scene.md" if scene_id == "voyage_open_world_scene" else ("production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md")))
-		var expected_floor := "hub_dock_ground" if scene_id == "hub_island_dock" else ("mist_wreck_ground_01" if scene_id == "exploration_mist_island" else ("voyage_air_lane_01" if scene_id == "voyage_open_world_scene" else ("ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01")))
+		var expected_spec := "production/scene-specs/initial-island-scene.md" if scene_id == "hub_island_dock" else ("production/scene-specs/mist-lamp-wreck-scene.md" if scene_id == "exploration_mist_island" else ("production/scene-specs/voyage-open-world-scene.md" if scene_id == "voyage_open_world_scene" else ("production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else ("production/scene-specs/old-market-edge-scene.md" if scene_id == "old_market_edge_scene" else "production/scene-specs/ship-interior-layered-scene.md"))))
+		var expected_floor := "hub_dock_ground" if scene_id == "hub_island_dock" else ("mist_wreck_ground_01" if scene_id == "exploration_mist_island" else ("voyage_air_lane_01" if scene_id == "voyage_open_world_scene" else ("ochre_island_ground_01" if scene_id == "ochre_island_scene" else ("old_market_edge_ground_01" if scene_id == "old_market_edge_scene" else "ship_deck_01"))))
 		_expect_scene_unit_authoring_linkage(contract, scene_id, expected_spec, expected_floor)
 	else:
 		var catalog := contract.get("scene_unit_catalog", []) as Array
@@ -703,13 +704,13 @@ func _expect_scene_physics_contract(
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	if production_asset_scene:
-		var minimum_units := 9 if scene_id == "exploration_mist_island" else (8 if scene_id == "voyage_open_world_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)))
+		var minimum_units := 9 if scene_id == "exploration_mist_island" else (8 if scene_id == "voyage_open_world_scene" else (7 if scene_id == "old_market_edge_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1))))
 		_expect(int(contract.get("authored_physical_unit_count", 0)) >= minimum_units, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:
 	var catalog := contract.get("scene_unit_catalog", []) as Array
-	var minimum_units := 9 if scene_id == "exploration_mist_island" else (8 if scene_id == "voyage_open_world_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)))
+	var minimum_units := 9 if scene_id == "exploration_mist_island" else (8 if scene_id == "voyage_open_world_scene" else (7 if scene_id == "old_market_edge_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1))))
 	_expect(catalog.size() == int(contract.get("authored_physical_unit_count", 0)), "%s unit catalog count matches authored physical unit count" % scene_id)
 	_expect(catalog.size() >= minimum_units, "%s unit catalog has authored physical units" % scene_id)
 	var has_blocking := false

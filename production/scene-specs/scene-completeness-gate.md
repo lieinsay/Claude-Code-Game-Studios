@@ -130,7 +130,7 @@ Story 003 的配套边界合同位于 `production/scene-specs/scene-vs-ui-eviden
 | `voyage_open_world_scene` | `implemented-asset-slice` | 独立 Godot 航行世界场景、#20 合同、作者化单位和自动证据已建立；当前不声明完整 #10 live driving、音频或非 headless 截图完成。 | 后续补实时驾驶任务、截图包和最终美术 / 音频。 |
 | `mist_lamp_wreck_scene` | `implemented-asset-slice` | 独立 Godot 雾灯残骸场景、#20 合同、作者化单位、无岛屿威胁区证据和自动证据链路已建立；当前不声明最终美术 / 音频、完整返航飞行或非 headless 截图完成。 | 后续补截图包、最终美术 / 音频和完整返航飞行任务；如有调整诉求走 `directed-content-modification`。 |
 | `ochre_island_scene` | `implemented-asset-slice` | 独立 Godot 资产、#20 合同、作者化单位、正式 `route.ochre`、Resources 奖励写入、Navigation encounter context 和 Hub 返航结算均已建立；仍不声明 release-ready，因为缺非 headless 截图、最终美术 / 音频和 release packet。 | 后续补截图包、最终表现和完整实时航行表现；如有调整诉求走 `directed-content-modification`。 |
-| `old_market_edge_scene` | `tracked-gap-future-market` | 旧集市边缘保留为后续市场内容缺口，不再作为当前 demo 第二岛屿。 | 后续市场阶段再起草旧集市场景规格和 #20 合同。 |
+| `old_market_edge_scene` | `asset-gate-future-market` | 独立 Godot 资产、场景规格、作者化单位和 #20 runtime contract 已建立；当前不声明可玩完成，因为 `route.market`、SettlementManager 世界交互、`S9_market` 购买 UI、截图包和最终美术 / 音频尚未接入。 | 后续市场阶段接入正式 route 与购买闭环；继续禁止用 Chart 控件或 `S9_market` 替代场景证据。 |
 | `repair_node_scene` | `tracked-gap-future` | 尚无当前可进入场景规格或 #20 合同；除非明确加入，否则不属于修正后的当前 demo 场景集。 | 视觉完成声明前起草修复场景规格。 |
 
 ## Story 边界

@@ -1,9 +1,9 @@
 {
-  "content_version": "polish-asset-reset-ochre-formal-route-v1",
+  "content_version": "polish-asset-reset-old-market-edge-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
-  "voyage_fast_forward_seconds": 240.0,
+  "voyage_fast_forward_seconds": 240,
   "initial_resources": [
     {
       "resource_id": "resource.basic_supply",
@@ -124,6 +124,27 @@
       "return_target_scene_id": "initial_island_scene",
       "return_target_runtime_contract_id": "hub_island_dock",
       "resource_reward_id": "resource.banded_iron_ore"
+    },
+    {
+      "scene_id": "old_market_edge_scene",
+      "runtime_contract_id": "old_market_edge_scene",
+      "display_name": "旧集市边缘",
+      "godot_scene_path": "src/scenes/market/OldMarketEdgeScene.tscn",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "production_asset_status": "implemented",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "required_child_assets": [
+        "scene_unit.prototype.market_edge_plaza",
+        "scene_unit.prototype.market_walk_path",
+        "scene_unit.prototype.market_general_stall",
+        "scene_unit.prototype.market_closed_stall",
+        "scene_unit.prototype.market_notice_board",
+        "scene_unit.prototype.market_cloudsea_boundary"
+      ],
+      "future_route_id": "route.market",
+      "destination_id": "location.old-market",
+      "route_exposed_in_current_chart": false
     }
   ],
   "scene_unit_prototypes": [
@@ -142,7 +163,8 @@
       "allowed_scene_ids": [
         "hub_island_dock",
         "exploration_mist_island",
-        "ochre_island_scene"
+        "ochre_island_scene",
+        "old_market_edge_scene"
       ],
       "behavior_tags": [
         "trigger_only"
@@ -716,6 +738,129 @@
         "gameplay_affecting_boundary"
       ],
       "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_edge_plaza",
+      "display_name": "旧集市广场地面",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "market plaza >= 2.0x player height and reads as walkable settlement edge ground",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "blocking_static"
+      ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_walk_path",
+      "display_name": "旧集市步行路径",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "passage_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "path clear width >= 1.1x player and connects spawn to stall anchor",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_general_stall",
+      "display_name": "阿图杂货摊世界摊位",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "interactable_anchor",
+      "collision": "blocking_static + soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "stall body 1.5-2.5x player width with readable soft-overlap counter anchor",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only",
+        "blocking_static",
+        "market_stall"
+      ],
+      "domain_owner": "settlement-market"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_closed_stall",
+      "display_name": "关闭摊位实体",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "closed stall blocks passage and communicates dormant/recovering state at about 1.5-2.5x player width",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "blocking_static",
+        "state_variant"
+      ],
+      "domain_owner": "settlement-market"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_notice_board",
+      "display_name": "旧集市公告板",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "visual_only",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "notice board about 1.0x player height and reads as repair/state cue without collision authority",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "visual_only_landmark"
+      ],
+      "domain_owner": "settlement-market"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.market_cloudsea_boundary",
+      "display_name": "旧集市云海边界",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "hazardous + blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "wide non-walkable cloudsea edge larger than player and readable as boundary",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "old_market_edge_scene"
+      ],
+      "behavior_tags": [
+        "gameplay_affecting_boundary"
+      ],
+      "domain_owner": "scene-physics"
     }
   ],
   "scene_unit_instances": [
@@ -1224,6 +1369,119 @@
       "layer": "midground_floor",
       "scene_spec": "production/scene-specs/ochre-island-scene.md",
       "state_hook": "boundary_clamp"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.player_marker",
+      "prototype_id": "scene_unit.prototype.player_marker",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "player_marker",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/PlayerSpawn",
+      "position": {
+        "x": 206,
+        "y": 548
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "player_spawn"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.plaza",
+      "prototype_id": "scene_unit.prototype.market_edge_plaza",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_edge_plaza",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/MarketPlazaGround",
+      "position": {
+        "x": 118,
+        "y": 354
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "scene_identity"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.walk_path",
+      "prototype_id": "scene_unit.prototype.market_walk_path",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_walk_path",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/MarketWalkPath",
+      "position": {
+        "x": 218,
+        "y": 520
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "walkable_path"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.general_stall",
+      "prototype_id": "scene_unit.prototype.market_general_stall",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_general_stall",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/GeneralStallBody",
+      "position": {
+        "x": 286,
+        "y": 386
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "default_open_stall",
+      "interaction_anchor_id": "general_stall_anchor"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.closed_stall",
+      "prototype_id": "scene_unit.prototype.market_closed_stall",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_closed_stall",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/ClosedStallBody",
+      "position": {
+        "x": 588,
+        "y": 402
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "dormant_stall_state"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.notice_board",
+      "prototype_id": "scene_unit.prototype.market_notice_board",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_notice_board",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/MarketNoticeBoard",
+      "position": {
+        "x": 842,
+        "y": 424
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "repair_state_cue"
+    },
+    {
+      "instance_id": "scene_unit.instance.old_market_edge_scene.cloudsea_boundary",
+      "prototype_id": "scene_unit.prototype.market_cloudsea_boundary",
+      "scene_id": "old_market_edge_scene",
+      "unit_id": "market_cloudsea_boundary",
+      "godot_node_path": "src/scenes/market/OldMarketEdgeScene.tscn::WorldLayer/MarketCloudSeaBoundary",
+      "position": {
+        "x": 0,
+        "y": 612
+      },
+      "floor_id": "old_market_edge_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/old-market-edge-scene.md",
+      "state_hook": "boundary_clamp"
     }
   ],
   "id_migrations": {
@@ -1311,7 +1569,7 @@
       "quantity_min": 1,
       "quantity_max": 1,
       "threat_id": "threat.playable-cloud-shear",
-      "threat_position": 2.0,
+      "threat_position": 2,
       "threat_trigger_radius": 0.25,
       "threat_damage": 6
     },

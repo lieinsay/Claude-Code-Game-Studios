@@ -877,6 +877,29 @@ public partial class HubRuntime : Node2D
 				"ore=resource_node + breakable + trigger_only; cloudsea=gameplay_affecting blocking_static boundary; glass=none; mirror=none; elastic=none; pushable=none in current slice",
 				"Clamp player into OchreIslandScene walk bounds; ore and return remain soft_overlap anchors so failed movement cannot block progression",
 				6),
+			"old_market_edge_scene" => BuildScenePhysicsContract(
+				sceneId,
+				"水平场景",
+				new Rect2(new Vector2(118, 354), new Vector2(1000, 268)),
+				"ground plane supports up/down/left/right movement through a market plaza path; far dock silhouettes are height_only cues and any S9 market UI remains assistive only",
+				"primary_walkable_layer=old_market_edge_ground_01; walkable_layer: market_walk_path, plaza_ground; transition_layer: future_market_route_entry; height_only_layer: far_dock_silhouette; blocked_layer: market_cloudsea_boundary, closed_stall_body, stall_counter; visual_layer: repair_notice_board",
+				"N/A true for floor_cutaway/interior_instance; behind_object_reveal=N/A true because stall bodies keep blocking/interaction identity and do not hide passable behind-paths",
+				"N/A true: single exterior market edge floor; floor_id=old_market_edge_ground_01; floor_index=0; is_active_floor=true; visibility_mode=full_visible; walkable_bounds=OldMarketEdgeScene plaza; vertical_connectors=future_market_route_entry; occluders_hidden_above=none; interactions_enabled=general_stall_anchor",
+				"old_market_edge_ground_01",
+				"old_market_edge_ground_01",
+				0,
+				true,
+				"full_visible",
+				"future_market_route_entry",
+				"none",
+				"general_stall_anchor",
+				"N/A true: no passable behind-object route in current Old Market Edge asset-gate; stall and board units keep blocking_static / collision identity",
+				"2.2m player height = 28px marker; stall body is about 4 player-widths; market path clear width >= 1.1x player",
+				"z_world_background < z_market_plaza_path < z_stall_board_boundary_units < z_interaction_markers",
+				"blocking_static: market plaza edge, closed stall, stall counter, cloudsea boundary; soft_overlap: player marker, market walk path, general stall anchor; height_marker: far dock silhouette",
+				"cloudsea=gameplay_affecting blocking_static boundary; stall=trigger_only + blocking_static; notice_board=visual_only repair/state cue; glass=none; mirror=none; elastic=none; pushable=none in current slice",
+				"Clamp player into OldMarketEdgeScene plaza bounds; stall anchor remains soft_overlap so failed movement cannot block later market UI entry",
+				7),
 			_ => new Godot.Collections.Dictionary
 			{
 				["scene_id"] = sceneId,
@@ -988,12 +1011,13 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"voyage_open_world_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
+			"old_market_edge_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
 		};
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "hub_island_dock" or "exploration_mist_island" or "voyage_open_world_scene" or "ochre_island_scene" or "hub_ship_interior";
+		sceneId is "hub_island_dock" or "exploration_mist_island" or "voyage_open_world_scene" or "ochre_island_scene" or "old_market_edge_scene" or "hub_ship_interior";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -1077,6 +1101,7 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "blocking_static: mist_island_mass, mist_cliff_edge, mist_lamp_wreck_body, mist_return_ship_hull, mist_water_boundary; soft_overlap: player_marker, mist_island_path, mist_search_scan_anchor, mist_return_helm_anchor, mist_horizon_fog; height_marker: mist_lamp_wreck_mast, mist_return_beacon_beam, mist_return_takeoff_trail",
 			"voyage_open_world_scene" => "blocking_static: voyage_fog_bank, voyage_wreckage_field, deep_cloudsea_edge; soft_overlap: voyage_route_corridor, voyage_beacon_chain, voyage_retreat_beacon; height_marker: voyage_ship_bow_foreground, voyage_cockpit_window_frame, voyage_bird_silhouette, voyage_destination_silhouette",
 			"ochre_island_scene" => "blocking_static: ochre_island_mass, ochre_cloudsea_boundary; soft_overlap: player_marker, ochre_island_path, banded_iron_ore, ochre_return_anchor",
+			"old_market_edge_scene" => "blocking_static: market_edge_plaza, market_general_stall, market_closed_stall, market_cloudsea_boundary; soft_overlap: player_marker, market_walk_path, general_stall_anchor; visual_only: market_notice_board",
 			_ => "",
 		};
 
@@ -1095,6 +1120,7 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "player_unit=1.0; mist_lamp_wreck_body about 6 player-widths; mist_return_ship_hull about 5 player-widths; beacon/mast/takeoff height markers visual-only; path clear width >= 1.1x player",
 			"voyage_open_world_scene" => "player_unit=1.0; ship bow foreground is cockpit-scale; route corridor clear width >= 3.0x player; beacon and wreckage gaps remain player-readable; bird and destination silhouettes are visual-only height markers",
 			"ochre_island_scene" => "player_unit=1.0; banded_iron_ore resource node 1.5-2.5x player width; return anchor clear width >= 1.1x player; island mass reads as landmark >= 2.0x player",
+			"old_market_edge_scene" => "player_unit=1.0; general stall 1.5-2.5x player width; market walk path clear width >= 1.1x player; closed stall reads as dormant state landmark",
 			_ => "",
 		};
 
@@ -1106,6 +1132,7 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; lamp_glow=visual_only search affordance; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
 			"voyage_open_world_scene" => "fog=gameplay_affecting scan/slow risk window; cloudsea=gameplay_affecting blocking_static edge; wreckage=blocking_static avoidance field; bird_shadow=visual_only ecological warning; glass=cockpit_window_frame visual_only",
 			"ochre_island_scene" => "cloudsea=gameplay_affecting blocking_static boundary with no passability implication; ore=resource_node + trigger_only + breakable state; glass=none; mirror=none; water=none",
+			"old_market_edge_scene" => "cloudsea=gameplay_affecting blocking_static boundary; market_stall=trigger_only + blocking_static; notice_board=visual_only state cue; glass=none; mirror=none; water=none",
 			_ => "",
 		};
 
@@ -1146,6 +1173,13 @@ public partial class HubRuntime : Node2D
 				BuildPhysicalBehavior("banded_iron_ore", "resource_node", "resource_node + trigger_only + breakable", "spatial Use anchor; harvest changes ore state and requests Resources reward in later runtime integration", "ore available/harvested visual state", "player_unit", 45, "resource_node trigger never changes collision footprint unless a future mining contract declares it", "keep ore visible and mark blocked/harvested; never replace with UI-only reward", "world_playable_scene", false),
 				BuildPhysicalBehavior("ochre_return_anchor", "trigger_only", "trigger_only + soft_overlap", "spatial return anchor; no entity collision; requires proximity and Use dispatch", "return beacon greybox prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "return to Hub through formal Resources settlement", "world_playable_scene", false),
 				BuildPhysicalBehavior("ochre_rock_face", "visual_only_landmark", "visual_only + height_only", "readability landmark; no collision, reward, or passability rule", "ochre rock face silhouette", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			"old_market_edge_scene" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("market_cloudsea_boundary", "hazardous", "hazardous + blocking_static", "cloudsea market edge blocks ground units; no damage in this asset-gate pass", "edge clamp and cloudsea boundary silhouette", "player_unit, pushable_unit", 80, "hazardous boundary wins over stall and visual-only cues", "clamp player back into OldMarketEdgeScene plaza bounds", "world_playable_scene", false),
+				BuildPhysicalBehavior("market_general_stall", "trigger_only_stall", "trigger_only + blocking_static + market_stall", "default open stall anchor; later opens S9_market through Settlement/UI authority", "stall counter and goods crates remain visible", "player_unit", 45, "stall trigger cannot override boundary or closed-stall blocking", "leave modal or step away from stall anchor; no direct Resources write from scene", "world_playable_scene", false),
+				BuildPhysicalBehavior("market_closed_stall", "state_variant_blocker", "blocking_static + state_variant", "closed stall communicates dormant/recovering state and remains non-interactive until SettlementManager unlocks it", "closed shutter silhouette", "player_unit", 35, "closed state blocks interaction until domain state opens it", "keep closed stall visible; future unlock must preserve footprint", "world_playable_scene", false),
+				BuildPhysicalBehavior("market_notice_board", "visual_only_landmark", "visual_only + repair_state_cue", "notice board explains repair/market state visually but does not own interaction or collision", "posted repair marks", "player_unit readability only", 10, "visual_only loses to gameplay-affecting tags", "no stuck state possible; ignore for movement", "world_playable_scene", false),
 			},
 			_ => [],
 		};
@@ -1188,6 +1222,7 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "hazardous_boundary:80 > trigger_only:45/40 > visual_only_fog:10",
 			"voyage_open_world_scene" => "gameplay_affecting_fog:75 > avoidance_field:65 > trigger_only:45 > visual_only_ecological_warning:15",
 			"ochre_island_scene" => "hazardous:80 > resource_node:45 > trigger_only:35",
+			"old_market_edge_scene" => "hazardous:80 > trigger_only_stall:45 > state_variant_blocker:35 > visual_only_landmark:10",
 			_ => "",
 		};
 
@@ -1199,6 +1234,7 @@ public partial class HubRuntime : Node2D
 			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; quiet island boundary clamp wins over search/return trigger anchors and visual fog.",
 			"voyage_open_world_scene" => "If a behavior tag lacks priority, implementation readiness fails; route corridor clamp and retreat beacon recover failed driving windows.",
 			"ochre_island_scene" => "If a behavior tag lacks priority, implementation readiness fails; cloudsea clamp wins over ore and return triggers.",
+			"old_market_edge_scene" => "If a behavior tag lacks priority, implementation readiness fails; cloudsea clamp and closed-stall blocker win over market UI triggers.",
 			_ => "",
 		};
 

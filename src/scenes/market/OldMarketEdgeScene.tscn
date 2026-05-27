@@ -1,0 +1,116 @@
+[gd_scene load_steps=3 format=3 uid="uid://old_market_edge_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/market/OldMarketEdgeScene.cs" id="1_market_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stall_anchor"]
+size = Vector2(170, 105)
+
+[node name="OldMarketEdgeScene" type="Node2D"]
+script = ExtResource("1_market_script")
+
+[node name="WorldLayer" type="Node2D" parent="."]
+
+[node name="MarketSkyBackdrop" type="ColorRect" parent="WorldLayer"]
+offset_left = 0.0
+offset_top = 110.0
+offset_right = 1280.0
+offset_bottom = 650.0
+mouse_filter = 2
+color = Color(0.24, 0.28, 0.30, 1)
+
+[node name="MarketFarDockSilhouette" type="ColorRect" parent="WorldLayer"]
+offset_left = 116.0
+offset_top = 238.0
+offset_right = 1088.0
+offset_bottom = 286.0
+mouse_filter = 2
+color = Color(0.16, 0.20, 0.22, 0.92)
+
+[node name="MarketCloudSeaBoundary" type="ColorRect" parent="WorldLayer"]
+offset_left = 0.0
+offset_top = 612.0
+offset_right = 1280.0
+offset_bottom = 690.0
+mouse_filter = 2
+color = Color(0.30, 0.48, 0.54, 1)
+
+[node name="MarketPlazaGround" type="ColorRect" parent="WorldLayer"]
+offset_left = 118.0
+offset_top = 354.0
+offset_right = 1118.0
+offset_bottom = 622.0
+mouse_filter = 2
+color = Color(0.39, 0.33, 0.25, 1)
+
+[node name="MarketWalkPath" type="ColorRect" parent="WorldLayer"]
+offset_left = 218.0
+offset_top = 520.0
+offset_right = 996.0
+offset_bottom = 574.0
+mouse_filter = 2
+color = Color(0.56, 0.47, 0.34, 1)
+
+[node name="GeneralStallBody" type="ColorRect" parent="WorldLayer"]
+offset_left = 286.0
+offset_top = 410.0
+offset_right = 456.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.52, 0.32, 0.20, 1)
+
+[node name="GeneralStallAwning" type="ColorRect" parent="WorldLayer"]
+offset_left = 268.0
+offset_top = 386.0
+offset_right = 474.0
+offset_bottom = 420.0
+mouse_filter = 2
+color = Color(0.68, 0.56, 0.38, 1)
+
+[node name="GeneralStallGoodsCrates" type="ColorRect" parent="WorldLayer"]
+offset_left = 318.0
+offset_top = 492.0
+offset_right = 424.0
+offset_bottom = 532.0
+mouse_filter = 2
+color = Color(0.72, 0.62, 0.42, 1)
+
+[node name="GeneralStallAnchor" type="Area2D" parent="WorldLayer"]
+position = Vector2(370, 512)
+
+[node name="GeneralStallSoftOverlapShape" type="CollisionShape2D" parent="WorldLayer/GeneralStallAnchor"]
+shape = SubResource("RectangleShape2D_stall_anchor")
+
+[node name="ClosedStallBody" type="ColorRect" parent="WorldLayer"]
+offset_left = 588.0
+offset_top = 402.0
+offset_right = 760.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.24, 0.20, 0.17, 1)
+
+[node name="ClosedStallShutter" type="ColorRect" parent="WorldLayer"]
+offset_left = 604.0
+offset_top = 438.0
+offset_right = 744.0
+offset_bottom = 514.0
+mouse_filter = 2
+color = Color(0.12, 0.12, 0.12, 0.96)
+
+[node name="MarketNoticeBoard" type="ColorRect" parent="WorldLayer"]
+offset_left = 842.0
+offset_top = 424.0
+offset_right = 908.0
+offset_bottom = 532.0
+mouse_filter = 2
+color = Color(0.48, 0.36, 0.22, 1)
+
+[node name="NoticeBoardRepairMarks" type="ColorRect" parent="WorldLayer"]
+offset_left = 858.0
+offset_top = 444.0
+offset_right = 890.0
+offset_bottom = 506.0
+mouse_filter = 2
+color = Color(0.78, 0.68, 0.46, 0.95)
+
+[node name="PlayerSpawn" type="Marker2D" parent="WorldLayer"]
+position = Vector2(206, 548)

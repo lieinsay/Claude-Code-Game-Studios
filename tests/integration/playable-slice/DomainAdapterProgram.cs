@@ -93,6 +93,7 @@ var hubIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var voyageUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var mistLampWreckUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var ochreIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
+var oldMarketEdgeUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var unitSpecContentByPath = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -130,6 +131,7 @@ if (authoredScenes.ValueKind == JsonValueKind.Array)
 	Check(authoredSceneIds.Contains("voyage_open_world_scene"), "authored scenes include the independent voyage open-world scene");
 	Check(authoredSceneIds.Contains("mist_lamp_wreck_scene"), "authored scenes include the independent mist-lamp wreck scene");
 	Check(authoredSceneIds.Contains("ochre_island_scene"), "authored scenes include the independent ochre island scene");
+	Check(authoredSceneIds.Contains("old_market_edge_scene"), "authored scenes include the independent old market edge scene");
 }
 
 if (routes.ValueKind == JsonValueKind.Array)
@@ -234,7 +236,7 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 		var expectedAllowedScenes = prototypeId switch
 		{
 			"scene_unit.prototype.chart_table" => new[] { "hub_ship_interior", "ship_interior_layered" },
-			"scene_unit.prototype.player_marker" => new[] { "hub_island_dock", "exploration_mist_island", "ochre_island_scene" },
+			"scene_unit.prototype.player_marker" => new[] { "hub_island_dock", "exploration_mist_island", "ochre_island_scene", "old_market_edge_scene" },
 			"scene_unit.prototype.hub_island_main_mass" or
 			"scene_unit.prototype.hub_dock_plank_walkway" or
 			"scene_unit.prototype.hub_docked_ship_hull" or
@@ -257,6 +259,12 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 			"scene_unit.prototype.mist_return_helm_anchor" or
 			"scene_unit.prototype.mist_return_takeoff_trail" or
 			"scene_unit.prototype.mist_water_boundary" => new[] { "exploration_mist_island" },
+			"scene_unit.prototype.market_edge_plaza" or
+			"scene_unit.prototype.market_walk_path" or
+			"scene_unit.prototype.market_general_stall" or
+			"scene_unit.prototype.market_closed_stall" or
+			"scene_unit.prototype.market_notice_board" or
+			"scene_unit.prototype.market_cloudsea_boundary" => new[] { "old_market_edge_scene" },
 			_ => new[] { "ochre_island_scene" },
 		};
 		Check(allowedScenes.SetEquals(expectedAllowedScenes), $"scene-unit prototype '{prototypeId}' is scoped to its approved asset slice");
@@ -280,6 +288,7 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		var isMistLampWreck = sceneId == "exploration_mist_island";
 		var isOchreIsland = sceneId == "ochre_island_scene";
 		var isShipInterior = sceneId == "hub_ship_interior";
+		var isOldMarketEdge = sceneId == "old_market_edge_scene";
 		var expectedFloorId = sceneId switch
 		{
 			"hub_island_dock" => "hub_dock_ground",
@@ -287,6 +296,7 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 			"exploration_mist_island" => "mist_wreck_ground_01",
 			"ochre_island_scene" => "ochre_island_ground_01",
 			"hub_ship_interior" => "ship_deck_01",
+			"old_market_edge_scene" => "old_market_edge_ground_01",
 			_ => string.Empty,
 		};
 		var expectedSceneSpec = sceneId switch
@@ -296,10 +306,11 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 			"exploration_mist_island" => "production/scene-specs/mist-lamp-wreck-scene.md",
 			"ochre_island_scene" => "production/scene-specs/ochre-island-scene.md",
 			"hub_ship_interior" => "production/scene-specs/ship-interior-layered-scene.md",
+			"old_market_edge_scene" => "production/scene-specs/old-market-edge-scene.md",
 			_ => string.Empty,
 		};
 
-		Check(isHubIsland || isVoyage || isMistLampWreck || isOchreIsland || isShipInterior, $"scene-unit instance '{instanceId}' belongs to an approved asset slice");
+		Check(isHubIsland || isVoyage || isMistLampWreck || isOchreIsland || isShipInterior || isOldMarketEdge, $"scene-unit instance '{instanceId}' belongs to an approved asset slice");
 		Check(sceneUnitPrototypeAllowedSceneIds.TryGetValue(prototypeId, out var allowedScenes) && allowedScenes.Contains(sceneId), $"scene-unit instance '{instanceId}' uses prototype allowed in its scene");
 		Check(!string.IsNullOrWhiteSpace(unitId), $"scene-unit instance '{instanceId}' has runtime unit id");
 		if (isHubIsland)
@@ -317,6 +328,10 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		if (isOchreIsland)
 		{
 			Check(ochreIslandUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ochre island");
+		}
+		if (isOldMarketEdge)
+		{
+			Check(oldMarketEdgeUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in old market edge");
 		}
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "godot_node_path")), $"scene-unit instance '{instanceId}' has Godot placement reference");
 		Check(RequiredString(instance, "floor_id") == expectedFloorId, $"scene-unit instance '{instanceId}' has expected floor id");
@@ -383,6 +398,20 @@ foreach (var expectedOchreUnit in new[]
 	Check(ochreIslandUnitIds.Contains(expectedOchreUnit), $"ochre-island placed units cover runtime catalog unit '{expectedOchreUnit}'");
 }
 
+foreach (var expectedOldMarketUnit in new[]
+{
+	"player_marker",
+	"market_edge_plaza",
+	"market_walk_path",
+	"market_general_stall",
+	"market_closed_stall",
+	"market_notice_board",
+	"market_cloudsea_boundary",
+})
+{
+	Check(oldMarketEdgeUnitIds.Contains(expectedOldMarketUnit), $"old market edge placed units cover runtime catalog unit '{expectedOldMarketUnit}'");
+}
+
 var sceneUnitAuthoring = SceneUnitAuthoringFixture.Load(contentPath);
 var hubUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_island_dock");
 Check(hubUnitDiagnostics.Count == 0, $"scene-unit authoring validates for initial island ({string.Join("; ", hubUnitDiagnostics)})");
@@ -392,6 +421,8 @@ var mistLampWreckUnitDiagnostics = sceneUnitAuthoring.ValidateScene("exploration
 Check(mistLampWreckUnitDiagnostics.Count == 0, $"scene-unit authoring validates for mist-lamp wreck ({string.Join("; ", mistLampWreckUnitDiagnostics)})");
 var ochreUnitDiagnostics = sceneUnitAuthoring.ValidateScene("ochre_island_scene");
 Check(ochreUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ochre island ({string.Join("; ", ochreUnitDiagnostics)})");
+var oldMarketEdgeDiagnostics = sceneUnitAuthoring.ValidateScene("old_market_edge_scene");
+Check(oldMarketEdgeDiagnostics.Count == 0, $"scene-unit authoring validates for old market edge ({string.Join("; ", oldMarketEdgeDiagnostics)})");
 var shipInteriorDiagnostics = sceneUnitAuthoring.ValidateScene("hub_ship_interior");
 Check(shipInteriorDiagnostics.Count == 0, $"scene-unit authoring validates for ship interior ({string.Join("; ", shipInteriorDiagnostics)})");
 
@@ -429,7 +460,7 @@ var adapter = new PlayableSliceDomainAdapter();
 adapter.OpenChart();
 var opened = adapter.Snapshot;
 Check(opened.ChartState == "Browsing", "adapter opens ChartManager into Browsing");
-Check(opened.ContentVersion == "polish-asset-reset-ochre-formal-route-v1", "adapter loads the asset-reset authored content version");
+Check(opened.ContentVersion == "polish-asset-reset-old-market-edge-v1", "adapter loads the asset-reset authored content version");
 Check(opened.ContentStatus == "polish_authored", "adapter reports authored playable content status");
 Check(opened.VisibleRouteCount >= 2, "adapter exposes seeded visible routes");
 Check(adapter.GetRouteDisplayName("route.playable-mist") == "雾海短程", "adapter resolves legacy route id display name through migration map");

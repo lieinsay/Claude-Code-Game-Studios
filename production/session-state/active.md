@@ -34,6 +34,16 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - 剩余风险: 当前仍是生产可追踪灰盒，不声明最终美术 / 音频、完整 90-120 秒实时航行表现或 release packet；非 headless 截图仍需后续补证。
 - 下一步建议: 运行最终 solution build / `git diff --check` 后提交；后续优先补非 headless 截图、最终表现或转向 `old_market_edge_scene` / 修复场景等后续 tracked-gap。
 
+## Session Extract -- old_market_edge_scene Future Market Asset Gate 2026-05-27
+- 当前任务完成: `old_market_edge_scene` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
+- 新增独立 Godot 场景资产: `src/scenes/market/OldMarketEdgeScene.tscn` 与 `src/scenes/market/OldMarketEdgeScene.cs`。场景包含 `WorldLayer`、集市广场、步行路径、一般摊位、关闭摊位、公告板、云海边界、玩家出生点和 `GeneralStallAnchor` 软重叠交互锚点。
+- Runtime 接入: `HubRuntime.DebugScenePhysicsContract("old_market_edge_scene")` 已接入 #20 物理合同，覆盖水平场景、`height_only` 远景、`blocking_static` / `soft_overlap` 语义、`cloudsea` 特殊表面、7 个作者化物理单位和恢复规则。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-old-market-edge-v1`，新增 `authored_scenes::old_market_edge_scene`、6 个市场单位原型和 7 个 `old_market_edge_scene` 摆放实例。
+- 证据边界: 本轮只是 future market asset-gate；不恢复 `route.market` 的 `S4_chart` 暴露，不把 `S9_market`、Chart 控件、旧 HubRuntime 灰盒、HUD、按钮、标签或调试入口当作 production-ready 场景证据。
+- 验证: Godot AI MCP PASS，`scene_open("res://src/scenes/market/OldMarketEdgeScene.tscn")` 成功，层级返回 17 个节点，`GeneralStallAnchor` 为 `Area2D` 且位置 `(370,512)`；`dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 1085/1085；`dotnet run --project tests/integration/session/ShellUiTest.csproj` PASS 18/18；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 106 existing warnings / 0 errors。
+- 剩余风险: 市场路线、Settlement / S9 购买 UI、NPC、最终美术 / 音频和非 headless 截图仍是后续工作；旧集市不替代当前 demo 第二岛屿 `route.ochre`。
+- 下一步建议: 提交后继续补 `old_market_edge_scene` 的非 headless 截图或进入市场路线 / S9 / Settlement 的后续资产与交互工作。
+
 ## Session Extract -- ship_interior_layered Godot Asset Workflow 2026-05-27
 - 当前任务完成: `ship_interior_layered` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
 - 新增独立 Godot 场景资产: `src/scenes/ship/ShipInteriorLayeredScene.tscn` 与 `src/scenes/ship/ShipInteriorLayeredScene.cs`。场景直接实例化 `src/scenes/units/ChartTable.tscn` 为 `ChartTableRuntimeInstance`，并通过 exported `PackedScene` 正式引用 `src/scenes/ui/ChartFullScreenSurface.tscn` / `S4_chart`。

@@ -46,7 +46,7 @@ release_handoff_ready =
 | `voyage_open_world_scene` | 独立 Godot 航行世界场景、#20 合同、作者化单位和自动证据已建立。 | `directed-content-modification` | `BLOCKED` | 当前是生产可追踪灰盒和证据接入；完整 #10 live driving、非 headless 截图、最终美术 / 音频和 release packet 仍未完成。 |
 | `mist_lamp_wreck_scene` | 独立 Godot 雾灯残骸场景、作者化单位、#20 运行时合同、返航起飞路径和自动证据链路已建立。 | `directed-content-modification` | `BLOCKED` | 当前是生产可追踪灰盒；仍需非 headless 截图、最终美术 / 音频、完整返航飞行玩法和 release packet。旧探索灰盒不得作为替代证据。 |
 | `ochre_island_scene` | 赭石岛已通过创建适合性审查，独立 Godot 资产、条带状铁矿固定单位、#20 运行时合同、作者化单位链路、正式 `route.ochre`、Resources 奖励写入和返航结算均已实现。 | `directed-content-modification` | `BLOCKED` | 当前是生产可追踪灰盒；仍需非 headless 截图、最终美术 / 音频、完整实时航行表现和 release packet。 |
-| `old_market_edge_scene` | `TRACKED_GAP`，保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `directed-content-modification` | `BLOCKED` | 后续市场阶段再补独立场景规格和 #20 合同。 |
+| `old_market_edge_scene` | `ASSET_GATE`，独立 Godot 场景、规格、作者化单位和 #20 合同已建立；仍保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `production/scene-specs/old-market-edge-scene.md`; `.godot-ai/verification/scene/old_market_edge_scene.verification.md` | `BLOCKED` | 后续市场阶段再补正式 route、SettlementManager 世界交互、S9 购买 UI、截图包和最终表现。 |
 
 ## Waiver 要求
 
