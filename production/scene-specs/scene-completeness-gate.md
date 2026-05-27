@@ -125,11 +125,11 @@ Story 003 的配套边界合同位于 `production/scene-specs/scene-vs-ui-eviden
 
 | Scene ID | 门禁状态 | 阻塞原因 | 必要下一步 |
 | --- | --- | --- | --- |
-| `initial_island_scene` | `spec-drafted-evidence-refresh-needed` | 独立规格和作者化单位数据已存在；仍需截图刷新和 P0 资产状态更新。 | 补 release packet 和规格一致性检查。 |
-| `ship_interior_layered` | `spec-drafted-evidence-refresh-needed` | 独立规格和作者化单位数据已存在；仍需截图刷新和 P0 资产状态更新。 | 补 release packet 和规格一致性检查。 |
+| `initial_island_scene` | `asset-reset-required` | 旧作者化单位数据已撤销；当前只剩运行壳 / 历史灰盒参考，不能作为现存游戏资产证据。 | 从 Godot asset workflow 重新实现，不做 release packet。 |
+| `ship_interior_layered` | `asset-reset-required` | 旧作者化单位数据已撤销；当前只剩运行壳 / 历史灰盒参考，不能作为现存游戏资产证据。 | 先实现 `chart-table` / `chart-full-screen-surface`，再重建船内场景资产。 |
 | `voyage_open_world_scene` | `spec-drafted-blocked-for-evidence` | 独立规格已存在，但 #20 合同、运行时证据和 Codex 规格一致性检查仍缺失。 | 起草 #20 合同和证据计划。 |
-| `mist_lamp_wreck_scene` | `spec-drafted-evidence-refresh-needed` | 独立规格和作者化单位数据已存在，并已明确为雾灯残骸浮岛目的地；仍需截图刷新和 P0 资产状态更新。 | 补 release packet 和规格一致性检查。 |
-| `ochre_island_scene` | `spec-drafted-blocked-for-evidence` | 用户已批准赭石岛作为当前 demo 第二小型资源岛，规格草案已起草；仍需 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据。 | 补 #20 合同、独立 Godot / 资产边界、作者化数据和 release packet。 |
+| `mist_lamp_wreck_scene` | `asset-reset-required` | 旧作者化单位数据已撤销；当前只剩运行壳 / 历史灰盒参考，不能作为现存游戏资产证据。 | 后续按 Godot asset workflow 重新实现，不做 release packet。 |
+| `ochre_island_scene` | `implemented-asset-slice` | 当前唯一保留的合规游戏资产切片；仍不是 release-ready，因为正式路线接入、domain 写入和截图证据尚未完成。 | 等核心 UI / 单位独立实现后，再补正式路线接入和 release packet。 |
 | `old_market_edge_scene` | `tracked-gap-future-market` | 旧集市边缘保留为后续市场内容缺口，不再作为当前 demo 第二岛屿。 | 后续市场阶段再起草旧集市场景规格和 #20 合同。 |
 | `repair_node_scene` | `tracked-gap-future` | 尚无当前可进入场景规格或 #20 合同；除非明确加入，否则不属于修正后的当前 demo 场景集。 | 视觉完成声明前起草修复场景规格。 |
 

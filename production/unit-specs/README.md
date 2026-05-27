@@ -25,12 +25,16 @@
 
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
-| `dynamic-entities/player-controlled-entity.md` | 玩家操作实体 / `scene_unit.prototype.player_marker` | 规格草案 |
-| `fixed-scene-objects/docked-airship-entity.md` | 停靠飞船实体 / 船体与气囊轮廓 | 规格草案 |
-| `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | 规格草案，创建适合性已通过，待实现证据 |
-| `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 规格草案，创建适合性已通过，待实现证据 |
+| `dynamic-entities/player-controlled-entity.md` | 玩家操作实体 / `scene_unit.prototype.player_marker` | 仅保留给 `ochre_island_scene` 当前资产切片；其它旧场景引用已撤销，后续需重新审查 / 实现 |
+| `fixed-scene-objects/docked-airship-entity.md` | 停靠飞船实体 / 船体与气囊轮廓 | 旧灰盒规格，不能作为现存资产证据；若继续需要，必须重新进入 Godot asset workflow |
+| `fixed-scene-objects/chart-table.md` | 新增独立航图台 / 星图桌固定单位 | **最高优先级**；规格草案，创建适合性已通过，必须下一个进入 Godot asset workflow 和独立实现 |
+| `fixed-scene-objects/banded-iron-ore.md` | 赭石岛条带状铁矿固定资源点 | 已随 `ochre_island_scene` 保留为当前唯一合规游戏资产切片 |
 | `dynamic-entities/physics-ball-example.md` | 非模板参考文件 | 示例，仅参考 |
 | `fixed-scene-objects/tree-regenerating-example.md` | 非模板参考文件 | 示例，仅参考 |
+
+## 当前最高优先级
+
+`fixed-scene-objects/chart-table.md` 是当前最该做的单位。旧 `helm_console`、旧航图按钮或 `HubRuntime` 内嵌节点都不能继续冒充航图台资产。下一步必须生成独立 Godot 单位资产、碰撞 / 交互锚点、与 `chart-full-screen-surface.md` 的绑定证据，以及对应 smoke / 截图证据。
 
 ## 这个目录解决什么
 

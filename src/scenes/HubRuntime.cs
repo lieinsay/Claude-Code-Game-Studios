@@ -664,7 +664,7 @@ public partial class HubRuntime : Node2D
 				"blocking_static: island edge, waterline, dock posts, docked ship hull; soft_overlap: boarding ramp; height_marker: airship envelope and mast silhouettes",
 				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
 				"Clamp player back into HubWalkBounds; boarding ramp remains soft_overlap so stuck states can exit through E interaction",
-				7),
+				0),
 			"hub_ship_interior" => BuildScenePhysicsContract(
 				sceneId,
 				"垂直场景",
@@ -687,7 +687,7 @@ public partial class HubRuntime : Node2D
 				"blocking_static: hull outline, bay separators, exterior door frame; soft_overlap: helm, storage, engine, exit anchors; height_marker: upper hull and window line",
 				"stairs_ladders: represented as future vertical connectors; glass: cockpit window visual-only; mirror: none; elastic: none; pushable: storage crates not pushable in current slice",
 				"Clamp player into ShipInteriorWalkBounds; exit door soft_overlap returns to hub_island_dock if pathing feels trapped",
-				10),
+				0),
 			"exploration_mist_island" => BuildScenePhysicsContract(
 				sceneId,
 				"水平场景",
@@ -710,7 +710,7 @@ public partial class HubRuntime : Node2D
 				"blocking_static: island edge, sea, cliff edge, return ship hull, search wreck body; soft_overlap: search scan arc, return helm; height_marker: mast, beacon beam, threat zone overlay",
 				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
 				"Clamp player into ExplorationWalkBounds; search and return stay as soft_overlap anchors so failed movement cannot block progression",
-				12),
+				0),
 			"ochre_island_scene" => BuildScenePhysicsContract(
 				sceneId,
 				"水平场景",
@@ -801,7 +801,7 @@ public partial class HubRuntime : Node2D
 			["occlusion_policy"] = occlusionPolicy,
 			["collision_semantics"] = collisionSemantics,
 			["special_surfaces"] = specialSurfaces,
-			["unit_catalog_ready"] = true,
+			["unit_catalog_ready"] = authoredPhysicalUnitCount > 0,
 			["collision_ready"] = true,
 			["occlusion_ready"] = true,
 			["scale_ready"] = true,
@@ -839,16 +839,13 @@ public partial class HubRuntime : Node2D
 	{
 		return sceneId switch
 		{
-			"hub_island_dock" => BuildAuthoredSceneUnitCatalog(sceneId),
-			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
-			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
 		};
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "hub_island_dock" or "hub_ship_interior" or "exploration_mist_island" or "ochre_island_scene";
+		sceneId is "ochre_island_scene";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{

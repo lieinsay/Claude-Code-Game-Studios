@@ -70,8 +70,12 @@
 
 | 文件 | 覆盖范围 | 状态 |
 | --- | --- | --- |
-| `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | 规格草案，创建适合性已通过，待实现证据 |
+| `chart-full-screen-surface.md` | `S4_chart` 航图全屏表面 | **最高优先级**；规格草案，创建适合性已通过，必须下一个进入 Godot asset workflow 和独立实现 |
 | `ui-spec-template.md` | 新 UI 规格模板 | 模板 |
+
+## 当前最高优先级
+
+`chart-full-screen-surface.md` 是当前最该做的 UI。旧 `ChartPanel` / HubRuntime 内嵌航图只能作为临时测试入口，不能继续作为 UI 本体或 release 证据。下一步必须为 `S4_chart` 建立独立 Godot UI 资产、presenter / controller 边界、输入 / 焦点测试和截图证据。
 
 ## 后续可拆分规格文件
 

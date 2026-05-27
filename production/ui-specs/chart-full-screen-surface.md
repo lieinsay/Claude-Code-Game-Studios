@@ -4,7 +4,7 @@
 > **UI 名称**: 航图全屏表面  
 > **UI 分类**: `full_screen_surface`  
 > **显示优先级**: P1  
-> **生命周期状态**: `spec_drafted`  
+> **生命周期状态**: `implementation_priority`
 > **创建适合性人工审查**: `APPROVED`  
 > **来源 GDD**: `design/gdd/ui-hud-chart-interface.md`  
 > **最后更新**: 2026-05-24
@@ -17,7 +17,7 @@
 | UI 名称 | 航图全屏表面 |
 | UI 分类 | `full_screen_surface` |
 | 显示优先级 | P1 |
-| 生命周期状态 | `spec_drafted` |
+| 生命周期状态 | `implementation_priority` |
 | 创建适合性人工审查 | `APPROVED` |
 | 来源 GDD | `design/gdd/ui-hud-chart-interface.md` |
 | 最近更新日期 | 2026-05-24 |

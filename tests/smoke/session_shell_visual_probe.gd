@@ -174,7 +174,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-003-authored-route-search-v1", "C# HubRuntime loads authored route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ochre-only-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -559,7 +559,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
-	_expect(bool(contract.get("unit_catalog_ready", false)), "%s declares unit catalog readiness" % scene_id)
+	var production_asset_scene := scene_id == "ochre_island_scene"
+	_expect(bool(contract.get("unit_catalog_ready", false)) == production_asset_scene, "%s unit catalog readiness matches approved asset status" % scene_id)
 	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
 	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
 	_expect(bool(contract.get("scale_ready", false)), "%s declares scale readiness" % scene_id)
@@ -573,18 +574,18 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("occlusion_layers", "")).contains("ui_overlay: not physical evidence"), "%s excludes UI overlay from physical occlusion evidence" % scene_id)
 	_expect(str(contract.get("scale_table", "")).contains("player_unit=1.0"), "%s exposes player-relative scale table" % scene_id)
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
-	_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-	if scene_id == "hub_island_dock":
-		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/initial-island-scene.md", "hub_dock_ground")
-	if scene_id == "hub_ship_interior":
-		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ship-interior-layered-scene.md", "ship_deck_01")
-	if scene_id == "exploration_mist_island":
-		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/mist-lamp-wreck-scene.md", "mist_wreck_ground_01")
-	if scene_id == "ochre_island_scene":
+	if production_asset_scene:
+		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ochre-island-scene.md", "ochre_island_ground_01")
+	else:
+		var catalog := contract.get("scene_unit_catalog", []) as Array
+		_expect(catalog.size() == 0, "%s has no production scene-unit assets after the reset" % scene_id)
+		_expect(int(contract.get("authored_physical_unit_count", -1)) == 0, "%s does not count temporary greybox nodes as authored assets" % scene_id)
+		_expect(str(contract.get("scene_unit_authoring_source", "")) == "not_migrated_first_slice", "%s is marked as needing fresh asset workflow" % scene_id)
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
-	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
+	if production_asset_scene:
+		_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:

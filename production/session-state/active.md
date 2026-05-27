@@ -13,7 +13,7 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - After implementation, user feedback is always modifiable and must enter `directed-content-modification`, which updates the target scene/UI/unit document and implementation instead of producing another PASS/BLOCKED verdict.
 - Each scene/UI/unit must stay independently traceable as its own implementation, asset, or asset group. Old non-compliant Godot nodes may not be silently preserved; if deletion is needed, ask before deletion.
 - `production/playtests/scene-composition-user-readability-checklist.md` is now a non-gating feedback prompt/index, not a release-readiness judgment form.
-- Next recommended implementation path: close the smallest current evidence loop for an approved independent content item, such as `ochre_island_scene` plus `banded_iron_ore`, or refresh release packets/screenshots for already implemented current scenes.
+- 2026-05-27 修正后的最高优先级: 不再优先 release packet / 截图收口。除 `ochre_island_scene` / `banded_iron_ore` 外，当前已有游戏资产都视为临时测试资产，不得继续作为 production-ready 证据。下一步应优先实现已通过创建适合性但没有独立实现的核心 UI / 单位，尤其是 `chart-full-screen-surface` 和 `chart-table`，并按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 重新建立资产。
 
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
 - Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.

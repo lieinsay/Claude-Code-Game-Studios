@@ -3,7 +3,7 @@
 > **Prototype ID**: `scene_unit.prototype.chart_table`
 > **中文名称**: 航图台 / 星图桌
 > **单位分类**: `fixed_scene_object`
-> **生命周期状态**: `spec_drafted`
+> **生命周期状态**: `implementation_priority`
 > **创建适合性人工审查**: `APPROVED`
 > **来源 GDD**: `design/gdd/ui-hud-chart-interface.md`, `design/gdd/airship-hub.md`, `design/gdd/scene-physics-unit-system.md`
 > **最后更新**: 2026-05-24
@@ -16,7 +16,7 @@
 | 单位名称 | 航图台 / 星图桌 |
 | 单位分类 | `fixed_scene_object` |
 | 存放目录 | `production/unit-specs/fixed-scene-objects/` |
-| 生命周期状态 | `spec_drafted` |
+| 生命周期状态 | `implementation_priority` |
 | 创建适合性人工审查 | `APPROVED` |
 | 来源 GDD | `design/gdd/ui-hud-chart-interface.md`; `design/gdd/airship-hub.md`; `design/gdd/scene-physics-unit-system.md` |
 | 关联场景 / UI | `ship_interior_layered`; `S4_chart` |

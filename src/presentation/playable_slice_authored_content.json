@@ -1,15 +1,24 @@
 {
-  "content_version": "polish-003-authored-route-search-v1",
+  "content_version": "polish-asset-reset-ochre-only-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
   "voyage_fast_forward_seconds": 240.0,
   "initial_resources": [
-    { "resource_id": "resource.basic_supply", "quantity": 13 },
-    { "resource_id": "resource.repair_kit", "quantity": 7 }
+    {
+      "resource_id": "resource.basic_supply",
+      "quantity": 13
+    },
+    {
+      "resource_id": "resource.repair_kit",
+      "quantity": 7
+    }
   ],
   "starting_modules": [
-    { "slot_id": "slot_a", "module_type": "Cargo" }
+    {
+      "slot_id": "slot_a",
+      "module_type": "Cargo"
+    }
   ],
   "scene_unit_prototypes": [
     {
@@ -24,393 +33,13 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "unit_spec": "production/unit-specs/dynamic-entities/player-controlled-entity.md",
-      "allowed_scene_ids": [ "hub_island_dock", "hub_ship_interior", "exploration_mist_island", "ochre_island_scene" ],
-      "behavior_tags": [ "trigger_only" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
       "domain_owner": "player-movement-interaction"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_island_main_mass",
-      "display_name": "Initial island main mass",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "landmark_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "landmark >= 2.0x player height",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_dock_plank_walkway",
-      "display_name": "Initial island dock walkway",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "passage_unit",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "door_or_passage width >= 1.1x player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "player-movement-interaction"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_docked_ship_hull",
-      "display_name": "Docked Cloudweaver hull",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "blocking_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "landmark >= 2.0x player height",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "unit_spec": "production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "airship-hub"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_boarding_ramp",
-      "display_name": "Initial island boarding ramp",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "door_or_passage",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "passage clear width >= 1.1x player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "airship-hub"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_airship_envelope",
-      "display_name": "Docked airship envelope",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "height_marker",
-      "collision": "height_marker",
-      "occlusion_layer": "height_shadow",
-      "scale_rule": "player_unit-relative landmark visual scale; no collision footprint",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "unit_spec": "production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "visual_only_height_marker" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.hub_waterline",
-      "display_name": "Initial island waterline",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "special_surface",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "blocked boundary larger than player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_island_dock" ],
-      "behavior_tags": [ "gameplay_affecting_boundary" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.ship_hull_outline",
-      "display_name": "Ship interior hull outline",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "blocking_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "player_unit-relative room-scale hull boundary",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.ship_room_bay",
-      "display_name": "Ship room bay",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "landmark_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "player_unit-relative room-scale unit",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.helm_console",
-      "display_name": "Helm console",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "interactable_anchor",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "npc/interactable scale 0.8-1.3x player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "chart-route-planning"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.storage_crate",
-      "display_name": "Storage crate",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "prop_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "small/prop scale tied to player_unit",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "resources-goods-capacity"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.ship_exit_threshold",
-      "display_name": "Ship exit threshold",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "door_or_passage",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "passage clear width >= 1.1x player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "airship-hub"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.cockpit_window_glass",
-      "display_name": "Cockpit window glass",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "special_surface",
-      "collision": "blocking_static",
-      "occlusion_layer": "background",
-      "scale_rule": "visual-only glass surface; no implied passage",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "visual_only_glass" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.upper_hull_front_wall",
-      "display_name": "Upper hull front wall",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "foreground_occluder",
-      "collision": "blocking_static",
-      "occlusion_layer": "foreground_occluder",
-      "scale_rule": "player_unit-relative front_wall_removed cutaway shell",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "hub_ship_interior" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.exploration_island_mass",
-      "display_name": "Mist-lamp wreck island mass",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "landmark_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "landmark >= 2.0x player height",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.exploration_path",
-      "display_name": "Exploration island path",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "passage_unit",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "walkable path width tied to player_unit",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "player-movement-interaction"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.exploration_cliff_edge",
-      "display_name": "Exploration cliff edge",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "blocking_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "blocked ledge boundary larger than player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.search_wreck",
-      "display_name": "Mist-lamp wreck search anchor",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "interactable_anchor",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "search wreck about 6 player-widths",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "exploration-scavenge"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.search_wreck_mast",
-      "display_name": "Mist-lamp wreck mast",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "height_marker",
-      "collision": "height_marker",
-      "occlusion_layer": "height_shadow",
-      "scale_rule": "player_unit-relative height-only visual cue",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "visual_only_height_marker" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.return_ship_hull",
-      "display_name": "Return ship hull",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "blocking_unit",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "return ship about 5 player-widths",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "blocking_static" ],
-      "domain_owner": "airship-hub"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.return_helm_anchor",
-      "display_name": "Return helm anchor",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "interactable_anchor",
-      "collision": "soft_overlap",
-      "occlusion_layer": "midground_object",
-      "scale_rule": "passage/interactable scale tied to player_unit",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "trigger_only" ],
-      "domain_owner": "airship-hub"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.mist_sea_boundary",
-      "display_name": "Mist sea boundary",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "special_surface",
-      "collision": "blocking_static",
-      "occlusion_layer": "midground_floor",
-      "scale_rule": "water boundary larger than player",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "gameplay_affecting_boundary" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.mist_horizon_fog",
-      "display_name": "Mist horizon fog",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "special_surface",
-      "collision": "soft_overlap",
-      "occlusion_layer": "background",
-      "scale_rule": "visual-only fog/cloud; no collision implication",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "visual_only_fog" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.return_beacon_beam",
-      "display_name": "Return beacon beam",
-      "prototype_classification": "fixed_scene_object",
-      "unit_type": "height_marker",
-      "collision": "height_marker",
-      "occlusion_layer": "height_shadow",
-      "scale_rule": "player_unit-relative height-only landing/readability cue",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "visual_only_height_marker" ],
-      "domain_owner": "scene-physics"
-    },
-    {
-      "prototype_id": "scene_unit.prototype.exploration_threat_zone",
-      "display_name": "Exploration threat zone",
-      "prototype_classification": "dynamic_entity",
-      "unit_type": "height_marker",
-      "collision": "height_marker",
-      "occlusion_layer": "height_shadow",
-      "scale_rule": "player_unit-relative height-only warning overlay in world layer",
-      "source_layer": "world_playable_scene",
-      "ui_evidence_allowed": false,
-      "source_gdd": "design/gdd/scene-physics-unit-system.md",
-      "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "exploration_mist_island" ],
-      "behavior_tags": [ "hazardous", "trigger_only" ],
-      "domain_owner": "combat-threat-handling"
     },
     {
       "prototype_id": "scene_unit.prototype.ochre_island_mass",
@@ -424,8 +53,12 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "ochre_island_scene" ],
-      "behavior_tags": [ "blocking_static" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "blocking_static"
+      ],
       "domain_owner": "scene-physics"
     },
     {
@@ -440,8 +73,12 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "ochre_island_scene" ],
-      "behavior_tags": [ "trigger_only" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
       "domain_owner": "player-movement-interaction"
     },
     {
@@ -456,8 +93,14 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "unit_spec": "production/unit-specs/fixed-scene-objects/banded-iron-ore.md",
-      "allowed_scene_ids": [ "ochre_island_scene" ],
-      "behavior_tags": [ "trigger_only", "resource_node", "breakable" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only",
+        "resource_node",
+        "breakable"
+      ],
       "domain_owner": "resources-goods-capacity"
     },
     {
@@ -472,8 +115,12 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "ochre_island_scene" ],
-      "behavior_tags": [ "trigger_only" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
       "domain_owner": "navigation-route-risk"
     },
     {
@@ -488,382 +135,26 @@
       "ui_evidence_allowed": false,
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "legacy_replacement_status": "pending_spec_replacement",
-      "allowed_scene_ids": [ "ochre_island_scene" ],
-      "behavior_tags": [ "gameplay_affecting_boundary" ],
+      "allowed_scene_ids": [
+        "ochre_island_scene"
+      ],
+      "behavior_tags": [
+        "gameplay_affecting_boundary"
+      ],
       "domain_owner": "scene-physics"
     }
   ],
   "scene_unit_instances": [
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.player_marker",
-      "prototype_id": "scene_unit.prototype.player_marker",
-      "scene_id": "hub_island_dock",
-      "unit_id": "player_marker",
-      "godot_node_path": "HubRoot/PlayableLayer/PlayerMarker",
-      "position": { "x": 246, "y": 610 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/initial-island-scene.md",
-      "state_hook": "player_position"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.island_main_mass",
-      "prototype_id": "scene_unit.prototype.hub_island_main_mass",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_island_main_mass",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubIslandMainMass",
-      "position": { "x": 468, "y": 522 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/initial-island-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.dock_plank_walkway",
-      "prototype_id": "scene_unit.prototype.hub_dock_plank_walkway",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_dock_plank_walkway",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubDockPlankWalkway",
-      "position": { "x": 120, "y": 562 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/initial-island-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.docked_ship_hull",
-      "prototype_id": "scene_unit.prototype.hub_docked_ship_hull",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_docked_ship_hull",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubDockedShipHullSilhouette",
-      "position": { "x": 382, "y": 448 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/initial-island-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.boarding_ramp",
-      "prototype_id": "scene_unit.prototype.hub_boarding_ramp",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_boarding_ramp",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubBoardingRamp",
-      "position": { "x": 236, "y": 558 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/initial-island-scene.md",
-      "interaction_anchor_id": "hub_boarding_ramp"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.airship_envelope",
-      "prototype_id": "scene_unit.prototype.hub_airship_envelope",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_airship_envelope",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubDockedShipBalloon",
-      "position": { "x": 446, "y": 390 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "height_shadow",
-      "scene_spec": "production/scene-specs/initial-island-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_island_dock.waterline",
-      "prototype_id": "scene_unit.prototype.hub_waterline",
-      "scene_id": "hub_island_dock",
-      "unit_id": "hub_waterline",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubDockWaterline",
-      "position": { "x": 72, "y": 632 },
-      "floor_id": "hub_dock_ground",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/initial-island-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.player_marker",
-      "prototype_id": "scene_unit.prototype.player_marker",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "player_marker",
-      "godot_node_path": "HubRoot/PlayableLayer/PlayerMarker",
-      "position": { "x": 246, "y": 610 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "state_hook": "player_position"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.hull_outline",
-      "prototype_id": "scene_unit.prototype.ship_hull_outline",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "hub_interior_hull_outline",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubInteriorHullOutline",
-      "position": { "x": 196, "y": 424 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.cockpit_bay",
-      "prototype_id": "scene_unit.prototype.ship_room_bay",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "hub_interior_cockpit_bay",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubInteriorCockpitBay",
-      "position": { "x": 260, "y": 456 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "interaction_anchor_id": "helm_console_prop"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.cargo_bay",
-      "prototype_id": "scene_unit.prototype.ship_room_bay",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "hub_interior_cargo_bay",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubInteriorCargoBay",
-      "position": { "x": 560, "y": 456 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "interaction_anchor_id": "storage_crate_prop"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.engine_bay",
-      "prototype_id": "scene_unit.prototype.ship_room_bay",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "hub_interior_engine_bay",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubInteriorEngineBay",
-      "position": { "x": 850, "y": 456 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "state_hook": "hull_integrity"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.helm_console",
-      "prototype_id": "scene_unit.prototype.helm_console",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "helm_console_prop",
-      "godot_node_path": "HubRoot/PlayableLayer/InteractionLayer/HubHelmMarker",
-      "position": { "x": 328, "y": 548 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "interaction_anchor_id": "helm_console_prop"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.storage_crate",
-      "prototype_id": "scene_unit.prototype.storage_crate",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "storage_crate_prop",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/HubStorageCrateProp",
-      "position": { "x": 596, "y": 532 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "state_hook": "cargo_used"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.exit_threshold",
-      "prototype_id": "scene_unit.prototype.ship_exit_threshold",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "ship_exit_threshold",
-      "godot_node_path": "HubRoot/PlayableLayer/InteractionLayer/HubShipExitMarker",
-      "position": { "x": 226, "y": 610 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md",
-      "interaction_anchor_id": "ship_exit_threshold"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.cockpit_window_glass",
-      "prototype_id": "scene_unit.prototype.cockpit_window_glass",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "cockpit_window_glass",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/CockpitWindowGlass",
-      "position": { "x": 308, "y": 438 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "background",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.hub_ship_interior.upper_hull_front_wall",
-      "prototype_id": "scene_unit.prototype.upper_hull_front_wall",
-      "scene_id": "hub_ship_interior",
-      "unit_id": "upper_hull_front_wall",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/UpperHullFrontWall",
-      "position": { "x": 196, "y": 424 },
-      "floor_id": "ship_deck_01",
-      "floor_index": 0,
-      "layer": "foreground_occluder",
-      "scene_spec": "production/scene-specs/ship-interior-layered-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.player_marker",
-      "prototype_id": "scene_unit.prototype.player_marker",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "player_marker",
-      "godot_node_path": "HubRoot/PlayableLayer/PlayerMarker",
-      "position": { "x": 168, "y": 610 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
-      "state_hook": "player_position"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.island_mass",
-      "prototype_id": "scene_unit.prototype.exploration_island_mass",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "exploration_island_mass",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationIslandMass",
-      "position": { "x": 390, "y": 430 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.island_path",
-      "prototype_id": "scene_unit.prototype.exploration_path",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "exploration_island_path",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationIslandPath",
-      "position": { "x": 342, "y": 584 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.cliff_edge",
-      "prototype_id": "scene_unit.prototype.exploration_cliff_edge",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "exploration_cliff_edge",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationCliffEdge",
-      "position": { "x": 416, "y": 444 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.search_wreck",
-      "prototype_id": "scene_unit.prototype.search_wreck",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "search_wreck_prop",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/SearchWreckProp",
-      "position": { "x": 558, "y": 540 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
-      "interaction_anchor_id": "search_wreck_prop",
-      "state_hook": "exploration_step"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.search_wreck_mast",
-      "prototype_id": "scene_unit.prototype.search_wreck_mast",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "search_wreck_mast",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/SearchWreckMast",
-      "position": { "x": 630, "y": 510 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "height_shadow",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.return_ship_hull",
-      "prototype_id": "scene_unit.prototype.return_ship_hull",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "return_ship_hull",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationReturnShipHullSilhouette",
-      "position": { "x": 102, "y": 520 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.return_helm_anchor",
-      "prototype_id": "scene_unit.prototype.return_helm_anchor",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "return_helm_anchor",
-      "godot_node_path": "HubRoot/PlayableLayer/InteractionLayer/ReturnInteractPoint",
-      "position": { "x": 204, "y": 594 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_object",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
-      "interaction_anchor_id": "return_helm_anchor"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.mist_sea_boundary",
-      "prototype_id": "scene_unit.prototype.mist_sea_boundary",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "mist_sea_boundary",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationPlayableSea",
-      "position": { "x": 0, "y": 596 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "midground_floor",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.mist_horizon_fog",
-      "prototype_id": "scene_unit.prototype.mist_horizon_fog",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "mist_horizon_fog",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationPlayableMistHorizon",
-      "position": { "x": 0, "y": 160 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "background",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.return_beacon_beam",
-      "prototype_id": "scene_unit.prototype.return_beacon_beam",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "return_beacon_beam",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ReturnBeaconBeam",
-      "position": { "x": 1032, "y": 478 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "height_shadow",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
-      "state_hook": "return_ready"
-    },
-    {
-      "instance_id": "scene_unit.instance.exploration_mist_island.threat_zone",
-      "prototype_id": "scene_unit.prototype.exploration_threat_zone",
-      "scene_id": "exploration_mist_island",
-      "unit_id": "exploration_threat_zone",
-      "godot_node_path": "HubRoot/PlayableLayer/SceneLayer/ExplorationThreatZone",
-      "position": { "x": 768, "y": 528 },
-      "floor_id": "mist_wreck_ground_01",
-      "floor_index": 0,
-      "layer": "height_shadow",
-      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
-      "state_hook": "threat_text"
-    },
     {
       "instance_id": "scene_unit.instance.ochre_island_scene.player_marker",
       "prototype_id": "scene_unit.prototype.player_marker",
       "scene_id": "ochre_island_scene",
       "unit_id": "player_marker",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/PlayerSpawn",
-      "position": { "x": 250, "y": 430 },
+      "position": {
+        "x": 250,
+        "y": 430
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_object",
@@ -876,7 +167,10 @@
       "scene_id": "ochre_island_scene",
       "unit_id": "ochre_island_mass",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/OchreIslandGround",
-      "position": { "x": 140, "y": 260 },
+      "position": {
+        "x": 140,
+        "y": 260
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_floor",
@@ -889,7 +183,10 @@
       "scene_id": "ochre_island_scene",
       "unit_id": "ochre_island_path",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/WalkPath",
-      "position": { "x": 260, "y": 390 },
+      "position": {
+        "x": 260,
+        "y": 390
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_floor",
@@ -902,7 +199,10 @@
       "scene_id": "ochre_island_scene",
       "unit_id": "banded_iron_ore",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/BandedIronOreInstance",
-      "position": { "x": 655, "y": 390 },
+      "position": {
+        "x": 655,
+        "y": 390
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_object",
@@ -916,7 +216,10 @@
       "scene_id": "ochre_island_scene",
       "unit_id": "ochre_return_anchor",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/OchreReturnAnchor",
-      "position": { "x": 875, "y": 430 },
+      "position": {
+        "x": 875,
+        "y": 430
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_object",
@@ -930,7 +233,10 @@
       "scene_id": "ochre_island_scene",
       "unit_id": "ochre_cloudsea_boundary",
       "godot_node_path": "src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/CloudSeaBoundary",
-      "position": { "x": 110, "y": 570 },
+      "position": {
+        "x": 110,
+        "y": 570
+      },
       "floor_id": "ochre_island_ground_01",
       "floor_index": 0,
       "layer": "midground_floor",
@@ -962,8 +268,14 @@
       "origin_id": "location.cloudweaver-hub",
       "destination_id": "location.mist-short",
       "distance_band": "short",
-      "chart_hazard_tags": [ "fog", "low_threat" ],
-      "navigation_hazard_tags": [ "safe", "low_threat" ]
+      "chart_hazard_tags": [
+        "fog",
+        "low_threat"
+      ],
+      "navigation_hazard_tags": [
+        "safe",
+        "low_threat"
+      ]
     },
     {
       "route_id": "route.market",
@@ -972,8 +284,14 @@
       "origin_id": "location.cloudweaver-hub",
       "destination_id": "location.old-market",
       "distance_band": "medium",
-      "chart_hazard_tags": [ "market", "medium_threat" ],
-      "navigation_hazard_tags": [ "safe", "medium_threat" ]
+      "chart_hazard_tags": [
+        "market",
+        "medium_threat"
+      ],
+      "navigation_hazard_tags": [
+        "safe",
+        "medium_threat"
+      ]
     }
   ],
   "search_points": [

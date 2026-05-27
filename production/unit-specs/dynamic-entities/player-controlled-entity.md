@@ -6,7 +6,7 @@
 > **生命周期状态**: `spec_drafted`
 > **创建适合性人工审查**: `APPROVED_WITH_NOTES`
 > **来源 GDD**: `design/gdd/scene-physics-unit-system.md`
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-27
 
 ## 0. 文件头
 
@@ -19,9 +19,9 @@
 | 生命周期状态 | `spec_drafted` |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 来源 GDD | `design/gdd/scene-physics-unit-system.md` |
-| 关联场景 / UI | `initial_island_scene`; `ship_interior_layered`; `mist_lamp_wreck_scene`; `ochre_island_scene` |
-| 独立实现入口 | 当前为作者化原型 + 运行时玩家标记；后续角色本体需独立场景 / 资产组。 |
-| 最后更新 | 2026-05-24 |
+| 关联场景 / UI | 当前仅 `ochre_island_scene`；其它旧场景引用已撤销，后续重建时重新登记。 |
+| 独立实现入口 | 当前仅作为 `ochre_island_scene` 作者化原型 + 运行时玩家标记保留；后续角色本体需独立场景 / 资产组。 |
+| 最后更新 | 2026-05-27 |
 
 ## 1. 独立实现 / 资产边界
 
@@ -30,7 +30,7 @@
 | 独立原型实现 | `src/presentation/playable_slice_authored_content.json::scene_unit.prototype.player_marker`；后续角色实体需独立 `.tscn` 或等价原型。 |
 | 配套脚本 / 行为 | 当前由场景运行时移动 / 交互系统驱动；后续拆出玩家实体行为组件。 |
 | 资产组 | 玩家可读占位图 / 标记、移动反馈、交互反馈。 |
-| 摆放实例来源 | 各可进入场景只引用玩家原型和出生 / 恢复实例，不静默改变本体规则。 |
+| 摆放实例来源 | 当前仅 `ochre_island_scene` 引用玩家原型和出生 / 恢复实例；其它旧灰盒实例已撤销。 |
 | 禁止混入位置 | 不得把玩家本体只作为 HUD 光标、摄像机锚点或临时调试节点。 |
 | 删除旧节点要求 | 若替代旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
@@ -38,7 +38,7 @@
 
 - 单位是什么: 当前可玩切片中由玩家操作、可移动、可触发空间交互的世界实体。
 - 玩家 3 秒内应如何识别: 玩家应能看出这是自己在场景中的位置和可操作对象；本轮可以是可移动图片或清晰标记。
-- 它服务的场景幻想 / 功能: 让玩家真实存在于初始岛屿、船内和离岛场景中，而不是只通过 UI 或摄像机状态存在。
+- 它服务的场景幻想 / 功能: 当前让玩家真实存在于 `ochre_island_scene` 中；初始岛屿、船内和雾灯残骸需要重新通过独立资产实现后再接入。
 - 它不是什么: 不是 HUD 光标、调试点、摄像机锚点，也不是完整角色动画 / 战斗 / 成长系统。
 
 ## 3. 分类与边界
@@ -98,16 +98,14 @@
 
 | 场景 | 使用方式 | 实例要求 | 后续反馈记录 |
 | --- | --- | --- | --- |
-| `initial_island_scene` / `hub_island_dock` | 玩家出生、移动、登船交互 | 必须有合法出生点和登船锚点 | `directed-content-modification` |
-| `ship_interior_layered` / `hub_ship_interior` | 船内移动、航图台 / 出口交互 | 必须有合法恢复点和交互锚点 | `directed-content-modification` |
-| `mist_lamp_wreck_scene` / `exploration_mist_island` | 搜索岛移动与返航交互 | 必须有合法出生点和返航锚点 | `directed-content-modification` |
-| `ochre_island_scene` | 资源岛移动与采集交互 | 后续新增实例前需对应场景规格、独立边界和运行证据 | `directed-content-modification` |
+| `ochre_island_scene` | 资源岛移动与采集交互 | 已有对应场景规格、独立边界和运行证据 | `directed-content-modification` |
+| `initial_island_scene` / `ship_interior_layered` / `mist_lamp_wreck_scene` | 旧灰盒引用已撤销 | 重新实现前不得作为现存玩家实体实例证据 | 重新走 Godot asset workflow |
 
 ## 9. 作者化数据要求
 
 | Prototype ID | 中文名称 | 可出现的场景 | 运行时行为 | 碰撞 / 触发 | 遮挡 | 状态与恢复 | UI 边界 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `scene_unit.prototype.player_marker` | 玩家位置标记 | `hub_island_dock`、`hub_ship_interior`、`exploration_mist_island` | 表示玩家在当前场景的可玩位置和进入点；随场景切换迁移；本轮只要求可移动和可触发空间交互 | `nav_blocker` 语义用于导航和出生点保护，不作为实体伤害体 | `actor` | 场景载入时由实例位置恢复；不得由 HUD 独立生成；移动动画、交互动画和战斗能力为后续扩展 | HUD 可显示玩家状态，但不能替代世界位置 |
+| `scene_unit.prototype.player_marker` | 玩家位置标记 | `ochre_island_scene` | 表示玩家在当前场景的可玩位置和进入点；本轮只要求可移动和可触发空间交互 | `nav_blocker` 语义用于导航和出生点保护，不作为实体伤害体 | `actor` | 场景载入时由实例位置恢复；不得由 HUD 独立生成；移动动画、交互动画和战斗能力为后续扩展 | HUD 可显示玩家状态，但不能替代世界位置 |
 
 ## 10. 资产与音频需求
 
