@@ -154,6 +154,23 @@ evidence for scene, UI, or unit work:
   the story's only scope is drafting the review packet or a non-implementation
   spec draft. Codex review, generated rationale, or asking the user during the
   implementation turn does not satisfy this gate.
+- If the story creates or introduces a new scene, UI surface, or reusable unit
+  and the human suitability gate has passed, require the corresponding
+  `godot-asset-skills` artifacts before production implementation:
+  `.godot-ai/contracts/<asset-type>/<stable-id>.contract.md`,
+  `.godot-ai/reviews/<asset-type>/<stable-id>.review.md`, and
+  `.godot-ai/execution-plans/<asset-type>/<stable-id>.execution-plan.md`. The
+  review must say `Can Execute: true`. If the contract, review, or execution plan
+  is missing, or the review is blocked, stop before coding unless this story's
+  only scope is to run `godot-asset-interview` / `godot-asset-review` and produce
+  those artifacts.
+- When implementing a new scene, UI surface, or reusable unit from approved
+  `.godot-ai` artifacts, prefer `godot-asset-execute` and the Godot AI MCP
+  installed under `addons/godot_ai` for Godot scene/resource/node work. Do not
+  bypass the asset contract by hand-building scattered nodes into a legacy scene
+  or large runtime script. After execution, require
+  `.godot-ai/verification/<asset-type>/<stable-id>.verification.md` and cite it in
+  the affected production spec or QA evidence.
 - If the story creates, changes, or claims evidence/readiness for an enterable
   scene, world/playable surface, route destination, repair point, market area,
   transition, scene identity, spatial layout, or scene physics contract, read the

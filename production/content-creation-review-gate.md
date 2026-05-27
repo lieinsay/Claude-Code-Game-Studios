@@ -18,9 +18,40 @@
 1. Codex 发现需要新建或替换 `scene` / `ui` / `unit` 时，先提出创建申请。
 2. 人工只审核“是否适合创建”；结论为 `APPROVED` 或 `APPROVED_WITH_NOTES` 才能继续。
 3. Codex 起草对应规格，并把人工备注写回规格。
-4. 不再设置规格二次人工审核硬门；规格满足模板、备注已写回、独立实现 / 资产边界明确后，可进入实现。
-5. 实现后用自动证据、截图 / 视觉证据和用户体验验收关闭当前轮次。
-6. 已验收内容仍保持可修改；后续按 `directed-content-modification` 对指定场景 / UI / 单位定向修改规格和实现。
+4. Codex 必须把已通过的创建需求进入 `godot-asset-skills` 工作流，生成可审查、可执行、可验证的 Godot 资产产物。
+5. 不再设置规格二次人工审核硬门；规格满足模板、备注已写回、独立实现 / 资产边界明确，并且 Godot 资产合约与审查计划齐备后，可进入实现。
+6. 实现后用自动证据、截图 / 视觉证据、Godot 资产验证记录和用户体验验收关闭当前轮次。
+7. 已验收内容仍保持可修改；后续按 `directed-content-modification` 对指定场景 / UI / 单位定向修改规格和实现。
+
+## Godot 资产工作流硬要求
+
+本项目是 Godot 项目。任何通过本门禁的新建 `scene` / `ui` / `unit`，在进入生产实现前，必须使用项目内 `godot-asset-skills/` 提供的资产工作流：
+
+```text
+godot-asset-interview -> godot-asset-review -> godot-asset-execute
+```
+
+工作流产物必须写入当前项目的 `.godot-ai/`：
+
+```text
+.godot-ai/
+  context/
+  interviews/
+  contracts/
+  reviews/
+  execution-plans/
+  verification/
+```
+
+最低要求：
+
+- `godot-asset-interview` 必须把人工适合性结论、规格文件、稳定 ID、独立边界、非目标和验收证据整理成 `.godot-ai/contracts/<asset-type>/<stable-id>.contract.md`。
+- `godot-asset-review` 必须产出 `.godot-ai/reviews/<asset-type>/<stable-id>.review.md`，且 `Can Execute: true`，才能进入实现。若审查为 `blocked`，story-readiness 和 `/dev-story` 必须阻塞。
+- `godot-asset-review` 应同时产出 `.godot-ai/execution-plans/<asset-type>/<stable-id>.execution-plan.md`，声明将创建或修改的 Godot 输出、需要的 Godot AI MCP 能力和验证证据。
+- `godot-asset-execute` 必须优先通过已部署在 `addons/godot_ai` 的 Godot AI MCP 执行资产合同；如果编辑器会话不可用，必须记录 blocker，不得用散落手写节点绕过合同。
+- 执行完成必须写入 `.godot-ai/verification/<asset-type>/<stable-id>.verification.md`，并在场景 / UI / 单位规格或 QA evidence 中引用该验证记录。
+
+除非用户明确接受直接执行风险，不能跳过 `godot-asset-review`。即使用户接受风险，也必须记录最小风险审查和验证证据。
 
 没有人工适合性审查时：
 
@@ -28,6 +59,7 @@
 - `/dev-story` 必须在编码前停止，不能把“正在问用户”当作已经批准。
 - 规格生命周期不能进入 `implementation_ready`。
 - 运行时数据、C# 代码、Godot 场景或测试夹具不能新增对应实体，除非只是为了生成审查材料且明确标为非生产实现。
+- `.godot-ai/contracts/`、`.godot-ai/reviews/` 和 `.godot-ai/execution-plans/` 缺少对应资产产物时，不能进入生产实现；除非 story 只负责起草这些产物。
 
 ## 旧 Godot 节点处理
 
@@ -77,6 +109,8 @@
 | 审查问题 | 至少回答本文件对应类型的问题 |
 | 结论 | `PENDING` / `APPROVED` / `APPROVED_WITH_NOTES` / `REVISE` / `REJECTED` |
 | 必须回写的备注 | 没有则写 `None` |
+| Godot 资产合约 | `.godot-ai/contracts/<asset-type>/<stable-id>.contract.md`，未生成时写 `PENDING` |
+| Godot 资产审查 | `.godot-ai/reviews/<asset-type>/<stable-id>.review.md`，未通过时写 `BLOCKED` |
 
 ## 审查问题
 

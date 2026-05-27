@@ -1,0 +1,4 @@
+interface:
+  display_name: "Godot Asset Interview"
+  short_description: "Clarify Godot asset requests into executable contracts."
+  default_prompt: "Interview me to turn this Godot asset idea into a clear, reviewable generation contract."

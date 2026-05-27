@@ -150,3 +150,11 @@ bash.exe.stackdump
 *.lnk
 bash.exe.stackdump
 /addons
+!/addons/
+/addons/*
+!/addons/godot_ai/
+!/addons/godot_ai/**
+
+# Godot AI asset workflow artifacts are project evidence.
+!.godot-ai/
+!.godot-ai/**

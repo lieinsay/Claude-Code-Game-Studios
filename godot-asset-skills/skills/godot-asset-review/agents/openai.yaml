@@ -1,0 +1,4 @@
+interface:
+  display_name: "Godot Asset Review"
+  short_description: "Review Godot asset contracts before execution."
+  default_prompt: "Review this Godot asset contract and decide whether it is ready to execute."

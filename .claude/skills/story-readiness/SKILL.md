@@ -213,6 +213,17 @@ items pass or are explicitly marked N/A with a stated reason.
   only scope is to draft the review packet or a non-implementation spec draft.
   Codex review, generated rationale, or asking the user during implementation
   does not satisfy this gate.
+- [ ] **Godot asset workflow required before new scene/UI/unit implementation**:
+  For any new scene, UI surface, or reusable unit that passed the human
+  suitability gate, the story must reference the matching `godot-asset-skills`
+  artifacts under `.godot-ai/`: a contract in
+  `.godot-ai/contracts/<asset-type>/<stable-id>.contract.md`, a review in
+  `.godot-ai/reviews/<asset-type>/<stable-id>.review.md`, and an execution plan
+  in `.godot-ai/execution-plans/<asset-type>/<stable-id>.execution-plan.md`.
+  The review must say `Can Execute: true` before implementation stories are
+  READY. If these artifacts are missing or the review is `blocked`, the story is
+  **BLOCKED** unless the story explicitly limits itself to producing the
+  `.godot-ai` interview/review artifacts.
 - [ ] **Scene specs required before scene work**: If a story creates, changes, claims
   readiness for, or adds evidence for any enterable scene, world/playable scene
   surface, route destination, level area, repair point, market area, or scene

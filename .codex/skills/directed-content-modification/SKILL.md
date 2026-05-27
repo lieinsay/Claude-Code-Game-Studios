@@ -45,7 +45,7 @@ Classify the requested change before editing:
 | Scope | Action |
 | --- | --- |
 | Existing-object modification | Continue in this workflow. |
-| Adds a new scene/UI/unit | Pause only that new object and request creation suitability approval via `production/content-creation-review-gate.md`. |
+| Adds a new scene/UI/unit | Pause only that new object and request creation suitability approval via `production/content-creation-review-gate.md`; after approval, route that object through `godot-asset-interview -> godot-asset-review -> godot-asset-execute` before production Godot implementation. |
 | Deletes non-compliant legacy Godot nodes | Ask the user before deletion; list file, node names, reason, and replacement path. |
 | Cross-system redesign | Recommend the appropriate design workflow before implementation. |
 
@@ -104,7 +104,11 @@ Apply the smallest implementation change that satisfies the updated spec:
 - Avoid unrelated refactors.
 - Do not add new dependencies.
 - If implementation exposes a missing new object, stop and route that object
-  through the creation gate.
+  through the creation gate and the required `.godot-ai` asset workflow.
+- For approved new Godot scene/UI/unit assets, require the matching
+  `.godot-ai/contracts/`, `.godot-ai/reviews/`, `.godot-ai/execution-plans/`,
+  and `.godot-ai/verification/` artifacts from `godot-asset-skills`; use Godot AI
+  MCP through `addons/godot_ai` when executing scene/resource/node work.
 
 ## 6. Verify
 

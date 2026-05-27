@@ -1,0 +1,4 @@
+interface:
+  display_name: "Godot Asset Execute"
+  short_description: "Execute reviewed Godot asset contracts with Godot AI MCP."
+  default_prompt: "Execute this Godot asset contract with Godot AI MCP and produce verification evidence."

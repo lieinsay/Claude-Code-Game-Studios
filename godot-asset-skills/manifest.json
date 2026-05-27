@@ -1,0 +1,10 @@
+{
+  "name": "godot-asset-skills",
+  "description": "Portable Codex skills for interviewing, reviewing, and executing Godot asset contracts with Godot AI MCP.",
+  "skills": [
+    "godot-asset-interview",
+    "godot-asset-review",
+    "godot-asset-execute"
+  ],
+  "artifactRoot": ".godot-ai"
+}
