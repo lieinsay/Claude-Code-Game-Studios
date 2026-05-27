@@ -17,6 +17,7 @@ public partial class HubRuntime : Node2D
 	private const string QuarantinedProgressFileName = "cloudweaver_playable_progress.quarantine.json";
 	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
 	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
+	private const string InitialIslandScenePath = "res://src/scenes/hub/InitialIslandScene.tscn";
 	private const string OchreIslandScenePath = "res://src/scenes/ochre/OchreIslandScene.tscn";
 	private const string ShipInteriorLayeredScenePath = "res://src/scenes/ship/ShipInteriorLayeredScene.tscn";
 	private const string ChartTableScenePath = "res://src/scenes/units/ChartTable.tscn";
@@ -56,6 +57,7 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
+	private InitialIslandScene? initialIslandAsset;
 	private ShipInteriorLayeredScene? shipInteriorAsset;
 	private ColorRect? chartMistSelectionFrame;
 	private ChartTable? chartTableAsset;
@@ -645,6 +647,24 @@ public partial class HubRuntime : Node2D
 		return DebugScenePhysicsContract(sceneId);
 	}
 
+	/// <summary>Returns independent initial-island scene evidence for smoke tests and QA diagnostics.</summary>
+	public Godot.Collections.Dictionary DebugInitialIslandAssetEvidence()
+	{
+		return initialIslandAsset?.DebugSceneAssetEvidence() ?? new Godot.Collections.Dictionary
+		{
+			["scene_id"] = "initial_island_scene",
+			["runtime_contract_id"] = "hub_island_dock",
+			["boarding_target_scene_id"] = "ship_interior_layered",
+			["boarding_target_runtime_contract_id"] = "hub_ship_interior",
+			["world_layer_ready"] = false,
+			["player_spawn_ready"] = false,
+			["boarding_anchor_ready"] = false,
+			["ship_exterior_ready"] = false,
+			["waterline_boundary_ready"] = false,
+			["ui_evidence_allowed_for_scene"] = false,
+		};
+	}
+
 	public Godot.Collections.Dictionary DebugShipInteriorAssetEvidence()
 	{
 		return shipInteriorAsset?.DebugSceneAssetEvidence() ?? new Godot.Collections.Dictionary
@@ -860,6 +880,7 @@ public partial class HubRuntime : Node2D
 	{
 		return sceneId switch
 		{
+			"hub_island_dock" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
@@ -867,7 +888,7 @@ public partial class HubRuntime : Node2D
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "ochre_island_scene" or "hub_ship_interior";
+		sceneId is "hub_island_dock" or "ochre_island_scene" or "hub_ship_interior";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -1306,38 +1327,7 @@ public partial class HubRuntime : Node2D
 
 	private void AddHubGreyboxSet()
 	{
-		AddSceneRect(hubSceneItems, "HubPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.12f, 0.22f, 0.27f, 1.0f));
-		AddSceneRect(hubSceneItems, "HubPlayableFarMist", new Vector2(0, 162), new Vector2(1280, 62), new Color(0.36f, 0.50f, 0.52f, 0.46f));
-		AddSceneRect(hubSceneItems, "HubPlayableSeaHorizon", new Vector2(0, 592), new Vector2(1280, 88), new Color(0.08f, 0.22f, 0.31f, 1.0f));
-		AddSceneEllipse(hubExteriorSceneItems, "HubIslandMainMass", new Vector2(468, 522), new Vector2(438, 154), new Color(0.18f, 0.36f, 0.28f, 1.0f));
-		AddSceneEllipse(hubExteriorSceneItems, "HubIslandGrassCap", new Vector2(464, 472), new Vector2(382, 78), new Color(0.34f, 0.55f, 0.42f, 1.0f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockPlankWalkway", new Vector2(120, 562), new Vector2(390, 54), new Color(0.48f, 0.40f, 0.28f, 1.0f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockPostLeft", new Vector2(144, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockPostRight", new Vector2(458, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
-		AddScenePolygon(hubExteriorSceneItems, "HubDockedShipHullSilhouette",
-			[
-				new Vector2(522, 480),
-				new Vector2(934, 470),
-				new Vector2(1016, 526),
-				new Vector2(952, 584),
-				new Vector2(558, 584),
-				new Vector2(488, 530),
-			],
-			new Color(0.16f, 0.23f, 0.30f, 1.0f));
-		AddSceneEllipse(hubExteriorSceneItems, "HubDockedShipEnvelopeSilhouette", new Vector2(756, 396), new Vector2(292, 68), new Color(0.54f, 0.68f, 0.70f, 0.96f));
-		AddSceneRect(hubExteriorSceneItems, "HubShipMastForward", new Vector2(636, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
-		AddSceneRect(hubExteriorSceneItems, "HubShipMastRear", new Vector2(846, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
-		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 1.0f));
-		AddSceneRect(hubExteriorSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
-		AddSceneRect(hubExteriorSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockWaterline", new Vector2(72, 632), new Vector2(1136, 18), new Color(0.10f, 0.26f, 0.34f, 0.78f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockPier", new Vector2(156, 568), new Vector2(224, 34), new Color(0.42f, 0.36f, 0.27f, 0.96f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockedShipExterior", new Vector2(382, 448), new Vector2(448, 126), new Color(0.18f, 0.25f, 0.31f, 1.0f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockedShipBalloon", new Vector2(446, 390), new Vector2(320, 54), new Color(0.43f, 0.58f, 0.62f, 0.90f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockedShipCabinDoor", new Vector2(410, 536), new Vector2(56, 38), new Color(0.54f, 0.48f, 0.34f, 0.98f));
-		AddSceneRect(hubExteriorSceneItems, "HubBoardingRamp", new Vector2(236, 558), new Vector2(174, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
-		AddSceneLabel(hubExteriorSceneItems, "HubBoardingRampLabel", new Vector2(208, 532), new Vector2(174, 22), "岛上码头 / 登船坡道");
-		AddSceneLabel(hubExteriorSceneItems, "HubIslandDockIdentityLabel", new Vector2(438, 414), new Vector2(360, 28), "停泊浮岛：云织号靠岸，可登船进入内部");
+		AddInitialIslandSceneAsset();
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.09f, 0.13f, 0.16f, 1.0f));
 		AddScenePolygon(hubInteriorSceneItems, "HubInteriorHullOutline",
 			[
@@ -1389,6 +1379,23 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorExitDoor", new Vector2(218, 552), new Vector2(42, 48), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
 		AddShipInteriorLayeredSceneAsset();
+	}
+
+	private void AddInitialIslandSceneAsset()
+	{
+		var scene = ResourceLoader.Load<PackedScene>(InitialIslandScenePath);
+		if (scene?.Instantiate() is not InitialIslandScene initialIsland)
+		{
+			AddSceneRect(hubExteriorSceneItems, "InitialIslandAssetLoadFailure", new Vector2(284, 388), new Vector2(640, 44), new Color(0.46f, 0.16f, 0.16f, 0.95f));
+			AddSceneLabel(hubExteriorSceneItems, "InitialIslandAssetLoadFailureLabel", new Vector2(298, 396), new Vector2(610, 26), "initial_island_scene 独立场景加载失败");
+			return;
+		}
+
+		initialIslandAsset = initialIsland;
+		initialIsland.Name = "InitialIslandSceneRuntimeInstance";
+		initialIsland.Visible = false;
+		sceneLayer?.AddChild(initialIsland);
+		hubExteriorSceneItems.Add(initialIsland);
 	}
 
 	private void AddShipInteriorLayeredSceneAsset()

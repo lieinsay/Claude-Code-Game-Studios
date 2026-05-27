@@ -1,0 +1,180 @@
+[gd_scene load_steps=3 format=3 uid="uid://initial_island_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/hub/InitialIslandScene.cs" id="1_initial_island_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boarding_ramp"]
+size = Vector2(174, 58)
+
+[node name="InitialIslandScene" type="Node2D"]
+script = ExtResource("1_initial_island_script")
+
+[node name="InitialIslandWorldLayer" type="Node2D" parent="."]
+
+[node name="HubPlayableSkyBackdrop" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 0.0
+offset_top = 126.0
+offset_right = 1280.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.12, 0.22, 0.27, 1)
+
+[node name="HubPlayableFarMist" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 0.0
+offset_top = 162.0
+offset_right = 1280.0
+offset_bottom = 224.0
+mouse_filter = 2
+color = Color(0.36, 0.5, 0.52, 0.46)
+
+[node name="HubPlayableSeaHorizon" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 0.0
+offset_top = 592.0
+offset_right = 1280.0
+offset_bottom = 680.0
+mouse_filter = 2
+color = Color(0.08, 0.22, 0.31, 1)
+
+[node name="HubIslandWalkBoundary" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 132.0
+offset_top = 380.0
+offset_right = 1148.0
+offset_bottom = 632.0
+mouse_filter = 2
+color = Color(0.13, 0.26, 0.25, 1)
+
+[node name="HubIslandMainMass" type="Polygon2D" parent="InitialIslandWorldLayer"]
+polygon = PackedVector2Array(170, 516, 266, 440, 530, 390, 884, 422, 1084, 510, 1016, 608, 738, 646, 390, 632)
+color = Color(0.18, 0.36, 0.28, 1)
+
+[node name="HubIslandGrassCap" type="Polygon2D" parent="InitialIslandWorldLayer"]
+polygon = PackedVector2Array(218, 492, 338, 438, 554, 408, 842, 432, 1018, 504, 910, 548, 520, 548)
+color = Color(0.34, 0.55, 0.42, 1)
+
+[node name="HubIslandUpperEdge" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 132.0
+offset_top = 380.0
+offset_right = 1148.0
+offset_bottom = 390.0
+mouse_filter = 2
+color = Color(0.46, 0.66, 0.6, 0.95)
+
+[node name="HubIslandLowerEdge" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 132.0
+offset_top = 622.0
+offset_right = 1148.0
+offset_bottom = 632.0
+mouse_filter = 2
+color = Color(0.46, 0.66, 0.6, 0.95)
+
+[node name="HubDockPlankWalkway" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 120.0
+offset_top = 562.0
+offset_right = 510.0
+offset_bottom = 616.0
+mouse_filter = 2
+color = Color(0.48, 0.4, 0.28, 1)
+
+[node name="HubDockPier" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 156.0
+offset_top = 568.0
+offset_right = 380.0
+offset_bottom = 602.0
+mouse_filter = 2
+color = Color(0.42, 0.36, 0.27, 0.96)
+
+[node name="HubDockPostLeft" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 144.0
+offset_top = 520.0
+offset_right = 162.0
+offset_bottom = 620.0
+mouse_filter = 2
+color = Color(0.3, 0.23, 0.16, 0.98)
+
+[node name="HubDockPostRight" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 458.0
+offset_top = 520.0
+offset_right = 476.0
+offset_bottom = 620.0
+mouse_filter = 2
+color = Color(0.3, 0.23, 0.16, 0.98)
+
+[node name="HubDockedShipHullSilhouette" type="Polygon2D" parent="InitialIslandWorldLayer"]
+polygon = PackedVector2Array(522, 480, 934, 470, 1016, 526, 952, 584, 558, 584, 488, 530)
+color = Color(0.16, 0.23, 0.3, 1)
+
+[node name="HubDockedShipExterior" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 382.0
+offset_top = 448.0
+offset_right = 830.0
+offset_bottom = 574.0
+mouse_filter = 2
+color = Color(0.18, 0.25, 0.31, 1)
+
+[node name="HubDockedShipEnvelopeSilhouette" type="Polygon2D" parent="InitialIslandWorldLayer"]
+polygon = PackedVector2Array(470, 410, 536, 374, 694, 370, 782, 404, 766, 442, 520, 448)
+color = Color(0.54, 0.68, 0.7, 0.96)
+
+[node name="HubDockedShipBalloon" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 446.0
+offset_top = 390.0
+offset_right = 766.0
+offset_bottom = 444.0
+mouse_filter = 2
+color = Color(0.43, 0.58, 0.62, 0.9)
+
+[node name="HubShipMastForward" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 636.0
+offset_top = 430.0
+offset_right = 646.0
+offset_bottom = 556.0
+mouse_filter = 2
+color = Color(0.52, 0.6, 0.58, 0.96)
+
+[node name="HubShipMastRear" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 846.0
+offset_top = 430.0
+offset_right = 856.0
+offset_bottom = 556.0
+mouse_filter = 2
+color = Color(0.52, 0.6, 0.58, 0.96)
+
+[node name="HubDockedShipCabinDoor" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 410.0
+offset_top = 536.0
+offset_right = 466.0
+offset_bottom = 574.0
+mouse_filter = 2
+color = Color(0.54, 0.48, 0.34, 0.98)
+
+[node name="HubBoardingRamp" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 236.0
+offset_top = 558.0
+offset_right = 410.0
+offset_bottom = 586.0
+mouse_filter = 2
+color = Color(0.48, 0.42, 0.31, 0.96)
+
+[node name="BoardingRampSoftOverlap" type="Area2D" parent="InitialIslandWorldLayer"]
+position = Vector2(323, 572)
+
+[node name="BoardingRampSoftOverlapShape" type="CollisionShape2D" parent="InitialIslandWorldLayer/BoardingRampSoftOverlap"]
+shape = SubResource("RectangleShape2D_boarding_ramp")
+
+[node name="HubWaterlineBoundary" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 72.0
+offset_top = 632.0
+offset_right = 1208.0
+offset_bottom = 650.0
+mouse_filter = 2
+color = Color(0.1, 0.26, 0.34, 0.78)
+
+[node name="HubDockWaterline" type="ColorRect" parent="InitialIslandWorldLayer"]
+offset_left = 72.0
+offset_top = 632.0
+offset_right = 1208.0
+offset_bottom = 650.0
+mouse_filter = 2
+color = Color(0.1, 0.26, 0.34, 0.78)
+
+[node name="InitialIslandPlayerStart" type="Marker2D" parent="InitialIslandWorldLayer"]
+position = Vector2(158, 610)

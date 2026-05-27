@@ -76,6 +76,7 @@ var contentPath = Path.Combine(projectRoot, "src", "presentation", "playable_sli
 Check(File.Exists(contentPath), "authored playable content file exists");
 using var contentDocument = JsonDocument.Parse(File.ReadAllText(contentPath));
 var contentRoot = contentDocument.RootElement;
+var authoredScenes = RequiredArray(contentRoot, "authored_scenes");
 var routes = RequiredArray(contentRoot, "routes");
 var searchPoints = RequiredArray(contentRoot, "search_points");
 var sceneUnitPrototypes = RequiredArray(contentRoot, "scene_unit_prototypes");
@@ -88,6 +89,7 @@ var searchPointIds = new HashSet<string>(StringComparer.Ordinal);
 var sceneUnitPrototypeIds = new HashSet<string>(StringComparer.Ordinal);
 var sceneUnitPrototypeAllowedSceneIds = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 var sceneUnitInstanceIds = new HashSet<string>(StringComparer.Ordinal);
+var hubIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var ochreIslandUnitIds = new HashSet<string>(StringComparer.Ordinal);
 var routeMigrationSources = new HashSet<string>(StringComparer.Ordinal);
 var searchPointMigrationSources = new HashSet<string>(StringComparer.Ordinal);
@@ -103,8 +105,27 @@ Check(RequiredInt(contentRoot, "cargo_capacity") > 0, "authored content cargo ca
 Check(RequiredDouble(contentRoot, "voyage_fast_forward_seconds") > 0, "authored content voyage fast-forward is positive");
 Check(routeCount >= 2, "authored content has multiple route rows");
 Check(searchPointCount >= 3, "authored content has multiple search point rows");
-Check(sceneUnitPrototypes.ValueKind == JsonValueKind.Array && sceneUnitPrototypes.GetArrayLength() >= 6, "authored content keeps only the approved Ochre scene-unit prototypes");
-Check(sceneUnitInstances.ValueKind == JsonValueKind.Array && sceneUnitInstances.GetArrayLength() >= 6, "authored content keeps only approved Ochre placed scene-unit instances");
+Check(authoredScenes.ValueKind == JsonValueKind.Array && authoredScenes.GetArrayLength() >= 2, "authored content lists independent scene assets");
+Check(sceneUnitPrototypes.ValueKind == JsonValueKind.Array && sceneUnitPrototypes.GetArrayLength() >= 12, "authored content includes approved initial-island, Ochre, and ship-interior scene-unit prototypes");
+Check(sceneUnitInstances.ValueKind == JsonValueKind.Array && sceneUnitInstances.GetArrayLength() >= 13, "authored content includes approved initial-island, Ochre, and ship-interior placed scene-unit instances");
+
+if (authoredScenes.ValueKind == JsonValueKind.Array)
+{
+	var authoredSceneIds = new HashSet<string>(StringComparer.Ordinal);
+	foreach (var scene in authoredScenes.EnumerateArray())
+	{
+		var sceneId = RequiredString(scene, "scene_id");
+		Check(authoredSceneIds.Add(sceneId), $"authored scene id '{sceneId}' is unique");
+		Check(RequiredString(scene, "production_asset_status") == "implemented", $"authored scene '{sceneId}' is implemented");
+		Check(RequiredString(scene, "source_layer") == "world_playable_scene", $"authored scene '{sceneId}' is world/playable evidence");
+		Check(!scene.TryGetProperty("ui_evidence_allowed", out var sceneUiEvidence) || sceneUiEvidence.ValueKind == JsonValueKind.False, $"authored scene '{sceneId}' rejects UI evidence");
+		Check(File.Exists(Path.Combine(projectRoot, RequiredString(scene, "godot_scene_path").Replace('/', Path.DirectorySeparatorChar))), $"authored scene '{sceneId}' Godot scene exists");
+		Check(File.Exists(Path.Combine(projectRoot, RequiredString(scene, "scene_spec").Replace('/', Path.DirectorySeparatorChar))), $"authored scene '{sceneId}' scene spec exists");
+	}
+
+	Check(authoredSceneIds.Contains("initial_island_scene"), "authored scenes include the independent initial island scene");
+	Check(authoredSceneIds.Contains("ship_interior_layered"), "authored scenes include the independent ship interior scene");
+}
 
 if (routes.ValueKind == JsonValueKind.Array)
 {
@@ -205,14 +226,19 @@ if (sceneUnitPrototypes.ValueKind == JsonValueKind.Array)
 				.ToHashSet(StringComparer.Ordinal)
 			: new HashSet<string>(StringComparer.Ordinal);
 		sceneUnitPrototypeAllowedSceneIds[prototypeId] = allowedScenes;
-		if (isShipInteriorChartTablePrototype)
+		var expectedAllowedScenes = prototypeId switch
 		{
-			Check(allowedScenes.SetEquals(new[] { "hub_ship_interior", "ship_interior_layered" }), $"scene-unit prototype '{prototypeId}' is scoped to the approved ship interior asset slice");
-		}
-		else
-		{
-			Check(allowedScenes.SetEquals(new[] { "ochre_island_scene" }), $"scene-unit prototype '{prototypeId}' is scoped to the approved Ochre asset slice");
-		}
+			"scene_unit.prototype.chart_table" => new[] { "hub_ship_interior", "ship_interior_layered" },
+			"scene_unit.prototype.player_marker" => new[] { "hub_island_dock", "ochre_island_scene" },
+			"scene_unit.prototype.hub_island_main_mass" or
+			"scene_unit.prototype.hub_dock_plank_walkway" or
+			"scene_unit.prototype.hub_docked_ship_hull" or
+			"scene_unit.prototype.hub_boarding_ramp" or
+			"scene_unit.prototype.hub_airship_envelope" or
+			"scene_unit.prototype.hub_waterline" => new[] { "hub_island_dock" },
+			_ => new[] { "ochre_island_scene" },
+		};
+		Check(allowedScenes.SetEquals(expectedAllowedScenes), $"scene-unit prototype '{prototypeId}' is scoped to its approved asset slice");
 	}
 }
 
@@ -228,24 +254,31 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		Check(instanceId.StartsWith("scene_unit.instance.", StringComparison.Ordinal), $"scene-unit instance id '{instanceId}' uses instance namespace");
 		Check(sceneUnitInstanceIds.Add(instanceId), $"scene-unit instance id '{instanceId}' is unique");
 		Check(sceneUnitPrototypeIds.Contains(prototypeId), $"scene-unit instance '{instanceId}' references known prototype");
+		var isHubIsland = sceneId == "hub_island_dock";
 		var isOchreIsland = sceneId == "ochre_island_scene";
 		var isShipInterior = sceneId == "hub_ship_interior";
 		var expectedFloorId = sceneId switch
 		{
+			"hub_island_dock" => "hub_dock_ground",
 			"ochre_island_scene" => "ochre_island_ground_01",
 			"hub_ship_interior" => "ship_deck_01",
 			_ => string.Empty,
 		};
 		var expectedSceneSpec = sceneId switch
 		{
+			"hub_island_dock" => "production/scene-specs/initial-island-scene.md",
 			"ochre_island_scene" => "production/scene-specs/ochre-island-scene.md",
 			"hub_ship_interior" => "production/scene-specs/ship-interior-layered-scene.md",
 			_ => string.Empty,
 		};
 
-		Check(isOchreIsland || isShipInterior, $"scene-unit instance '{instanceId}' belongs to an approved asset slice");
+		Check(isHubIsland || isOchreIsland || isShipInterior, $"scene-unit instance '{instanceId}' belongs to an approved asset slice");
 		Check(sceneUnitPrototypeAllowedSceneIds.TryGetValue(prototypeId, out var allowedScenes) && allowedScenes.Contains(sceneId), $"scene-unit instance '{instanceId}' uses prototype allowed in its scene");
 		Check(!string.IsNullOrWhiteSpace(unitId), $"scene-unit instance '{instanceId}' has runtime unit id");
+		if (isHubIsland)
+		{
+			Check(hubIslandUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in initial island");
+		}
 		if (isOchreIsland)
 		{
 			Check(ochreIslandUnitIds.Add(unitId), $"scene-unit instance unit id '{unitId}' is unique in ochre island");
@@ -255,6 +288,20 @@ if (sceneUnitInstances.ValueKind == JsonValueKind.Array)
 		Check(RequiredString(instance, "scene_spec") == expectedSceneSpec, $"scene-unit instance '{instanceId}' traces to scene spec");
 		Check(!string.IsNullOrWhiteSpace(RequiredString(instance, "layer")), $"scene-unit instance '{instanceId}' has placement layer");
 	}
+}
+
+foreach (var expectedHubUnit in new[]
+{
+	"player_marker",
+	"hub_island_main_mass",
+	"hub_dock_plank_walkway",
+	"hub_docked_ship_hull",
+	"hub_boarding_ramp",
+	"hub_airship_envelope",
+	"hub_waterline",
+})
+{
+	Check(hubIslandUnitIds.Contains(expectedHubUnit), $"initial-island placed units cover runtime catalog unit '{expectedHubUnit}'");
 }
 
 foreach (var expectedOchreUnit in new[]
@@ -271,6 +318,8 @@ foreach (var expectedOchreUnit in new[]
 }
 
 var sceneUnitAuthoring = SceneUnitAuthoringFixture.Load(contentPath);
+var hubUnitDiagnostics = sceneUnitAuthoring.ValidateScene("hub_island_dock");
+Check(hubUnitDiagnostics.Count == 0, $"scene-unit authoring validates for initial island ({string.Join("; ", hubUnitDiagnostics)})");
 var ochreUnitDiagnostics = sceneUnitAuthoring.ValidateScene("ochre_island_scene");
 Check(ochreUnitDiagnostics.Count == 0, $"scene-unit authoring validates for ochre island ({string.Join("; ", ochreUnitDiagnostics)})");
 var shipInteriorDiagnostics = sceneUnitAuthoring.ValidateScene("hub_ship_interior");
@@ -310,7 +359,7 @@ var adapter = new PlayableSliceDomainAdapter();
 adapter.OpenChart();
 var opened = adapter.Snapshot;
 Check(opened.ChartState == "Browsing", "adapter opens ChartManager into Browsing");
-Check(opened.ContentVersion == "polish-asset-reset-ship-interior-v1", "adapter loads the asset-reset authored content version");
+Check(opened.ContentVersion == "polish-asset-reset-initial-island-v1", "adapter loads the asset-reset authored content version");
 Check(opened.ContentStatus == "polish_authored", "adapter reports authored playable content status");
 Check(opened.VisibleRouteCount >= 2, "adapter exposes seeded visible routes");
 Check(adapter.GetRouteDisplayName("route.playable-mist") == "雾海短程", "adapter resolves legacy route id display name through migration map");

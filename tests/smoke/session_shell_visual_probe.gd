@@ -61,6 +61,18 @@ func _run() -> void:
 	_expect(_button_text(session, "DeleteProgressButton").contains("删除"), "Delete local progress entry is visible")
 	_expect(_button_disabled(session, "DeleteProgressButton"), "Delete local progress starts disabled with no save")
 
+	_expect(hub.call("DebugNodeVisible", "InitialIslandSceneRuntimeInstance"), "Hub mounts the independent initial_island_scene asset")
+	var initial_scene_evidence := hub.call("DebugInitialIslandAssetEvidence") as Dictionary
+	_expect(str(initial_scene_evidence.get("scene_id", "")) == "initial_island_scene", "Independent initial island reports the authored scene id")
+	_expect(str(initial_scene_evidence.get("runtime_contract_id", "")) == "hub_island_dock", "Independent initial island keeps the runtime compatibility contract id")
+	_expect(str(initial_scene_evidence.get("boarding_target_scene_id", "")) == "ship_interior_layered", "Initial island leads to the independent ship interior scene")
+	_expect(str(initial_scene_evidence.get("boarding_target_runtime_contract_id", "")) == "hub_ship_interior", "Initial island boarding target keeps the ship interior runtime contract")
+	_expect(bool(initial_scene_evidence.get("world_layer_ready", false)), "Initial island exposes a world/playable layer")
+	_expect(bool(initial_scene_evidence.get("player_spawn_ready", false)), "Initial island exposes a player spawn")
+	_expect(bool(initial_scene_evidence.get("boarding_anchor_ready", false)), "Initial island exposes a boarding ramp anchor")
+	_expect(bool(initial_scene_evidence.get("ship_exterior_ready", false)), "Initial island exposes a docked ship exterior")
+	_expect(bool(initial_scene_evidence.get("waterline_boundary_ready", false)), "Initial island exposes the waterline boundary")
+	_expect(not bool(initial_scene_evidence.get("ui_evidence_allowed_for_scene", true)), "Initial island refuses UI-only scene evidence")
 	_expect(hub.call("DebugNodeVisible", "HubIslandWalkBoundary"), "Hub has a walkable island boundary")
 	_expect(hub.call("DebugHubSpace") == "exterior", "Hub starts on the island dock exterior")
 	_expect(hub.call("DebugNodeVisible", "HubPlayableSkyBackdrop"), "Hub exterior has a large visible sky backdrop")
@@ -186,7 +198,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ship-interior-v1", "C# HubRuntime loads asset-reset route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-initial-island-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -571,7 +583,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
-	var production_asset_scene := scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
+	var production_asset_scene := scene_id == "hub_island_dock" or scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
 	_expect(bool(contract.get("unit_catalog_ready", false)) == production_asset_scene, "%s unit catalog readiness matches approved asset status" % scene_id)
 	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
 	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
@@ -588,8 +600,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	if production_asset_scene:
 		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-		var expected_spec := "production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md"
-		var expected_floor := "ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01"
+		var expected_spec := "production/scene-specs/initial-island-scene.md" if scene_id == "hub_island_dock" else ("production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md")
+		var expected_floor := "hub_dock_ground" if scene_id == "hub_island_dock" else ("ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01")
 		_expect_scene_unit_authoring_linkage(contract, scene_id, expected_spec, expected_floor)
 	else:
 		var catalog := contract.get("scene_unit_catalog", []) as Array
@@ -599,13 +611,13 @@ func _expect_scene_physics_contract(
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	if production_asset_scene:
-		var minimum_units := 6 if scene_id == "ochre_island_scene" else 1
+		var minimum_units := 6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)
 		_expect(int(contract.get("authored_physical_unit_count", 0)) >= minimum_units, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:
 	var catalog := contract.get("scene_unit_catalog", []) as Array
-	var minimum_units := 6 if scene_id == "ochre_island_scene" else 1
+	var minimum_units := 6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)
 	_expect(catalog.size() == int(contract.get("authored_physical_unit_count", 0)), "%s unit catalog count matches authored physical unit count" % scene_id)
 	_expect(catalog.size() >= minimum_units, "%s unit catalog has authored physical units" % scene_id)
 	var has_blocking := false

@@ -2,9 +2,9 @@
 
 > **Scene ID**: `initial_island_scene`
 > **运行时合同 ID**: `hub_island_dock`
-> **状态**: spec_drafted
+> **状态**: implementation_ready
 > **负责人**: Scene Composition System (#19) + Scene Physics Unit System (#20)
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-27
 
 ## 0. 文件头
 
@@ -13,12 +13,12 @@
 | Scene ID | `initial_island_scene` |
 | 玩家可见场景名 | 初始岛屿 / Hub 外部码头 |
 | 所属循环节点 | Hub |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `implementation_ready` |
 | 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md` |
 | 来源 story 或设计说明 | `N/A true` |
 | 创建适合性人工审查 | `APPROVED` |
 | 创建审查记录 | 本文件“创建适合性人工审查”和“创建适合性记录” |
-| 最近更新日期 | 2026-05-24 |
+| 最近更新日期 | 2026-05-27 |
 | 负责人 | Codex / user / QA |
 
 ## 创建适合性人工审查
@@ -43,12 +43,12 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；当前灰盒由 `src/scenes/HubRuntime.*` 装配，不能作为新增永久场景边界。 |
-| 配套脚本 / runtime | 当前为 `src/scenes/HubRuntime.cs`；后续独立化需拆出 `initial_island_scene` 专属运行时或数据驱动入口。 |
-| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `hub_island_dock` 原型与实例。 |
+| 独立 Godot 场景 | `src/scenes/hub/InitialIslandScene.tscn`；运行时挂载为 `InitialIslandSceneRuntimeInstance`。 |
+| 配套脚本 / runtime | `src/scenes/hub/InitialIslandScene.cs` 只拥有本地场景证据；`src/scenes/HubRuntime.cs` 只负责挂载、可见性、输入和场景切换。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `authored_scenes::initial_island_scene`、`hub_island_dock` 原型与实例。 |
 | 资产组 | 初始岛屿地形、木栈道、登船坡道、停靠飞船、水线 / 云海边界。 |
 | 装配入口 | Hub shell 只负责挂载或切换，不拥有场景本体规则。 |
-| 禁止混入位置 | 不得把新增场景规则继续散落进旧 `HubRuntime.tscn`、`HubRuntime.cs` 或 UI 容器。 |
+| 禁止混入位置 | 不得把旧 `HubRuntime` 灰盒、HUD、按钮、标签或调试入口作为 production-ready 场景证据。 |
 | 删除旧节点要求 | 若替换旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
 ## 1. 场景身份
@@ -63,7 +63,7 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 物理来源 | 运行时合同 + 作者化原型 / 实例数据 |
+| 物理来源 | 独立 Godot 场景 + 运行时合同 + 作者化原型 / 实例数据 |
 | 合同场景 ID | `hub_island_dock` |
 | `physics_contract_complete` 状态 | 当前灰盒合同通过 |
 | 场景物理类型 | `水平场景` |
@@ -132,7 +132,7 @@
 - 持久化字段: 现有 playable-slice progress 和场景状态。
 - 信号 / 语义事件: Hub 空间切换、保存 / 读取、登船提示、Hub 摘要同步。
 - 焦点和模态边界: ADR-0012 仍是权威。
-- 运行时 debug / smoke hook: `DebugScenePhysicsContract("hub_island_dock")`。
+- 运行时 debug / smoke hook: `DebugInitialIslandAssetEvidence()`；`DebugScenePhysicsContract("hub_island_dock")`。
 
 ## 10. 资产与音频需求
 
@@ -148,10 +148,10 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd`; `production/qa/evidence/scene-unit-placement-initial-island-evidence.md` | PASS |
-| 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj`; `production/qa/evidence/scene-unit-placement-initial-island-evidence.md` | PASS |
-| 截图 / 视觉证明 | 既有 hub exterior visual probe 证据 | 待刷新 |
-| Codex 审核 | 实现审查 | PASS |
+| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd`; `.godot-ai/verification/scene/initial_island_scene.verification.md` | PASS |
+| 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj`; `.godot-ai/verification/scene/initial_island_scene.verification.md` | PASS |
+| 截图 / 视觉证明 | headless smoke 层级 / 面积 / alpha 证据；非 headless 截图待补 | PARTIAL |
+| Codex 审核 | `.godot-ai/reviews/scene/initial_island_scene.review.md` | PASS |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 ## 13. 创建适合性记录
@@ -188,4 +188,5 @@
 - [x] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [x] 运行时 / 状态合同没有创建新的玩法权威。
 - [ ] P0 资产 / 音频需求已用最终资产解决。
-- [ ] 截图证据和规格一致性检查在实现后刷新。
+- [x] 独立 Godot 场景、运行时挂载、作者化数据和 smoke / integration 证据已刷新。
+- [ ] 非 headless 截图证据在可用显示环境中刷新。

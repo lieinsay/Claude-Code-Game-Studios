@@ -24,6 +24,16 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频完成；旧 HubRuntime helper 节点保留为非破坏性 fallback/status scaffolding，不得作为 production-ready 场景资产证据。
 - 下一步建议: 继续按 Godot asset workflow 重建下一个 reset scene，优先 `initial_island_scene` 或 `voyage_open_world_scene`，并在非 headless 环境补截图证据。
 
+## Session Extract -- initial_island_scene Godot Asset Workflow 2026-05-27
+- 当前任务完成: `initial_island_scene` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
+- 新增独立 Godot 场景资产: `src/scenes/hub/InitialIslandScene.tscn` 与 `src/scenes/hub/InitialIslandScene.cs`。场景包含 `InitialIslandWorldLayer`、浮岛主地形、木栈道、停靠云织号船体 / 气囊、水线边界、`InitialIslandPlayerStart` 和 `BoardingRampSoftOverlap`。
+- Runtime 接入: `HubRuntime` 现在挂载 `InitialIslandSceneRuntimeInstance` 作为 Hub 外部码头世界空间，保留 `hub_island_dock` 作为兼容运行时合同 ID，并通过 `DebugInitialIslandAssetEvidence()` 暴露独立场景、登船目标 `ship_interior_layered` / `hub_ship_interior`、出生点、登船锚点、水线和 UI 证据排除。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-initial-island-v1`，新增 `authored_scenes::initial_island_scene`，并将 `scene_unit.instance.hub_island_dock.*` 指向 `InitialIslandScene.tscn` 的世界层节点。
+- 证据边界: 不再把旧 `HubRuntime` 外部码头灰盒、HUD、按钮、标签或调试入口作为 production-ready 场景证据；旧运行时只保留挂载 / 输入 / 状态切换职责。
+- 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 479/479；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 107 existing warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
+- 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频完成；当前 headless 显示驱动跳过截图；部分初始岛屿子单位仍需 dedicated unit specs 或正式美术替换。
+- 下一步建议: 继续按 Godot asset workflow 重建 `voyage_open_world_scene`，或先补 `hub_boarding_ramp` / `hub_waterline` 等初始岛屿子单位规格与非 headless 截图证据。
+
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
 - Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.
 - User corrected the current demo scene set: initial island, layered horizontal ship interior, combined voyage open-world scene, mist-lamp wreck, and old market edge. Prior `chart_table_scene` / generic `exploration_mist_island` queue was too implementation-derived.

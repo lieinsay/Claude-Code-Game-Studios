@@ -1,5 +1,5 @@
 {
-  "content_version": "polish-asset-reset-ship-interior-v1",
+  "content_version": "polish-asset-reset-initial-island-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
@@ -21,6 +21,26 @@
     }
   ],
   "authored_scenes": [
+    {
+      "scene_id": "initial_island_scene",
+      "runtime_contract_id": "hub_island_dock",
+      "display_name": "初始岛屿 / Hub 外部码头",
+      "godot_scene_path": "src/scenes/hub/InitialIslandScene.tscn",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "production_asset_status": "implemented",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "required_child_assets": [
+        "scene_unit.prototype.hub_island_main_mass",
+        "scene_unit.prototype.hub_dock_plank_walkway",
+        "scene_unit.prototype.hub_docked_ship_hull",
+        "scene_unit.prototype.hub_boarding_ramp",
+        "scene_unit.prototype.hub_airship_envelope",
+        "scene_unit.prototype.hub_waterline"
+      ],
+      "leads_to_scene_id": "ship_interior_layered",
+      "leads_to_runtime_contract_id": "hub_ship_interior"
+    },
     {
       "scene_id": "ship_interior_layered",
       "runtime_contract_id": "hub_ship_interior",
@@ -50,12 +70,134 @@
       "source_gdd": "design/gdd/scene-physics-unit-system.md",
       "unit_spec": "production/unit-specs/dynamic-entities/player-controlled-entity.md",
       "allowed_scene_ids": [
+        "hub_island_dock",
         "ochre_island_scene"
       ],
       "behavior_tags": [
         "trigger_only"
       ],
       "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_island_main_mass",
+      "display_name": "初始岛屿主地形",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "island landmark >= 2.0x player height; provides readable safe ground mass",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "blocking_static"
+      ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_dock_plank_walkway",
+      "display_name": "初始岛屿木栈道",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "passage_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "dock path clear width >= 1.1x player and visually connects island to ship",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_docked_ship_hull",
+      "display_name": "停靠云织号船体",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "docked ship hull >= 2.0x player height and readable as the boarding target",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "blocking_static",
+        "docked_airship_landmark"
+      ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_boarding_ramp",
+      "display_name": "初始岛屿登船坡道",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "door_or_passage",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "boarding passage clear width >= 1.1x player and directly connects dock to ship door",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_airship_envelope",
+      "display_name": "停靠云织号飞艇气囊",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "height_marker",
+      "collision": "height_marker + visual_only",
+      "occlusion_layer": "height_shadow",
+      "scale_rule": "large envelope silhouette reads above docked hull for player readability and never implies passability",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/docked-airship-entity.md",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "visual_only_height_marker"
+      ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.hub_waterline",
+      "display_name": "初始岛屿水线 / 云海边界",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "hazardous + blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "wide boundary larger than player and readable as non-walkable edge",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "hub_island_dock"
+      ],
+      "behavior_tags": [
+        "gameplay_affecting_boundary"
+      ],
+      "domain_owner": "scene-physics"
     },
     {
       "prototype_id": "scene_unit.prototype.chart_table",
@@ -183,6 +325,119 @@
     }
   ],
   "scene_unit_instances": [
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.player_marker",
+      "prototype_id": "scene_unit.prototype.player_marker",
+      "scene_id": "hub_island_dock",
+      "unit_id": "player_marker",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/InitialIslandPlayerStart",
+      "position": {
+        "x": 158,
+        "y": 610
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "player_spawn"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.island_mass",
+      "prototype_id": "scene_unit.prototype.hub_island_main_mass",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_island_main_mass",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/HubIslandMainMass",
+      "position": {
+        "x": 468,
+        "y": 522
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "scene_identity"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.dock_plank_walkway",
+      "prototype_id": "scene_unit.prototype.hub_dock_plank_walkway",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_dock_plank_walkway",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/HubDockPlankWalkway",
+      "position": {
+        "x": 120,
+        "y": 562
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "walkable_path"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.docked_ship_hull",
+      "prototype_id": "scene_unit.prototype.hub_docked_ship_hull",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_docked_ship_hull",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/HubDockedShipExterior",
+      "position": {
+        "x": 382,
+        "y": 448
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "ship_boarding_target"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.boarding_ramp",
+      "prototype_id": "scene_unit.prototype.hub_boarding_ramp",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_boarding_ramp",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/BoardingRampSoftOverlap",
+      "position": {
+        "x": 323,
+        "y": 572
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "enter_ship_interior",
+      "interaction_anchor_id": "hub_boarding_ramp"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.airship_envelope",
+      "prototype_id": "scene_unit.prototype.hub_airship_envelope",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_airship_envelope",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/HubDockedShipBalloon",
+      "position": {
+        "x": 446,
+        "y": 390
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "height_shadow",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "height_readability"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_island_dock.waterline",
+      "prototype_id": "scene_unit.prototype.hub_waterline",
+      "scene_id": "hub_island_dock",
+      "unit_id": "hub_waterline",
+      "godot_node_path": "src/scenes/hub/InitialIslandScene.tscn::InitialIslandWorldLayer/HubWaterlineBoundary",
+      "position": {
+        "x": 72,
+        "y": 632
+      },
+      "floor_id": "hub_dock_ground",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/initial-island-scene.md",
+      "state_hook": "boundary_clamp"
+    },
     {
       "instance_id": "scene_unit.instance.ochre_island_scene.player_marker",
       "prototype_id": "scene_unit.prototype.player_marker",
