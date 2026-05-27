@@ -70,6 +70,6 @@
 | --- | --- | --- | --- |
 | `initial_island_scene` | [scene-readability-initial-island.md](scene-readability-initial-island.md) | `feedback-template` | 实现后如有调整诉求，走 `directed-content-modification`。 |
 | `ship_interior_layered` | [scene-readability-ship-interior-layered.md](scene-readability-ship-interior-layered.md) | `feedback-template` | 实现后如有调整诉求，走 `directed-content-modification`。 |
-| `voyage_open_world_scene` | [scene-readability-voyage-open-world.md](scene-readability-voyage-open-world.md) | `feedback-template` | 先补 #20 合同、运行时证据和规格一致性检查。 |
+| `voyage_open_world_scene` | [scene-readability-voyage-open-world.md](scene-readability-voyage-open-world.md) | `feedback-template` | 实现后如有调整诉求，走 `directed-content-modification`；非 headless 截图仍需后续补证。 |
 | `mist_lamp_wreck_scene` | [scene-readability-mist-lamp-wreck.md](scene-readability-mist-lamp-wreck.md) | `feedback-template` | 实现后如有调整诉求，走 `directed-content-modification`。 |
 | `ochre_island_scene` | [scene-readability-ochre-island.md](scene-readability-ochre-island.md) | `feedback-template` | 先补 #20 合同、独立实现 / 资产边界、作者化数据和运行时证据。 |

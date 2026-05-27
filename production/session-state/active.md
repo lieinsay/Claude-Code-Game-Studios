@@ -34,6 +34,16 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频完成；当前 headless 显示驱动跳过截图；部分初始岛屿子单位仍需 dedicated unit specs 或正式美术替换。
 - 下一步建议: 继续按 Godot asset workflow 重建 `voyage_open_world_scene`，或先补 `hub_boarding_ramp` / `hub_waterline` 等初始岛屿子单位规格与非 headless 截图证据。
 
+## Session Extract -- voyage_open_world_scene Godot Asset Workflow 2026-05-27
+- 当前任务完成: `voyage_open_world_scene` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
+- 新增独立 Godot 场景资产: `src/scenes/voyage/VoyageOpenWorldScene.tscn` 与 `src/scenes/voyage/VoyageOpenWorldScene.cs`。场景包含 `VoyageWorldLayer`、起飞尾迹、主动驾驶船首 / 舱窗前景、航道走廊、航标链、浓雾、漂浮残骸、大鸟剪影、雾灯目的地轮廓和撤退信标。
+- Runtime 接入: `HubRuntime` 现在在出航后的世界层挂载 `VoyageOpenWorldSceneRuntimeInstance`，并通过 `DebugVoyageOpenWorldAssetEvidence()` 暴露路线、目的地、抵达 `exploration_mist_island` 路径、问题窗口和 UI 证据排除。本轮保留现有 #10 导航 / 存档 / `exploration_mist_island` 搜撤流程，不做破坏性重写。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-voyage-open-world-v1`，新增 `authored_scenes::voyage_open_world_scene`，并将 8 个航行场景单位原型 / 实例指向 `VoyageOpenWorldScene.tscn` 的世界层节点。
+- 证据边界: 不再把航图 UI、旧 HUD、按钮、标签、进度条或调试入口作为 production-ready 航行场景证据；旧运行时只保留状态流、出航触发和现有探索闭环职责。
+- 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 679/679；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 107 existing warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
+- 剩余风险: 当前为生产可追踪灰盒，不声明最终美术 / 音频或完整 60-75 秒实时驾驶完成；非 headless 截图仍需后续补证。
+- 下一步建议: 按 Godot asset workflow 继续重建 `mist_lamp_wreck_scene`，把当前 `exploration_mist_island` 旧灰盒替换为独立雾灯残骸世界资产。
+
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
 - Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.
 - User corrected the current demo scene set: initial island, layered horizontal ship interior, combined voyage open-world scene, mist-lamp wreck, and old market edge. Prior `chart_table_scene` / generic `exploration_mist_island` queue was too implementation-derived.

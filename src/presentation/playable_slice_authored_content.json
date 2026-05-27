@@ -1,5 +1,5 @@
 {
-  "content_version": "polish-asset-reset-initial-island-v1",
+  "content_version": "polish-asset-reset-voyage-open-world-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
@@ -54,6 +54,30 @@
         "scene_unit.prototype.chart_table",
         "S4_chart"
       ]
+    },
+    {
+      "scene_id": "voyage_open_world_scene",
+      "runtime_contract_id": "voyage_open_world_scene",
+      "display_name": "航行大场景 / 雾海航道",
+      "godot_scene_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "production_asset_status": "implemented",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "required_child_assets": [
+        "scene_unit.prototype.voyage_ship_bow_foreground",
+        "scene_unit.prototype.voyage_route_corridor",
+        "scene_unit.prototype.voyage_beacon_chain",
+        "scene_unit.prototype.voyage_fog_bank",
+        "scene_unit.prototype.voyage_wreckage_field",
+        "scene_unit.prototype.voyage_bird_silhouette",
+        "scene_unit.prototype.voyage_destination_silhouette",
+        "scene_unit.prototype.voyage_retreat_beacon"
+      ],
+      "route_id": "route.mist",
+      "destination_id": "location.mist-short",
+      "leads_to_scene_id": "mist_lamp_wreck_scene",
+      "leads_to_runtime_contract_id": "exploration_mist_island"
     }
   ],
   "scene_unit_prototypes": [
@@ -220,6 +244,168 @@
         "blocking_static"
       ],
       "domain_owner": "chart-route-planning"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_ship_bow_foreground",
+      "display_name": "航行船首 / 舱窗前景",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "height_marker",
+      "collision": "height_marker + visual_only",
+      "occlusion_layer": "foreground_occluder",
+      "scale_rule": "ship bow foreground spans cockpit scale and remains readable against player_unit size",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "visual_only_height_marker"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_route_corridor",
+      "display_name": "航行航道可驾驶走廊",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "passage_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "air lane clear width >= 3.0x player and readable as active driving space",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_beacon_chain",
+      "display_name": "航行航标链",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "beacon spacing remains readable from cockpit view and references player_unit scale",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only",
+        "navigation_landmark"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_fog_bank",
+      "display_name": "航行浓雾带",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "blocking_static + scan_window",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "fog bank larger than player and ship proxy; must leave beacon direction readable",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "gameplay_affecting_fog"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_wreckage_field",
+      "display_name": "航行漂浮残骸群",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static + avoidance_gap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "wreckage gaps remain wider than 1.1x player and readable as steering choices",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "blocking_static",
+        "avoidance_field"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_bird_silhouette",
+      "display_name": "航行飞行大鸟剪影",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "height_marker",
+      "collision": "height_marker + visual_only",
+      "occlusion_layer": "height_shadow",
+      "scale_rule": "bird silhouette reads larger than player and ship foreground but remains visual-only",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "visual_only_ecological_warning"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_destination_silhouette",
+      "display_name": "航行目的地远景轮廓",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "visual_only",
+      "occlusion_layer": "background",
+      "scale_rule": "destination silhouette grows in cockpit view and references player_unit travel scale",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "visual_only_landmark"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.voyage_retreat_beacon",
+      "display_name": "航行撤退返航信标",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "door_or_passage",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "retreat beacon clear interaction width >= 1.1x player and visible from cockpit view",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "voyage_open_world_scene"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "navigation-route-risk"
     },
     {
       "prototype_id": "scene_unit.prototype.ochre_island_mass",
@@ -453,6 +639,138 @@
       "layer": "midground_object",
       "scene_spec": "production/scene-specs/ochre-island-scene.md",
       "state_hook": "player_spawn"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.ship_bow_foreground",
+      "prototype_id": "scene_unit.prototype.voyage_ship_bow_foreground",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_ship_bow_foreground",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageShipBowForeground",
+      "position": {
+        "x": 380,
+        "y": 558
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "foreground_occluder",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "active_driving_view"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.route_corridor",
+      "prototype_id": "scene_unit.prototype.voyage_route_corridor",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_route_corridor",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageRouteCorridor",
+      "position": {
+        "x": 637,
+        "y": 454
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "active_air_lane",
+      "interaction_anchor_id": "voyage.heading"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.beacon_chain",
+      "prototype_id": "scene_unit.prototype.voyage_beacon_chain",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_beacon_chain",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageBeaconChain",
+      "position": {
+        "x": 296,
+        "y": 424
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "route_readability"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.fog_bank",
+      "prototype_id": "scene_unit.prototype.voyage_fog_bank",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_fog_bank",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageFogBank",
+      "position": {
+        "x": 829,
+        "y": 407
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "fog_problem_window",
+      "interaction_anchor_id": "voyage.scan"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.wreckage_field",
+      "prototype_id": "scene_unit.prototype.voyage_wreckage_field",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_wreckage_field",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageWreckageField",
+      "position": {
+        "x": 448,
+        "y": 462
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "wreckage_avoidance_window",
+      "interaction_anchor_id": "voyage.evade"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.bird_silhouette",
+      "prototype_id": "scene_unit.prototype.voyage_bird_silhouette",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_bird_silhouette",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageBirdSilhouette",
+      "position": {
+        "x": 944,
+        "y": 236
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "height_shadow",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "ecological_pressure_readability"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.destination_silhouette",
+      "prototype_id": "scene_unit.prototype.voyage_destination_silhouette",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_destination_silhouette",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageDestinationMistLampSilhouette",
+      "position": {
+        "x": 956,
+        "y": 356
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "background",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "destination_approach_readability"
+    },
+    {
+      "instance_id": "scene_unit.instance.voyage_open_world_scene.retreat_beacon",
+      "prototype_id": "scene_unit.prototype.voyage_retreat_beacon",
+      "scene_id": "voyage_open_world_scene",
+      "unit_id": "voyage_retreat_beacon",
+      "godot_node_path": "src/scenes/voyage/VoyageOpenWorldScene.tscn::VoyageWorldLayer/VoyageRetreatBeacon",
+      "position": {
+        "x": 209,
+        "y": 491
+      },
+      "floor_id": "voyage_air_lane_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
+      "state_hook": "retreat_anchor",
+      "interaction_anchor_id": "voyage.retreat"
     },
     {
       "instance_id": "scene_unit.instance.hub_ship_interior.chart_table",

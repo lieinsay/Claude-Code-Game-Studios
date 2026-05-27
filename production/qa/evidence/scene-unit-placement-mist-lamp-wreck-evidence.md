@@ -40,8 +40,8 @@ This evidence covers the second scene-unit authoring slice after the Cloudweaver
 
 - Godot node paths are stable authored references, but this pass still does not introspect each path against a serialized `.tscn` scene.
 - This is still a greybox placement slice; final art, audio, and readability polish remain separate work.
-- Only two current scenes use authored prototype/instance linkage. `hub_island_dock`, `voyage_open_world_scene`, and destination scenes still need migration before claiming full project coverage.
+- `hub_island_dock` and `voyage_open_world_scene` have since been migrated through their own Godot asset workflows; destination scenes, especially `mist_lamp_wreck_scene`, still need fresh migration before claiming full project coverage.
 
 ## Recommended Next Step
 
-Run a designer review of `production/scene-specs/mist-lamp-wreck-scene.md` against the in-game greybox, then migrate `initial_island_scene` or `voyage_open_world_scene` using the same authoring pattern.
+Run the Godot asset workflow for `production/scene-specs/mist-lamp-wreck-scene.md`, then replace the remaining `exploration_mist_island` greybox evidence with an independent `mist_lamp_wreck_scene` asset.

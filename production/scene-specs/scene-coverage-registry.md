@@ -2,7 +2,7 @@
 
 > **Epic**: #19 Complete Scene Composition and Acceptance
 > **Story**: `production/epics/scene-composition-system/story-001-scene-spec-template-coverage-registry.md`
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-27
 > **登记规则**: 每个可进入场景在被视为 production-ready 前，必须链接场景规格、等价完整来源说明、待补规格缺口，或明确的 #20 豁免。
 > **语言规则**: 除路径、代码符号、命令、稳定 ID、状态枚举、ADR/TR 编号等必要内容外，本目录文档必须使用中文。
 
@@ -27,14 +27,15 @@
 | `asset-reset-required` | 旧灰盒 / 作者化数据已撤销，不能作为现存游戏资产证据；必须重新通过 Godot asset workflow 实现。 |
 | `exempt-no-physical-units` | 场景没有玩法相关物理单位，并明确说明 #20 不适用。 |
 | `spec_drafted` | 独立场景规格已起草；仍可能需要 Codex 规格一致性检查、运行时证据或截图证据。 |
+| `implemented` | 已有独立 Godot 场景资产、运行时挂载、作者化数据和自动验证证据；仍可保留非 headless 截图或最终美术 / 音频风险。 |
 
 ## 当前可进入场景覆盖
 
 | Scene ID | 玩家可见场景 | 当前进入来源 | 场景规格状态 | #20 物理输入 | 当前证据 / 来源 | 必要下一步 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `initial_island_scene` | 初始岛屿 | 新游戏开始 / 返回原点 | `implemented` | 独立 Godot 场景 `src/scenes/hub/InitialIslandScene.tscn` 已挂载为 Hub 外部世界空间；`hub_island_dock` 保留为兼容运行时合同 ID。旧 HubRuntime 灰盒、HUD、按钮、标签或调试入口不得作为 production-ready 证据。 | `production/scene-specs/initial-island-scene.md`; `.godot-ai/verification/scene/initial_island_scene.verification.md`; `production/qa/evidence/scene-unit-placement-initial-island-evidence.md` | 非 headless 截图和部分子单位 dedicated specs 仍是后续风险。 |
-| `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `asset-reset-required` | `hub_ship_interior` 旧运行时合同可作为技术草稿参考，但旧原型 / 摆放实例已撤销；不得作为现存资产证据。 | `design/gdd/airship-hub.md`; `production/scene-specs/ship-interior-layered-scene.md`; 历史证据仅供问题背景参考 | 优先实现 `chart-table` 和 `chart-full-screen-surface` 后，再从 Godot asset workflow 重建船内场景资产。 |
-| `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `spec_drafted` | implementation readiness 前需要 #20 合同：伪 3D 相机对齐飞行、航线边界、风险物、云 / 雾特殊表面、恢复规则 | `production/scene-specs/voyage-open-world-scene.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 起草 #20 合同和运行时证据计划。 |
+| `ship_interior_layered` | 云织号船内分层水平场景 | 从初始岛屿登船 / 从航行返回 | `implemented` | 独立 Godot 场景 `src/scenes/ship/ShipInteriorLayeredScene.tscn` 已挂载为船内世界空间；`hub_ship_interior` 保留为兼容运行时合同 ID。旧 HubRuntime 船内灰盒、HUD、按钮、标签或调试入口不得作为 production-ready 证据。 | `production/scene-specs/ship-interior-layered-scene.md`; `.godot-ai/verification/scene/ship_interior_layered.verification.md`; `src/presentation/playable_slice_authored_content.json` | 非 headless 截图、最终美术 / 音频和更多子单位 dedicated specs 仍是后续风险。 |
+| `voyage_open_world_scene` | 航行大场景 | 从初始岛屿前往 demo 目的地 | `implemented` | 独立 Godot 场景 `src/scenes/voyage/VoyageOpenWorldScene.tscn` 已作为出航后的前置航行世界空间挂载；`HubRuntime.DebugScenePhysicsContract("voyage_open_world_scene")` 暴露伪 3D 航行、航线边界、风险物、云 / 雾特殊表面、撤退恢复和作者化单位合同。旧航图 UI、进度条、HUD、按钮、标签或调试入口不得作为 production-ready 航行场景证据。 | `production/scene-specs/voyage-open-world-scene.md`; `.godot-ai/verification/scene/voyage_open_world_scene.verification.md`; `production/qa/evidence/scene-unit-placement-voyage-open-world-evidence.md`; `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md` | 当前接入不重写 #10 live driving / 存档格式；非 headless 截图、最终美术 / 音频和完整 60-75s 驾驶玩法仍是后续风险。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛 | 从 `voyage_open_world_scene` 抵达 | `asset-reset-required` | `exploration_mist_island` 旧运行时合同可作为技术草稿参考，但旧原型 / 摆放实例已撤销；不得作为现存资产证据。 | `design/gdd/exploration-scavenge-scenario.md`; `production/scene-specs/mist-lamp-wreck-scene.md`; 历史证据仅供问题背景参考 | 当前不做 release 收口；后续按 Godot asset workflow 重新实现。 |
 | `ochre_island_scene` | 赭石岛 | 从 `voyage_open_world_scene` 抵达 | `spec_drafted` | #20 合同位于 `HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`；独立 Godot 资产、条带状铁矿原型、6 个作者化场景单位和 Debug build `OchreDebugButton` 开发入口已链接 | `production/scene-specs/ochre-island-scene.md`; `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`; `production/qa/evidence/ochre-island-godot-asset-execution-evidence.md`; `design/gdd/resources-goods-capacity.md`; `design/gdd/scene-composition-system.md` | 补矿脉采集奖励 / 正式返航 domain 写入、截图刷新和 release packet；真实 playable route 等入口闭环稳定后再接。 |
 | `old_market_edge_scene` | 旧集市边缘 | 后续市场内容候选 | `tracked-gap` | implementation readiness 前需要 #20 合同，因为市场边缘、摊位、NPC、货物和可通行性都是物理场景单位 | `design/gdd/port-village-market.md`; `design/gdd/scene-composition-system.md` | 当前 demo 第二岛屿改为 `ochre_island_scene`；旧集市保留为后续市场缺口，不进入本轮 runtime 替换。 |

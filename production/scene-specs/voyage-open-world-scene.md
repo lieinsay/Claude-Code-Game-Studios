@@ -2,8 +2,8 @@
 
 > **Scene ID**: `voyage_open_world_scene`
 > **玩家可见场景名**: 航行大场景
-> **状态**: `spec_drafted`
-> **最后更新**: 2026-05-24
+> **状态**: `implemented`
+> **最后更新**: 2026-05-27
 > **来源 GDD**: `design/gdd/navigation-route-risk.md`, `design/gdd/scene-composition-system.md`, `design/gdd/scene-physics-unit-system.md`
 
 ## 0. 文件头
@@ -13,12 +13,12 @@
 | Scene ID | `voyage_open_world_scene` |
 | 玩家可见场景名 | 航行大场景 |
 | 所属循环节点 | Chart / Exploration |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `implemented` |
 | 来源 GDD | `design/gdd/navigation-route-risk.md`; `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md` |
 | 来源 story 或设计说明 | `N/A true` |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 创建审查记录 | 本文件“创建适合性人工审查”和“创建适合性记录” |
-| 最近更新日期 | 2026-05-24 |
+| 最近更新日期 | 2026-05-27 |
 | 负责人 | Codex / user / QA |
 
 ## 创建适合性人工审查
@@ -43,9 +43,9 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；必须是独立航行场景或等价数据驱动运行时，不能作为 `chart-full-screen-surface` 的子面板实现。 |
-| 配套脚本 / runtime | `pending`；需独立承载航向、问题窗口、撤退和抵达流程。 |
-| 作者化数据 | 航线、问题窗口、目的地接近状态和风险物实例表待建立。 |
+| 独立 Godot 场景 | `src/scenes/voyage/VoyageOpenWorldScene.tscn`；独立航行世界场景，不是 `chart-full-screen-surface` 子面板。 |
+| 配套脚本 / runtime | `src/scenes/voyage/VoyageOpenWorldScene.cs`；`HubRuntime` 非破坏性挂载为 `VoyageOpenWorldSceneRuntimeInstance`，并暴露 `DebugVoyageOpenWorldAssetEvidence()` / `DebugScenePhysicsContract("voyage_open_world_scene")`。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `authored_scenes::voyage_open_world_scene`、8 个航行场景单位原型和 8 个摆放实例。 |
 | 资产组 | 船首 / 舱窗前景、近景云雾、航标链、残骸群、飞行大鸟、目的地远景轮廓。 |
 | 装配入口 | Chart / Hub 只负责启动航线；航行大场景拥有可玩航行过程。 |
 | 禁止混入位置 | 不得把航行过程实现为航图 UI 进度条、旧面板逻辑或无独立边界的临时节点。 |
@@ -63,16 +63,16 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 物理来源 | 设计规格 |
+| 物理来源 | 独立 Godot 场景 + 作者化数据 + 运行时 debug contract |
 | 合同场景 ID | `voyage_open_world_scene` |
-| `physics_contract_complete` 状态 | pending |
+| `physics_contract_complete` 状态 | complete；`HubRuntime.DebugScenePhysicsContract("voyage_open_world_scene")` |
 | 场景物理类型 | `水平场景`，使用伪 3D 表现 |
 | 移动平面 | 飞船在航道平面内前进、后退、转向；玩家视角与当前前进方向一致 |
 | Layer / Height Model | 近景云雾 / 中景航标和残骸 / 远景目的地轮廓 / UI overlay 分层 |
 | Cutaway / Reveal Model | N/A true；无建筑剖切，但云雾和大型生物遮挡必须保留航向与飞船可读性 |
-| 单位目录 | 飞船前景轮廓、云层、航标、漂浮残骸、浓雾带、飞行大鸟、目的地轮廓；后续可扩展风暴边缘、空盗追击影、失控无人浮标 |
-| 碰撞 / 遮挡 / 比例 | pending；残骸、浓雾边界、大鸟靠近 / 离开路径、云层遮挡需要可读边界 |
-| 特殊表面 / 动态行为 / 恢复规则 | 云雾、残骸、飞行大鸟临时避险、返航点标记；卡死或迷航时必须能撤退或回到最近安全航向 |
+| 单位目录 | `voyage_ship_bow_foreground`、`voyage_route_corridor`、`voyage_beacon_chain`、`voyage_fog_bank`、`voyage_wreckage_field`、`voyage_bird_silhouette`、`voyage_destination_silhouette`、`voyage_retreat_beacon`。后续可扩展风暴边缘、空盗追击影、失控无人浮标。 |
+| 碰撞 / 遮挡 / 比例 | `src/presentation/playable_slice_authored_content.json::scene_unit_instances` 与 `HubRuntime.DebugScenePhysicsContract("voyage_open_world_scene")` 记录 blocking / soft-overlap / height-marker、前景舱窗遮挡、玩家相对比例和航道边界。 |
+| 特殊表面 / 动态行为 / 恢复规则 | 雾带、残骸、飞行大鸟、返航信标和航道 clamp 已进入运行时合同；当前为生产可追踪灰盒，不声明完整 #10 live driving 后果。 |
 | 无玩法相关物理单位时的豁免原因 | N/A |
 
 ## 3. 进入 / 离开
@@ -232,14 +232,14 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: TBD；应为独立航行大场景，而非 Chart UI 子面板。
+- Godot 场景或运行时表面: `src/scenes/voyage/VoyageOpenWorldScene.tscn`；独立航行大场景，而非 Chart UI 子面板。
 - 稳定 ID: `voyage_open_world_scene`, `route.sky-reef-arc-01`, `route.storm-cut-01`, `mist_lamp_wreck_scene`, `ochre_island_scene`。
 - 读取的领域管理器: #9 航图、#10 航行风险、#8 船体 / 模块、#6 情报、#3 存档。
 - 会变更的领域管理器: #10 航程状态；#8 船体 / 模块后果；#6 航线知识；#3 航程快照。
 - 持久化字段: 航线 ID、航向、进度、已解决问题、已揭示风险、船体 / 模块后果、撤退状态。
 - 信号 / 语义事件: `voyage_state_changed`, `encounter_triggered`, `hull_band_changed`, `route_travel_completed`。
 - 焦点和模态边界: 航行操控不应被常驻 UI 抢焦点；警报和提示为辅助。
-- 运行时 debug / smoke hook: TBD；至少暴露当前航线、航向、问题类型、解决状态、UI 是否主导、目的地接近状态。
+- 运行时 debug / smoke hook: `DebugVoyageOpenWorldAssetEvidence()` 暴露当前航线、目的地、起飞过渡、主动驾驶视角、雾带、残骸、大鸟、目的地轮廓、撤退锚点和 UI 证据排除；`DebugScenePhysicsContract("voyage_open_world_scene")` 暴露 #20 物理合同。
 
 ## 10. 资产与音频需求
 
@@ -257,9 +257,9 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | 航行大场景 runtime contract / debug hook | pending |
-| 截图 / 视觉证明 | 初始航行、浓雾 / 残骸 / 大鸟临时避险、抵达目的地 | pending |
-| Codex 审核 | 场景规格 + #19/#20 gate review | pending |
+| 自动 smoke | 航行大场景 runtime contract / debug hook | 本轮新增；`tests/smoke/session_shell_visual_probe.gd` |
+| 截图 / 视觉证明 | 初始航行、浓雾 / 残骸 / 大鸟临时避险、抵达目的地 | pending；当前 headless 环境按既有逻辑跳过截图 |
+| Codex 审核 | 场景规格 + #19/#20 gate review | `.godot-ai/reviews/scene/voyage_open_world_scene.review.md`; `.godot-ai/verification/scene/voyage_open_world_scene.verification.md` |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 实现后自检问题:
@@ -296,11 +296,19 @@
 - [x] 场景目的、循环角色和情绪目标明确。
 - [x] 进入、离开、失败和返回路径在设计层明确。
 - [x] 空间布局列出航道、云层、航标、残骸、风险物、目的地轮廓。
-- [ ] Scene Physics Contract 已链接并通过。
+- [x] Scene Physics Contract 已链接并通过。
 - [x] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
 - [x] 关键路径和可选可读性节拍已记录。
 - [x] 至少三个状态变体已记录。
 - [x] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [x] 运行时 / 状态合同没有创建新的玩法权威。
 - [x] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
-- [ ] 自动证据、截图证据和规格一致性检查路径完整。
+- [x] 自动证据和规格一致性检查路径完整；非 headless 截图仍是后续风险。
+
+## 16. 本轮实现记录
+
+- Godot 资产: `src/scenes/voyage/VoyageOpenWorldScene.tscn` 与 `src/scenes/voyage/VoyageOpenWorldScene.cs`。
+- Runtime 接入: `HubRuntime` 在出航后的探索表面挂载 `VoyageOpenWorldSceneRuntimeInstance`，保留现有 `exploration_mist_island` 抵达 / 搜撤流程，避免本轮重写 #10 导航状态和存档格式。
+- 作者化数据: `playable_slice_authored_content.json` 更新到 `polish-asset-reset-voyage-open-world-v1`，新增 `authored_scenes::voyage_open_world_scene` 与 8 个航行世界场景单位。
+- 证据边界: 航图 UI、旧 HUD、按钮、标签、调试入口和进度条都不能替代本场景；本轮 smoke 只把独立航行场景资产、世界层节点、作者化单位和 #20 合同作为 production-ready 证据。
+- 已知限制: 当前为生产可追踪灰盒和证据接入；完整 60-75 秒实时驾驶、航向 / 速度输入后果、音频、最终美术和非 headless 截图仍需后续任务完成。

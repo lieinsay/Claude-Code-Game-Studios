@@ -1,0 +1,179 @@
+[gd_scene load_steps=5 format=3 uid="uid://voyage_open_world_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/voyage/VoyageOpenWorldScene.cs" id="1_voyage_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_route_corridor"]
+size = Vector2(930, 144)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fog_bank"]
+size = Vector2(278, 138)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_retreat_beacon"]
+size = Vector2(150, 94)
+
+[node name="VoyageOpenWorldScene" type="Node2D"]
+script = ExtResource("1_voyage_script")
+
+[node name="VoyageWorldLayer" type="Node2D" parent="."]
+
+[node name="VoyageSkyBackdrop" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 0.0
+offset_top = 126.0
+offset_right = 1280.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.09, 0.19, 0.25, 1)
+
+[node name="VoyageFarHorizonBand" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 0.0
+offset_top = 178.0
+offset_right = 1280.0
+offset_bottom = 236.0
+mouse_filter = 2
+color = Color(0.33, 0.48, 0.52, 0.58)
+
+[node name="VoyageCloudParallaxMid" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 86.0
+offset_top = 280.0
+offset_right = 1168.0
+offset_bottom = 356.0
+mouse_filter = 2
+color = Color(0.47, 0.62, 0.64, 0.42)
+
+[node name="VoyageCloudParallaxNear" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = -80.0
+offset_top = 526.0
+offset_right = 1360.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.38, 0.54, 0.58, 0.50)
+
+[node name="VoyageRouteCorridorVisual" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 172.0
+offset_top = 382.0
+offset_right = 1102.0
+offset_bottom = 526.0
+mouse_filter = 2
+color = Color(0.16, 0.33, 0.36, 0.72)
+
+[node name="VoyageRouteCorridor" type="Area2D" parent="VoyageWorldLayer"]
+position = Vector2(637, 454)
+
+[node name="VoyageRouteCorridorShape" type="CollisionShape2D" parent="VoyageWorldLayer/VoyageRouteCorridor"]
+shape = SubResource("RectangleShape2D_route_corridor")
+
+[node name="VoyageTakeoffTrail" type="Polygon2D" parent="VoyageWorldLayer"]
+polygon = PackedVector2Array(118, 560, 248, 504, 382, 478, 428, 500, 268, 552)
+color = Color(0.58, 0.67, 0.56, 0.72)
+
+[node name="VoyageInitialIslandRecedingSilhouette" type="Polygon2D" parent="VoyageWorldLayer"]
+polygon = PackedVector2Array(82, 486, 170, 444, 280, 454, 330, 500, 238, 532, 118, 520)
+color = Color(0.17, 0.31, 0.27, 0.94)
+
+[node name="VoyageBeaconChain" type="Node2D" parent="VoyageWorldLayer"]
+
+[node name="VoyageBeaconNear" type="ColorRect" parent="VoyageWorldLayer/VoyageBeaconChain"]
+offset_left = 296.0
+offset_top = 424.0
+offset_right = 318.0
+offset_bottom = 482.0
+mouse_filter = 2
+color = Color(0.74, 0.66, 0.38, 0.98)
+
+[node name="VoyageBeaconMid" type="ColorRect" parent="VoyageWorldLayer/VoyageBeaconChain"]
+offset_left = 558.0
+offset_top = 372.0
+offset_right = 574.0
+offset_bottom = 426.0
+mouse_filter = 2
+color = Color(0.70, 0.72, 0.48, 0.94)
+
+[node name="VoyageBeaconFar" type="ColorRect" parent="VoyageWorldLayer/VoyageBeaconChain"]
+offset_left = 838.0
+offset_top = 326.0
+offset_right = 850.0
+offset_bottom = 372.0
+mouse_filter = 2
+color = Color(0.62, 0.76, 0.62, 0.90)
+
+[node name="VoyageFogBankVisual" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 690.0
+offset_top = 338.0
+offset_right = 968.0
+offset_bottom = 476.0
+mouse_filter = 2
+color = Color(0.62, 0.74, 0.72, 0.54)
+
+[node name="VoyageFogBank" type="Area2D" parent="VoyageWorldLayer"]
+position = Vector2(829, 407)
+
+[node name="VoyageFogBankShape" type="CollisionShape2D" parent="VoyageWorldLayer/VoyageFogBank"]
+shape = SubResource("RectangleShape2D_fog_bank")
+
+[node name="VoyageWreckageField" type="Node2D" parent="VoyageWorldLayer"]
+
+[node name="VoyageWreckageLeft" type="ColorRect" parent="VoyageWorldLayer/VoyageWreckageField"]
+offset_left = 448.0
+offset_top = 492.0
+offset_right = 554.0
+offset_bottom = 534.0
+mouse_filter = 2
+color = Color(0.31, 0.27, 0.20, 0.98)
+
+[node name="VoyageWreckageRight" type="ColorRect" parent="VoyageWorldLayer/VoyageWreckageField"]
+offset_left = 596.0
+offset_top = 462.0
+offset_right = 728.0
+offset_bottom = 506.0
+mouse_filter = 2
+color = Color(0.33, 0.29, 0.22, 0.98)
+
+[node name="VoyageWreckageGapMarker" type="ColorRect" parent="VoyageWorldLayer/VoyageWreckageField"]
+offset_left = 560.0
+offset_top = 500.0
+offset_right = 594.0
+offset_bottom = 514.0
+mouse_filter = 2
+color = Color(0.62, 0.76, 0.56, 0.86)
+
+[node name="VoyageBirdSilhouette" type="Polygon2D" parent="VoyageWorldLayer"]
+polygon = PackedVector2Array(944, 236, 1018, 264, 1088, 238, 1032, 284, 996, 284)
+color = Color(0.07, 0.10, 0.12, 0.88)
+
+[node name="VoyageDestinationMistLampSilhouette" type="Polygon2D" parent="VoyageWorldLayer"]
+polygon = PackedVector2Array(956, 410, 1036, 356, 1134, 390, 1172, 490, 1060, 510, 948, 482)
+color = Color(0.19, 0.34, 0.31, 0.94)
+
+[node name="VoyageDestinationLampGlow" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 1056.0
+offset_top = 372.0
+offset_right = 1082.0
+offset_bottom = 438.0
+mouse_filter = 2
+color = Color(0.78, 0.76, 0.44, 0.72)
+
+[node name="VoyageRetreatBeaconVisual" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 172.0
+offset_top = 448.0
+offset_right = 246.0
+offset_bottom = 534.0
+mouse_filter = 2
+color = Color(0.60, 0.39, 0.32, 0.92)
+
+[node name="VoyageRetreatBeacon" type="Area2D" parent="VoyageWorldLayer"]
+position = Vector2(209, 491)
+
+[node name="VoyageRetreatBeaconShape" type="CollisionShape2D" parent="VoyageWorldLayer/VoyageRetreatBeacon"]
+shape = SubResource("RectangleShape2D_retreat_beacon")
+
+[node name="VoyageShipBowForeground" type="Polygon2D" parent="VoyageWorldLayer"]
+polygon = PackedVector2Array(380, 646, 502, 558, 778, 558, 900, 646)
+color = Color(0.15, 0.22, 0.27, 1)
+
+[node name="VoyageCockpitWindowFrame" type="ColorRect" parent="VoyageWorldLayer"]
+offset_left = 226.0
+offset_top = 556.0
+offset_right = 1054.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.08, 0.11, 0.14, 0.74)

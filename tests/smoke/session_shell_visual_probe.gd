@@ -198,7 +198,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-initial-island-v1", "C# HubRuntime loads asset-reset route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-voyage-open-world-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -233,6 +233,26 @@ func _run() -> void:
 	_expect(_draw_alpha(session, "ExplorationReturnShipHullSilhouette") >= 0.99, "Exploration return ship silhouette is opaque scene evidence")
 	_expect(hub.call("DebugNodeVisible", "ExplorationDockedShip"), "Exploration has a docked ship spatial anchor")
 	_expect(hub.call("DebugNodeVisible", "ExplorationBoardingRamp"), "Exploration has a boarding ramp spatial anchor")
+	_expect(hub.call("DebugNodeVisible", "VoyageOpenWorldSceneRuntimeInstance"), "Exploration departure mounts the independent voyage_open_world_scene asset")
+	_expect(hub.call("DebugNodeVisible", "VoyageShipBowForeground"), "Voyage scene has active driving ship-bow foreground")
+	_expect(hub.call("DebugNodeVisible", "VoyageCockpitWindowFrame"), "Voyage scene has cockpit driving view framing")
+	_expect(hub.call("DebugNodeVisible", "VoyageTakeoffTrail"), "Voyage scene preserves takeoff transition evidence from the island dock")
+	_expect(hub.call("DebugNodeVisible", "VoyageBeaconChain"), "Voyage scene has a world-layer beacon chain")
+	_expect(hub.call("DebugNodeVisible", "VoyageFogBankVisual"), "Voyage scene has a readable fog problem window")
+	_expect(hub.call("DebugNodeVisible", "VoyageWreckageField"), "Voyage scene has a readable wreckage avoidance field")
+	_expect(hub.call("DebugNodeVisible", "VoyageBirdSilhouette"), "Voyage scene has ecological pressure silhouette evidence")
+	_expect(hub.call("DebugNodeVisible", "VoyageDestinationMistLampSilhouette"), "Voyage scene shows the destination in driving view")
+	var voyage_scene_evidence := hub.call("DebugVoyageOpenWorldAssetEvidence") as Dictionary
+	_expect(str(voyage_scene_evidence.get("scene_id", "")) == "voyage_open_world_scene", "Independent voyage scene reports the authored scene id")
+	_expect(str(voyage_scene_evidence.get("route_id", "")) == "route.mist", "Independent voyage scene is bound to the current mist route")
+	_expect(str(voyage_scene_evidence.get("arrival_runtime_contract_id", "")) == "exploration_mist_island", "Voyage scene keeps arrival path evidence into the mist-lamp wreck runtime")
+	_expect(bool(voyage_scene_evidence.get("takeoff_transition_ready", false)), "Voyage scene reports takeoff transition readiness")
+	_expect(bool(voyage_scene_evidence.get("active_driving_view_ready", false)), "Voyage scene reports active driving view readiness")
+	_expect(bool(voyage_scene_evidence.get("fog_problem_ready", false)), "Voyage scene reports fog problem readiness")
+	_expect(bool(voyage_scene_evidence.get("wreckage_problem_ready", false)), "Voyage scene reports wreckage problem readiness")
+	_expect(bool(voyage_scene_evidence.get("bird_evasion_ready", false)), "Voyage scene reports bird evasion readability")
+	_expect(bool(voyage_scene_evidence.get("destination_silhouette_ready", false)), "Voyage scene reports destination silhouette readiness")
+	_expect(not bool(voyage_scene_evidence.get("ui_evidence_allowed_for_scene", true)), "Voyage scene rejects UI-only evidence")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandPath"), "Exploration has a walkable island path")
 	_expect(hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration has an authored greybox sky field")
 	_expect(hub.call("DebugNodeVisible", "SearchWreckProp"), "Exploration has an authored greybox search wreck prop")
@@ -249,6 +269,7 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "SearchWreckMast"), "Exploration search landmark has a readable wreck mast")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconBeam"), "Exploration return landmark has a visible beacon beam")
 	_expect_scene_physics_contract(hub, "exploration_mist_island", "水平场景", "water", "blocking_static", "soft_overlap")
+	_expect_scene_physics_contract(hub, "voyage_open_world_scene", "水平场景", "fog", "blocking_static", "soft_overlap")
 	_expect_scene_physics_contract(hub, "ochre_island_scene", "水平场景", "cloudsea", "blocking_static", "soft_overlap")
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "exploration_mist_island", "Current physics contract follows Exploration state")
 	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
@@ -583,7 +604,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
-	var production_asset_scene := scene_id == "hub_island_dock" or scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
+	var production_asset_scene := scene_id == "hub_island_dock" or scene_id == "voyage_open_world_scene" or scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
 	_expect(bool(contract.get("unit_catalog_ready", false)) == production_asset_scene, "%s unit catalog readiness matches approved asset status" % scene_id)
 	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
 	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
@@ -600,8 +621,8 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	if production_asset_scene:
 		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-		var expected_spec := "production/scene-specs/initial-island-scene.md" if scene_id == "hub_island_dock" else ("production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md")
-		var expected_floor := "hub_dock_ground" if scene_id == "hub_island_dock" else ("ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01")
+		var expected_spec := "production/scene-specs/initial-island-scene.md" if scene_id == "hub_island_dock" else ("production/scene-specs/voyage-open-world-scene.md" if scene_id == "voyage_open_world_scene" else ("production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md"))
+		var expected_floor := "hub_dock_ground" if scene_id == "hub_island_dock" else ("voyage_air_lane_01" if scene_id == "voyage_open_world_scene" else ("ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01"))
 		_expect_scene_unit_authoring_linkage(contract, scene_id, expected_spec, expected_floor)
 	else:
 		var catalog := contract.get("scene_unit_catalog", []) as Array
@@ -611,13 +632,13 @@ func _expect_scene_physics_contract(
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	if production_asset_scene:
-		var minimum_units := 6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)
+		var minimum_units := 8 if scene_id == "voyage_open_world_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1))
 		_expect(int(contract.get("authored_physical_unit_count", 0)) >= minimum_units, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:
 	var catalog := contract.get("scene_unit_catalog", []) as Array
-	var minimum_units := 6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1)
+	var minimum_units := 8 if scene_id == "voyage_open_world_scene" else (6 if scene_id == "ochre_island_scene" else (7 if scene_id == "hub_island_dock" else 1))
 	_expect(catalog.size() == int(contract.get("authored_physical_unit_count", 0)), "%s unit catalog count matches authored physical unit count" % scene_id)
 	_expect(catalog.size() >= minimum_units, "%s unit catalog has authored physical units" % scene_id)
 	var has_blocking := false
@@ -648,7 +669,7 @@ func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required
 	_expect(has_overlap, "%s unit catalog includes soft-overlap interaction anchors" % scene_id)
 	_expect(has_player_unit, "%s unit catalog includes player_unit scale basis" % scene_id)
 	_expect(has_landmark_or_prop, "%s unit catalog includes props, passages, or landmarks" % scene_id)
-	if scene_id == "ochre_island_scene":
+	if scene_id == "ochre_island_scene" or scene_id == "voyage_open_world_scene":
 		_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
 
 

@@ -41,9 +41,9 @@ release_handoff_ready =
 
 | Scene ID | Codex / 自动状态 | 后续反馈入口 | Release handoff 状态 | 原因 |
 | --- | --- | --- | --- | --- |
-| `initial_island_scene` | 旧作者化单位链路已撤销；当前不再算现存游戏资产。 | `directed-content-modification` | `BLOCKED` | 必须重新通过 Godot asset workflow 实现，不能刷新旧 release packet。 |
-| `ship_interior_layered` | 旧作者化单位链路已撤销；当前不再算现存游戏资产。 | `directed-content-modification` | `BLOCKED` | 必须先补核心 `chart-table` / `chart-full-screen-surface` 独立实现，再重建船内场景。 |
-| `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据和 Codex 规格一致性检查仍缺失。 | `directed-content-modification` | `BLOCKED` | 场景设计存在，但实现和证据门禁尚未完成。 |
+| `initial_island_scene` | 独立 Godot 场景、作者化单位、#20 运行时合同和自动证据已建立。 | `directed-content-modification` | `BLOCKED` | 仍需非 headless 截图、最终美术 / 音频和 release packet；旧 HubRuntime 灰盒不得作为替代证据。 |
+| `ship_interior_layered` | 独立 Godot 场景、ChartTable / S4_chart 接入、作者化单位、#20 运行时合同和自动证据已建立。 | `directed-content-modification` | `BLOCKED` | 仍需非 headless 截图、最终美术 / 音频和 release packet；旧船内灰盒不得作为替代证据。 |
+| `voyage_open_world_scene` | 独立 Godot 航行世界场景、#20 合同、作者化单位和自动证据已建立。 | `directed-content-modification` | `BLOCKED` | 当前是生产可追踪灰盒和证据接入；完整 #10 live driving、非 headless 截图、最终美术 / 音频和 release packet 仍未完成。 |
 | `mist_lamp_wreck_scene` | 旧作者化单位链路已撤销；当前不再算现存游戏资产。 | `directed-content-modification` | `BLOCKED` | 必须重新通过 Godot asset workflow 实现，不能刷新旧 release packet。 |
 | `ochre_island_scene` | 赭石岛已通过创建适合性审查，独立 Godot 资产、条带状铁矿固定单位、#20 运行时合同、作者化单位链路和 Debug build 按钮入口已实现；当前是唯一保留的合规游戏资产切片。 | `directed-content-modification` | `BLOCKED` | 仍需正式采集奖励 / 返航 domain 写入、截图刷新和 release packet，但这些排在核心 UI / 单位独立实现之后。 |
 | `old_market_edge_scene` | `TRACKED_GAP`，保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `directed-content-modification` | `BLOCKED` | 后续市场阶段再补独立场景规格和 #20 合同。 |
