@@ -23,9 +23,9 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；必须建立独立 `ochre_island_scene` 场景或等价作者化数据边界，不能复用旧市场或探索面板。 |
-| 配套脚本 / runtime | `pending`；仅承载资源岛移动、采集和返航触发，不拥有完整经济链。 |
-| 作者化数据 | 待建立 `ochre_island_scene` 场景实例、`banded_iron_ore` 实例和返航点实例。 |
+| 独立 Godot 场景 | `src/scenes/ochre/OchreIslandScene.tscn`；已建立独立灰盒场景资产，不能复用旧市场或探索面板。 |
+| 配套脚本 / runtime | `src/scenes/ochre/OchreIslandScene.cs`；仅承载资源岛本地信号，Resources / Navigation / Hub 仍为领域权威。 |
+| 作者化数据 | Godot 场景内已实例化 `BandedIronOreInstance`、`OchreReturnAnchor` 和 `PlayerSpawn`；`src/presentation/playable_slice_authored_content.json` runtime 作者化链路待补。 |
 | 资产组 | 赭色岛体、条带状铁矿、返航点、岛屿边界、采集反馈。 |
 | 装配入口 | 航行大场景只负责抵达；赭石岛拥有自身场景本体和资源点实例。 |
 | 禁止混入位置 | 不得把赭石岛只写成旧市场场景、探索面板或无独立边界的临时节点。 |
@@ -61,9 +61,9 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 物理来源 | 设计规格草案；运行时合同 pending |
+| 物理来源 | 独立 Godot 灰盒资产 + 作者化数据 + `HubRuntime.DebugScenePhysicsContract("ochre_island_scene")` |
 | 合同场景 ID | `ochre_island_scene` |
-| `physics_contract_complete` 状态 | pending |
+| `physics_contract_complete` 状态 | true；仍需 playable route 接入和截图刷新 |
 | 场景物理类型 | `水平场景` |
 | 移动平面 | 小型岛屿地面平面四方向移动 |
 | Layer / Height Model | 岛体地面、矿脉前景、边界、返航点 |
@@ -71,9 +71,9 @@
 | 单位目录 | 玩家位置、岛体、路径、条带状铁矿、返航点、边界 |
 | 固定单位原型 | `production/unit-specs/fixed-scene-objects/banded-iron-ore.md`；其余岛体 / 路径 / 返航点待单体规格 |
 | 实体单位原型 | `production/unit-specs/dynamic-entities/player-controlled-entity.md` |
-| 摆放实例 | pending；不得引用 runtime scaffold |
-| 碰撞 / 遮挡 / 比例 | pending；矿脉必须可读为资源点，不能只是纹理 |
-| 特殊表面 / 动态行为 / 恢复规则 | 矿脉采集状态、岛屿边界、返航点恢复 |
+| 摆放实例 | `src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/BandedIronOreInstance`；`src/presentation/playable_slice_authored_content.json` 已记录 6 个场景单位实例。 |
+| 碰撞 / 遮挡 / 比例 | `blocking_static` 岛体 / 云海边界，`soft_overlap` 路径 / 矿脉 / 返航点；矿脉必须可读为资源点，不能只是纹理 |
+| 特殊表面 / 动态行为 / 恢复规则 | `cloudsea` 边界 clamp 优先于矿脉和返航触发；矿脉为 `resource_node + trigger_only + breakable_state` |
 | 无玩法相关物理单位时的豁免原因 | N/A true |
 
 ## 3. 进入 / 离开
@@ -128,30 +128,30 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: pending；不得复用旧市场或探索面板作为场景本体。
+- Godot 场景或运行时表面: `src/scenes/ochre/OchreIslandScene.tscn`、`src/scenes/ochre/OchreIslandScene.cs`、`HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`、Debug build `OchreDebugButton` / `HubRuntime.DebugEnterOchreIslandScene()`；不得复用旧市场或探索面板作为场景本体。
 - 稳定 ID: `ochre_island_scene`。
 - 读取的领域管理器: Resources、Navigation、Scene。
 - 会变更的领域管理器: Resources（采集结果）、Navigation / Hub（返航）。
 - 持久化字段: 玩家位置、矿脉采集状态、携带资源、返航状态。
 - 信号 / 语义事件: ore_harvested、resource_collected、return_departure_requested。
 - 焦点和模态边界: 场景交互不得被常驻 UI 替代；采集提示不抢占世界输入。
-- 运行时 debug / smoke hook: pending；需要验证矿脉和返航点均来自 authored scene units。
+- 运行时 debug / smoke hook: `tests/smoke/session_shell_visual_probe.gd` 校验 #20 物理合同、作者化单位链接、边界 / overlap / special surface / dynamic behavior，并通过 Debug build 按钮入口验证矿脉采集状态、返航两步和不替换 `route.mist`。
 
 ## 10. 资产与音频需求
 
 | 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 赭色小岛灰盒 | 场景身份、边界、移动平面 | 待制作 | Scene / Art |
-| P0 | 条带状铁矿灰盒 / 图标 | 资源点身份、采集状态 | `banded-iron-ore.md` | Unit / Art |
+| P0 | 赭色小岛灰盒 | 场景身份、边界、移动平面 | `src/scenes/ochre/OchreIslandScene.tscn` | Scene / Art |
+| P0 | 条带状铁矿灰盒 / 图标 | 资源点身份、采集状态 | `src/scenes/units/BandedIronOre.tscn`; `banded-iron-ore.md` | Unit / Art |
 | P1 | 采集反馈音 / 视觉反馈 | 成功、失败、容量不足 | 待制作 | Audio / UX |
 
 ## 11. QA 证据
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | pending |
+| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | partial；Godot AI MCP hierarchy PASS，#20 runtime contract smoke PASS，debug 入口采集 / 返航 PASS；正式 playable route、Resources 奖励和 Navigation 返航写入待补 |
 | 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending |
-| Codex 审核 | 规格与 authored content 对齐检查 | pending |
+| Codex 审核 | 规格与 authored content 对齐检查 | partial；`.godot-ai/verification/composite-feature/ochre_island_resource_slice.verification.md`、`production/qa/evidence/ochre-island-godot-asset-execution-evidence.md` 和 `DomainAdapterTest` 已记录资产 / 作者化 / 运行时合同证据 |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 实现后自检问题:
@@ -198,4 +198,4 @@
 - [ ] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [ ] 运行时 / 状态合同没有创建新的玩法权威。
 - [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
-- [ ] 自动证据、截图证据和规格一致性检查路径已命名。
+- [x] 自动证据、截图证据和规格一致性检查路径已命名。

@@ -7,9 +7,11 @@ public partial class HubRuntime : Node2D
 	private static readonly Vector2 HubPlayerStart = new(158, 610);
 	private static readonly Vector2 ShipInteriorPlayerStart = new(246, 610);
 	private static readonly Vector2 ExplorationPlayerStart = new(168, 610);
+	private static readonly Vector2 OchreIslandPlayerStart = new(286, 536);
 	private static readonly Rect2 HubWalkBounds = new(new Vector2(132, 380), new Vector2(1016, 252));
 	private static readonly Rect2 ShipInteriorWalkBounds = new(new Vector2(196, 424), new Vector2(836, 208));
 	private static readonly Rect2 ExplorationWalkBounds = new(new Vector2(132, 390), new Vector2(1016, 246));
+	private static readonly Rect2 OchreIslandWalkBounds = new(new Vector2(140, 292), new Vector2(900, 278));
 	private const string DurableProgressFileName = "cloudweaver_playable_progress.json";
 	private const string DurableProgressPath = $"user://{DurableProgressFileName}";
 	private const string QuarantinedProgressFileName = "cloudweaver_playable_progress.quarantine.json";
@@ -33,6 +35,8 @@ public partial class HubRuntime : Node2D
 	private ColorRect? hubStorageMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
+	private ColorRect? ochreOreMarker;
+	private ColorRect? ochreReturnMarker;
 	private ColorRect? explorationRouteProgressFill;
 	private ColorRect? explorationThreatZone;
 	private ColorRect? explorationSearchPulseFill;
@@ -47,10 +51,13 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> hubInteriorSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
+	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
 	private ColorRect? chartMistSelectionFrame;
 	private Label? explorationPointSemanticLabel;
 	private Label? explorationThreatSemanticLabel;
 	private Label? explorationExtractionSemanticLabel;
+	private Label? ochreOreSemanticLabel;
+	private Label? ochreReturnSemanticLabel;
 	private Label? storageValueLabel;
 	private Label? cargoValueLabel;
 	private Label? hullValueLabel;
@@ -60,13 +67,16 @@ public partial class HubRuntime : Node2D
 	private Label? runtimeHintLabel;
 	private Label? footerLabel;
 	private Button? deleteProgressButton;
-	private readonly Button?[] hubActionButtons = new Button?[4];
+	private Button? ochreDebugButton;
+	private readonly Button?[] hubActionButtons = new Button?[5];
 	private string selectedRoute = "";
 	private string currentScreen = "hub";
 	private string hubSpace = "exterior";
 	private int explorationStep;
 	private int searchPulseStage;
 	private int returnPrepStage;
+	private int ochreReturnPrepStage;
+	private bool ochreOreHarvested;
 	private Vector2 playerPosition = HubPlayerStart;
 	private string nearestInteraction = "";
 	private bool hasLoadableProgress;
@@ -123,7 +133,7 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
-		if (currentScreen == "exploration")
+		if (currentScreen == "exploration" || currentScreen == "ochre_dev")
 		{
 			if (key.Keycode == Key.Escape)
 			{
@@ -282,6 +292,59 @@ public partial class HubRuntime : Node2D
 		UpdateOnboardingHint();
 	}
 
+	public void OnOchreHarvestPressed()
+	{
+		if (currentScreen != "ochre_dev")
+		{
+			return;
+		}
+
+		UpdateSpatialInteraction();
+		if (nearestInteraction != "ochre_ore")
+		{
+			SetFooter("需要移动到条带状铁矿旁边再按 E 采集。");
+			return;
+		}
+
+		if (ochreOreHarvested)
+		{
+			SetFooter("条带状铁矿已采集：开发入口保留状态可读性，不写入正式 Resources 奖励。");
+			return;
+		}
+
+		ochreOreHarvested = true;
+		UpdateOchreSceneSemantics();
+		SetFooter("条带状铁矿采集完成：已验证世界锚点和采集后状态；正式资源奖励仍待后续 runtime 集成。");
+	}
+
+	public void OnOchreReturnPressed()
+	{
+		if (currentScreen != "ochre_dev")
+		{
+			return;
+		}
+
+		UpdateSpatialInteraction();
+		if (nearestInteraction != "ochre_return")
+		{
+			SetFooter("需要移动到赭石岛返航点旁边再按 E。");
+			return;
+		}
+
+		if (ochreReturnPrepStage < 1)
+		{
+			ochreReturnPrepStage += 1;
+			UpdateOchreSceneSemantics();
+			SetFooter("赭石岛返航 1/2：返航锚点已预热，再按 E 返回 Hub。");
+			return;
+		}
+
+		ochreReturnPrepStage = 0;
+		playerPosition = HubPlayerStart;
+		ShowHub();
+		SetFooter("已从赭石岛开发入口返回 Hub；正式 playable route 未被替换。");
+	}
+
 	public void OnSavePressed()
 	{
 		if (Godot.FileAccess.FileExists(DurableProgressPath) && !pendingOverwriteConfirmation)
@@ -359,6 +422,7 @@ public partial class HubRuntime : Node2D
 		{
 			"chart" => "航图桌",
 			"exploration" => "雾海搜撤记录",
+			"ochre_dev" => "赭石岛开发入口",
 			_ => "空艇停泊区",
 		};
 		SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / {restoredScreenName}");
@@ -372,6 +436,11 @@ public partial class HubRuntime : Node2D
 		{
 			ShowExplorationSurface();
 			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 雾海搜撤记录");
+		}
+		else if (currentScreen == "ochre_dev")
+		{
+			ShowOchreDevSurface();
+			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 赭石岛开发入口");
 		}
 		else
 		{
@@ -426,6 +495,25 @@ public partial class HubRuntime : Node2D
 		UpdateOnboardingHint();
 	}
 
+	public void DebugEnterOchreIslandScene()
+	{
+		currentScreen = "ochre_dev";
+		ochreOreHarvested = false;
+		ochreReturnPrepStage = 0;
+		playerPosition = OchreIslandPlayerStart;
+		ShowOchreDevSurface();
+	}
+
+	public void OnOchreDebugButtonPressed()
+	{
+		if (!OS.IsDebugBuild())
+		{
+			return;
+		}
+
+		DebugEnterOchreIslandScene();
+	}
+
 	public void TrySpatialInteraction()
 	{
 		UpdateSpatialInteraction();
@@ -454,6 +542,14 @@ public partial class HubRuntime : Node2D
 		else if (nearestInteraction == "exploration_return")
 		{
 			OnExplorationReturnPressed();
+		}
+		else if (nearestInteraction == "ochre_ore")
+		{
+			OnOchreHarvestPressed();
+		}
+		else if (nearestInteraction == "ochre_return")
+		{
+			OnOchreReturnPressed();
 		}
 		else
 		{
@@ -516,6 +612,8 @@ public partial class HubRuntime : Node2D
 	{
 		var sceneId = currentScreen == "exploration"
 			? "exploration_mist_island"
+			: currentScreen == "ochre_dev"
+				? "ochre_island_scene"
 			: hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock";
 		return DebugScenePhysicsContract(sceneId);
 	}
@@ -593,6 +691,29 @@ public partial class HubRuntime : Node2D
 				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
 				"Clamp player into ExplorationWalkBounds; search and return stay as soft_overlap anchors so failed movement cannot block progression",
 				12),
+			"ochre_island_scene" => BuildScenePhysicsContract(
+				sceneId,
+				"水平场景",
+				new Rect2(new Vector2(140, 292), new Vector2(900, 278)),
+				"ground plane supports up/down/left/right movement; height_only cues are visual-only in first pass and never imply jump/fly traversal",
+				"primary_walkable_layer=ochre_island_ground_01; walkable_layer: ochre_walk_path; transition_layer: ochre_return_anchor_to_voyage_or_hub; height_only_layer: none in first pass; blocked_layer: rock_wall_boundary, cloudsea_boundary, ore_body_when_blocking; visual_layer: ochre_rock_face",
+				"N/A true for floor_cutaway/interior_instance; behind_object_reveal=N/A true because banded iron ore and return beacon keep collision/interaction identity and do not hide passable behind-paths",
+				"N/A true: single exterior island floor; floor_id=ochre_island_ground_01; floor_index=0; is_active_floor=true; visibility_mode=full_visible; walkable_bounds=OchreIslandScene ground; vertical_connectors=ochre_return_anchor_to_voyage_or_hub; occluders_hidden_above=none; interactions_enabled=banded_iron_ore_anchor,ochre_return_anchor",
+				"ochre_island_ground_01",
+				"ochre_island_ground_01",
+				0,
+				true,
+				"full_visible",
+				"ochre_return_anchor_to_voyage_or_hub",
+				"none",
+				"banded_iron_ore_anchor,ochre_return_anchor",
+				"N/A true: no passable behind-object route in current Ochre Island slice; ore and return anchor keep collision and interaction identity",
+				"2.2m player height = 28px marker; banded ore is about 3 player-widths; return anchor clear width >= 1.1x player",
+				"z_world_background < z_island_ground_path < z_ore_return_boundary_units < z_interaction_markers",
+				"blocking_static: ochre island edge, rock wall, cloudsea boundary; soft_overlap: player marker, walk path, banded iron ore anchor, return anchor",
+				"ore=resource_node + breakable + trigger_only; cloudsea=gameplay_affecting blocking_static boundary; glass=none; mirror=none; elastic=none; pushable=none in current slice",
+				"Clamp player into OchreIslandScene walk bounds; ore and return remain soft_overlap anchors so failed movement cannot block progression",
+				6),
 			_ => new Godot.Collections.Dictionary
 			{
 				["scene_id"] = sceneId,
@@ -701,12 +822,13 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
+			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
 		};
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "hub_island_dock" or "hub_ship_interior" or "exploration_mist_island";
+		sceneId is "hub_island_dock" or "hub_ship_interior" or "exploration_mist_island" or "ochre_island_scene";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -788,6 +910,7 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => "blocking_static: hub_island_main_mass, hub_docked_ship_hull, hub_waterline; soft_overlap: player_marker, hub_dock_plank_walkway, hub_boarding_ramp; height_marker: hub_airship_envelope",
 			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, helm_console_prop, ship_exit_threshold",
 			"exploration_mist_island" => "blocking_static: exploration_island_mass, exploration_cliff_edge, return_ship_hull, mist_sea_boundary; soft_overlap: player_marker, exploration_island_path, search_wreck_prop, return_helm_anchor, mist_horizon_fog; height_marker: search_wreck_mast, return_beacon_beam, exploration_threat_zone",
+			"ochre_island_scene" => "blocking_static: ochre_island_mass, ochre_cloudsea_boundary; soft_overlap: player_marker, ochre_island_path, banded_iron_ore, ochre_return_anchor",
 			_ => "",
 		};
 
@@ -804,6 +927,7 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => "player_unit=1.0; door_or_passage hub_boarding_ramp clear width >= 1.1x player; landmark hub_docked_ship_hull >= 2.0x player; height_marker hub_airship_envelope visual-only",
 			"hub_ship_interior" => "player_unit=1.0; room bays are room-scale landmarks; helm/storage/engine anchors are 0.8-1.3x player-readable interactables; exit threshold clear width >= 1.1x player",
 			"exploration_mist_island" => "player_unit=1.0; search_wreck about 6 player-widths; return_ship about 5 player-widths; beacon/mast height markers visual-only; path clear width >= 1.1x player",
+			"ochre_island_scene" => "player_unit=1.0; banded_iron_ore resource node 1.5-2.5x player width; return anchor clear width >= 1.1x player; island mass reads as landmark >= 2.0x player",
 			_ => "",
 		};
 
@@ -813,6 +937,7 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => "water=gameplay_affecting blocking_static hazard boundary with no passability implication; glass=none; mirror=none; fog/cloud=visual_only sky backdrop",
 			"hub_ship_interior" => "glass=cockpit_window visual_only blocking_static, transparent but not passable/interactable; mirror=none; water=none; reflective_metal=visual_only hull trim",
 			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
+			"ochre_island_scene" => "cloudsea=gameplay_affecting blocking_static boundary with no passability implication; ore=resource_node + trigger_only + breakable state; glass=none; mirror=none; water=none",
 			_ => "",
 		};
 
@@ -839,6 +964,13 @@ public partial class HubRuntime : Node2D
 				BuildPhysicalBehavior("search_wreck_prop", "trigger_only", "trigger_only + soft_overlap", "three-step scan anchor; no entity collision; requires proximity and Use dispatch", "scan calibration, echo lock, salvage pulse feedback", "player_unit", 40, "trigger_only is ignored until proximity and Use gate pass", "reset scan stage by moving away or returning to Hub; no forced stuck state", "world_playable_scene", false),
 				BuildPhysicalBehavior("return_helm_anchor", "trigger_only", "trigger_only + soft_overlap", "two-step return anchor; no entity collision; requires proximity and Use dispatch", "engine preheat and piloting prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "escape interaction returns to hub_island_dock after preheat", "world_playable_scene", false),
 				BuildPhysicalBehavior("mist_horizon_fog", "visual_only_fog", "fog_or_cloud + visual_only", "atmospheric fog; no collision, slow, blindness, or current/wind force", "mist backdrop only", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
+			},
+			"ochre_island_scene" => new Godot.Collections.Array<Godot.Collections.Dictionary>
+			{
+				BuildPhysicalBehavior("ochre_cloudsea_boundary", "hazardous", "hazardous + blocking_static", "cloudsea island edge blocks ground units; no damage in current slice", "cloudsea boundary and clamp feedback", "player_unit, pushable_unit", 80, "hazardous boundary wins over trigger_only anchors", "clamp player back into OchreIslandScene walk bounds", "world_playable_scene", false),
+				BuildPhysicalBehavior("banded_iron_ore", "resource_node", "resource_node + trigger_only + breakable", "spatial Use anchor; harvest changes ore state and requests Resources reward in later runtime integration", "ore available/harvested visual state", "player_unit", 45, "resource_node trigger never changes collision footprint unless a future mining contract declares it", "keep ore visible and mark blocked/harvested; never replace with UI-only reward", "world_playable_scene", false),
+				BuildPhysicalBehavior("ochre_return_anchor", "trigger_only", "trigger_only + soft_overlap", "spatial return anchor; no entity collision; requires proximity and Use dispatch", "return beacon greybox prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "return to voyage/hub flow when Navigation integration is wired", "world_playable_scene", false),
+				BuildPhysicalBehavior("ochre_rock_face", "visual_only_landmark", "visual_only + height_only", "readability landmark; no collision, reward, or passability rule", "ochre rock face silhouette", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
 			},
 			_ => [],
 		};
@@ -879,6 +1011,7 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => "hazardous:80 > trigger_only:30 > visual_only_height_marker:10",
 			"hub_ship_interior" => "trigger_only:30 > blocking_static:20 > visual_only_glass:10",
 			"exploration_mist_island" => "hazardous:90 > hazardous_warning:70 > trigger_only:40/35 > visual_only_fog:10",
+			"ochre_island_scene" => "hazardous:80 > resource_node:45 > trigger_only:35",
 			_ => "",
 		};
 
@@ -888,6 +1021,7 @@ public partial class HubRuntime : Node2D
 			"hub_island_dock" => "If a behavior tag lacks priority, implementation readiness fails; waterline clamp and ramp escape interaction are the recovery fallback.",
 			"hub_ship_interior" => "If a behavior tag lacks priority, implementation readiness fails; static crate remains non-pushable until pushable priority and recovery are declared.",
 			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; hazardous boundary clamp wins over trigger-only anchors and visual fog.",
+			"ochre_island_scene" => "If a behavior tag lacks priority, implementation readiness fails; cloudsea clamp wins over ore and return triggers.",
 			_ => "",
 		};
 
@@ -917,6 +1051,10 @@ public partial class HubRuntime : Node2D
 	public int DebugSearchPulseStage() => searchPulseStage;
 
 	public int DebugReturnPrepStage() => returnPrepStage;
+
+	public int DebugOchreReturnPrepStage() => ochreReturnPrepStage;
+
+	public bool DebugOchreOreHarvested() => ochreOreHarvested;
 
 	public bool DebugDurableProgressExists() => Godot.FileAccess.FileExists(DurableProgressPath);
 
@@ -1091,12 +1229,15 @@ public partial class HubRuntime : Node2D
 		AddHubGreyboxSet();
 		AddChartGreyboxSet();
 		AddExplorationGreyboxSet();
+		AddOchreGreyboxSet();
 		hubShipEntryMarker = AddWorldMarker("ShipEntryInteractPoint", new Vector2(202, 584), new Color(0.45f, 0.62f, 0.52f), "登船 E");
 		hubShipExitMarker = AddWorldMarker("ShipExitInteractPoint", new Vector2(224, 584), new Color(0.45f, 0.52f, 0.62f), "下船 E");
 		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
 		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(204, 594), new Color(0.64f, 0.39f, 0.28f), "驾驶返航 E");
+		ochreOreMarker = AddWorldMarker("OchreOreInteractPoint", new Vector2(610, 502), new Color(0.64f, 0.50f, 0.30f), "采集 E");
+		ochreReturnMarker = AddWorldMarker("OchreReturnInteractPoint", new Vector2(896, 508), new Color(0.44f, 0.58f, 0.63f), "返航 E");
 
 		playerMarker = new ColorRect
 		{
@@ -1118,6 +1259,9 @@ public partial class HubRuntime : Node2D
 		};
 		interactionPromptLabel.AddThemeFontSizeOverride("font_size", 18);
 		interactionLayer.AddChild(interactionPromptLabel);
+
+		ochreDebugButton = CreateOchreDebugButton();
+		hubActionButtons[4] = ochreDebugButton;
 	}
 
 	private void AddHubGreyboxSet()
@@ -1293,6 +1437,27 @@ public partial class HubRuntime : Node2D
 		explorationExtractionSemanticLabel = AddSceneLabel(explorationSceneItems, "ExplorationExtractionSemanticLabel", new Vector2(924, 508), new Vector2(246, 24), "撤离：可随时返航");
 	}
 
+	private void AddOchreGreyboxSet()
+	{
+		AddSceneRect(ochreSceneItems, "OchrePlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.17f, 0.24f, 0.28f, 0.98f));
+		AddSceneRect(ochreSceneItems, "OchreCloudSeaBackdrop", new Vector2(0, 560), new Vector2(1280, 104), new Color(0.50f, 0.62f, 0.66f, 0.82f));
+		AddSceneRect(ochreSceneItems, "OchreIslandWalkBoundary", OchreIslandWalkBounds.Position, OchreIslandWalkBounds.Size, new Color(0.28f, 0.25f, 0.20f, 0.90f));
+		AddSceneEllipse(ochreSceneItems, "OchreIslandGround", new Vector2(590, 482), new Vector2(430, 132), new Color(0.53f, 0.36f, 0.22f, 0.98f));
+		AddSceneEllipse(ochreSceneItems, "OchreIslandPath", new Vector2(580, 506), new Vector2(284, 42), new Color(0.66f, 0.52f, 0.32f, 0.96f));
+		AddSceneRect(ochreSceneItems, "OchreCloudSeaBoundary", new Vector2(132, 562), new Vector2(980, 30), new Color(0.40f, 0.56f, 0.62f, 0.84f));
+		AddSceneRect(ochreSceneItems, "OchreRockWallBoundary", new Vector2(254, 336), new Vector2(250, 54), new Color(0.38f, 0.28f, 0.22f, 0.96f));
+		AddSceneLabel(ochreSceneItems, "OchreIslandIdentityLabel", new Vector2(410, 350), new Vector2(390, 28), "赭石岛开发入口：资源点 / 返航点独立验证");
+		AddSceneRect(ochreSceneItems, "BandedIronOreBody", new Vector2(596, 446), new Vector2(156, 80), new Color(0.60f, 0.45f, 0.30f, 0.98f));
+		AddSceneRect(ochreSceneItems, "BandedIronOreDarkBandA", new Vector2(612, 462), new Vector2(126, 12), new Color(0.22f, 0.23f, 0.24f, 0.96f));
+		AddSceneRect(ochreSceneItems, "BandedIronOreDarkBandB", new Vector2(618, 496), new Vector2(116, 10), new Color(0.26f, 0.25f, 0.22f, 0.96f));
+		AddSceneLabel(ochreSceneItems, "BandedIronOreLabel", new Vector2(600, 424), new Vector2(154, 24), "条带状铁矿");
+		ochreOreSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreOreSemanticLabel", new Vector2(520, 532), new Vector2(300, 24), "矿脉：可采集 / reward pending");
+		AddSceneRect(ochreSceneItems, "OchreReturnBeaconGreybox", new Vector2(884, 456), new Vector2(104, 82), new Color(0.34f, 0.48f, 0.54f, 0.96f));
+		AddSceneRect(ochreSceneItems, "OchreReturnBeaconCore", new Vector2(922, 476), new Vector2(28, 52), new Color(0.72f, 0.78f, 0.66f, 0.98f));
+		AddSceneLabel(ochreSceneItems, "OchreReturnBeaconLabel", new Vector2(862, 432), new Vector2(156, 24), "赭石岛返航点");
+		ochreReturnSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreReturnSemanticLabel", new Vector2(810, 542), new Vector2(270, 24), "返航：待预热");
+	}
+
 	private ColorRect AddWorldMarker(string nodeName, Vector2 markerPosition, Color markerColor, string labelText)
 	{
 		var marker = new ColorRect
@@ -1386,6 +1551,7 @@ public partial class HubRuntime : Node2D
 		WireButton("SaveButton", OnSavePressed);
 		WireButton("LoadButton", OnLoadPressed);
 		WireButton("DeleteProgressButton", OnDeleteProgressPressed);
+		WireButton("OchreDebugButton", OnOchreDebugButtonPressed);
 	}
 
 	private void WireButton(string nodeName, Action callback)
@@ -1427,6 +1593,14 @@ public partial class HubRuntime : Node2D
 		SetWorldMode("exploration");
 		SetExplorationStatus();
 		SetFooter("雾海搜撤开始：移动到残骸旁按 E 完成三段扫描，回到空艇旁按 E 预热并驾驶返航。");
+	}
+
+	private void ShowOchreDevSurface()
+	{
+		SetHubControlsEnabled(false);
+		SetWorldMode("ochre_dev");
+		UpdateOchreSceneSemantics();
+		SetFooter("赭石岛开发入口：移动到条带状铁矿按 E 采集，或到返航点按 E 两步返回 Hub。");
 	}
 
 	private void UpdateChartSceneSelection()
@@ -1544,6 +1718,24 @@ public partial class HubRuntime : Node2D
 		SetMarkerLabel(explorationReturnMarker, returnPrepStage <= 0 ? "预热返航 E" : "起航 E");
 	}
 
+	private void UpdateOchreSceneSemantics()
+	{
+		if (ochreOreSemanticLabel is not null)
+		{
+			ochreOreSemanticLabel.Text = ochreOreHarvested
+				? "矿脉：已采集 / reward pending"
+				: "矿脉：可采集 / reward pending";
+		}
+		if (ochreReturnSemanticLabel is not null)
+		{
+			ochreReturnSemanticLabel.Text = ochreReturnPrepStage > 0
+				? "返航：已预热，再按 E 返回"
+				: "返航：待预热";
+		}
+		SetMarkerLabel(ochreOreMarker, ochreOreHarvested ? "已采集" : "采集 E");
+		SetMarkerLabel(ochreReturnMarker, ochreReturnPrepStage > 0 ? "返回 E" : "返航 E");
+	}
+
 	private static void SetMarkerLabel(Control? marker, string text)
 	{
 		if (marker?.FindChild($"{marker.Name}Label", false, false) is Label label)
@@ -1643,6 +1835,10 @@ public partial class HubRuntime : Node2D
 				{
 					buttonEnabled = enabled && HasAnyDurableProgressFile();
 				}
+				if (index == 4)
+				{
+					buttonEnabled = enabled && OS.IsDebugBuild();
+				}
 				button.Disabled = !buttonEnabled;
 				button.FocusMode = buttonEnabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
 			}
@@ -1657,6 +1853,7 @@ public partial class HubRuntime : Node2D
 		SetSceneGroupVisible(hubInteriorSceneItems, mode == "hub" && hubSpace == "interior");
 		SetSceneGroupVisible(chartSceneItems, mode == "chart");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
+		SetSceneGroupVisible(ochreSceneItems, mode == "ochre_dev");
 		if (mode == "hub")
 		{
 			UpdateHubInteriorSemantics(domain.Snapshot);
@@ -1671,6 +1868,8 @@ public partial class HubRuntime : Node2D
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
 		if (explorationReturnMarker is not null) explorationReturnMarker.Visible = mode == "exploration";
+		if (ochreOreMarker is not null) ochreOreMarker.Visible = mode == "ochre_dev";
+		if (ochreReturnMarker is not null) ochreReturnMarker.Visible = mode == "ochre_dev";
 		if (playerMarker is not null)
 		{
 			if (mode == "chart")
@@ -1756,6 +1955,25 @@ public partial class HubRuntime : Node2D
 					: "按 E 驾驶空艇返航。";
 			}
 		}
+		else if (currentScreen == "ochre_dev")
+		{
+			var oreDistance = DistanceToMarker(ochreOreMarker);
+			var returnDistance = DistanceToMarker(ochreReturnMarker);
+			if (oreDistance <= InteractionRadius && oreDistance <= returnDistance)
+			{
+				nearestInteraction = "ochre_ore";
+				prompt = ochreOreHarvested
+					? "条带状铁矿已采集：正式 Resources 奖励待后续接入。"
+					: "按 E 采集条带状铁矿：验证世界资源锚点。";
+			}
+			else if (returnDistance <= InteractionRadius)
+			{
+				nearestInteraction = "ochre_return";
+				prompt = ochreReturnPrepStage <= 0
+					? "按 E 预热赭石岛返航锚点。"
+					: "按 E 从赭石岛开发入口返回 Hub。";
+			}
+		}
 
 		if (interactionPromptLabel is not null)
 		{
@@ -1780,6 +1998,10 @@ public partial class HubRuntime : Node2D
 		if (currentScreen == "exploration")
 		{
 			return ExplorationWalkBounds;
+		}
+		if (currentScreen == "ochre_dev")
+		{
+			return OchreIslandWalkBounds;
 		}
 
 		return hubSpace == "interior" ? ShipInteriorWalkBounds : HubWalkBounds;
@@ -1879,6 +2101,33 @@ public partial class HubRuntime : Node2D
 		{
 			actionStack.MoveChild(button, saveStatusLabel.GetIndex());
 		}
+		return button;
+	}
+
+	private Button? CreateOchreDebugButton()
+	{
+		if (FindChild("OchreDebugButton", true, false) is Button existing)
+		{
+			existing.Visible = OS.IsDebugBuild();
+			return existing;
+		}
+		if (interactionLayer is null)
+		{
+			return null;
+		}
+
+		var button = new Button
+		{
+			Name = "OchreDebugButton",
+			Text = "赭石岛调试入口",
+			Position = new Vector2(1018, 132),
+			CustomMinimumSize = new Vector2(190, 38),
+			Size = new Vector2(190, 38),
+			FocusMode = Control.FocusModeEnum.All,
+			ZIndex = 30,
+			Visible = OS.IsDebugBuild(),
+		};
+		interactionLayer.AddChild(button);
 		return button;
 	}
 
@@ -2008,6 +2257,13 @@ public partial class HubRuntime : Node2D
 			deleteProgressButton.Disabled = !enabled;
 			deleteProgressButton.FocusMode = enabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
 			deleteProgressButton.Text = pendingDeleteConfirmation ? "确认删除本地航行日志" : "删除本地航行日志";
+		}
+		if (ochreDebugButton is not null)
+		{
+			var enabled = currentScreen == "hub" && OS.IsDebugBuild();
+			ochreDebugButton.Visible = OS.IsDebugBuild();
+			ochreDebugButton.Disabled = !enabled;
+			ochreDebugButton.FocusMode = enabled ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
 		}
 	}
 

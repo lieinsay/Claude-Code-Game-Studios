@@ -1,0 +1,62 @@
+[gd_scene load_steps=5 format=3 uid="uid://ochre_island_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/ochre/OchreIslandScene.cs" id="1_scene_script"]
+[ext_resource type="PackedScene" path="res://src/scenes/units/BandedIronOre.tscn" id="2_ore_scene"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_return_overlap"]
+size = Vector2(150, 110)
+
+[node name="OchreIslandScene" type="Node2D"]
+script = ExtResource("1_scene_script")
+
+[node name="WorldLayer" type="Node2D" parent="."]
+
+[node name="OchreIslandGround" type="ColorRect" parent="WorldLayer"]
+offset_left = 140.0
+offset_top = 260.0
+offset_right = 1040.0
+offset_bottom = 560.0
+color = Color(0.62, 0.31, 0.13, 1)
+
+[node name="WalkPath" type="ColorRect" parent="WorldLayer"]
+offset_left = 260.0
+offset_top = 390.0
+offset_right = 820.0
+offset_bottom = 474.0
+color = Color(0.84, 0.6, 0.32, 1)
+
+[node name="CloudSeaBoundary" type="ColorRect" parent="WorldLayer"]
+offset_left = 110.0
+offset_top = 570.0
+offset_right = 1070.0
+offset_bottom = 640.0
+color = Color(0.62, 0.75, 0.78, 1)
+
+[node name="RockWallBoundary" type="ColorRect" parent="WorldLayer"]
+offset_left = 150.0
+offset_top = 250.0
+offset_right = 1010.0
+offset_bottom = 292.0
+color = Color(0.36, 0.18, 0.1, 1)
+
+[node name="PlayerSpawn" type="Marker2D" parent="WorldLayer"]
+position = Vector2(250, 430)
+
+[node name="BandedIronOreInstance" parent="WorldLayer" instance=ExtResource("2_ore_scene")]
+position = Vector2(655, 390)
+
+[node name="OchreReturnAnchor" type="Area2D" parent="WorldLayer"]
+position = Vector2(875, 430)
+
+[node name="ReturnSoftOverlapShape" type="CollisionShape2D" parent="WorldLayer/OchreReturnAnchor"]
+shape = SubResource("RectangleShape2D_return_overlap")
+
+[node name="ReturnBeaconGreybox" type="ColorRect" parent="WorldLayer"]
+offset_left = 830.0
+offset_top = 372.0
+offset_right = 920.0
+offset_bottom = 490.0
+color = Color(0.28, 0.54, 0.66, 1)
+
+[node name="HarvestStateMarkers" type="Node2D" parent="WorldLayer"]
+

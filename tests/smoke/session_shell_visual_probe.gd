@@ -217,6 +217,7 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "SearchWreckMast"), "Exploration search landmark has a readable wreck mast")
 	_expect(hub.call("DebugNodeVisible", "ReturnBeaconBeam"), "Exploration return landmark has a visible beacon beam")
 	_expect_scene_physics_contract(hub, "exploration_mist_island", "水平场景", "water", "blocking_static", "soft_overlap")
+	_expect_scene_physics_contract(hub, "ochre_island_scene", "水平场景", "cloudsea", "blocking_static", "soft_overlap")
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "exploration_mist_island", "Current physics contract follows Exploration state")
 	var pre_search_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	hub.call("OnExplorationAdvancePressed")
@@ -335,6 +336,35 @@ func _run() -> void:
 	_expect(_label_text(session, "ChartStation").contains("压力循环完成"), "Hub chart station syncs completed pressure loop")
 	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
 	_expect(_label_text(session, "HubCargoStatusLabel").contains("收益锁定"), "Hub cargo interior status syncs locked rewards")
+
+	var ochre_debug_button := session.find_child("OchreDebugButton", true, false) as Button
+	_expect(ochre_debug_button != null and ochre_debug_button.visible, "Debug build exposes Ochre Island debug entry button")
+	_expect(ochre_debug_button != null and not ochre_debug_button.disabled, "Ochre Island debug entry button is usable from Hub")
+	ochre_debug_button.emit_signal("pressed")
+	await process_frame
+	_expect(str(hub.call("DebugCurrentScreen")) == "ochre_dev", "Debug entry opens Ochre Island without replacing playable route")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "ochre_island_scene", "Current physics contract follows Ochre debug scene")
+	_expect(hub.call("DebugNodeVisible", "OchreIslandGround"), "Ochre debug scene renders independent island ground")
+	_expect(hub.call("DebugNodeVisible", "BandedIronOreBody"), "Ochre debug scene renders banded iron ore")
+	_expect(_label_text(session, "OchreOreSemanticLabel").contains("可采集"), "Ochre ore starts harvestable")
+	_expect(not bool(hub.call("DebugOchreOreHarvested")), "Ochre ore starts unharvested")
+	hub.call("DebugSetPlayerPosition", Vector2(656, 521))
+	await process_frame
+	_expect(hub.call("DebugInteractionPrompt").contains("采集条带状铁矿"), "Moving near Ochre ore reveals harvest prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(bool(hub.call("DebugOchreOreHarvested")), "Ochre debug harvest toggles world resource state")
+	_expect(_label_text(session, "OchreOreSemanticLabel").contains("已采集"), "Ochre ore label shows harvested state")
+	hub.call("DebugSetPlayerPosition", Vector2(942, 527))
+	await process_frame
+	_expect(hub.call("DebugInteractionPrompt").contains("预热赭石岛返航锚点"), "Moving near Ochre return anchor reveals return prompt")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugOchreReturnPrepStage")) == 1, "Ochre debug return uses two-step preheat")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(str(hub.call("DebugCurrentScreen")) == "hub", "Ochre debug return lands back in Hub")
+	_expect(str((hub.call("DebugDomainSnapshot") as Dictionary).get("committed_route", "")) == "route.mist", "Ochre debug entry does not replace committed playable route")
 
 	await _save_runtime_screenshot(root, SCREENSHOT_PATH, "Runtime screenshot")
 
@@ -527,6 +557,8 @@ func _expect_scene_physics_contract(
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ship-interior-layered-scene.md", "ship_deck_01")
 	if scene_id == "exploration_mist_island":
 		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/mist-lamp-wreck-scene.md", "mist_wreck_ground_01")
+	if scene_id == "ochre_island_scene":
+		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ochre-island-scene.md", "ochre_island_ground_01")
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)

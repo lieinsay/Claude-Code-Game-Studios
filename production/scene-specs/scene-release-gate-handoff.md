@@ -45,7 +45,7 @@ release_handoff_ready =
 | `ship_interior_layered` | 船内作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | 水平分层、剖切、P0 资产缺口需要进入交接包。 |
 | `voyage_open_world_scene` | 独立规格已起草；#20 合同、运行时证据和 Codex 规格一致性检查仍缺失。 | `directed-content-modification` | `BLOCKED` | 场景设计存在，但实现和证据门禁尚未完成。 |
 | `mist_lamp_wreck_scene` | 雾灯残骸浮岛作者化单位链路已实现并有自动证据；仍需截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | P0 资产缺口和截图刷新需要进入交接包。 |
-| `ochre_island_scene` | 赭石岛已通过创建适合性审查并起草规格；仍无 #20 合同、独立实现 / 资产边界、作者化数据或运行时证据。 | `directed-content-modification` | `BLOCKED` | 尚无 #20 合同、作者化单位和运行时证据；规格二次人工审核不是实现硬门。 |
+| `ochre_island_scene` | 赭石岛已通过创建适合性审查，独立 Godot 资产、条带状铁矿固定单位、#20 运行时合同、作者化单位链路和 Debug build 按钮入口已实现；仍需正式采集奖励 / 返航 domain 写入、截图刷新和 release packet。 | `directed-content-modification` | `BLOCKED` | P0 资产 / 截图证据和完整玩法路线尚未进入交接包；当前入口刻意不替换 `route.mist`。 |
 | `old_market_edge_scene` | `TRACKED_GAP`，保留为后续市场内容候选，不属于当前 demo 第二岛屿。 | `directed-content-modification` | `BLOCKED` | 后续市场阶段再补独立场景规格和 #20 合同。 |
 
 ## Waiver 要求

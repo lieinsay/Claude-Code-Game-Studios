@@ -20,17 +20,17 @@
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 来源 GDD | `design/gdd/scene-physics-unit-system.md`; `design/gdd/resources-goods-capacity.md` |
 | 关联场景 / UI | `ochre_island_scene` |
-| 独立实现入口 | `pending`；目标为独立固定资源点原型和资产组 |
+| 独立实现入口 | `src/scenes/units/BandedIronOre.tscn`; `src/scenes/units/BandedIronOre.cs` |
 | 最后更新 | 2026-05-24 |
 
 ## 1. 独立实现 / 资产边界
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立原型实现 | `scene_unit.prototype.banded_iron_ore`；后续进入 authored content 和独立 `.tscn` / `.tres` 或等价原型。 |
-| 配套脚本 / 行为 | 最小采集 / 获取资源行为；复杂采矿工具、再生、冶炼和经济链为后续范围。 |
+| 独立原型实现 | `scene_unit.prototype.banded_iron_ore`；已建立独立 Godot 灰盒单位 `src/scenes/units/BandedIronOre.tscn`。 |
+| 配套脚本 / 行为 | `src/scenes/units/BandedIronOre.cs` 暴露本地采集请求信号；Resources 奖励写入仍由后续 runtime 集成负责。 |
 | 资产组 | 条带状矿脉、采集前 / 后状态、禁用反馈、采集音效。 |
-| 摆放实例来源 | `ochre_island_scene` 只引用矿脉原型，不静默改变本体规则。 |
+| 摆放实例来源 | `src/scenes/ochre/OchreIslandScene.tscn::WorldLayer/BandedIronOreInstance`；`ochre_island_scene` 只引用矿脉原型，不静默改变本体规则。 |
 | 禁止混入位置 | 不得把矿脉只画成地面纹理、市场商品或 UI 按钮。 |
 | 删除旧节点要求 | 若替代旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
@@ -130,8 +130,8 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 数据验证 | 条带状铁矿原型和实例字段完整 | pending |
-| 运行时 smoke | 靠近 + Use 采集；容量不足给禁用反馈；采集后状态改变 | pending |
+| 数据验证 | 条带状铁矿原型和实例字段完整 | PASS；Godot AI MCP hierarchy PASS，`scene_unit.prototype.banded_iron_ore` 和实例已纳入作者化数据 / `DomainAdapterTest` |
+| 运行时 smoke | 靠近 + Use 采集；容量不足给禁用反馈；采集后状态改变 | partial；`DebugEnterOchreIslandScene()` 可验证靠近 + Use 和采集后状态，正式 Resources 奖励 / 容量不足反馈待补 |
 | 截图 / 视觉证明 | 矿脉首屏、采集后状态和返航路径 | pending |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
@@ -152,9 +152,9 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 
 ## 14. 就绪检查清单
 
-- [ ] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
-- [ ] 独立实现 / 资产边界已明确，不能只混入旧大场景、大脚本或临时节点。
-- [ ] 单位分类、目录、物理合同和 UI 边界一致。
+- [x] 创建适合性人工审查已记录，结论为 `APPROVED` 或 `APPROVED_WITH_NOTES`。
+- [x] 独立实现 / 资产边界已明确，不能只混入旧大场景、大脚本或临时节点。
+- [x] 单位分类、目录、物理合同和 UI 边界一致。
 - [ ] 状态变化可读，不需要靠 UI 独自解释。
 - [ ] 场景实例只引用原型，不静默改变本体规则。
 - [ ] 最终状态保持可修改，后续需求走 `directed-content-modification`。
