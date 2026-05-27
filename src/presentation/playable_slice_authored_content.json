@@ -42,6 +42,27 @@
       "domain_owner": "player-movement-interaction"
     },
     {
+      "prototype_id": "scene_unit.prototype.chart_table",
+      "display_name": "航图台 / 星图桌",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "interactable_anchor",
+      "collision": "blocking_static + soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "0.8-1.3x player-readable interactable; smaller than cockpit bay and larger than small cargo props",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/ui-hud-chart-interface.md",
+      "unit_spec": "production/unit-specs/fixed-scene-objects/chart-table.md",
+      "allowed_scene_ids": [
+        "hub_ship_interior"
+      ],
+      "behavior_tags": [
+        "trigger_only",
+        "blocking_static"
+      ],
+      "domain_owner": "chart-route-planning"
+    },
+    {
       "prototype_id": "scene_unit.prototype.ochre_island_mass",
       "display_name": "Ochre island main mass",
       "prototype_classification": "fixed_scene_object",
@@ -160,6 +181,23 @@
       "layer": "midground_object",
       "scene_spec": "production/scene-specs/ochre-island-scene.md",
       "state_hook": "player_spawn"
+    },
+    {
+      "instance_id": "scene_unit.instance.hub_ship_interior.chart_table",
+      "prototype_id": "scene_unit.prototype.chart_table",
+      "scene_id": "hub_ship_interior",
+      "unit_id": "chart_table",
+      "godot_node_path": "src/scenes/units/ChartTable.tscn::ChartTable",
+      "position": {
+        "x": 362,
+        "y": 574
+      },
+      "floor_id": "ship_deck_01",
+      "floor_index": 1,
+      "layer": "midground_object",
+      "scene_spec": "production/unit-specs/fixed-scene-objects/chart-table.md",
+      "state_hook": "s4_chart_open",
+      "interaction_anchor_id": "chart_table_anchor"
     },
     {
       "instance_id": "scene_unit.instance.ochre_island_scene.island_mass",

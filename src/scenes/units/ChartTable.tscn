@@ -1,0 +1,82 @@
+[gd_scene load_steps=4 format=3 uid="uid://chart_table_unit"]
+
+[ext_resource type="Script" path="res://src/scenes/units/ChartTable.cs" id="1_chart_table_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_soft_overlap"]
+size = Vector2(182, 94)
+
+[node name="ChartTable" type="Node2D"]
+script = ExtResource("1_chart_table_script")
+
+[node name="TableBody" type="ColorRect" parent="."]
+offset_left = -82.0
+offset_top = -32.0
+offset_right = 82.0
+offset_bottom = 32.0
+color = Color(0.28, 0.19, 0.12, 1)
+
+[node name="BrassRimTop" type="ColorRect" parent="."]
+offset_left = -74.0
+offset_top = -28.0
+offset_right = 74.0
+offset_bottom = -22.0
+color = Color(0.72, 0.57, 0.32, 1)
+
+[node name="BrassRimBottom" type="ColorRect" parent="."]
+offset_left = -74.0
+offset_top = 22.0
+offset_right = 74.0
+offset_bottom = 28.0
+color = Color(0.72, 0.57, 0.32, 1)
+
+[node name="ProjectionGlow" type="ColorRect" parent="."]
+visible = false
+offset_left = -54.0
+offset_top = -20.0
+offset_right = 54.0
+offset_bottom = 20.0
+color = Color(0.32, 0.66, 0.72, 0.42)
+
+[node name="MapSurface" type="ColorRect" parent="."]
+offset_left = -48.0
+offset_top = -16.0
+offset_right = 48.0
+offset_bottom = 16.0
+color = Color(0.62, 0.58, 0.42, 1)
+
+[node name="RouteLine" type="ColorRect" parent="."]
+offset_left = -32.0
+offset_top = -3.0
+offset_right = 38.0
+offset_bottom = 3.0
+rotation = -0.22
+color = Color(0.30, 0.57, 0.55, 1)
+
+[node name="FocusHighlight" type="ColorRect" parent="."]
+visible = false
+offset_left = -92.0
+offset_top = -42.0
+offset_right = 92.0
+offset_bottom = 42.0
+color = Color(0.84, 0.76, 0.38, 0.28)
+
+[node name="DisabledOverlay" type="ColorRect" parent="."]
+visible = false
+offset_left = -82.0
+offset_top = -32.0
+offset_right = 82.0
+offset_bottom = 32.0
+color = Color(0.08, 0.08, 0.08, 0.55)
+
+[node name="StateLabel" type="Label" parent="."]
+offset_left = -88.0
+offset_top = 36.0
+offset_right = 88.0
+offset_bottom = 58.0
+text = "航图台：待规划"
+horizontal_alignment = 1
+
+[node name="ChartTableAnchor" type="Area2D" parent="."]
+
+[node name="SoftOverlapShape" type="CollisionShape2D" parent="ChartTableAnchor"]
+shape = SubResource("RectangleShape2D_soft_overlap")

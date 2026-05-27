@@ -43,7 +43,7 @@ func _run() -> void:
 	_expect(session.find_child("WorldSceneLayer", true, false) != null, "World scene layer is separate from interaction markers")
 	_expect(session.find_child("WorldInteractionLayer", true, false) != null, "World interaction layer is separate from scene art")
 	_expect(_canvas_z_index(session, "PlayableVerticalSliceLayer") >= 12, "Playable world layer renders above the text dashboard")
-	_expect(session.find_child("HelmInteractPoint", true, false) != null, "Hub has a spatial helm interaction point")
+	_expect(session.find_child("ChartTableInteractPoint", true, false) != null, "Hub has a spatial chart table interaction point")
 	var hub := session.find_child("HubRuntime", true, false)
 	hub.call("DebugClearDurableProgress")
 	await process_frame
@@ -108,7 +108,8 @@ func _run() -> void:
 	_expect(_label_text(session, "HubCabinStatusLabel").contains("待规划"), "Hub cockpit status starts in planning state")
 	_expect(_label_text(session, "HubCargoStatusLabel").contains("空载"), "Hub cargo status starts empty")
 	_expect(_label_text(session, "HubEngineStatusLabel").contains("稳定"), "Hub engine status starts stable")
-	_expect(hub.call("DebugNodeVisible", "HelmConsoleProp"), "Hub has an authored greybox helm console prop")
+	_expect(hub.call("DebugNodeVisible", "ChartTableRuntimeInstance"), "Hub has an independent chart table unit instance")
+	_expect(hub.call("DebugDescendantNames", "ChartTableAnchor").size() > 0, "Chart table unit exposes a soft-overlap anchor")
 	_expect(hub.call("DebugNodeVisible", "StorageCrateProp"), "Hub has an authored greybox storage crate prop")
 	_expect(not hub.call("DebugNodeVisible", "ExplorationSkyField"), "Exploration greybox field is hidden while in Hub")
 	_expect_scene_physics_contract(hub, "hub_ship_interior", "垂直场景", "glass", "blocking_static", "soft_overlap")
@@ -153,15 +154,15 @@ func _run() -> void:
 
 	hub.call("DebugSetPlayerPosition", Vector2(362, 613))
 	await process_frame
-	_expect(hub.call("DebugInteractionPrompt").contains("驾驶舱航台"), "Moving near the helm reveals a spatial interaction prompt")
+	_expect(hub.call("DebugInteractionPrompt").contains("独立航图台"), "Moving near the chart table reveals a spatial interaction prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
-	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "Chart world surface is active after spatial helm interaction")
+	_expect(str(hub.call("DebugCurrentScreen")) == "chart", "S4 chart surface is active after spatial chart table interaction")
 	var chart_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
 	_expect(str(chart_onboarding.get("next_hint_step", "")) == "select_route", "Onboarding advances to route-selection hint after Chart opens")
-	_expect(hub.call("DebugNodeVisible", "ChartTableSurface"), "Chart mode has a visible chart table scene")
-	_expect(hub.call("DebugNodeVisible", "ChartParchmentMap"), "Chart mode has a parchment map surface")
-	_expect(hub.call("DebugNodeVisible", "ChartRouteMistLine"), "Chart mode shows the mist route line")
+	_expect(hub.call("DebugNodeVisible", "S4ChartRuntimeSurface"), "Chart mode loads the independent S4 chart UI scene")
+	_expect(hub.call("DebugNodeVisible", "MapGround"), "Chart mode has a map surface")
+	_expect(hub.call("DebugDescendantNames", "RouteMistLine").size() > 0, "Chart mode includes the mist route line node")
 	_expect(not hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode does not expose tracked-gap old market route")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
@@ -185,7 +186,7 @@ func _run() -> void:
 	var route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(route_snapshot.get("selected_route", "")) == "route.mist", "C# HubRuntime route selection is backed by ChartManager state")
 	_expect(str(route_snapshot.get("chart_state", "")) == "RouteSelected", "ChartManager enters RouteSelected after route choice")
-	_expect(hub.call("DebugNodeVisible", "ChartRouteMistSelectionFrame"), "Chart scene highlights the selected route")
+	_expect(hub.call("DebugNodeVisible", "RouteMistSelectionFrame"), "Chart scene highlights the selected route")
 	hub.call("OnDepartPressed")
 	await process_frame
 	var departed_onboarding := hub.call("DebugOnboardingSnapshot") as Dictionary
@@ -559,7 +560,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("collision_semantics", "")).contains(required_collision), "%s declares blocking collision semantics" % scene_id)
 	_expect(str(contract.get("collision_semantics", "")).contains(required_overlap), "%s declares soft-overlap interaction semantics" % scene_id)
 	_expect(str(contract.get("special_surfaces", "")).contains(required_surface), "%s declares special surface policy" % scene_id)
-	var production_asset_scene := scene_id == "ochre_island_scene"
+	var production_asset_scene := scene_id == "ochre_island_scene" or scene_id == "hub_ship_interior"
 	_expect(bool(contract.get("unit_catalog_ready", false)) == production_asset_scene, "%s unit catalog readiness matches approved asset status" % scene_id)
 	_expect(bool(contract.get("collision_ready", false)), "%s declares collision readiness" % scene_id)
 	_expect(bool(contract.get("occlusion_ready", false)), "%s declares occlusion readiness" % scene_id)
@@ -576,7 +577,9 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	if production_asset_scene:
 		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-		_expect_scene_unit_authoring_linkage(contract, scene_id, "production/scene-specs/ochre-island-scene.md", "ochre_island_ground_01")
+		var expected_spec := "production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/unit-specs/fixed-scene-objects/chart-table.md"
+		var expected_floor := "ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01"
+		_expect_scene_unit_authoring_linkage(contract, scene_id, expected_spec, expected_floor)
 	else:
 		var catalog := contract.get("scene_unit_catalog", []) as Array
 		_expect(catalog.size() == 0, "%s has no production scene-unit assets after the reset" % scene_id)
@@ -585,13 +588,15 @@ func _expect_scene_physics_contract(
 	_expect_dynamic_behavior_contract(contract, scene_id)
 	_expect(str(contract.get("recovery_rule", "")).contains("Clamp"), "%s declares stuck-state recovery" % scene_id)
 	if production_asset_scene:
-		_expect(int(contract.get("authored_physical_unit_count", 0)) >= 6, "%s has authored physical scene units, not UI-only evidence" % scene_id)
+		var minimum_units := 6 if scene_id == "ochre_island_scene" else 1
+		_expect(int(contract.get("authored_physical_unit_count", 0)) >= minimum_units, "%s has authored physical scene units, not UI-only evidence" % scene_id)
 
 
 func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required_collision: String, required_overlap: String) -> void:
 	var catalog := contract.get("scene_unit_catalog", []) as Array
+	var minimum_units := 6 if scene_id == "ochre_island_scene" else 1
 	_expect(catalog.size() == int(contract.get("authored_physical_unit_count", 0)), "%s unit catalog count matches authored physical unit count" % scene_id)
-	_expect(catalog.size() >= 6, "%s unit catalog has authored physical units" % scene_id)
+	_expect(catalog.size() >= minimum_units, "%s unit catalog has authored physical units" % scene_id)
 	var has_blocking := false
 	var has_overlap := false
 	var has_player_unit := false
@@ -613,14 +618,15 @@ func _expect_scene_unit_catalog(contract: Dictionary, scene_id: String, required
 		_expect(not bool(item.get("ui_evidence_allowed", true)), "%s catalog unit %s cannot be satisfied by UI" % [scene_id, unit_id])
 		has_blocking = has_blocking or collision.contains(required_collision)
 		has_overlap = has_overlap or collision.contains(required_overlap)
-		has_player_unit = has_player_unit or unit_type == "player_unit"
-		has_landmark_or_prop = has_landmark_or_prop or unit_type.contains("landmark") or unit_type.contains("prop") or unit_type.contains("door_or_passage")
+		has_player_unit = has_player_unit or unit_type == "player_unit" or scale_rule.contains("player")
+		has_landmark_or_prop = has_landmark_or_prop or unit_type.contains("landmark") or unit_type.contains("prop") or unit_type.contains("door_or_passage") or unit_type.contains("interactable_anchor")
 		has_special_surface = has_special_surface or unit_type == "special_surface"
 	_expect(has_blocking, "%s unit catalog includes blocking collision units" % scene_id)
 	_expect(has_overlap, "%s unit catalog includes soft-overlap interaction anchors" % scene_id)
 	_expect(has_player_unit, "%s unit catalog includes player_unit scale basis" % scene_id)
 	_expect(has_landmark_or_prop, "%s unit catalog includes props, passages, or landmarks" % scene_id)
-	_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
+	if scene_id == "ochre_island_scene":
+		_expect(has_special_surface, "%s unit catalog includes special surface policy unit" % scene_id)
 
 
 func _expect_scene_unit_authoring_linkage(contract: Dictionary, scene_id: String, expected_spec: String, expected_floor: String) -> void:

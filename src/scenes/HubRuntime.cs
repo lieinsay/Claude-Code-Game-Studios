@@ -18,6 +18,8 @@ public partial class HubRuntime : Node2D
 	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
 	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
 	private const string OchreIslandScenePath = "res://src/scenes/ochre/OchreIslandScene.tscn";
+	private const string ChartTableScenePath = "res://src/scenes/units/ChartTable.tscn";
+	private const string ChartSurfaceScenePath = "res://src/scenes/ui/ChartFullScreenSurface.tscn";
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
 	private static readonly SceneUnitAuthoringFixture SceneUnitAuthoring = SceneUnitAuthoringFixture.Load(AuthoredContentPath);
@@ -32,7 +34,7 @@ public partial class HubRuntime : Node2D
 	private Label? interactionPromptLabel;
 	private ColorRect? hubShipEntryMarker;
 	private ColorRect? hubShipExitMarker;
-	private ColorRect? hubHelmMarker;
+	private ColorRect? hubChartTableMarker;
 	private ColorRect? hubStorageMarker;
 	private ColorRect? explorationSearchMarker;
 	private ColorRect? explorationReturnMarker;
@@ -54,6 +56,8 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
 	private ColorRect? chartMistSelectionFrame;
+	private ChartTable? chartTableAsset;
+	private ChartFullScreenSurface? chartSurfaceAsset;
 	private Label? explorationPointSemanticLabel;
 	private Label? explorationThreatSemanticLabel;
 	private Label? explorationExtractionSemanticLabel;
@@ -195,12 +199,13 @@ public partial class HubRuntime : Node2D
 	{
 		if (currentScreen == "hub" && hubSpace != "interior")
 		{
-			SetFooter("需要先从岛上登船，进入驾驶舱航台后再打开航图。");
+			SetFooter("需要先从岛上登船，进入驾驶舱航图台后再打开航图。");
 			return;
 		}
 
 		currentScreen = "chart";
 		domain.OpenChart();
+		chartTableAsset?.SetChartOpen();
 		ShowChartSurface();
 		SetChartStatus("航图桌已展开：选择一条可读航线后确认离港。");
 		UpdateOnboardingHint();
@@ -526,7 +531,7 @@ public partial class HubRuntime : Node2D
 		{
 			ExitShipInterior();
 		}
-		else if (nearestInteraction == "hub_helm")
+		else if (nearestInteraction == "hub_chart_table")
 		{
 			OnChartPressed();
 		}
@@ -672,7 +677,7 @@ public partial class HubRuntime : Node2D
 				"left/right primary movement across ship deck; room depth is visual; future up/down traversal must use declared ladders/stairs or floor connectors before implementation",
 				"floor_id=ship_deck_01; floor_index=1; walkable_layer: cockpit_bay, cargo_bay, engine_bay, exit_threshold; visual_layer: upper_hull_shell, cockpit_window; transition_layer: exit_door_to_hub_dock; blocked_layer: hull_outline, bay_separators; depth_layer: front_wall_removed_room_depth",
 				"front_wall_removed + active_floor_focus; current deck stays fully readable; upper hull/window line remains visual reference; non-active future decks must fade/lock interactions before implementation readiness",
-				"floor_id=ship_deck_01; floor_index=1; is_active_floor=true; visibility_mode=front_wall_removed; walkable_bounds=ShipInteriorWalkBounds; vertical_connectors=future_ladders_stairs_declared_not_implemented; occluders_hidden_above=upper_hull_front_wall; interactions_enabled=helm,storage,engine,exit",
+				"floor_id=ship_deck_01; floor_index=1; is_active_floor=true; visibility_mode=front_wall_removed; walkable_bounds=ShipInteriorWalkBounds; vertical_connectors=future_ladders_stairs_declared_not_implemented; occluders_hidden_above=upper_hull_front_wall; interactions_enabled=chart_table,storage,engine,exit",
 				"ship_deck_01",
 				"ship_deck_01",
 				1,
@@ -680,11 +685,11 @@ public partial class HubRuntime : Node2D
 				"front_wall_removed",
 				"future_ladders_stairs_declared_not_implemented",
 				"upper_hull_front_wall",
-				"helm,storage,engine,exit",
+				"chart_table,storage,engine,exit",
 				"N/A true: interior uses front_wall_removed + active_floor_focus, not behind-object passage",
 				"2.2m player height = 28px marker; cockpit/cargo/engine bays each read as one room-scale unit",
 				"z_world_background < z_hull_shell < z_room_volumes < z_props < z_interaction_markers",
-				"blocking_static: hull outline, bay separators, exterior door frame; soft_overlap: helm, storage, engine, exit anchors; height_marker: upper hull and window line",
+				"blocking_static: hull outline, bay separators, exterior door frame, chart table body; soft_overlap: chart table, storage, engine, exit anchors; height_marker: upper hull and window line",
 				"stairs_ladders: represented as future vertical connectors; glass: cockpit window visual-only; mirror: none; elastic: none; pushable: storage crates not pushable in current slice",
 				"Clamp player into ShipInteriorWalkBounds; exit door soft_overlap returns to hub_island_dock if pathing feels trapped",
 				0),
@@ -769,6 +774,7 @@ public partial class HubRuntime : Node2D
 		int authoredPhysicalUnitCount)
 	{
 		var sceneUnitCatalog = BuildSceneUnitCatalog(sceneId);
+		var actualAuthoredPhysicalUnitCount = sceneUnitCatalog.Count;
 		var authoringDiagnostics = BuildAuthoringDiagnostics(sceneId);
 		var authoringApplies = HasSceneUnitAuthoring(sceneId);
 		return new Godot.Collections.Dictionary
@@ -801,7 +807,7 @@ public partial class HubRuntime : Node2D
 			["occlusion_policy"] = occlusionPolicy,
 			["collision_semantics"] = collisionSemantics,
 			["special_surfaces"] = specialSurfaces,
-			["unit_catalog_ready"] = authoredPhysicalUnitCount > 0,
+			["unit_catalog_ready"] = actualAuthoredPhysicalUnitCount > 0,
 			["collision_ready"] = true,
 			["occlusion_ready"] = true,
 			["scale_ready"] = true,
@@ -830,7 +836,7 @@ public partial class HubRuntime : Node2D
 			["stuck_recovery_seconds"] = 2.0f,
 			["recovery_table"] = BuildRecoveryTable(sceneId, recoveryRule),
 			["recovery_rule"] = recoveryRule,
-			["authored_physical_unit_count"] = authoredPhysicalUnitCount,
+			["authored_physical_unit_count"] = actualAuthoredPhysicalUnitCount,
 			["source_gdd"] = "design/gdd/scene-physics-unit-system.md",
 		};
 	}
@@ -839,13 +845,14 @@ public partial class HubRuntime : Node2D
 	{
 		return sceneId switch
 		{
+			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
 		};
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "ochre_island_scene";
+		sceneId is "ochre_island_scene" or "hub_ship_interior";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -925,7 +932,7 @@ public partial class HubRuntime : Node2D
 		sceneId switch
 		{
 			"hub_island_dock" => "blocking_static: hub_island_main_mass, hub_docked_ship_hull, hub_waterline; soft_overlap: player_marker, hub_dock_plank_walkway, hub_boarding_ramp; height_marker: hub_airship_envelope",
-			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, helm_console_prop, ship_exit_threshold",
+			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, chart_table_prop, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, chart_table_anchor, ship_exit_threshold",
 			"exploration_mist_island" => "blocking_static: exploration_island_mass, exploration_cliff_edge, return_ship_hull, mist_sea_boundary; soft_overlap: player_marker, exploration_island_path, search_wreck_prop, return_helm_anchor, mist_horizon_fog; height_marker: search_wreck_mast, return_beacon_beam, exploration_threat_zone",
 			"ochre_island_scene" => "blocking_static: ochre_island_mass, ochre_cloudsea_boundary; soft_overlap: player_marker, ochre_island_path, banded_iron_ore, ochre_return_anchor",
 			_ => "",
@@ -970,6 +977,7 @@ public partial class HubRuntime : Node2D
 			},
 			"hub_ship_interior" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
+				BuildPhysicalBehavior("chart_table_anchor", "trigger_only", "trigger_only + soft_overlap", "independent chart table Use anchor; no entity collision; opens S4_chart through Chart/Hub authority", "table focus highlight and chart-open prompt", "player_unit", 35, "trigger_only cannot override room blocking geometry", "escape or return control closes S4_chart and restores ship interior", "world_playable_scene", false),
 				BuildPhysicalBehavior("ship_exit_threshold", "trigger_only", "trigger_only + soft_overlap", "spatial exit anchor; no entity collision; requires proximity and Use dispatch", "exit prompt at threshold", "player_unit", 30, "trigger_only never changes room collision", "escape interaction returns to hub_island_dock", "world_playable_scene", false),
 				BuildPhysicalBehavior("storage_crate_prop", "blocking_static", "blocking_static", "static crate blocks readability footprint; pushable behavior is not implemented until a later contract adds priority", "solid crate silhouette", "player_unit", 20, "blocking_static applies unless a future pushable tag with priority is declared", "clamp player into ShipInteriorWalkBounds; crate does not move", "world_playable_scene", false),
 				BuildPhysicalBehavior("cockpit_window_glass", "visual_only_glass", "glass_clear + visual_only", "transparent surface; not passable and not interactable", "window transparency, no Use prompt", "player_unit readability only", 10, "visual_only cannot imply passage or interaction", "no stuck state possible; ignore for movement", "world_playable_scene", false),
@@ -1249,7 +1257,7 @@ public partial class HubRuntime : Node2D
 		AddOchreGreyboxSet();
 		hubShipEntryMarker = AddWorldMarker("ShipEntryInteractPoint", new Vector2(202, 584), new Color(0.45f, 0.62f, 0.52f), "登船 E");
 		hubShipExitMarker = AddWorldMarker("ShipExitInteractPoint", new Vector2(224, 584), new Color(0.45f, 0.52f, 0.62f), "下船 E");
-		hubHelmMarker = AddWorldMarker("HelmInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "舵台 E");
+		hubChartTableMarker = AddWorldMarker("ChartTableInteractPoint", new Vector2(316, 594), new Color(0.22f, 0.58f, 0.72f), "航图台 E");
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
 		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(204, 594), new Color(0.64f, 0.39f, 0.28f), "驾驶返航 E");
@@ -1334,7 +1342,7 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(hubInteriorSceneItems, "HubShipInteriorShell", new Vector2(220, 442), new Vector2(804, 166), new Color(0.13f, 0.18f, 0.22f, 1.0f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinGlow", new Vector2(278, 456), new Vector2(176, 6), new Color(0.56f, 0.82f, 0.92f, 0.98f));
-		AddSceneLabel(hubInteriorSceneItems, "HubCabinRoomLabel", new Vector2(288, 470), new Vector2(154, 24), "驾驶舱 / 航台");
+		AddSceneLabel(hubInteriorSceneItems, "HubCabinRoomLabel", new Vector2(288, 470), new Vector2(154, 24), "驾驶舱 / 航图台");
 		AddSceneRect(hubInteriorSceneItems, "HubCabinWindow", new Vector2(304, 490), new Vector2(124, 10), new Color(0.48f, 0.68f, 0.78f, 0.92f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinNavigationSlate", new Vector2(302, 506), new Vector2(128, 14), new Color(0.12f, 0.27f, 0.34f, 0.96f));
 		hubCabinStatusLabel = AddSceneLabel(hubInteriorSceneItems, "HubCabinStatusLabel", new Vector2(286, 528), new Vector2(162, 22), "驾驶舱：待规划");
@@ -1359,9 +1367,7 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorDoorLineCabinCargo", new Vector2(474, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorDoorLineCargoEngine", new Vector2(728, 470), new Vector2(10, 52), new Color(0.58f, 0.58f, 0.46f, 0.88f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorMainAisle", new Vector2(276, 536), new Vector2(672, 8), new Color(0.50f, 0.55f, 0.48f, 0.82f));
-		AddSceneRect(hubInteriorSceneItems, "HelmConsoleProp", new Vector2(286, 546), new Vector2(150, 58), new Color(0.14f, 0.38f, 0.48f, 0.95f));
-		AddSceneLabel(hubInteriorSceneItems, "HelmConsoleLabel", new Vector2(298, 552), new Vector2(126, 22), "航图舵台");
-		AddSceneRect(hubInteriorSceneItems, "HelmConsoleArrow", new Vector2(344, 528), new Vector2(28, 16), new Color(0.74f, 0.88f, 0.92f, 0.95f));
+		AddChartTableAsset();
 		AddSceneRect(hubInteriorSceneItems, "StorageCrateProp", new Vector2(520, 548), new Vector2(132, 56), new Color(0.42f, 0.34f, 0.22f, 0.95f));
 		AddSceneRect(hubInteriorSceneItems, "StorageCrateBand", new Vector2(536, 564), new Vector2(100, 10), new Color(0.68f, 0.59f, 0.39f, 0.95f));
 		AddSceneLabel(hubInteriorSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
@@ -1369,8 +1375,40 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
 	}
 
+	private void AddChartTableAsset()
+	{
+		var scene = ResourceLoader.Load<PackedScene>(ChartTableScenePath);
+		if (scene?.Instantiate() is ChartTable table)
+		{
+			chartTableAsset = table;
+			table.Name = "ChartTableRuntimeInstance";
+			table.Position = new Vector2(362, 574);
+			table.Visible = false;
+			sceneLayer?.AddChild(table);
+			hubInteriorSceneItems.Add(table);
+			return;
+		}
+
+		AddSceneRect(hubInteriorSceneItems, "ChartTableAssetLoadFailure", new Vector2(286, 546), new Vector2(150, 58), new Color(0.46f, 0.16f, 0.16f, 0.95f));
+		AddSceneLabel(hubInteriorSceneItems, "ChartTableAssetLoadFailureLabel", new Vector2(298, 552), new Vector2(126, 22), "航图台加载失败");
+	}
+
 	private void AddChartGreyboxSet()
 	{
+		var scene = ResourceLoader.Load<PackedScene>(ChartSurfaceScenePath);
+		if (scene?.Instantiate() is ChartFullScreenSurface surface)
+		{
+			chartSurfaceAsset = surface;
+			surface.Name = "S4ChartRuntimeSurface";
+			surface.Visible = false;
+			surface.RouteSelected += SelectDomainRoute;
+			surface.DepartureConfirmed += OnDepartPressed;
+			surface.ChartClosed += ShowHub;
+			sceneLayer?.AddChild(surface);
+			chartSceneItems.Add(surface);
+			return;
+		}
+
 		AddSceneRect(chartSceneItems, "ChartCabinBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.08f, 0.12f, 0.13f, 1.0f));
 		AddSceneRect(chartSceneItems, "ChartTableShadow", new Vector2(128, 210), new Vector2(1024, 398), new Color(0.05f, 0.08f, 0.08f, 0.82f));
 		AddSceneRect(chartSceneItems, "ChartTableSurface", new Vector2(150, 190), new Vector2(980, 382), new Color(0.31f, 0.24f, 0.16f, 0.98f));
@@ -1600,7 +1638,7 @@ public partial class HubRuntime : Node2D
 		SetHubControlsEnabled(false);
 		SetWorldMode("chart");
 		UpdateChartSceneSelection();
-		SetFooter("航图世界表面已展开：当前仅保留作者化航图场景和调试入口；Esc 返回船内。");
+		SetFooter("S4 航图全屏表面已展开：选择航线后确认离港，Esc 或返回按钮回到航图台。");
 	}
 
 	private void ShowExplorationSurface()
@@ -1621,6 +1659,7 @@ public partial class HubRuntime : Node2D
 
 	private void UpdateChartSceneSelection()
 	{
+		chartSurfaceAsset?.SetSelectedRoute(selectedRoute);
 		if (chartMistSelectionFrame is not null)
 		{
 			chartMistSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.mist";
@@ -1876,11 +1915,16 @@ public partial class HubRuntime : Node2D
 		}
 		if (mode == "chart")
 		{
+			chartTableAsset?.SetChartOpen();
 			UpdateChartSceneSelection();
+		}
+		else if (chartTableAsset is not null)
+		{
+			chartTableAsset.SetIdle();
 		}
 		if (hubShipEntryMarker is not null) hubShipEntryMarker.Visible = mode == "hub" && hubSpace == "exterior";
 		if (hubShipExitMarker is not null) hubShipExitMarker.Visible = mode == "hub" && hubSpace == "interior";
-		if (hubHelmMarker is not null) hubHelmMarker.Visible = mode == "hub" && hubSpace == "interior";
+		if (hubChartTableMarker is not null) hubChartTableMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
 		if (explorationReturnMarker is not null) explorationReturnMarker.Visible = mode == "exploration";
@@ -1931,19 +1975,21 @@ public partial class HubRuntime : Node2D
 			}
 			else
 			{
+				chartTableAsset?.SetIdle();
 				var exitDistance = DistanceToMarker(hubShipExitMarker);
-				var helmDistance = DistanceToMarker(hubHelmMarker);
+				var chartTableDistance = DistanceToMarker(hubChartTableMarker);
 				var storageDistance = DistanceToMarker(hubStorageMarker);
-				var nearestHubDistance = Math.Min(exitDistance, Math.Min(helmDistance, storageDistance));
+				var nearestHubDistance = Math.Min(exitDistance, Math.Min(chartTableDistance, storageDistance));
 				if (exitDistance <= InteractionRadius && exitDistance <= nearestHubDistance)
 				{
 					nearestInteraction = "hub_exit_ship";
 					prompt = "按 E 下船回到岛上码头。";
 				}
-				else if (helmDistance <= InteractionRadius && helmDistance <= nearestHubDistance)
+				else if (chartTableDistance <= InteractionRadius && chartTableDistance <= nearestHubDistance)
 				{
-					nearestInteraction = "hub_helm";
-					prompt = "按 E 使用驾驶舱航台：打开航图并选择航线。";
+					nearestInteraction = "hub_chart_table";
+					prompt = "按 E 使用独立航图台：打开 S4 航图并选择航线。";
+					chartTableAsset?.SetFocused();
 				}
 				else if (storageDistance <= InteractionRadius && storageDistance <= nearestHubDistance)
 				{
@@ -2081,7 +2127,7 @@ public partial class HubRuntime : Node2D
 	{
 		return stepId switch
 		{
-			OnboardingManager.FindHubHudStepId => "新手提示：查看船内状态，按 M 或靠近舵台按 E 打开航图桌。",
+			OnboardingManager.FindHubHudStepId => "新手提示：查看船内状态，按 M 或靠近航图台按 E 打开航图。",
 			OnboardingManager.OpenChartStepId => "新手提示：打开航图后选择一条可见航线。",
 			OnboardingManager.SelectRouteStepId => "新手提示：选择“雾海短程”，然后确认出发。",
 			OnboardingManager.DepartRouteStepId => "新手提示：确认出发会进入雾海搜撤。",
