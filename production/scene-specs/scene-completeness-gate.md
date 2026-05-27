@@ -129,7 +129,7 @@ Story 003 的配套边界合同位于 `production/scene-specs/scene-vs-ui-eviden
 | `ship_interior_layered` | `implemented-asset-slice` | 独立 Godot 场景、ChartTable / S4_chart 接入、作者化单位和 smoke / integration 证据已建立；仍缺非 headless 截图和最终美术 / 音频。 | 后续补截图包和更多船内子单位 specs；如有调整诉求走 `directed-content-modification`。 |
 | `voyage_open_world_scene` | `implemented-asset-slice` | 独立 Godot 航行世界场景、#20 合同、作者化单位和自动证据已建立；当前不声明完整 #10 live driving、音频或非 headless 截图完成。 | 后续补实时驾驶任务、截图包和最终美术 / 音频。 |
 | `mist_lamp_wreck_scene` | `implemented-asset-slice` | 独立 Godot 雾灯残骸场景、#20 合同、作者化单位、无岛屿威胁区证据和自动证据链路已建立；当前不声明最终美术 / 音频、完整返航飞行或非 headless 截图完成。 | 后续补截图包、最终美术 / 音频和完整返航飞行任务；如有调整诉求走 `directed-content-modification`。 |
-| `ochre_island_scene` | `implemented-asset-slice` | 当前唯一保留的合规游戏资产切片；仍不是 release-ready，因为正式路线接入、domain 写入和截图证据尚未完成。 | 等核心 UI / 单位独立实现后，再补正式路线接入和 release packet。 |
+| `ochre_island_scene` | `implemented-asset-slice` | 独立 Godot 资产、#20 合同、作者化单位、正式 `route.ochre`、Resources 奖励写入、Navigation encounter context 和 Hub 返航结算均已建立；仍不声明 release-ready，因为缺非 headless 截图、最终美术 / 音频和 release packet。 | 后续补截图包、最终表现和完整实时航行表现；如有调整诉求走 `directed-content-modification`。 |
 | `old_market_edge_scene` | `tracked-gap-future-market` | 旧集市边缘保留为后续市场内容缺口，不再作为当前 demo 第二岛屿。 | 后续市场阶段再起草旧集市场景规格和 #20 合同。 |
 | `repair_node_scene` | `tracked-gap-future` | 尚无当前可进入场景规格或 #20 合同；除非明确加入，否则不属于修正后的当前 demo 场景集。 | 视觉完成声明前起草修复场景规格。 |
 

@@ -65,6 +65,7 @@ public partial class HubRuntime : Node2D
 	private MistLampWreckScene? mistLampWreckAsset;
 	private ShipInteriorLayeredScene? shipInteriorAsset;
 	private ColorRect? chartMistSelectionFrame;
+	private ColorRect? chartOchreSelectionFrame;
 	private ChartTable? chartTableAsset;
 	private ChartFullScreenSurface? chartSurfaceAsset;
 	private Label? explorationPointSemanticLabel;
@@ -147,7 +148,7 @@ public partial class HubRuntime : Node2D
 			return;
 		}
 
-		if (currentScreen == "exploration" || currentScreen == "ochre_dev")
+		if (currentScreen == "exploration" || IsOchreScreen(currentScreen))
 		{
 			if (key.Keycode == Key.Escape)
 			{
@@ -222,6 +223,8 @@ public partial class HubRuntime : Node2D
 
 	public void OnRouteMistPressed() => SelectDomainRoute("route.mist");
 
+	public void OnRouteOchrePressed() => SelectDomainRoute("route.ochre");
+
 	public void OnDepartPressed()
 	{
 		if (string.IsNullOrEmpty(selectedRoute))
@@ -233,6 +236,13 @@ public partial class HubRuntime : Node2D
 		if (!domain.ConfirmDeparture())
 		{
 			SetChartStatus($"出航失败：{domain.Snapshot.LastStatus}");
+			return;
+		}
+
+		if (selectedRoute == "route.ochre" || domain.Snapshot.EncounterDestinationId == "location.ochre-island")
+		{
+			EnterOchreIslandRoute();
+			UpdateOnboardingHint();
 			return;
 		}
 
@@ -309,7 +319,7 @@ public partial class HubRuntime : Node2D
 
 	public void OnOchreHarvestPressed()
 	{
-		if (currentScreen != "ochre_dev")
+		if (!IsOchreScreen(currentScreen))
 		{
 			return;
 		}
@@ -323,18 +333,28 @@ public partial class HubRuntime : Node2D
 
 		if (ochreOreHarvested)
 		{
-			SetFooter("条带状铁矿已采集：开发入口保留状态可读性，不写入正式 Resources 奖励。");
+			SetFooter(currentScreen == "ochre_island"
+				? "条带状铁矿已采集：Resources carried pool 已保留该奖励。"
+				: "条带状铁矿已采集：开发入口保留状态可读性，不写入正式 Resources 奖励。");
+			return;
+		}
+
+		if (currentScreen == "ochre_island" && !domain.HarvestOchreOre())
+		{
+			SetFooter($"条带状铁矿采集失败：{domain.Snapshot.LastStatus}");
 			return;
 		}
 
 		ochreOreHarvested = true;
 		UpdateOchreSceneSemantics();
-		SetFooter("条带状铁矿采集完成：已验证世界锚点和采集后状态；正式资源奖励仍待后续 runtime 集成。");
+		SetFooter(currentScreen == "ochre_island"
+			? "条带状铁矿采集完成：resource.banded_iron_ore x1 已写入 ResourcesManager carried pool。"
+			: "条带状铁矿采集完成：已验证世界锚点和采集后状态；正式资源奖励仍待后续 runtime 集成。");
 	}
 
 	public void OnOchreReturnPressed()
 	{
-		if (currentScreen != "ochre_dev")
+		if (!IsOchreScreen(currentScreen))
 		{
 			return;
 		}
@@ -355,9 +375,16 @@ public partial class HubRuntime : Node2D
 		}
 
 		ochreReturnPrepStage = 0;
+		var formalRoute = currentScreen == "ochre_island";
+		if (formalRoute)
+		{
+			domain.ReturnToHub();
+		}
 		playerPosition = HubPlayerStart;
 		ShowHub();
-		SetFooter("已从赭石岛开发入口返回 Hub；正式 playable route 未被替换。");
+		SetFooter(formalRoute
+			? "已从赭石岛返航至初始岛屿码头；条带状铁矿已结算入飞艇仓库。"
+			: "已从赭石岛开发入口返回 Hub；正式 playable route 未被替换。");
 	}
 
 	public void OnSavePressed()
@@ -437,6 +464,7 @@ public partial class HubRuntime : Node2D
 		{
 			"chart" => "航图桌",
 			"exploration" => "雾海搜撤记录",
+			"ochre_island" => "赭石岛正式航线",
 			"ochre_dev" => "赭石岛开发入口",
 			_ => "空艇停泊区",
 		};
@@ -452,10 +480,10 @@ public partial class HubRuntime : Node2D
 			ShowExplorationSurface();
 			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 雾海搜撤记录");
 		}
-		else if (currentScreen == "ochre_dev")
+		else if (IsOchreScreen(currentScreen))
 		{
-			ShowOchreDevSurface();
-			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / 赭石岛开发入口");
+			ShowOchreSurface();
+			SetSaveStatus($"加载完成：本地航行日志 gen {result.Generation} / {restoredScreenName}");
 		}
 		else
 		{
@@ -516,7 +544,7 @@ public partial class HubRuntime : Node2D
 		ochreOreHarvested = false;
 		ochreReturnPrepStage = 0;
 		playerPosition = OchreIslandPlayerStart;
-		ShowOchreDevSurface();
+		ShowOchreSurface();
 	}
 
 	public void OnOchreDebugButtonPressed()
@@ -646,7 +674,7 @@ public partial class HubRuntime : Node2D
 	{
 		var sceneId = currentScreen == "exploration"
 			? "exploration_mist_island"
-			: currentScreen == "ochre_dev"
+			: IsOchreScreen(currentScreen)
 				? "ochre_island_scene"
 			: hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock";
 		return DebugScenePhysicsContract(sceneId);
@@ -1116,7 +1144,7 @@ public partial class HubRuntime : Node2D
 			{
 				BuildPhysicalBehavior("ochre_cloudsea_boundary", "hazardous", "hazardous + blocking_static", "cloudsea island edge blocks ground units; no damage in current slice", "cloudsea boundary and clamp feedback", "player_unit, pushable_unit", 80, "hazardous boundary wins over trigger_only anchors", "clamp player back into OchreIslandScene walk bounds", "world_playable_scene", false),
 				BuildPhysicalBehavior("banded_iron_ore", "resource_node", "resource_node + trigger_only + breakable", "spatial Use anchor; harvest changes ore state and requests Resources reward in later runtime integration", "ore available/harvested visual state", "player_unit", 45, "resource_node trigger never changes collision footprint unless a future mining contract declares it", "keep ore visible and mark blocked/harvested; never replace with UI-only reward", "world_playable_scene", false),
-				BuildPhysicalBehavior("ochre_return_anchor", "trigger_only", "trigger_only + soft_overlap", "spatial return anchor; no entity collision; requires proximity and Use dispatch", "return beacon greybox prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "return to voyage/hub flow when Navigation integration is wired", "world_playable_scene", false),
+				BuildPhysicalBehavior("ochre_return_anchor", "trigger_only", "trigger_only + soft_overlap", "spatial return anchor; no entity collision; requires proximity and Use dispatch", "return beacon greybox prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "return to Hub through formal Resources settlement", "world_playable_scene", false),
 				BuildPhysicalBehavior("ochre_rock_face", "visual_only_landmark", "visual_only + height_only", "readability landmark; no collision, reward, or passability rule", "ochre rock face silhouette", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
 			},
 			_ => [],
@@ -1286,6 +1314,9 @@ public partial class HubRuntime : Node2D
 			["repair_kits_in_storage"] = snapshot.RepairKitsInStorage,
 			["reward_in_storage"] = snapshot.RewardInStorage,
 			["reward_carried"] = snapshot.RewardCarried,
+			["ochre_ore_in_storage"] = snapshot.OchreOreInStorage,
+			["ochre_ore_carried"] = snapshot.OchreOreCarried,
+			["ochre_ore_harvested"] = ochreOreHarvested,
 			["cargo_used"] = snapshot.CargoUsed,
 			["hull_integrity"] = snapshot.HullIntegrity,
 			["threat_text"] = snapshot.ThreatText,
@@ -1555,10 +1586,22 @@ public partial class HubRuntime : Node2D
 				new Vector2(370, 382),
 			],
 			new Color(0.46f, 0.66f, 0.62f, 0.92f));
+		AddScenePolygon(chartSceneItems, "ChartRouteOchreLine",
+			[
+				new Vector2(364, 388),
+				new Vector2(676, 426),
+				new Vector2(672, 444),
+				new Vector2(360, 404),
+			],
+			new Color(0.64f, 0.44f, 0.28f, 0.92f));
 		AddSceneEllipse(chartSceneItems, "ChartMistDestinationNode", new Vector2(684, 304), new Vector2(34, 22), new Color(0.40f, 0.64f, 0.56f, 0.98f));
+		AddSceneEllipse(chartSceneItems, "ChartOchreDestinationNode", new Vector2(704, 422), new Vector2(34, 22), new Color(0.70f, 0.44f, 0.26f, 0.98f));
 		chartMistSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteMistSelectionFrame", new Vector2(630, 274), new Vector2(112, 64), new Color(0.84f, 0.78f, 0.38f, 0.38f));
 		chartMistSelectionFrame.Visible = false;
+		chartOchreSelectionFrame = AddSceneRect(chartSceneItems, "ChartRouteOchreSelectionFrame", new Vector2(652, 394), new Vector2(112, 64), new Color(0.84f, 0.62f, 0.38f, 0.38f));
+		chartOchreSelectionFrame.Visible = false;
 		AddSceneLabel(chartSceneItems, "ChartMistRouteLabel", new Vector2(610, 334), new Vector2(180, 24), "雾海短程 / 雾灯残骸");
+		AddSceneLabel(chartSceneItems, "ChartOchreRouteLabel", new Vector2(652, 454), new Vector2(180, 24), "赭石岛航线 / 铁矿");
 		AddSceneRect(chartSceneItems, "ChartCompassPlate", new Vector2(930, 252), new Vector2(124, 124), new Color(0.18f, 0.29f, 0.30f, 0.95f));
 		AddSceneRect(chartSceneItems, "ChartCompassNeedle", new Vector2(988, 270), new Vector2(8, 88), new Color(0.76f, 0.64f, 0.38f, 0.98f));
 		AddSceneLabel(chartSceneItems, "ChartCompassLabel", new Vector2(934, 378), new Vector2(116, 24), "罗经稳定");
@@ -1673,7 +1716,7 @@ public partial class HubRuntime : Node2D
 			AddSceneLabel(ochreSceneItems, "OchreIslandSceneLoadFailureLabel", new Vector2(330, 410), new Vector2(520, 28), "赭石岛场景资产加载失败");
 		}
 
-		ochreOreSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreOreSemanticLabel", new Vector2(520, 454), new Vector2(300, 24), "矿脉：可采集 / reward pending");
+		ochreOreSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreOreSemanticLabel", new Vector2(520, 454), new Vector2(300, 24), "矿脉：可采集 / Resources ready");
 		ochreReturnSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreReturnSemanticLabel", new Vector2(760, 498), new Vector2(270, 24), "返航：待预热");
 	}
 
@@ -1814,12 +1857,24 @@ public partial class HubRuntime : Node2D
 		SetFooter("雾海搜撤开始：移动到残骸旁按 E 完成三段扫描，回到空艇旁按 E 预热并驾驶返航。");
 	}
 
-	private void ShowOchreDevSurface()
+	private void EnterOchreIslandRoute()
+	{
+		currentScreen = "ochre_island";
+		ochreOreHarvested = domain.Snapshot.OchreOreCarried + domain.Snapshot.OchreOreInStorage > 0;
+		ochreReturnPrepStage = 0;
+		explorationStep = 0;
+		playerPosition = OchreIslandPlayerStart;
+		ShowOchreSurface();
+	}
+
+	private void ShowOchreSurface()
 	{
 		SetHubControlsEnabled(false);
-		SetWorldMode("ochre_dev");
+		SetWorldMode(currentScreen);
 		UpdateOchreSceneSemantics();
-		SetFooter("赭石岛开发入口：移动到条带状铁矿按 E 采集，或到返航点按 E 两步返回 Hub。");
+		SetFooter(currentScreen == "ochre_island"
+			? "赭石岛正式航线：移动到条带状铁矿按 E 采集，或到返航点按 E 两步返回初始岛屿。"
+			: "赭石岛开发入口：移动到条带状铁矿按 E 采集，或到返航点按 E 两步返回 Hub。");
 	}
 
 	private void UpdateChartSceneSelection()
@@ -1828,6 +1883,10 @@ public partial class HubRuntime : Node2D
 		if (chartMistSelectionFrame is not null)
 		{
 			chartMistSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.mist";
+		}
+		if (chartOchreSelectionFrame is not null)
+		{
+			chartOchreSelectionFrame.Visible = currentScreen == "chart" && selectedRoute == "route.ochre";
 		}
 	}
 
@@ -1943,8 +2002,8 @@ public partial class HubRuntime : Node2D
 		if (ochreOreSemanticLabel is not null)
 		{
 			ochreOreSemanticLabel.Text = ochreOreHarvested
-				? "矿脉：已采集 / reward pending"
-				: "矿脉：可采集 / reward pending";
+				? currentScreen == "ochre_island" ? "矿脉：已采集 / carried resource.banded_iron_ore" : "矿脉：已采集 / debug state"
+				: currentScreen == "ochre_island" ? "矿脉：可采集 / Resources ready" : "矿脉：可采集 / debug state";
 		}
 		if (ochreReturnSemanticLabel is not null)
 		{
@@ -2073,7 +2132,7 @@ public partial class HubRuntime : Node2D
 		SetSceneGroupVisible(hubInteriorSceneItems, mode == "hub" && hubSpace == "interior");
 		SetSceneGroupVisible(chartSceneItems, mode == "chart");
 		SetSceneGroupVisible(explorationSceneItems, mode == "exploration");
-		SetSceneGroupVisible(ochreSceneItems, mode == "ochre_dev");
+		SetSceneGroupVisible(ochreSceneItems, IsOchreScreen(mode));
 		if (mode == "hub")
 		{
 			UpdateHubInteriorSemantics(domain.Snapshot);
@@ -2093,8 +2152,8 @@ public partial class HubRuntime : Node2D
 		if (hubStorageMarker is not null) hubStorageMarker.Visible = mode == "hub" && hubSpace == "interior";
 		if (explorationSearchMarker is not null) explorationSearchMarker.Visible = mode == "exploration";
 		if (explorationReturnMarker is not null) explorationReturnMarker.Visible = mode == "exploration";
-		if (ochreOreMarker is not null) ochreOreMarker.Visible = mode == "ochre_dev";
-		if (ochreReturnMarker is not null) ochreReturnMarker.Visible = mode == "ochre_dev";
+		if (ochreOreMarker is not null) ochreOreMarker.Visible = IsOchreScreen(mode);
+		if (ochreReturnMarker is not null) ochreReturnMarker.Visible = IsOchreScreen(mode);
 		if (playerMarker is not null)
 		{
 			if (mode == "chart")
@@ -2182,7 +2241,7 @@ public partial class HubRuntime : Node2D
 					: "按 E 驾驶空艇返航。";
 			}
 		}
-		else if (currentScreen == "ochre_dev")
+		else if (IsOchreScreen(currentScreen))
 		{
 			var oreDistance = DistanceToMarker(ochreOreMarker);
 			var returnDistance = DistanceToMarker(ochreReturnMarker);
@@ -2190,15 +2249,15 @@ public partial class HubRuntime : Node2D
 			{
 				nearestInteraction = "ochre_ore";
 				prompt = ochreOreHarvested
-					? "条带状铁矿已采集：正式 Resources 奖励待后续接入。"
-					: "按 E 采集条带状铁矿：验证世界资源锚点。";
+					? currentScreen == "ochre_island" ? "条带状铁矿已采集：Resources carried pool 已记录。" : "条带状铁矿已采集：开发入口只验证状态。"
+					: currentScreen == "ochre_island" ? "按 E 采集条带状铁矿：写入 ResourcesManager。" : "按 E 采集条带状铁矿：验证世界资源锚点。";
 			}
 			else if (returnDistance <= InteractionRadius)
 			{
 				nearestInteraction = "ochre_return";
 				prompt = ochreReturnPrepStage <= 0
 					? "按 E 预热赭石岛返航锚点。"
-					: "按 E 从赭石岛开发入口返回 Hub。";
+					: currentScreen == "ochre_island" ? "按 E 从赭石岛正式返航初始岛屿。" : "按 E 从赭石岛开发入口返回 Hub。";
 			}
 		}
 
@@ -2257,7 +2316,7 @@ public partial class HubRuntime : Node2D
 		{
 			return ExplorationWalkBounds;
 		}
-		if (currentScreen == "ochre_dev")
+		if (IsOchreScreen(currentScreen))
 		{
 			return OchreIslandWalkBounds;
 		}
@@ -2276,6 +2335,9 @@ public partial class HubRuntime : Node2D
 
 	private static bool IsLoadShortcut(InputEventKey key) =>
 		key.CtrlPressed && !key.AltPressed && !key.MetaPressed && key.Keycode == Key.L;
+
+	private static bool IsOchreScreen(string screen) =>
+		screen is "ochre_island" or "ochre_dev";
 
 	private void SetChartStatus(string text)
 	{

@@ -9,8 +9,8 @@
 - Changed Godot Outputs: `src/scenes/ochre/OchreIslandScene.tscn`; `src/scenes/ochre/OchreIslandScene.cs`; `src/scenes/units/BandedIronOre.tscn`; `src/scenes/units/BandedIronOre.cs`
 - Evidence: Godot AI MCP loaded both child assets and returned hierarchy evidence. The composite scene contains `BandedIronOreInstance` under `WorldLayer`; build passed with 0 errors.
 - Failed Checks: `logs_read` was called with an unsupported `limit` argument, so no log snapshot was captured through MCP. This does not invalidate hierarchy/build evidence.
-- Risks Preserved: This pass creates standalone Godot assets and proof of child linkage. It does not yet update release handoff status, playable route integration, screenshot evidence, or #20 runtime contract smoke.
-- Follow-up Needed: Wire `ochre_island_scene` into runtime/authoring evidence and add screenshot + smoke proof.
+- Risks Preserved: This pass created standalone Godot assets and proof of child linkage. A later formal-route pass wired runtime/authoring evidence, Resources reward, Navigation destination, and smoke proof; screenshot evidence and final presentation polish remain open.
+- Follow-up Needed: Add non-headless screenshot evidence and final presentation polish.
 
 ## Child Results
 
@@ -21,4 +21,4 @@
 
 ## Gate Interpretation
 
-Interview, review, and non-destructive asset execution are complete. The resource-island slice now has standalone Godot asset evidence; release handoff remains pending integration, screenshots, and smoke evidence.
+Interview, review, and non-destructive asset execution are complete. The later `.godot-ai/verification/composite-feature/ochre_island_formal_route.verification.md` closes playable route integration; release handoff remains pending screenshots and final presentation polish.

@@ -68,11 +68,10 @@ layout_mode = 2
 focus_mode = 2
 text = "雾海短程"
 
-[node name="RouteMarketButton" type="Button" parent="Frame/Layout/BodyRow/RouteList"]
+[node name="RouteOchreButton" type="Button" parent="Frame/Layout/BodyRow/RouteList"]
 layout_mode = 2
-focus_mode = 0
-disabled = true
-text = "旧集市航道：待审查开放"
+focus_mode = 2
+text = "赭石岛航线"
 
 [node name="MapPanel" type="Control" parent="Frame/Layout/BodyRow"]
 layout_mode = 2
@@ -97,6 +96,15 @@ offset_bottom = 156.0
 rotation = -0.16
 color = Color(0.26, 0.52, 0.50, 1)
 
+[node name="RouteOchreLine" type="ColorRect" parent="Frame/Layout/BodyRow/MapPanel"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 176.0
+offset_right = 458.0
+offset_bottom = 184.0
+rotation = 0.19
+color = Color(0.56, 0.42, 0.25, 1)
+
 [node name="OriginNode" type="ColorRect" parent="Frame/Layout/BodyRow/MapPanel"]
 layout_mode = 0
 offset_left = 72.0
@@ -113,6 +121,14 @@ offset_right = 446.0
 offset_bottom = 126.0
 color = Color(0.28, 0.54, 0.45, 1)
 
+[node name="OchreDestinationNode" type="ColorRect" parent="Frame/Layout/BodyRow/MapPanel"]
+layout_mode = 0
+offset_left = 438.0
+offset_top = 184.0
+offset_right = 482.0
+offset_bottom = 228.0
+color = Color(0.64, 0.44, 0.27, 1)
+
 [node name="RouteMistSelectionFrame" type="ColorRect" parent="Frame/Layout/BodyRow/MapPanel"]
 visible = false
 layout_mode = 0
@@ -121,6 +137,15 @@ offset_top = 66.0
 offset_right = 462.0
 offset_bottom = 142.0
 color = Color(0.86, 0.74, 0.34, 0.42)
+
+[node name="RouteOchreSelectionFrame" type="ColorRect" parent="Frame/Layout/BodyRow/MapPanel"]
+visible = false
+layout_mode = 0
+offset_left = 422.0
+offset_top = 168.0
+offset_right = 498.0
+offset_bottom = 244.0
+color = Color(0.86, 0.62, 0.34, 0.42)
 
 [node name="MapCaptionLabel" type="Label" parent="Frame/Layout/BodyRow/MapPanel"]
 layout_mode = 1
@@ -132,7 +157,7 @@ offset_left = 24.0
 offset_top = -38.0
 offset_right = -24.0
 offset_bottom = -10.0
-text = "玻璃港 -> 雾灯残骸"
+text = "玻璃港 -> 雾灯残骸 / 赭石岛"
 horizontal_alignment = 1
 
 [node name="RiskSummaryPanel" type="PanelContainer" parent="Frame/Layout/BodyRow"]

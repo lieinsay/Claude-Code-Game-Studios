@@ -13,11 +13,12 @@ public sealed class PlayableSliceDomainAdapter
 	private const string BasicSupplyId = ModuleHullManager.BasicSupplyId;
 	private const string RepairKitId = ModuleHullManager.RepairKitId;
 	private const string RewardResourceId = "resource.beacon_crystal";
+	private const string BandedIronOreId = "resource.banded_iron_ore";
 	private const string ContentPath = "src/presentation/playable_slice_authored_content.json";
 	private readonly PlayableSliceRuntimeFixture fixture;
 	private readonly ChartManager chart;
 	private readonly HubManager hub;
-	private readonly NavigationManager navigation;
+	private NavigationManager navigation;
 	private readonly ExplorationManager exploration;
 	private readonly ResourcesManager resources;
 	private readonly ModuleHullManager modules;
@@ -101,6 +102,8 @@ public sealed class PlayableSliceDomainAdapter
 		RepairKitsInStorage: resources.GetQuantity(ResourcePool.InStorage, RepairKitId),
 		RewardInStorage: resources.GetQuantity(ResourcePool.InStorage, RewardResourceId),
 		RewardCarried: resources.GetQuantity(ResourcePool.Carried, RewardResourceId),
+		OchreOreInStorage: resources.GetQuantity(ResourcePool.InStorage, BandedIronOreId),
+		OchreOreCarried: resources.GetQuantity(ResourcePool.Carried, BandedIronOreId),
 		CargoUsed: CargoUsed,
 		CargoCapacity: fixture.CargoCapacity,
 		StorageText: StorageText,
@@ -167,6 +170,7 @@ public sealed class PlayableSliceDomainAdapter
 				? rawDestination?.ToString() ?? lastCommittedDestination
 				: lastCommittedDestination;
 			var hazardTags = ReadStringList(summary, "hazard_tags");
+			navigation = BuildNavigationManager();
 			StartNavigationAndExploration(routeId, destinationId, hazardTags);
 			DepartureConfirmed?.Invoke(routeId);
 		}
@@ -226,6 +230,26 @@ public sealed class PlayableSliceDomainAdapter
 			? "HubManager arrival completed; ResourcesManager extracted carried rewards to storage."
 			: $"HubManager arrival completed; reward extraction failed: {extraction.Result}.";
 		ReturnedToHub?.Invoke(before, Snapshot);
+	}
+
+	/// <summary>
+	/// Harvests the authored Ochre Island ore node into the carried resource pool for formal route evidence.
+	/// </summary>
+	public bool HarvestOchreOre()
+	{
+		var alreadyHarvested = resources.GetQuantity(ResourcePool.Carried, BandedIronOreId)
+			+ resources.GetQuantity(ResourcePool.InStorage, BandedIronOreId) > 0;
+		if (alreadyHarvested)
+		{
+			lastStatus = "ResourcesManager rejected Ochre harvest: banded iron ore already collected.";
+			return false;
+		}
+
+		var result = resources.Add(ResourcePool.Carried, BandedIronOreId, 1);
+		lastStatus = result.Success
+			? "ResourcesManager added resource.banded_iron_ore x1 to carried pool."
+			: $"ResourcesManager rejected Ochre harvest: {result.Result}.";
+		return result.Success;
 	}
 
 	public PersistenceOperationResult SaveSceneState(PlayableSliceSceneState state)
@@ -549,6 +573,7 @@ public sealed class PlayableSliceDomainAdapter
 		package.Payload["player_y"] = state.PlayerY;
 		package.Payload["footer"] = state.Footer;
 		package.Payload["reward_carried"] = resources.GetQuantity(ResourcePool.Carried, RewardResourceId);
+		package.Payload["ochre_ore_carried"] = resources.GetQuantity(ResourcePool.Carried, BandedIronOreId);
 		package.Payload["last_search_point_id"] = lastSearchPointId;
 		package.Payload["last_search_point_name"] = lastSearchPointName;
 		package.Payload["last_search_message"] = lastSearchMessage;
@@ -575,6 +600,16 @@ public sealed class PlayableSliceDomainAdapter
 		if (restoredCarried > 0)
 		{
 			resources.Add(ResourcePool.Carried, RewardResourceId, restoredCarried);
+		}
+		var currentOreCarried = resources.GetQuantity(ResourcePool.Carried, BandedIronOreId);
+		if (currentOreCarried > 0)
+		{
+			resources.Remove(ResourcePool.Carried, BandedIronOreId, currentOreCarried);
+		}
+		var restoredOreCarried = Math.Max(0, ReadInt(package.Payload, "ochre_ore_carried", 0));
+		if (restoredOreCarried > 0)
+		{
+			resources.Add(ResourcePool.Carried, BandedIronOreId, restoredOreCarried);
 		}
 		lastSearchPointId = fixture.ResolveSearchPointId(ReadString(package.Payload, "last_search_point_id", ""));
 		lastSearchPointName = ReadString(package.Payload, "last_search_point_name", SearchPointName(lastSearchPointId));
@@ -607,6 +642,7 @@ public sealed class PlayableSliceDomainAdapter
 	private string StorageText =>
 		$"基础补给 x{resources.GetQuantity(ResourcePool.InStorage, BasicSupplyId)} / "
 		+ $"信标水晶 x{TotalRewards} / "
+		+ $"条带状铁矿 x{resources.GetQuantity(ResourcePool.InStorage, BandedIronOreId) + resources.GetQuantity(ResourcePool.Carried, BandedIronOreId)} / "
 		+ $"修理包 x{resources.GetQuantity(ResourcePool.InStorage, RepairKitId)}";
 
 	private static string ReadString(IReadOnlyDictionary<string, object?> payload, string key, string fallback) =>
@@ -679,6 +715,8 @@ public sealed record PlayableSliceSnapshot(
 	int RepairKitsInStorage,
 	int RewardInStorage,
 	int RewardCarried,
+	int OchreOreInStorage,
+	int OchreOreCarried,
 	int CargoUsed,
 	int CargoCapacity,
 	string StorageText,

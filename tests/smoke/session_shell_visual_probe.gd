@@ -186,6 +186,7 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "S4ChartRuntimeSurface"), "Chart mode loads the independent S4 chart UI scene")
 	_expect(hub.call("DebugNodeVisible", "MapGround"), "Chart mode has a map surface")
 	_expect(hub.call("DebugDescendantNames", "RouteMistLine").size() > 0, "Chart mode includes the mist route line node")
+	_expect(hub.call("DebugDescendantNames", "RouteOchreLine").size() > 0, "Chart mode includes the formal Ochre Island route line node")
 	_expect(not hub.call("DebugNodeVisible", "ChartRouteMarketLine"), "Chart mode does not expose tracked-gap old market route")
 	_expect(_button_disabled(session, "ChartButton"), "Chart entry is disabled while Chart panel is open")
 	_expect(_button_disabled(session, "SaveButton"), "Save entry is disabled while Chart panel is open")
@@ -198,7 +199,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-mist-lamp-wreck-v1", "C# HubRuntime loads asset-reset route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ochre-formal-route-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -415,6 +416,51 @@ func _run() -> void:
 	_expect(_label_text(session, "CargoStation").contains("收益锁定"), "Hub cargo station syncs completed pressure loop")
 	_expect(_label_text(session, "HubCargoStatusLabel").contains("收益锁定"), "Hub cargo interior status syncs locked rewards")
 
+	hub.call("EnterShipInterior")
+	await process_frame
+	hub.call("OnChartPressed")
+	await process_frame
+	hub.call("OnRouteOchrePressed")
+	await process_frame
+	var ochre_route_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(ochre_route_snapshot.get("selected_route", "")) == "route.ochre", "C# HubRuntime selects the formal Ochre Island route")
+	_expect(str(ochre_route_snapshot.get("selected_route_name", "")) == "赭石岛航线", "Formal Ochre route exposes the authored display name")
+	_expect(hub.call("DebugNodeVisible", "RouteOchreSelectionFrame"), "Chart scene highlights the selected Ochre Island route")
+	hub.call("OnDepartPressed")
+	await process_frame
+	var ochre_departure_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(hub.call("DebugCurrentScreen")) == "ochre_island", "Formal Ochre route enters the Ochre Island scene")
+	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "ochre_island_scene", "Current physics contract follows formal Ochre scene")
+	_expect(str(ochre_departure_snapshot.get("committed_route", "")) == "route.ochre", "Formal Ochre departure commits through ChartManager")
+	_expect(str(ochre_departure_snapshot.get("committed_destination", "")) == "location.ochre-island", "Formal Ochre departure records the authored destination")
+	_expect(str(ochre_departure_snapshot.get("encounter_destination", "")) == "location.ochre-island", "NavigationManager builds the Ochre Island encounter context")
+	_expect(hub.call("DebugNodeVisible", "OchreIslandGround"), "Formal Ochre scene renders independent island ground")
+	_expect(hub.call("DebugNodeVisible", "BandedIronOreInstance"), "Formal Ochre scene uses the independent banded iron ore instance")
+	_expect(_label_text(session, "OchreOreSemanticLabel").contains("可采集"), "Formal Ochre ore starts harvestable")
+	hub.call("DebugSetPlayerPosition", Vector2(655, 410))
+	await process_frame
+	_expect(str(hub.call("DebugNearestInteraction")) == "ochre_ore", "Formal Ochre ore marker becomes the nearest interaction")
+	_expect(hub.call("DebugInteractionPrompt").contains("ResourcesManager"), "Formal Ochre harvest prompt names the resource write")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	var ochre_harvest_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(bool(hub.call("DebugOchreOreHarvested")), "Formal Ochre harvest toggles world resource state")
+	_expect(int(ochre_harvest_snapshot.get("ochre_ore_carried", 0)) == 1, "Formal Ochre harvest writes banded iron ore to carried ResourcesManager pool")
+	_expect(_label_text(session, "OchreOreSemanticLabel").contains("已采集"), "Formal Ochre ore label shows harvested state")
+	hub.call("DebugSetPlayerPosition", Vector2(875, 430))
+	await process_frame
+	_expect(str(hub.call("DebugNearestInteraction")) == "ochre_return", "Formal Ochre return marker becomes the nearest interaction")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	_expect(int(hub.call("DebugOchreReturnPrepStage")) == 1, "Formal Ochre return uses two-step preheat")
+	hub.call("TrySpatialInteraction")
+	await process_frame
+	var ochre_return_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
+	_expect(str(hub.call("DebugCurrentScreen")) == "hub", "Formal Ochre return lands back in Hub")
+	_expect(int(ochre_return_snapshot.get("ochre_ore_carried", 0)) == 0, "Formal Ochre return clears carried ore")
+	_expect(int(ochre_return_snapshot.get("ochre_ore_in_storage", 0)) == 1, "Formal Ochre return extracts ore into storage")
+	_expect(_label_text(session, "StorageValue").contains("条带状铁矿 x1"), "Hub storage summary syncs returned Ochre ore")
+
 	var ochre_debug_button := session.find_child("OchreDebugButton", true, false) as Button
 	_expect(ochre_debug_button != null and ochre_debug_button.visible, "Debug build exposes Ochre Island debug entry button")
 	_expect(ochre_debug_button != null and not ochre_debug_button.disabled, "Ochre Island debug entry button is usable from Hub")
@@ -449,7 +495,7 @@ func _run() -> void:
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(str(hub.call("DebugCurrentScreen")) == "hub", "Ochre debug return lands back in Hub")
-	_expect(str((hub.call("DebugDomainSnapshot") as Dictionary).get("committed_route", "")) == "route.mist", "Ochre debug entry does not replace committed playable route")
+	_expect(str((hub.call("DebugDomainSnapshot") as Dictionary).get("committed_route", "")) == "route.ochre", "Ochre debug entry does not replace committed playable route")
 
 	await _save_runtime_screenshot(root, SCREENSHOT_PATH, "Runtime screenshot")
 

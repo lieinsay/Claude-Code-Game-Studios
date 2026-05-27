@@ -11,7 +11,7 @@
 | Scene ID | `ochre_island_scene` |
 | 玩家可见场景名 | 赭石岛 |
 | 所属循环节点 | Exploration / Resource |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `implemented` |
 | 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md`; `design/gdd/resources-goods-capacity.md` |
 | 来源 story 或设计说明 | 用户 2026-05-24 指定：赭石岛是可采条带状铁矿的小型资源岛 |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
@@ -23,9 +23,9 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `src/scenes/ochre/OchreIslandScene.tscn`；已建立独立灰盒场景资产，不能复用旧市场或探索面板。 |
-| 配套脚本 / runtime | `src/scenes/ochre/OchreIslandScene.cs`；仅承载资源岛本地信号，Resources / Navigation / Hub 仍为领域权威。`HubRuntime` 的 debug 入口必须实例化 `OchreIslandScene.tscn`，不得另画一套运行时赭石岛。 |
-| 作者化数据 | Godot 场景内已实例化 `BandedIronOreInstance`、`OchreReturnAnchor` 和 `PlayerSpawn`；`src/presentation/playable_slice_authored_content.json` runtime 作者化链路待补。 |
+| 独立 Godot 场景 | `src/scenes/ochre/OchreIslandScene.tscn`；已建立独立灰盒场景资产，不能复用旧市场、旧探索面板或 HubRuntime 临时灰盒。 |
+| 配套脚本 / runtime | `src/scenes/ochre/OchreIslandScene.cs`；Resources / Navigation / Hub 仍为领域权威。`HubRuntime` 通过正式 `route.ochre` 进入 `ochre_island`，Debug build 入口只保留为同一资产的开发诊断。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 已记录 `authored_scenes::ochre_island_scene`、`route.ochre`、6 个场景单位实例和 `resource.banded_iron_ore` 奖励链路。 |
 | 资产组 | 赭色岛体、条带状铁矿、返航点、岛屿边界、采集反馈。 |
 | 装配入口 | 航行大场景只负责抵达；赭石岛拥有自身场景本体和资源点实例。 |
 | 禁止混入位置 | 不得把赭石岛只写成旧市场场景、探索面板或无独立边界的临时节点。 |
@@ -63,7 +63,7 @@
 | --- | --- |
 | 物理来源 | 独立 Godot 灰盒资产 + 作者化数据 + `HubRuntime.DebugScenePhysicsContract("ochre_island_scene")` |
 | 合同场景 ID | `ochre_island_scene` |
-| `physics_contract_complete` 状态 | true；仍需 playable route 接入和截图刷新 |
+| `physics_contract_complete` 状态 | true；正式 playable route、资源写入和返航结算已接入；仍需非 headless 截图刷新 |
 | 场景物理类型 | `水平场景` |
 | 移动平面 | 小型岛屿地面平面四方向移动 |
 | Layer / Height Model | 岛体地面、矿脉前景、边界、返航点 |
@@ -78,9 +78,9 @@
 
 ## 3. 进入 / 离开
 
-- 进入来源: 从 `voyage_open_world_scene` 抵达。
+- 进入来源: `S4_chart` 选择 `route.ochre` 后，经 Navigation 合同进入 `ochre_island_scene`。
 - 出生 / 抵达位置: 赭石岛安全着陆点 / 玩家出生点。
-- 离开或返回路径: 靠近返航点，起飞并经航行过程返回初始岛屿或船内。
+- 离开或返回路径: 靠近返航点两步预热，调用 `PlayableSliceDomainAdapter.ReturnToHub()` 将 carried 资源结算入仓并返回 `initial_island_scene` / `hub_island_dock`。
 - 取消 / 失败路径: 容量不足、采集不可用或输入焦点被 UI 占用时给出禁用反馈。
 - 存档状态返回行为: 恢复玩家位置、矿脉采集状态、携带资源和返航状态。
 - 场景切换清理预期: 关闭仅属于本场景的采集提示和临时交互焦点；不得清理全局资源状态。
@@ -128,14 +128,14 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: `src/scenes/ochre/OchreIslandScene.tscn`、`src/scenes/ochre/OchreIslandScene.cs`、`HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`、Debug build `OchreDebugButton` / `HubRuntime.DebugEnterOchreIslandScene()`；debug 入口通过 `ResourceLoader.Load<PackedScene>("res://src/scenes/ochre/OchreIslandScene.tscn")` 挂载同一个场景资产，不得复用旧市场、探索面板或手写重复灰盒作为场景本体。
+- Godot 场景或运行时表面: `src/scenes/ochre/OchreIslandScene.tscn`、`src/scenes/ochre/OchreIslandScene.cs`、`HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`、`HubRuntime.OnRouteOchrePressed()`、`HubRuntime.OnOchreHarvestPressed()`、`HubRuntime.OnOchreReturnPressed()`；debug 入口通过 `ResourceLoader.Load<PackedScene>("res://src/scenes/ochre/OchreIslandScene.tscn")` 挂载同一个场景资产，不得复用旧市场、探索面板或手写重复灰盒作为 production-ready 场景本体。
 - 稳定 ID: `ochre_island_scene`。
 - 读取的领域管理器: Resources、Navigation、Scene。
 - 会变更的领域管理器: Resources（采集结果）、Navigation / Hub（返航）。
 - 持久化字段: 玩家位置、矿脉采集状态、携带资源、返航状态。
 - 信号 / 语义事件: ore_harvested、resource_collected、return_departure_requested。
 - 焦点和模态边界: 场景交互不得被常驻 UI 替代；采集提示不抢占世界输入。
-- 运行时 debug / smoke hook: `tests/smoke/session_shell_visual_probe.gd` 校验 #20 物理合同、作者化单位链接、边界 / overlap / special surface / dynamic behavior，并通过 Debug build 按钮入口验证矿脉采集状态、返航两步和不替换 `route.mist`。
+- 运行时 debug / smoke hook: `tests/smoke/session_shell_visual_probe.gd` 校验 #20 物理合同、作者化单位链接、边界 / overlap / special surface / dynamic behavior，并通过正式 `route.ochre` 验证进入赭石岛、矿脉采集写入 `ResourcesManager` carried pool、返航结算到 storage。Debug build 按钮入口仅用于证明诊断入口不会替换已提交正式航线。
 
 ## 10. 资产与音频需求
 
@@ -149,9 +149,9 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | partial；Godot AI MCP hierarchy PASS，#20 runtime contract smoke PASS，debug 入口实例化独立 `OchreIslandScene.tscn`、采集 / 返航 PASS；正式 playable route、Resources 奖励和 Navigation 返航写入待补 |
-| 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending |
-| Codex 审核 | 规格与 authored content 对齐检查 | partial；`.godot-ai/verification/composite-feature/ochre_island_resource_slice.verification.md`、`production/qa/evidence/ochre-island-godot-asset-execution-evidence.md` 和 `DomainAdapterTest` 已记录资产 / 作者化 / 运行时合同证据 |
+| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | PASS；Godot AI MCP hierarchy PASS，#20 runtime contract smoke PASS，正式 `route.ochre` 进入、Resources 奖励、Navigation encounter context 和 Hub 返航结算均 PASS |
+| 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending；当前 headless 显示驱动跳过截图 |
+| Codex 审核 | 规格与 authored content 对齐检查 | PASS；`.godot-ai/verification/composite-feature/ochre_island_formal_route.verification.md`、`production/qa/evidence/ochre-island-godot-asset-execution-evidence.md` 和 `DomainAdapterTest` 已记录资产 / 作者化 / 运行时合同证据 |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 实现后自检问题:
@@ -186,16 +186,16 @@
 
 ## 15. 就绪检查清单
 
-- [ ] 场景目的、循环角色和情绪目标明确。
-- [ ] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
-- [ ] 进入、离开、失败和返回路径明确。
-- [ ] 空间布局列出可行走区域、边界、地标和交互锚点。
-- [ ] Scene Physics Contract 已链接并通过，或 #20 豁免明确。
-- [ ] 固定单位与实体单位已分开引用；单位本体规则不只散落在本场景规格中。
-- [ ] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
-- [ ] 关键路径和可选可读性节拍已记录。
-- [ ] 至少三个状态变体已记录，或明确豁免。
-- [ ] 交互锚点说明输入 / 焦点行为和领域负责人。
-- [ ] 运行时 / 状态合同没有创建新的玩法权威。
-- [ ] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
+- [x] 场景目的、循环角色和情绪目标明确。
+- [x] 创建适合性人工审查已通过；未通过时不能进入 `implementation_ready`。
+- [x] 进入、离开、失败和返回路径明确。
+- [x] 空间布局列出可行走区域、边界、地标和交互锚点。
+- [x] Scene Physics Contract 已链接并通过，或 #20 豁免明确。
+- [x] 固定单位与实体单位已分开引用；单位本体规则不只散落在本场景规格中。
+- [x] 场景单位来自世界 / 可玩场景层，而不是 UI/HUD/按钮/标签/调试覆盖层。
+- [x] 关键路径和可选可读性节拍已记录。
+- [x] 至少三个状态变体已记录，或明确豁免。
+- [x] 交互锚点说明输入 / 焦点行为和领域负责人。
+- [x] 运行时 / 状态合同没有创建新的玩法权威。
+- [x] P0 资产 / 音频需求可追溯到身份、交互、状态或反馈。
 - [x] 自动证据、截图证据和规格一致性检查路径已命名。

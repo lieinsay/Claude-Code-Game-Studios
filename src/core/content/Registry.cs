@@ -2295,6 +2295,15 @@ public static class RegistryBootstrap
 			["max_stack"] = 99,
 			["supply_class"] = "repair",
 		});
+		yield return Entity("resource.banded_iron_ore", "resource", "条带状铁矿", 7, new()
+		{
+			["unit"] = "ore_chunk",
+			["stack_rule"] = "stackable",
+			["material_tags"] = new[] { "ore", "repair-material" },
+			["max_stack"] = 20,
+			["supply_class"] = "local-specialty",
+			["mass_class"] = "medium",
+		});
 
 		yield return Entity("repair_node.starlight_dock", "repair-node", "星光灯塔", 1, new()
 		{

@@ -129,6 +129,7 @@ if (authoredScenes.ValueKind == JsonValueKind.Array)
 	Check(authoredSceneIds.Contains("ship_interior_layered"), "authored scenes include the independent ship interior scene");
 	Check(authoredSceneIds.Contains("voyage_open_world_scene"), "authored scenes include the independent voyage open-world scene");
 	Check(authoredSceneIds.Contains("mist_lamp_wreck_scene"), "authored scenes include the independent mist-lamp wreck scene");
+	Check(authoredSceneIds.Contains("ochre_island_scene"), "authored scenes include the independent ochre island scene");
 }
 
 if (routes.ValueKind == JsonValueKind.Array)
@@ -428,7 +429,7 @@ var adapter = new PlayableSliceDomainAdapter();
 adapter.OpenChart();
 var opened = adapter.Snapshot;
 Check(opened.ChartState == "Browsing", "adapter opens ChartManager into Browsing");
-Check(opened.ContentVersion == "polish-asset-reset-mist-lamp-wreck-v1", "adapter loads the asset-reset authored content version");
+Check(opened.ContentVersion == "polish-asset-reset-ochre-formal-route-v1", "adapter loads the asset-reset authored content version");
 Check(opened.ContentStatus == "polish_authored", "adapter reports authored playable content status");
 Check(opened.VisibleRouteCount >= 2, "adapter exposes seeded visible routes");
 Check(adapter.GetRouteDisplayName("route.playable-mist") == "雾海短程", "adapter resolves legacy route id display name through migration map");
@@ -514,6 +515,27 @@ var legacyLoad = adapter.LoadSceneState();
 Check(legacySave.Success, "Persistence saves scene state containing legacy route id");
 Check(legacyLoad.Result.Success, "Persistence reloads scene state containing legacy route id");
 Check(legacyLoad.State.Route == "route.mist", "Persistence migrates legacy route id to current route id on restore");
+
+var ochreAdapter = new PlayableSliceDomainAdapter();
+ochreAdapter.OpenChart();
+Check(ochreAdapter.SelectRoute("route.ochre"), "adapter accepts the formal Ochre Island route");
+var ochreSelected = ochreAdapter.Snapshot;
+Check(ochreSelected.SelectedRouteId == "route.ochre", "Ochre route selection is backed by ChartManager state");
+Check(ochreSelected.SelectedRouteName == "赭石岛航线", "Ochre route display name is mapped for Godot UI");
+Check(ochreAdapter.ConfirmDeparture(), "adapter confirms formal Ochre Island departure through ChartManager and HubManager");
+var ochreDeparted = ochreAdapter.Snapshot;
+Check(ochreDeparted.CommittedRouteId == "route.ochre", "Ochre route commits through ChartManager");
+Check(ochreDeparted.CommittedDestinationId == "location.ochre-island", "Ochre route commits the authored destination");
+Check(ochreDeparted.EncounterDestinationId == "location.ochre-island", "NavigationManager produces Ochre Island encounter context");
+Check(ochreAdapter.HarvestOchreOre(), "adapter harvests banded iron ore through ResourcesManager");
+var ochreHarvested = ochreAdapter.Snapshot;
+Check(ochreHarvested.OchreOreCarried == 1, "ResourcesManager carries the authored banded iron ore reward before return");
+Check(ochreHarvested.OchreOreInStorage == 0, "Ochre ore is not in storage before return");
+ochreAdapter.ReturnToHub();
+var ochreReturned = ochreAdapter.Snapshot;
+Check(ochreReturned.HubDockingState == "Landed", "HubManager returns to Landed after Ochre route arrival");
+Check(ochreReturned.OchreOreCarried == 0, "ResourcesManager clears carried Ochre ore after Hub return");
+Check(ochreReturned.OchreOreInStorage == 1, "ResourcesManager extracts Ochre ore into storage on Hub return");
 
 Console.WriteLine($"RESULT {total - failed}/{total} passing");
 return failed == 0 ? 0 : 1;

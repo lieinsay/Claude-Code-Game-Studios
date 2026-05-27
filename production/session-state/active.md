@@ -24,6 +24,16 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 891/891；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，截图因 headless 显示驱动跳过；Godot AI MCP PASS，`editor_state` ready、`scene_open("res://src/scenes/mist/MistLampWreckScene.tscn")` 成功、层级返回 28 个节点且 `node_find(name="Threat")` 返回 0；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 107 existing warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
 - 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频或完整返航飞行完成；非 headless 截图仍需后续补证。
 
+## Session Extract -- ochre_island_scene Formal Route Workflow 2026-05-27
+- 当前任务完成: `ochre_island_scene` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 补齐 formal route 资产链路；新增 `.godot-ai/context`、interview、contract、review、execution-plan、verification 记录。
+- Runtime 接入: `S4_chart` 现在提供 `route.ochre` / 赭石岛航线，`HubRuntime` 在确认出发后进入正式 `ochre_island` 屏幕，而不是只依赖 Debug build `OchreDebugButton`。Debug 入口保留为同一独立场景资产的诊断入口，且 smoke 证明它不会替换已提交的正式路线。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-ochre-formal-route-v1`，新增 `authored_scenes::ochre_island_scene`、`route.ochre`、`location.ochre-island`、`resource.banded_iron_ore` 奖励链路和 6 个赭石岛场景单位证据。
+- Domain 接入: `Registry` 注册 `resource.banded_iron_ore`；`PlayableSliceDomainAdapter.HarvestOchreOre()` 将条带状铁矿写入 Resources carried pool；返航通过 `ReturnToHub()` 将 ore 结算入 storage。每次确认出航会重建 `NavigationManager` 航程实例，避免同一会话内旧 Arrived 状态阻塞第二条正式路线的 encounter context。
+- 证据边界: 不把旧 HubRuntime 灰盒、HUD、按钮、标签或调试入口作为 production-ready 赭石岛证据；场景本体证据来自 `src/scenes/ochre/OchreIslandScene.tscn`、作者化场景单位、Godot AI MCP 和自动 smoke。
+- 验证: Godot AI MCP PASS，`scene_open("res://src/scenes/ochre/OchreIslandScene.tscn")` 成功，层级返回 18 个节点，`BandedIronOreInstance` 位置 `(655,390)`、脚本 `BandedIronOre.cs`、`Harvested=false`；`dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 921/921；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，截图因 headless 显示驱动跳过。
+- 剩余风险: 当前仍是生产可追踪灰盒，不声明最终美术 / 音频、完整 90-120 秒实时航行表现或 release packet；非 headless 截图仍需后续补证。
+- 下一步建议: 运行最终 solution build / `git diff --check` 后提交；后续优先补非 headless 截图、最终表现或转向 `old_market_edge_scene` / 修复场景等后续 tracked-gap。
+
 ## Session Extract -- ship_interior_layered Godot Asset Workflow 2026-05-27
 - 当前任务完成: `ship_interior_layered` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
 - 新增独立 Godot 场景资产: `src/scenes/ship/ShipInteriorLayeredScene.tscn` 与 `src/scenes/ship/ShipInteriorLayeredScene.cs`。场景直接实例化 `src/scenes/units/ChartTable.tscn` 为 `ChartTableRuntimeInstance`，并通过 exported `PackedScene` 正式引用 `src/scenes/ui/ChartFullScreenSurface.tscn` / `S4_chart`。

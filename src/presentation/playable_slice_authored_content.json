@@ -1,5 +1,5 @@
 {
-  "content_version": "polish-asset-reset-mist-lamp-wreck-v1",
+  "content_version": "polish-asset-reset-ochre-formal-route-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
@@ -101,6 +101,29 @@
       "arrives_from_scene_id": "voyage_open_world_scene",
       "return_target_scene_id": "initial_island_scene",
       "return_target_runtime_contract_id": "hub_island_dock"
+    },
+    {
+      "scene_id": "ochre_island_scene",
+      "runtime_contract_id": "ochre_island_scene",
+      "display_name": "赭石岛资源浮岛",
+      "godot_scene_path": "src/scenes/ochre/OchreIslandScene.tscn",
+      "scene_spec": "production/scene-specs/ochre-island-scene.md",
+      "production_asset_status": "implemented",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "required_child_assets": [
+        "scene_unit.prototype.ochre_island_mass",
+        "scene_unit.prototype.ochre_island_path",
+        "scene_unit.prototype.banded_iron_ore",
+        "scene_unit.prototype.ochre_return_anchor",
+        "scene_unit.prototype.ochre_cloudsea_boundary"
+      ],
+      "route_id": "route.ochre",
+      "destination_id": "location.ochre-island",
+      "arrives_from_scene_id": "ship_interior_layered",
+      "return_target_scene_id": "initial_island_scene",
+      "return_target_runtime_contract_id": "hub_island_dock",
+      "resource_reward_id": "resource.banded_iron_ore"
     }
   ],
   "scene_unit_prototypes": [
@@ -1245,6 +1268,22 @@
       "distance_band": "medium",
       "chart_hazard_tags": [
         "market",
+        "medium_threat"
+      ],
+      "navigation_hazard_tags": [
+        "safe",
+        "medium_threat"
+      ]
+    },
+    {
+      "route_id": "route.ochre",
+      "display_name": "赭石岛航线",
+      "description": "通往赭色资源浮岛的正式中程航线，用于验证条带状铁矿采集、资源写入和返航结算。",
+      "origin_id": "location.cloudweaver-hub",
+      "destination_id": "location.ochre-island",
+      "distance_band": "medium",
+      "chart_hazard_tags": [
+        "ore",
         "medium_threat"
       ],
       "navigation_hazard_tags": [

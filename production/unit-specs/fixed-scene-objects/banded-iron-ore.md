@@ -131,7 +131,7 @@ UI 只能解释单位状态、可用动作或失败原因；不能成为唯一�
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
 | 数据验证 | 条带状铁矿原型和实例字段完整 | PASS；Godot AI MCP hierarchy PASS，`scene_unit.prototype.banded_iron_ore` 和实例已纳入作者化数据 / `DomainAdapterTest` |
-| 运行时 smoke | 靠近 + Use 采集；容量不足给禁用反馈；采集后状态改变 | partial；`DebugEnterOchreIslandScene()` 可验证靠近 + Use 和采集后状态，正式 Resources 奖励 / 容量不足反馈待补 |
+| 运行时 smoke | 靠近 + Use 采集；采集后状态改变；正式 Resources 写入 | PASS；正式 `route.ochre` 可验证靠近 + Use、`resource.banded_iron_ore` carried pool 写入、返航 storage 结算和采集后状态。容量不足反馈仍属后续容量压力用例。 |
 | 截图 / 视觉证明 | 矿脉首屏、采集后状态和返航路径 | pending |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
