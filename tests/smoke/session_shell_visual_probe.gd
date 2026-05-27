@@ -86,6 +86,17 @@ func _run() -> void:
 	await process_frame
 	_expect(hub.call("DebugHubSpace") == "interior", "Ship entry moves the player into the interior")
 	_expect(hub.call("DebugNodeVisible", "HubShipInteriorShell"), "Ship interior shell becomes visible after boarding")
+	_expect(hub.call("DebugNodeVisible", "ShipInteriorLayeredSceneRuntimeInstance"), "Ship interior mounts the independent ship_interior_layered scene asset")
+	_expect(hub.call("DebugDescendantNames", "ShipInteriorChartTableSocket").size() > 0, "Independent ship interior has a chart table socket")
+	var ship_scene_evidence := hub.call("DebugShipInteriorAssetEvidence") as Dictionary
+	_expect(str(ship_scene_evidence.get("scene_id", "")) == "ship_interior_layered", "Independent ship interior reports the authored scene id")
+	_expect(str(ship_scene_evidence.get("runtime_contract_id", "")) == "hub_ship_interior", "Independent ship interior keeps the runtime compatibility contract id")
+	_expect(bool(ship_scene_evidence.get("chart_table_instance_ready", false)), "Independent ship interior instances ChartTable.tscn")
+	_expect(bool(ship_scene_evidence.get("chart_table_anchor_ready", false)), "Independent ship interior exposes the ChartTable anchor")
+	_expect(bool(ship_scene_evidence.get("s4_chart_reference_ready", false)), "Independent ship interior references the S4_chart scene")
+	_expect(str(ship_scene_evidence.get("bound_chart_table_prototype_id", "")) == "scene_unit.prototype.chart_table", "Ship interior binds to the authored chart table prototype")
+	_expect(str(ship_scene_evidence.get("bound_chart_ui_id", "")) == "S4_chart", "Ship interior binds to the authored S4 chart UI")
+	_expect(not bool(ship_scene_evidence.get("ui_evidence_allowed_for_scene", true)), "Ship interior refuses UI-only scene evidence")
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior has an authored deck floor")
 	_expect(not hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Dock exterior hides while inside the ship")
 	_expect(hub.call("DebugNodeVisible", "HubInteriorHullOutline"), "Ship interior has a visible hull outline")
@@ -175,7 +186,7 @@ func _run() -> void:
 
 	var chart_open_snapshot := hub.call("DebugDomainSnapshot") as Dictionary
 	_expect(str(chart_open_snapshot.get("chart_state", "")) == "Browsing", "C# HubRuntime opens ChartManager into Browsing")
-	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ochre-only-v1", "C# HubRuntime loads asset-reset route/search content version")
+	_expect(str(chart_open_snapshot.get("content_version", "")) == "polish-asset-reset-ship-interior-v1", "C# HubRuntime loads asset-reset route/search content version")
 	_expect(str(chart_open_snapshot.get("content_status", "")) == "polish_authored", "C# HubRuntime reports authored route/search content status")
 	_expect(int(chart_open_snapshot.get("visible_route_count", 0)) >= 2, "C# HubRuntime exposes visible ChartManager routes")
 
@@ -577,7 +588,7 @@ func _expect_scene_physics_contract(
 	_expect(str(contract.get("special_surface_table", "")).contains("visual_only") or str(contract.get("special_surface_table", "")).contains("gameplay_affecting"), "%s classifies special surfaces" % scene_id)
 	if production_asset_scene:
 		_expect_scene_unit_catalog(contract, scene_id, required_collision, required_overlap)
-		var expected_spec := "production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/unit-specs/fixed-scene-objects/chart-table.md"
+		var expected_spec := "production/scene-specs/ochre-island-scene.md" if scene_id == "ochre_island_scene" else "production/scene-specs/ship-interior-layered-scene.md"
 		var expected_floor := "ochre_island_ground_01" if scene_id == "ochre_island_scene" else "ship_deck_01"
 		_expect_scene_unit_authoring_linkage(contract, scene_id, expected_spec, expected_floor)
 	else:

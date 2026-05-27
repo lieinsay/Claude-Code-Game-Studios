@@ -2,7 +2,7 @@
 
 > **Scene ID**: `ship_interior_layered`
 > **运行时合同 ID**: `hub_ship_interior`
-> **状态**: spec_drafted
+> **状态**: implemented
 > **负责人**: Scene Composition System (#19) + Scene Physics Unit System (#20)
 > **最后更新**: 2026-05-24
 
@@ -13,12 +13,12 @@
 | Scene ID | `ship_interior_layered` |
 | 玩家可见场景名 | 云织号船内分层场景 |
 | 所属循环节点 | Hub / Chart |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `implemented` |
 | 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md`; `design/gdd/airship-hub.md` |
 | 来源 story 或设计说明 | `N/A true` |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 创建审查记录 | 本文件“创建适合性人工审查”和“创建适合性记录” |
-| 最近更新日期 | 2026-05-24 |
+| 最近更新日期 | 2026-05-27 |
 | 负责人 | Codex / user / QA |
 
 ## 创建适合性人工审查
@@ -43,11 +43,11 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；当前灰盒由 `src/scenes/HubRuntime.*` 装配，不能作为新增永久船内边界。 |
-| 配套脚本 / runtime | 当前为 `src/scenes/HubRuntime.cs`；后续独立化需拆出 `ship_interior_layered` 专属运行时或数据驱动入口。 |
-| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `hub_ship_interior` 原型与实例。 |
+| 独立 Godot 场景 | `src/scenes/ship/ShipInteriorLayeredScene.tscn`；HubRuntime 只负责挂载 / 切换，不再作为船内 production-ready 场景本体证据。 |
+| 配套脚本 / runtime | `src/scenes/ship/ShipInteriorLayeredScene.cs` 持有场景身份 / 子资产证据；`src/scenes/HubRuntime.cs` 保留运行时状态、输入和领域接入。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `authored_scenes::ship_interior_layered` 与 `hub_ship_interior` 兼容运行时实例链路。 |
 | 资产组 | 船体剖切、驾驶舱、货舱、引擎区、航图台、出口阈值、储物箱。 |
-| 装配入口 | Hub shell 只负责挂载或切换，不拥有船内场景本体规则。 |
+| 装配入口 | Hub shell 挂载 `ShipInteriorLayeredSceneRuntimeInstance` 并切换可见性，不拥有船内场景本体规则。 |
 | 禁止混入位置 | 不得把新增船内规则继续散落进旧 `HubRuntime.tscn`、`HubRuntime.cs` 或 UI 容器。 |
 | 删除旧节点要求 | 若替换旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
@@ -91,15 +91,15 @@
 - 可行走区域: `ShipInteriorWalkBounds`。
 - 边界: 船体轮廓、上层前墙、驾驶舱玻璃、房间舱室。
 - 地标: 驾驶舱、货舱、引擎舱。
-- 交互锚点: 舵台控制台、储物箱、出口阈值。
+- 交互锚点: 独立航图台、储物箱、出口阈值。
 - 遮挡风险: 上层前墙和驾驶舱玻璃不能超过 #20 限制而遮住玩家或核心锚点。
 - 最低灰盒可读性要求: 不读 HUD 文本也能区分驾驶舱 / 货舱 / 引擎区。
 
 ## 5. 关键路径
 
 1. 从码头 / 外部进入船内。
-2. 靠近驾驶舱、货舱或引擎锚点。
-3. 使用舵台 / 出口 / 储物交互，或返回外部流程。
+2. 靠近驾驶舱中的独立航图台、货舱或引擎锚点。
+3. 使用航图台 / 出口 / 储物交互，或返回外部流程。
 
 ## 6. 可选内容 / 可读性节拍
 
@@ -121,27 +121,27 @@
 
 | 锚点 ID | 玩家动作 | 输入 / 焦点规则 | 领域负责人 | 禁用 / 失败反馈 | 世界证据 |
 | --- | --- | --- | --- | --- | --- |
-| `helm_console_prop` | 打开航图 / 航线规划 | 靠近 + 使用；被模态焦点阻止 | Chart / Hub | 航线不可用反馈 | 舵台控制台实例 |
+| `chart_table_anchor` | 打开航图 / 航线规划 | 靠近 + 使用；被模态焦点阻止 | Chart / Hub | 航线不可用反馈 | `ChartTableRuntimeInstance`，来自 `src/scenes/units/ChartTable.tscn` |
 | `storage_crate_prop` | 读取货物 / 仓储状态 | 靠近 + 使用，或被动可读状态 | Resources | 容量反馈 | 储物箱实例 |
 | `ship_exit_threshold` | 离开船内 | 靠近 + 使用 | Hub | 模态焦点拥有输入时阻止 | 出口阈值实例 |
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: `src/scenes/HubRuntime.cs`。
+- Godot 场景或运行时表面: `src/scenes/ship/ShipInteriorLayeredScene.tscn`; `src/scenes/HubRuntime.cs`。
 - 稳定 ID: `src/presentation/playable_slice_authored_content.json` 中的 `scene_unit_prototypes` 和 `scene_unit_instances`。
 - 读取的领域管理器: 通过现有 `PlayableSliceDomainAdapter` 读取 Hub、Chart、Resources、ModuleHull。
 - 会变更的领域管理器: 场景单位作者数据不变更任何领域管理器。
 - 持久化字段: 不新增持久化玩法权威。
 - 信号 / 语义事件: 现有航线、货物、保存 / 读取和 Hub 信号。
 - 焦点和模态边界: ADR-0012 仍是权威。
-- 运行时 debug / smoke hook: `DebugScenePhysicsContract("hub_ship_interior")`。
+- 运行时 debug / smoke hook: `DebugScenePhysicsContract("hub_ship_interior")`; `DebugShipInteriorAssetEvidence()`。
 
 ## 10. 资产与音频需求
 
 | 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 飞艇内部背景 | 身份 | 灰盒 | 美术 |
-| P0 | 舵台控制台 | 交互 | 灰盒标记 | 美术 |
+| P0 | 飞艇内部背景 | 身份 | `ShipInteriorLayeredScene.tscn` 灰盒生产证据 | 美术 |
+| P0 | 航图台 | 交互 | `ChartTable.tscn` 实例化于 `ShipInteriorLayeredScene.tscn` | 美术 |
 | P0 | 储物箱 | 状态 / 交互 | 灰盒标记 | 美术 |
 | P0 | 引擎台 / 磨损覆盖层 | 状态 | 灰盒覆盖层 | 美术 |
 | P1 | 舱室氛围音 | 反馈 | fallback / 缺失 | 音频 |
@@ -150,10 +150,10 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd` | 已通过，等待截图刷新 |
+| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd` | 已接入独立场景断言，等待本轮验证刷新 |
 | 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj` | 已通过 |
 | 截图 / 视觉证明 | 既有 visual probe 证据 | 待刷新 |
-| Codex 审核 | 实现审查 | 数据链路通过 |
+| Codex 审核 | `.godot-ai/reviews/scene/ship_interior_layered.review.md`; `.godot-ai/verification/scene/ship_interior_layered.verification.md` | 本轮新增 |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 ## 13. 创建适合性记录
@@ -189,5 +189,5 @@
 - [x] 至少三个状态变体已记录。
 - [x] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [x] 运行时 / 状态合同没有创建新的玩法权威。
-- [ ] P0 资产 / 音频需求已用最终资产解决。
+- [x] P0 船内场景 / 航图台生产证据已由独立 Godot 资产解决；最终美术 / 音频仍非本轮完成范围。
 - [ ] 截图证据和规格一致性检查在实现后刷新。

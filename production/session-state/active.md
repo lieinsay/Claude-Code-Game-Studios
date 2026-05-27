@@ -15,6 +15,15 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - `production/playtests/scene-composition-user-readability-checklist.md` is now a non-gating feedback prompt/index, not a release-readiness judgment form.
 - 2026-05-27 修正后的最高优先级: 不再优先 release packet / 截图收口。除 `ochre_island_scene` / `banded_iron_ore` 外，当前已有游戏资产都视为临时测试资产，不得继续作为 production-ready 证据。下一步应优先实现已通过创建适合性但没有独立实现的核心 UI / 单位，尤其是 `chart-full-screen-surface` 和 `chart-table`，并按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 重新建立资产。
 
+## Session Extract -- ship_interior_layered Godot Asset Workflow 2026-05-27
+- 当前任务完成: `ship_interior_layered` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
+- 新增独立 Godot 场景资产: `src/scenes/ship/ShipInteriorLayeredScene.tscn` 与 `src/scenes/ship/ShipInteriorLayeredScene.cs`。场景直接实例化 `src/scenes/units/ChartTable.tscn` 为 `ChartTableRuntimeInstance`，并通过 exported `PackedScene` 正式引用 `src/scenes/ui/ChartFullScreenSurface.tscn` / `S4_chart`。
+- Runtime 接入: `HubRuntime` 现在挂载 `ShipInteriorLayeredSceneRuntimeInstance`，保留 `hub_ship_interior` 作为兼容运行时合同 ID，并通过 `DebugShipInteriorAssetEvidence()` 暴露独立场景 / ChartTable / S4_chart 证据。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-ship-interior-v1`，新增 `authored_scenes::ship_interior_layered`，并将 `scene_unit.instance.hub_ship_interior.chart_table` 指向独立船内场景中的 ChartTable 实例。
+- 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 303/303；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
+- 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频完成；旧 HubRuntime helper 节点保留为非破坏性 fallback/status scaffolding，不得作为 production-ready 场景资产证据。
+- 下一步建议: 继续按 Godot asset workflow 重建下一个 reset scene，优先 `initial_island_scene` 或 `voyage_open_world_scene`，并在非 headless 环境补截图证据。
+
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
 - Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.
 - User corrected the current demo scene set: initial island, layered horizontal ship interior, combined voyage open-world scene, mist-lamp wreck, and old market edge. Prior `chart_table_scene` / generic `exploration_mist_island` queue was too implementation-derived.

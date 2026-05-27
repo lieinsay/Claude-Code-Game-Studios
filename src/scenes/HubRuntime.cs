@@ -18,6 +18,7 @@ public partial class HubRuntime : Node2D
 	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
 	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
 	private const string OchreIslandScenePath = "res://src/scenes/ochre/OchreIslandScene.tscn";
+	private const string ShipInteriorLayeredScenePath = "res://src/scenes/ship/ShipInteriorLayeredScene.tscn";
 	private const string ChartTableScenePath = "res://src/scenes/units/ChartTable.tscn";
 	private const string ChartSurfaceScenePath = "res://src/scenes/ui/ChartFullScreenSurface.tscn";
 	private const float PlayerSpeed = 260.0f;
@@ -55,6 +56,7 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> chartSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> explorationSceneItems = [];
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
+	private ShipInteriorLayeredScene? shipInteriorAsset;
 	private ColorRect? chartMistSelectionFrame;
 	private ChartTable? chartTableAsset;
 	private ChartFullScreenSurface? chartSurfaceAsset;
@@ -608,7 +610,7 @@ public partial class HubRuntime : Node2D
 	public string DebugInteractionPrompt() => interactionPromptLabel?.Text ?? "";
 
 	public bool DebugNodeVisible(string nodeName) =>
-		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
+		AnyVisibleDescendantNamed(this, nodeName);
 
 	/// <summary>Returns the current nearest spatial interaction id for smoke tests.</summary>
 	public string DebugNearestInteraction() => nearestInteraction;
@@ -641,6 +643,19 @@ public partial class HubRuntime : Node2D
 				? "ochre_island_scene"
 			: hubSpace == "interior" ? "hub_ship_interior" : "hub_island_dock";
 		return DebugScenePhysicsContract(sceneId);
+	}
+
+	public Godot.Collections.Dictionary DebugShipInteriorAssetEvidence()
+	{
+		return shipInteriorAsset?.DebugSceneAssetEvidence() ?? new Godot.Collections.Dictionary
+		{
+			["scene_id"] = "ship_interior_layered",
+			["runtime_contract_id"] = "hub_ship_interior",
+			["chart_table_instance_ready"] = false,
+			["chart_table_anchor_ready"] = false,
+			["s4_chart_reference_ready"] = false,
+			["ui_evidence_allowed_for_scene"] = false,
+		};
 	}
 
 	public Godot.Collections.Dictionary DebugScenePhysicsContract(string sceneId)
@@ -1373,6 +1388,25 @@ public partial class HubRuntime : Node2D
 		AddSceneLabel(hubInteriorSceneItems, "StorageCrateLabel", new Vector2(527, 552), new Vector2(118, 22), "仓储货箱");
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorExitDoor", new Vector2(218, 552), new Vector2(42, 48), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(hubInteriorSceneItems, "HubMovementCueLabel", new Vector2(430, 606), new Vector2(380, 22), "船内走廊连接驾驶舱、货舱、轮机间");
+		AddShipInteriorLayeredSceneAsset();
+	}
+
+	private void AddShipInteriorLayeredSceneAsset()
+	{
+		var scene = ResourceLoader.Load<PackedScene>(ShipInteriorLayeredScenePath);
+		if (scene?.Instantiate() is not ShipInteriorLayeredScene shipInterior)
+		{
+			AddSceneRect(hubInteriorSceneItems, "ShipInteriorLayeredAssetLoadFailure", new Vector2(284, 388), new Vector2(640, 44), new Color(0.46f, 0.16f, 0.16f, 0.95f));
+			AddSceneLabel(hubInteriorSceneItems, "ShipInteriorLayeredAssetLoadFailureLabel", new Vector2(298, 396), new Vector2(610, 26), "ship_interior_layered 独立场景加载失败");
+			return;
+		}
+
+		shipInteriorAsset = shipInterior;
+		shipInterior.Name = "ShipInteriorLayeredSceneRuntimeInstance";
+		shipInterior.Visible = false;
+		sceneLayer?.AddChild(shipInterior);
+		hubInteriorSceneItems.Add(shipInterior);
+		chartTableAsset = shipInterior.ChartTableInstance ?? chartTableAsset;
 	}
 
 	private void AddChartTableAsset()
@@ -2068,6 +2102,24 @@ public partial class HubRuntime : Node2D
 		}
 	}
 
+	private static bool AnyVisibleDescendantNamed(Node node, string nodeName)
+	{
+		foreach (var child in node.GetChildren())
+		{
+			if (child.Name.ToString() == nodeName && child is CanvasItem item && item.IsVisibleInTree())
+			{
+				return true;
+			}
+
+			if (AnyVisibleDescendantNamed(child, nodeName))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private Rect2 CurrentWalkBounds()
 	{
 		if (currentScreen == "exploration")
@@ -2151,7 +2203,7 @@ public partial class HubRuntime : Node2D
 
 	private Control? FindControl(string nodeName) => FindChild(nodeName, true, false) as Control;
 
-	private static bool IsVisible(CanvasItem? item) => item is not null && item.Visible;
+	private static bool IsVisible(CanvasItem? item) => item is not null && item.IsVisibleInTree();
 
 	private Button? CreateDeleteProgressButton()
 	{

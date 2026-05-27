@@ -1,0 +1,352 @@
+[gd_scene load_steps=5 format=3 uid="uid://ship_interior_layered_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/ship/ShipInteriorLayeredScene.cs" id="1_ship_scene_script"]
+[ext_resource type="PackedScene" path="res://src/scenes/units/ChartTable.tscn" id="2_chart_table_scene"]
+[ext_resource type="PackedScene" path="res://src/scenes/ui/ChartFullScreenSurface.tscn" id="3_s4_chart_scene"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit_threshold"]
+size = Vector2(72, 92)
+
+[node name="ShipInteriorLayeredScene" type="Node2D"]
+script = ExtResource("1_ship_scene_script")
+S4ChartScene = ExtResource("3_s4_chart_scene")
+
+[node name="ShipInteriorWorldLayer" type="Node2D" parent="."]
+
+[node name="HubInteriorBackdrop" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 0.0
+offset_top = 126.0
+offset_right = 1280.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.09, 0.13, 0.16, 1)
+
+[node name="HubInteriorHullOutline" type="Polygon2D" parent="ShipInteriorWorldLayer"]
+polygon = PackedVector2Array(156, 450, 248, 378, 1002, 378, 1128, 452, 1018, 632, 236, 632)
+color = Color(0.14, 0.19, 0.23, 1)
+
+[node name="UpperHullFrontWall" type="Polygon2D" parent="ShipInteriorWorldLayer"]
+polygon = PackedVector2Array(218, 392, 1006, 392, 1100, 450, 1042, 470, 246, 470)
+color = Color(0.18, 0.25, 0.29, 0.72)
+
+[node name="HubShipInteriorShell" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 220.0
+offset_top = 442.0
+offset_right = 1024.0
+offset_bottom = 608.0
+mouse_filter = 2
+color = Color(0.13, 0.18, 0.22, 1)
+
+[node name="ShipInteriorWalkBounds" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 196.0
+offset_top = 424.0
+offset_right = 1032.0
+offset_bottom = 632.0
+mouse_filter = 2
+color = Color(0.12, 0.19, 0.20, 0.64)
+
+[node name="HubDeckFloor" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 196.0
+offset_top = 526.0
+offset_right = 1032.0
+offset_bottom = 638.0
+mouse_filter = 2
+color = Color(0.18, 0.23, 0.24, 0.88)
+
+[node name="HubDeckRail" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 216.0
+offset_top = 502.0
+offset_right = 996.0
+offset_bottom = 514.0
+mouse_filter = 2
+color = Color(0.43, 0.55, 0.56, 0.95)
+
+[node name="HubInteriorMainAisle" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 276.0
+offset_top = 536.0
+offset_right = 948.0
+offset_bottom = 544.0
+mouse_filter = 2
+color = Color(0.50, 0.55, 0.48, 0.82)
+
+[node name="CockpitChartBay" type="Node2D" parent="ShipInteriorWorldLayer"]
+
+[node name="HubInteriorCockpitBay" type="ColorRect" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 244.0
+offset_top = 408.0
+offset_right = 492.0
+offset_bottom = 530.0
+mouse_filter = 2
+color = Color(0.18, 0.37, 0.44, 0.96)
+
+[node name="HubCabinRoom" type="ColorRect" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 274.0
+offset_top = 464.0
+offset_right = 458.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.21, 0.34, 0.40, 0.94)
+
+[node name="HubCabinGlow" type="ColorRect" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 278.0
+offset_top = 456.0
+offset_right = 454.0
+offset_bottom = 462.0
+mouse_filter = 2
+color = Color(0.56, 0.82, 0.92, 0.98)
+
+[node name="HubCabinRoomLabel" type="Label" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 288.0
+offset_top = 470.0
+offset_right = 442.0
+offset_bottom = 494.0
+text = "驾驶舱 / 航图台"
+horizontal_alignment = 1
+
+[node name="HubCabinWindow" type="ColorRect" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 304.0
+offset_top = 490.0
+offset_right = 428.0
+offset_bottom = 500.0
+mouse_filter = 2
+color = Color(0.48, 0.68, 0.78, 0.92)
+
+[node name="HubCabinNavigationSlate" type="ColorRect" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 302.0
+offset_top = 506.0
+offset_right = 430.0
+offset_bottom = 520.0
+mouse_filter = 2
+color = Color(0.12, 0.27, 0.34, 0.96)
+
+[node name="HubCabinStatusLabel" type="Label" parent="ShipInteriorWorldLayer/CockpitChartBay"]
+offset_left = 286.0
+offset_top = 528.0
+offset_right = 448.0
+offset_bottom = 550.0
+text = "驾驶舱：待规划"
+horizontal_alignment = 1
+
+[node name="ShipInteriorChartTableSocket" type="Node2D" parent="ShipInteriorWorldLayer"]
+position = Vector2(362, 574)
+
+[node name="ChartTableRuntimeInstance" parent="ShipInteriorWorldLayer/ShipInteriorChartTableSocket" instance=ExtResource("2_chart_table_scene")]
+
+[node name="CargoBay" type="Node2D" parent="ShipInteriorWorldLayer"]
+
+[node name="HubInteriorCargoBay" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 520.0
+offset_top = 408.0
+offset_right = 770.0
+offset_bottom = 530.0
+mouse_filter = 2
+color = Color(0.42, 0.32, 0.20, 0.96)
+
+[node name="HubCargoRoom" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 506.0
+offset_top = 464.0
+offset_right = 690.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.37, 0.30, 0.21, 0.94)
+
+[node name="HubCargoGlow" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 510.0
+offset_top = 456.0
+offset_right = 686.0
+offset_bottom = 462.0
+mouse_filter = 2
+color = Color(0.86, 0.66, 0.34, 0.98)
+
+[node name="HubCargoRoomLabel" type="Label" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 530.0
+offset_top = 472.0
+offset_right = 666.0
+offset_bottom = 494.0
+text = "货舱"
+horizontal_alignment = 1
+
+[node name="HubCargoShelfLeft" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 520.0
+offset_top = 490.0
+offset_right = 554.0
+offset_bottom = 520.0
+mouse_filter = 2
+color = Color(0.55, 0.46, 0.29, 0.95)
+
+[node name="HubCargoShelfRight" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 642.0
+offset_top = 490.0
+offset_right = 676.0
+offset_bottom = 520.0
+mouse_filter = 2
+color = Color(0.55, 0.46, 0.29, 0.95)
+
+[node name="HubCargoLoadTrack" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 560.0
+offset_top = 504.0
+offset_right = 632.0
+offset_bottom = 514.0
+mouse_filter = 2
+color = Color(0.24, 0.21, 0.16, 0.96)
+
+[node name="HubCargoLoadFill" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+visible = false
+offset_left = 560.0
+offset_top = 504.0
+offset_right = 560.0
+offset_bottom = 514.0
+mouse_filter = 2
+color = Color(0.78, 0.64, 0.34, 0.98)
+
+[node name="HubCargoStatusLabel" type="Label" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 518.0
+offset_top = 528.0
+offset_right = 678.0
+offset_bottom = 550.0
+text = "货舱：空载"
+horizontal_alignment = 1
+
+[node name="StorageCrateProp" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 520.0
+offset_top = 548.0
+offset_right = 652.0
+offset_bottom = 604.0
+mouse_filter = 2
+color = Color(0.42, 0.34, 0.22, 0.95)
+
+[node name="StorageCrateBand" type="ColorRect" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 536.0
+offset_top = 564.0
+offset_right = 636.0
+offset_bottom = 574.0
+mouse_filter = 2
+color = Color(0.68, 0.59, 0.39, 0.95)
+
+[node name="StorageCrateLabel" type="Label" parent="ShipInteriorWorldLayer/CargoBay"]
+offset_left = 527.0
+offset_top = 552.0
+offset_right = 645.0
+offset_bottom = 574.0
+text = "仓储货箱"
+horizontal_alignment = 1
+
+[node name="EngineBay" type="Node2D" parent="ShipInteriorWorldLayer"]
+
+[node name="HubInteriorEngineBay" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 798.0
+offset_top = 408.0
+offset_right = 1048.0
+offset_bottom = 530.0
+mouse_filter = 2
+color = Color(0.28, 0.31, 0.43, 0.96)
+
+[node name="HubEngineRoom" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 766.0
+offset_top = 464.0
+offset_right = 950.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.28, 0.30, 0.38, 0.94)
+
+[node name="HubEngineGlow" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 770.0
+offset_top = 456.0
+offset_right = 946.0
+offset_bottom = 462.0
+mouse_filter = 2
+color = Color(0.72, 0.76, 0.96, 0.98)
+
+[node name="HubEngineRoomLabel" type="Label" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 788.0
+offset_top = 472.0
+offset_right = 928.0
+offset_bottom = 494.0
+text = "轮机间"
+horizontal_alignment = 1
+
+[node name="HubEngineCoilLeft" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 794.0
+offset_top = 492.0
+offset_right = 836.0
+offset_bottom = 520.0
+mouse_filter = 2
+color = Color(0.34, 0.43, 0.56, 0.95)
+
+[node name="HubEngineCoilRight" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 882.0
+offset_top = 492.0
+offset_right = 924.0
+offset_bottom = 520.0
+mouse_filter = 2
+color = Color(0.34, 0.43, 0.56, 0.95)
+
+[node name="HubEnginePowerConduit" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 836.0
+offset_top = 504.0
+offset_right = 882.0
+offset_bottom = 512.0
+mouse_filter = 2
+color = Color(0.64, 0.70, 0.48, 0.95)
+
+[node name="HubEngineWearOverlay" type="ColorRect" parent="ShipInteriorWorldLayer/EngineBay"]
+visible = false
+offset_left = 800.0
+offset_top = 486.0
+offset_right = 918.0
+offset_bottom = 522.0
+mouse_filter = 2
+color = Color(0.64, 0.25, 0.21, 0.35)
+
+[node name="HubEngineStatusLabel" type="Label" parent="ShipInteriorWorldLayer/EngineBay"]
+offset_left = 778.0
+offset_top = 528.0
+offset_right = 938.0
+offset_bottom = 550.0
+text = "轮机间：稳定"
+horizontal_alignment = 1
+
+[node name="HubInteriorDoorLineCabinCargo" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 474.0
+offset_top = 470.0
+offset_right = 484.0
+offset_bottom = 522.0
+mouse_filter = 2
+color = Color(0.58, 0.58, 0.46, 0.88)
+
+[node name="HubInteriorDoorLineCargoEngine" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 728.0
+offset_top = 470.0
+offset_right = 738.0
+offset_bottom = 522.0
+mouse_filter = 2
+color = Color(0.58, 0.58, 0.46, 0.88)
+
+[node name="HubInteriorExitDoor" type="ColorRect" parent="ShipInteriorWorldLayer"]
+offset_left = 218.0
+offset_top = 552.0
+offset_right = 260.0
+offset_bottom = 600.0
+mouse_filter = 2
+color = Color(0.48, 0.42, 0.31, 0.96)
+
+[node name="ShipExitThreshold" type="Area2D" parent="ShipInteriorWorldLayer"]
+position = Vector2(224, 584)
+
+[node name="ShipExitThresholdShape" type="CollisionShape2D" parent="ShipInteriorWorldLayer/ShipExitThreshold"]
+shape = SubResource("RectangleShape2D_exit_threshold")
+
+[node name="ShipInteriorPlayerStart" type="Marker2D" parent="ShipInteriorWorldLayer"]
+position = Vector2(246, 610)
+
+[node name="HubMovementCueLabel" type="Label" parent="ShipInteriorWorldLayer"]
+offset_left = 430.0
+offset_top = 606.0
+offset_right = 810.0
+offset_bottom = 628.0
+text = "船内走廊连接驾驶舱、货舱、轮机间"
+horizontal_alignment = 1
+
+[node name="SceneReferences" type="Node" parent="."]
+
+[node name="S4ChartSceneReference" type="Node" parent="SceneReferences"]
