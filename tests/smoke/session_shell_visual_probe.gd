@@ -67,6 +67,9 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubIslandMainMass"), "Hub exterior has a large island mass")
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipHullSilhouette"), "Hub exterior has a readable ship hull silhouette")
 	_expect(_control_area(session, "HubPlayableSkyBackdrop") > 500000.0, "Hub scene occupies the main viewport instead of a text-only strip")
+	_expect(_draw_alpha(session, "HubPlayableSkyBackdrop") >= 0.99, "Hub backdrop is opaque so the old text dashboard cannot bleed through")
+	_expect(_draw_alpha(session, "HubIslandWalkBoundary") >= 0.99, "Hub walkable island layer is opaque scene evidence")
+	_expect(_draw_alpha(session, "HubDockedShipHullSilhouette") >= 0.99, "Hub ship silhouette is opaque scene evidence")
 	_expect(_control_area(session, "HubDockPlankWalkway") > 18000.0, "Hub dock is large enough for manual visual recognition")
 	_expect(hub.call("DebugNodeVisible", "HubDockPier"), "Hub has an authored island dock pier")
 	_expect(hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Hub shows the docked ship exterior")
@@ -86,6 +89,8 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "HubDeckFloor"), "Ship interior has an authored deck floor")
 	_expect(not hub.call("DebugNodeVisible", "HubDockedShipExterior"), "Dock exterior hides while inside the ship")
 	_expect(hub.call("DebugNodeVisible", "HubInteriorHullOutline"), "Ship interior has a visible hull outline")
+	_expect(_draw_alpha(session, "HubInteriorBackdrop") >= 0.99, "Ship interior backdrop is opaque so deck text cannot dominate")
+	_expect(_draw_alpha(session, "HubShipInteriorShell") >= 0.99, "Ship interior shell is opaque scene evidence")
 	_expect(hub.call("DebugNodeVisible", "HubInteriorCockpitBay"), "Ship interior cockpit bay is a large readable space")
 	_expect(hub.call("DebugNodeVisible", "HubInteriorCargoBay"), "Ship interior cargo bay is a large readable space")
 	_expect(hub.call("DebugNodeVisible", "HubInteriorEngineBay"), "Ship interior engine bay is a large readable space")
@@ -199,6 +204,9 @@ func _run() -> void:
 	_expect(hub.call("DebugNodeVisible", "ExplorationPlayableIslandBody"), "Exploration has a large visible island body")
 	_expect(hub.call("DebugNodeVisible", "ExplorationReturnShipHullSilhouette"), "Exploration return point reads as a docked ship")
 	_expect(_control_area(session, "ExplorationPlayableSkyBackdrop") > 500000.0, "Exploration scene occupies the main viewport instead of only HUD text")
+	_expect(_draw_alpha(session, "ExplorationPlayableSkyBackdrop") >= 0.99, "Exploration backdrop is opaque so the old text dashboard cannot bleed through")
+	_expect(_draw_alpha(session, "ExplorationIslandWalkBoundary") >= 0.99, "Exploration walkable island layer is opaque scene evidence")
+	_expect(_draw_alpha(session, "ExplorationReturnShipHullSilhouette") >= 0.99, "Exploration return ship silhouette is opaque scene evidence")
 	_expect(hub.call("DebugNodeVisible", "ExplorationDockedShip"), "Exploration has a docked ship spatial anchor")
 	_expect(hub.call("DebugNodeVisible", "ExplorationBoardingRamp"), "Exploration has a boarding ramp spatial anchor")
 	_expect(hub.call("DebugNodeVisible", "ExplorationIslandPath"), "Exploration has a walkable island path")
@@ -345,18 +353,25 @@ func _run() -> void:
 	_expect(str(hub.call("DebugCurrentScreen")) == "ochre_dev", "Debug entry opens Ochre Island without replacing playable route")
 	_expect(str((hub.call("DebugCurrentScenePhysicsContract") as Dictionary).get("scene_id", "")) == "ochre_island_scene", "Current physics contract follows Ochre debug scene")
 	_expect(hub.call("DebugNodeVisible", "OchreIslandGround"), "Ochre debug scene renders independent island ground")
-	_expect(hub.call("DebugNodeVisible", "BandedIronOreBody"), "Ochre debug scene renders banded iron ore")
+	_expect(hub.call("DebugNodeVisible", "BandedIronOreInstance"), "Ochre debug scene uses the independent banded iron ore instance")
+	_expect(hub.call("DebugNodeVisible", "OreBodyAvailable"), "Ochre debug scene renders banded iron ore body from the unit scene")
 	_expect(_label_text(session, "OchreOreSemanticLabel").contains("可采集"), "Ochre ore starts harvestable")
 	_expect(not bool(hub.call("DebugOchreOreHarvested")), "Ochre ore starts unharvested")
-	hub.call("DebugSetPlayerPosition", Vector2(656, 521))
+	_expect(bool(hub.call("DebugMarkerVisible", "OchreOreInteractPoint")), "Ochre ore interaction marker is visible in debug scene")
+	_expect(bool(hub.call("DebugMarkerVisible", "OchreReturnInteractPoint")), "Ochre return interaction marker is visible in debug scene")
+	hub.call("DebugSetPlayerPosition", Vector2(655, 410))
 	await process_frame
+	_expect(float(hub.call("DebugDistanceToMarker", "OchreOreInteractPoint")) <= 2.0, "Ochre ore marker aligns with the independent ore scene")
+	_expect(str(hub.call("DebugNearestInteraction")) == "ochre_ore", "Ochre ore marker becomes the nearest interaction")
 	_expect(hub.call("DebugInteractionPrompt").contains("采集条带状铁矿"), "Moving near Ochre ore reveals harvest prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
 	_expect(bool(hub.call("DebugOchreOreHarvested")), "Ochre debug harvest toggles world resource state")
 	_expect(_label_text(session, "OchreOreSemanticLabel").contains("已采集"), "Ochre ore label shows harvested state")
-	hub.call("DebugSetPlayerPosition", Vector2(942, 527))
+	hub.call("DebugSetPlayerPosition", Vector2(875, 430))
 	await process_frame
+	_expect(float(hub.call("DebugDistanceToMarker", "OchreReturnInteractPoint")) <= 2.0, "Ochre return marker aligns with the independent return anchor")
+	_expect(str(hub.call("DebugNearestInteraction")) == "ochre_return", "Ochre return marker becomes the nearest interaction")
 	_expect(hub.call("DebugInteractionPrompt").contains("预热赭石岛返航锚点"), "Moving near Ochre return anchor reveals return prompt")
 	hub.call("TrySpatialInteraction")
 	await process_frame
@@ -401,6 +416,14 @@ func _control_width(root_node: Node, node_name: String) -> float:
 func _control_area(root_node: Node, node_name: String) -> float:
 	var control := root_node.find_child(node_name, true, false) as Control
 	return 0.0 if control == null else control.size.x * control.size.y
+
+
+func _draw_alpha(root_node: Node, node_name: String) -> float:
+	var color_rect := root_node.find_child(node_name, true, false) as ColorRect
+	if color_rect != null:
+		return color_rect.color.a
+	var polygon := root_node.find_child(node_name, true, false) as Polygon2D
+	return -1.0 if polygon == null else polygon.color.a
 
 
 func _canvas_z_index(root_node: Node, node_name: String) -> int:

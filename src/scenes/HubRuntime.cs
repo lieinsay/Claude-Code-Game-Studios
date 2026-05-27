@@ -17,6 +17,7 @@ public partial class HubRuntime : Node2D
 	private const string QuarantinedProgressFileName = "cloudweaver_playable_progress.quarantine.json";
 	private const string QuarantinedProgressPath = $"user://{QuarantinedProgressFileName}";
 	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
+	private const string OchreIslandScenePath = "res://src/scenes/ochre/OchreIslandScene.tscn";
 	private const float PlayerSpeed = 260.0f;
 	private const float InteractionRadius = 74.0f;
 	private static readonly SceneUnitAuthoringFixture SceneUnitAuthoring = SceneUnitAuthoringFixture.Load(AuthoredContentPath);
@@ -603,6 +604,25 @@ public partial class HubRuntime : Node2D
 
 	public bool DebugNodeVisible(string nodeName) =>
 		FindChild(nodeName, true, false) is CanvasItem item && item.Visible;
+
+	/// <summary>Returns the current nearest spatial interaction id for smoke tests.</summary>
+	public string DebugNearestInteraction() => nearestInteraction;
+
+	/// <summary>Reports whether a named interaction marker is visible for smoke tests.</summary>
+	public bool DebugMarkerVisible(string nodeName) =>
+		FindChild(nodeName, true, false) is Control marker && marker.Visible;
+
+	/// <summary>Returns the current player distance to a named interaction marker for smoke tests.</summary>
+	public float DebugDistanceToMarker(string nodeName) =>
+		FindChild(nodeName, true, false) is Control marker ? DistanceToMarker(marker) : float.PositiveInfinity;
+
+	/// <summary>Returns descendant node paths whose names contain the supplied fragment for smoke diagnostics.</summary>
+	public Godot.Collections.Array<string> DebugDescendantNames(string nameFragment)
+	{
+		var matches = new Godot.Collections.Array<string>();
+		CollectDescendantNames(this, nameFragment, matches);
+		return matches;
+	}
 
 	public string DebugHubSpace() => hubSpace;
 
@@ -1236,8 +1256,8 @@ public partial class HubRuntime : Node2D
 		hubStorageMarker = AddWorldMarker("StorageInteractPoint", new Vector2(536, 594), new Color(0.58f, 0.45f, 0.26f), "仓储 E");
 		explorationSearchMarker = AddWorldMarker("SearchInteractPoint", new Vector2(592, 594), new Color(0.46f, 0.67f, 0.33f), "搜索 E");
 		explorationReturnMarker = AddWorldMarker("ReturnInteractPoint", new Vector2(204, 594), new Color(0.64f, 0.39f, 0.28f), "驾驶返航 E");
-		ochreOreMarker = AddWorldMarker("OchreOreInteractPoint", new Vector2(610, 502), new Color(0.64f, 0.50f, 0.30f), "采集 E");
-		ochreReturnMarker = AddWorldMarker("OchreReturnInteractPoint", new Vector2(896, 508), new Color(0.44f, 0.58f, 0.63f), "返航 E");
+		ochreOreMarker = AddWorldMarker("OchreOreInteractPoint", new Vector2(609, 391), new Color(0.64f, 0.50f, 0.30f), "采集 E");
+		ochreReturnMarker = AddWorldMarker("OchreReturnInteractPoint", new Vector2(829, 411), new Color(0.44f, 0.58f, 0.63f), "返航 E");
 
 		playerMarker = new ColorRect
 		{
@@ -1266,12 +1286,12 @@ public partial class HubRuntime : Node2D
 
 	private void AddHubGreyboxSet()
 	{
-		AddSceneRect(hubSceneItems, "HubPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.12f, 0.22f, 0.27f, 0.98f));
+		AddSceneRect(hubSceneItems, "HubPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.12f, 0.22f, 0.27f, 1.0f));
 		AddSceneRect(hubSceneItems, "HubPlayableFarMist", new Vector2(0, 162), new Vector2(1280, 62), new Color(0.36f, 0.50f, 0.52f, 0.46f));
-		AddSceneRect(hubSceneItems, "HubPlayableSeaHorizon", new Vector2(0, 592), new Vector2(1280, 88), new Color(0.08f, 0.22f, 0.31f, 0.98f));
-		AddSceneEllipse(hubExteriorSceneItems, "HubIslandMainMass", new Vector2(468, 522), new Vector2(438, 154), new Color(0.18f, 0.36f, 0.28f, 0.98f));
-		AddSceneEllipse(hubExteriorSceneItems, "HubIslandGrassCap", new Vector2(464, 472), new Vector2(382, 78), new Color(0.34f, 0.55f, 0.42f, 0.98f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockPlankWalkway", new Vector2(120, 562), new Vector2(390, 54), new Color(0.48f, 0.40f, 0.28f, 0.98f));
+		AddSceneRect(hubSceneItems, "HubPlayableSeaHorizon", new Vector2(0, 592), new Vector2(1280, 88), new Color(0.08f, 0.22f, 0.31f, 1.0f));
+		AddSceneEllipse(hubExteriorSceneItems, "HubIslandMainMass", new Vector2(468, 522), new Vector2(438, 154), new Color(0.18f, 0.36f, 0.28f, 1.0f));
+		AddSceneEllipse(hubExteriorSceneItems, "HubIslandGrassCap", new Vector2(464, 472), new Vector2(382, 78), new Color(0.34f, 0.55f, 0.42f, 1.0f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockPlankWalkway", new Vector2(120, 562), new Vector2(390, 54), new Color(0.48f, 0.40f, 0.28f, 1.0f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockPostLeft", new Vector2(144, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockPostRight", new Vector2(458, 520), new Vector2(18, 100), new Color(0.30f, 0.23f, 0.16f, 0.98f));
 		AddScenePolygon(hubExteriorSceneItems, "HubDockedShipHullSilhouette",
@@ -1283,22 +1303,22 @@ public partial class HubRuntime : Node2D
 				new Vector2(558, 584),
 				new Vector2(488, 530),
 			],
-			new Color(0.16f, 0.23f, 0.30f, 0.98f));
+			new Color(0.16f, 0.23f, 0.30f, 1.0f));
 		AddSceneEllipse(hubExteriorSceneItems, "HubDockedShipEnvelopeSilhouette", new Vector2(756, 396), new Vector2(292, 68), new Color(0.54f, 0.68f, 0.70f, 0.96f));
 		AddSceneRect(hubExteriorSceneItems, "HubShipMastForward", new Vector2(636, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
 		AddSceneRect(hubExteriorSceneItems, "HubShipMastRear", new Vector2(846, 430), new Vector2(10, 126), new Color(0.52f, 0.60f, 0.58f, 0.96f));
-		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 0.90f));
+		AddSceneRect(hubSceneItems, "HubIslandWalkBoundary", HubWalkBounds.Position, HubWalkBounds.Size, new Color(0.13f, 0.26f, 0.25f, 1.0f));
 		AddSceneRect(hubExteriorSceneItems, "HubIslandUpperEdge", new Vector2(132, 380), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
 		AddSceneRect(hubExteriorSceneItems, "HubIslandLowerEdge", new Vector2(132, 622), new Vector2(1016, 10), new Color(0.46f, 0.66f, 0.60f, 0.95f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockWaterline", new Vector2(72, 632), new Vector2(1136, 18), new Color(0.10f, 0.26f, 0.34f, 0.78f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockPier", new Vector2(156, 568), new Vector2(224, 34), new Color(0.42f, 0.36f, 0.27f, 0.96f));
-		AddSceneRect(hubExteriorSceneItems, "HubDockedShipExterior", new Vector2(382, 448), new Vector2(448, 126), new Color(0.18f, 0.25f, 0.31f, 0.95f));
+		AddSceneRect(hubExteriorSceneItems, "HubDockedShipExterior", new Vector2(382, 448), new Vector2(448, 126), new Color(0.18f, 0.25f, 0.31f, 1.0f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockedShipBalloon", new Vector2(446, 390), new Vector2(320, 54), new Color(0.43f, 0.58f, 0.62f, 0.90f));
 		AddSceneRect(hubExteriorSceneItems, "HubDockedShipCabinDoor", new Vector2(410, 536), new Vector2(56, 38), new Color(0.54f, 0.48f, 0.34f, 0.98f));
 		AddSceneRect(hubExteriorSceneItems, "HubBoardingRamp", new Vector2(236, 558), new Vector2(174, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(hubExteriorSceneItems, "HubBoardingRampLabel", new Vector2(208, 532), new Vector2(174, 22), "岛上码头 / 登船坡道");
 		AddSceneLabel(hubExteriorSceneItems, "HubIslandDockIdentityLabel", new Vector2(438, 414), new Vector2(360, 28), "停泊浮岛：云织号靠岸，可登船进入内部");
-		AddSceneRect(hubInteriorSceneItems, "HubInteriorBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.09f, 0.13f, 0.16f, 0.98f));
+		AddSceneRect(hubInteriorSceneItems, "HubInteriorBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.09f, 0.13f, 0.16f, 1.0f));
 		AddScenePolygon(hubInteriorSceneItems, "HubInteriorHullOutline",
 			[
 				new Vector2(156, 450),
@@ -1308,13 +1328,13 @@ public partial class HubRuntime : Node2D
 				new Vector2(1018, 632),
 				new Vector2(236, 632),
 			],
-			new Color(0.14f, 0.19f, 0.23f, 0.98f));
+			new Color(0.14f, 0.19f, 0.23f, 1.0f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorDeckSpine", new Vector2(214, 540), new Vector2(820, 42), new Color(0.42f, 0.48f, 0.44f, 0.92f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorCockpitBay", new Vector2(244, 408), new Vector2(248, 122), new Color(0.18f, 0.37f, 0.44f, 0.96f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorCargoBay", new Vector2(520, 408), new Vector2(250, 122), new Color(0.42f, 0.32f, 0.20f, 0.96f));
 		AddSceneRect(hubInteriorSceneItems, "HubInteriorEngineBay", new Vector2(798, 408), new Vector2(250, 122), new Color(0.28f, 0.31f, 0.43f, 0.96f));
 		AddSceneLabel(hubInteriorSceneItems, "HubStationIdentityLabel", new Vector2(440, 424), new Vector2(360, 28), "云织号船内：驾驶舱 / 货舱 / 轮机间");
-		AddSceneRect(hubInteriorSceneItems, "HubShipInteriorShell", new Vector2(220, 442), new Vector2(804, 166), new Color(0.13f, 0.18f, 0.22f, 0.95f));
+		AddSceneRect(hubInteriorSceneItems, "HubShipInteriorShell", new Vector2(220, 442), new Vector2(804, 166), new Color(0.13f, 0.18f, 0.22f, 1.0f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinRoom", new Vector2(274, 464), new Vector2(184, 64), new Color(0.21f, 0.34f, 0.40f, 0.94f));
 		AddSceneRect(hubInteriorSceneItems, "HubCabinGlow", new Vector2(278, 456), new Vector2(176, 6), new Color(0.56f, 0.82f, 0.92f, 0.98f));
 		AddSceneLabel(hubInteriorSceneItems, "HubCabinRoomLabel", new Vector2(288, 470), new Vector2(154, 24), "驾驶舱 / 航台");
@@ -1354,7 +1374,7 @@ public partial class HubRuntime : Node2D
 
 	private void AddChartGreyboxSet()
 	{
-		AddSceneRect(chartSceneItems, "ChartCabinBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.08f, 0.12f, 0.13f, 0.98f));
+		AddSceneRect(chartSceneItems, "ChartCabinBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.08f, 0.12f, 0.13f, 1.0f));
 		AddSceneRect(chartSceneItems, "ChartTableShadow", new Vector2(128, 210), new Vector2(1024, 398), new Color(0.05f, 0.08f, 0.08f, 0.82f));
 		AddSceneRect(chartSceneItems, "ChartTableSurface", new Vector2(150, 190), new Vector2(980, 382), new Color(0.31f, 0.24f, 0.16f, 0.98f));
 		AddSceneRect(chartSceneItems, "ChartTableBrassRimTop", new Vector2(172, 212), new Vector2(936, 10), new Color(0.70f, 0.55f, 0.31f, 0.98f));
@@ -1385,12 +1405,12 @@ public partial class HubRuntime : Node2D
 
 	private void AddExplorationGreyboxSet()
 	{
-		AddSceneRect(explorationSceneItems, "ExplorationPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.10f, 0.20f, 0.25f, 0.98f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.10f, 0.20f, 0.25f, 1.0f));
 		AddSceneRect(explorationSceneItems, "ExplorationPlayableMistHorizon", new Vector2(0, 160), new Vector2(1280, 72), new Color(0.42f, 0.52f, 0.50f, 0.44f));
-		AddSceneRect(explorationSceneItems, "ExplorationPlayableSea", new Vector2(0, 596), new Vector2(1280, 84), new Color(0.07f, 0.22f, 0.30f, 0.98f));
-		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandBody", new Vector2(650, 510), new Vector2(468, 152), new Color(0.16f, 0.35f, 0.27f, 0.98f));
-		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandUpperTrail", new Vector2(650, 462), new Vector2(380, 68), new Color(0.34f, 0.52f, 0.39f, 0.96f));
-		AddSceneRect(explorationSceneItems, "ExplorationPlayablePier", new Vector2(122, 566), new Vector2(276, 46), new Color(0.47f, 0.38f, 0.26f, 0.98f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayableSea", new Vector2(0, 596), new Vector2(1280, 84), new Color(0.07f, 0.22f, 0.30f, 1.0f));
+		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandBody", new Vector2(650, 510), new Vector2(468, 152), new Color(0.16f, 0.35f, 0.27f, 1.0f));
+		AddSceneEllipse(explorationSceneItems, "ExplorationPlayableIslandUpperTrail", new Vector2(650, 462), new Vector2(380, 68), new Color(0.34f, 0.52f, 0.39f, 1.0f));
+		AddSceneRect(explorationSceneItems, "ExplorationPlayablePier", new Vector2(122, 566), new Vector2(276, 46), new Color(0.47f, 0.38f, 0.26f, 1.0f));
 		AddScenePolygon(explorationSceneItems, "ExplorationReturnShipHullSilhouette",
 			[
 				new Vector2(102, 520),
@@ -1400,9 +1420,9 @@ public partial class HubRuntime : Node2D
 				new Vector2(130, 610),
 				new Vector2(72, 560),
 			],
-			new Color(0.16f, 0.24f, 0.31f, 0.98f));
+			new Color(0.16f, 0.24f, 0.31f, 1.0f));
 		AddSceneEllipse(explorationSceneItems, "ExplorationReturnShipEnvelope", new Vector2(218, 474), new Vector2(132, 42), new Color(0.52f, 0.66f, 0.68f, 0.94f));
-		AddSceneRect(explorationSceneItems, "ExplorationIslandWalkBoundary", ExplorationWalkBounds.Position, ExplorationWalkBounds.Size, new Color(0.12f, 0.27f, 0.24f, 0.90f));
+		AddSceneRect(explorationSceneItems, "ExplorationIslandWalkBoundary", ExplorationWalkBounds.Position, ExplorationWalkBounds.Size, new Color(0.12f, 0.27f, 0.24f, 1.0f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandUpperEdge", new Vector2(132, 390), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationIslandLowerEdge", new Vector2(132, 624), new Vector2(1016, 12), new Color(0.45f, 0.64f, 0.54f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationDockedShip", new Vector2(156, 546), new Vector2(154, 74), new Color(0.20f, 0.27f, 0.33f, 0.96f));
@@ -1411,8 +1431,8 @@ public partial class HubRuntime : Node2D
 		AddSceneRect(explorationSceneItems, "ExplorationBoardingRamp", new Vector2(290, 580), new Vector2(92, 28), new Color(0.48f, 0.42f, 0.31f, 0.96f));
 		AddSceneLabel(explorationSceneItems, "ExplorationBoardingRampLabel", new Vector2(166, 522), new Vector2(132, 22), "靠岸空艇");
 		AddSceneRect(explorationSceneItems, "ExplorationIslandPath", new Vector2(342, 584), new Vector2(610, 20), new Color(0.32f, 0.44f, 0.36f, 0.95f));
-		AddSceneRect(explorationSceneItems, "ExplorationSkyField", new Vector2(92, 500), new Vector2(1092, 138), new Color(0.10f, 0.20f, 0.25f, 0.90f));
-		AddSceneRect(explorationSceneItems, "ExplorationIslandMass", new Vector2(390, 430), new Vector2(470, 154), new Color(0.18f, 0.34f, 0.27f, 0.94f));
+		AddSceneRect(explorationSceneItems, "ExplorationSkyField", new Vector2(92, 500), new Vector2(1092, 138), new Color(0.10f, 0.20f, 0.25f, 1.0f));
+		AddSceneRect(explorationSceneItems, "ExplorationIslandMass", new Vector2(390, 430), new Vector2(470, 154), new Color(0.18f, 0.34f, 0.27f, 1.0f));
 		AddSceneRect(explorationSceneItems, "ExplorationCliffEdge", new Vector2(416, 444), new Vector2(418, 18), new Color(0.56f, 0.66f, 0.50f, 0.95f));
 		AddSceneRect(explorationSceneItems, "ExplorationSearchPathSteps", new Vector2(472, 578), new Vector2(86, 14), new Color(0.62f, 0.57f, 0.40f, 0.95f));
 		AddSceneLabel(explorationSceneItems, "ExplorationIslandIdentityLabel", new Vector2(432, 466), new Vector2(356, 26), "雾海浮岛：沿路径接近残骸搜索");
@@ -1439,23 +1459,22 @@ public partial class HubRuntime : Node2D
 
 	private void AddOchreGreyboxSet()
 	{
-		AddSceneRect(ochreSceneItems, "OchrePlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.17f, 0.24f, 0.28f, 0.98f));
-		AddSceneRect(ochreSceneItems, "OchreCloudSeaBackdrop", new Vector2(0, 560), new Vector2(1280, 104), new Color(0.50f, 0.62f, 0.66f, 0.82f));
-		AddSceneRect(ochreSceneItems, "OchreIslandWalkBoundary", OchreIslandWalkBounds.Position, OchreIslandWalkBounds.Size, new Color(0.28f, 0.25f, 0.20f, 0.90f));
-		AddSceneEllipse(ochreSceneItems, "OchreIslandGround", new Vector2(590, 482), new Vector2(430, 132), new Color(0.53f, 0.36f, 0.22f, 0.98f));
-		AddSceneEllipse(ochreSceneItems, "OchreIslandPath", new Vector2(580, 506), new Vector2(284, 42), new Color(0.66f, 0.52f, 0.32f, 0.96f));
-		AddSceneRect(ochreSceneItems, "OchreCloudSeaBoundary", new Vector2(132, 562), new Vector2(980, 30), new Color(0.40f, 0.56f, 0.62f, 0.84f));
-		AddSceneRect(ochreSceneItems, "OchreRockWallBoundary", new Vector2(254, 336), new Vector2(250, 54), new Color(0.38f, 0.28f, 0.22f, 0.96f));
-		AddSceneLabel(ochreSceneItems, "OchreIslandIdentityLabel", new Vector2(410, 350), new Vector2(390, 28), "赭石岛开发入口：资源点 / 返航点独立验证");
-		AddSceneRect(ochreSceneItems, "BandedIronOreBody", new Vector2(596, 446), new Vector2(156, 80), new Color(0.60f, 0.45f, 0.30f, 0.98f));
-		AddSceneRect(ochreSceneItems, "BandedIronOreDarkBandA", new Vector2(612, 462), new Vector2(126, 12), new Color(0.22f, 0.23f, 0.24f, 0.96f));
-		AddSceneRect(ochreSceneItems, "BandedIronOreDarkBandB", new Vector2(618, 496), new Vector2(116, 10), new Color(0.26f, 0.25f, 0.22f, 0.96f));
-		AddSceneLabel(ochreSceneItems, "BandedIronOreLabel", new Vector2(600, 424), new Vector2(154, 24), "条带状铁矿");
-		ochreOreSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreOreSemanticLabel", new Vector2(520, 532), new Vector2(300, 24), "矿脉：可采集 / reward pending");
-		AddSceneRect(ochreSceneItems, "OchreReturnBeaconGreybox", new Vector2(884, 456), new Vector2(104, 82), new Color(0.34f, 0.48f, 0.54f, 0.96f));
-		AddSceneRect(ochreSceneItems, "OchreReturnBeaconCore", new Vector2(922, 476), new Vector2(28, 52), new Color(0.72f, 0.78f, 0.66f, 0.98f));
-		AddSceneLabel(ochreSceneItems, "OchreReturnBeaconLabel", new Vector2(862, 432), new Vector2(156, 24), "赭石岛返航点");
-		ochreReturnSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreReturnSemanticLabel", new Vector2(810, 542), new Vector2(270, 24), "返航：待预热");
+		var scene = ResourceLoader.Load<PackedScene>(OchreIslandScenePath);
+		if (scene?.Instantiate() is CanvasItem ochreScene)
+		{
+			ochreScene.Name = "OchreIslandSceneRuntimeInstance";
+			ochreScene.Visible = false;
+			sceneLayer?.AddChild(ochreScene);
+			ochreSceneItems.Add(ochreScene);
+		}
+		else
+		{
+			AddSceneRect(ochreSceneItems, "OchreIslandSceneLoadFailure", new Vector2(140, 292), new Vector2(900, 278), new Color(0.46f, 0.16f, 0.16f, 1.0f));
+			AddSceneLabel(ochreSceneItems, "OchreIslandSceneLoadFailureLabel", new Vector2(330, 410), new Vector2(520, 28), "赭石岛场景资产加载失败");
+		}
+
+		ochreOreSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreOreSemanticLabel", new Vector2(520, 454), new Vector2(300, 24), "矿脉：可采集 / reward pending");
+		ochreReturnSemanticLabel = AddSceneLabel(ochreSceneItems, "OchreReturnSemanticLabel", new Vector2(760, 498), new Vector2(270, 24), "返航：待预热");
 	}
 
 	private ColorRect AddWorldMarker(string nodeName, Vector2 markerPosition, Color markerColor, string labelText)
@@ -1991,6 +2010,19 @@ public partial class HubRuntime : Node2D
 		return marker is null || !marker.Visible
 			? float.PositiveInfinity
 			: playerPosition.DistanceTo(marker.Position + (marker.Size * 0.5f));
+	}
+
+	private static void CollectDescendantNames(Node node, string nameFragment, Godot.Collections.Array<string> matches)
+	{
+		foreach (var child in node.GetChildren())
+		{
+			if (child.Name.ToString().Contains(nameFragment, StringComparison.OrdinalIgnoreCase))
+			{
+				matches.Add(child.GetPath().ToString());
+			}
+
+			CollectDescendantNames(child, nameFragment, matches);
+		}
 	}
 
 	private Rect2 CurrentWalkBounds()

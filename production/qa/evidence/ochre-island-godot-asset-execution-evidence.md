@@ -15,7 +15,7 @@
 | 固定单位脚本 | `src/scenes/units/BandedIronOre.cs` | 已创建 |
 | 作者化数据 | `src/presentation/playable_slice_authored_content.json` | 已接入 |
 | 运行时合同 | `HubRuntime.DebugScenePhysicsContract("ochre_island_scene")` | 已接入 |
-| 开发验证入口 | Debug build `OchreDebugButton` -> `HubRuntime.DebugEnterOchreIslandScene()` | 已接入，不替换正式 playable route |
+| 开发验证入口 | Debug build `OchreDebugButton` -> `HubRuntime.DebugEnterOchreIslandScene()` | 已接入，实例化 `src/scenes/ochre/OchreIslandScene.tscn`，不替换正式 playable route |
 | Godot AI 合同 | `.godot-ai/contracts/composite-feature/ochre_island_resource_slice.contract.md` | 已创建 |
 | Godot AI 审查 | `.godot-ai/reviews/composite-feature/ochre_island_resource_slice.review.md` | `pass-with-risks` |
 | Godot AI 验证 | `.godot-ai/verification/composite-feature/ochre_island_resource_slice.verification.md` | `pass` |
@@ -66,7 +66,7 @@ Godot AI MCP 会话:
 | C# 脚本可编译 | `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS，0 errors。 |
 | #20 作者化单位链路 | `DomainAdapterTest` 验证 `ochre_island_scene` 的 6 个 scene units、spec path、floor id、Godot node path。 |
 | #20 运行时合同 | `session_shell_visual_probe.gd` 验证 `cloudsea`、`blocking_static`、`soft_overlap`、作者化单位链接和动态行为恢复规则。 |
-| 稳定开发入口 | `session_shell_visual_probe.gd` 验证 Debug build 显示 `OchreDebugButton`，点击后可进入赭石岛、矿脉采集状态可切换、返航锚点两步返回 Hub，且 `committed_route` 仍保持 `route.mist`。 |
+| 稳定开发入口 | `session_shell_visual_probe.gd` 验证 Debug build 显示 `OchreDebugButton`，点击后可进入由同一个 `OchreIslandScene.tscn` 实例化的赭石岛、矿脉采集状态可切换、返航锚点两步返回 Hub，且 `committed_route` 仍保持 `route.mist`。 |
 
 ## 验证命令
 
@@ -75,8 +75,8 @@ Godot AI MCP 会话:
 | Godot AI MCP `scene_open` + `scene_get_hierarchy` for `BandedIronOre.tscn` | PASS |
 | Godot AI MCP `scene_open` + `scene_get_hierarchy` for `OchreIslandScene.tscn` | PASS |
 | `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` | PASS，897/897 passing |
-| `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` | PASS |
-| `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` | PASS，0 warnings，0 errors |
+| `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` | PASS；验证运行时可见 `OchreIslandGround`、`BandedIronOreInstance`、`OreBodyAvailable`，矿点 / 返航点交互坐标与独立场景对齐 |
+| `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` | PASS，107 个既有 warning，0 errors |
 
 ## 剩余风险
 

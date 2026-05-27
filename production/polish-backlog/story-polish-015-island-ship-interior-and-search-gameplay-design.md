@@ -1,7 +1,7 @@
 # Polish Story 015: Island / Ship Interior and Search Gameplay Design
 
 > **Phase**: Polish
-> **Status**: Fix Candidate -- Awaiting Human QA Rerun
+> **Status**: Closed -- Human Verified
 > **Layer**: Scene Structure / Gameplay Design / Godot Runtime Presentation
 > **Type**: Blocking Design + Implementation Story
 > **Estimate**: L / 2-3 days
@@ -24,33 +24,33 @@ with actual choices or timing, and a return flow that expresses ship movement.
 
 ## Acceptance Criteria
 
-- [ ] GIVEN the player enters the Hub area, WHEN they view the scene, THEN the
+- [x] GIVEN the player enters the Hub area, WHEN they view the scene, THEN the
   space reads as an island/dock environment with a visible ship, not only a flat
   interior UI backdrop.
-- [ ] GIVEN the player approaches the ship, WHEN they interact, THEN they can
+- [x] GIVEN the player approaches the ship, WHEN they interact, THEN they can
   enter a readable ship interior space.
-- [ ] GIVEN the player is inside the ship, WHEN they move through it, THEN
+- [x] GIVEN the player is inside the ship, WHEN they move through it, THEN
   cockpit/helm, cargo/storage, and engine/module spaces are distinct through
   topology, boundaries, and props, not only labels or color blocks.
-- [ ] GIVEN the player opens Chart, WHEN they do so, THEN the helm interaction
+- [x] GIVEN the player opens Chart, WHEN they do so, THEN the helm interaction
   still owns the Chart affordance and preserves focus/input isolation.
-- [ ] GIVEN Exploration starts, WHEN the player views the scene, THEN the search
+- [x] GIVEN Exploration starts, WHEN the player views the scene, THEN the search
   area has enough authored complexity to suggest an explorable place rather
   than an empty field.
-- [ ] GIVEN the player searches, WHEN they engage the search site, THEN the
+- [x] GIVEN the player searches, WHEN they engage the search site, THEN the
   action involves a small playable interaction such as choosing a scan angle,
   timing a salvage pulse, or checking multiple nearby clues before reward
   settlement.
-- [ ] GIVEN the player wants to return, WHEN they complete the route, THEN the
+- [x] GIVEN the player wants to return, WHEN they complete the route, THEN the
   return interaction reads as moving or piloting the ship back, not only walking
   to a beacon.
-- [ ] GIVEN onboarding hints are active, WHEN the player moves between island,
+- [x] GIVEN onboarding hints are active, WHEN the player moves between island,
   ship interior, Exploration, search gameplay, and return, THEN hints support
   the new structure without stealing focus.
-- [ ] GIVEN existing smoke probes run, WHEN the new scene structure is present,
+- [x] GIVEN existing smoke probes run, WHEN the new scene structure is present,
   THEN visual, durable persistence, long-session, and perf smoke remain passing
   or document non-blocking notes.
-- [ ] GIVEN human QA reruns the focused checklist, WHEN they evaluate the same
+- [x] GIVEN human QA reruns the focused checklist, WHEN they evaluate the same
   blockers, THEN Hub/ship identity, Exploration readability, search gameplay,
   and return flow are no longer CONCERN-level blockers.
 
@@ -146,7 +146,32 @@ search/return loops are sufficiently playable for the release-readiness blocker.
 This is not a release-readiness pass. The focused Polish 015 checklist still
 needs a human rerun.
 
+## BUG-003 Opaque World-Layer Follow-up -- 2026-05-27
+
+- The 2026-05-24 fix candidate still allowed old dashboard text to bleed
+  through semi-transparent world surfaces.
+- Hub, ship interior, chart, exploration, and Ochre debug scene primary
+  backdrops now use opaque main world surfaces.
+- Hub island walk layer, dock/ship hull, ship-interior shell, exploration
+  island walk layer, and exploration return-ship silhouette now block Deck text
+  bleed-through.
+- Visual smoke now asserts opacity for critical scene evidence, in addition to
+  world-layer z-order and viewport area.
+- Windowed screenshot evidence:
+  `production/qa/evidence/polish-015-opaque-world-hub-probe.png` and
+  `production/qa/evidence/polish-015-opaque-world-exploration-probe.png`.
+
+## Human QA Rerun 2 -- 2026-05-27
+
+- Verdict: PASS / blocker closed.
+- Tester: liein.
+- Result: After the opaque world-layer follow-up and manual rerun, the user
+  confirmed BUG-003 / Polish 015 can be closed.
+- Closed bug: `production/qa/bugs/BUG-003-polish-015-world-scene-hidden-by-text-dashboard.md`.
+- Remaining release boundary: This closes the Polish 015 blocker, but does not
+  by itself replace the later formal release checklist / gate.
+
 ## Release Triage Rule
 
-Do not run a formal release checklist/gate until this story is complete or the
-release-readiness blocker is explicitly waived by the user.
+Polish 015 is complete. A later formal release checklist / gate should use this
+story as closed evidence, not as an open blocker.

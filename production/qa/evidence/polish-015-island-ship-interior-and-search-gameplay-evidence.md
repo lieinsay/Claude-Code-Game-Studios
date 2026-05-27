@@ -2,12 +2,13 @@
 
 **Date:** 2026-05-23  
 **Story:** `production/polish-backlog/story-polish-015-island-ship-interior-and-search-gameplay-design.md`  
-**Status:** PASS -- Fix candidate awaiting human QA rerun
+**Status:** PASS -- Human verified / closed
 **Purpose:** Verify the structural scene and gameplay blocker fix before focused human rerun.
 
 This evidence does not establish Release readiness. It records that the new
 island/ship structure, search micro-game, return piloting flow, and existing
-smoke paths are technically healthy enough for human judgment.
+smoke paths are technically healthy and that the focused BUG-003 / Polish 015
+blocker has been manually accepted for closure.
 
 ## Commands
 
@@ -57,9 +58,40 @@ Windowed screenshot evidence:
 - `production/qa/evidence/polish-015-fix-final-hub-probe.png`
 - `production/qa/evidence/polish-015-fix-exploration-semantics-probe.png`
 
-## Manual QA Boundary
+## BUG-003 Opaque World-Layer Fix -- 2026-05-27
 
-Focused human QA must decide whether the current greybox now satisfies the
-intended fantasy and blocker: island with docked ship, enterable interior,
-recognizable ship rooms, search as a small gameplay beat, and return as a ship
-movement/piloting action.
+The prior fix candidate still allowed the old text dashboard to show through
+semi-transparent world surfaces. This made the scene more visible than before,
+but it still read as text layered behind greybox art.
+
+Second fix candidate:
+
+- Hub, ship interior, chart, exploration, and Ochre debug scene primary world
+  backdrops now use opaque main surfaces.
+- Hub island walk layer, dock/ship hull, ship-interior shell, exploration
+  island walk layer, and exploration return-ship silhouette now block Deck
+  text bleed-through.
+- `tests/smoke/session_shell_visual_probe.gd` now asserts the critical world
+  surfaces are opaque enough to prevent the old dashboard from dominating.
+
+Additional automated evidence:
+
+- `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false`: PASS with existing warnings / 0 errors.
+- `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd`: PASS.
+- `godot --path . -s tests/smoke/session_shell_visual_probe.gd`: PASS, screenshots refreshed.
+
+Windowed screenshot evidence:
+
+- `production/qa/evidence/polish-015-opaque-world-hub-probe.png`
+- `production/qa/evidence/polish-015-opaque-world-exploration-probe.png`
+
+## Manual QA Closure -- 2026-05-27
+
+- Verdict: PASS / closed.
+- Tester: liein.
+- User confirmation: BUG-003 / Polish 015 can be closed after manual rerun.
+- Closure scope: island with docked ship, enterable interior, recognizable ship
+  rooms, search as a small gameplay beat, return as ship movement / piloting,
+  and no old text-dashboard bleed-through dominating the world layer.
+- Release boundary: This closes the focused Polish 015 blocker only; it is not a
+  substitute for the later formal release checklist / gate.

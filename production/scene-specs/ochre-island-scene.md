@@ -24,7 +24,7 @@
 | 字段 | 内容 |
 | --- | --- |
 | 独立 Godot 场景 | `src/scenes/ochre/OchreIslandScene.tscn`；已建立独立灰盒场景资产，不能复用旧市场或探索面板。 |
-| 配套脚本 / runtime | `src/scenes/ochre/OchreIslandScene.cs`；仅承载资源岛本地信号，Resources / Navigation / Hub 仍为领域权威。 |
+| 配套脚本 / runtime | `src/scenes/ochre/OchreIslandScene.cs`；仅承载资源岛本地信号，Resources / Navigation / Hub 仍为领域权威。`HubRuntime` 的 debug 入口必须实例化 `OchreIslandScene.tscn`，不得另画一套运行时赭石岛。 |
 | 作者化数据 | Godot 场景内已实例化 `BandedIronOreInstance`、`OchreReturnAnchor` 和 `PlayerSpawn`；`src/presentation/playable_slice_authored_content.json` runtime 作者化链路待补。 |
 | 资产组 | 赭色岛体、条带状铁矿、返航点、岛屿边界、采集反馈。 |
 | 装配入口 | 航行大场景只负责抵达；赭石岛拥有自身场景本体和资源点实例。 |
@@ -128,7 +128,7 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: `src/scenes/ochre/OchreIslandScene.tscn`、`src/scenes/ochre/OchreIslandScene.cs`、`HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`、Debug build `OchreDebugButton` / `HubRuntime.DebugEnterOchreIslandScene()`；不得复用旧市场或探索面板作为场景本体。
+- Godot 场景或运行时表面: `src/scenes/ochre/OchreIslandScene.tscn`、`src/scenes/ochre/OchreIslandScene.cs`、`HubRuntime.DebugScenePhysicsContract("ochre_island_scene")`、Debug build `OchreDebugButton` / `HubRuntime.DebugEnterOchreIslandScene()`；debug 入口通过 `ResourceLoader.Load<PackedScene>("res://src/scenes/ochre/OchreIslandScene.tscn")` 挂载同一个场景资产，不得复用旧市场、探索面板或手写重复灰盒作为场景本体。
 - 稳定 ID: `ochre_island_scene`。
 - 读取的领域管理器: Resources、Navigation、Scene。
 - 会变更的领域管理器: Resources（采集结果）、Navigation / Hub（返航）。
@@ -149,7 +149,7 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | partial；Godot AI MCP hierarchy PASS，#20 runtime contract smoke PASS，debug 入口采集 / 返航 PASS；正式 playable route、Resources 奖励和 Navigation 返航写入待补 |
+| 自动 smoke | 场景载入、玩家移动、矿脉采集、返航触发 | partial；Godot AI MCP hierarchy PASS，#20 runtime contract smoke PASS，debug 入口实例化独立 `OchreIslandScene.tscn`、采集 / 返航 PASS；正式 playable route、Resources 奖励和 Navigation 返航写入待补 |
 | 截图 / 视觉证明 | 赭石岛首屏、矿脉、返航点、采集后状态 | pending |
 | Codex 审核 | 规格与 authored content 对齐检查 | partial；`.godot-ai/verification/composite-feature/ochre_island_resource_slice.verification.md`、`production/qa/evidence/ochre-island-godot-asset-execution-evidence.md` 和 `DomainAdapterTest` 已记录资产 / 作者化 / 运行时合同证据 |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
