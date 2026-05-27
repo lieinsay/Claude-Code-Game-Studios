@@ -149,7 +149,7 @@
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `.godot-ai/verification/scene/mist_lamp_wreck_scene.verification.md` | PASS；headless 截图按现有驱动逻辑跳过 |
+| 自动 smoke / MCP | `tests/smoke/session_shell_visual_probe.gd`; Godot AI MCP `scene_open` / `scene_get_hierarchy`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `.godot-ai/verification/scene/mist_lamp_wreck_scene.verification.md` | PASS；MCP 编辑器侧确认 28 个场景节点、返航 / 搜索锚点和无 `Threat` 节点；headless 截图按现有驱动逻辑跳过 |
 | 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md` | PASS 891/891 |
 | 截图 / 视觉证明 | 既有 visual probe 证据 | 非 headless 截图仍待刷新；当前 headless 运行因显示驱动限制跳过截图 |
 | Codex 审核 | `.godot-ai/reviews/scene/mist_lamp_wreck_scene.review.md` | `APPROVED_WITH_NOTES` |

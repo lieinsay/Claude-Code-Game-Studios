@@ -31,8 +31,17 @@
 | `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` | PASS | 0 warnings / 0 errors. |
 | `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` | PASS | 891/891 checks. |
 | `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` | PASS | 独立场景、核心节点、debug evidence 和 #20 合同通过；截图因当前 headless 显示驱动跳过。 |
+| Godot AI MCP editor validation | PASS | `editor_state` ready；MCP 打开 `res://src/scenes/mist/MistLampWreckScene.tscn`；层级返回 28 个节点；`node_find(name="Threat")` 返回 0。 |
 | `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` | PASS | 107 existing warnings / 0 errors. |
 | `git diff --check` | PASS | 仅 LF/CRLF working-copy warnings。 |
+
+## Godot AI MCP 编辑器侧证据
+
+- 当前编辑器状态: `readiness=ready`，Godot `4.6.2-stable (official)`，当前场景为 `res://src/scenes/mist/MistLampWreckScene.tscn`。
+- 根节点属性确认脚本为 `res://src/scenes/mist/MistLampWreckScene.cs`，并暴露 `SceneId=mist_lamp_wreck_scene`、`RuntimeContractId=exploration_mist_island`、`ReturnTargetSceneId=initial_island_scene`、`ReturnTargetRuntimeContractId=hub_island_dock`。
+- 场景层级确认 `MistLampWorldLayer`、`MistIslandMass`、`MistLampWreckBody`、`MistSearchScanAnchor`、`MistReturnShipHull`、`MistReturnHelmAnchor`、`MistReturnTakeoffTrail`、`MistWaterBoundary`、`MistLampPlayerStart` 均存在。
+- `MistSearchScanAnchor` 位于 `(653,574)`；`MistReturnHelmAnchor` 位于 `(230,594)`。
+- `node_find(name="Threat")` 返回 0 个节点，确认岛屿本体仍无威胁区节点。
 
 ## 剩余风险
 
