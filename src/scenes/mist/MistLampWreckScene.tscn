@@ -1,0 +1,177 @@
+[gd_scene load_steps=4 format=3 uid="uid://mist_lamp_wreck_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/mist/MistLampWreckScene.cs" id="1_mist_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_search_anchor"]
+size = Vector2(210, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_return_helm"]
+size = Vector2(162, 86)
+
+[node name="MistLampWreckScene" type="Node2D"]
+script = ExtResource("1_mist_script")
+
+[node name="MistLampWorldLayer" type="Node2D" parent="."]
+
+[node name="MistSkyBackdrop" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 0.0
+offset_top = 126.0
+offset_right = 1280.0
+offset_bottom = 646.0
+mouse_filter = 2
+color = Color(0.10, 0.20, 0.25, 1)
+
+[node name="MistHorizonBand" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 0.0
+offset_top = 160.0
+offset_right = 1280.0
+offset_bottom = 232.0
+mouse_filter = 2
+color = Color(0.42, 0.52, 0.50, 0.44)
+
+[node name="MistWaterBoundary" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 0.0
+offset_top = 596.0
+offset_right = 1280.0
+offset_bottom = 680.0
+mouse_filter = 2
+color = Color(0.07, 0.22, 0.30, 1)
+
+[node name="MistIslandWalkBoundary" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 132.0
+offset_top = 390.0
+offset_right = 1148.0
+offset_bottom = 636.0
+mouse_filter = 2
+color = Color(0.12, 0.27, 0.24, 1)
+
+[node name="MistIslandMass" type="Polygon2D" parent="MistLampWorldLayer"]
+polygon = PackedVector2Array(150, 566, 390, 444, 750, 426, 1060, 514, 1128, 610, 902, 648, 454, 642)
+color = Color(0.17, 0.34, 0.27, 1)
+
+[node name="MistIslandGrassCap" type="Polygon2D" parent="MistLampWorldLayer"]
+polygon = PackedVector2Array(240, 540, 438, 466, 744, 452, 980, 516, 824, 574, 402, 574)
+color = Color(0.32, 0.50, 0.38, 1)
+
+[node name="MistCliffEdge" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 416.0
+offset_top = 444.0
+offset_right = 834.0
+offset_bottom = 462.0
+mouse_filter = 2
+color = Color(0.56, 0.66, 0.50, 0.95)
+
+[node name="MistIslandPath" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 342.0
+offset_top = 584.0
+offset_right = 952.0
+offset_bottom = 604.0
+mouse_filter = 2
+color = Color(0.32, 0.44, 0.36, 0.95)
+
+[node name="MistSearchPathSteps" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 472.0
+offset_top = 578.0
+offset_right = 558.0
+offset_bottom = 592.0
+mouse_filter = 2
+color = Color(0.62, 0.57, 0.40, 0.95)
+
+[node name="MistReturnShipHull" type="Polygon2D" parent="MistLampWorldLayer"]
+polygon = PackedVector2Array(102, 520, 298, 510, 354, 548, 306, 610, 130, 610, 72, 560)
+color = Color(0.16, 0.24, 0.31, 1)
+
+[node name="MistReturnShipEnvelope" type="Polygon2D" parent="MistLampWorldLayer"]
+polygon = PackedVector2Array(112, 476, 194, 444, 292, 456, 350, 488, 308, 516, 162, 514)
+color = Color(0.52, 0.66, 0.68, 0.94)
+
+[node name="MistReturnHelm" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 196.0
+offset_top = 558.0
+offset_right = 264.0
+offset_bottom = 592.0
+mouse_filter = 2
+color = Color(0.18, 0.38, 0.48, 0.96)
+
+[node name="MistReturnHelmAnchor" type="Area2D" parent="MistLampWorldLayer"]
+position = Vector2(230, 594)
+
+[node name="MistReturnHelmShape" type="CollisionShape2D" parent="MistLampWorldLayer/MistReturnHelmAnchor"]
+shape = SubResource("RectangleShape2D_return_helm")
+
+[node name="MistReturnTakeoffTrail" type="Polygon2D" parent="MistLampWorldLayer"]
+polygon = PackedVector2Array(190, 538, 284, 486, 374, 474, 390, 502, 286, 548)
+color = Color(0.60, 0.68, 0.58, 0.66)
+
+[node name="MistLampWreckBody" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 558.0
+offset_top = 540.0
+offset_right = 728.0
+offset_bottom = 606.0
+mouse_filter = 2
+color = Color(0.28, 0.42, 0.29, 0.96)
+
+[node name="MistLampWreckMast" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 630.0
+offset_top = 510.0
+offset_right = 642.0
+offset_bottom = 552.0
+mouse_filter = 2
+color = Color(0.56, 0.48, 0.34, 0.95)
+
+[node name="MistLampSignalGlow" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 594.0
+offset_top = 574.0
+offset_right = 690.0
+offset_bottom = 584.0
+mouse_filter = 2
+color = Color(0.78, 0.84, 0.46, 0.98)
+
+[node name="MistSearchClueLeft" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 526.0
+offset_top = 536.0
+offset_right = 550.0
+offset_bottom = 560.0
+mouse_filter = 2
+color = Color(0.68, 0.62, 0.38, 0.95)
+
+[node name="MistSearchClueRight" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 706.0
+offset_top = 572.0
+offset_right = 730.0
+offset_bottom = 596.0
+mouse_filter = 2
+color = Color(0.68, 0.62, 0.38, 0.95)
+
+[node name="MistSearchScanArc" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 548.0
+offset_top = 526.0
+offset_right = 744.0
+offset_bottom = 534.0
+mouse_filter = 2
+color = Color(0.54, 0.74, 0.68, 0.90)
+
+[node name="MistSearchScanAnchor" type="Area2D" parent="MistLampWorldLayer"]
+position = Vector2(653, 574)
+
+[node name="MistSearchScanShape" type="CollisionShape2D" parent="MistLampWorldLayer/MistSearchScanAnchor"]
+shape = SubResource("RectangleShape2D_search_anchor")
+
+[node name="MistReturnBeaconBeam" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 1032.0
+offset_top = 478.0
+offset_right = 1044.0
+offset_bottom = 530.0
+mouse_filter = 2
+color = Color(0.86, 0.66, 0.40, 0.72)
+
+[node name="MistReturnBeaconCore" type="ColorRect" parent="MistLampWorldLayer"]
+offset_left = 1024.0
+offset_top = 540.0
+offset_right = 1052.0
+offset_bottom = 592.0
+mouse_filter = 2
+color = Color(0.78, 0.62, 0.42, 0.98)
+
+[node name="MistLampPlayerStart" type="Marker2D" parent="MistLampWorldLayer"]
+position = Vector2(168, 610)

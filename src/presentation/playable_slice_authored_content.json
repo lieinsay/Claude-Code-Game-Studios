@@ -1,5 +1,5 @@
 {
-  "content_version": "polish-asset-reset-voyage-open-world-v1",
+  "content_version": "polish-asset-reset-mist-lamp-wreck-v1",
   "content_status": "polish_authored",
   "origin_id": "location.cloudweaver-hub",
   "cargo_capacity": 500,
@@ -78,6 +78,29 @@
       "destination_id": "location.mist-short",
       "leads_to_scene_id": "mist_lamp_wreck_scene",
       "leads_to_runtime_contract_id": "exploration_mist_island"
+    },
+    {
+      "scene_id": "mist_lamp_wreck_scene",
+      "runtime_contract_id": "exploration_mist_island",
+      "display_name": "雾灯残骸浮岛",
+      "godot_scene_path": "src/scenes/mist/MistLampWreckScene.tscn",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "production_asset_status": "implemented",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "required_child_assets": [
+        "scene_unit.prototype.mist_island_mass",
+        "scene_unit.prototype.mist_island_path",
+        "scene_unit.prototype.mist_lamp_wreck_body",
+        "scene_unit.prototype.mist_search_scan_anchor",
+        "scene_unit.prototype.mist_return_ship_hull",
+        "scene_unit.prototype.mist_return_helm_anchor",
+        "scene_unit.prototype.mist_return_takeoff_trail",
+        "scene_unit.prototype.mist_water_boundary"
+      ],
+      "arrives_from_scene_id": "voyage_open_world_scene",
+      "return_target_scene_id": "initial_island_scene",
+      "return_target_runtime_contract_id": "hub_island_dock"
     }
   ],
   "scene_unit_prototypes": [
@@ -95,6 +118,7 @@
       "unit_spec": "production/unit-specs/dynamic-entities/player-controlled-entity.md",
       "allowed_scene_ids": [
         "hub_island_dock",
+        "exploration_mist_island",
         "ochre_island_scene"
       ],
       "behavior_tags": [
@@ -406,6 +430,167 @@
         "trigger_only"
       ],
       "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_island_mass",
+      "display_name": "雾灯残骸浮岛主地形",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "mist island mass >= 2.0x player height and readable as quiet destination ground",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "blocking_static"
+      ],
+      "domain_owner": "scene-physics"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_island_path",
+      "display_name": "雾灯残骸浮岛路径",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "passage_unit",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "path clear width >= 1.1x player and connects return ship to search wreck",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "player-movement-interaction"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_lamp_wreck_body",
+      "display_name": "雾灯残骸主体",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "wreck body about 6 player-widths and readable as the search target",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "blocking_static"
+      ],
+      "domain_owner": "exploration-scavenge"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_search_scan_anchor",
+      "display_name": "雾灯残骸搜索扫描锚点",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "interactable_anchor",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "scan anchor overlaps wreck body and remains readable against player_unit scale",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "exploration-scavenge"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_return_ship_hull",
+      "display_name": "雾灯残骸返航飞艇船体",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "landmark_unit",
+      "collision": "blocking_static",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "return ship hull about 5 player-widths and readable as the departure target",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "blocking_static",
+        "return_airship_landmark"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_return_helm_anchor",
+      "display_name": "雾灯残骸返航舵点",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "door_or_passage",
+      "collision": "soft_overlap",
+      "occlusion_layer": "midground_object",
+      "scale_rule": "return helm clear interaction width >= 1.1x player",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "trigger_only"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_return_takeoff_trail",
+      "display_name": "雾灯残骸返航起飞尾迹",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "height_marker",
+      "collision": "height_marker + visual_only",
+      "occlusion_layer": "height_shadow",
+      "scale_rule": "takeoff trail reads against player_unit scale as return direction and never implies walkable ground",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "visual_only_height_marker"
+      ],
+      "domain_owner": "navigation-route-risk"
+    },
+    {
+      "prototype_id": "scene_unit.prototype.mist_water_boundary",
+      "display_name": "雾灯残骸雾海边界",
+      "prototype_classification": "fixed_scene_object",
+      "unit_type": "special_surface",
+      "collision": "hazardous + blocking_static",
+      "occlusion_layer": "midground_floor",
+      "scale_rule": "water boundary spans the viewport and is larger than player_unit",
+      "source_layer": "world_playable_scene",
+      "ui_evidence_allowed": false,
+      "source_gdd": "design/gdd/scene-physics-unit-system.md",
+      "legacy_replacement_status": "pending_spec_replacement",
+      "allowed_scene_ids": [
+        "exploration_mist_island"
+      ],
+      "behavior_tags": [
+        "gameplay_affecting_boundary"
+      ],
+      "domain_owner": "scene-physics"
     },
     {
       "prototype_id": "scene_unit.prototype.ochre_island_mass",
@@ -771,6 +956,152 @@
       "scene_spec": "production/scene-specs/voyage-open-world-scene.md",
       "state_hook": "retreat_anchor",
       "interaction_anchor_id": "voyage.retreat"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.player_marker",
+      "prototype_id": "scene_unit.prototype.player_marker",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "player_marker",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistLampPlayerStart",
+      "position": {
+        "x": 168,
+        "y": 610
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "player_spawn"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.island_mass",
+      "prototype_id": "scene_unit.prototype.mist_island_mass",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_island_mass",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistIslandMass",
+      "position": {
+        "x": 150,
+        "y": 426
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "scene_identity"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.island_path",
+      "prototype_id": "scene_unit.prototype.mist_island_path",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_island_path",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistIslandPath",
+      "position": {
+        "x": 342,
+        "y": 584
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "walkable_path"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.search_wreck",
+      "prototype_id": "scene_unit.prototype.mist_lamp_wreck_body",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_lamp_wreck_body",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistLampWreckBody",
+      "position": {
+        "x": 558,
+        "y": 540
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "search_target"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.search_scan_anchor",
+      "prototype_id": "scene_unit.prototype.mist_search_scan_anchor",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_search_scan_anchor",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistSearchScanAnchor",
+      "position": {
+        "x": 653,
+        "y": 574
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "search_scan_anchor",
+      "interaction_anchor_id": "search_wreck_prop"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.return_ship_hull",
+      "prototype_id": "scene_unit.prototype.mist_return_ship_hull",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_return_ship_hull",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistReturnShipHull",
+      "position": {
+        "x": 72,
+        "y": 510
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "return_ship_target"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.return_helm_anchor",
+      "prototype_id": "scene_unit.prototype.mist_return_helm_anchor",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_return_helm_anchor",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistReturnHelmAnchor",
+      "position": {
+        "x": 230,
+        "y": 594
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_object",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "return_ready",
+      "interaction_anchor_id": "return_helm_anchor"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.return_takeoff_trail",
+      "prototype_id": "scene_unit.prototype.mist_return_takeoff_trail",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_return_takeoff_trail",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistReturnTakeoffTrail",
+      "position": {
+        "x": 190,
+        "y": 474
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "height_shadow",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "return_takeoff_path"
+    },
+    {
+      "instance_id": "scene_unit.instance.exploration_mist_island.water_boundary",
+      "prototype_id": "scene_unit.prototype.mist_water_boundary",
+      "scene_id": "exploration_mist_island",
+      "unit_id": "mist_water_boundary",
+      "godot_node_path": "src/scenes/mist/MistLampWreckScene.tscn::MistLampWorldLayer/MistWaterBoundary",
+      "position": {
+        "x": 0,
+        "y": 596
+      },
+      "floor_id": "mist_wreck_ground_01",
+      "floor_index": 0,
+      "layer": "midground_floor",
+      "scene_spec": "production/scene-specs/mist-lamp-wreck-scene.md",
+      "state_hook": "boundary_clamp"
     },
     {
       "instance_id": "scene_unit.instance.hub_ship_interior.chart_table",

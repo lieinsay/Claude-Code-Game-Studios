@@ -15,6 +15,15 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - `production/playtests/scene-composition-user-readability-checklist.md` is now a non-gating feedback prompt/index, not a release-readiness judgment form.
 - 2026-05-27 修正后的最高优先级: 不再优先 release packet / 截图收口。除 `ochre_island_scene` / `banded_iron_ore` 外，当前已有游戏资产都视为临时测试资产，不得继续作为 production-ready 证据。下一步应优先实现已通过创建适合性但没有独立实现的核心 UI / 单位，尤其是 `chart-full-screen-surface` 和 `chart-table`，并按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 重新建立资产。
 
+## Session Extract -- mist_lamp_wreck_scene Godot Asset Workflow 2026-05-27
+- 当前任务完成: `mist_lamp_wreck_scene` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
+- 新增独立 Godot 场景资产: `src/scenes/mist/MistLampWreckScene.tscn` 与 `src/scenes/mist/MistLampWreckScene.cs`。场景包含 `MistLampWorldLayer`、雾岛主地形、路径、雾灯残骸、搜索扫描锚点、返航船、返航舵点、返航起飞尾迹和雾海边界。
+- Runtime 接入: `HubRuntime` 在探索状态挂载 `MistLampWreckSceneRuntimeInstance`，保留 `exploration_mist_island` 作为兼容运行时合同 ID，并通过 `DebugMistLampWreckAssetEvidence()` 暴露独立场景、返回目标、搜索 / 返航 / 起飞 / 边界和 UI 证据排除。
+- 作者化数据: `src/presentation/playable_slice_authored_content.json` 更新到 `polish-asset-reset-mist-lamp-wreck-v1`，新增 `authored_scenes::mist_lamp_wreck_scene`，并将 8 个雾灯残骸原型与 9 个 `exploration_mist_island` 摆放实例指向 `MistLampWreckScene.tscn` 的世界层节点。
+- 证据边界: 不再把旧 `HubRuntime` 探索灰盒、HUD、按钮、标签或调试入口作为 production-ready 场景证据；旧运行时只保留挂载 / 输入 / 状态切换职责。岛屿本体不含威胁区，危险仍归属前往 / 返回的航行过程。
+- 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 891/891；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS，截图因 headless 显示驱动跳过；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 107 existing warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
+- 剩余风险: 本轮仍是生产可追踪灰盒，不声明最终美术 / 音频或完整返航飞行完成；非 headless 截图仍需后续补证。
+
 ## Session Extract -- ship_interior_layered Godot Asset Workflow 2026-05-27
 - 当前任务完成: `ship_interior_layered` 已按 `godot-asset-interview -> godot-asset-review -> godot-asset-execute` 建立 `.godot-ai` context / interview / contract / review / execution-plan / verification 链路。
 - 新增独立 Godot 场景资产: `src/scenes/ship/ShipInteriorLayeredScene.tscn` 与 `src/scenes/ship/ShipInteriorLayeredScene.cs`。场景直接实例化 `src/scenes/units/ChartTable.tscn` 为 `ChartTableRuntimeInstance`，并通过 exported `PackedScene` 正式引用 `src/scenes/ui/ChartFullScreenSurface.tscn` / `S4_chart`。
@@ -42,7 +51,7 @@ Task: Scene Physics #20 and Scene Composition #19 stories closed via story-done;
 - 证据边界: 不再把航图 UI、旧 HUD、按钮、标签、进度条或调试入口作为 production-ready 航行场景证据；旧运行时只保留状态流、出航触发和现有探索闭环职责。
 - 验证: `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` PASS 0 warnings / 0 errors；`dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` PASS 679/679；`godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` PASS；`dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` PASS 107 existing warnings / 0 errors；`git diff --check` PASS with LF/CRLF warnings only。
 - 剩余风险: 当前为生产可追踪灰盒，不声明最终美术 / 音频或完整 60-75 秒实时驾驶完成；非 headless 截图仍需后续补证。
-- 下一步建议: 按 Godot asset workflow 继续重建 `mist_lamp_wreck_scene`，把当前 `exploration_mist_island` 旧灰盒替换为独立雾灯残骸世界资产。
+- 下一步建议: `mist_lamp_wreck_scene` 已进入后续重建记录；之后可继续处理剩余 reset 场景 / 单位，或补非 headless 截图和子单位 specs。
 
 ## Session Extract -- Scene Composition Readability Gate Prep 2026-05-24
 - Superseded on 2026-05-25: this extract used the old post-implementation approval flow. Do not use it as the current next-step source.

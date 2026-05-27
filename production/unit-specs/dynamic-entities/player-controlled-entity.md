@@ -99,7 +99,7 @@
 | 场景 | 使用方式 | 实例要求 | 后续反馈记录 |
 | --- | --- | --- | --- |
 | `ochre_island_scene` | 资源岛移动与采集交互 | 已有对应场景规格、独立边界和运行证据 | `directed-content-modification` |
-| `initial_island_scene` / `ship_interior_layered` / `mist_lamp_wreck_scene` | 旧灰盒引用已撤销 | 重新实现前不得作为现存玩家实体实例证据 | 重新走 Godot asset workflow |
+| `initial_island_scene` / `ship_interior_layered` / `mist_lamp_wreck_scene` | 已通过独立 Godot asset workflow 重建场景资产 | 玩家实体实例证据来自对应独立场景的 `player_marker` / spawn 节点与作者化实例；旧灰盒、HUD、按钮、标签或调试入口不得作为 production-ready 证据 | 后续补 dedicated player spawn / controller 细化规格与非 headless 截图 |
 
 ## 9. 作者化数据要求
 

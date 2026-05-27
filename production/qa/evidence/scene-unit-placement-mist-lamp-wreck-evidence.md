@@ -1,47 +1,41 @@
-# Mist-Lamp Wreck Scene Unit Placement Evidence
+# 雾灯残骸浮岛场景单位与独立资产证据
 
-> **Date**: 2026-05-24
-> **Scope**: Mist-lamp wreck scene (`mist_lamp_wreck_scene` / runtime `exploration_mist_island`)
-> **Source Plan**: `.omx/plans/prd-scene-unit-placement-taxonomy.md`
-> **Result**: PASS with residual editor/live-node-path review risks
+> **日期**: 2026-05-27
+> **范围**: `mist_lamp_wreck_scene` / runtime `exploration_mist_island`
+> **工作流**: `godot-asset-interview -> godot-asset-review -> godot-asset-execute`
+> **结果**: PASS；当前实现为生产可追踪灰盒，非 release-ready
 
-## What Changed
+## 变更摘要
 
-This evidence covers the second scene-unit authoring slice after the Cloudweaver ship interior:
+- 新增独立 Godot 场景 `src/scenes/mist/MistLampWreckScene.tscn` 与脚本 `src/scenes/mist/MistLampWreckScene.cs`。
+- `HubRuntime` 在探索状态挂载 `MistLampWreckSceneRuntimeInstance`，并通过 `DebugMistLampWreckAssetEvidence()` 暴露世界层、搜索、返航、起飞、边界和 UI-only 证据拒绝字段。
+- `src/presentation/playable_slice_authored_content.json` 更新为 `polish-asset-reset-mist-lamp-wreck-v1`，登记 `authored_scenes::mist_lamp_wreck_scene`、8 个雾灯残骸原型和 9 个 `exploration_mist_island` 摆放实例。
+- `tests/smoke/session_shell_visual_probe.gd` 验证独立场景挂载、核心节点、返航目标、无岛屿威胁区和 #20 合同。
+- `tests/integration/playable-slice/DomainAdapterProgram.cs` 验证 authored scene、prototype / instance 链路、floor `mist_wreck_ground_01` 和 `SceneUnitAuthoringFixture.ValidateScene("exploration_mist_island")`。
 
-- `production/scene-specs/mist-lamp-wreck-scene.md` now defines the standalone scene spec for the existing `exploration_mist_island` runtime scene.
-- `production/scene-specs/scene-coverage-registry.md` marks `mist_lamp_wreck_scene` as `spec_drafted` and links the new spec plus authored content.
-- `src/presentation/playable_slice_authored_content.json` now contains mist-lamp wreck reusable prototypes and placed instances.
-- `HubRuntime.DebugScenePhysicsContract("exploration_mist_island")` now builds its scene-unit catalog from authored prototype/instance data instead of a separate hardcoded catalog branch.
-- Integration and Godot smoke checks now validate authored scene-unit linkage for both `hub_ship_interior` and `exploration_mist_island`.
+## 接受映射
 
-## Verification Commands
+| 验收项 | 证据 |
+| --- | --- |
+| 雾灯残骸有独立场景资产 | `src/scenes/mist/MistLampWreckScene.tscn`。 |
+| 运行时兼容旧探索合同 | `scene_id=mist_lamp_wreck_scene`；`runtime_contract_id=exploration_mist_island`。 |
+| 岛屿本体没有威胁区 | `MistLampWreckScene.DebugSceneAssetEvidence().island_has_threat_zone=false`；场景不包含 `MistThreatZone`。 |
+| 返航路径不是纯画面切换 | `MistReturnShipHull`、`MistReturnHelmAnchor`、`MistReturnTakeoffTrail` 和 return target 字段记录返回 `initial_island_scene` / `hub_island_dock`。 |
+| 作者化单位来自世界 / 可玩层 | `playable_slice_authored_content.json` 中 9 个实例均指向 `MistLampWreckScene.tscn::MistLampWorldLayer/...`。 |
+| UI 证据无效 | 独立场景、原型、实例和 smoke 均记录 `ui_evidence_allowed=false`。 |
+
+## 验证命令
 
 | Command | Result | Notes |
 | --- | --- | --- |
-| `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` | PASS | 580/580 checks, including prototype allowed-scene coverage and instance-to-prototype scene compatibility. |
-| `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` | PASS | 0 errors, 5 existing warnings in unrelated tests. |
-| `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` | PASS | Verifies `exploration_mist_island` authored data, prototype-instance linkage, authored content source, empty diagnostics, scene spec traceability, Godot placement references, floor assignment, and UI-evidence rejection. |
-| `git diff --check` | PASS | LF/CRLF warnings only. |
+| `dotnet build CloudWeaverVoyage.csproj --no-restore -p:UseSharedCompilation=false` | PASS | 0 warnings / 0 errors. |
+| `dotnet run --project tests/integration/playable-slice/DomainAdapterTest.csproj` | PASS | 891/891 checks. |
+| `godot --headless --path . -s tests/smoke/session_shell_visual_probe.gd` | PASS | 独立场景、核心节点、debug evidence 和 #20 合同通过；截图因当前 headless 显示驱动跳过。 |
+| `dotnet build CloudWeaverVoyage.sln --no-restore -p:UseSharedCompilation=false` | PASS | 107 existing warnings / 0 errors. |
+| `git diff --check` | PASS | 仅 LF/CRLF working-copy warnings。 |
 
-## Acceptance Mapping
+## 剩余风险
 
-| Acceptance | Evidence |
-| --- | --- |
-| Mist-lamp wreck has a standalone spec | `production/scene-specs/mist-lamp-wreck-scene.md`. |
-| Existing runtime scene maps to the new scene identity | Coverage registry maps `mist_lamp_wreck_scene` to runtime `exploration_mist_island`; scene spec records both IDs. |
-| Unit prototypes are reusable and classified | New `scene_unit.prototype.*` records include `dynamic_entity` / `fixed_scene_object`, collision, occlusion, scale, owner, and allowed scenes. |
-| Placed instances reference prototypes | New `scene_unit.instance.exploration_mist_island.*` records reference known prototypes and the mist-lamp wreck scene spec. |
-| Runtime reads the same authoring source | `HubRuntime` routes `exploration_mist_island` through `BuildAuthoredSceneUnitCatalog`. |
-| Gate can fail on invalid linkage | Integration checks validate prototype IDs, allowed scene IDs, scene spec references, floor IDs, and `SceneUnitAuthoringFixture.ValidateScene("exploration_mist_island")`. |
-| UI evidence remains invalid | Smoke checks require world/playable source data and reject UI-only scene-unit evidence. |
-
-## Remaining Risks
-
-- Godot node paths are stable authored references, but this pass still does not introspect each path against a serialized `.tscn` scene.
-- This is still a greybox placement slice; final art, audio, and readability polish remain separate work.
-- `hub_island_dock` and `voyage_open_world_scene` have since been migrated through their own Godot asset workflows; destination scenes, especially `mist_lamp_wreck_scene`, still need fresh migration before claiming full project coverage.
-
-## Recommended Next Step
-
-Run the Godot asset workflow for `production/scene-specs/mist-lamp-wreck-scene.md`, then replace the remaining `exploration_mist_island` greybox evidence with an independent `mist_lamp_wreck_scene` asset.
+- 当前是生产可追踪灰盒，不声明最终美术或音频完成。
+- 当前不重写 #10 live driving 或完整返航飞行玩法，只保留返航起飞路径证据。
+- 非 headless 截图仍需后续补证。

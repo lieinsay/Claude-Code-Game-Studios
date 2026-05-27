@@ -20,6 +20,7 @@ public partial class HubRuntime : Node2D
 	private const string AuthoredContentPath = "src/presentation/playable_slice_authored_content.json";
 	private const string InitialIslandScenePath = "res://src/scenes/hub/InitialIslandScene.tscn";
 	private const string VoyageOpenWorldScenePath = "res://src/scenes/voyage/VoyageOpenWorldScene.tscn";
+	private const string MistLampWreckScenePath = "res://src/scenes/mist/MistLampWreckScene.tscn";
 	private const string OchreIslandScenePath = "res://src/scenes/ochre/OchreIslandScene.tscn";
 	private const string ShipInteriorLayeredScenePath = "res://src/scenes/ship/ShipInteriorLayeredScene.tscn";
 	private const string ChartTableScenePath = "res://src/scenes/units/ChartTable.tscn";
@@ -61,6 +62,7 @@ public partial class HubRuntime : Node2D
 	private readonly Godot.Collections.Array<CanvasItem> ochreSceneItems = [];
 	private InitialIslandScene? initialIslandAsset;
 	private VoyageOpenWorldScene? voyageOpenWorldAsset;
+	private MistLampWreckScene? mistLampWreckAsset;
 	private ShipInteriorLayeredScene? shipInteriorAsset;
 	private ColorRect? chartMistSelectionFrame;
 	private ChartTable? chartTableAsset;
@@ -705,6 +707,29 @@ public partial class HubRuntime : Node2D
 		};
 	}
 
+	/// <summary>Returns independent mist-lamp wreck scene evidence for smoke tests and QA diagnostics.</summary>
+	public Godot.Collections.Dictionary DebugMistLampWreckAssetEvidence()
+	{
+		return mistLampWreckAsset?.DebugSceneAssetEvidence() ?? new Godot.Collections.Dictionary
+		{
+			["scene_id"] = "mist_lamp_wreck_scene",
+			["runtime_contract_id"] = "exploration_mist_island",
+			["return_target_scene_id"] = "initial_island_scene",
+			["return_target_runtime_contract_id"] = "hub_island_dock",
+			["world_layer_ready"] = false,
+			["player_spawn_ready"] = false,
+			["island_mass_ready"] = false,
+			["search_wreck_ready"] = false,
+			["search_anchor_ready"] = false,
+			["return_ship_ready"] = false,
+			["return_helm_anchor_ready"] = false,
+			["return_takeoff_ready"] = false,
+			["water_boundary_ready"] = false,
+			["island_has_threat_zone"] = false,
+			["ui_evidence_allowed_for_scene"] = false,
+		};
+	}
+
 	public Godot.Collections.Dictionary DebugScenePhysicsContract(string sceneId)
 	{
 		return sceneId switch
@@ -759,25 +784,25 @@ public partial class HubRuntime : Node2D
 				sceneId,
 				"水平场景",
 				ExplorationWalkBounds,
-				"ground plane supports up/down/left/right movement; mast, beacon beam, and threat zone are height_only cues with ground-shadow/landing-height readability, not extra walkable floors",
-				"primary_walkable_layer=mist_island_path; walkable_layer: shoreline_path, search_wreck_approach, return_ship_approach; transition_layer: return_helm_to_hub_dock; height_only_layer: mast, beacon_beam, threat_zone_overlay; blocked_layer: sea, cliff_edge, wreck_body, return_ship_hull; visual_layer: mist_horizon",
+				"ground plane supports up/down/left/right movement; mast, beacon beam, and return takeoff trail are height_only cues with ground-shadow/landing-height readability, not extra walkable floors",
+				"primary_walkable_layer=mist_wreck_ground_01; walkable_layer: shoreline_path, search_wreck_approach, return_ship_approach; transition_layer: return_helm_takeoff_to_voyage_and_hub; height_only_layer: mast, beacon_beam, return_takeoff_trail; blocked_layer: sea, cliff_edge, wreck_body, return_ship_hull; visual_layer: mist_horizon",
 				"N/A true for floor_cutaway/interior_instance; search wreck and return ship are blocking units with no passable behind-path in current slice, so behind_object_reveal=N/A true; future foreground occluders must declare occluder_peek",
-				"N/A true: single exterior island floor; floor_id=mist_island_path; floor_index=0; is_active_floor=true; visibility_mode=full_visible; walkable_bounds=ExplorationWalkBounds; vertical_connectors=return_helm_to_hub_dock; occluders_hidden_above=none; interactions_enabled=search_scan_arc,return_helm",
-				"mist_island_path",
-				"mist_island_path",
+				"N/A true: single exterior island floor; floor_id=mist_wreck_ground_01; floor_index=0; is_active_floor=true; visibility_mode=full_visible; walkable_bounds=ExplorationWalkBounds; vertical_connectors=return_helm_takeoff_to_voyage_and_hub; occluders_hidden_above=none; interactions_enabled=search_scan_arc,return_helm",
+				"mist_wreck_ground_01",
+				"mist_wreck_ground_01",
 				0,
 				true,
 				"full_visible",
-				"return_helm_to_hub_dock",
+				"return_helm_takeoff_to_voyage_and_hub",
 				"none",
 				"search_scan_arc,return_helm",
 				"N/A true: no passable behind-object route in current Exploration slice; wreck and return ship hull keep collision/interaction identity",
 				"2.2m player height = 28px marker; search wreck is about 6 player-widths; return ship is about 5 player-widths",
-				"z_world_background < z_island_body_path < z_wreck_return_ship_threat_units < z_interaction_markers",
-				"blocking_static: island edge, sea, cliff edge, return ship hull, search wreck body; soft_overlap: search scan arc, return helm; height_marker: mast, beacon beam, threat zone overlay",
+				"z_world_background < z_island_body_path < z_wreck_return_ship_units < z_interaction_markers",
+				"blocking_static: island edge, sea, cliff edge, return ship hull, search wreck body; soft_overlap: search scan arc, return helm; height_marker: mast, beacon beam, return takeoff trail",
 				"water: blocking_static hazard boundary; glass: none; mirror: none; elastic: none; pushable: none in current slice",
 				"Clamp player into ExplorationWalkBounds; search and return stay as soft_overlap anchors so failed movement cannot block progression",
-				0),
+				8),
 			"voyage_open_world_scene" => BuildScenePhysicsContract(
 				sceneId,
 				"水平场景",
@@ -932,6 +957,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"hub_ship_interior" => BuildAuthoredSceneUnitCatalog(sceneId),
+			"exploration_mist_island" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"voyage_open_world_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			"ochre_island_scene" => BuildAuthoredSceneUnitCatalog(sceneId),
 			_ => [],
@@ -939,7 +965,7 @@ public partial class HubRuntime : Node2D
 	}
 
 	private static bool HasSceneUnitAuthoring(string sceneId) =>
-		sceneId is "hub_island_dock" or "voyage_open_world_scene" or "ochre_island_scene" or "hub_ship_interior";
+		sceneId is "hub_island_dock" or "exploration_mist_island" or "voyage_open_world_scene" or "ochre_island_scene" or "hub_ship_interior";
 
 	private static Godot.Collections.Array<Godot.Collections.Dictionary> BuildAuthoredSceneUnitCatalog(string sceneId)
 	{
@@ -1020,7 +1046,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "blocking_static: hub_island_main_mass, hub_docked_ship_hull, hub_waterline; soft_overlap: player_marker, hub_dock_plank_walkway, hub_boarding_ramp; height_marker: hub_airship_envelope",
 			"hub_ship_interior" => "blocking_static: hub_interior_hull_outline, hub_interior_cockpit_bay, hub_interior_cargo_bay, hub_interior_engine_bay, chart_table_prop, storage_crate_prop, cockpit_window_glass, upper_hull_front_wall; soft_overlap: player_marker, chart_table_anchor, ship_exit_threshold",
-			"exploration_mist_island" => "blocking_static: exploration_island_mass, exploration_cliff_edge, return_ship_hull, mist_sea_boundary; soft_overlap: player_marker, exploration_island_path, search_wreck_prop, return_helm_anchor, mist_horizon_fog; height_marker: search_wreck_mast, return_beacon_beam, exploration_threat_zone",
+			"exploration_mist_island" => "blocking_static: mist_island_mass, mist_cliff_edge, mist_lamp_wreck_body, mist_return_ship_hull, mist_water_boundary; soft_overlap: player_marker, mist_island_path, mist_search_scan_anchor, mist_return_helm_anchor, mist_horizon_fog; height_marker: mist_lamp_wreck_mast, mist_return_beacon_beam, mist_return_takeoff_trail",
 			"voyage_open_world_scene" => "blocking_static: voyage_fog_bank, voyage_wreckage_field, deep_cloudsea_edge; soft_overlap: voyage_route_corridor, voyage_beacon_chain, voyage_retreat_beacon; height_marker: voyage_ship_bow_foreground, voyage_cockpit_window_frame, voyage_bird_silhouette, voyage_destination_silhouette",
 			"ochre_island_scene" => "blocking_static: ochre_island_mass, ochre_cloudsea_boundary; soft_overlap: player_marker, ochre_island_path, banded_iron_ore, ochre_return_anchor",
 			_ => "",
@@ -1038,7 +1064,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "player_unit=1.0; door_or_passage hub_boarding_ramp clear width >= 1.1x player; landmark hub_docked_ship_hull >= 2.0x player; height_marker hub_airship_envelope visual-only",
 			"hub_ship_interior" => "player_unit=1.0; room bays are room-scale landmarks; helm/storage/engine anchors are 0.8-1.3x player-readable interactables; exit threshold clear width >= 1.1x player",
-			"exploration_mist_island" => "player_unit=1.0; search_wreck about 6 player-widths; return_ship about 5 player-widths; beacon/mast height markers visual-only; path clear width >= 1.1x player",
+			"exploration_mist_island" => "player_unit=1.0; mist_lamp_wreck_body about 6 player-widths; mist_return_ship_hull about 5 player-widths; beacon/mast/takeoff height markers visual-only; path clear width >= 1.1x player",
 			"voyage_open_world_scene" => "player_unit=1.0; ship bow foreground is cockpit-scale; route corridor clear width >= 3.0x player; beacon and wreckage gaps remain player-readable; bird and destination silhouettes are visual-only height markers",
 			"ochre_island_scene" => "player_unit=1.0; banded_iron_ore resource node 1.5-2.5x player width; return anchor clear width >= 1.1x player; island mass reads as landmark >= 2.0x player",
 			_ => "",
@@ -1049,7 +1075,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "water=gameplay_affecting blocking_static hazard boundary with no passability implication; glass=none; mirror=none; fog/cloud=visual_only sky backdrop",
 			"hub_ship_interior" => "glass=cockpit_window visual_only blocking_static, transparent but not passable/interactable; mirror=none; water=none; reflective_metal=visual_only hull trim",
-			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
+			"exploration_mist_island" => "water=gameplay_affecting blocking_static sea boundary; fog/cloud=visual_only mist horizon with no collision/passability implication; lamp_glow=visual_only search affordance; glass=none; mirror=none; ledge_or_void=blocking_static cliff edge",
 			"voyage_open_world_scene" => "fog=gameplay_affecting scan/slow risk window; cloudsea=gameplay_affecting blocking_static edge; wreckage=blocking_static avoidance field; bird_shadow=visual_only ecological warning; glass=cockpit_window_frame visual_only",
 			"ochre_island_scene" => "cloudsea=gameplay_affecting blocking_static boundary with no passability implication; ore=resource_node + trigger_only + breakable state; glass=none; mirror=none; water=none",
 			_ => "",
@@ -1074,10 +1100,9 @@ public partial class HubRuntime : Node2D
 			},
 			"exploration_mist_island" => new Godot.Collections.Array<Godot.Collections.Dictionary>
 			{
-				BuildPhysicalBehavior("mist_sea_boundary", "hazardous", "hazardous + water_deep + blocking_static", "deep water/void boundary; blocks ground units; no current/wind force in current slice", "shoreline, cliff, and sea feedback", "player_unit, pushable_unit", 90, "hazardous resolves before water visual and before trigger_only", "clamp player back into ExplorationWalkBounds", "world_playable_scene", false),
-				BuildPhysicalBehavior("exploration_threat_zone", "hazardous_warning", "hazardous + height_marker + visual_warning", "world-layer threat warning only; domain threat consequences stay with ExplorationManager", "visible threat zone overlay and text synced to domain state", "player_unit", 70, "hazardous warning wins over visual height marker but does not own damage", "safe-floor return via route/return ship flow", "world_playable_scene", false),
-				BuildPhysicalBehavior("search_wreck_prop", "trigger_only", "trigger_only + soft_overlap", "three-step scan anchor; no entity collision; requires proximity and Use dispatch", "scan calibration, echo lock, salvage pulse feedback", "player_unit", 40, "trigger_only is ignored until proximity and Use gate pass", "reset scan stage by moving away or returning to Hub; no forced stuck state", "world_playable_scene", false),
-				BuildPhysicalBehavior("return_helm_anchor", "trigger_only", "trigger_only + soft_overlap", "two-step return anchor; no entity collision; requires proximity and Use dispatch", "engine preheat and piloting prompt", "player_unit", 35, "trigger_only cannot override hazardous boundary clamp", "escape interaction returns to hub_island_dock after preheat", "world_playable_scene", false),
+				BuildPhysicalBehavior("mist_water_boundary", "hazardous_boundary", "hazardous + water_deep + blocking_static", "deep water/void boundary; blocks ground units; no island-local threat or damage source in current slice", "shoreline, cliff, and sea feedback", "player_unit, pushable_unit", 80, "hazardous boundary resolves before water visual and before trigger_only", "clamp player back into ExplorationWalkBounds", "world_playable_scene", false),
+				BuildPhysicalBehavior("mist_search_scan_anchor", "trigger_only", "trigger_only + soft_overlap", "three-step scan anchor; no entity collision; requires proximity and Use dispatch", "scan calibration, echo lock, salvage pulse feedback", "player_unit", 45, "trigger_only is ignored until proximity and Use gate pass", "reset scan stage by moving away or returning to Hub; no forced stuck state", "world_playable_scene", false),
+				BuildPhysicalBehavior("mist_return_helm_anchor", "trigger_only", "trigger_only + soft_overlap", "two-step return anchor; no entity collision; requires proximity and Use dispatch", "engine preheat, takeoff trail, and piloting prompt", "player_unit", 40, "trigger_only cannot override hazardous boundary clamp", "return takeoff leads to voyage/hub flow after preheat", "world_playable_scene", false),
 				BuildPhysicalBehavior("mist_horizon_fog", "visual_only_fog", "fog_or_cloud + visual_only", "atmospheric fog; no collision, slow, blindness, or current/wind force", "mist backdrop only", "player_unit readability only", 10, "visual_only loses to every gameplay-affecting tag", "no stuck state possible; ignore for movement", "world_playable_scene", false),
 			},
 			"voyage_open_world_scene" => new Godot.Collections.Array<Godot.Collections.Dictionary>
@@ -1132,7 +1157,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "hazardous:80 > trigger_only:30 > visual_only_height_marker:10",
 			"hub_ship_interior" => "trigger_only:30 > blocking_static:20 > visual_only_glass:10",
-			"exploration_mist_island" => "hazardous:90 > hazardous_warning:70 > trigger_only:40/35 > visual_only_fog:10",
+			"exploration_mist_island" => "hazardous_boundary:80 > trigger_only:45/40 > visual_only_fog:10",
 			"voyage_open_world_scene" => "gameplay_affecting_fog:75 > avoidance_field:65 > trigger_only:45 > visual_only_ecological_warning:15",
 			"ochre_island_scene" => "hazardous:80 > resource_node:45 > trigger_only:35",
 			_ => "",
@@ -1143,7 +1168,7 @@ public partial class HubRuntime : Node2D
 		{
 			"hub_island_dock" => "If a behavior tag lacks priority, implementation readiness fails; waterline clamp and ramp escape interaction are the recovery fallback.",
 			"hub_ship_interior" => "If a behavior tag lacks priority, implementation readiness fails; static crate remains non-pushable until pushable priority and recovery are declared.",
-			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; hazardous boundary clamp wins over trigger-only anchors and visual fog.",
+			"exploration_mist_island" => "If a behavior tag lacks priority, implementation readiness fails; quiet island boundary clamp wins over search/return trigger anchors and visual fog.",
 			"voyage_open_world_scene" => "If a behavior tag lacks priority, implementation readiness fails; route corridor clamp and retreat beacon recover failed driving windows.",
 			"ochre_island_scene" => "If a behavior tag lacks priority, implementation readiness fails; cloudsea clamp wins over ore and return triggers.",
 			_ => "",
@@ -1545,6 +1570,7 @@ public partial class HubRuntime : Node2D
 	private void AddExplorationGreyboxSet()
 	{
 		AddVoyageOpenWorldSceneAsset();
+		AddMistLampWreckSceneAsset();
 		AddSceneRect(explorationSceneItems, "ExplorationPlayableSkyBackdrop", new Vector2(0, 126), new Vector2(1280, 520), new Color(0.10f, 0.20f, 0.25f, 1.0f));
 		AddSceneRect(explorationSceneItems, "ExplorationPlayableMistHorizon", new Vector2(0, 160), new Vector2(1280, 72), new Color(0.42f, 0.52f, 0.50f, 0.44f));
 		AddSceneRect(explorationSceneItems, "ExplorationPlayableSea", new Vector2(0, 596), new Vector2(1280, 84), new Color(0.07f, 0.22f, 0.30f, 1.0f));
@@ -1612,6 +1638,23 @@ public partial class HubRuntime : Node2D
 		voyageScene.Visible = false;
 		sceneLayer?.AddChild(voyageScene);
 		explorationSceneItems.Add(voyageScene);
+	}
+
+	private void AddMistLampWreckSceneAsset()
+	{
+		var scene = ResourceLoader.Load<PackedScene>(MistLampWreckScenePath);
+		if (scene?.Instantiate() is not MistLampWreckScene mistScene)
+		{
+			AddSceneRect(explorationSceneItems, "MistLampWreckAssetLoadFailure", new Vector2(284, 300), new Vector2(640, 44), new Color(0.46f, 0.16f, 0.16f, 0.95f));
+			AddSceneLabel(explorationSceneItems, "MistLampWreckAssetLoadFailureLabel", new Vector2(298, 308), new Vector2(610, 26), "mist_lamp_wreck_scene 独立场景加载失败");
+			return;
+		}
+
+		mistLampWreckAsset = mistScene;
+		mistScene.Name = "MistLampWreckSceneRuntimeInstance";
+		mistScene.Visible = false;
+		sceneLayer?.AddChild(mistScene);
+		explorationSceneItems.Add(mistScene);
 	}
 
 	private void AddOchreGreyboxSet()

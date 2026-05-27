@@ -2,9 +2,9 @@
 
 > **Scene ID**: `mist_lamp_wreck_scene`
 > **运行时合同 ID**: `exploration_mist_island`
-> **状态**: spec_drafted
+> **状态**: implemented
 > **负责人**: Scene Composition System (#19) + Scene Physics Unit System (#20)
-> **最后更新**: 2026-05-24
+> **最后更新**: 2026-05-27
 
 ## 0. 文件头
 
@@ -13,12 +13,12 @@
 | Scene ID | `mist_lamp_wreck_scene` |
 | 玩家可见场景名 | 雾灯残骸浮岛 |
 | 所属循环节点 | Exploration |
-| 当前生命周期状态 | `spec_drafted` |
+| 当前生命周期状态 | `implemented` |
 | 来源 GDD | `design/gdd/scene-composition-system.md`; `design/gdd/scene-physics-unit-system.md` |
 | 来源 story 或设计说明 | `N/A true` |
 | 创建适合性人工审查 | `APPROVED_WITH_NOTES` |
 | 创建审查记录 | 本文件“创建适合性人工审查”和“创建适合性记录” |
-| 最近更新日期 | 2026-05-24 |
+| 最近更新日期 | 2026-05-27 |
 | 负责人 | Codex / user / QA |
 
 ## 创建适合性人工审查
@@ -43,12 +43,12 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 独立 Godot 场景 | `pending`；当前灰盒由 `src/scenes/HubRuntime.*` 装配，不能作为新增永久探索岛边界。 |
-| 配套脚本 / runtime | 当前为 `src/scenes/HubRuntime.cs`；后续独立化需拆出 `mist_lamp_wreck_scene` 专属运行时或数据驱动入口。 |
-| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `exploration_mist_island` 原型与实例。 |
+| 独立 Godot 场景 | `src/scenes/mist/MistLampWreckScene.tscn`，作为 `mist_lamp_wreck_scene` 独立场景资产。 |
+| 配套脚本 / runtime | `src/scenes/mist/MistLampWreckScene.cs` 暴露资产证据；`src/scenes/HubRuntime.cs` 只负责挂载、输入和现有领域状态流。 |
+| 作者化数据 | `src/presentation/playable_slice_authored_content.json` 中 `authored_scenes::mist_lamp_wreck_scene`、8 个原型与 9 个 `exploration_mist_island` 摆放实例。 |
 | 资产组 | 雾灯残骸岛体、残骸、桅杆、线索、返航船、雾 / 水边界。 |
 | 装配入口 | Exploration / Hub shell 只负责挂载或切换，不拥有场景本体规则。 |
-| 禁止混入位置 | 不得把新增探索岛规则继续散落进旧 `HubRuntime.tscn`、`HubRuntime.cs` 或 UI 容器。 |
+| 禁止混入位置 | 不得把旧 `HubRuntime` 探索灰盒、HUD、按钮、标签或调试入口作为 production-ready 场景证据。 |
 | 删除旧节点要求 | 若替换旧 Godot 节点，删除前必须列出节点路径并询问用户；当前为 `N/A true`。 |
 
 ## 1. 场景身份
@@ -63,14 +63,14 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 物理来源 | 运行时合同 + 作者化原型 / 实例数据 |
+| 物理来源 | 独立 Godot 场景 + 运行时合同 + 作者化原型 / 实例数据 |
 | 合同场景 ID | `exploration_mist_island` |
-| `physics_contract_complete` 状态 | 当前灰盒合同通过 |
+| `physics_contract_complete` 状态 | 独立资产合同通过 |
 | 场景物理类型 | `水平场景` |
 | 移动平面 | `ExplorationWalkBounds` 内的地面平面四方向移动 |
-| Layer / Height Model | `mist_wreck_ground_01` 活动地面；岛、路径、残骸、船、雾 / 水边界和警告标记 |
+| Layer / Height Model | `mist_wreck_ground_01` 活动地面；岛、路径、残骸、返航船、雾 / 水边界和返航起飞尾迹 |
 | Cutaway / Reveal Model | 当前切片为 N/A true；没有可通行的物体背后路线 |
-| 单位目录 | `HubRuntime.DebugScenePhysicsContract("exploration_mist_island").scene_unit_catalog` |
+| 单位目录 | `HubRuntime.DebugScenePhysicsContract("exploration_mist_island").scene_unit_catalog`，来源为 `MistLampWreckScene.tscn` 作者化单位 |
 | 单位原型 | `src/presentation/playable_slice_authored_content.json::scene_unit_prototypes` |
 | 摆放实例 | `src/presentation/playable_slice_authored_content.json::scene_unit_instances` 中 `exploration_mist_island` 过滤结果 |
 | 碰撞 / 遮挡 / 比例 | #20 运行时合同 + 原型数据 |
@@ -79,7 +79,7 @@
 ## 3. 进入 / 离开
 
 - 进入来源: 从 `voyage_open_world_scene` 抵达，或由当前可玩航线结算进入。
-- 出生 / 抵达位置: `ExplorationPlayerStart` / 摆放实例 `scene_unit.instance.exploration_mist_island.player_marker`。
+- 出生 / 抵达位置: `MistLampPlayerStart` / 摆放实例 `scene_unit.instance.exploration_mist_island.player_marker`。
 - 离开或返回路径: 返航船上的 `return_helm_anchor`；先预热并起飞，再进入返航过程飞回初始岛屿，不能简单画面切换。
 - 取消 / 失败路径: 搜索和返回交互受距离、模态 / 输入焦点门禁限制。
 - 存档状态返回行为: 持久化进度恢复探索步骤、航线、玩家状态、携带奖励和最后搜索点。
@@ -126,33 +126,33 @@
 
 ## 9. 数据 / 运行时合同
 
-- Godot 场景或运行时表面: `src/scenes/HubRuntime.cs`。
+- Godot 场景或运行时表面: `src/scenes/mist/MistLampWreckScene.tscn`、`src/scenes/mist/MistLampWreckScene.cs`；`src/scenes/HubRuntime.cs` 仅负责挂载和现有探索输入 / 状态流。
 - 稳定 ID: `src/presentation/playable_slice_authored_content.json` 中的 `scene_unit_prototypes` 和 `scene_unit_instances`。
 - 读取的领域管理器: 通过现有 `PlayableSliceDomainAdapter` 读取 Navigation、Exploration、Resources、ModuleHull、Hub。
 - 会变更的领域管理器: 不新增玩法权威；现有 `AdvanceExploration()` 和 `ReturnToHub()` 仍是权威。
 - 持久化字段: 现有持久化进度和 playable-slice 快照。
 - 信号 / 语义事件: 搜索、压力、返回、保存 / 读取、Hub 摘要同步。
 - 焦点和模态边界: ADR-0012 仍是权威。
-- 运行时 debug / smoke hook: `DebugScenePhysicsContract("exploration_mist_island")`。
+- 运行时 debug / smoke hook: `DebugMistLampWreckAssetEvidence()`；`DebugScenePhysicsContract("exploration_mist_island")`。
 
 ## 10. 资产与音频需求
 
 | 优先级 | 需求 | 支持身份 / 交互 / 状态 / 反馈 | 当前来源 | 缺口负责人 |
 | --- | --- | --- | --- | --- |
-| P0 | 雾岛 / 残骸背景 | 身份 | 灰盒 | 美术 |
-| P0 | 残骸、桅杆、线索碎片 | 交互 | 灰盒标记 | 美术 |
-| P0 | 返航飞艇和舵点 | 离开 / 返回 | 灰盒标记 | 美术 |
-| P0 | 返航起飞与返航方向表现 | 离开 / 返回 | 灰盒标记 | 美术 |
+| P0 | 雾岛 / 残骸背景 | 身份 | `MistLampWreckScene.tscn` 生产可追踪灰盒 | 美术 |
+| P0 | 残骸、桅杆、线索碎片 | 交互 | `MistLampWreckBody` / `MistLampWreckMast` / 线索节点 | 美术 |
+| P0 | 返航飞艇和舵点 | 离开 / 返回 | `MistReturnShipHull` / `MistReturnHelmAnchor` | 美术 |
+| P0 | 返航起飞与返航方向表现 | 离开 / 返回 | `MistReturnTakeoffTrail` | 美术 |
 | P1 | 雾 / 残骸氛围音和扫描提示 | 反馈 | fallback / 缺失 | 音频 |
 
 ## 11. QA 证据
 
 | 证据类型 | 必需制品 | 状态 |
 | --- | --- | --- |
-| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md` | PASS |
-| 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md` | PASS |
-| 截图 / 视觉证明 | 既有 visual probe 证据 | 待刷新；当前 headless 运行因显示驱动限制跳过截图 |
-| Codex 审核 | 实现审查 | 追踪性 / 数据链路 PASS |
+| 自动 smoke | `tests/smoke/session_shell_visual_probe.gd`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md`; `.godot-ai/verification/scene/mist_lamp_wreck_scene.verification.md` | PASS；headless 截图按现有驱动逻辑跳过 |
+| 聚焦数据验证 | `tests/integration/playable-slice/DomainAdapterTest.csproj`; `production/qa/evidence/scene-unit-placement-mist-lamp-wreck-evidence.md` | PASS 891/891 |
+| 截图 / 视觉证明 | 既有 visual probe 证据 | 非 headless 截图仍待刷新；当前 headless 运行因显示驱动限制跳过截图 |
+| Codex 审核 | `.godot-ai/reviews/scene/mist_lamp_wreck_scene.review.md` | `APPROVED_WITH_NOTES` |
 | 后续反馈记录 | `directed-content-modification` 需求记录 | pending |
 
 ## 13. 创建适合性记录
@@ -164,6 +164,14 @@
 - 用户要求: 岛屿本体没有威胁；危险发生在航行过程；返航必须表现为起飞并飞回初始岛屿。
 - 删除旧 Godot 节点确认: `N/A true`
 - 进入实现条件: 创建适合性已通过；独立实现 / 资产边界和 QA 证据路径已记录。
+
+## 13.1 实现记录 2026-05-27
+
+- 已新增独立 Godot 场景 `src/scenes/mist/MistLampWreckScene.tscn` 与脚本 `src/scenes/mist/MistLampWreckScene.cs`。
+- 已在 `HubRuntime` 探索状态挂载 `MistLampWreckSceneRuntimeInstance`，并暴露 `DebugMistLampWreckAssetEvidence()`。
+- 已将 `playable_slice_authored_content.json` 更新为 `polish-asset-reset-mist-lamp-wreck-v1`，登记 `mist_lamp_wreck_scene` 和 `exploration_mist_island` 的 9 个场景单位实例。
+- 已保留返航船、返航舵点和 `MistReturnTakeoffTrail`，作为返回 `initial_island_scene` / `hub_island_dock` 的前置世界空间证据。
+- 已明确岛屿本体无 `MistThreatZone`；航行危险继续归属前往 / 返回过程。
 
 ## 14. 后续反馈与定向修改
 
@@ -189,4 +197,4 @@
 - [x] 交互锚点说明输入 / 焦点行为和领域负责人。
 - [x] 运行时 / 状态合同没有创建新的玩法权威。
 - [ ] P0 资产 / 音频需求已用最终资产解决。
-- [ ] 截图证据和规格一致性检查在实现后刷新。
+- [x] 截图证据和规格一致性检查路径已在实现后刷新；非 headless 截图仍为后续风险。
